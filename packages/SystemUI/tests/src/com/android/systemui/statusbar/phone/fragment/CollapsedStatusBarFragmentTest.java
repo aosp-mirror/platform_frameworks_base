@@ -16,6 +16,8 @@ package com.android.systemui.statusbar.phone.fragment;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_CLOSED;
+import static com.android.systemui.shade.ShadeExpansionStateManagerKt.STATE_OPEN;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_IN;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.ANIMATING_OUT;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.IDLE;
@@ -93,6 +95,7 @@ import java.util.List;
 public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
     private NotificationIconAreaController mMockNotificationAreaController;
+    private ShadeExpansionStateManager mShadeExpansionStateManager;
     private View mNotificationAreaInner;
     private OngoingCallController mOngoingCallController;
     private SystemStatusAnimationScheduler mAnimationScheduler;
@@ -291,6 +294,67 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
         assertEquals(View.VISIBLE, getClockView().getVisibility());
+    }
+
+
+    @Test
+    public void disable_shadeOpenAndShouldHide_everythingHidden() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN the shade is open and configured to hide the status bar icons
+        mShadeExpansionStateManager.updateState(STATE_OPEN);
+        when(mShadeViewController.shouldHideStatusBarIconsWhenExpanded()).thenReturn(true);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN all views are hidden
+        assertEquals(View.INVISIBLE, getClockView().getVisibility());
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    public void disable_shadeOpenButNotShouldHide_everythingShown() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN the shade is open but *not* configured to hide the status bar icons
+        mShadeExpansionStateManager.updateState(STATE_OPEN);
+        when(mShadeViewController.shouldHideStatusBarIconsWhenExpanded()).thenReturn(false);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN all views are shown
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    /** Regression test for b/279790651. */
+    @Test
+    public void disable_shadeOpenAndShouldHide_thenShadeNotOpenAndDozingUpdate_everythingShown() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN the shade is open and configured to hide the status bar icons
+        mShadeExpansionStateManager.updateState(STATE_OPEN);
+        when(mShadeViewController.shouldHideStatusBarIconsWhenExpanded()).thenReturn(true);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN all views are hidden
+        assertEquals(View.INVISIBLE, getClockView().getVisibility());
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+
+        // WHEN the shade is updated to no longer be open
+        mShadeExpansionStateManager.updateState(STATE_CLOSED);
+
+        // AND we internally request an update via dozing change
+        fragment.onDozingChanged(true);
+
+        // THEN all views are shown
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
     @Test
@@ -494,6 +558,8 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         when(mIconManagerFactory.create(any(), any())).thenReturn(mIconManager);
         mSecureSettings = mock(SecureSettings.class);
 
+        mShadeExpansionStateManager = new ShadeExpansionStateManager();
+
         setUpNotificationIconAreaController();
         return new CollapsedStatusBarFragment(
                 mStatusBarFragmentComponentFactory,
@@ -501,7 +567,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mAnimationScheduler,
                 mLocationPublisher,
                 mMockNotificationAreaController,
-                new ShadeExpansionStateManager(),
+                mShadeExpansionStateManager,
                 mock(FeatureFlags.class),
                 mStatusBarIconController,
                 mIconManagerFactory,

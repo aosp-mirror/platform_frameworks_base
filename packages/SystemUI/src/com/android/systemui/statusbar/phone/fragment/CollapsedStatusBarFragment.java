@@ -112,8 +112,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private View mClockView;
     private View mOngoingCallChip;
     private View mNotificationIconAreaInner;
-    private int mDisabled1;
-    private int mDisabled2;
+    // Disabled flags come in from external callers, but we also sometimes modify them internally.
+    // We need to store both so that we don't accidentally propagate our internally modified flags
+    // for too long.
+    private int mExternalDisabled1;
+    private int mExternalDisabled2;
+    private int mInternalDisabled1;
+    private int mInternalDisabled2;
     private DarkIconManager mDarkIconManager;
     private final StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
     private final CommandQueue mCommandQueue;
@@ -141,7 +146,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final OngoingCallListener mOngoingCallListener = new OngoingCallListener() {
         @Override
         public void onOngoingCallStateChanged(boolean animate) {
-            disable(getContext().getDisplayId(), mDisabled1, mDisabled2, animate);
+            updateStatusBarVisibilities(animate);
         }
     };
     private OperatorNameViewController mOperatorNameViewController;
@@ -389,7 +394,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         notificationIconArea.addView(mNotificationIconAreaInner);
 
         // #disable should have already been called, so use the disable values to set visibility.
-        updateNotificationIconAreaAndCallChip(mDisabled1, false);
+        updateNotificationIconAreaAndCallChip(mInternalDisabled1, false);
     }
 
     /**
@@ -403,11 +408,20 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         return mStatusBarFragmentComponent;
     }
 
+    private void updateStatusBarVisibilities(boolean animate) {
+        // Make sure that we pass the last *external* flags so that we don't accidentally propagate
+        // our internal adjustments.
+        disable(getContext().getDisplayId(), mExternalDisabled1, mExternalDisabled2, animate);
+    }
+
     @Override
     public void disable(int displayId, int state1, int state2, boolean animate) {
         if (displayId != getContext().getDisplayId()) {
             return;
         }
+
+        mExternalDisabled1 = state1;
+        mExternalDisabled2 = state2;
 
         int state1BeforeAdjustment = state1;
         state1 = adjustDisableFlags(state1);
@@ -416,12 +430,12 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 /* new= */ new DisableState(state1BeforeAdjustment, state2),
                 /* newAfterLocalModification= */ new DisableState(state1, state2));
 
-        final int old1 = mDisabled1;
+        final int old1 = mInternalDisabled1;
         final int diff1 = state1 ^ old1;
-        final int old2 = mDisabled2;
+        final int old2 = mInternalDisabled2;
         final int diff2 = state2 ^ old2;
-        mDisabled1 = state1;
-        mDisabled2 = state2;
+        mInternalDisabled1 = state1;
+        mInternalDisabled2 = state2;
         if ((diff1 & DISABLE_SYSTEM_INFO) != 0 || ((diff2 & DISABLE2_SYSTEM_ICONS) != 0)) {
             if ((state1 & DISABLE_SYSTEM_INFO) != 0 || ((state2 & DISABLE2_SYSTEM_ICONS) != 0)) {
                 hideEndSideContent(animate);
@@ -683,7 +697,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     @Override
     public void onDozingChanged(boolean isDozing) {
-        disable(getContext().getDisplayId(), mDisabled1, mDisabled2, false /* animate */);
+        updateStatusBarVisibilities(/* animate= */ false);
     }
 
     @Nullable
@@ -696,10 +710,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public Animator onSystemEventAnimationFinish(boolean hasPersistentDot) {
         return mSystemEventAnimator.onSystemEventAnimationFinish(hasPersistentDot);
-    }
-
-    private boolean isSystemIconAreaDisabled() {
-        return (mDisabled1 & DISABLE_SYSTEM_INFO) != 0 || (mDisabled2 & DISABLE2_SYSTEM_ICONS) != 0;
     }
 
     private void updateStatusBarLocation(int left, int right) {
