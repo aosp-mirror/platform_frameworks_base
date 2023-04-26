@@ -152,11 +152,10 @@ public abstract class DisplayEventReceiver {
      * @hide
      */
     public static final class VsyncEventData {
-        // The amount of frame timeline choices.
-        // Must be in sync with VsyncEventData::kFrameTimelinesLength in
-        // frameworks/native/libs/gui/include/gui/VsyncEventData.h. If they do not match, a runtime
-        // assertion is thrown when Choreographer is processing VsyncEventData.
-        static final int FRAME_TIMELINES_LENGTH = 7;
+        // The max capacity of frame timeline choices.
+        // Must be in sync with VsyncEventData::kFrameTimelinesCapacity in
+        // frameworks/native/libs/gui/include/gui/VsyncEventData.h
+        static final int FRAME_TIMELINES_CAPACITY = 7;
 
         public static class FrameTimeline {
             FrameTimeline() {}
@@ -201,7 +200,7 @@ public abstract class DisplayEventReceiver {
         public int frameTimelinesLength = 0;
 
         VsyncEventData() {
-            frameTimelines = new FrameTimeline[FRAME_TIMELINES_LENGTH];
+            frameTimelines = new FrameTimeline[FRAME_TIMELINES_CAPACITY];
             for (int i = 0; i < frameTimelines.length; i++) {
                 frameTimelines[i] = new FrameTimeline();
             }

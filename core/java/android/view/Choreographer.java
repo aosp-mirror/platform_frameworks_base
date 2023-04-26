@@ -1116,7 +1116,7 @@ public final class Choreographer {
         private boolean mInCallback = false;
 
         FrameData() {
-            allocateFrameTimelines(DisplayEventReceiver.VsyncEventData.FRAME_TIMELINES_LENGTH);
+            allocateFrameTimelines(DisplayEventReceiver.VsyncEventData.FRAME_TIMELINES_CAPACITY);
         }
 
         /** The time in nanoseconds when the frame started being rendered. */
