@@ -257,8 +257,8 @@
     <!-- The margin of the notification action list at the top -->
     <dimen name="notification_action_list_margin_top">0dp</dimen>
 
-    <!-- The visual height of the emphasized notification action -->
-    <dimen name="notification_action_emphasized_height">36dp</dimen>
+    <!-- The overall height of the emphasized notification action -->
+    <dimen name="notification_action_emphasized_height">48dp</dimen>
 
     <!-- The padding of the actions in non-conversation layout. For conversations, the analogous
          value is calculated in ConversationLayout#updateActionListPadding() -->
