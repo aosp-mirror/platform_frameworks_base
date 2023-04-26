@@ -58,7 +58,7 @@ class BacklightDialogViewModelTest : SysuiTestCase() {
                 KeyboardBacklightInteractor(keyboardRepository),
                 accessibilityManagerWrapper
             )
-        keyboardRepository.setKeyboardConnected(true)
+        keyboardRepository.setIsAnyKeyboardConnected(true)
     }
 
     @Test
@@ -81,7 +81,7 @@ class BacklightDialogViewModelTest : SysuiTestCase() {
     @Test
     fun emitsNull_after5secDelay_fromLastBacklightChange() = runTest {
         val latest by collectLastValue(underTest.dialogContent)
-        keyboardRepository.setKeyboardConnected(true)
+        keyboardRepository.setIsAnyKeyboardConnected(true)
 
         keyboardRepository.setBacklight(BacklightModel(1, 5))
         assertThat(latest).isEqualTo(BacklightDialogContentViewModel(1, 5))
