@@ -130,12 +130,11 @@ final class DevicePolicyEngine {
     <V> void setLocalPolicy(
             @NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin,
-            @NonNull PolicyValue<V> value,
+            @Nullable PolicyValue<V> value,
             int userId,
             boolean skipEnforcePolicy) {
         Objects.requireNonNull(policyDefinition);
         Objects.requireNonNull(enforcingAdmin);
-        Objects.requireNonNull(value);
 
         synchronized (mLock) {
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
