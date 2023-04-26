@@ -80,6 +80,7 @@ import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIFI;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WINDOWS;
 import static android.Manifest.permission.MANAGE_DEVICE_POLICY_WIPE_DATA;
 import static android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS;
+import static android.Manifest.permission.MASTER_CLEAR;
 import static android.Manifest.permission.QUERY_ADMIN_POLICY;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.Manifest.permission.SET_TIME;
@@ -7552,9 +7553,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean calledByProfileOwnerOnOrgOwnedDevice =
                 isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId());
         if (isPolicyEngineForFinanceFlagEnabled()) {
-            EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
+            EnforcingAdmin enforcingAdmin = enforcePermissionsAndGetEnforcingAdmin(
                     /*admin=*/ null,
-                    /*permission= */ MANAGE_DEVICE_POLICY_WIPE_DATA,
+                    /*permission=*/ new String[]{MANAGE_DEVICE_POLICY_WIPE_DATA, MASTER_CLEAR},
                     USES_POLICY_WIPE_DATA,
                     caller.getPackageName(),
                     factoryReset ? UserHandle.USER_ALL : getAffectedUser(calledOnParentInstance));
@@ -7576,12 +7577,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 admin = getActiveAdminWithPolicyForUidLocked(/* who= */ null,
                         DeviceAdminInfo.USES_POLICY_WIPE_DATA, caller.getUid());
             }
+            Preconditions.checkCallAuthorization(
+                    (admin != null) || hasCallingOrSelfPermission(permission.MASTER_CLEAR),
+                    "No active admin for user %d and caller %d does not hold MASTER_CLEAR "
+                            + "permission",
+                    caller.getUserId(), caller.getUid());
         }
 
-        Preconditions.checkCallAuthorization(
-                (admin != null) || hasCallingOrSelfPermission(permission.MASTER_CLEAR),
-                "No active admin for user %d and caller %d does not hold MASTER_CLEAR permission",
-                caller.getUserId(), caller.getUid());
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_WIPE_DATA);
 
         if (TextUtils.isEmpty(wipeReasonForUser)) {
@@ -7836,15 +7838,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else {
                 // Explicit behaviour
                 if (factoryReset) {
-                    // TODO(b/254031494) Replace with new factory reset permission checks
-                    if (!isPermissionCheckFlagEnabled()) {
-                        boolean hasPermission = isDeviceOwnerUserId(userId)
-                                || (isOrganizationOwnedDeviceWithManagedProfile()
-                                && calledOnParentInstance);
-                        Preconditions.checkCallAuthorization(hasPermission,
-                                "Admin %s does not have permission to factory reset the device.",
-                                userId);
-                    }
+                    EnforcingAdmin enforcingAdmin = enforcePermissionsAndGetEnforcingAdmin(
+                            /*admin=*/ null,
+                            /*permission=*/ new String[]{MANAGE_DEVICE_POLICY_WIPE_DATA,
+                                    MASTER_CLEAR},
+                            USES_POLICY_WIPE_DATA,
+                            adminPackage,
+                            factoryReset ? UserHandle.USER_ALL :
+                                    getAffectedUser(calledOnParentInstance));
                     wipeDevice = true;
                 } else {
                     Preconditions.checkCallAuthorization(!isSystemUser,
@@ -23222,6 +23223,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     /**
+     * Checks if the calling process has been granted permission to apply a device policy on a
+     * specific user.  Only one permission provided in the list needs to be granted to pass this
+     * check.
+     * The given permissions will be checked along with their associated cross-user permissions if
+     * they exist and the target user is different to the calling user.
+     * Returns an {@link EnforcingAdmin} for the caller.
+     *
+     * @param admin the component name of the admin.
+     * @param callerPackageName The package name of the calling application.
+     * @param permissions The names of the permissions being checked.
+     * @param deviceAdminPolicy The userId of the user which the caller needs permission to act on.
+     * @throws SecurityException if the caller has not been granted the given permission,
+     * the associated cross-user permission if the caller's user is different to the target user.
+     */
+    private EnforcingAdmin enforcePermissionsAndGetEnforcingAdmin(@Nullable ComponentName admin,
+            String[] permissions, int deviceAdminPolicy, String callerPackageName,
+            int targetUserId) {
+        enforcePermissions(permissions, deviceAdminPolicy, callerPackageName, targetUserId);
+        return getEnforcingAdminForCaller(admin, callerPackageName);
+    }
+
+    /**
      * Checks whether the calling process has been granted permission to query a device policy on
      * a specific user.
      * The given permission will be checked along with its associated cross-user permission if it
@@ -23267,12 +23290,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     /**
      * Checks if the calling process has been granted permission to apply a device policy on a
-     * specific user.
-     * The given permission will be checked along with its associated cross-user permission if it
-     * exists and the target user is different to the calling user.
+     * specific user. Only one permission provided in the list needs to be granted to pass this
+     * check.
+     * The given permissions will be checked along with their associated cross-user permissions if
+     * they exists and the target user is different to the calling user.
      *
      * @param callerPackageName The package name  of the calling application.
-     * @param permission The name of the permission being checked.
+     * @param permissions The names of the permissions being checked.
      * @param targetUserId The userId of the user which the caller needs permission to act on.
      * @throws SecurityException if the caller has not been granted the given permission,
      * the associated cross-user permission if the caller's user is different to the target user.
@@ -23334,6 +23358,27 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         enforcePermission(permission, callerPackageName, targetUserId);
+    }
+
+    /**
+     * Checks if the calling process has been granted permission to apply a device policy on a
+     * specific user.
+     * The given permission will be checked along with its associated cross-user permission if it
+     * exists and the target user is different to the calling user.
+     *
+     * @param callerPackageName The package name  of the calling application.
+     * @param adminPolicy The admin policy that should grant holders permission.
+     * @param permission The name of the permission being checked.
+     * @param targetUserId The userId of the user which the caller needs permission to act on.
+     * @throws SecurityException if the caller has not been granted the given permission,
+     * the associated cross-user permission if the caller's user is different to the target user.
+     */
+    private void enforcePermissions(String[] permissions, int adminPolicy,
+            String callerPackageName, int targetUserId) throws SecurityException {
+        if (hasAdminPolicy(adminPolicy, callerPackageName)) {
+            return;
+        }
+        enforcePermissions(permissions, callerPackageName, targetUserId);
     }
 
     /**
@@ -23463,7 +23508,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Check for non-DPC active admins.
         admin = getActiveAdminForCaller(who, caller);
         if (admin != null) {
-            return EnforcingAdmin.createDeviceAdminEnforcingAdmin(who, userId, admin);
+            return EnforcingAdmin.createDeviceAdminEnforcingAdmin(admin.info.getComponent(), userId,
+                    admin);
         }
         admin = getUserData(userId).createOrGetPermissionBasedAdmin(userId);
         return  EnforcingAdmin.createEnforcingAdmin(caller.getPackageName(), userId, admin);
