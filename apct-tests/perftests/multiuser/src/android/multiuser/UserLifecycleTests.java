@@ -1261,15 +1261,13 @@ public class UserLifecycleTests {
      * <p> This should always be used for profiles since profiles cannot be started in foreground.
      */
     private void startUserInBackgroundAndWaitForUnlock(int userId) {
-        final ProgressWaiter waiter = new ProgressWaiter();
-        boolean success = false;
         try {
-            mIam.startUserInBackgroundWithListener(userId, waiter);
-            success = waiter.waitForFinish(TIMEOUT_IN_SECOND);
-        } catch (RemoteException e) {
-            Log.e(TAG, "startUserInBackgroundAndWaitForUnlock failed", e);
+            attestTrue("Failed to start user " + userId + " in background.",
+                    ShellHelper.runShellCommandWithTimeout("am start-user -w " + userId,
+                            TIMEOUT_IN_SECOND).startsWith("Success:"));
+        } catch (TimeoutException e) {
+            fail("Could not start user " + userId + " in " + TIMEOUT_IN_SECOND + " seconds");
         }
-        attestTrue("Failed to start user " + userId + " in background.", success);
     }
 
     /** Starts the given user in the foreground. */
