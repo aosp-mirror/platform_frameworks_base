@@ -42,7 +42,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
-import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
@@ -231,8 +230,6 @@ constructor(
      * Widget Picker to all users.
      */
     fun setNoteTaskShortcutEnabled(value: Boolean, user: UserHandle) {
-        val componentName = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
-
         val enabledState =
             if (value) {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED
@@ -249,8 +246,9 @@ constructor(
             } else {
                 context.createContextAsUser(user, /* flags= */ 0)
             }
+
         userContext.packageManager.setComponentEnabledSetting(
-            componentName,
+            SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT,
             enabledState,
             PackageManager.DONT_KILL_APP,
         )
@@ -297,6 +295,19 @@ constructor(
 
     companion object {
         val TAG = NoteTaskController::class.simpleName.orEmpty()
+
+        /**
+         * IMPORTANT! The shortcut package name and class should be synchronized with Settings:
+         * [com.android.settings.notetask.shortcut.CreateNoteTaskShortcutActivity].
+         *
+         * Changing the package name or class is a breaking change.
+         */
+        @VisibleForTesting
+        val SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT =
+            ComponentName(
+                "com.android.settings",
+                "com.android.settings.notetask.shortcut.CreateNoteTaskShortcutActivity",
+            )
 
         const val SHORTCUT_ID = "note_task_shortcut_id"
 
