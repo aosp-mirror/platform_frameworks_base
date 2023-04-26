@@ -20,7 +20,7 @@ import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.platform.test.rule.SettingOverrideRule
 import android.provider.Settings
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
