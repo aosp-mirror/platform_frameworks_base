@@ -72,19 +72,24 @@ class AppIdAppOpPolicy : BaseAppOpPolicy(AppIdAppOpPersistence()) {
     }
 
     fun GetStateScope.getAppOpModes(appId: Int, userId: Int): IndexedMap<String, Int>? =
-        state.userStates[userId]!!.appIdAppOpModes[appId]
+        state.userStates[userId]?.appIdAppOpModes?.get(appId)
 
     fun MutateStateScope.removeAppOpModes(appId: Int, userId: Int): Boolean {
-        val appIdIndex = newState.userStates[userId]!!.appIdAppOpModes.indexOfKey(appId)
+        val userStateIndex = newState.userStates.indexOfKey(userId)
+        if (userStateIndex < 0) {
+            return false
+        }
+        val appIdIndex = newState.userStates.valueAt(userStateIndex).appIdAppOpModes
+            .indexOfKey(appId)
         if (appIdIndex < 0) {
             return false
         }
-        newState.mutateUserState(userId)!!.mutateAppIdAppOpModes().removeAt(appIdIndex)
+        newState.mutateUserStateAt(userStateIndex).mutateAppIdAppOpModes().removeAt(appIdIndex)
         return true
     }
 
     fun GetStateScope.getAppOpMode(appId: Int, userId: Int, appOpName: String): Int =
-        state.userStates[userId]!!.appIdAppOpModes[appId]
+        state.userStates[userId]?.appIdAppOpModes?.get(appId)
             .getWithDefault(appOpName, AppOpsManager.opToDefaultMode(appOpName))
 
     fun MutateStateScope.setAppOpMode(
