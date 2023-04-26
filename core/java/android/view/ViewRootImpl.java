@@ -961,12 +961,20 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 sAnrReported = true;
+                // If we're making an in-process call to ActivityManagerService
+                // and the previous binder call on this thread was oneway, the
+                // calling PID will be 0. Clearing the calling identity fixes
+                // this and ensures ActivityManager gets the correct calling
+                // pid.
+                final long identityToken = Binder.clearCallingIdentity();
                 try {
                     ActivityManager.getService().appNotResponding(reason);
                 } catch (RemoteException e) {
                     // We asked the system to crash us, but the system
                     // already crashed. Unfortunately things may be
                     // out of control.
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
                 }
             }
         };
