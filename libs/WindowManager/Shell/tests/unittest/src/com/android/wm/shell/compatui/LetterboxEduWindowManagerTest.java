@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.compatui;
 
+import static android.content.res.Configuration.UI_MODE_NIGHT_YES;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -369,6 +371,25 @@ public class LetterboxEduWindowManagerTest extends ShellTestCase {
         windowManager.release();
 
         verify(mAnimationController).cancelAnimation();
+    }
+
+    @Test
+    public void testDeviceThemeChange_educationDialogUnseen_recreated() {
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
+        ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();
+        newTaskInfo.configuration.uiMode |= UI_MODE_NIGHT_YES;
+
+        assertTrue(windowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
+    }
+
+    @Test
+    public void testDeviceThemeHasChanged_educationDialogSeen_notRecreated() {
+        LetterboxEduWindowManager windowManager = createWindowManager(/* eligible= */ true);
+        mCompatUIConfiguration.setSeenLetterboxEducation(USER_ID_1);
+        ActivityManager.RunningTaskInfo newTaskInfo = new ActivityManager.RunningTaskInfo();
+        newTaskInfo.configuration.uiMode |= UI_MODE_NIGHT_YES;
+
+        assertFalse(windowManager.needsToBeRecreated(newTaskInfo, mTaskListener));
     }
 
     private void verifyLayout(LetterboxEduDialogLayout layout, ViewGroup.LayoutParams params,
