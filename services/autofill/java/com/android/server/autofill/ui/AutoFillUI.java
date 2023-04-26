@@ -23,7 +23,6 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -53,6 +52,7 @@ import com.android.server.LocalServices;
 import com.android.server.UiModeManagerInternal;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
+import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
 
@@ -198,6 +198,7 @@ public final class AutoFillUI {
      * @param serviceIcon icon of autofill service
      * @param callback identifier for the caller
      * @param userId the user associated wit the session
+     * @param context context with the proper state (like display id) to show the UI
      * @param sessionId id of the autofill session
      * @param compatMode whether the app is being autofilled in compatibility mode.
      */
@@ -205,11 +206,11 @@ public final class AutoFillUI {
             @Nullable String filterText, @Nullable String servicePackageName,
             @NonNull ComponentName componentName, @NonNull CharSequence serviceLabel,
             @NonNull Drawable serviceIcon, @NonNull AutoFillUiCallback callback,
-            @UserIdInt int userId, int sessionId, boolean compatMode) {
+            @NonNull Context context, int sessionId, boolean compatMode) {
         if (sDebug) {
             final int size = filterText == null ? 0 : filterText.length();
-            Slog.d(TAG, "showFillUi(): id=" + focusedId + ", filter=" + size + " chars, userId="
-                    + userId);
+            Slogf.d(TAG, "showFillUi(): id=%s, filter=%d chars, displayId=%d", focusedId, size,
+                    context.getDisplayId());
         }
         final LogMaker log = Helper
                 .newLogMaker(MetricsEvent.AUTOFILL_FILL_UI, componentName, servicePackageName,
@@ -224,10 +225,8 @@ public final class AutoFillUI {
                 return;
             }
             hideAllUiThread(callback);
-            mFillUi = new FillUi(mContext, userId, response, focusedId,
-                    filterText, mOverlayControl, serviceLabel, serviceIcon,
-                    mUiModeMgr.isNightMode(),
-                    new FillUi.Callback() {
+            mFillUi = new FillUi(context, response, focusedId, filterText, mOverlayControl,
+                    serviceLabel, serviceIcon, mUiModeMgr.isNightMode(), new FillUi.Callback() {
                 @Override
                 public void onResponsePicked(FillResponse response) {
                     log.setType(MetricsEvent.TYPE_DETAIL);
@@ -325,12 +324,12 @@ public final class AutoFillUI {
     public void showSaveUi(@NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
             @Nullable String servicePackageName, @NonNull SaveInfo info,
             @NonNull ValueFinder valueFinder, @NonNull ComponentName componentName,
-            @NonNull AutoFillUiCallback callback, @UserIdInt int userId,
+            @NonNull AutoFillUiCallback callback, @NonNull Context context,
             @NonNull PendingUi pendingSaveUi, boolean isUpdate, boolean compatMode,
             boolean showServiceIcon) {
         if (sVerbose) {
-            Slog.v(TAG, "showSaveUi(update=" + isUpdate + ") for " + componentName.toShortString()
-                    + " and user " + userId + ": " + info);
+            Slogf.v(TAG, "showSaveUi(update=%b) for %s and display %d: %s", isUpdate,
+                    componentName.toShortString(), context.getDisplayId(), info);
         }
         int numIds = 0;
         numIds += info.getRequiredIds() == null ? 0 : info.getRequiredIds().length;
@@ -350,7 +349,7 @@ public final class AutoFillUI {
             }
             hideAllUiThread(callback);
             mSaveUiCallback = callback;
-            mSaveUi = new SaveUi(mContext, userId, pendingSaveUi, serviceLabel, serviceIcon,
+            mSaveUi = new SaveUi(context, pendingSaveUi, serviceLabel, serviceIcon,
                     servicePackageName, componentName, info, valueFinder, mOverlayControl,
                     new SaveUi.OnSaveListener() {
                 @Override
