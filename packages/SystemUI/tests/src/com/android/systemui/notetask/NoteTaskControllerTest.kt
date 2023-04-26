@@ -45,8 +45,8 @@ import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.notetask.NoteTaskController.Companion.EXTRA_SHORTCUT_BADGE_OVERRIDE_PACKAGE
+import com.android.systemui.notetask.NoteTaskController.Companion.SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT
 import com.android.systemui.notetask.NoteTaskController.Companion.SHORTCUT_ID
-import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import com.android.systemui.settings.FakeUserTracker
@@ -423,8 +423,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 eq(COMPONENT_ENABLED_STATE_ENABLED),
                 eq(PackageManager.DONT_KILL_APP),
             )
-        assertThat(argument.value.className)
-            .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
+
+        assertThat(argument.value).isEqualTo(SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT)
     }
 
     @Test
@@ -438,8 +438,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 eq(COMPONENT_ENABLED_STATE_DISABLED),
                 eq(PackageManager.DONT_KILL_APP),
             )
-        assertThat(argument.value.className)
-            .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
+        assertThat(argument.value).isEqualTo(SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT)
     }
 
     @Test
@@ -458,8 +457,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 eq(COMPONENT_ENABLED_STATE_ENABLED),
                 eq(PackageManager.DONT_KILL_APP),
             )
-        assertThat(argument.value.className)
-            .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
+        assertThat(argument.value).isEqualTo(SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT)
     }
 
     @Test
@@ -479,8 +477,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 eq(COMPONENT_ENABLED_STATE_DISABLED),
                 eq(PackageManager.DONT_KILL_APP),
             )
-        assertThat(argument.value.className)
-            .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
+        assertThat(argument.value).isEqualTo(SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT)
     }
     // endregion
 
@@ -664,8 +661,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 eq(COMPONENT_ENABLED_STATE_ENABLED),
                 eq(PackageManager.DONT_KILL_APP),
             )
-        assertThat(actualComponent.value.className)
-            .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
+        assertThat(actualComponent.value).isEqualTo(SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT)
         verify(shortcutManager, never()).disableShortcuts(any())
         verify(shortcutManager).enableShortcuts(listOf(SHORTCUT_ID))
         val actualShortcuts = argumentCaptor<List<ShortcutInfo>>()
@@ -696,8 +692,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 eq(COMPONENT_ENABLED_STATE_DISABLED),
                 eq(PackageManager.DONT_KILL_APP),
             )
-        assertThat(argument.value.className)
-            .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
+        assertThat(argument.value).isEqualTo(SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT)
         verify(shortcutManager).disableShortcuts(listOf(SHORTCUT_ID))
         verify(shortcutManager, never()).enableShortcuts(any())
         verify(shortcutManager, never()).updateShortcuts(any())
@@ -714,8 +709,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
                 eq(COMPONENT_ENABLED_STATE_DISABLED),
                 eq(PackageManager.DONT_KILL_APP),
             )
-        assertThat(argument.value.className)
-            .isEqualTo(CreateNoteTaskShortcutActivity::class.java.name)
+        assertThat(argument.value).isEqualTo(SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT)
         verify(shortcutManager).disableShortcuts(listOf(SHORTCUT_ID))
         verify(shortcutManager, never()).enableShortcuts(any())
         verify(shortcutManager, never()).updateShortcuts(any())
