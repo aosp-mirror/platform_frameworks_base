@@ -185,6 +185,7 @@ public final class NetworkProviderInfo implements Parcelable {
          */
         @NonNull
         public Builder setExtras(@NonNull Bundle extras) {
+            Objects.requireNonNull(extras);
             mExtras = extras;
             return this;
         }
