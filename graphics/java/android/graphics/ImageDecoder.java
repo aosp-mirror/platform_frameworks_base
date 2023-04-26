@@ -40,6 +40,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
+import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Trace;
@@ -914,8 +915,6 @@ public final class ImageDecoder implements AutoCloseable {
             case "image/jpeg":
             case "image/webp":
             case "image/gif":
-            case "image/heif":
-            case "image/heic":
             case "image/bmp":
             case "image/x-ico":
             case "image/vnd.wap.wbmp":
@@ -930,6 +929,9 @@ public final class ImageDecoder implements AutoCloseable {
             case "image/x-pentax-pef":
             case "image/x-samsung-srw":
                 return true;
+            case "image/heif":
+            case "image/heic":
+                return isHevcDecoderSupported();
             case "image/avif":
                 return isP010SupportedForAV1();
             default:
@@ -2067,6 +2069,28 @@ public final class ImageDecoder implements AutoCloseable {
         return decodeBitmapImpl(src, null);
     }
 
+    private static boolean sIsHevcDecoderSupported = false;
+    private static boolean sIsHevcDecoderSupportedInitialized = false;
+    private static final Object sIsHevcDecoderSupportedLock = new Object();
+
+    /*
+     * Check if HEVC decoder is supported by the device.
+     */
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private static boolean isHevcDecoderSupported() {
+        synchronized (sIsHevcDecoderSupportedLock) {
+            if (sIsHevcDecoderSupportedInitialized) {
+                return sIsHevcDecoderSupported;
+            }
+            MediaFormat format = new MediaFormat();
+            format.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_HEVC);
+            MediaCodecList mcl = new MediaCodecList(MediaCodecList.ALL_CODECS);
+            sIsHevcDecoderSupported = mcl.findDecoderForFormat(format) != null;
+            sIsHevcDecoderSupportedInitialized = true;
+            return sIsHevcDecoderSupported;
+        }
+    }
+
     private static boolean sIsP010SupportedForAV1 = false;
     private static boolean sIsP010SupportedForHEVC = false;
     private static boolean sIsP010SupportedFlagsInitialized = false;
@@ -2111,14 +2135,14 @@ public final class ImageDecoder implements AutoCloseable {
                 continue;
             }
             for (String mediaType : mediaCodecInfo.getSupportedTypes()) {
-                if (mediaType.equalsIgnoreCase("video/av01")
-                        || mediaType.equalsIgnoreCase("video/hevc")) {
+                if (mediaType.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AV1)
+                        || mediaType.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC)) {
                     MediaCodecInfo.CodecCapabilities codecCapabilities =
                         mediaCodecInfo.getCapabilitiesForType(mediaType);
                     for (int i = 0; i < codecCapabilities.colorFormats.length; ++i) {
                         if (codecCapabilities.colorFormats[i]
                             == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010) {
-                            if (mediaType.equalsIgnoreCase("video/av01")) {
+                            if (mediaType.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AV1)) {
                                 sIsP010SupportedForAV1 = true;
                             } else {
                                 sIsP010SupportedForHEVC = true;
