@@ -84,23 +84,26 @@ static jobjectArray nativeGetStreamConfigs(JNIEnv* env, jclass clazz,
     return result;
 }
 
+static int nativeSetTvMessageEnabled(JNIEnv* env, jclass clazz, jlong ptr, jint deviceId,
+                                     jint streamId, jint type, jboolean enabled) {
+    JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
+    return tvInputHal->setTvMessageEnabled(deviceId, streamId, type, enabled);
+}
+
 static void nativeClose(JNIEnv* env, jclass clazz, jlong ptr) {
     JTvInputHal* tvInputHal = (JTvInputHal*)ptr;
     delete tvInputHal;
 }
 
 static const JNINativeMethod gTvInputHalMethods[] = {
-    /* name, signature, funcPtr */
-    { "nativeOpen", "(Landroid/os/MessageQueue;)J",
-            (void*) nativeOpen },
-    { "nativeAddOrUpdateStream", "(JIILandroid/view/Surface;)I",
-            (void*) nativeAddOrUpdateStream },
-    { "nativeRemoveStream", "(JII)I",
-            (void*) nativeRemoveStream },
-    { "nativeGetStreamConfigs", "(JII)[Landroid/media/tv/TvStreamConfig;",
-            (void*) nativeGetStreamConfigs },
-    { "nativeClose", "(J)V",
-            (void*) nativeClose },
+        /* name, signature, funcPtr */
+        {"nativeOpen", "(Landroid/os/MessageQueue;)J", (void*)nativeOpen},
+        {"nativeAddOrUpdateStream", "(JIILandroid/view/Surface;)I", (void*)nativeAddOrUpdateStream},
+        {"nativeRemoveStream", "(JII)I", (void*)nativeRemoveStream},
+        {"nativeGetStreamConfigs", "(JII)[Landroid/media/tv/TvStreamConfig;",
+         (void*)nativeGetStreamConfigs},
+        {"nativeSetTvMessageEnabled", "(JIIIZ)I", (void*)nativeSetTvMessageEnabled},
+        {"nativeClose", "(J)V", (void*)nativeClose},
 };
 
 #define FIND_CLASS(var, className) \
