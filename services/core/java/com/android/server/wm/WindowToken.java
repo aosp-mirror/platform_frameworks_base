@@ -596,6 +596,7 @@ class WindowToken extends WindowContainer<WindowState> {
                 .build();
         t.setPosition(leash, mLastSurfacePosition.x, mLastSurfacePosition.y);
         t.reparent(getSurfaceControl(), leash);
+        t.setFixedTransformHint(leash, getWindowConfiguration().getDisplayRotation());
         mFixedRotationTransformLeash = leash;
         updateSurfaceRotation(t, rotation, mFixedRotationTransformLeash);
         return mFixedRotationTransformLeash;
