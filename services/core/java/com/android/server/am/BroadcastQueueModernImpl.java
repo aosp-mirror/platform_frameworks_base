@@ -606,24 +606,18 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             final BroadcastProcessQueue queue = getOrCreateProcessQueue(
                     getReceiverProcessName(receiver), getReceiverUid(receiver));
 
-            boolean wouldBeSkipped = false;
-            if (receiver instanceof ResolveInfo) {
-                // If the app is running but would not have been started if the process weren't
-                // running, we're going to deliver the broadcast but mark that it's not a manifest
-                // broadcast that would have started the app. This allows BroadcastProcessQueue to
-                // defer the broadcast as though it were a normal runtime receiver.
-                wouldBeSkipped = (mSkipPolicy.shouldSkipMessage(r, receiver) != null);
-                if (wouldBeSkipped && queue.app == null && !queue.getActiveViaColdStart()) {
-                    // Skip receiver if there's no running app, the app is not being started, and
-                    // the app wouldn't be launched for this broadcast
-                    setDeliveryState(null, null, r, i, receiver, BroadcastRecord.DELIVERY_SKIPPED,
-                            "skipped by policy to avoid cold start");
-                    continue;
-                }
+            // If this receiver is going to be skipped, skip it now itself and don't even enqueue
+            // it.
+            final boolean wouldBeSkipped = (mSkipPolicy.shouldSkipMessage(r, receiver) != null);
+            if (wouldBeSkipped) {
+                setDeliveryState(null, null, r, i, receiver, BroadcastRecord.DELIVERY_SKIPPED,
+                        "skipped by policy at enqueue");
+                continue;
             }
+
             enqueuedBroadcast = true;
             final BroadcastRecord replacedBroadcast = queue.enqueueOrReplaceBroadcast(
-                    r, i, wouldBeSkipped, mBroadcastConsumerDeferApply);
+                    r, i, mBroadcastConsumerDeferApply);
             if (replacedBroadcast != null) {
                 replacedBroadcasts.add(replacedBroadcast);
             }
