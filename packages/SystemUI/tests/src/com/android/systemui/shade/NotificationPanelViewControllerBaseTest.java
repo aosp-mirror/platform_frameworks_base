@@ -115,6 +115,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -304,6 +305,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
             mEmptySpaceClickListenerCaptor;
     @Mock protected ActivityStarter mActivityStarter;
     @Mock protected KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    @Mock protected ShadeRepository mShadeRepository;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
@@ -672,7 +674,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFeatureFlags,
                 mInteractionJankMonitor,
                 mShadeLog,
-                mKeyguardFaceAuthInteractor
+                mKeyguardFaceAuthInteractor,
+                mShadeRepository
         );
     }
 
