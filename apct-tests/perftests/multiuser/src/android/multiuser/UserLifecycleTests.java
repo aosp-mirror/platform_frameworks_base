@@ -24,11 +24,9 @@ import static org.junit.Assume.assumeTrue;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
-import android.app.WaitResult;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -1387,14 +1385,20 @@ public class UserLifecycleTests {
      * Launches the given package in the given user.
      * Make sure the keyguard has been dismissed prior to calling.
      */
-    private void startApp(int userId, String packageName) throws RemoteException {
-        final Context context = InstrumentationRegistry.getContext();
-        final WaitResult result = ActivityTaskManager.getService().startActivityAndWait(null,
-                context.getPackageName(), context.getAttributionTag(),
-                context.getPackageManager().getLaunchIntentForPackage(packageName), null, null,
-                null, 0, 0, null, null, userId);
-        attestTrue("User " + userId + " failed to start " + packageName,
-                result.result == ActivityManager.START_SUCCESS);
+    private void startApp(int userId, String packageName) {
+        final String failMessage = "User " + userId + " failed to start " + packageName;
+        final String component = InstrumentationRegistry.getContext().getPackageManager()
+                .getLaunchIntentForPackage(packageName).getComponent().flattenToShortString();
+        try {
+            final String result = ShellHelper.runShellCommandWithTimeout(
+                    "am start -W -n " + component + " --user " + userId, TIMEOUT_IN_SECOND);
+            assertTrue(failMessage + ", component=" + component + ", result=" + result,
+                    result.contains("Status: ok")
+                    && !result.contains("Warning:")
+                    && !result.contains("Error:"));
+        } catch (TimeoutException e) {
+            fail(failMessage + " in " + TIMEOUT_IN_SECOND + " seconds");
+        }
     }
 
     private class ProgressWaiter extends IProgressListener.Stub {
