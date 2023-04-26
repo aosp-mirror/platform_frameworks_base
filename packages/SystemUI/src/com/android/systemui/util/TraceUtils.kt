@@ -16,22 +16,20 @@
 
 package com.android.systemui.util
 
-import android.os.Handler
+import android.os.Trace
 import android.os.TraceNameSupplier
-import androidx.tracing.Trace
 
 /**
- * Run a block within a [Trace] section. Calls [Trace.beginSection] before and [Trace.endSection]
- * after the passed block. If tracing is disabled, it will run the block directly to avoid using an
- * unnecessary try-finally block.
+ * Run a block within a [Trace] section.
+ * Calls [Trace.beginSection] before and [Trace.endSection] after the passed block.
  */
 inline fun <T> traceSection(tag: String, block: () -> T): T =
-        if (Trace.isEnabled()) {
-            Trace.beginSection(tag)
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
+            Trace.traceBegin(Trace.TRACE_TAG_APP, tag)
             try {
                 block()
             } finally {
-                Trace.endSection()
+                Trace.traceEnd(Trace.TRACE_TAG_APP)
             }
         } else {
             block()
@@ -44,10 +42,8 @@ class TraceUtils {
         }
 
         /**
-         * Helper function for creating a [Runnable] that implements [TraceNameSupplier]. This is
-         * useful when posting to a [Handler] so that the [Runnable] has a meaningful name in the
-         * trace. Otherwise, the class name of the [Runnable] is used, which is often something like
-         * `pkg.MyClass$$ExternalSyntheticLambda0`.
+         * Helper function for creating a Runnable object that implements TraceNameSupplier.
+         * This is useful for posting Runnables to Handlers with meaningful names.
          */
         inline fun namedRunnable(tag: String, crossinline block: () -> Unit): Runnable {
             return object : Runnable, TraceNameSupplier {
