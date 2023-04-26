@@ -70,6 +70,7 @@ import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -136,6 +137,7 @@ public class QuickSettingsController {
     private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     private final FeatureFlags mFeatureFlags;
     private final InteractionJankMonitor mInteractionJankMonitor;
+    private final ShadeRepository mShadeRepository;
     private final FalsingManager mFalsingManager;
     private final AccessibilityManager mAccessibilityManager;
     private final MetricsLogger mMetricsLogger;
@@ -321,7 +323,8 @@ public class QuickSettingsController {
             FeatureFlags featureFlags,
             InteractionJankMonitor interactionJankMonitor,
             ShadeLogger shadeLog,
-            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor
+            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
+            ShadeRepository shadeRepository
     ) {
         mPanelViewControllerLazy = panelViewControllerLazy;
         mPanelView = panelView;
@@ -363,6 +366,7 @@ public class QuickSettingsController {
         mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
         mFeatureFlags = featureFlags;
         mInteractionJankMonitor = interactionJankMonitor;
+        mShadeRepository = shadeRepository;
 
         mLockscreenShadeTransitionController.addCallback(new LockscreenShadeTransitionCallback());
     }
@@ -1001,6 +1005,7 @@ public class QuickSettingsController {
 
         mDepthController.setQsPanelExpansion(qsExpansionFraction);
         mStatusBarKeyguardViewManager.setQsExpansion(qsExpansionFraction);
+        mShadeRepository.setQsExpansion(qsExpansionFraction);
 
         // TODO (b/265193930): remove dependency on NPVC
         float shadeExpandedFraction = mBarState == KEYGUARD
