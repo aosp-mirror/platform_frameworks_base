@@ -19,8 +19,6 @@ import android.annotation.ColorInt
 import android.util.Log
 import android.view.View
 import com.android.internal.annotations.VisibleForTesting
-import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.media.controls.ui.KeyguardMediaController
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager
 import com.android.systemui.statusbar.notification.SourceType
@@ -51,11 +49,10 @@ class NotificationSectionsManager @Inject internal constructor(
     @IncomingHeader private val incomingHeaderController: SectionHeaderController,
     @PeopleHeader private val peopleHeaderController: SectionHeaderController,
     @AlertingHeader private val alertingHeaderController: SectionHeaderController,
-    @SilentHeader private val silentHeaderController: SectionHeaderController,
-    featureFlags: FeatureFlags
+    @SilentHeader private val silentHeaderController: SectionHeaderController
 ) : SectionProvider {
 
-    private val useRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES)
+    private val useRoundnessSourceTypes = true
 
     private val configurationListener = object : ConfigurationController.ConfigurationListener {
         override fun onLocaleListChanged() {

@@ -61,7 +61,6 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.controls.ui.KeyguardMediaController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
@@ -125,8 +124,6 @@ import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.settings.SecureSettings;
-
-import kotlin.Unit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -723,7 +720,7 @@ public class NotificationStackScrollLayoutController {
         mShadeController = shadeController;
         mNotifIconAreaController = notifIconAreaController;
         mFeatureFlags = featureFlags;
-        mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
+        mUseRoundnessSourceTypes = true;
         mNotificationTargetsHelper = notificationTargetsHelper;
         mSecureSettings = secureSettings;
         mDismissibilityProvider = dismissibilityProvider;
@@ -822,7 +819,7 @@ public class NotificationStackScrollLayoutController {
                 mView.generateRemoveAnimation(mKeyguardMediaController.getSinglePaneContainer());
             }
             mView.requestChildrenUpdate();
-            return Unit.INSTANCE;
+            return kotlin.Unit.INSTANCE;
         });
 
         // attach callback, and then call it to update mView immediately
