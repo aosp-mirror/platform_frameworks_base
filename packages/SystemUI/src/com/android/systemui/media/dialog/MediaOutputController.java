@@ -713,7 +713,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             dividerItems.forEach((key, item) -> {
                 finalMediaItems.add(key, item);
             });
-            finalMediaItems.add(new MediaItem());
+            attachConnectNewDeviceItemIfNeeded(finalMediaItems);
             mMediaItemList.clear();
             mMediaItemList.addAll(finalMediaItems);
         }
@@ -749,7 +749,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                     finalMediaItems.add(new MediaItem(device));
                 }
             }
-            finalMediaItems.add(new MediaItem());
+            attachConnectNewDeviceItemIfNeeded(finalMediaItems);
             mMediaItemList.clear();
             mMediaItemList.addAll(finalMediaItems);
         }
@@ -758,6 +758,13 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private void attachGroupDivider(List<MediaItem> mediaItems, String title) {
         mediaItems.add(
                 new MediaItem(title, MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
+    }
+
+    private void attachConnectNewDeviceItemIfNeeded(List<MediaItem> mediaItems) {
+        // Attach "Connect a device" item only when current output is not remote and not a group
+        if (!isCurrentConnectedDeviceRemote() && getSelectedMediaDevice().size() == 1) {
+            mediaItems.add(new MediaItem());
+        }
     }
 
     private void attachRangeInfo(List<MediaDevice> devices) {
