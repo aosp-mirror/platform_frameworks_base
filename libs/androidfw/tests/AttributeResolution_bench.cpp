@@ -36,14 +36,15 @@ constexpr const static char* kFrameworkPath = "/system/framework/framework-res.a
 constexpr const static uint32_t Theme_Material_Light = 0x01030237u;
 
 static void BM_ApplyStyle(benchmark::State& state) {
-  auto styles_apk = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
+  std::unique_ptr<const ApkAssets> styles_apk =
+      ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
   if (styles_apk == nullptr) {
     state.SkipWithError("failed to load assets");
     return;
   }
 
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({styles_apk});
+  assetmanager.SetApkAssets({styles_apk.get()});
 
   std::unique_ptr<Asset> asset =
       assetmanager.OpenNonAsset("res/layout/layout.xml", Asset::ACCESS_BUFFER);
@@ -79,20 +80,21 @@ static void BM_ApplyStyle(benchmark::State& state) {
 BENCHMARK(BM_ApplyStyle);
 
 static void BM_ApplyStyleFramework(benchmark::State& state) {
-  auto framework_apk = ApkAssets::Load(kFrameworkPath);
+  std::unique_ptr<const ApkAssets> framework_apk = ApkAssets::Load(kFrameworkPath);
   if (framework_apk == nullptr) {
     state.SkipWithError("failed to load framework assets");
     return;
   }
 
-  auto basic_apk = ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+  std::unique_ptr<const ApkAssets> basic_apk =
+      ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
   if (basic_apk == nullptr) {
     state.SkipWithError("failed to load assets");
     return;
   }
 
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({framework_apk, basic_apk});
+  assetmanager.SetApkAssets({framework_apk.get(), basic_apk.get()});
 
   ResTable_config device_config;
   memset(&device_config, 0, sizeof(device_config));

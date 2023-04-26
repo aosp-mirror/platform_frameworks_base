@@ -80,10 +80,10 @@ bool CanCompileLayout(ResXMLParser* parser) {
 }
 
 namespace {
-void CompileApkAssetsLayouts(const android::ApkAssetsPtr& assets, CompilationTarget target,
-                             std::ostream& target_out) {
+void CompileApkAssetsLayouts(const std::unique_ptr<android::ApkAssets>& assets,
+                             CompilationTarget target, std::ostream& target_out) {
   android::AssetManager2 resources;
-  resources.SetApkAssets({assets});
+  resources.SetApkAssets({assets.get()});
 
   std::string package_name;
 
