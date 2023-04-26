@@ -25,6 +25,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
@@ -49,6 +50,7 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
@@ -185,10 +187,15 @@ final class LetterboxUiController {
     // when dealing with translucent activities.
     private final List<LetterboxUiController> mDestroyListeners = new ArrayList<>();
 
+    // Corresponds to OVERRIDE_MIN_ASPECT_RATIO
+    private final boolean mIsOverrideMinAspectRatio;
+
     @Nullable
     private final Boolean mBooleanPropertyAllowOrientationOverride;
     @Nullable
     private final Boolean mBooleanPropertyAllowDisplayOrientationOverride;
+    @Nullable
+    private final Boolean mBooleanPropertyAllowMinAspectRatioOverride;
 
     /*
      * WindowContainerListener responsible to make translucent activities inherit
@@ -300,6 +307,10 @@ final class LetterboxUiController {
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         /* gatingCondition */ null,
                         PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE);
+        mBooleanPropertyAllowMinAspectRatioOverride =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        /* gatingCondition */ null,
+                        PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
 
         mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
         mIsOverrideToPortraitOrientationEnabled =
@@ -330,6 +341,7 @@ final class LetterboxUiController {
 
         mIsOverrideEnableCompatFakeFocusEnabled =
                 isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS);
+        mIsOverrideMinAspectRatio = isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO);
     }
 
     /**
@@ -499,6 +511,25 @@ final class LetterboxUiController {
                 /* gatingCondition */ mLetterboxConfiguration::isCompatFakeFocusEnabled,
                 mIsOverrideEnableCompatFakeFocusEnabled,
                 mBooleanPropertyFakeFocus);
+    }
+
+    /**
+     * Whether we should apply the min aspect ratio per-app override. When this override is applied
+     * the min aspect ratio given in the app's manifest will be overridden to the largest enabled
+     * aspect ratio treatment unless the app's manifest value is higher. The treatment will also
+     * apply if no value is provided in the manifest.
+     *
+     * <p>This method returns {@code true} when the following conditions are met:
+     * <ul>
+     *     <li>Opt-out component property isn't enabled
+     *     <li>Per-app override is enabled
+     * </ul>
+     */
+    boolean shouldOverrideMinAspectRatio() {
+        return shouldEnableWithOptInOverrideAndOptOutProperty(
+                /* gatingCondition */ () -> true,
+                mIsOverrideMinAspectRatio,
+                mBooleanPropertyAllowMinAspectRatioOverride);
     }
 
     /**
