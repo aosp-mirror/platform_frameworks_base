@@ -39,6 +39,7 @@ import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIV
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.common.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
+import static com.android.wm.shell.common.split.SplitScreenConstants.splitPositionToString;
 import static com.android.wm.shell.common.split.SplitScreenUtils.reverseSplitPosition;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
@@ -2853,12 +2854,18 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         final String childPrefix = innerPrefix + "  ";
         pw.println(prefix + TAG + " mDisplayId=" + mDisplayId);
         pw.println(innerPrefix + "mDividerVisible=" + mDividerVisible);
+        pw.println(innerPrefix + "isSplitActive=" + isSplitActive());
+        pw.println(innerPrefix + "isSplitVisible=" + isSplitScreenVisible());
         pw.println(innerPrefix + "MainStage");
-        pw.println(childPrefix + "stagePosition=" + getMainStagePosition());
+        pw.println(childPrefix + "stagePosition=" + splitPositionToString(getMainStagePosition()));
         pw.println(childPrefix + "isActive=" + mMainStage.isActive());
+        mMainStage.dump(pw, childPrefix);
+        pw.println(innerPrefix + "MainStageListener");
         mMainStageListener.dump(pw, childPrefix);
         pw.println(innerPrefix + "SideStage");
-        pw.println(childPrefix + "stagePosition=" + getSideStagePosition());
+        pw.println(childPrefix + "stagePosition=" + splitPositionToString(getSideStagePosition()));
+        mSideStage.dump(pw, childPrefix);
+        pw.println(innerPrefix + "SideStageListener");
         mSideStageListener.dump(pw, childPrefix);
         if (mMainStage.isActive()) {
             pw.println(innerPrefix + "SplitLayout");
