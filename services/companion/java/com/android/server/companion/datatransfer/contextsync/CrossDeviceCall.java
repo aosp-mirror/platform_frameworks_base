@@ -16,12 +16,14 @@
 
 package com.android.server.companion.datatransfer.contextsync;
 
+import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
 import android.telecom.VideoProfile;
@@ -46,7 +48,7 @@ public class CrossDeviceCall {
     private static final AtomicLong sNextId = new AtomicLong(1);
 
     private final long mId;
-    private final Call mCall;
+    private Call mCall;
     @VisibleForTesting boolean mIsEnterprise;
     @VisibleForTesting boolean mIsOtt;
     private final String mCallingAppPackageName;
@@ -58,17 +60,23 @@ public class CrossDeviceCall {
     private boolean mIsMuted;
     private final Set<Integer> mControls = new HashSet<>();
 
-    public CrossDeviceCall(PackageManager packageManager, Call call,
+    public CrossDeviceCall(PackageManager packageManager, @NonNull Call call,
+            CallAudioState callAudioState) {
+        this(packageManager, call.getDetails(), callAudioState);
+        mCall = call;
+        final Bundle extras = new Bundle();
+        extras.putLong(EXTRA_CALL_ID, mId);
+        call.putExtras(extras);
+    }
+
+    CrossDeviceCall(PackageManager packageManager, Call.Details callDetails,
             CallAudioState callAudioState) {
         mId = sNextId.getAndIncrement();
-        mCall = call;
-        mCallingAppPackageName = call != null
-                ? call.getDetails().getAccountHandle().getComponentName().getPackageName() : null;
-        mIsOtt = call != null
-                && (call.getDetails().getCallCapabilities() & Call.Details.PROPERTY_SELF_MANAGED)
+        mCallingAppPackageName =
+                callDetails.getAccountHandle().getComponentName().getPackageName();
+        mIsOtt = (callDetails.getCallCapabilities() & Call.Details.PROPERTY_SELF_MANAGED)
                 == Call.Details.PROPERTY_SELF_MANAGED;
-        mIsEnterprise = call != null
-                && (call.getDetails().getCallProperties() & Call.Details.PROPERTY_ENTERPRISE_CALL)
+        mIsEnterprise = (callDetails.getCallProperties() & Call.Details.PROPERTY_ENTERPRISE_CALL)
                 == Call.Details.PROPERTY_ENTERPRISE_CALL;
         try {
             final ApplicationInfo applicationInfo = packageManager
@@ -81,9 +89,7 @@ public class CrossDeviceCall {
             Slog.e(TAG, "Could not get application info for package " + mCallingAppPackageName, e);
         }
         mIsMuted = callAudioState != null && callAudioState.isMuted();
-        if (call != null) {
-            updateCallDetails(call.getDetails());
-        }
+        updateCallDetails(callDetails);
     }
 
     private byte[] renderDrawableToByteArray(Drawable drawable) {
@@ -108,10 +114,10 @@ public class CrossDeviceCall {
             final Canvas canvas = new Canvas(bitmap);
             drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
             drawable.draw(canvas);
+            return renderBitmapToByteArray(bitmap);
         } finally {
             bitmap.recycle();
         }
-        return renderBitmapToByteArray(bitmap);
     }
 
     private byte[] renderBitmapToByteArray(Bitmap bitmap) {
