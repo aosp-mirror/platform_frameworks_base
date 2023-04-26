@@ -177,7 +177,7 @@ public class BubbleFlyoutView extends FrameLayout {
 
         final TypedArray ta = mContext.obtainStyledAttributes(
                 new int[] {
-                        com.android.internal.R.attr.colorSurface,
+                        com.android.internal.R.attr.materialColorSurfaceContainer,
                         android.R.attr.dialogCornerRadius});
         mFloatingBackgroundColor = ta.getColor(0, Color.WHITE);
         mCornerRadius = ta.getDimensionPixelSize(1, 0);
