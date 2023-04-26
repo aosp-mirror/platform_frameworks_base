@@ -650,7 +650,7 @@ public class Transitions implements RemoteCallable<Transitions> {
                     active.mToken, info, active.mStartT, active.mFinishT);
         }
 
-        if (info.getRootCount() == 0 && !alwaysReportToKeyguard(info)) {
+        if (info.getRootCount() == 0 && !TransitionUtil.alwaysReportToKeyguard(info)) {
             // No root-leashes implies that the transition is empty/no-op, so just do
             // housekeeping and return.
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "No transition roots in %s so"
@@ -697,23 +697,6 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
         processReadyQueue(track);
         return true;
-    }
-
-    /**
-     * Some transitions we always need to report to keyguard even if they are empty.
-     * TODO (b/274954192): Remove this once keyguard dispatching moves to Shell.
-     */
-    private static boolean alwaysReportToKeyguard(TransitionInfo info) {
-        // occlusion status of activities can change while screen is off so there will be no
-        // visibility change but we still need keyguardservice to be notified.
-        if (info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE) return true;
-
-        // It's possible for some activities to stop with bad timing (esp. since we can't yet
-        // queue activity transitions initiated by apps) that results in an empty transition for
-        // keyguard going-away. In general, we should should always report Keyguard-going-away.
-        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) return true;
-
-        return false;
     }
 
     private boolean areTracksIdle() {
