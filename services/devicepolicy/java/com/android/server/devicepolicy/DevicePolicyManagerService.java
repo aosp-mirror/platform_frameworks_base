@@ -864,7 +864,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     // TODO(b/265683382) remove the flag after rollout.
     private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
-    private static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = false;
+    private static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = true;
 
     private static final String ENABLE_WORK_PROFILE_TELEPHONY_FLAG =
             "enable_work_profile_telephony";
