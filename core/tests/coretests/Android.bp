@@ -59,6 +59,7 @@ android_test {
         "print-test-util-lib",
         "testng",
         "servicestests-utils",
+        "device-time-shell-utils",
     ],
 
     libs: [
