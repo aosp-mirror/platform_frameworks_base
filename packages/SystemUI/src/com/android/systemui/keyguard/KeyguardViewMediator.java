@@ -1463,13 +1463,17 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             notifyFinishedGoingToSleep();
 
             if (cameraGestureTriggered) {
-
                 // Just to make sure, make sure the device is awake.
                 mContext.getSystemService(PowerManager.class).wakeUp(SystemClock.uptimeMillis(),
                         PowerManager.WAKE_REASON_CAMERA_LAUNCH,
                         "com.android.systemui:CAMERA_GESTURE_PREVENT_LOCK");
                 setPendingLock(false);
                 mPendingReset = false;
+                mPowerGestureIntercepted = true;
+                if (DEBUG) {
+                    Log.d(TAG, "cameraGestureTriggered=" + cameraGestureTriggered
+                            + ",mPowerGestureIntercepted=" + mPowerGestureIntercepted);
+                }
             }
 
             if (mPendingReset) {
@@ -1668,7 +1672,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             mAnimatingScreenOff = false;
             cancelDoKeyguardLaterLocked();
             cancelDoKeyguardForChildProfilesLocked();
-            if (DEBUG) Log.d(TAG, "onStartedWakingUp, seq = " + mDelayedShowingSequence);
+            if (cameraGestureTriggered) {
+                mPowerGestureIntercepted = true;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "onStartedWakingUp, seq = " + mDelayedShowingSequence
+                        + ", mPowerGestureIntercepted = " + mPowerGestureIntercepted);
+            }
             notifyStartedWakingUp();
         }
         mUpdateMonitor.dispatchStartedWakingUp(pmWakeReason);
@@ -1884,11 +1894,18 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 startKeyguardExitAnimation(0, 0);
             }
 
+            mPowerGestureIntercepted = mUpdateMonitor.isSecureCameraLaunchedOverKeyguard();
+
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
                 mKeyguardViewControllerLazy.get().setOccluded(isOccluded, animate
                         && mDeviceInteractive);
                 adjustStatusBarLocked();
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "isOccluded=" + isOccluded + ",mPowerGestureIntercepted="
+                        + mPowerGestureIntercepted);
             }
         }
         Trace.endSection();
@@ -2993,6 +3010,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 if (!mShowHomeOverLockscreen || !mInGestureNavigationMode) {
                     flags |= StatusBarManager.DISABLE_HOME;
                 }
+                flags |= StatusBarManager.DISABLE_RECENT;
+            }
+
+            if (mPowerGestureIntercepted) {
                 flags |= StatusBarManager.DISABLE_RECENT;
             }
 
