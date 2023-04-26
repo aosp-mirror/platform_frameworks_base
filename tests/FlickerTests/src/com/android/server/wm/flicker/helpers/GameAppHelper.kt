@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import android.tools.device.traces.parsers.toFlickerComponent

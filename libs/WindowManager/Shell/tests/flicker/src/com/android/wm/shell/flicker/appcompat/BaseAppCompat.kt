@@ -20,11 +20,11 @@ import android.content.Context
 import android.system.helpers.CommandsHelper
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
-import com.android.wm.shell.flicker.BaseTest
-import com.android.server.wm.flicker.helpers.setRotation
-import com.android.server.wm.flicker.helpers.LetterboxAppHelper
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import android.tools.device.flicker.legacy.IFlickerTestData
+import com.android.server.wm.flicker.helpers.LetterboxAppHelper
+import com.android.server.wm.flicker.helpers.setRotation
+import com.android.wm.shell.flicker.BaseTest
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
 import org.junit.Assume
@@ -104,8 +104,8 @@ abstract class BaseAppCompat(flicker: FlickerTest) : BaseTest(flicker) {
         /**
          * Creates the test configurations.
          *
-         * See [FlickerTestFactory.rotationTests] for configuring screen orientation and
-         * navigation modes.
+         * See [FlickerTestFactory.rotationTests] for configuring screen orientation and navigation
+         * modes.
          */
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

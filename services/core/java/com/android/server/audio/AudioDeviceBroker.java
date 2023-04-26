@@ -957,6 +957,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
         }
     }
 
+    /*package*/ void postSetA2dpSuspended(boolean enable, String eventSource) {
+        sendILMsgNoDelay(MSG_IL_SET_A2DP_SUSPENDED, SENDMSG_QUEUE, (enable ? 1 : 0), eventSource);
+    }
+
     /*package*/ void setA2dpSuspended(boolean enable, boolean internal, String eventSource) {
         if (AudioService.DEBUG_COMM_RTE) {
             Log.v(TAG, "setA2dpSuspended source: " + eventSource + ", enable: "
@@ -983,6 +987,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
             mBluetoothA2dpSuspendedExt = false;
             updateAudioHalBluetoothState();
         }
+    }
+
+    /*package*/ void postSetLeAudioSuspended(boolean enable, String eventSource) {
+        sendILMsgNoDelay(
+                MSG_IL_SET_LEAUDIO_SUSPENDED, SENDMSG_QUEUE, (enable ? 1 : 0), eventSource);
     }
 
     /*package*/ void setLeAudioSuspended(boolean enable, boolean internal, String eventSource) {
@@ -1795,6 +1804,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     final int capturePreset = msg.arg1;
                     mDeviceInventory.onSaveClearPreferredDevicesForCapturePreset(capturePreset);
                 } break;
+                case MSG_IL_SET_A2DP_SUSPENDED: {
+                    setA2dpSuspended((msg.arg1 == 1), false /*internal*/, (String) msg.obj);
+                } break;
+                case MSG_IL_SET_LEAUDIO_SUSPENDED: {
+                    setLeAudioSuspended((msg.arg1 == 1), false /*internal*/, (String) msg.obj);
+                } break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
@@ -1869,6 +1884,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
     private static final int MSG_IL_SAVE_NDEF_DEVICE_FOR_STRATEGY = 47;
     private static final int MSG_IL_SAVE_REMOVE_NDEF_DEVICE_FOR_STRATEGY = 48;
     private static final int MSG_IL_BTLEAUDIO_TIMEOUT = 49;
+    private static final int MSG_IL_SET_A2DP_SUSPENDED = 50;
+    private static final int MSG_IL_SET_LEAUDIO_SUSPENDED = 51;
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
         switch(msgId) {

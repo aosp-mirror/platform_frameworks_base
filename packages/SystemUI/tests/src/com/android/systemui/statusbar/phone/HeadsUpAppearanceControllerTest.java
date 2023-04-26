@@ -34,8 +34,6 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeHeadsUpTracker;
@@ -82,7 +80,6 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     private CommandQueue mCommandQueue;
     private NotificationRoundnessManager mNotificationRoundnessManager;
-    private FeatureFlags mFeatureFlag;
 
     @Before
     public void setUp() throws Exception {
@@ -103,9 +100,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mKeyguardStateController = mock(KeyguardStateController.class);
         mCommandQueue = mock(CommandQueue.class);
         mNotificationRoundnessManager = mock(NotificationRoundnessManager.class);
-        mFeatureFlag = mock(FeatureFlags.class);
         when(mShadeViewController.getShadeHeadsUpTracker()).thenReturn(mShadeHeadsUpTracker);
-        when(mFeatureFlag.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES)).thenReturn(true);
         mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                 mock(NotificationIconAreaController.class),
                 mHeadsUpManager,
@@ -118,7 +113,6 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mStackScrollerController,
                 mShadeViewController,
                 mNotificationRoundnessManager,
-                mFeatureFlag,
                 mHeadsUpStatusBarView,
                 new Clock(mContext, null),
                 Optional.of(mOperatorNameView));
@@ -202,7 +196,6 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mStackScrollerController,
                 mShadeViewController,
                 mNotificationRoundnessManager,
-                mFeatureFlag,
                 mHeadsUpStatusBarView,
                 new Clock(mContext, null),
                 Optional.empty());

@@ -101,7 +101,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId =
             new SparseArray<>();
-    private final DragListenerImpl mDragStartListener = new DragListenerImpl();
+    private final DragStartListenerImpl mDragStartListener = new DragStartListenerImpl();
     private final InputMonitorFactory mInputMonitorFactory;
     private TaskOperations mTaskOperations;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
@@ -777,21 +777,32 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final TaskPositioner taskPositioner =
-                new TaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController,
-                        mDragStartListener);
+        final DragPositioningCallback dragPositioningCallback;
+        if (!DesktopModeStatus.isVeiledResizeEnabled()) {
+            dragPositioningCallback =
+                    new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration,
+                            mDisplayController, mDragStartListener);
+        } else {
+            windowDecoration.createResizeVeil();
+            dragPositioningCallback =
+                    new VeiledResizeTaskPositioner(mTaskOrganizer, windowDecoration,
+                            mDisplayController, mDragStartListener);
+        }
         final DesktopModeTouchEventListener touchEventListener =
-                new DesktopModeTouchEventListener(taskInfo, taskPositioner);
+                new DesktopModeTouchEventListener(taskInfo, dragPositioningCallback);
+
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
         windowDecoration.setCornersListener(mCornersListener);
-        windowDecoration.setDragPositioningCallback(taskPositioner);
+        windowDecoration.setDragPositioningCallback(dragPositioningCallback);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */);
         incrementEventReceiverTasks(taskInfo.displayId);
     }
 
-    private class DragListenerImpl implements TaskPositioner.DragStartListener {
+
+    private class DragStartListenerImpl
+            implements DragPositioningCallbackUtility.DragStartListener {
         @Override
         public void onDragStart(int taskId) {
             mWindowDecorByTaskId.get(taskId).closeHandleMenu();

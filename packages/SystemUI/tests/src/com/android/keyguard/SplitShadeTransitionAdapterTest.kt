@@ -18,6 +18,7 @@ package com.android.keyguard
 import android.animation.Animator
 import android.testing.AndroidTestingRunner
 import android.transition.TransitionValues
+import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardStatusViewController.SplitShadeTransitionAdapter
 import com.android.systemui.SysuiTestCase
@@ -44,14 +45,16 @@ class SplitShadeTransitionAdapterTest : SysuiTestCase() {
 
     @Test
     fun createAnimator_nullStartValues_returnsNull() {
-        val animator = adapter.createAnimator(startValues = null, endValues = TransitionValues())
+        val endValues = createEndValues()
+
+        val animator = adapter.createAnimator(startValues = null, endValues = endValues)
 
         assertThat(animator).isNull()
     }
 
     @Test
     fun createAnimator_nullEndValues_returnsNull() {
-        val animator = adapter.createAnimator(startValues = TransitionValues(), endValues = null)
+        val animator = adapter.createAnimator(startValues = createStartValues(), endValues = null)
 
         assertThat(animator).isNull()
     }
@@ -59,10 +62,22 @@ class SplitShadeTransitionAdapterTest : SysuiTestCase() {
     @Test
     fun createAnimator_nonNullStartAndEndValues_returnsAnimator() {
         val animator =
-            adapter.createAnimator(startValues = TransitionValues(), endValues = TransitionValues())
+            adapter.createAnimator(startValues = createStartValues(), endValues = createEndValues())
 
         assertThat(animator).isNotNull()
     }
+
+    private fun createStartValues() =
+        TransitionValues().also { values ->
+            values.view = View(context)
+            adapter.captureStartValues(values)
+        }
+
+    private fun createEndValues() =
+        TransitionValues().also { values ->
+            values.view = View(context)
+            adapter.captureEndValues(values)
+        }
 }
 
 private fun SplitShadeTransitionAdapter.createAnimator(

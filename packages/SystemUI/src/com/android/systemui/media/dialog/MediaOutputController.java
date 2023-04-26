@@ -126,9 +126,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final ActivityStarter mActivityStarter;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
-    private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final CommonNotifCollection mNotifCollection;
     private final Object mMediaDevicesLock = new Object();
+    @VisibleForTesting
+    final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
     final List<MediaDevice> mCachedMediaDevices = new CopyOnWriteArrayList<>();
@@ -713,7 +714,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             dividerItems.forEach((key, item) -> {
                 finalMediaItems.add(key, item);
             });
-            finalMediaItems.add(new MediaItem());
+            attachConnectNewDeviceItemIfNeeded(finalMediaItems);
             mMediaItemList.clear();
             mMediaItemList.addAll(finalMediaItems);
         }
@@ -749,7 +750,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                     finalMediaItems.add(new MediaItem(device));
                 }
             }
-            finalMediaItems.add(new MediaItem());
+            attachConnectNewDeviceItemIfNeeded(finalMediaItems);
             mMediaItemList.clear();
             mMediaItemList.addAll(finalMediaItems);
         }
@@ -758,6 +759,13 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private void attachGroupDivider(List<MediaItem> mediaItems, String title) {
         mediaItems.add(
                 new MediaItem(title, MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
+    }
+
+    private void attachConnectNewDeviceItemIfNeeded(List<MediaItem> mediaItems) {
+        // Attach "Connect a device" item only when current output is not remote and not a group
+        if (!isCurrentConnectedDeviceRemote() && getSelectedMediaDevice().size() == 1) {
+            mediaItems.add(new MediaItem());
+        }
     }
 
     private void attachRangeInfo(List<MediaDevice> devices) {
@@ -1251,7 +1259,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return null;
     }
 
-    private final MediaController.Callback mCb = new MediaController.Callback() {
+    @VisibleForTesting
+    final MediaController.Callback mCb = new MediaController.Callback() {
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
             mCallback.onMediaChanged();

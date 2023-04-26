@@ -308,6 +308,13 @@ final class PolicyDefinition<V> {
                         DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY, accountType));
     }
 
+    static PolicyDefinition<Set<String>> PERMITTED_INPUT_METHODS = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY),
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            (Set<String> value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            new StringSetPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -333,6 +340,8 @@ final class PolicyDefinition<V> {
                 GENERIC_APPLICATION_HIDDEN);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY,
                 GENERIC_ACCOUNT_MANAGEMENT_DISABLED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY,
+                PERMITTED_INPUT_METHODS);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);

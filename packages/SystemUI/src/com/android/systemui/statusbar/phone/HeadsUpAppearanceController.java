@@ -27,8 +27,6 @@ import androidx.annotation.NonNull;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.R;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeHeadsUpTracker;
@@ -120,14 +118,13 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
             NotificationStackScrollLayoutController stackScrollerController,
             ShadeViewController shadeViewController,
             NotificationRoundnessManager notificationRoundnessManager,
-            FeatureFlags featureFlags,
             HeadsUpStatusBarView headsUpStatusBarView,
             Clock clockView,
             @Named(OPERATOR_NAME_FRAME_VIEW) Optional<View> operatorNameViewOptional) {
         super(headsUpStatusBarView);
         mNotificationIconAreaController = notificationIconAreaController;
         mNotificationRoundnessManager = notificationRoundnessManager;
-        mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
+        mUseRoundnessSourceTypes = true;
         mHeadsUpManager = headsUpManager;
 
         // We may be mid-HUN-expansion when this controller is re-created (for example, if the user

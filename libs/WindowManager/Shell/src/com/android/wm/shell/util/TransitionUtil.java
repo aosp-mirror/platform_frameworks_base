@@ -24,7 +24,9 @@ import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -74,6 +76,23 @@ public class TransitionUtil {
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * Some transitions we always need to report to keyguard even if they are empty.
+     * TODO (b/274954192): Remove this once keyguard dispatching moves to Shell.
+     */
+    public static boolean alwaysReportToKeyguard(TransitionInfo info) {
+        // occlusion status of activities can change while screen is off so there will be no
+        // visibility change but we still need keyguardservice to be notified.
+        if (info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE) return true;
+
+        // It's possible for some activities to stop with bad timing (esp. since we can't yet
+        // queue activity transitions initiated by apps) that results in an empty transition for
+        // keyguard going-away. In general, we should should always report Keyguard-going-away.
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) return true;
+
         return false;
     }
 
