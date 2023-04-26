@@ -185,8 +185,8 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final TaskPositioner taskPositioner =
-                new TaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController);
+        final FluidResizeTaskPositioner taskPositioner =
+                new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController);
         final CaptionTouchEventListener touchEventListener =
                 new CaptionTouchEventListener(taskInfo, taskPositioner);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
