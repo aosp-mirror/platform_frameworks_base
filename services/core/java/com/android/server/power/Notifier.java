@@ -51,6 +51,7 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -87,7 +88,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * tell the system when we go to sleep so that it can lock the keyguard if needed.
  * </p>
  */
-@VisibleForTesting
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
 public class Notifier {
     private static final String TAG = "PowerManagerNotifier";
 
@@ -150,14 +151,21 @@ public class Notifier {
     // begins charging wirelessly
     private final boolean mShowWirelessChargingAnimationConfig;
 
-    // The current interactive state.  This is set as soon as an interactive state
+    // Encapsulates interactivity information about a particular display group.
+    private static class Interactivity {
+        public boolean isInteractive = true;
+        public int changeReason;
+        public long changeStartTime; // In SystemClock.uptimeMillis()
+        public boolean isChanging;
+    }
+
+    private final SparseArray<Interactivity> mInteractivityByGroupId = new SparseArray<>();
+
+    // The current global interactive state.  This is set as soon as an interactive state
     // transition begins so as to capture the reason that it happened.  At some point
     // this state will propagate to the pending state then eventually to the
     // broadcasted state over the course of reporting the transition asynchronously.
-    private boolean mInteractive = true;
-    private int mInteractiveChangeReason;
-    private long mInteractiveChangeStartTime; // In SystemClock.uptimeMillis()
-    private boolean mInteractiveChanging;
+    private Interactivity mGlobalInteractivity = new Interactivity();
 
     // The pending interactive state that we will eventually want to broadcast.
     // This is designed so that we can collapse redundant sequences of awake/sleep
@@ -438,7 +446,8 @@ public class Notifier {
      * which case it will assume that the state did not fully converge before the
      * next transition began and will recover accordingly.
      */
-    public void onWakefulnessChangeStarted(final int wakefulness, int reason, long eventTime) {
+    public void onGlobalWakefulnessChangeStarted(final int wakefulness, int reason,
+            long eventTime) {
         final boolean interactive = PowerManagerInternal.isInteractive(wakefulness);
         if (DEBUG) {
             Slog.d(TAG, "onWakefulnessChangeStarted: wakefulness=" + wakefulness
@@ -456,10 +465,10 @@ public class Notifier {
 
         // Handle any early interactive state changes.
         // Finish pending incomplete ones from a previous cycle.
-        if (mInteractive != interactive) {
+        if (mGlobalInteractivity.isInteractive != interactive) {
             // Finish up late behaviors if needed.
-            if (mInteractiveChanging) {
-                handleLateInteractiveChange();
+            if (mGlobalInteractivity.isChanging) {
+                handleLateGlobalInteractiveChange();
             }
 
             // Start input as soon as we start waking up or going to sleep.
@@ -475,11 +484,11 @@ public class Notifier {
                             FrameworkStatsLog.INTERACTIVE_STATE_CHANGED__STATE__OFF);
 
             // Handle early behaviors.
-            mInteractive = interactive;
-            mInteractiveChangeReason = reason;
-            mInteractiveChangeStartTime = eventTime;
-            mInteractiveChanging = true;
-            handleEarlyInteractiveChange();
+            mGlobalInteractivity.isInteractive = interactive;
+            mGlobalInteractivity.isChanging = true;
+            mGlobalInteractivity.changeReason = reason;
+            mGlobalInteractivity.changeStartTime = eventTime;
+            handleEarlyGlobalInteractiveChange();
         }
     }
 
@@ -490,10 +499,34 @@ public class Notifier {
         if (DEBUG) {
             Slog.d(TAG, "onWakefulnessChangeFinished");
         }
+        for (int i = 0; i < mInteractivityByGroupId.size(); i++) {
+            int groupId = mInteractivityByGroupId.keyAt(i);
+            Interactivity interactivity = mInteractivityByGroupId.valueAt(i);
+            if (interactivity.isChanging) {
+                interactivity.isChanging = false;
+                handleLateInteractiveChange(groupId);
+            }
+        }
+        if (mGlobalInteractivity.isChanging) {
+            mGlobalInteractivity.isChanging = false;
+            handleLateGlobalInteractiveChange();
+        }
+    }
 
-        if (mInteractiveChanging) {
-            mInteractiveChanging = false;
-            handleLateInteractiveChange();
+
+    private void handleEarlyInteractiveChange(int groupId) {
+        synchronized (mLock) {
+            Interactivity interactivity = mInteractivityByGroupId.get(groupId);
+            if (interactivity == null) {
+                Slog.e(TAG, "no Interactivity entry for groupId:" + groupId);
+                return;
+            }
+            final int changeReason = interactivity.changeReason;
+            if (interactivity.isInteractive) {
+                mHandler.post(() -> mPolicy.startedWakingUp(groupId, changeReason));
+            } else {
+                mHandler.post(() -> mPolicy.startedGoingToSleep(groupId, changeReason));
+            }
         }
     }
 
@@ -501,13 +534,13 @@ public class Notifier {
      * Handle early interactive state changes such as getting applications or the lock
      * screen running and ready for the user to see (such as when turning on the screen).
      */
-    private void handleEarlyInteractiveChange() {
+    private void handleEarlyGlobalInteractiveChange() {
         synchronized (mLock) {
-            if (mInteractive) {
+            if (mGlobalInteractivity.isInteractive) {
                 // Waking up...
                 mHandler.post(() -> {
-                    mPolicy.startedWakingUp(mInteractiveChangeReason);
                     mDisplayManagerInternal.onEarlyInteractivityChange(true /*isInteractive*/);
+                    mPolicy.startedWakingUpGlobal(mGlobalInteractivity.changeReason);
                 });
 
                 // Send interactive broadcast.
@@ -516,37 +549,36 @@ public class Notifier {
                 updatePendingBroadcastLocked();
             } else {
                 // Going to sleep...
-                // Tell the policy that we started going to sleep.
                 mHandler.post(() -> {
-                    mPolicy.startedGoingToSleep(mInteractiveChangeReason);
                     mDisplayManagerInternal.onEarlyInteractivityChange(false /*isInteractive*/);
+                    mPolicy.startedGoingToSleepGlobal(mGlobalInteractivity.changeReason);
                 });
             }
         }
     }
 
     /**
-     * Handle late interactive state changes once they are finished so that the system can
-     * finish pending transitions (such as turning the screen off) before causing
-     * applications to change state visibly.
+     * Handle late global interactive state changes. Also see
+     * {@link #handleLateInteractiveChange(int)}.
      */
-    private void handleLateInteractiveChange() {
+    private void handleLateGlobalInteractiveChange() {
         synchronized (mLock) {
             final int interactiveChangeLatency =
-                    (int) (SystemClock.uptimeMillis() - mInteractiveChangeStartTime);
-            if (mInteractive) {
+                    (int) (SystemClock.uptimeMillis() - mGlobalInteractivity.changeStartTime);
+            if (mGlobalInteractivity.isInteractive) {
                 // Finished waking up...
                 mHandler.post(() -> {
                     LogMaker log = new LogMaker(MetricsEvent.SCREEN);
                     log.setType(MetricsEvent.TYPE_OPEN);
                     log.setSubtype(WindowManagerPolicyConstants.translateWakeReasonToOnReason(
-                            mInteractiveChangeReason));
+                            mGlobalInteractivity.changeReason));
                     log.setLatency(interactiveChangeLatency);
-                    log.addTaggedData(
-                            MetricsEvent.FIELD_SCREEN_WAKE_REASON, mInteractiveChangeReason);
+                    log.addTaggedData(MetricsEvent.FIELD_SCREEN_WAKE_REASON,
+                            mGlobalInteractivity.changeReason);
                     MetricsLogger.action(log);
                     EventLogTags.writePowerScreenState(1, 0, 0, 0, interactiveChangeLatency);
-                    mPolicy.finishedWakingUp(mInteractiveChangeReason);
+
+                    mPolicy.finishedWakingUpGlobal(mGlobalInteractivity.changeReason);
                 });
             } else {
                 // Finished going to sleep...
@@ -563,18 +595,19 @@ public class Notifier {
 
                 // Tell the policy we finished going to sleep.
                 final int offReason = WindowManagerPolicyConstants.translateSleepReasonToOffReason(
-                        mInteractiveChangeReason);
+                        mGlobalInteractivity.changeReason);
                 mHandler.post(() -> {
                     LogMaker log = new LogMaker(MetricsEvent.SCREEN);
                     log.setType(MetricsEvent.TYPE_CLOSE);
                     log.setSubtype(offReason);
                     log.setLatency(interactiveChangeLatency);
-                    log.addTaggedData(
-                            MetricsEvent.FIELD_SCREEN_SLEEP_REASON, mInteractiveChangeReason);
+                    log.addTaggedData(MetricsEvent.FIELD_SCREEN_SLEEP_REASON,
+                            mGlobalInteractivity.changeReason);
                     MetricsLogger.action(log);
                     EventLogTags.writePowerScreenState(
                             0, offReason, 0, 0, interactiveChangeLatency);
-                    mPolicy.finishedGoingToSleep(mInteractiveChangeReason);
+
+                    mPolicy.finishedGoingToSleepGlobal(mGlobalInteractivity.changeReason);
                 });
 
                 // Send non-interactive broadcast.
@@ -586,12 +619,62 @@ public class Notifier {
     }
 
     /**
+     * Handle late interactive state changes once they are finished so that the system can
+     * finish pending transitions (such as turning the screen off) before causing
+     * applications to change state visibly.
+     */
+    private void handleLateInteractiveChange(int groupId) {
+        synchronized (mLock) {
+            Interactivity interactivity = mInteractivityByGroupId.get(groupId);
+            if (interactivity == null) {
+                Slog.e(TAG, "no Interactivity entry for groupId:" + groupId);
+                return;
+            }
+            final int changeReason = interactivity.changeReason;
+            if (interactivity.isInteractive) {
+                mHandler.post(() -> mPolicy.finishedWakingUp(groupId, changeReason));
+            } else {
+                mHandler.post(() -> mPolicy.finishedGoingToSleep(groupId, changeReason));
+            }
+        }
+    }
+
+    /**
      * Called when an individual PowerGroup changes wakefulness.
      */
-    public void onPowerGroupWakefulnessChanged(int groupId, int groupWakefulness, int changeReason,
-            int globalWakefulness) {
-        mHandler.post(() -> mPolicy.onPowerGroupWakefulnessChanged(groupId, groupWakefulness,
-                changeReason, globalWakefulness));
+    public void onGroupWakefulnessChangeStarted(int groupId, int wakefulness, int changeReason,
+            long eventTime) {
+        final boolean isInteractive = PowerManagerInternal.isInteractive(wakefulness);
+
+        boolean isNewGroup = false;
+        Interactivity interactivity = mInteractivityByGroupId.get(groupId);
+        if (interactivity == null) {
+            isNewGroup = true;
+            interactivity = new Interactivity();
+            mInteractivityByGroupId.put(groupId, interactivity);
+        }
+        if (isNewGroup || interactivity.isInteractive != isInteractive) {
+            // Finish up late behaviors if needed.
+            if (interactivity.isChanging) {
+                handleLateInteractiveChange(groupId);
+            }
+
+            // Handle early behaviors.
+            interactivity.isInteractive = isInteractive;
+            interactivity.changeReason = changeReason;
+            interactivity.changeStartTime = eventTime;
+            interactivity.isChanging = true;
+            handleEarlyInteractiveChange(groupId);
+        }
+    }
+
+    /**
+     * Called when a PowerGroup has been removed.
+     *
+     * @param groupId which group was removed
+     */
+    public void onGroupRemoved(int groupId) {
+        mInteractivityByGroupId.remove(groupId);
     }
 
     /**
