@@ -36,11 +36,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.broadcastradio.RadioServiceUserController;
 import com.android.server.utils.Slogf;
 
 import java.util.ArrayList;
@@ -419,8 +421,13 @@ final class RadioModule {
 
     @GuardedBy("mLock")
     private void fanoutAidlCallbackLocked(AidlCallbackRunnable runnable) {
+        int currentUserId = RadioServiceUserController.getCurrentUser();
         List<TunerSession> deadSessions = null;
         for (int i = 0; i < mAidlTunerSessions.size(); i++) {
+            if (mAidlTunerSessions.valueAt(i).mUserId != currentUserId
+                    && mAidlTunerSessions.valueAt(i).mUserId != UserHandle.USER_SYSTEM) {
+                continue;
+            }
             try {
                 runnable.run(mAidlTunerSessions.valueAt(i).mCallback,
                         mAidlTunerSessions.valueAt(i).getUid());
