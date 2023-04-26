@@ -17,15 +17,15 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
-import androidx.test.uiautomator.By
-import androidx.test.uiautomator.Until
-import com.android.server.wm.flicker.testapp.ActivityOptions
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.device.traces.parsers.toFlickerComponent
-import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.helpers.FIND_TIMEOUT
 import android.tools.device.helpers.SYSTEMUI_PACKAGE
+import android.tools.device.traces.parsers.WindowManagerStateHelper
+import android.tools.device.traces.parsers.toFlickerComponent
+import androidx.test.uiautomator.By
+import androidx.test.uiautomator.Until
+import com.android.server.wm.flicker.testapp.ActivityOptions
 
 class LetterboxAppHelper
 @JvmOverloads
@@ -37,13 +37,21 @@ constructor(
 ) : StandardAppHelper(instr, launcherName, component) {
 
     fun clickRestart(wmHelper: WindowManagerStateHelper) {
-        val restartButton = uiDevice.wait(Until.findObject(By.res(
-            SYSTEMUI_PACKAGE, "size_compat_restart_button")), FIND_TIMEOUT)
+        val restartButton =
+            uiDevice.wait(
+                Until.findObject(By.res(SYSTEMUI_PACKAGE, "size_compat_restart_button")),
+                FIND_TIMEOUT
+            )
         restartButton?.run { restartButton.click() } ?: error("Restart button not found")
 
         // size compat mode restart confirmation dialog button
-        val restartDialogButton = uiDevice.wait(Until.findObject(By.res(
-            SYSTEMUI_PACKAGE, "letterbox_restart_dialog_restart_button")), FIND_TIMEOUT)
+        val restartDialogButton =
+            uiDevice.wait(
+                Until.findObject(
+                    By.res(SYSTEMUI_PACKAGE, "letterbox_restart_dialog_restart_button")
+                ),
+                FIND_TIMEOUT
+            )
         restartDialogButton?.run { restartDialogButton.click() }
             ?: error("Restart dialog button not found")
         wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
