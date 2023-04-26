@@ -17,7 +17,6 @@
 package com.android.systemui.dreams;
 
 import static com.android.systemui.dreams.dagger.DreamModule.DREAM_OVERLAY_SERVICE_COMPONENT;
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
 
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -35,6 +34,7 @@ import android.service.dreams.IDreamManager;
 import android.util.Log;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.condition.ConditionalCoreStartable;
 
@@ -105,7 +105,7 @@ public class DreamOverlayRegistrant extends ConditionalCoreStartable {
     @Inject
     public DreamOverlayRegistrant(Context context, @Main Resources resources,
             @Named(DREAM_OVERLAY_SERVICE_COMPONENT) ComponentName dreamOverlayServiceComponent,
-            @Named(DREAM_PRETEXT_MONITOR) Monitor monitor) {
+            @SystemUser Monitor monitor) {
         super(monitor);
         mContext = context;
         mResources = resources;
