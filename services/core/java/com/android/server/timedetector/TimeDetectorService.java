@@ -96,8 +96,8 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
 
             CallerIdentityInjector callerIdentityInjector = CallerIdentityInjector.REAL;
             TimeDetectorService service = new TimeDetectorService(
-                    context, handler, callerIdentityInjector, serviceConfigAccessor,
-                    timeDetectorStrategy, NtpTrustedTime.getInstance(context));
+                    context, handler, callerIdentityInjector, timeDetectorStrategy,
+                    NtpTrustedTime.getInstance(context));
 
             // Publish the binder service so it can be accessed from other (appropriately
             // permissioned) processes.
@@ -108,7 +108,6 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     @NonNull private final Handler mHandler;
     @NonNull private final Context mContext;
     @NonNull private final CallerIdentityInjector mCallerIdentityInjector;
-    @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final TimeDetectorStrategy mTimeDetectorStrategy;
     @NonNull private final NtpTrustedTime mNtpTrustedTime;
 
@@ -123,20 +122,18 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
     @VisibleForTesting
     public TimeDetectorService(@NonNull Context context, @NonNull Handler handler,
             @NonNull CallerIdentityInjector callerIdentityInjector,
-            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull TimeDetectorStrategy timeDetectorStrategy,
             @NonNull NtpTrustedTime ntpTrustedTime) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
         mCallerIdentityInjector = Objects.requireNonNull(callerIdentityInjector);
-        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeDetectorStrategy = Objects.requireNonNull(timeDetectorStrategy);
         mNtpTrustedTime = Objects.requireNonNull(ntpTrustedTime);
 
-        // Wire up a change listener so that ITimeZoneDetectorListeners can be notified when
-        // the configuration changes for any reason.
-        mServiceConfigAccessor.addConfigurationInternalChangeListener(
-                () -> mHandler.post(this::handleConfigurationInternalChangedOnHandlerThread));
+        // Wire up a change listener so that ITimeDetectorListeners can be notified when the
+        // detector state changes for any reason.
+        mTimeDetectorStrategy.addChangeListener(
+                () -> mHandler.post(this::handleChangeOnHandlerThread));
     }
 
     @Override
@@ -151,10 +148,8 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
 
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            ConfigurationInternal configurationInternal =
-                    mServiceConfigAccessor.getConfigurationInternal(userId);
-            final boolean bypassUserPolicyCheck = false;
-            return configurationInternal.createCapabilitiesAndConfig(bypassUserPolicyCheck);
+            final boolean bypassUserPolicyChecks = false;
+            return mTimeDetectorStrategy.getCapabilitiesAndConfig(userId, bypassUserPolicyChecks);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -180,9 +175,9 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
 
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            final boolean bypassUserPolicyCheck = false;
-            return mServiceConfigAccessor.updateConfiguration(
-                    resolvedUserId, configuration, bypassUserPolicyCheck);
+            final boolean bypassUserPolicyChecks = false;
+            return mTimeDetectorStrategy.updateConfiguration(
+                    resolvedUserId, configuration, bypassUserPolicyChecks);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -262,7 +257,7 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub
         }
     }
 
-    private void handleConfigurationInternalChangedOnHandlerThread() {
+    private void handleChangeOnHandlerThread() {
         // Configuration has changed, but each user may have a different view of the configuration.
         // It's possible that this will cause unnecessary notifications but that shouldn't be a
         // problem.
