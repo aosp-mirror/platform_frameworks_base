@@ -43,6 +43,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
@@ -172,7 +174,7 @@ class ClockRegistryTest : SysuiTestCase() {
     }
 
     @Test
-    fun clockIdConflict_ErrorWithoutCrash() {
+    fun clockIdConflict_ErrorWithoutCrash_unloadDuplicate() {
         val mockPluginLifecycle1 = mock<PluginLifecycleManager<ClockProviderPlugin>>()
         val plugin1 = FakeClockPlugin()
             .addClock("clock_1", "clock 1", { mockClock }, { mockThumbnail })
@@ -199,6 +201,8 @@ class ClockRegistryTest : SysuiTestCase() {
         assertEquals(registry.createExampleClock("clock_2"), mockClock)
         assertEquals(registry.getClockThumbnail("clock_1"), mockThumbnail)
         assertEquals(registry.getClockThumbnail("clock_2"), mockThumbnail)
+        verify(mockPluginLifecycle1, never()).unloadPlugin()
+        verify(mockPluginLifecycle2, times(2)).unloadPlugin()
     }
 
     @Test
