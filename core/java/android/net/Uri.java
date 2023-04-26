@@ -1790,8 +1790,8 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * or external sources like Bluetooth, NFC, or the Internet) should
      * be normalized before they are used to create an Intent.
      *
-     * <p class="note">This method does <em>not</em> validate bad URI's,
-     * or 'fix' poorly formatted URI's - so do not use it for input validation.
+     * <p class="note">This method does <em>not</em> validate bad URIs,
+     * or 'fix' poorly formatted URIs - so do not use it for input validation.
      * A Uri will always be returned, even if the Uri is badly formatted to
      * begin with and a scheme component cannot be found.
      *
