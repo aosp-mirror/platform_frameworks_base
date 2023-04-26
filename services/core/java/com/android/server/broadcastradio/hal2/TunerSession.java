@@ -26,6 +26,7 @@ import android.hardware.radio.ITuner;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
@@ -52,6 +53,7 @@ class TunerSession extends ITuner.Stub {
 
     private final RadioModule mModule;
     private final ITunerSession mHwSession;
+    final int mUserId;
     final android.hardware.radio.ITunerCallback mCallback;
 
     @GuardedBy("mLock")
@@ -68,6 +70,7 @@ class TunerSession extends ITuner.Stub {
             @NonNull android.hardware.radio.ITunerCallback callback) {
         mModule = Objects.requireNonNull(module);
         mHwSession = Objects.requireNonNull(hwSession);
+        mUserId = Binder.getCallingUserHandle().getIdentifier();
         mCallback = Objects.requireNonNull(callback);
         mEventLogger = new RadioEventLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);
     }

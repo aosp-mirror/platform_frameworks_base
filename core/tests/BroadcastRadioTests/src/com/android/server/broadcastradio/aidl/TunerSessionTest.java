@@ -47,9 +47,11 @@ import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
 import android.hardware.radio.RadioTuner;
+import android.os.Binder;
 import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
@@ -73,6 +75,8 @@ import java.util.Set;
  */
 public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
+    private static final int USER_ID_1 = 11;
+    private static final int USER_ID_2 = 12;
     private static final VerificationWithTimeout CALLBACK_TIMEOUT =
             timeout(/* millis= */ 200);
     private static final int SIGNAL_QUALITY = 90;
@@ -109,7 +113,10 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
             SIGNAL_QUALITY);
 
     // Mocks
-    @Mock private IBroadcastRadio mBroadcastRadioMock;
+    @Mock
+    private UserHandle mUserHandleMock;
+    @Mock
+    private IBroadcastRadio mBroadcastRadioMock;
     private android.hardware.radio.ITunerCallback[] mAidlTunerCallbackMocks;
 
     // RadioModule under test
@@ -124,14 +131,18 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
     @Override
     protected void initializeSession(StaticMockitoSessionBuilder builder) {
-        builder.spyStatic(RadioServiceUserController.class).spyStatic(CompatChanges.class);
+        builder.spyStatic(RadioServiceUserController.class).spyStatic(CompatChanges.class)
+                .spyStatic(Binder.class);
     }
 
     @Before
     public void setup() throws Exception {
+        when(mUserHandleMock.getIdentifier()).thenReturn(USER_ID_1);
         doReturn(true).when(() -> CompatChanges.isChangeEnabled(
                 eq(ConversionUtils.RADIO_U_VERSION_REQUIRED), anyInt()));
         doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        doReturn(USER_ID_1).when(() -> RadioServiceUserController.getCurrentUser());
+        doReturn(mUserHandleMock).when(() -> Binder.getCallingUserHandle());
 
         mRadioModule = new RadioModule(mBroadcastRadioMock,
                 AidlTestUtils.makeDefaultModuleProperties());
@@ -418,6 +429,21 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT.times(0))
                 .onCurrentProgramInfoChanged(tuneInfo);
+    }
+
+    @Test
+    public void tune_forSystemUser() throws Exception {
+        when(mUserHandleMock.getIdentifier()).thenReturn(UserHandle.USER_SYSTEM);
+        doReturn(mUserHandleMock).when(() -> Binder.getCallingUserHandle());
+        doReturn(true).when(() -> RadioServiceUserController.isCurrentOrSystemUser());
+        ProgramSelector initialSel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+        RadioManager.ProgramInfo tuneInfo =
+                AidlTestUtils.makeProgramInfo(initialSel, SIGNAL_QUALITY);
+        openAidlClients(/* numClients= */ 1);
+
+        mTunerSessions[0].tune(initialSel);
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT).onCurrentProgramInfoChanged(tuneInfo);
     }
 
     @Test
@@ -1133,6 +1159,19 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
 
         assertWithMessage("Exception for getting parameters when HAL throws remote exception")
                 .that(thrown).hasMessageThat().contains(exceptionMessage);
+    }
+
+    @Test
+    public void onCurrentProgramInfoChanged_withNoncurrentUser_doesNotInvokeCallback()
+            throws Exception {
+        openAidlClients(1);
+        doReturn(USER_ID_2).when(() -> RadioServiceUserController.getCurrentUser());
+
+        mHalTunerCallback.onCurrentProgramInfoChanged(AidlTestUtils.makeHalProgramInfo(
+                AidlTestUtils.makeHalFmSelector(/* freq= */ 97300), SIGNAL_QUALITY));
+
+        verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT.times(0))
+                .onCurrentProgramInfoChanged(any());
     }
 
     @Test
