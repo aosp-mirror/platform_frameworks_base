@@ -31,8 +31,16 @@ class FakeTrustRepository : TrustRepository {
     override val isCurrentUserActiveUnlockAvailable: StateFlow<Boolean> =
         _isCurrentUserActiveUnlockAvailable.asStateFlow()
 
+    private val _isCurrentUserTrustManaged = MutableStateFlow(false)
+    override val isCurrentUserTrustManaged: StateFlow<Boolean>
+        get() = _isCurrentUserTrustManaged
+
     fun setCurrentUserTrusted(trust: Boolean) {
         _isCurrentUserTrusted.value = trust
+    }
+
+    fun setCurrentUserTrustManaged(value: Boolean) {
+        _isCurrentUserTrustManaged.value = value
     }
 
     fun setCurrentUserActiveUnlockAvailable(available: Boolean) {
