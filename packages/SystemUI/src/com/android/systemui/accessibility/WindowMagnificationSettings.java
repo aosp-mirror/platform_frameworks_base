@@ -463,12 +463,16 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         if ((configDiff & ActivityInfo.CONFIG_UI_MODE) != 0
                 || (configDiff & ActivityInfo.CONFIG_ASSETS_PATHS) != 0
                 || (configDiff & ActivityInfo.CONFIG_FONT_SCALE) != 0
+                || (configDiff & ActivityInfo.CONFIG_LOCALE) != 0
                 || (configDiff & ActivityInfo.CONFIG_DENSITY) != 0) {
             // We listen to following config changes to trigger layout inflation:
             // CONFIG_UI_MODE: theme change
             // CONFIG_ASSETS_PATHS: wallpaper change
             // CONFIG_FONT_SCALE: font size change
+            // CONFIG_LOCALE: language change
             // CONFIG_DENSITY: display size change
+
+            mParams.accessibilityTitle = getAccessibilityWindowTitle(mContext);
 
             boolean showSettingPanelAfterThemeChange = mIsVisible;
             hideSettingPanel(/* resetPosition= */ false);
@@ -490,11 +494,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                     + mDraggableWindowBounds.top;
             return;
         }
-
-        if ((configDiff & ActivityInfo.CONFIG_LOCALE) != 0) {
-            updateAccessibilityWindowTitle();
-            return;
-        }
     }
 
     private void onWindowInsetChanged() {
@@ -511,13 +510,6 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
                     mDraggableWindowBounds.right);
             mParams.y = MathUtils.constrain(mParams.y, mDraggableWindowBounds.top,
                     mDraggableWindowBounds.bottom);
-            mWindowManager.updateViewLayout(mSettingView, mParams);
-        }
-    }
-
-    private void updateAccessibilityWindowTitle() {
-        mParams.accessibilityTitle = getAccessibilityWindowTitle(mContext);
-        if (mIsVisible) {
             mWindowManager.updateViewLayout(mSettingView, mParams);
         }
     }
