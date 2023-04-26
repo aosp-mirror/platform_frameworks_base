@@ -984,13 +984,20 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // Record all the now-hiding activities so that they are committed. Just use
             // mParticipants because we can avoid a new list this way.
             for (int i = 0; i < mTransientHideTasks.size(); ++i) {
-                // Only worry about tasks that were actually hidden. Otherwise, we could end-up
-                // committing visibility for activity-level changes that aren't part of this
-                // transition.
-                if (mTransientHideTasks.get(i).isVisibleRequested()) continue;
-                mTransientHideTasks.get(i).forAllActivities(r -> {
+                final Task rootTask = mTransientHideTasks.get(i);
+                rootTask.forAllActivities(r -> {
                     // Only check leaf-tasks that were collected
                     if (!mParticipants.contains(r.getTask())) return;
+                    if (rootTask.isVisibleRequested()) {
+                        // This transient-hide didn't hide, so don't commit anything (otherwise we
+                        // could prematurely commit invisible on unrelated activities). To be safe,
+                        // though, notify the controller to prevent degenerate cases.
+                        if (!r.isVisibleRequested()) {
+                            mController.mValidateCommitVis.add(r);
+                        }
+                        return;
+                    }
+                    // This did hide: commit immediately so that other transitions know about it.
                     mParticipants.add(r);
                 });
             }
