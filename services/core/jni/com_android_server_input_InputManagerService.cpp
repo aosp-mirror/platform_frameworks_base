@@ -2567,6 +2567,11 @@ static void nativeSetStylusPointerIconEnabled(JNIEnv* env, jobject nativeImplObj
     im->setStylusPointerIconEnabled(enabled);
 }
 
+static void nativeNotifyKeyGestureTimeoutsChanged(JNIEnv* env, jobject nativeImplObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->getInputManager()->getDispatcher().requestRefreshConfiguration();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2663,6 +2668,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetStylusButtonMotionEventsEnabled},
         {"getMouseCursorPosition", "()[F", (void*)nativeGetMouseCursorPosition},
         {"setStylusPointerIconEnabled", "(Z)V", (void*)nativeSetStylusPointerIconEnabled},
+        {"notifyKeyGestureTimeoutsChanged", "()V", (void*)nativeNotifyKeyGestureTimeoutsChanged},
 };
 
 #define FIND_CLASS(var, className) \
