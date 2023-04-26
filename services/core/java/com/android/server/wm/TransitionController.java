@@ -858,7 +858,7 @@ class TransitionController {
         tryStartCollectFromQueue();
     }
 
-    private boolean canStartCollectingNow(Transition queued) {
+    private boolean canStartCollectingNow(@Nullable Transition queued) {
         if (mCollectingTransition == null) return true;
         // Population (collect until ready) is still serialized, so always wait for that.
         if (!mCollectingTransition.isPopulated()) return false;
@@ -931,14 +931,14 @@ class TransitionController {
      * `collecting` transition. It may still ultimately block in sync-engine or become dependent
      * in {@link #getIsIndependent} later.
      */
-    boolean getCanBeIndependent(Transition collecting, Transition queued) {
+    boolean getCanBeIndependent(Transition collecting, @Nullable Transition queued) {
         // For tests
-        if (queued.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL
+        if (queued != null && queued.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL
                 && collecting.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL) {
             return true;
         }
         // For recents
-        if (queued.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
+        if (queued != null && queued.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
             if (collecting.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
                 // Must serialize with itself.
                 return false;
@@ -1233,6 +1233,44 @@ class TransitionController {
         moveToCollecting(transit);
         onStartCollect.onCollectStarted(false /* deferred */);
         return true;
+    }
+
+    /**
+     * This will create and start collecting for a transition if possible. If there's no way to
+     * start collecting for `parallelType` now, then this returns null.
+     *
+     * WARNING: ONLY use this if the transition absolutely cannot be deferred!
+     */
+    @NonNull
+    Transition createAndStartCollecting(int type) {
+        if (mTransitionPlayer == null) {
+            return null;
+        }
+        if (!mQueuedTransitions.isEmpty()) {
+            // There is a queue, so it's not possible to start immediately
+            return null;
+        }
+        if (mSyncEngine.hasActiveSync()) {
+            if (isCollecting()) {
+                // Check if we can run in parallel here.
+                if (canStartCollectingNow(null /* transit */)) {
+                    // create and collect in parallel.
+                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from"
+                            + " collecting to waiting.", mCollectingTransition.getSyncId());
+                    mWaitingTransitions.add(mCollectingTransition);
+                    mCollectingTransition = null;
+                    Transition transit = new Transition(type, 0 /* flags */, this, mSyncEngine);
+                    moveToCollecting(transit);
+                    return transit;
+                }
+            } else {
+                Slog.w(TAG, "Ongoing Sync outside of transition.");
+            }
+            return null;
+        }
+        Transition transit = new Transition(type, 0 /* flags */, this, mSyncEngine);
+        moveToCollecting(transit);
+        return transit;
     }
 
     /** Returns {@code true} if it started collecting, {@code false} if it was queued. */
