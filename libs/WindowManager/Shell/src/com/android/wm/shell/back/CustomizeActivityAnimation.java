@@ -323,7 +323,7 @@ class CustomizeActivityAnimation {
         }
 
         @Override
-        public void onAnimationCancelled(boolean isKeyguardOccluded) {
+        public void onAnimationCancelled() {
             finishAnimation();
         }
     }

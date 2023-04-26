@@ -1662,14 +1662,16 @@ public final class DevicePolicyResources {
             /**
              * Label returned from
              * {@link android.content.pm.CrossProfileApps#getProfileSwitchingLabel(UserHandle)}
-             * that calling app can show to user for the semantic of switching to work profile.
+             * that calling app can show to user for the semantic of switching to work profile, and
+             * accepts the app name as a param.
              */
             public static final String SWITCH_TO_WORK_LABEL = PREFIX + "SWITCH_TO_WORK_LABEL";
 
             /**
              * Label returned from
              * {@link android.content.pm.CrossProfileApps#getProfileSwitchingLabel(UserHandle)}
-             * that calling app can show to user for the semantic of switching to personal profile.
+             * that calling app can show to user for the semantic of switching to personal profile,
+             * and accepts the app name as a param.
              */
             public static final String SWITCH_TO_PERSONAL_LABEL =
                     PREFIX + "SWITCH_TO_PERSONAL_LABEL";

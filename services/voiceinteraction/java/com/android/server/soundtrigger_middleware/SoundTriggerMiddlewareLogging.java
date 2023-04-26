@@ -16,6 +16,10 @@
 
 package com.android.server.soundtrigger_middleware;
 
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.*;
+import static com.android.server.utils.EventLogger.Event.ALOGI;
+import static com.android.server.utils.EventLogger.Event.ALOGW;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -41,13 +45,20 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.server.LocalServices;
+import com.android.server.utils.EventLogger.Event;
+import com.android.server.utils.EventLogger;
+
 
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.Deque;
+
 
 /**
  * An ISoundTriggerMiddlewareService decorator, which adds logging of all API calls (and
@@ -74,9 +85,17 @@ import java.util.function.Supplier;
  */
 public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInternal, Dumpable {
     private static final String TAG = "SoundTriggerMiddlewareLogging";
+    private static final int SESSION_MAX_EVENT_SIZE = 128;
     private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
     private final @NonNull LatencyTracker mLatencyTracker;
     private final @NonNull Supplier<BatteryStatsInternal> mBatteryStatsInternalSupplier;
+    private final @NonNull EventLogger mServiceEventLogger = new EventLogger(256,
+            "Service Events");
+
+    private final Set<EventLogger> mSessionEventLoggers = ConcurrentHashMap.newKeySet(4);
+    private final Deque<EventLogger> mDetachedSessionEventLoggers = new LinkedBlockingDeque<>(4);
+    private final AtomicInteger mSessionCount = new AtomicInteger(0);
+
 
     public SoundTriggerMiddlewareLogging(@NonNull Context context,
             @NonNull ISoundTriggerMiddlewareInternal delegate) {
@@ -99,10 +118,19 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
     SoundTriggerModuleDescriptor[] listModules() {
         try {
             SoundTriggerModuleDescriptor[] result = mDelegate.listModules();
-            logReturn("listModules", result);
+            var moduleSummary = Arrays.stream(result).map((descriptor) ->
+                    new ModulePropertySummary(descriptor.handle,
+                        descriptor.properties.implementor,
+                        descriptor.properties.version)).toArray(ModulePropertySummary[]::new);
+
+            mServiceEventLogger.enqueue(ServiceEvent.createForReturn(
+                        ServiceEvent.Type.LIST_MODULE,
+                        IdentityContext.get().packageName, moduleSummary).printLog(ALOGI, TAG));
             return result;
         } catch (Exception e) {
-            logException("listModules", e);
+            mServiceEventLogger.enqueue(ServiceEvent.createForException(
+                        ServiceEvent.Type.LIST_MODULE,
+                        IdentityContext.get().packageName, e).printLog(ALOGW, TAG));
             throw e;
         }
     }
@@ -111,12 +139,29 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
     public @NonNull
     ISoundTriggerModule attach(int handle, ISoundTriggerCallback callback) {
         try {
-            ModuleLogging result = new ModuleLogging(callback);
-            result.attach(mDelegate.attach(handle, result.getCallbackWrapper()));
-            logReturn("attach", result, handle, callback);
+            var originatorIdentity = IdentityContext.getNonNull();
+            String packageIdentification = originatorIdentity.packageName
+                    + mSessionCount.getAndIncrement();
+            ModuleLogging result = new ModuleLogging();
+            var eventLogger = new EventLogger(SESSION_MAX_EVENT_SIZE,
+                "Session logger for: " + packageIdentification);
+
+            var callbackWrapper = new CallbackLogging(callback, eventLogger, originatorIdentity);
+
+            result.attach(mDelegate.attach(handle, callbackWrapper), eventLogger);
+
+            mServiceEventLogger.enqueue(ServiceEvent.createForReturn(
+                        ServiceEvent.Type.ATTACH,
+                        packageIdentification, result, handle, callback)
+                    .printLog(ALOGI, TAG));
+
+            mSessionEventLoggers.add(eventLogger);
             return result;
         } catch (Exception e) {
-            logException("attach", e, handle, callback);
+            mServiceEventLogger.enqueue(ServiceEvent.createForException(
+                        ServiceEvent.Type.ATTACH,
+                        IdentityContext.get().packageName, e, handle, callback)
+                    .printLog(ALOGW, TAG));
             throw e;
         }
     }
@@ -127,44 +172,27 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         return mDelegate.toString();
     }
 
-    private void logException(String methodName, Exception ex, Object... args) {
-        logExceptionWithObject(this, IdentityContext.get(), methodName, ex, args);
-    }
-
-    private void logReturn(String methodName, Object retVal, Object... args) {
-        logReturnWithObject(this, IdentityContext.get(), methodName, retVal, args);
-    }
-
-    private void logVoidReturn(String methodName, Object... args) {
-        logVoidReturnWithObject(this, IdentityContext.get(), methodName, args);
-    }
-
     private class ModuleLogging implements ISoundTriggerModule {
         private ISoundTriggerModule mDelegate;
-        private final @NonNull CallbackLogging mCallbackWrapper;
-        private final @NonNull Identity mOriginatorIdentity;
+        private EventLogger mEventLogger;
 
-        ModuleLogging(@NonNull ISoundTriggerCallback callback) {
-            mCallbackWrapper = new CallbackLogging(callback);
-            mOriginatorIdentity = IdentityContext.getNonNull();
-        }
-
-        void attach(@NonNull ISoundTriggerModule delegate) {
+        void attach(@NonNull ISoundTriggerModule delegate, EventLogger eventLogger) {
             mDelegate = delegate;
-        }
-
-        ISoundTriggerCallback getCallbackWrapper() {
-            return mCallbackWrapper;
+            mEventLogger = eventLogger;
         }
 
         @Override
         public int loadModel(SoundModel model) throws RemoteException {
             try {
                 int result = mDelegate.loadModel(model);
-                logReturn("loadModel", result, model);
+                mEventLogger.enqueue(SessionEvent.createForReturn(
+                            LOAD_MODEL, result, model.uuid)
+                        .printLog(ALOGI, TAG));
                 return result;
             } catch (Exception e) {
-                logException("loadModel", e, model);
+                mEventLogger.enqueue(SessionEvent.createForReturn(
+                            LOAD_MODEL, e, model.uuid)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -173,10 +201,14 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         public int loadPhraseModel(PhraseSoundModel model) throws RemoteException {
             try {
                 int result = mDelegate.loadPhraseModel(model);
-                logReturn("loadPhraseModel", result, model);
+                mEventLogger.enqueue(SessionEvent.createForReturn(
+                            LOAD_PHRASE_MODEL, result, model.common.uuid)
+                        .printLog(ALOGI, TAG));
                 return result;
             } catch (Exception e) {
-                logException("loadPhraseModel", e, model);
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            LOAD_PHRASE_MODEL, e, model.common.uuid)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -185,9 +217,13 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         public void unloadModel(int modelHandle) throws RemoteException {
             try {
                 mDelegate.unloadModel(modelHandle);
-                logVoidReturn("unloadModel", modelHandle);
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            UNLOAD_MODEL, modelHandle)
+                        .printLog(ALOGI, TAG));
             } catch (Exception e) {
-                logException("unloadModel", e, modelHandle);
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            UNLOAD_MODEL, e, modelHandle)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -197,9 +233,13 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 throws RemoteException {
             try {
                 mDelegate.startRecognition(modelHandle, config);
-                logVoidReturn("startRecognition", modelHandle, config);
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            START_RECOGNITION, modelHandle, config)
+                        .printLog(ALOGI, TAG));
             } catch (Exception e) {
-                logException("startRecognition", e, modelHandle, config);
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            START_RECOGNITION, e, modelHandle, config)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -208,9 +248,13 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         public void stopRecognition(int modelHandle) throws RemoteException {
             try {
                 mDelegate.stopRecognition(modelHandle);
-                logVoidReturn("stopRecognition", modelHandle);
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            STOP_RECOGNITION, modelHandle)
+                        .printLog(ALOGI, TAG));
             } catch (Exception e) {
-                logException("stopRecognition", e, modelHandle);
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            STOP_RECOGNITION, e, modelHandle)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -219,9 +263,13 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         public void forceRecognitionEvent(int modelHandle) throws RemoteException {
             try {
                 mDelegate.forceRecognitionEvent(modelHandle);
-                logVoidReturn("forceRecognitionEvent", modelHandle);
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            FORCE_RECOGNITION, modelHandle)
+                        .printLog(ALOGI, TAG));
             } catch (Exception e) {
-                logException("forceRecognitionEvent", e, modelHandle);
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            FORCE_RECOGNITION, e, modelHandle)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -231,9 +279,13 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 throws RemoteException {
             try {
                 mDelegate.setModelParameter(modelHandle, modelParam, value);
-                logVoidReturn("setModelParameter", modelHandle, modelParam, value);
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            SET_MODEL_PARAMETER, modelHandle, modelParam, value)
+                        .printLog(ALOGI, TAG));
             } catch (Exception e) {
-                logException("setModelParameter", e, modelHandle, modelParam, value);
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            SET_MODEL_PARAMETER, e, modelHandle, modelParam, value)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -242,10 +294,14 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         public int getModelParameter(int modelHandle, int modelParam) throws RemoteException {
             try {
                 int result = mDelegate.getModelParameter(modelHandle, modelParam);
-                logReturn("getModelParameter", result, modelHandle, modelParam);
+                mEventLogger.enqueue(SessionEvent.createForReturn(
+                            GET_MODEL_PARAMETER, result, modelHandle, modelParam)
+                        .printLog(ALOGI, TAG));
                 return result;
             } catch (Exception e) {
-                logException("getModelParameter", e, modelHandle, modelParam);
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            GET_MODEL_PARAMETER, e, modelHandle, modelParam)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -256,10 +312,14 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             try {
                 ModelParameterRange result = mDelegate.queryModelParameterSupport(modelHandle,
                         modelParam);
-                logReturn("queryModelParameterSupport", result, modelHandle, modelParam);
+                mEventLogger.enqueue(SessionEvent.createForReturn(
+                            QUERY_MODEL_PARAMETER, result, modelHandle, modelParam)
+                        .printLog(ALOGI, TAG));
                 return result;
             } catch (Exception e) {
-                logException("queryModelParameterSupport", e, modelHandle, modelParam);
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            QUERY_MODEL_PARAMETER, e, modelHandle, modelParam)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -267,10 +327,20 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         @Override
         public void detach() throws RemoteException {
             try {
+                if (mSessionEventLoggers.remove(mEventLogger)) {
+                    while (!mDetachedSessionEventLoggers.offerFirst(mEventLogger)) {
+                        // Remove the oldest element, if one still exists
+                        mDetachedSessionEventLoggers.pollLast();
+                    }
+                }
                 mDelegate.detach();
-                logVoidReturn("detach");
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            DETACH)
+                        .printLog(ALOGI, TAG));
             } catch (Exception e) {
-                logException("detach", e);
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            DETACH, e)
+                        .printLog(ALOGW, TAG));
                 throw e;
             }
         }
@@ -285,107 +355,112 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         public String toString() {
             return Objects.toString(mDelegate);
         }
+    }
 
-        private void logException(String methodName, Exception ex, Object... args) {
-            logExceptionWithObject(this, mOriginatorIdentity, methodName, ex, args);
+    private class CallbackLogging implements ISoundTriggerCallback {
+        private final ISoundTriggerCallback mCallbackDelegate;
+        private final EventLogger mEventLogger;
+        private final Identity mOriginatorIdentity;
+
+        private CallbackLogging(ISoundTriggerCallback delegate,
+                EventLogger eventLogger, Identity originatorIdentity) {
+            mCallbackDelegate = Objects.requireNonNull(delegate);
+            mEventLogger = Objects.requireNonNull(eventLogger);
+            mOriginatorIdentity = originatorIdentity;
         }
 
-        private void logReturn(String methodName, Object retVal, Object... args) {
-            logReturnWithObject(this, mOriginatorIdentity, methodName, retVal, args);
+        @Override
+        public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
+                throws RemoteException {
+            try {
+                mBatteryStatsInternalSupplier.get().noteWakingSoundTrigger(
+                        SystemClock.elapsedRealtime(), mOriginatorIdentity.uid);
+                mCallbackDelegate.onRecognition(modelHandle, event, captureSession);
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            RECOGNITION, modelHandle, event, captureSession)
+                        .printLog(ALOGI, TAG));
+            } catch (Exception e) {
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            RECOGNITION, e, modelHandle, event, captureSession)
+                        .printLog(ALOGW, TAG));
+                throw e;
+            }
         }
 
-        private void logVoidReturn(String methodName, Object... args) {
-            logVoidReturnWithObject(this, mOriginatorIdentity, methodName, args);
+        @Override
+        public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event,
+                int captureSession)
+                throws RemoteException {
+            try {
+                mBatteryStatsInternalSupplier.get().noteWakingSoundTrigger(
+                        SystemClock.elapsedRealtime(), mOriginatorIdentity.uid);
+                startKeyphraseEventLatencyTracking(event);
+                mCallbackDelegate.onPhraseRecognition(modelHandle, event, captureSession);
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            RECOGNITION, modelHandle, event, captureSession)
+                        .printLog(ALOGI, TAG));
+            } catch (Exception e) {
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            RECOGNITION, e, modelHandle, event, captureSession)
+                        .printLog(ALOGW, TAG));
+                throw e;
+            }
         }
 
-        private class CallbackLogging implements ISoundTriggerCallback {
-            private final ISoundTriggerCallback mCallbackDelegate;
-
-            private CallbackLogging(ISoundTriggerCallback delegate) {
-                mCallbackDelegate = delegate;
+        @Override
+        public void onModelUnloaded(int modelHandle) throws RemoteException {
+            try {
+                mCallbackDelegate.onModelUnloaded(modelHandle);
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            MODEL_UNLOADED, modelHandle)
+                        .printLog(ALOGI, TAG));
+            } catch (Exception e) {
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            MODEL_UNLOADED, e, modelHandle)
+                        .printLog(ALOGW, TAG));
+                throw e;
             }
+        }
 
-            @Override
-            public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
-                    throws RemoteException {
-                try {
-                    mBatteryStatsInternalSupplier.get().noteWakingSoundTrigger(
-                            SystemClock.elapsedRealtime(), mOriginatorIdentity.uid);
-                    mCallbackDelegate.onRecognition(modelHandle, event, captureSession);
-                    logVoidReturn("onRecognition", modelHandle, event);
-                } catch (Exception e) {
-                    logException("onRecognition", e, modelHandle, event);
-                    throw e;
-                }
+        @Override
+        public void onResourcesAvailable() throws RemoteException {
+            try {
+                mCallbackDelegate.onResourcesAvailable();
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            RESOURCES_AVAILABLE)
+                        .printLog(ALOGI, TAG));
+            } catch (Exception e) {
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            RESOURCES_AVAILABLE, e)
+                        .printLog(ALOGW, TAG));
+                throw e;
             }
+        }
 
-            @Override
-            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event,
-                    int captureSession)
-                    throws RemoteException {
-                try {
-                    mBatteryStatsInternalSupplier.get().noteWakingSoundTrigger(
-                            SystemClock.elapsedRealtime(), mOriginatorIdentity.uid);
-                    startKeyphraseEventLatencyTracking(event);
-                    mCallbackDelegate.onPhraseRecognition(modelHandle, event, captureSession);
-                    logVoidReturn("onPhraseRecognition", modelHandle, event);
-                } catch (Exception e) {
-                    logException("onPhraseRecognition", e, modelHandle, event);
-                    throw e;
-                }
+        @Override
+        public void onModuleDied() throws RemoteException {
+            try {
+                mCallbackDelegate.onModuleDied();
+                mEventLogger.enqueue(SessionEvent.createForVoid(
+                            MODULE_DIED)
+                        .printLog(ALOGW, TAG));
+            } catch (Exception e) {
+                mEventLogger.enqueue(SessionEvent.createForException(
+                            MODULE_DIED, e)
+                        .printLog(ALOGW, TAG));
+                throw e;
             }
+        }
 
-            @Override
-            public void onModelUnloaded(int modelHandle) throws RemoteException {
-                try {
-                    mCallbackDelegate.onModelUnloaded(modelHandle);
-                    logVoidReturn("onModelUnloaded", modelHandle);
-                } catch (Exception e) {
-                    logException("onModelUnloaded", e, modelHandle);
-                    throw e;
-                }
-            }
+        @Override
+        public IBinder asBinder() {
+            return mCallbackDelegate.asBinder();
+        }
 
-            @Override
-            public void onResourcesAvailable() throws RemoteException {
-                try {
-                    mCallbackDelegate.onResourcesAvailable();
-                    logVoidReturn("onResourcesAvailable");
-                } catch (Exception e) {
-                    logException("onResourcesAvailable", e);
-                    throw e;
-                }
-            }
-
-            @Override
-            public void onModuleDied() throws RemoteException {
-                try {
-                    mCallbackDelegate.onModuleDied();
-                    logVoidReturn("onModuleDied");
-                } catch (Exception e) {
-                    logException("onModuleDied", e);
-                    throw e;
-                }
-            }
-
-            private void logException(String methodName, Exception ex, Object... args) {
-                logExceptionWithObject(this, mOriginatorIdentity, methodName, ex, args);
-            }
-
-            private void logVoidReturn(String methodName, Object... args) {
-                logVoidReturnWithObject(this, mOriginatorIdentity, methodName, args);
-            }
-
-            @Override
-            public IBinder asBinder() {
-                return mCallbackDelegate.asBinder();
-            }
-
-            // Override toString() in order to have the delegate's ID in it.
-            @Override
-            public String toString() {
-                return Objects.toString(mCallbackDelegate);
-            }
+        // Override toString() in order to have the delegate's ID in it.
+        @Override
+        public String toString() {
+            return Objects.toString(mCallbackDelegate);
         }
     }
 
@@ -418,105 +493,193 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
                 latencyTrackerTag);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    // Actual logging logic below.
-    private static final int NUM_EVENTS_TO_DUMP = 64;
-    private final static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM-dd HH:mm:ss:SSS");
-    private final @NonNull LinkedList<Event> mLastEvents = new LinkedList<>();
-
-    static private class Event {
-        public final long timestamp = System.currentTimeMillis();
-        public final String message;
-
-        private Event(String message) {
-            this.message = message;
-        }
-    }
-
-    private static String printArgs(@NonNull Object[] args) {
-        StringBuilder result = new StringBuilder();
+    private static StringBuilder printArgs(StringBuilder builder, @NonNull Object[] args) {
         for (int i = 0; i < args.length; ++i) {
             if (i > 0) {
-                result.append(", ");
+                builder.append(", ");
             }
-            printObject(result, args[i]);
+            ObjectPrinter.print(builder, args[i]);
         }
-        return result.toString();
-    }
-
-    private static void printObject(@NonNull StringBuilder builder, @Nullable Object obj) {
-        ObjectPrinter.print(builder, obj, 16);
-    }
-
-    private static String printObject(@Nullable Object obj) {
-        StringBuilder builder = new StringBuilder();
-        printObject(builder, obj);
-        return builder.toString();
-    }
-
-    private void logReturnWithObject(@NonNull Object object, @Nullable Identity originatorIdentity,
-            String methodName,
-            @Nullable Object retVal,
-            @NonNull Object[] args) {
-        final String message = String.format("%s[this=%s, client=%s](%s) -> %s", methodName,
-                object,
-                printObject(originatorIdentity),
-                printArgs(args),
-                printObject(retVal));
-        Slog.i(TAG, message);
-        appendMessage(message);
-    }
-
-    private void logVoidReturnWithObject(@NonNull Object object,
-            @Nullable Identity originatorIdentity, @NonNull String methodName,
-            @NonNull Object[] args) {
-        final String message = String.format("%s[this=%s, client=%s](%s)", methodName,
-                object,
-                printObject(originatorIdentity),
-                printArgs(args));
-        Slog.i(TAG, message);
-        appendMessage(message);
-    }
-
-    private void logExceptionWithObject(@NonNull Object object,
-            @Nullable Identity originatorIdentity, @NonNull String methodName,
-            @NonNull Exception ex,
-            Object[] args) {
-        final String message = String.format("%s[this=%s, client=%s](%s) threw", methodName,
-                object,
-                printObject(originatorIdentity),
-                printArgs(args));
-        Slog.e(TAG, message, ex);
-        appendMessage(message + " " + ex.toString());
-    }
-
-    private void appendMessage(@NonNull String message) {
-        Event event = new Event(message);
-        synchronized (mLastEvents) {
-            if (mLastEvents.size() > NUM_EVENTS_TO_DUMP) {
-                mLastEvents.remove();
-            }
-            mLastEvents.add(event);
-        }
+        return builder;
     }
 
     @Override
     public void dump(PrintWriter pw) {
-        pw.println();
-        pw.println("=========================================");
-        pw.println("Last events");
-        pw.println("=========================================");
-        synchronized (mLastEvents) {
-            for (Event event : mLastEvents) {
-                pw.print(DATE_FORMAT.format(new Date(event.timestamp)));
-                pw.print('\t');
-                pw.println(event.message);
-            }
+        // Event loggers
+        pw.println("##Service-Wide logs:");
+        mServiceEventLogger.dump(pw, /* indent = */ "  ");
+
+        pw.println("\n##Active Session dumps:\n");
+        for (var sessionLogger : mSessionEventLoggers) {
+            sessionLogger.dump(pw, /* indent= */ "  ");
+            pw.println("");
         }
-        pw.println();
+        pw.println("##Detached Session dumps:\n");
+        for (var sessionLogger : mDetachedSessionEventLoggers) {
+            sessionLogger.dump(pw, /* indent= */ "  ");
+            pw.println("");
+        }
 
         if (mDelegate instanceof Dumpable) {
             ((Dumpable) mDelegate).dump(pw);
         }
+    }
+
+    public static void printSystemLog(int type, String tag, String message, Exception e) {
+        switch (type) {
+            case Event.ALOGI:
+                Slog.i(tag, message, e);
+                break;
+            case Event.ALOGE:
+                Slog.e(tag, message, e);
+                break;
+            case Event.ALOGW:
+                Slog.w(tag, message, e);
+                break;
+            case Event.ALOGV:
+            default:
+                Slog.v(tag, message, e);
+        }
+    }
+
+    public static class ServiceEvent extends Event {
+        private final Type mType;
+        private final String mPackageName;
+        private final Object mReturnValue;
+        private final Object[] mParams;
+        private final Exception mException;
+
+        public enum Type {
+            ATTACH,
+            LIST_MODULE,
+        }
+
+        public static ServiceEvent createForException(Type type, String packageName,
+                Exception exception, Object... params) {
+            return new ServiceEvent(exception, type, packageName, null, params);
+        }
+
+        public static ServiceEvent createForReturn(Type type, String packageName,
+                Object returnValue, Object... params) {
+            return new ServiceEvent(null , type, packageName, returnValue, params);
+        }
+
+        private ServiceEvent(Exception exception, Type type, String packageName, Object returnValue,
+                Object... params) {
+            mException = exception;
+            mType = type;
+            mPackageName = packageName;
+            mReturnValue = returnValue;
+            mParams = params;
+        }
+
+        @Override
+        public Event printLog(int type, String tag) {
+            printSystemLog(type, tag, eventToString(), mException);
+            return this;
+        }
+
+        @Override
+        public String eventToString() {
+            var sb = new StringBuilder(mType.name()).append(" [client= ");
+            ObjectPrinter.print(sb, mPackageName);
+            sb.append("] (");
+            printArgs(sb, mParams);
+            sb.append(") -> ");
+            if (mException != null) {
+                sb.append("ERROR: ");
+                ObjectPrinter.print(sb, mException);
+            } else {
+                ObjectPrinter.print(sb, mReturnValue);
+            }
+            return sb.toString();
+        }
+    }
+
+    public static class SessionEvent extends Event {
+        public enum Type {
+            LOAD_MODEL,
+            LOAD_PHRASE_MODEL,
+            START_RECOGNITION,
+            STOP_RECOGNITION,
+            FORCE_RECOGNITION,
+            UNLOAD_MODEL,
+            GET_MODEL_PARAMETER,
+            SET_MODEL_PARAMETER,
+            QUERY_MODEL_PARAMETER,
+            DETACH,
+            RECOGNITION,
+            MODEL_UNLOADED,
+            MODULE_DIED,
+            RESOURCES_AVAILABLE,
+        }
+
+        private final Type mType;
+        private final Exception mException;
+        private final Object mReturnValue;
+        private final Object[] mParams;
+
+        public static SessionEvent createForException(Type type, Exception exception,
+                Object... params) {
+            return new SessionEvent(exception, type, null, params);
+        }
+
+        public static SessionEvent createForReturn(Type type,
+                Object returnValue, Object... params) {
+            return new SessionEvent(null , type, returnValue, params);
+        }
+
+        public static SessionEvent createForVoid(Type type, Object... params) {
+            return new SessionEvent(null, type, null, params);
+        }
+
+
+        private SessionEvent(Exception exception, Type type, Object returnValue,
+                Object... params) {
+            mException = exception;
+            mType = type;
+            mReturnValue = returnValue;
+            mParams = params;
+        }
+
+        @Override
+        public Event printLog(int type, String tag) {
+            printSystemLog(type, tag, eventToString(), mException);
+            return this;
+        }
+
+        @Override
+        public String eventToString() {
+            var sb = new StringBuilder(mType.name());
+            sb.append(" (");
+            printArgs(sb, mParams);
+            sb.append(")");
+            if (mException != null) {
+                sb.append(" -> ERROR: ");
+                ObjectPrinter.print(sb, mException);
+            } else if (mReturnValue != null) {
+                sb.append(" -> ");
+                ObjectPrinter.print(sb, mReturnValue);
+            }
+            return sb.toString();
+        }
+    }
+
+    private static final class ModulePropertySummary {
+        private int mId;
+        private String mImplementor;
+        private int mVersion;
+
+        ModulePropertySummary(int id, String implementor, int version) {
+            mId = id;
+            mImplementor = implementor;
+            mVersion = version;
+        }
+
+        @Override
+       public String toString() {
+           return "{Id: " + mId + ", Implementor: " + mImplementor
+               + ", Version: " + mVersion + "}";
+       }
     }
 }

@@ -30,6 +30,10 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -39,17 +43,17 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyString
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.anyInt
-import org.mockito.Mockito.mock
+import org.mockito.Mockito.clearInvocations
+import org.mockito.Mockito.inOrder
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -62,16 +66,21 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
     private lateinit var subscriberService: IControlsSubscriber.Stub
     @Mock
     private lateinit var service: IControlsProvider.Stub
-
+    @Mock
+    private lateinit var packageUpdateMonitor: PackageUpdateMonitor
     @Captor
     private lateinit var wrapperCaptor: ArgumentCaptor<ControlActionWrapper>
+
+    private lateinit var packageUpdateMonitorFactory: FakePackageUpdateMonitorFactory
 
     private val componentName = ComponentName("test.pkg", "test.cls")
     private lateinit var manager: ControlsProviderLifecycleManager
     private lateinit var executor: FakeExecutor
+    private lateinit var fakeSystemClock: FakeSystemClock
 
     companion object {
         fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+        private val USER = UserHandle.of(0)
     }
 
     @Before
@@ -79,16 +88,20 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         context.addMockService(componentName, service)
-        executor = FakeExecutor(FakeSystemClock())
+        fakeSystemClock = FakeSystemClock()
+        executor = FakeExecutor(fakeSystemClock)
         `when`(service.asBinder()).thenCallRealMethod()
-        `when`(service.queryLocalInterface(ArgumentMatchers.anyString())).thenReturn(service)
+        `when`(service.queryLocalInterface(anyString())).thenReturn(service)
+
+        packageUpdateMonitorFactory = FakePackageUpdateMonitorFactory(packageUpdateMonitor)
 
         manager = ControlsProviderLifecycleManager(
                 context,
                 executor,
                 actionCallbackService,
-                UserHandle.of(0),
-                componentName
+                USER,
+                componentName,
+                packageUpdateMonitorFactory,
         )
     }
 
@@ -122,7 +135,7 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
 
     @Test
     fun testNullBinding() {
-        val mockContext = mock(Context::class.java)
+        val mockContext = mock<Context>()
         lateinit var serviceConnection: ServiceConnection
         `when`(mockContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer {
             val component = (it.arguments[0] as Intent).component
@@ -139,8 +152,9 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
                 mockContext,
                 executor,
                 actionCallbackService,
-                UserHandle.of(0),
-                componentName
+                USER,
+                componentName,
+                packageUpdateMonitorFactory,
         )
 
         nullManager.bindService()
@@ -229,14 +243,15 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
 
     @Test
     fun testFalseBindCallsUnbind() {
-        val falseContext = mock(Context::class.java)
+        val falseContext = mock<Context>()
         `when`(falseContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(false)
         val manager = ControlsProviderLifecycleManager(
             falseContext,
             executor,
             actionCallbackService,
-            UserHandle.of(0),
-            componentName
+            USER,
+            componentName,
+            packageUpdateMonitorFactory,
         )
         manager.bindService()
         executor.runAllReady()
@@ -247,4 +262,150 @@ class ControlsProviderLifecycleManagerTest : SysuiTestCase() {
         verify(falseContext).bindServiceAsUser(any(), captor.capture(), anyInt(), any())
         verify(falseContext).unbindService(captor.value)
     }
+
+    @Test
+    fun testPackageUpdateMonitor_createdWithCorrectValues() {
+        assertEquals(USER, packageUpdateMonitorFactory.lastUser)
+        assertEquals(componentName.packageName, packageUpdateMonitorFactory.lastPackage)
+    }
+
+    @Test
+    fun testBound_packageMonitorStartsMonitoring() {
+        manager.bindService()
+        executor.runAllReady()
+
+        // Service will connect and monitoring should start
+        verify(packageUpdateMonitor).startMonitoring()
+    }
+
+    @Test
+    fun testOnPackageUpdateWhileBound_unbound_thenBindAgain() {
+        val mockContext = mock<Context> {
+            `when`(bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(true)
+        }
+
+        val manager = ControlsProviderLifecycleManager(
+            mockContext,
+            executor,
+            actionCallbackService,
+            USER,
+            componentName,
+            packageUpdateMonitorFactory,
+        )
+
+        manager.bindService()
+        executor.runAllReady()
+        clearInvocations(mockContext)
+
+        packageUpdateMonitorFactory.lastCallback?.run()
+        executor.runAllReady()
+
+        val inOrder = inOrder(mockContext)
+        inOrder.verify(mockContext).unbindService(any())
+        inOrder.verify(mockContext).bindServiceAsUser(any(), any(), anyInt(), any())
+    }
+
+    @Test
+    fun testOnPackageUpdateWhenNotBound_nothingHappens() {
+        val mockContext = mock<Context> {
+            `when`(bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(true)
+        }
+
+        ControlsProviderLifecycleManager(
+            mockContext,
+            executor,
+            actionCallbackService,
+            USER,
+            componentName,
+            packageUpdateMonitorFactory,
+        )
+
+        packageUpdateMonitorFactory.lastCallback?.run()
+        verifyNoMoreInteractions(mockContext)
+    }
+
+    @Test
+    fun testUnbindService_stopsTracking() {
+        manager.bindService()
+        manager.unbindService()
+        executor.runAllReady()
+
+        verify(packageUpdateMonitor).stopMonitoring()
+    }
+
+    @Test
+    fun testRebindForPanelWithSameFlags() {
+        val mockContext = mock<Context> {
+            `when`(bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(true)
+        }
+
+        val manager = ControlsProviderLifecycleManager(
+            mockContext,
+            executor,
+            actionCallbackService,
+            USER,
+            componentName,
+            packageUpdateMonitorFactory,
+        )
+
+        manager.bindServiceForPanel()
+        executor.runAllReady()
+
+        val flagsCaptor = argumentCaptor<Int>()
+        verify(mockContext).bindServiceAsUser(any(), any(), capture(flagsCaptor), any())
+        clearInvocations(mockContext)
+
+        packageUpdateMonitorFactory.lastCallback?.run()
+        executor.runAllReady()
+
+        verify(mockContext).bindServiceAsUser(any(), any(), eq(flagsCaptor.value), any())
+    }
+
+    @Test
+    fun testBindAfterSecurityExceptionWorks() {
+        val mockContext = mock<Context> {
+            `when`(bindServiceAsUser(any(), any(), anyInt(), any()))
+                .thenThrow(SecurityException("exception"))
+        }
+
+        val manager = ControlsProviderLifecycleManager(
+            mockContext,
+            executor,
+            actionCallbackService,
+            USER,
+            componentName,
+            packageUpdateMonitorFactory,
+        )
+
+        manager.bindServiceForPanel()
+        executor.runAllReady()
+
+        `when`(mockContext.bindServiceAsUser(any(), any(), anyInt(), any())).thenReturn(true)
+
+        manager.bindServiceForPanel()
+        executor.runAllReady()
+
+        verify(mockContext, times(2)).bindServiceAsUser(any(), any(), anyInt(), any())
+    }
+
+    private class FakePackageUpdateMonitorFactory(
+        private val monitor: PackageUpdateMonitor
+    ) : PackageUpdateMonitor.Factory {
+
+        var lastUser: UserHandle? = null
+        var lastPackage: String? = null
+        var lastCallback: Runnable? = null
+
+        override fun create(
+            user: UserHandle,
+            packageName: String,
+            callback: Runnable
+        ): PackageUpdateMonitor {
+            lastUser = user
+            lastPackage = packageName
+            lastCallback = callback
+            return monitor
+        }
+    }
 }
+

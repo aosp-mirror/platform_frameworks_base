@@ -6994,7 +6994,7 @@ public class Notification implements Parcelable
      */
     public boolean isColorized() {
         return extras.getBoolean(EXTRA_COLORIZED)
-                && (hasColorizedPermission() || isForegroundService());
+                && (hasColorizedPermission() || isFgsOrUij());
     }
 
     /**

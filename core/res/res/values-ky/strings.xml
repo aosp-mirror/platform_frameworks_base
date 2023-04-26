@@ -503,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Колдонмого дирилдегичти көзөмөлдөө мүмкүнчүлүгүн берет."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Колдонмого дирилдөө абалына кирүүгө уруксат берет."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"телефон номерлерине түз чалуу"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Колдонмого сиздин катышууңузсуз телефон номурларга чалуу уруксатын берет. Бул сиз күтпөгөн чыгымдарга же чалууларга алып келиши мүмкүн. Бул куткаруучулардын номурларына чалууга уруксат бербей тургандыгын эске алыңыз. Зыяндуу колдонмолор, сиздин ырастооңузсуз чалууларды аткарып, көп чыгымдарга себепкер болушу мүмкүн."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS чалуу кызматына мүмкүнчүлүк алуу"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Колдонмого сизди катыштырбай туруп, IMS кызматынын жардамы менен, чалууларды жасоо мүмкүнчүлүгүн берет."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"телефондун абалын жана аныктыгын окуу"</string>
@@ -610,7 +611,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Колдонмого сүрөт жыйнагыңызды өзгөртүүгө мүмкүнчүлүк берет."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"медиа жыйнагыңыз сакталган жерлерди окуу"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Колдонмого медиа жыйнагыңыз сакталган жерлерди окууга мүмкүнчүлүк берет."</string>
-    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Биометрикалык жөндөөлөрдү колдонуу"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Биометрикалык параметрлерди колдонуу"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Биометрикалык жөндөөнү же экрандын кулпусун колдонуу"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Өзүңүздү ырастаңыз"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Улантуу үчүн биометрикалык жөндөөнү колдонуу"</string>
@@ -709,8 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Жүздүн аныктыгын текшерүү жокко чыгарылды."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Жүзүнөн таанып ачуу функциясын колдонуучу өчүрүп салды"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Өтө көп жолу аракет жасадыңыз. Бир аздан кийин кайталап көрүңүз."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Өтө көп жолу аракет кылдыңыз. \"Жүзүнөн таанып ачуу\" жеткиликсиз."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Өтө көп жолу аракет кылдыңыз. Эрканды кулпулоо функциясын колдонуңуз."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Жүз ырасталбай жатат. Кайталап көрүңүз."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Жүзүнөн таанып ачуу функциясын жөндөй элексиз"</string>
@@ -1161,7 +1161,7 @@
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Киргизүү ыкмасын өзгөртүү"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Айрым функциялар иштебеши мүмкүн"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Тутумда сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Системада сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> иштөөдө"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Көбүрөөк маалымат үчүн же колдонмону токтотуш үчүн таптап коюңуз."</string>
     <string name="ok" msgid="2646370155170753815">"Жарайт"</string>
@@ -1401,7 +1401,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Башка колдонмолордун үстүнөн көрсөтүү"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> колдонмосун башка терезелердин үстүнөн көрсөтүү"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g>: башка колдонмолордун үстүнөн"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, параметрлерди ачып туруп, аны өчүрүп коюңуз."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Өчүрүү"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> текшерилүүдө…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Учурдагы мазмун каралып жатат"</string>
@@ -2159,14 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Бул мазмунду жумуш колдонмолору менен ачуу мүмкүн эмес"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Бул мазмунду жеке колдонмолор менен бөлүшүү мүмкүн эмес"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Бул мазмунду жеке колдонмолор менен ачуу мүмкүн эмес"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Жумуш профили тындырылган"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Күйгүзүү үчүн таптап коюңуз"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Жумуш колдонмолору жок"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Жеке колдонмолор жок"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Жеке <xliff:g id="APP">%s</xliff:g> колдонмосун ачуу"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Жумуш үчүн <xliff:g id="APP">%s</xliff:g> колдонмосун ачуу"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Жеке серепчини колдонуу"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Жумуш серепчисин колдонуу"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM карта тармагынын кулпусун ачуучу PIN код"</string>

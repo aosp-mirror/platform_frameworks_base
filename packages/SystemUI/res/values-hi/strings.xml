@@ -168,6 +168,34 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"अगर आप फिर से गलत पैटर्न डालते हैं, तो आपकी वर्क प्रोफ़ाइल और उसका डेटा मिटा दिया जाएगा."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"अगर आप फिर से गलत पिन डालते हैं, तो आपकी वर्क प्रोफ़ाइल और उसका डेटा मिटा दिया जाएगा."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"अगर आप फिर से गलत पासवर्ड डालते हैं, तो आपकी वर्क प्रोफ़ाइल और उसका डेटा मिटा दिया जाएगा."</string>
+    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
+    <skip />
+    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
+    <skip />
+    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फ़िंगरप्रिंट सेंसर को छुएं"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"चेहरे की पहचान नहीं हुई. फ़िंगरप्रिंट इस्तेमाल करें."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -545,7 +573,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"बिना आवाज़ के सूचनाएं दिखाएं"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"डिफ़ॉल्ट"</string>
     <string name="notification_automatic_title" msgid="3745465364578762652">"अपने-आप"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"किसी तरह की आवाज़ या वाइब्रेशन न हो"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"आवाज़ या वाइब्रेशन न हो"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"इससे किसी तरह की आवाज़ या वाइब्रेशन नहीं होता और बातचीत, सेक्शन में सबसे नीचे दिखती है"</string>
     <string name="notification_channel_summary_default" msgid="777294388712200605">"डिवाइस की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="3482483084451555344">"डिवाइस की सेटिंग के आधार पर, सूचना आने पर घंटी बज सकती है या वाइब्रेशन हो सकता है. <xliff:g id="APP_NAME">%1$s</xliff:g> पर होने वाली बातचीत, डिफ़ॉल्ट रूप से बबल के तौर पर दिखती है."</string>

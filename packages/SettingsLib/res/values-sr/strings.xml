@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Више времена."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Мање времена."</string>
     <string name="cancel" msgid="5665114069455378395">"Откажи"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Даље"</string>
+    <string name="back" msgid="5554327870352703710">"Назад"</string>
+    <string name="save" msgid="3745809743277153149">"Сачувај"</string>
     <string name="okay" msgid="949938843324579502">"Потврди"</string>
     <string name="done" msgid="381184316122520313">"Готово"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Аларми и подсетници"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Додајете новог корисника?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Овај уређај можете да делите са другим људима ако направите још корисника. Сваки корисник има сопствени простор, који може да прилагођава помоћу апликација, позадине и слично. Корисници могу да прилагођавају и подешавања уређаја која утичу на свакога, попут Wi‑Fi-ја.\n\nКада додате новог корисника, та особа треба да подеси сопствени простор.\n\nСваки корисник може да ажурира апликације за све остале кориснике. Подешавања и услуге приступачности не могу да се преносе на новог корисника."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Када додате новог корисника, та особа треба да подеси сопствени простор.\n\nСваки корисник може да ажурира апликације за све остале кориснике."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Желите да поставите овог корисника за администратора?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Администратори имају посебне привилегије које остали корисници немају. Администратор може да управља свим корисницима, ажурира или ресетује овај уређај, прилагођава подешавања, прегледа све инсталиране апликације и додељује или опозива привилегије администратора за друге."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Постави за администратора"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Подешавате корисника?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Та особа треба да узме уређај и подеси свој простор"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Желите ли да одмах подесите профил?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Тиме ћете покренути нову сесију госта и избрисати све апликације и податке из актуелне сесије"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Излазите из режима госта?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Тиме ћете избрисати све апликације и податке из актуелне сесије госта"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Да, постави га за администратора"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Не, не постављај га за администратора"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Изађи"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Сачуваћете активности госта?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Сачувајте активности из актуелне сесије или избришите све апликације и податке"</string>

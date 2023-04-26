@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Daha uzun süre."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Daha kısa süre."</string>
     <string name="cancel" msgid="5665114069455378395">"İptal"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Sonraki"</string>
+    <string name="back" msgid="5554327870352703710">"Geri"</string>
+    <string name="save" msgid="3745809743277153149">"Kaydet"</string>
     <string name="okay" msgid="949938843324579502">"Tamam"</string>
     <string name="done" msgid="381184316122520313">"Bitti"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmlar ve hatırlatıcılar"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Yeni kullanıcı eklensin mi?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Ek kullanıcılar oluşturarak bu cihazı başkalarıyla paylaşabilirsiniz. Her kullanıcının uygulamalarla, duvar kağıdıyla ve başka ayarlarla özelleştirebileceği kendi alanı olur. Kullanıcılar ayrıca kablosuz ağ gibi herkesi etkileyen cihaz ayarlarını değiştirebilirler.\n\nYeni bir kullanıcı eklediğinizde, ilgili kişinin kendi alanını ayarlaması gerekir.\n\nHer kullanıcı diğer tüm kullanıcılar için uygulamaları güncelleyebilir. Erişilebilirlik ayarları ve hizmetleri yeni kullanıcıya aktarılamayabilir."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Yeni bir kullanıcı eklediğinizde, bu kişinin kendi alanını ayarlaması gerekir.\n\nHerhangi bir kullanıcı, diğer tüm kullanıcılar için uygulamaları güncelleyebilir."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Bu kullanıcı yönetici yapılsın mı?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Yöneticiler diğer kullanıcıların sahip olmadığı özel ayrıcalıklara sahiptir. Yöneticiler tüm kullanıcıları yönetebilir, bu cihazı güncelleyebilir veya sıfırlayabilir, ayarları değiştirebilir, yüklü tüm uygulamaları görebilir ve başkalarına yönetici ayrıcalıkları verebilir veya mevcut ayrıcalıkları iptal edebilir."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Yönetici yap"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Kullanıcı şimdi ayarlansın mı?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"İlgili kişinin cihazı almak ve kendi alanını ayarlamak için müsait olduğundan emin olun"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profil şimdi yapılandırılsın mı?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Bu işlem, yeni bir misafir oturumu başlatarak mevcut oturumdaki tüm uygulamaları ve verileri siler"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Misafir modundan çıkılsın mı?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Bu işlem mevcut misafir oturumundaki tüm uygulamaları ve verileri siler"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Evet, onu yönetici yap"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Hayır, onu yönetici yapma"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Çık"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Misafir etkinliği kaydedilsin mi?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Oturumdaki etkinliği kaydedebilir ya da tüm uygulama ve verileri silebilirsiniz"</string>

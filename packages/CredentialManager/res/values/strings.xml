@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
   <!-- The name of this application. Credential Manager is a service that centralizes and provides
   access to a user's credentials used to sign in to various apps. [CHAR LIMIT=80] -->
@@ -99,13 +114,13 @@
   <!-- Strings for the get flow. -->
   <!-- This appears as the title of the modal bottom sheet asking for user confirmation to use the single previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_use_passkey_for">Use your saved passkey for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
-  <!-- This appears as the title of the dialog asking for user confirmation to use the single previously saved credential to sign in to the app. [CHAR LIMIT=200] -->
-  <string name="get_dialog_title_use_sign_in_for">Use your saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
-  <!-- This appears as the title of the dialog asking for user to make a choice from various previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
-  <string name="get_dialog_title_choose_sign_in_for">Choose a saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
-  <!-- This appears as the title of the dialog asking for user to make a choice from various previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
+  <!-- This appears as the title of the dialog asking for user confirmation to use the single user credential (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_use_sign_in_for">Use your sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from various available user credentials (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_sign_in_for">Choose a sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from options of available user information (e.g. driver's license, vaccination status) to pass to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_choose_option_for">Choose an option for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
-  <!-- This appears as the title of the dialog asking user to use a previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
+  <!-- This appears as the title of the dialog asking user to send a piece of user information (e.g. driver's license, vaccination status) to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_use_info_on">Use this info on <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
   <!-- This is a label for a button that links the user to different sign-in methods . [CHAR LIMIT=80] -->
   <string name="get_dialog_use_saved_passkey_for">Sign in another way</string>

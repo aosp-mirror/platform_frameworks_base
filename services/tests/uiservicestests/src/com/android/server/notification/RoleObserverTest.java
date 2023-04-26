@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,7 +55,6 @@ import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableContext;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -64,7 +62,6 @@ import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.config.sysui.TestableFlagResolver;
 import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.InstanceIdSequenceFake;
@@ -162,14 +159,14 @@ public class RoleObserverTest extends UiServiceTestCase {
                     mock(UsageStatsManagerInternal.class),
                     mock(DevicePolicyManagerInternal.class), mock(IUriGrantsManager.class),
                     mock(UriGrantsManagerInternal.class),
-                    mock(AppOpsManager.class), mock(IAppOpsService.class),
-                    mUm, mock(NotificationHistoryManager.class),
+                    mock(AppOpsManager.class), mUm, mock(NotificationHistoryManager.class),
                     mock(StatsManager.class), mock(TelephonyManager.class),
                     mock(ActivityManagerInternal.class),
                     mock(MultiRateLimiter.class), mock(PermissionHelper.class),
-                    mock(UsageStatsManagerInternal.class), mock (TelecomManager.class),
+                    mock(UsageStatsManagerInternal.class), mock(TelecomManager.class),
                     mock(NotificationChannelLogger.class), new TestableFlagResolver(),
-                    mock(PermissionManager.class));
+                    mock(PermissionManager.class),
+                    new NotificationManagerService.PostNotificationTrackerFactory() {});
         } catch (SecurityException e) {
             if (!e.getMessage().contains("Permission Denial: not allowed to send broadcast")) {
                 throw e;

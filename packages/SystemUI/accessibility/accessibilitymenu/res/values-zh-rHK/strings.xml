@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="accessibility_menu_service_name" msgid="730136711554740131">"無障礙功能選單"</string>
-    <string name="accessibility_menu_intro" msgid="3164193281544042394">"「無障礙功能選單」是螢幕上的大型選單，用來控制裝置，方便您鎖定裝置、控制音量和亮度、擷取螢幕畫面及執行其他功能。"</string>
+    <string name="accessibility_menu_intro" msgid="3164193281544042394">"「無障礙功能選單」是螢幕上的大型選單，用來控制裝置，方便你鎖定裝置、控制音量和亮度、擷取螢幕畫面及執行其他功能。"</string>
     <string name="assistant_label" msgid="6796392082252272356">"Google 助理"</string>
     <string name="assistant_utterance" msgid="65509599221141377">"Google 助理"</string>
     <string name="a11y_settings_label" msgid="3977714687248445050">"無障礙功能設定"</string>
@@ -20,7 +20,7 @@
     <string name="brightness_down_label" msgid="7115662941913272072">"調暗亮度"</string>
     <string name="previous_button_content_description" msgid="840869171117765966">"前往上一個畫面"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"前往下一個畫面"</string>
-    <string name="accessibility_menu_description" msgid="4458354794093858297">"「無障礙功能選單」是螢幕上的大型選單，用來控制裝置，方便您鎖定裝置、控制音量和亮度、擷取螢幕截圖及執行其他功能。"</string>
+    <string name="accessibility_menu_description" msgid="4458354794093858297">"「無障礙功能選單」是螢幕上的大型選單，用來控制裝置，方便你鎖定裝置、控制音量和亮度、擷取螢幕截圖及執行其他功能。"</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"透過大型選單控制裝置"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"無障礙功能選單設定"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"大按鈕"</string>

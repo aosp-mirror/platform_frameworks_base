@@ -168,6 +168,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"შემდეგი მცდელობისას განმბლოკავი ნიმუშის არასწორად შეყვანის შემთხვევაში, თქვენი სამსახურის პროფილი და მისი მონაცემები წაიშლება."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"შემდეგი მცდელობისას PIN-კოდის არასწორად შეყვანის შემთხვევაში, თქვენი სამსახურის პროფილი და მისი მონაცემები წაიშლება."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"შემდეგი მცდელობისას პაროლის არასწორად შეყვანის შემთხვევაში, თქვენი სამსახურის პროფილი და მისი მონაცემები წაიშლება."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"დაყენება"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"ახლა არა"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"საჭიროა უსაფრთხოებისა და ეფექტურობის გასაუმჯობესებლად"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"ანაბეჭდით განბლოკვის ხელახლა დაყენება"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"ანაბეჭდით განბლოკვა"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"თითის ანაბეჭდით განბლოკვის დაყენება"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"ანაბეჭდით განბლოკვის ხელახლა დასაყენებლად ამჟამინდელი ანაბეჭდის ფოტოები და მოდელები წაიშლება.\n\nმათი წაშლის შემდეგ მოგიწევთ ანაბეჭდით განბლოკვის ხელახლა დაყენება, ტელეფონის ანაბეჭდით განსაბლოკად ან ვინაობის დასადასტურებლად."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"ანაბეჭდით განბლოკვის ხელახლა დასაყენებლად ამჟამინდელი ანაბეჭდის ფოტოები და მოდელები წაიშლება.\n\nმათი წაშლის შემდეგ მოგიწევთ ანაბეჭდით განბლოკვის ხელახლა დაყენება, ტელეფონის ანაბეჭდით განსაბლოკად ან ვინაობის დასადასტურებლად."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"ანაბეჭდით განბლოკვის დაყენება ვერ მოხერხდა. გადადით პარამეტრებზე და ცადეთ ხელახლა."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"დააყენეთ სახით განბლოკვა ხელახლა"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"განბლოკვა სახით"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"სახით განბლოკვის პარამეტრების დაყენება"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"სახით განბლოკვის ისევ დასაყენებლად თქვენი ამჟამინდელი სახის მოდელი წაიშლება.\n\nთქვენ მოგიწევთ ამ ფუნქციის ხელახლა დაყენება სახის მეშვეობით ტელეფონის განსაბლოკად."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"სახით განბლოკვის დაყენება ვერ მოხერხდა. გადადით პარამეტრებზე და ცადეთ ხელახლა."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"შეეხეთ თითის ანაბეჭდის სენსორს"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"სახის ამოცნობა ვერ ხერხდება. სანაცვლოდ თითის ანაბეჭდი გამოიყენეთ."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -885,8 +899,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"რჩეულებიდან ამოღება"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"გადატანა პოზიციაზე <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"მართვის საშუალებები"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"სწრაფად წვდომისთვის აირჩიეთ მოწყობილობების მართვის საშუალებები"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"მართვის საშუალებების გადაწყობა შეგიძლიათ მათი ჩავლებით გადატანით"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"მართვის ყველა საშუალება ამოიშალა"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ცვლილებები არ შენახულა"</string>
@@ -1124,14 +1137,12 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"სამსახურის პროფილზე გადართვა"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"დახურვა"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"ჩაკეთილი ეკრანის მორგება"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"ჩაკეტილი ეკრანის მოსარგებად გაბლოკეთ"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi მიუწვდომელია"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"კამერა დაბლოკილია"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"კამერა და მიკროფონი დაბლოკილია"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"მიკროფონი დაბლოკილია"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"პრიორიტეტული რეჟიმი ჩართულია"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"ასისტენტის ყურადღების ფუნქცია ჩართულია"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"დააყენეთ ნაგულისხმევი შენიშვნების აპი პარამეტრებში"</string>
 </resources>

@@ -19,7 +19,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="no_applications" msgid="5800789569715871963">"Нема апликации."</string>
     <string name="menu_show_system" msgid="906304605807554788">"Прикажи го системот"</string>
-    <string name="menu_hide_system" msgid="374571689914923020">"Сокриј го системот"</string>
+    <string name="menu_hide_system" msgid="374571689914923020">"Скриј го системот"</string>
     <string name="app_permission_summary_allowed" msgid="6115213465364138103">"Со дозволен пристап"</string>
     <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"Без дозволен пристап"</string>
     <string name="version_text" msgid="4001669804596458577">"верзија <xliff:g id="VERSION_NUM">%1$s</xliff:g>"</string>

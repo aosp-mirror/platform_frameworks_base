@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager
 
+import android.app.Activity
 import android.content.Intent
 import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.RequestInfo
@@ -47,6 +48,8 @@ import com.android.credentialmanager.ui.theme.PlatformTheme
 class CredentialSelectorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN,
+            0, 0)
         Log.d(Constants.LOG_TAG, "Creating new CredentialSelectorActivity")
         try {
             val (isCancellationRequest, shouldShowCancellationUi, _) =

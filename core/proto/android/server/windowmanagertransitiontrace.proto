@@ -44,6 +44,10 @@ message TransitionTraceProto {
   // Additional debugging info only collected and dumped when explicitly requested to trace
   repeated TransitionState transition_states = 3;
   repeated TransitionInfo transition_info = 4;
+
+  /* offset between real-time clock and elapsed time clock in nanoseconds.
+   Calculated as: 1000000 * System.currentTimeMillis() - SystemClock.elapsedRealtimeNanos() */
+  optional fixed64 real_to_elapsed_time_offset_nanos = 5;
 }
 
 message Transition {

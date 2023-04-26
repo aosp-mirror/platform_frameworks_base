@@ -168,6 +168,34 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ако внесете погрешна шема при следниот обид, работниот профил и неговите податоци ќе се избришат."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ако внесете погрешен PIN при следниот обид, работниот профил и неговите податоци ќе се избришат."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ако внесете погрешна лозинка при следниот обид, работниот профил и неговите податоци ќе се избришат."</string>
+    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
+    <skip />
+    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
+    <skip />
+    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Допрете го сензорот за отпечатоци"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Не се препознава ликот. Користете отпечаток."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -223,7 +251,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Екранот е заклучен во ориентација на пејзаж."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Екранот е заклучен во ориентација на портрет."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Dessert Case"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Заштитник на екран"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Штедач на екран"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Етернет"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не вознемирувај"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
@@ -237,7 +265,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Автоматско ротирање"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматско ротирање на екранот"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Локација"</string>
-    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Заштитник на екран"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Штедач на екран"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Пристап до камерата"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Пристап до микрофонот"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Дозволен"</string>
@@ -538,7 +566,7 @@
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Вклучи"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Контроли за известувањата за напојување"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Вклучено - според лице"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Со контролите за известувањата за напојување, може да поставите ниво на важност од 0 до 5 за известувањата на која било апликација. \n\n"<b>"Ниво 5"</b>" \n- Прикажувај на врвот на списокот со известувања \n- Дозволи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 4"</b>" \n- Спречи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 3"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n\n"<b>"Ниво 2"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n\n"<b>"Ниво 1"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n- Сокриј од заклучен екран и статусна лента \n- Прикажувај на дното на списокот со известувања \n\n"<b>"Ниво 0"</b>" \n- Блокирај ги сите известувања од апликацијата"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"Со контролите за известувањата за напојување, може да поставите ниво на важност од 0 до 5 за известувањата на која било апликација. \n\n"<b>"Ниво 5"</b>" \n- Прикажувај на врвот на списокот со известувања \n- Дозволи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 4"</b>" \n- Спречи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 3"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n\n"<b>"Ниво 2"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n\n"<b>"Ниво 1"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n- Скриј од заклучен екран и статусна лента \n- Прикажувај на дното на списокот со известувања \n\n"<b>"Ниво 0"</b>" \n- Блокирај ги сите известувања од апликацијата"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Готово"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Примени"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Исклучи известувања"</string>
@@ -637,7 +665,7 @@
     <string name="group_system_cycle_forward" msgid="9202444850838205990">"Прелистувајте ги неодамнешните апликации (напред)"</string>
     <string name="group_system_cycle_back" msgid="5163464503638229131">"Прелистувајте ги неодамнешните апликации (назад)"</string>
     <string name="group_system_access_all_apps_search" msgid="488070738028991753">"Отв. список со сите аплик. и пребарувајте (т.е. Пребарување/Стартер)"</string>
-    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Сокриј и (повторно) прикажи ја лентата со задачи"</string>
+    <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"Скриј и (повторно) прикажи ја лентата со задачи"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"Пристапете до поставките на системот"</string>
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Пристапете до „Помошник на Google“"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заклучен екран"</string>
@@ -917,9 +945,9 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Повлечете за да видите повеќе"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Се вчитуваат препораки"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Аудиовизуелни содржини"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Да се сокријат контролите за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="controls_media_active_session" msgid="3146882316024153337">"Аудиовизуелнава сесија не може да се сокрие."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Сокриј"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Да се скријат контролите за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Аудиовизуелнава сесија не може да се скрие."</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скриј"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Продолжи"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Поставки"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> од <xliff:g id="ARTIST_NAME">%2$s</xliff:g> е пуштено на <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -1124,14 +1152,12 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Префрли се на работен профил"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Затвори"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Приспособете го заклучениот екран"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Отклучување за приспособување на заклучениот екран"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi не е достапно"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камерата е блокирана"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камерата и микрофонот се блокирани"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофонот е блокиран"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Приоритетниот режим е вклучен"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Вниманието на „Помошникот“ е вклучено"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Поставете стандардна апликација за белешки во „Поставки“"</string>
 </resources>

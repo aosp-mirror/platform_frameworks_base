@@ -3839,7 +3839,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // This can still happen if WMCore starts a new transition when there is ongoing
             // sync transaction from Shell. Please file a bug if it happens.
             throw new IllegalStateException("Can't sync on 2 groups simultaneously"
-                    + " currentSyncId=" + mSyncGroup.mSyncId + " newSyncId=" + group.mSyncId);
+                    + " currentSyncId=" + mSyncGroup.mSyncId + " newSyncId=" + group.mSyncId
+                    + " wc=" + this);
         }
         mSyncGroup = group;
     }

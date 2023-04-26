@@ -168,6 +168,34 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Hurrengo saiakeran eredua oker marrazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Hurrengo saiakeran PINa oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Hurrengo saiakeran pasahitza oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
+    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
+    <skip />
+    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
+    <skip />
+    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sakatu hatz-marken sentsorea"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ezin da hauteman aurpegia. Erabili hatz-marka."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -824,7 +852,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"pantaila-grabaketa"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ez du izenik"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Egonean"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Letraren tamaina"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Letra-tamaina"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"Txikitu"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"Handitu"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Lupa-leihoa"</string>
@@ -917,7 +945,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pasatu hatza aukera gehiago ikusteko"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Gomendioak kargatzen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia-edukia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren multimedia kontr. aukerak ezkutatu?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Multimedia kontrolatzeko aukerak (<xliff:g id="APP_NAME">%1$s</xliff:g>) ezkutatu?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Ezin da ezkutatu multimedia-saioa."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ezkutatu"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Berrekin"</string>
@@ -1124,14 +1152,12 @@
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Aldatu laneko profilera"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Itxi"</string>
     <string name="lock_screen_settings" msgid="6152703934761402399">"Pertsonalizatu pantaila blokeatua"</string>
-    <!-- no translation found for keyguard_unlock_to_customize_ls (2068542308086253819) -->
-    <skip />
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Desblokeatu eta pertsonalizatu pantaila blokeatua"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wifi-konexioa ez dago erabilgarri"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera blokeatuta dago"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera eta mikrofonoa blokeatuta daude"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofonoa blokeatuta dago"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Lehentasun modua aktibatuta dago"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Laguntzailea zerbitzuak arreta jarrita dauka"</string>
-    <!-- no translation found for set_default_notes_app_toast_content (2812374329662610753) -->
-    <skip />
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Ezarri oharren aplikazio lehenetsia ezarpenetan"</string>
 </resources>

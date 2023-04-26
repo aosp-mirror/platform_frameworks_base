@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"အချိန်တိုးရန်။"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"အချိန်လျှော့ရန်။"</string>
     <string name="cancel" msgid="5665114069455378395">"မလုပ်တော့"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"ရှေ့သို့"</string>
+    <string name="back" msgid="5554327870352703710">"နောက်သို့"</string>
+    <string name="save" msgid="3745809743277153149">"သိမ်းရန်"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"ပြီးပြီ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"နှိုးစက်နှင့် သတိပေးချက်များ"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"အသုံးပြုသူအသစ် ထည့်မလား။"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"နောက်ထပ် အသုံးပြုသူများ ထည့်သွင်းခြင်းဖြင့် ဤစက်ပစ္စည်းကို အခြားသူများနှင့် မျှဝေအသုံးပြုနိုင်သည်။ အသုံးပြုသူတိုင်းသည် မိမိတို့ကိုယ်ပိုင်နေရာ ရရှိမည်ဖြစ်ပြီး အက်ပ်၊ နောက်ခံပုံနှင့် အခြားအရာတို့ဖြင့် စိတ်ကြိုက်ပြင်ဆင်နိုင်ပါမည်။ အားလုံးကို အကျိုးသက်ရောက်မှု ရှိစေနိုင်သည့် Wi-Fi ကဲ့သို့ ဆက်တင်များကိုလည်း ချိန်ညှိနိုင်ပါမည်။\n\nအသုံးပြုသူအသစ် ထည့်သည့်အခါ ထိုသူသည် မိမိ၏ကိုယ်ပိုင်နေရာကို သတ်မှတ်ရပါမည်။\n\nအသုံးပြုသူ မည်သူမဆို အခြားအသုံးပြုသူများအတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်နိုင်သည်။ အများသုံးစွဲနိုင်မှုဆက်တင်များနှင့် ဝန်ဆောင်မှုများကို အသုံးပြုသူအသစ်ထံသို့ လွှဲပြောင်းပေးမည် မဟုတ်ပါ။"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"သင်က အသုံးပြုသူ အသစ် တစ်ဦးကို ထည့်ပေးလိုက်လျှင်၊ ထိုသူသည် ၎င်း၏ နေရာကို သတ်မှတ်စီစဉ်ရန် လိုအပ်မည်။\n\n အသုံးပြုသူ မည်သူမဆို ကျန်အသုံးပြုသူ အားလုံးတို့အတွက် အက်ပ်များကို အပ်ဒိတ်လုပ်ပေးနိုင်သည်။"</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ဤအသုံးပြုသူကို စီမံခန့်ခွဲသူအဖြစ် သတ်မှတ်မလား။"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"စီမံခန့်ခွဲသူများ၌ အခြားအသုံးပြုသူများတွင်မရှိသော အထူးဆောင်ရွက်ခွင့်များရှိသည်။ စီမံခန့်ခွဲသူက အသုံးပြုသူအားလုံးကို စီမံခြင်း၊ ဤစက်ပစ္စည်းကို အပ်ဒိတ်လုပ်ခြင်း (သို့) ပြင်ဆင်သတ်မှတ်ခြင်း၊ ဆက်တင်များပြင်ဆင်ခြင်း၊ ထည့်သွင်းထားသောအက်ပ်အားလုံးကို ကြည့်ခြင်းနှင့် အခြားသူများအတွက် စီမံခန့်ခွဲသူ ဆောင်ရွက်ခွင့်များပေးခြင်း (သို့) ရုပ်သိမ်းခြင်းတို့ လုပ်နိုင်သည်။"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"စီမံခန့်ခွဲသူအဖြစ် သတ်မှတ်ရန်"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"အသုံးပြုသူကို ယခုသတ်မှတ်မလား။"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ထိုသူသည် ကိရိယာကိုယူ၍ ၎င်းတို့၏နေရာများကို ယခုသတ်မှတ်နိုင်ရမည်"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ယခု ကိုယ်ရေးအချက်အလက်ကို အစီအမံလုပ်မည်လား?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"၎င်းသည် ဧည့်သည် စက်ရှင်အသစ်ကို စတင်မည်ဖြစ်ပြီး လက်ရှိစက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်ပါမည်"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ဧည့်သည်မုဒ်မှ ထွက်မလား။"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"၎င်းသည် လက်ရှိဧည့်သည် စက်ရှင်မှ အက်ပ်နှင့် ဒေတာအားလုံးကို ဖျက်လိုက်ပါမည်"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"စီမံခန့်ခွဲသူအဖြစ် သတ်မှတ်ရန်"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"စီမံခန့်ခွဲသူအဖြစ် မသတ်မှတ်ပါနှင့်"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ထွက်ရန်"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ဧည့်သည်လုပ်ဆောင်ချက် သိမ်းမလား။"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"လက်ရှိစက်ရှင်မှ လုပ်ဆောင်ချက် သိမ်းနိုင်သည် (သို့) အက်ပ်နှင့် ဒေတာအားလုံး ဖျက်နိုင်သည်"</string>

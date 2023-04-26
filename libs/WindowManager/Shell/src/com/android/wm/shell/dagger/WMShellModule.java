@@ -634,14 +634,8 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static UnfoldBackgroundController provideUnfoldBackgroundController(
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            Context context
-    ) {
-        return new UnfoldBackgroundController(
-                context,
-                rootTaskDisplayAreaOrganizer
-        );
+    static UnfoldBackgroundController provideUnfoldBackgroundController(Context context) {
+        return new UnfoldBackgroundController(context);
     }
 
     //

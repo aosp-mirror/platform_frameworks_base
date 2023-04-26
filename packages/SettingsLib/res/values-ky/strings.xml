@@ -195,7 +195,7 @@
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> желеге туташууну талап кылат"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> колдоого алынган эмес"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"Текшерилүүдө…"</string>
-    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> жөндөөлөрдү"</string>
+    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> параметрлерди"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Жарак тууралоолорун ачуу"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Тандалган жарак"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Жалпы"</string>
@@ -519,12 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Көбүрөөк убакыт."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Азыраак убакыт."</string>
     <string name="cancel" msgid="5665114069455378395">"Жок"</string>
-    <!-- no translation found for next (2699398661093607009) -->
-    <skip />
-    <!-- no translation found for back (5554327870352703710) -->
-    <skip />
-    <!-- no translation found for save (3745809743277153149) -->
-    <skip />
+    <string name="next" msgid="2699398661093607009">"Кийинки"</string>
+    <string name="back" msgid="5554327870352703710">"Артка"</string>
+    <string name="save" msgid="3745809743277153149">"Сактоо"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Бүттү"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Ойготкучтар жана эстеткичтер"</string>
@@ -579,12 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңы колдонуучу кошосузбу?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Эгер түзмөгүңүздү дагы бир адам колдонуп жаткан болсо, кошумча профилдерди түзүп коюңуз. Профилдин ээси аны өзү каалагандай тууралап, тушкагаздарды коюп, керектүү колдонмолорду орнотуп алат. Мындан тышкары, колдонуучулар түзмөктүн Wi‑Fi´ды өчүрүү/күйгүзүү сыяктуу жалпы параметрлерин өзгөртө алышат.\n\nПрофиль түзүлгөндөн кийин, аны тууралап алуу керек.\n\nЖалпы колдонмолорду баары жаңырта алат, бирок атайын мүмкүнчүлүктөр өз-өзүнчө жөндөлөт."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңы колдонуучу кошулганда, ал өз мейкиндигин түзүп алышы керек.\n\nКолдонмолорду бир колдонуучу жаңыртканда, ал калган бардык колдонуучулар үчүн да жаңырат."</string>
-    <!-- no translation found for user_grant_admin_title (5157031020083343984) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_message (1673791931033486709) -->
-    <skip />
-    <!-- no translation found for user_grant_admin_button (5441486731331725756) -->
-    <skip />
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Бул колдонуучуну админ кыласызбы?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Админдердин өзгөчө укуктары бар. Админ бардык колдонуучуларды тескеп, бул түзмөктү жаңыртып же баштапкы абалга келтирип, параметрлерди өзгөртүп, орнотулган колдонмолордун баарын көрүп, башкаларга админ укуктарын берип же жокко чыгара алат."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Админ кылуу"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профилди жөндөйсүзбү?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Өз мейкиндигин жөндөп алышы үчүн, түзмөктү колдонуучуга беришиңиз керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл азыр түзүлсүнбү?"</string>
@@ -616,10 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Бул аракет жаңы конок сеансын баштап, учурдагы сеанстагы бардык колдонмолорду жана алардагы нерселерди жок кылат"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Конок режиминен чыгасызбы?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Учурдагы конок сеансындагы бардык колдонмолор менен алардагы нерселер өчүп калат"</string>
-    <!-- no translation found for grant_admin (4323199171790522574) -->
-    <skip />
-    <!-- no translation found for not_grant_admin (3557849576157702485) -->
-    <skip />
+    <string name="grant_admin" msgid="4323199171790522574">"Ооба, аны админ кылуу"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Жок, ал админ болбосун"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Чыгуу"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Коноктун аракеттерин сактайсызбы?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Учурдагы сеанстагы аракеттерди сактап же бардык колдонмолорду жана алардагы нерселерди жок кылсаңыз болот"</string>

@@ -129,8 +129,12 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             final int screenWidth = metrics.widthPixels;
             final int screenHeight = metrics.heightPixels;
             final SurfaceControl sc = change.getLeash();
-            startT.setCrop(sc, null);
-            startT.apply();
+            final Rect endBounds = change.getEndAbsBounds();
+            // Hide the first (fullscreen) frame because the animation will start from the freeform
+            // size.
+            startT.hide(sc)
+                    .setWindowCrop(sc, endBounds.width(), endBounds.height())
+                    .apply();
             final ValueAnimator animator = new ValueAnimator();
             animator.setFloatValues(0f, 1f);
             animator.setDuration(FULLSCREEN_ANIMATION_DURATION);
@@ -144,9 +148,10 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
                 float fraction = animation.getAnimatedFraction();
                 float currentScaleX = scaleX + ((1 - scaleX) * fraction);
                 float currentScaleY = scaleY + ((1 - scaleY) * fraction);
-                t.setPosition(sc, startPos.x * (1 - fraction), startPos.y * (1 - fraction));
-                t.setScale(sc, currentScaleX, currentScaleY);
-                t.apply();
+                t.setPosition(sc, startPos.x * (1 - fraction), startPos.y * (1 - fraction))
+                        .setScale(sc, currentScaleX, currentScaleY)
+                        .show(sc)
+                        .apply();
             });
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
