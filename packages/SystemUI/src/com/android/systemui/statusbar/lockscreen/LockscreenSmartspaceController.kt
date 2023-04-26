@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.lockscreen
 
 import android.app.PendingIntent
-import android.app.WallpaperManager
 import android.app.smartspace.SmartspaceConfig
 import android.app.smartspace.SmartspaceManager
 import android.app.smartspace.SmartspaceSession
@@ -56,7 +55,6 @@ import com.android.systemui.plugins.WeatherData
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
-import com.android.systemui.shared.regionsampling.UpdateColorCallback
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.DATE_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.smartspace.dagger.SmartspaceModule.Companion.WEATHER_SMARTSPACE_DATA_PLUGIN
 import com.android.systemui.statusbar.phone.KeyguardBypassController
@@ -120,7 +118,7 @@ constructor(
 
     private val regionSamplingEnabled =
             featureFlags.isEnabled(Flags.REGION_SAMPLING)
-    private var isContentUpdatedOnce = false
+    private var isRegionSamplersCreated = false
     private var showNotifications = false
     private var showSensitiveContentForCurrentUser = false
     private var showSensitiveContentForManagedUser = false
@@ -128,7 +126,6 @@ constructor(
 
     // TODO(b/202758428): refactor so that we can test color updates via region samping, similar to
     //  how we test color updates when theme changes (See testThemeChangeUpdatesTextColor).
-    private val updateFun: UpdateColorCallback = { updateTextColorFromRegionSampler() }
 
     // TODO: Move logic into SmartspaceView
     var stateChangeListener = object : View.OnAttachStateChangeListener {
@@ -143,6 +140,9 @@ constructor(
 
         override fun onViewDetachedFromWindow(v: View) {
             smartspaceViews.remove(v as SmartspaceView)
+
+            regionSamplers[v]?.stopRegionSampler()
+            regionSamplers.remove(v as SmartspaceView)
 
             if (smartspaceViews.isEmpty()) {
                 disconnect()
@@ -170,7 +170,7 @@ constructor(
 
         val filteredTargets = targets.filter(::filterSmartspaceTarget)
         plugin?.onTargetsAvailable(filteredTargets)
-        if (!isContentUpdatedOnce) {
+        if (!isRegionSamplersCreated) {
             for (v in smartspaceViews) {
                 if (regionSamplingEnabled) {
                     var regionSampler = RegionSampler(
@@ -178,15 +178,14 @@ constructor(
                         uiExecutor,
                         bgExecutor,
                         regionSamplingEnabled,
-                        updateFun
-                    )
+                        isLockscreen = true,
+                    ) { updateTextColorFromRegionSampler() }
                     initializeTextColors(regionSampler)
                     regionSamplers[v] = regionSampler
                     regionSampler.startRegionSampler()
                 }
-                updateTextColorFromWallpaper()
             }
-            isContentUpdatedOnce = true
+            isRegionSamplersCreated = true
         }
     }
 
@@ -504,18 +503,16 @@ constructor(
     }
 
     private fun updateTextColorFromRegionSampler() {
-        smartspaceViews.forEach {
-            val textColor = regionSamplers.get(it)?.currentForegroundColor()
+        regionSamplers.forEach { (view, region) ->
+            val textColor = region.currentForegroundColor()
             if (textColor != null) {
-                it.setPrimaryTextColor(textColor)
+                view.setPrimaryTextColor(textColor)
             }
         }
     }
 
     private fun updateTextColorFromWallpaper() {
-        val wallpaperManager = WallpaperManager.getInstance(context)
-        if (!regionSamplingEnabled || wallpaperManager.lockScreenWallpaperExists() ||
-            regionSamplers.isEmpty()) {
+        if (!regionSamplingEnabled || regionSamplers.isEmpty()) {
             val wallpaperTextColor =
                     Utils.getColorAttrDefaultColor(context, R.attr.wallpaperTextColor)
             smartspaceViews.forEach { it.setPrimaryTextColor(wallpaperTextColor) }

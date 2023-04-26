@@ -588,7 +588,7 @@ public final class WallpaperColors implements Parcelable {
 
         int hints = 0;
         double meanLuminance = totalLuminance / pixels.length;
-        if (meanLuminance > BRIGHT_IMAGE_MEAN_LUMINANCE && darkPixels < maxDarkPixels) {
+        if (meanLuminance > BRIGHT_IMAGE_MEAN_LUMINANCE && darkPixels <= maxDarkPixels) {
             hints |= HINT_SUPPORTS_DARK_TEXT;
         }
         if (meanLuminance < DARK_THEME_MEAN_LUMINANCE) {

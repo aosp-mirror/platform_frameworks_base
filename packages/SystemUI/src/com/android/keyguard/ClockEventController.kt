@@ -21,13 +21,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.Resources
-import android.graphics.Rect
 import android.text.format.DateFormat
 import android.util.TypedValue
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import android.view.ViewTreeObserver
-import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
@@ -55,16 +53,16 @@ import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import java.util.Locale
-import java.util.TimeZone
-import java.util.concurrent.Executor
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import java.util.Locale
+import java.util.TimeZone
+import java.util.concurrent.Executor
+import javax.inject.Inject
 
 /**
  * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
@@ -98,12 +96,7 @@ constructor(
 
                 value.initialize(resources, dozeAmount, 0f)
 
-                if (regionSamplingEnabled) {
-                    clock?.run {
-                        smallClock.view.addOnLayoutChangeListener(mLayoutChangedListener)
-                        largeClock.view.addOnLayoutChangeListener(mLayoutChangedListener)
-                    }
-                } else {
+                if (!regionSamplingEnabled) {
                     updateColors()
                 }
                 updateFontSizes()
@@ -139,44 +132,10 @@ constructor(
     private var disposableHandle: DisposableHandle? = null
     private val regionSamplingEnabled = featureFlags.isEnabled(REGION_SAMPLING)
 
-    private val mLayoutChangedListener =
-        object : View.OnLayoutChangeListener {
-
-            override fun onLayoutChange(
-                view: View?,
-                left: Int,
-                top: Int,
-                right: Int,
-                bottom: Int,
-                oldLeft: Int,
-                oldTop: Int,
-                oldRight: Int,
-                oldBottom: Int
-            ) {
-                view?.removeOnLayoutChangeListener(this)
-
-                val parent = (view?.parent) as FrameLayout
-
-                // don't pass in negative bounds when clocks are in transition state
-                if (view.locationOnScreen[0] < 0 || view.locationOnScreen[1] < 0) {
-                    return
-                }
-
-                val currentViewRect = Rect(left, top, right, bottom)
-                val oldViewRect = Rect(oldLeft, oldTop, oldRight, oldBottom)
-
-                if (
-                    currentViewRect.width() != oldViewRect.width() ||
-                        currentViewRect.height() != oldViewRect.height()
-                ) {
-                    updateRegionSampler(view)
-                }
-            }
-        }
 
     private fun updateColors() {
         val wallpaperManager = WallpaperManager.getInstance(context)
-        if (regionSamplingEnabled && !wallpaperManager.lockScreenWallpaperExists()) {
+        if (regionSamplingEnabled) {
             regionSampler?.let { regionSampler ->
                 clock?.let { clock ->
                     if (regionSampler.sampledView == clock.smallClock.view) {
@@ -211,6 +170,7 @@ constructor(
                     mainExecutor,
                     bgExecutor,
                     regionSamplingEnabled,
+                    isLockscreen = true,
                     ::updateColors
                 )
                 ?.apply { startRegionSampler() }
@@ -219,10 +179,11 @@ constructor(
     }
 
     protected open fun createRegionSampler(
-        sampledView: View?,
+        sampledView: View,
         mainExecutor: Executor?,
         bgExecutor: Executor?,
         regionSamplingEnabled: Boolean,
+        isLockscreen: Boolean,
         updateColors: () -> Unit
     ): RegionSampler? {
         return RegionSampler(
@@ -230,8 +191,8 @@ constructor(
             mainExecutor,
             bgExecutor,
             regionSamplingEnabled,
-            updateColors
-        )
+            isLockscreen,
+        ) { updateColors() }
     }
 
     var regionSampler: RegionSampler? = null
