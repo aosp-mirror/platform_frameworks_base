@@ -164,10 +164,12 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.LocalServices;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.InlineFillUi;
 import com.android.server.autofill.ui.PendingUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -214,7 +216,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final AutofillManagerServiceImpl mService;
     private final Handler mHandler;
     private final AutoFillUI mUi;
-    @NonNull private final Context mContext;
+
+    /**
+     * Context associated with the session, it has the same {@link Context#getDisplayId() displayId}
+     * of the activity being autofilled.
+     */
+    private final Context mContext;
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
@@ -1352,7 +1359,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mHasCallback = hasCallback;
         mUiLatencyHistory = uiLatencyHistory;
         mWtfHistory = wtfHistory;
-        mContext = context;
+        int displayId = LocalServices.getService(ActivityTaskManagerInternal.class)
+                .getDisplayId(activityToken);
+        mContext = Helper.getDisplayContext(context, displayId);
         mComponentName = componentName;
         mCompatMode = compatMode;
         mSessionState = STATE_ACTIVE;
@@ -3401,7 +3410,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final long saveUiDisplayStartTimestamp = SystemClock.elapsedRealtime();
                 getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
-                        mComponentName, this, userId, mPendingSaveUi, isUpdate, mCompatMode,
+                        mComponentName, this, mContext,  mPendingSaveUi, isUpdate, mCompatMode,
                         response.getShowSaveDialogIcon());
                 mSaveEventLogger.maybeSetLatencySaveUiDisplayMillis(
                     SystemClock.elapsedRealtime()- saveUiDisplayStartTimestamp);
@@ -4272,7 +4281,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         getUiForShowing().showFillUi(filledId, response, filterText,
                 mService.getServicePackageName(), mComponentName,
-                targetLabel, targetIcon, this, userId, id, mCompatMode);
+                targetLabel, targetIcon, this, mContext, id, mCompatMode);
 
         synchronized (mLock) {
             mPresentationStatsEventLogger.maybeSetCountShown(
@@ -5453,6 +5462,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         pw.print(prefix); pw.print("uid: "); pw.println(uid);
         pw.print(prefix); pw.print("taskId: "); pw.println(taskId);
         pw.print(prefix); pw.print("flags: "); pw.println(mFlags);
+        pw.print(prefix); pw.print("displayId: "); pw.println(mContext.getDisplayId());
         pw.print(prefix); pw.print("state: "); pw.println(sessionStateAsString(mSessionState));
         pw.print(prefix); pw.print("mComponentName: "); pw.println(mComponentName);
         pw.print(prefix); pw.print("mActivityToken: "); pw.println(mActivityToken);
