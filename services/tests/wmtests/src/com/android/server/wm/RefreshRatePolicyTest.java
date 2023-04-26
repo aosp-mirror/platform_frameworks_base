@@ -37,7 +37,6 @@ import android.view.Surface;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.RefreshRatePolicy.FrameRateVote;
@@ -53,7 +52,6 @@ import org.junit.runner.RunWith;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-@FlakyTest
 public class RefreshRatePolicyTest extends WindowTestsBase {
     private static final int HI_MODE_ID = 1;
     private static final float HI_REFRESH_RATE = 90;
