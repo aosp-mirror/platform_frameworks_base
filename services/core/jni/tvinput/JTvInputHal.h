@@ -44,6 +44,8 @@ using ::aidl::android::hardware::tv::input::BnTvInputCallback;
 using ::aidl::android::hardware::tv::input::CableConnectionStatus;
 using ::aidl::android::hardware::tv::input::TvInputEventType;
 using ::aidl::android::hardware::tv::input::TvInputType;
+using ::aidl::android::hardware::tv::input::TvMessageEvent;
+using ::aidl::android::hardware::tv::input::TvMessageEventType;
 
 using AidlAudioDevice = ::aidl::android::media::audio::common::AudioDevice;
 using AidlAudioDeviceAddress = ::aidl::android::media::audio::common::AudioDeviceAddress;
@@ -53,6 +55,7 @@ using AidlNativeHandle = ::aidl::android::hardware::common::NativeHandle;
 using AidlTvInputDeviceInfo = ::aidl::android::hardware::tv::input::TvInputDeviceInfo;
 using AidlTvInputEvent = ::aidl::android::hardware::tv::input::TvInputEvent;
 using AidlTvMessageEvent = ::aidl::android::hardware::tv::input::TvMessageEvent;
+using AidlTvMessageEventType = ::aidl::android::hardware::tv::input::TvMessageEventType;
 using AidlTvStreamConfig = ::aidl::android::hardware::tv::input::TvStreamConfig;
 
 extern gTvInputHalClassInfoType gTvInputHalClassInfo;
@@ -69,6 +72,7 @@ public:
     static JTvInputHal* createInstance(JNIEnv* env, jobject thiz, const sp<Looper>& looper);
 
     int addOrUpdateStream(int deviceId, int streamId, const sp<Surface>& surface);
+    int setTvMessageEnabled(int deviceId, int streamId, int type, bool enabled);
     int removeStream(int deviceId, int streamId);
     const std::vector<AidlTvStreamConfig> getStreamConfigs(int deviceId);
 
@@ -150,6 +154,8 @@ private:
         ::ndk::ScopedAStatus openStream(int32_t in_deviceId, int32_t in_streamId,
                                         AidlNativeHandle* _aidl_return);
         ::ndk::ScopedAStatus closeStream(int32_t in_deviceId, int32_t in_streamId);
+        ::ndk::ScopedAStatus setTvMessageEnabled(int32_t deviceId, int32_t streamId,
+                                                 TvMessageEventType in_type, bool enabled);
 
     private:
         ::ndk::ScopedAStatus hidlSetCallback(const std::shared_ptr<TvInputCallback>& in_callback);

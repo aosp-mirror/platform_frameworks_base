@@ -144,6 +144,17 @@ int JTvInputHal::removeStream(int deviceId, int streamId) {
     return NO_ERROR;
 }
 
+int JTvInputHal::setTvMessageEnabled(int deviceId, int streamId, int type, bool enabled) {
+    Mutex::Autolock autoLock(&mLock);
+    if (!mTvInput->setTvMessageEnabled(deviceId, streamId,
+                                       static_cast<AidlTvMessageEventType>(type), enabled)
+                 .isOk()) {
+        ALOGE("Error in setTvMessageEnabled. device id:%d stream id:%d", deviceId, streamId);
+        return BAD_VALUE;
+    }
+    return NO_ERROR;
+}
+
 const std::vector<AidlTvStreamConfig> JTvInputHal::getStreamConfigs(int deviceId) {
     std::vector<AidlTvStreamConfig> list;
     ::ndk::ScopedAStatus status = mTvInput->getStreamConfigurations(deviceId, &list);
@@ -381,6 +392,17 @@ JTvInputHal::ITvInputWrapper::ITvInputWrapper(std::shared_ptr<AidlITvInput>& aid
         return hidlCloseStream(in_deviceId, in_streamId);
     } else {
         return mAidlTvInput->closeStream(in_deviceId, in_streamId);
+    }
+}
+
+::ndk::ScopedAStatus JTvInputHal::ITvInputWrapper::setTvMessageEnabled(int32_t deviceId,
+                                                                       int32_t streamId,
+                                                                       TvMessageEventType in_type,
+                                                                       bool enabled) {
+    if (mIsHidl) {
+        return ::ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
+    } else {
+        return mAidlTvInput->setTvMessageEnabled(deviceId, streamId, in_type, enabled);
     }
 }
 
