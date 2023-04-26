@@ -16,8 +16,6 @@
 
 package com.android.systemui.complication;
 
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
-
 import android.database.ContentObserver;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -25,6 +23,7 @@ import android.provider.Settings;
 import com.android.settingslib.dream.DreamBackend;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.shared.condition.Monitor;
 import com.android.systemui.util.condition.ConditionalCoreStartable;
@@ -33,7 +32,6 @@ import com.android.systemui.util.settings.SecureSettings;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 /**
  * {@link ComplicationTypesUpdater} observes the state of available complication types set by the
@@ -53,7 +51,7 @@ public class ComplicationTypesUpdater extends ConditionalCoreStartable {
             @Main Executor executor,
             SecureSettings secureSettings,
             DreamOverlayStateController dreamOverlayStateController,
-            @Named(DREAM_PRETEXT_MONITOR) Monitor monitor) {
+            @SystemUser Monitor monitor) {
         super(monitor);
         mDreamBackend = dreamBackend;
         mExecutor = executor;
