@@ -19,6 +19,7 @@ package com.android.systemui.controls.ui
 
 import android.app.ActivityOptions
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
@@ -90,6 +91,11 @@ class PanelTaskViewControllerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testTaskViewStartsWithAlpha0() {
+        verify(taskView).alpha = 0f
+    }
+
+    @Test
     fun testLaunchTaskViewAttachedListener() {
         underTest.launchTaskView()
         verify(taskView).setListener(eq(uiExecutor), any())
@@ -117,6 +123,16 @@ class PanelTaskViewControllerTest : SysuiTestCase() {
         assertThat(intentCaptor.value.flags)
             .isEqualTo(FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_MULTIPLE_TASK)
         assertThat(optionsCaptor.value.taskAlwaysOnTop).isTrue()
+    }
+
+    @Test
+    fun testOnTaskCreated_taskViewAlpha1() {
+        underTest.launchTaskView()
+        verify(taskView).setListener(any(), capture(listenerCaptor))
+
+        listenerCaptor.value.onTaskCreated(1, ComponentName("Test", "TEST"))
+
+        verify(taskView).alpha = 1f
     }
 
     @Test

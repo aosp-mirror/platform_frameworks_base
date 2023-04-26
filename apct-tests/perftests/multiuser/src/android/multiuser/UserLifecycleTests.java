@@ -69,6 +69,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Perf tests for user life cycle events.
@@ -101,7 +103,6 @@ public class UserLifecycleTests {
     private static final long TIMEOUT_MAX_TEST_TIME_MS = 24 * 60_000;
 
     private static final int TIMEOUT_IN_SECOND = 30;
-    private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
 
     /** Name of users/profiles in the test. Users with this name may be freely removed. */
     private static final String TEST_USER_NAME = "UserLifecycleTests_test_user";
@@ -1471,17 +1472,10 @@ public class UserLifecycleTests {
     private void removeUser(int userId) throws RemoteException {
         stopUserAfterWaitingForBroadcastIdle(userId, true);
         try {
-            mUm.removeUser(userId);
-            final long startTime = System.currentTimeMillis();
-            final long timeoutInMs = TIMEOUT_IN_SECOND * 1000;
-            while (mUm.getUserInfo(userId) != null &&
-                    System.currentTimeMillis() - startTime < timeoutInMs) {
-                TimeUnit.MILLISECONDS.sleep(CHECK_USER_REMOVED_INTERVAL_MS);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            // Ignore
+            runShellCommandWithTimeout("pm remove-user -w " + userId, TIMEOUT_IN_SECOND);
+        } catch (TimeoutException e) {
+            Log.e(TAG, String.format("Could not remove user %d in %d seconds",
+                    userId, TIMEOUT_IN_SECOND), e);
         }
         if (mUm.getUserInfo(userId) != null) {
             mUsersToRemove.add(userId);
@@ -1544,7 +1538,11 @@ public class UserLifecycleTests {
     }
 
     private void waitForBroadcastIdle() {
-        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+        try {
+            runShellCommandWithTimeout("am wait-for-broadcast-idle", TIMEOUT_IN_SECOND);
+        } catch (TimeoutException e) {
+            Log.e(TAG, "Ending waitForBroadcastIdle because it is taking too long", e);
+        }
     }
 
     private void sleep(long ms) {
@@ -1559,5 +1557,42 @@ public class UserLifecycleTests {
         final int tenSeconds = 1000 * 10;
         waitForBroadcastIdle();
         sleep(tenSeconds);
+    }
+
+    /**
+     * Runs a Shell command with a timeout, returning a trimmed response.
+     */
+    private String runShellCommandWithTimeout(String command, long timeoutInSecond)
+            throws TimeoutException {
+        AtomicReference<Exception> exception = new AtomicReference<>(null);
+        AtomicReference<String> result = new AtomicReference<>(null);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        new Thread(() -> {
+            try {
+                result.set(ShellHelper.runShellCommandRaw(command));
+            } catch (Exception e) {
+                exception.set(e);
+            } finally {
+                latch.countDown();
+            }
+        }).start();
+
+        try {
+            if (!latch.await(timeoutInSecond, TimeUnit.SECONDS)) {
+                throw new TimeoutException("Command: '" + command + "' could not run in "
+                        + timeoutInSecond + " seconds");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        if (exception.get() != null) {
+            Log.e(TAG, "Command: '" + command + "' failed.", exception.get());
+            throw new RuntimeException(exception.get());
+        }
+
+        return result.get();
     }
 }

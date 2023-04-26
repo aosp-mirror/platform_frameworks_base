@@ -9599,6 +9599,7 @@ public class DevicePolicyManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             } catch (IllegalArgumentException ex) {
+                Log.e(TAG, "IllegalArgumentException checking isPackageSuspended", ex);
                 throw new NameNotFoundException(packageName);
             }
         }

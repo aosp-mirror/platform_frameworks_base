@@ -21,6 +21,7 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -172,12 +173,13 @@ final class SaveUi {
 
     private boolean mDestroyed;
 
-    SaveUi(@NonNull Context context, @NonNull PendingUi pendingUi,
+    SaveUi(@NonNull Context systemContext, @UserIdInt int userId, @NonNull PendingUi pendingUi,
            @NonNull CharSequence serviceLabel, @NonNull Drawable serviceIcon,
            @Nullable String servicePackageName, @NonNull ComponentName componentName,
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
            boolean nightMode, boolean isUpdate, boolean compatMode, boolean showServiceIcon) {
+        Context context = DisplayHelper.getDisplayContext(systemContext, userId);
         if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mPendingUi = pendingUi;

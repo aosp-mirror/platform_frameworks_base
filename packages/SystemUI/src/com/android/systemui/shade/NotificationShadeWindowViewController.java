@@ -163,6 +163,7 @@ public class NotificationShadeWindowViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
+        mLockIconViewController.init();
         mService = centralSurfaces;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;

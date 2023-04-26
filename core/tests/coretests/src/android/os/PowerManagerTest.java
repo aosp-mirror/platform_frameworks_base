@@ -49,9 +49,6 @@ public class PowerManagerTest extends AndroidTestCase {
     @Mock
     private PowerManager.OnThermalStatusChangedListener mListener2;
     private static final long CALLBACK_TIMEOUT_MILLI_SEC = 5000;
-    private native Parcel nativeObtainWorkSourceParcel(int[] uids, String[] names);
-    private native void nativeUnparcelAndVerifyWorkSource(Parcel parcel, int[] uids,
-            String[] names);
     private native Parcel nativeObtainPowerSaveStateParcel(boolean batterySaverEnabled,
             boolean globalBatterySaverEnabled, int locationMode, int soundTriggerMode,
             float brightnessFactor);
@@ -300,54 +297,6 @@ public class PowerManagerTest extends AndroidTestCase {
     }
 
     /**
-     * Helper function to obtain a WorkSource object as parcel from native, with
-     * specified uids and names and verify the WorkSource object created from the parcel.
-     */
-    private void unparcelWorkSourceFromNativeAndVerify(int[] uids, String[] names) {
-        // Obtain WorkSource as parcel from native, with uids and names.
-        Parcel wsParcel = nativeObtainWorkSourceParcel(uids, names);
-        WorkSource ws = WorkSource.CREATOR.createFromParcel(wsParcel);
-        if (uids == null)  {
-            assertEquals(ws.size(), 0);
-        } else {
-            assertEquals(uids.length, ws.size());
-            for (int i = 0; i < ws.size(); i++) {
-                assertEquals(ws.getUid(i), uids[i]);
-            }
-        }
-        if (names != null)  {
-            for (int i = 0; i < names.length; i++) {
-                assertEquals(ws.getName(i), names[i]);
-            }
-        }
-    }
-
-    /**
-     * Helper function to send a WorkSource as parcel from java to native.
-     * Native will verify the WorkSource in native is expected.
-     */
-    private void parcelWorkSourceToNativeAndVerify(int[] uids, String[] names) {
-        WorkSource ws = new WorkSource();
-        if (uids != null) {
-            if (names == null) {
-                for (int i = 0; i < uids.length; i++) {
-                    ws.add(uids[i]);
-                }
-            } else {
-                assertEquals(uids.length, names.length);
-                for (int i = 0; i < uids.length; i++) {
-                    ws.add(uids[i], names[i]);
-                }
-            }
-        }
-        Parcel wsParcel = Parcel.obtain();
-        ws.writeToParcel(wsParcel, 0 /* flags */);
-        wsParcel.setDataPosition(0);
-        //Set the WorkSource as parcel to native and verify.
-        nativeUnparcelAndVerifyWorkSource(wsParcel, uids, names);
-    }
-
-    /**
      * Helper function to obtain a PowerSaveState as parcel from native, with
      * specified parameters, and verify the PowerSaveState object created from the parcel.
      */
@@ -419,43 +368,6 @@ public class PowerManagerTest extends AndroidTestCase {
                     new String[bsIn.getDeviceSpecificSettings().values().size()]);
         // Set the BatterySaverPolicyConfig as parcel to native and verify in native space.
         nativeUnparcelAndVerifyBSPConfig(bsParcel, bsIn, keys, values);
-    }
-
-    /**
-     * Confirm that we can pass WorkSource from native to Java.
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testWorkSourceNativeToJava() {
-        final int[] uids1 = {1000};
-        final int[] uids2 = {1000, 2000};
-        final String[] names1 = {"testWorkSource1"};
-        final String[] names2 = {"testWorkSource1", "testWorkSource2"};
-        unparcelWorkSourceFromNativeAndVerify(null /* uids */, null /* names */);
-        unparcelWorkSourceFromNativeAndVerify(uids1, null /* names */);
-        unparcelWorkSourceFromNativeAndVerify(uids2, null /* names */);
-        unparcelWorkSourceFromNativeAndVerify(null /* uids */, names1);
-        unparcelWorkSourceFromNativeAndVerify(uids1, names1);
-        unparcelWorkSourceFromNativeAndVerify(uids2, names2);
-    }
-
-    /**
-     * Confirm that we can pass WorkSource from Java to native.
-     *
-     * @throws Exception
-     */
-    @Test
-    public void testWorkSourceJavaToNative() {
-        final int[] uids1 = {1000};
-        final int[] uids2 = {1000, 2000};
-        final String[] names1 = {"testGetWorkSource1"};
-        final String[] names2 = {"testGetWorkSource1", "testGetWorkSource2"};
-        parcelWorkSourceToNativeAndVerify(null /* uids */, null /* names */);
-        parcelWorkSourceToNativeAndVerify(uids1, null /* names */);
-        parcelWorkSourceToNativeAndVerify(uids2, null /* names */);
-        parcelWorkSourceToNativeAndVerify(uids1, names1);
-        parcelWorkSourceToNativeAndVerify(uids2, names2);
     }
 
     /**

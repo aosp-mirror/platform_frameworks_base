@@ -19,13 +19,13 @@ import android.annotation.UserIdInt;
 import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.os.UserHandle;
+import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -55,8 +55,7 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     private final SparseIntArray mPermissionPolicy = new SparseIntArray();
 
     @GuardedBy("mLock")
-    private List<String> mLauncherShortcutOverrides =
-            new ArrayList<>();
+    private ArrayMap<String, String> mLauncherShortcutOverrides = new ArrayMap<>();
 
 
     /** Maps to {@code ActiveAdmin.mAdminCanGrantSensorsPermissions}. */
@@ -130,18 +129,20 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     @Override
-    public List<String> getLauncherShortcutOverrides() {
+    public Map<String, String> getLauncherShortcutOverrides() {
         synchronized (mLock) {
-            return new ArrayList<>(mLauncherShortcutOverrides);
+            return new ArrayMap<>(mLauncherShortcutOverrides);
         }
     }
 
     /**
-     * Sets a list of packages for which shortcuts should be replaced by their badged version.
+     * Sets a map of packages names to package names, for which all launcher shortcuts which
+     * match a key package name should be modified to launch the corresponding value package
+     * name in the managed profile. The overridden shortcut should be badged accordingly.
      */
-    public void setLauncherShortcutOverrides(List<String> launcherShortcutOverrides) {
+    public void setLauncherShortcutOverrides(ArrayMap<String, String> launcherShortcutOverrides) {
         synchronized (mLock) {
-            mLauncherShortcutOverrides = new ArrayList<>(launcherShortcutOverrides);
+            mLauncherShortcutOverrides = new ArrayMap<>(launcherShortcutOverrides);
         }
     }
 

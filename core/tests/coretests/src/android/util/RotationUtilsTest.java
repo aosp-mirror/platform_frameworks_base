@@ -19,6 +19,7 @@ package android.util;
 import static android.util.RotationUtils.rotateBounds;
 import static android.util.RotationUtils.rotatePoint;
 import static android.util.RotationUtils.rotatePointF;
+import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
@@ -102,5 +103,20 @@ public class RotationUtilsTest {
         rotatePointF(testResult, ROTATION_270, parentW, parentH);
         assertEquals(560f, testResult.x, .1f);
         assertEquals(60f, testResult.y, .1f);
+    }
+
+    @Test
+    public void testReverseRotationDirectionAroundZAxis() {
+        assertEquals(ROTATION_90,
+                RotationUtils.reverseRotationDirectionAroundZAxis(ROTATION_270));
+        assertEquals(ROTATION_270,
+                RotationUtils.reverseRotationDirectionAroundZAxis(ROTATION_90));
+        assertEquals(ROTATION_0,
+                RotationUtils.reverseRotationDirectionAroundZAxis(ROTATION_0));
+        assertEquals(ROTATION_180,
+                RotationUtils.reverseRotationDirectionAroundZAxis(ROTATION_180));
+
+        assertEquals(-1,
+                RotationUtils.reverseRotationDirectionAroundZAxis(-1));
     }
 }

@@ -452,6 +452,9 @@ public class BackgroundActivityStartController {
         // If we are here, it means all exemptions not based on PI sender failed, so we'll block
         // unless resultIfPiSenderAllowsBal is an allow and the PI sender allows BAL
 
+        String realCallingPackage = callingUid == realCallingUid ? callingPackage :
+                mService.mContext.getPackageManager().getNameForUid(realCallingUid);
+
         String stateDumpLog = " [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
                 + "; appSwitchState: " + appSwitchState
@@ -460,6 +463,7 @@ public class BackgroundActivityStartController {
                         ActivityManager.class, "PROCESS_STATE_", callingUidProcState)
                 + "; isCallingUidPersistentSystemProcess: " + isCallingUidPersistentSystemProcess
                 + "; balAllowedByPiSender: " + balAllowedByPiSender
+                + "; realCallingPackage: " + realCallingPackage
                 + "; realCallingUid: " + realCallingUid
                 + "; realCallingUidHasAnyVisibleWindow: " + realCallingUidHasAnyVisibleWindow
                 + "; realCallingUidProcState: " + DebugUtils.valueToString(

@@ -395,8 +395,8 @@ public final class MediaProjectionManagerService extends SystemService
         synchronized (mLock) {
             final boolean consentGranted =
                     consentResult == RECORD_CONTENT_DISPLAY || consentResult == RECORD_CONTENT_TASK;
-            if (consentGranted && projection == null || !isCurrentProjection(
-                    projection.asBinder())) {
+            if (consentGranted && !isCurrentProjection(
+                    projection == null ? null : projection.asBinder())) {
                 Slog.v(TAG, "Reusing token: Ignore consent result of " + consentResult + " for a "
                         + "token that isn't current");
                 return;

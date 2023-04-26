@@ -217,12 +217,14 @@ class TextInterpolator(
                 run.fontRuns.forEach { fontRun ->
                     fontRun.baseFont =
                         fontInterpolator.lerp(fontRun.baseFont, fontRun.targetFont, progress)
-                    val tmpFontVariationsArray = mutableListOf<FontVariationAxis>()
-                    fontRun.baseFont.axes.forEach {
-                        tmpFontVariationsArray.add(FontVariationAxis(it.tag, it.styleValue))
-                    }
-                    basePaint.fontVariationSettings =
+                    val fvar = run {
+                        val tmpFontVariationsArray = mutableListOf<FontVariationAxis>()
+                        fontRun.baseFont.axes.forEach {
+                            tmpFontVariationsArray.add(FontVariationAxis(it.tag, it.styleValue))
+                        }
                         FontVariationAxis.toFontVariationSettings(tmpFontVariationsArray)
+                    }
+                    basePaint.typeface = typefaceCache.getTypefaceForVariant(fvar, basePaint)
                 }
             }
         }
