@@ -119,7 +119,7 @@ public class ProviderSessionMetric {
      */
     public void collectCandidateMetricSetupViaInitialMetric(InitialPhaseMetric initMetric) {
         try {
-            mCandidatePhasePerProviderMetric.setSessionId(initMetric.getSessionId());
+            mCandidatePhasePerProviderMetric.setSessionId(MetricUtilities.getHighlyUniqueInteger());
             mCandidatePhasePerProviderMetric.setServiceBeganTimeNanoseconds(
                     initMetric.getCredentialServiceStartedTimeNanoseconds());
             mCandidatePhasePerProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());

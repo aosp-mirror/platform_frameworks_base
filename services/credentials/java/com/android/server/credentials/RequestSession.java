@@ -132,7 +132,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
                 mUserId, this, mEnabledProviders);
         mHybridService = context.getResources().getString(
                 R.string.config_defaultCredentialManagerHybridService);
-        mRequestSessionMetric.collectInitialPhaseMetricInfo(timestampStarted, mRequestId,
+        mRequestSessionMetric.collectInitialPhaseMetricInfo(timestampStarted,
                 mCallingUid, ApiName.getMetricCodeFromRequestInfo(mRequestType));
         setCancellationListener();
     }

@@ -24,12 +24,14 @@ import android.util.Slog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
+import com.android.server.credentials.metrics.CandidateAggregateMetric;
 import com.android.server.credentials.metrics.CandidateBrowsingPhaseMetric;
 import com.android.server.credentials.metrics.CandidatePhaseMetric;
 import com.android.server.credentials.metrics.ChosenProviderFinalPhaseMetric;
 import com.android.server.credentials.metrics.EntryEnum;
 import com.android.server.credentials.metrics.InitialPhaseMetric;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +78,15 @@ public class MetricUtilities {
             Slog.i(TAG, "Couldn't find required uid");
         }
         return sessUid;
+    }
+
+    /**
+     * Used to help generate random sequences for local sessions, in the time-scale of credential
+     * manager flows.
+     * @return a high entropy int useful to use in reasonable time-frame sessions.
+     */
+    public static int getHighlyUniqueInteger() {
+        return new SecureRandom().nextInt();
     }
 
     /**
@@ -334,6 +345,65 @@ public class MetricUtilities {
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during initial metric emit: " + e);
+        }
+    }
+
+    /**
+     * A logging utility focused on track 1, where the calling app is known. This captures all
+     * aggregate information for the candidate phase.
+     *
+     * @param candidateAggregateMetric the aggregate candidate metric information collected
+     * @param sequenceNum the sequence number for this api call session emit
+     */
+    public static void logApiCalledAggregateCandidate(
+            CandidateAggregateMetric candidateAggregateMetric,
+            int sequenceNum) {
+        try {
+            if (!LOG_FLAG) {
+                FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_TOTAL_REPORTED,
+                        /*session_id*/ candidateAggregateMetric.getSessionId(),
+                        /*sequence_num*/ sequenceNum,
+                        /*query_returned*/ true,
+                        /*num_query_providers*/ DEFAULT_INT_32,
+                        /*min_query_start_timestamp_microseconds*/
+                        DEFAULT_INT_32,
+                        /*max_query_end_timestamp_microseconds*/
+                        DEFAULT_INT_32,
+                        /*query_response_unique_classtypes*/
+                        DEFAULT_REPEATED_STR,
+                        /*query_per_classtype_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*query_unique_entries*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*query_per_entry_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*query_total_candidate_failure*/
+                        DEFAULT_INT_32,
+                        /*query_framework_exception_unique_classtypes*/
+                        DEFAULT_REPEATED_STR,
+                        /*query_per_exception_classtype_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*auth_response_unique_classtypes*/
+                        DEFAULT_REPEATED_STR,
+                        /*auth_per_classtype_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*auth_unique_entries*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*auth_per_entry_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*auth_total_candidate_failure*/
+                        DEFAULT_INT_32,
+                        /*auth_framework_exception_unique_classtypes*/
+                        DEFAULT_REPEATED_STR,
+                        /*auth_per_exception_classtype_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*num_auth_clicks*/
+                        DEFAULT_INT_32,
+                        /*auth_returned*/ false
+                );
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 }

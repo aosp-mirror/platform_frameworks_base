@@ -22,11 +22,12 @@ import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPhase;
 
+import android.annotation.NonNull;
 import android.credentials.GetCredentialRequest;
 import android.credentials.ui.UserSelectionDialogResult;
-import android.os.IBinder;
 import android.util.Slog;
 
+import com.android.server.credentials.MetricUtilities;
 import com.android.server.credentials.ProviderSession;
 
 import java.util.ArrayList;
@@ -53,6 +54,10 @@ public class RequestSessionMetric {
             mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric();
     // TODO(b/271135048) - Replace this with a new atom per each browsing emit (V4)
     protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric = new ArrayList<>();
+    // Specific aggregate candidate provider metric for the provider this session handles
+    @NonNull
+    protected final CandidateAggregateMetric mCandidateAggregateMetric =
+            new CandidateAggregateMetric();
 
     public RequestSessionMetric() {
     }
@@ -76,18 +81,24 @@ public class RequestSessionMetric {
     }
 
     /**
+     * @return the aggregate candidate phase metrics associated with the request session
+     */
+    public CandidateAggregateMetric getCandidateAggregateMetric() {
+        return mCandidateAggregateMetric;
+    }
+
+    /**
      * Upon starting the service, this fills the initial phase metric properly.
      *
      * @param timestampStarted the timestamp the service begins at
-     * @param mRequestId       the IBinder used to retrieve a unique id
      * @param mCallingUid      the calling process's uid
      * @param metricCode       typically pulled from {@link ApiName}
      */
-    public void collectInitialPhaseMetricInfo(long timestampStarted, IBinder mRequestId,
+    public void collectInitialPhaseMetricInfo(long timestampStarted,
             int mCallingUid, int metricCode) {
         try {
             mInitialPhaseMetric.setCredentialServiceStartedTimeNanoseconds(timestampStarted);
-            mInitialPhaseMetric.setSessionId(mRequestId.hashCode());
+            mInitialPhaseMetric.setSessionId(MetricUtilities.getHighlyUniqueInteger());
             mInitialPhaseMetric.setCallerUid(mCallingUid);
             mInitialPhaseMetric.setApiName(metricCode);
         } catch (Exception e) {
@@ -206,7 +217,6 @@ public class RequestSessionMetric {
             CandidatePhaseMetric selectedProviderPhaseMetric) {
         try {
             CandidateBrowsingPhaseMetric browsingPhaseMetric = new CandidateBrowsingPhaseMetric();
-            browsingPhaseMetric.setSessionId(mInitialPhaseMetric.getSessionId());
             browsingPhaseMetric.setEntryEnum(
                     EntryEnum.getMetricCodeFromString(selection.getEntryKey()));
             browsingPhaseMetric.setProviderUid(selectedProviderPhaseMetric.getCandidateUid());
@@ -328,6 +338,20 @@ public class RequestSessionMetric {
             logApiCalledCandidatePhase(providers, ++mSequenceCounter, mInitialPhaseMetric);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during candidate metric emit: " + e);
+        }
+    }
+
+    /**
+     * Handles aggregate candidate phase metric emits in the RequestSession context, after the
+     * candidate phase completes.
+     *
+     * @param providers a map with known providers and their held metric objects
+     */
+    public void logCandidateAggregateMetrics(Map<String, ProviderSession> providers) {
+        try {
+            mCandidateAggregateMetric.collectAverages(providers);
+        } catch (Exception e) {
+            Slog.i(TAG, "Unexpected error during aggregate candidate logging " + e);
         }
     }
 
