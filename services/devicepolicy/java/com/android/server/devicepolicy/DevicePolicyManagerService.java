@@ -12195,7 +12195,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller;
-        if (isPermissionCheckFlagEnabled()) {
+        if (isPolicyEngineForFinanceFlagEnabled()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
@@ -12205,7 +12205,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         int userId = getProfileParentUserIfRequested(
                 caller.getUserId(), calledOnParentInstance);
         if (calledOnParentInstance) {
-            if (!isPermissionCheckFlagEnabled()) {
+            if (!isPolicyEngineForFinanceFlagEnabled()) {
                 Preconditions.checkCallAuthorization(
                         isProfileOwnerOfOrganizationOwnedDevice(caller));
             }
@@ -12213,7 +12213,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     "Permitted input methods must allow all input methods or only "
                             + "system input methods when called on the parent instance of an "
                             + "organization-owned device");
-        } else if (!isPermissionCheckFlagEnabled()) {
+        } else if (!isPolicyEngineForFinanceFlagEnabled()) {
             Preconditions.checkCallAuthorization(
                     isDefaultDeviceOwner(caller) || isProfileOwner(caller));
         }
@@ -12241,7 +12241,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (getLockObject()) {
             if (isPolicyEngineForFinanceFlagEnabled()) {
-                EnforcingAdmin admin = getEnforcingAdminForCaller(who, callerPackageName);
+                EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(
+                        who, MANAGE_DEVICE_POLICY_INPUT_METHODS,
+                        caller.getPackageName(), userId);
                 mDevicePolicyEngine.setLocalPolicy(
                         PolicyDefinition.PERMITTED_INPUT_METHODS,
                         admin,
@@ -13436,6 +13438,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setUserRestrictionGlobally(String callerPackage, String key) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
 
+        EnforcingAdmin admin = enforcePermissionForUserRestriction(
+                /* who= */ null,
+                key,
+                caller.getPackageName(),
+                UserHandle.USER_ALL
+        );
+
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
 
         if (!isPolicyEngineForFinanceFlagEnabled()) {
@@ -13451,13 +13460,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (!UserRestrictionsUtils.isValidRestriction(key)) {
             throw new IllegalArgumentException("Invalid restriction key: " + key);
         }
-
-        EnforcingAdmin admin = enforcePermissionForUserRestriction(
-                /* who= */ null,
-                key,
-                caller.getPackageName(),
-                UserHandle.USER_ALL
-        );
 
         setGlobalUserRestrictionInternal(admin, key, /* enabled= */ true);
 
@@ -22836,6 +22838,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_DISPLAY,
             MANAGE_DEVICE_POLICY_FACTORY_RESET,
             MANAGE_DEVICE_POLICY_FUN,
+            MANAGE_DEVICE_POLICY_INPUT_METHODS,
             MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES,
             MANAGE_DEVICE_POLICY_KEYGUARD,
             MANAGE_DEVICE_POLICY_LOCALE,
@@ -22911,9 +22914,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_BLUETOOTH,
                     MANAGE_DEVICE_POLICY_CALLS,
                     MANAGE_DEVICE_POLICY_CAMERA,
+                    MANAGE_DEVICE_POLICY_CERTIFICATES,
                     MANAGE_DEVICE_POLICY_DEBUGGING_FEATURES,
                     MANAGE_DEVICE_POLICY_DISPLAY,
                     MANAGE_DEVICE_POLICY_FACTORY_RESET,
+                    MANAGE_DEVICE_POLICY_INPUT_METHODS,
                     MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES,
                     MANAGE_DEVICE_POLICY_KEYGUARD,
                     MANAGE_DEVICE_POLICY_LOCALE,
@@ -22946,7 +22951,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_ACROSS_USERS,
                     MANAGE_DEVICE_POLICY_AIRPLANE_MODE,
                     MANAGE_DEVICE_POLICY_APPS_CONTROL,
-                    MANAGE_DEVICE_POLICY_CERTIFICATES,
                     MANAGE_DEVICE_POLICY_COMMON_CRITERIA_MODE,
                     MANAGE_DEVICE_POLICY_DEFAULT_SMS,
                     MANAGE_DEVICE_POLICY_LOCALE,
@@ -23071,11 +23075,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     //Map of Permission to Delegate Scope.
     private static final HashMap<String, String> DELEGATE_SCOPES = new HashMap<>();
     {
-        DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS, DELEGATION_PERMISSION_GRANT);
         DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_APP_RESTRICTIONS, DELEGATION_APP_RESTRICTIONS);
         DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_BLOCK_UNINSTALL, DELEGATION_BLOCK_UNINSTALL);
-        DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_SECURITY_LOGGING, DELEGATION_SECURITY_LOGGING);
+        DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_CERTIFICATES, DELEGATION_CERT_INSTALL);
         DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_PACKAGE_STATE, DELEGATION_PACKAGE_ACCESS);
+        DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS, DELEGATION_PERMISSION_GRANT);
+        DELEGATE_SCOPES.put(MANAGE_DEVICE_POLICY_SECURITY_LOGGING, DELEGATION_SECURITY_LOGGING);
     }
 
     private static final HashMap<String, String> CROSS_USER_PERMISSIONS =
