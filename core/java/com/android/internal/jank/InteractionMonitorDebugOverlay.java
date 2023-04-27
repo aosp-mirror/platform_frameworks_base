@@ -19,25 +19,30 @@ package com.android.internal.jank;
 import static com.android.internal.jank.FrameTracker.REASON_END_NORMAL;
 
 import android.annotation.ColorInt;
+import android.annotation.UiThread;
 import android.app.ActivityThread;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.Trace;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.WindowCallbacks;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.jank.FrameTracker.Reasons;
 import com.android.internal.jank.InteractionJankMonitor.CujType;
 
 /**
  * An overlay that uses WindowCallbacks to draw the names of all running CUJs to the window
  * associated with one of the CUJs being tracked. There's no guarantee which window it will
- * draw to. NOTE: sometimes the CUJ names will remain displayed on the screen longer than they
- * are actually running.
+ * draw to. Traces that use the debug overlay should not be used for performance analysis.
+ * <p>
+ * To enable the overlay, run the following: <code>adb shell device_config put
+ * interaction_jank_monitor debug_overlay_enabled true</code>
  * <p>
  * CUJ names will be drawn as follows:
  * <ul>
@@ -45,12 +50,16 @@ import com.android.internal.jank.InteractionJankMonitor.CujType;
  * <li> Grey text indicates the CUJ ended normally and is no longer running
  * <li> Red text with a strikethrough indicates the CUJ was canceled or ended abnormally
  * </ul>
+ * @hide
  */
 class InteractionMonitorDebugOverlay implements WindowCallbacks {
     private static final int REASON_STILL_RUNNING = -1000;
+    private final Object mLock;
     // Sparse array where the key in the CUJ and the value is the session status, or null if
     // it's currently running
+    @GuardedBy("mLock")
     private final SparseIntArray mRunningCujs = new SparseIntArray();
+    private Handler mHandler = null;
     private FrameTracker.ViewRootWrapper mViewRoot = null;
     private final Paint mDebugPaint;
     private final Paint.FontMetrics mDebugFontMetrics;
@@ -59,8 +68,10 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
     private final int mBgColor;
     private final double mYOffset;
     private final String mPackageName;
+    private static final String TRACK_NAME = "InteractionJankMonitor";
 
-    InteractionMonitorDebugOverlay(@ColorInt int bgColor, double yOffset) {
+    InteractionMonitorDebugOverlay(Object lock, @ColorInt int bgColor, double yOffset) {
+        mLock = lock;
         mBgColor = bgColor;
         mYOffset = yOffset;
         mDebugPaint = new Paint();
@@ -70,18 +81,30 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
         mPackageName = context.getPackageName();
     }
 
+    @UiThread
     void dispose() {
-        if (mViewRoot != null) {
-            mViewRoot.removeWindowCallbacks(this);
+        if (mViewRoot != null && mHandler != null) {
+            mHandler.runWithScissors(() ->  mViewRoot.removeWindowCallbacks(this),
+                    InteractionJankMonitor.EXECUTOR_TASK_TIMEOUT);
             forceRedraw();
         }
+        mHandler = null;
         mViewRoot = null;
+        Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TRACK_NAME, 0);
     }
 
-    private boolean attachViewRootIfNeeded(FrameTracker.ViewRootWrapper viewRoot) {
+    @UiThread
+    private boolean attachViewRootIfNeeded(FrameTracker tracker) {
+        FrameTracker.ViewRootWrapper viewRoot = tracker.getViewRoot();
         if (mViewRoot == null && viewRoot != null) {
+            // Add a trace marker so we can identify traces that were captured while the debug
+            // overlay was enabled. Traces that use the debug overlay should NOT be used for
+            // performance analysis.
+            Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, TRACK_NAME, "DEBUG_OVERLAY_DRAW", 0);
+            mHandler = tracker.getHandler();
             mViewRoot = viewRoot;
-            viewRoot.addWindowCallbacks(this);
+            mHandler.runWithScissors(() -> viewRoot.addWindowCallbacks(this),
+                    InteractionJankMonitor.EXECUTOR_TASK_TIMEOUT);
             forceRedraw();
             return true;
         }
@@ -115,52 +138,61 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
         }
     }
 
+    @UiThread
     private void forceRedraw() {
-        if (mViewRoot != null) {
-            mViewRoot.requestInvalidateRootRenderNode();
-            mViewRoot.getView().invalidate();
+        if (mViewRoot != null && mHandler != null) {
+            mHandler.runWithScissors(() -> {
+                mViewRoot.requestInvalidateRootRenderNode();
+                mViewRoot.getView().invalidate();
+            }, InteractionJankMonitor.EXECUTOR_TASK_TIMEOUT);
         }
     }
 
+    @UiThread
     void onTrackerRemoved(@CujType int removedCuj, @Reasons int reason,
                           SparseArray<FrameTracker> runningTrackers) {
-        mRunningCujs.put(removedCuj, reason);
-        // If REASON_STILL_RUNNING is not in mRunningCujs, then all CUJs have ended
-        if (mRunningCujs.indexOfValue(REASON_STILL_RUNNING) < 0) {
-            mRunningCujs.clear();
-            dispose();
-        } else {
-            boolean needsNewViewRoot = true;
-            if (mViewRoot != null) {
-                // Check to see if this viewroot is still associated with one of the running
-                // trackers
-                for (int i = 0; i < runningTrackers.size(); i++) {
-                    if (mViewRoot.equals(
-                            runningTrackers.valueAt(i).getViewRoot())) {
-                        needsNewViewRoot = false;
-                        break;
-                    }
-                }
-            }
-            if (needsNewViewRoot) {
+        synchronized (mLock) {
+            mRunningCujs.put(removedCuj, reason);
+            // If REASON_STILL_RUNNING is not in mRunningCujs, then all CUJs have ended
+            if (mRunningCujs.indexOfValue(REASON_STILL_RUNNING) < 0) {
+                mRunningCujs.clear();
                 dispose();
-                for (int i = 0; i < runningTrackers.size(); i++) {
-                    if (attachViewRootIfNeeded(runningTrackers.valueAt(i).getViewRoot())) {
-                        break;
+            } else {
+                boolean needsNewViewRoot = true;
+                if (mViewRoot != null) {
+                    // Check to see if this viewroot is still associated with one of the running
+                    // trackers
+                    for (int i = 0; i < runningTrackers.size(); i++) {
+                        if (mViewRoot.equals(
+                                runningTrackers.valueAt(i).getViewRoot())) {
+                            needsNewViewRoot = false;
+                            break;
+                        }
                     }
                 }
-            } else {
-                forceRedraw();
+                if (needsNewViewRoot) {
+                    dispose();
+                    for (int i = 0; i < runningTrackers.size(); i++) {
+                        if (attachViewRootIfNeeded(runningTrackers.valueAt(i))) {
+                            break;
+                        }
+                    }
+                } else {
+                    forceRedraw();
+                }
             }
         }
     }
 
-    void onTrackerAdded(@CujType int addedCuj, FrameTracker.ViewRootWrapper viewRoot) {
-        // Use REASON_STILL_RUNNING (not technically one of the '@Reasons') to indicate the CUJ
-        // is still running
-        mRunningCujs.put(addedCuj, REASON_STILL_RUNNING);
-        attachViewRootIfNeeded(viewRoot);
-        forceRedraw();
+    @UiThread
+    void onTrackerAdded(@CujType int addedCuj, FrameTracker tracker) {
+        synchronized (mLock) {
+            // Use REASON_STILL_RUNNING (not technically one of the '@Reasons') to indicate the CUJ
+            // is still running
+            mRunningCujs.put(addedCuj, REASON_STILL_RUNNING);
+            attachViewRootIfNeeded(tracker);
+            forceRedraw();
+        }
     }
 
     @Override
@@ -188,7 +220,6 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
 
     @Override
     public void onPostDraw(RecordingCanvas canvas) {
-        Trace.beginSection("InteractionJankMonitor#drawDebug");
         final int padding = dipToPx(5);
         final int h = canvas.getHeight();
         final int w = canvas.getWidth();
@@ -235,6 +266,5 @@ class InteractionMonitorDebugOverlay implements WindowCallbacks {
             canvas.translate(0, cujNameTextHeight);
             canvas.drawText(cujName, 0, 0, mDebugPaint);
         }
-        Trace.endSection();
     }
 }

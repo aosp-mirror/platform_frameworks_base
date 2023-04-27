@@ -772,11 +772,12 @@ public class InteractionJankMonitor {
         return true;
     }
 
+    @UiThread
     private void putTracker(@CujType int cuj, @NonNull FrameTracker tracker) {
         synchronized (mLock) {
             mRunningTrackers.put(cuj, tracker);
             if (mDebugOverlay != null) {
-                mDebugOverlay.onTrackerAdded(cuj, tracker.getViewRoot());
+                mDebugOverlay.onTrackerAdded(cuj, tracker);
             }
             if (DEBUG) {
                 Log.d(TAG, "Added tracker for " + getNameOfCuj(cuj)
@@ -791,6 +792,7 @@ public class InteractionJankMonitor {
         }
     }
 
+    @UiThread
     private void removeTracker(@CujType int cuj, int reason) {
         synchronized (mLock) {
             mRunningTrackers.remove(cuj);
@@ -818,7 +820,7 @@ public class InteractionJankMonitor {
                 SETTINGS_DEBUG_OVERLAY_ENABLED_KEY,
                 DEFAULT_DEBUG_OVERLAY_ENABLED);
         if (debugOverlayEnabled && mDebugOverlay == null) {
-            mDebugOverlay = new InteractionMonitorDebugOverlay(mDebugBgColor, mDebugYOffset);
+            mDebugOverlay = new InteractionMonitorDebugOverlay(mLock, mDebugBgColor, mDebugYOffset);
         } else if (!debugOverlayEnabled && mDebugOverlay != null) {
             mDebugOverlay.dispose();
             mDebugOverlay = null;
