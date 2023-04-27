@@ -110,6 +110,9 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
+import com.android.server.companion.datatransfer.contextsync.CrossDeviceCall;
+import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
+import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncControllerCallback;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 import com.android.server.companion.transport.CompanionTransportManager;
 import com.android.server.pm.UserManagerInternal;
@@ -119,6 +122,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -202,6 +206,8 @@ public class CompanionDeviceManagerService extends SystemService {
     private final RemoteCallbackList<IOnAssociationsChangedListener> mListeners =
             new RemoteCallbackList<>();
 
+    private CrossDeviceSyncController mCrossDeviceSyncController;
+
     public CompanionDeviceManagerService(Context context) {
         super(context);
 
@@ -241,6 +247,8 @@ public class CompanionDeviceManagerService extends SystemService {
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
+        // TODO(b/279663946): move context sync to a dedicated system service
+        mCrossDeviceSyncController = new CrossDeviceSyncController(getContext(), mTransportManager);
 
         // Publish "binder" service.
         final CompanionDeviceManagerImpl impl = new CompanionDeviceManagerImpl();
@@ -1370,6 +1378,39 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void removeInactiveSelfManagedAssociations() {
             CompanionDeviceManagerService.this.removeInactiveSelfManagedAssociations();
+        }
+
+        @Override
+        public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.registerCallMetadataSyncCallback(callback);
+            }
+        }
+
+        @Override
+        public void crossDeviceSync(int userId, Collection<CrossDeviceCall> calls) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.syncToAllDevicesForUserId(userId, calls);
+            }
+        }
+
+        @Override
+        public void crossDeviceSync(AssociationInfo associationInfo,
+                Collection<CrossDeviceCall> calls) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.syncToSingleDevice(associationInfo, calls);
+            }
+        }
+
+        @Override
+        public void sendCrossDeviceSyncMessage(int associationId, byte[] message) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.syncMessageToDevice(associationId, message);
+            }
         }
     }
 
