@@ -112,6 +112,43 @@ constructor(
         )
     }
 
+    /** Starts the notes role setting. */
+    fun startNotesRoleSetting(activityContext: Context, entryPoint: NoteTaskEntryPoint?) {
+        val user =
+            if (entryPoint == null) {
+                userTracker.userHandle
+            } else {
+                getUserForHandlingNotesTaking(entryPoint)
+            }
+        activityContext.startActivityAsUser(
+            Intent(Intent.ACTION_MANAGE_DEFAULT_APP).apply {
+                putExtra(Intent.EXTRA_ROLE_NAME, ROLE_NOTES)
+            },
+            user
+        )
+    }
+
+    /**
+     * Returns the [UserHandle] of an android user that should handle the notes taking [entryPoint].
+     *
+     * On company owned personally enabled (COPE) devices, if the given [entryPoint] is in the
+     * [FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES] list, the default notes app in the work
+     * profile user will always be launched.
+     *
+     * On non managed devices or devices with other management modes, the current [UserHandle] is
+     * returned.
+     */
+    fun getUserForHandlingNotesTaking(entryPoint: NoteTaskEntryPoint): UserHandle =
+        if (
+            entryPoint in FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES &&
+                devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile
+        ) {
+            userTracker.userProfiles.firstOrNull { userManager.isManagedProfile(it.id) }?.userHandle
+                ?: userTracker.userHandle
+        } else {
+            userTracker.userHandle
+        }
+
     /**
      * Shows a note task. How the task is shown will depend on when the method is invoked.
      *
@@ -122,30 +159,13 @@ constructor(
      * bubble is already opened.
      *
      * That will let users open other apps in full screen, and take contextual notes.
-     *
-     * On company owned personally enabled (COPE) devices, if the given [entryPoint] is in the
-     * [FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES] list, the default notes app in the work
-     * profile user will always be launched.
      */
     fun showNoteTask(
         entryPoint: NoteTaskEntryPoint,
     ) {
         if (!isEnabled) return
 
-        val user: UserHandle =
-            if (
-                entryPoint in FORCE_WORK_NOTE_APPS_ENTRY_POINTS_ON_COPE_DEVICES &&
-                    devicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile
-            ) {
-                userTracker.userProfiles
-                    .firstOrNull { userManager.isManagedProfile(it.id) }
-                    ?.userHandle
-                    ?: userTracker.userHandle
-            } else {
-                userTracker.userHandle
-            }
-
-        showNoteTaskAsUser(entryPoint, user)
+        showNoteTaskAsUser(entryPoint, getUserForHandlingNotesTaking(entryPoint))
     }
 
     /** A variant of [showNoteTask] which launches note task in the given [user]. */

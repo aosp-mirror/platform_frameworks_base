@@ -992,6 +992,18 @@
             android:excludeFromRecents="true"
             android:resizeableActivity="false"
             android:theme="@android:style/Theme.NoDisplay" />
+
+        <activity
+            android:name=".notetask.LaunchNotesRoleSettingsTrampolineActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:resizeableActivity="false"
+            android:theme="@android:style/Theme.NoDisplay" >
+            <intent-filter>
+                <action android:name="com.android.systemui.action.MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <!-- endregion -->
 
         <!-- started from ControlsRequestReceiver -->
