@@ -2094,14 +2094,14 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 && !mScreenOffBecauseOfProximity) {
             setReportedScreenState(REPORTED_TO_POLICY_SCREEN_OFF);
             unblockScreenOn();
-            mWindowManagerPolicy.screenTurnedOff(mDisplayId);
+            mWindowManagerPolicy.screenTurnedOff(mDisplayId, mIsInTransition);
         } else if (!isOff
                 && mReportedScreenStateToPolicy == REPORTED_TO_POLICY_SCREEN_TURNING_OFF) {
 
             // We told policy already that screen was turning off, but now we changed our minds.
             // Complete the full state transition on -> turningOff -> off.
             unblockScreenOff();
-            mWindowManagerPolicy.screenTurnedOff(mDisplayId);
+            mWindowManagerPolicy.screenTurnedOff(mDisplayId, mIsInTransition);
             setReportedScreenState(REPORTED_TO_POLICY_SCREEN_OFF);
         }
         if (!isOff
