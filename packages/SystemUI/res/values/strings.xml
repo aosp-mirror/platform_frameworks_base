@@ -3038,6 +3038,19 @@
     -->
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2">&#8226; At least one device is available</string>
 
+    <!---
+    Requirement for the notes app to be available for the user to use. This is shown as part of a
+    bulleted list of requirements. When all requirements are met, the app can be accessed through a
+    shortcut button on the lock screen. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction">Select a default notes app to use notetaking shortcut</string>
+
+    <!---
+    The action to make the lock screen shortcut for the notes app to be available for the user to
+    use. This is shown as the action button in the dialog listing the requirements. When all
+    requirements are met, the app can be accessed through a shortcut button on the lock screen.
+    [CHAR LIMIT=NONE] -->
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action">Open settings</string>
+
     <!--
     Error message shown when a shortcut must be pressed and held to activate it, usually shown when
     the user tried to tap the shortcut or held it for too short a time. [CHAR LIMIT=32].
