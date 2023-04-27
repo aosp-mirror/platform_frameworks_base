@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.plugins.log
 
-import android.util.Log
+/** Keeps track of which [LogBuffer] messages should also appear in logcat. */
+interface LogcatEchoTracker {
+    /** Whether [bufferName] should echo messages of [level] or higher to logcat. */
+    fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean
 
-/** Enum version of @Log.Level */
-enum class LogLevel(@Log.Level val nativeLevel: Int, val shortString: String) {
-    VERBOSE(Log.VERBOSE, "V"),
-    DEBUG(Log.DEBUG, "D"),
-    INFO(Log.INFO, "I"),
-    WARNING(Log.WARN, "W"),
-    ERROR(Log.ERROR, "E"),
-    WTF(Log.ASSERT, "WTF")
+    /** Whether [tagName] should echo messages of [level] or higher to logcat. */
+    fun isTagLoggable(tagName: String, level: LogLevel): Boolean
+
+    /** Whether to log messages in a background thread. */
+    val logInBackgroundThread: Boolean
 }
