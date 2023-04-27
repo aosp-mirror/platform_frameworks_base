@@ -87,13 +87,8 @@ constructor(
             bypassController.isPulseExpanding = value
             if (changed) {
                 if (value) {
-                    val topEntry = headsUpManager.topEntry
-                    topEntry?.let {
-                        roundnessManager.setTrackingHeadsUp(it.row)
-                    }
                     lockscreenShadeTransitionController.onPulseExpansionStarted()
                 } else {
-                    roundnessManager.setTrackingHeadsUp(null)
                     if (!leavingLockscreen) {
                         bypassController.maybePerformPendingUnlock()
                         pulseExpandAbortListener?.run()
