@@ -192,7 +192,6 @@ public class NotificationStackScrollLayoutController {
     private int mBarState;
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private final FeatureFlags mFeatureFlags;
-    private final boolean mUseRoundnessSourceTypes;
     private final NotificationTargetsHelper mNotificationTargetsHelper;
     private final SecureSettings mSecureSettings;
     private final NotificationDismissibilityProvider mDismissibilityProvider;
@@ -591,36 +590,12 @@ public class NotificationStackScrollLayoutController {
                 }
 
                 @Override
-                public void onHeadsUpPinned(NotificationEntry entry) {
-                    if (!mUseRoundnessSourceTypes) {
-                        mNotificationRoundnessManager.updateView(
-                                entry.getRow(),
-                                /* animate = */ false);
-                    }
-                }
-
-                @Override
-                public void onHeadsUpUnPinned(NotificationEntry entry) {
-                    if (!mUseRoundnessSourceTypes) {
-                        ExpandableNotificationRow row = entry.getRow();
-                        // update the roundedness posted, because we might be animating away the
-                        // headsup soon, so no need to set the roundedness to 0 and then back to 1.
-                        row.post(() -> mNotificationRoundnessManager.updateView(row,
-                                true /* animate */));
-                    }
-                }
-
-                @Override
                 public void onHeadsUpStateChanged(NotificationEntry entry, boolean isHeadsUp) {
                     long numEntries = mHeadsUpManager.getAllEntries().count();
                     NotificationEntry topEntry = mHeadsUpManager.getTopEntry();
                     mView.setNumHeadsUp(numEntries);
                     mView.setTopHeadsUpEntry(topEntry);
                     generateHeadsUpAnimation(entry, isHeadsUp);
-                    if (!mUseRoundnessSourceTypes) {
-                        ExpandableNotificationRow row = entry.getRow();
-                        mNotificationRoundnessManager.updateView(row, true /* animate */);
-                    }
                 }
             };
 
@@ -720,7 +695,6 @@ public class NotificationStackScrollLayoutController {
         mShadeController = shadeController;
         mNotifIconAreaController = notifIconAreaController;
         mFeatureFlags = featureFlags;
-        mUseRoundnessSourceTypes = true;
         mNotificationTargetsHelper = notificationTargetsHelper;
         mSecureSettings = secureSettings;
         mDismissibilityProvider = dismissibilityProvider;
@@ -787,11 +761,6 @@ public class NotificationStackScrollLayoutController {
         mLockscreenShadeTransitionController.setStackScroller(this);
 
         mLockscreenUserManager.addUserChangedListener(mLockscreenUserChangeListener);
-
-        if (!mUseRoundnessSourceTypes) {
-            mNotificationRoundnessManager.setOnRoundingChangedCallback(mView::invalidate);
-            mView.addOnExpandedHeightChangedListener(mNotificationRoundnessManager::setExpanded);
-        }
 
         mVisibilityLocationProviderDelegator.setDelegate(this::isInVisibleLocation);
 
@@ -958,7 +927,6 @@ public class NotificationStackScrollLayoutController {
 
     public void setTrackingHeadsUp(ExpandableNotificationRow expandableNotificationRow) {
         mView.setTrackingHeadsUp(expandableNotificationRow);
-        mNotificationRoundnessManager.setTrackingHeadsUp(expandableNotificationRow);
     }
 
     public void wakeUpFromPulse() {
@@ -1776,9 +1744,6 @@ public class NotificationStackScrollLayoutController {
         @Override
         public void bindRow(ExpandableNotificationRow row) {
             row.setHeadsUpAnimatingAwayListener(animatingAway -> {
-                if (!mUseRoundnessSourceTypes) {
-                    mNotificationRoundnessManager.updateView(row, false);
-                }
                 NotificationEntry entry = row.getEntry();
                 mHeadsUpAppearanceController.updateHeader(entry);
                 mHeadsUpAppearanceController.updateHeadsUpAndPulsingRoundness(entry);
