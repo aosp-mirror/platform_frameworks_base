@@ -18,11 +18,11 @@ package com.android.keyguard.logging
 
 import android.hardware.biometrics.BiometricSourceType
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
+import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.dagger.BiometricLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.plugins.log.LogLevel.DEBUG
-import com.android.systemui.plugins.log.LogLevel.INFO
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_DISMISS_BOUNCER
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_NONE
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_ONLY_WAKE

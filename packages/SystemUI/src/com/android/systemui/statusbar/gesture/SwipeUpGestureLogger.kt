@@ -18,8 +18,8 @@ package com.android.systemui.statusbar.gesture
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.dagger.SwipeUpLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import javax.inject.Inject
 
 /** Log messages for [SwipeUpGestureHandler]. */
