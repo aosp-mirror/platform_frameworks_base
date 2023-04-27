@@ -18,6 +18,7 @@ package com.android.server.display.brightness.strategy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -40,6 +41,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
 import com.android.server.display.AutomaticBrightnessController;
+import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 
 import org.junit.After;
@@ -262,12 +264,13 @@ public class AutomaticBrightnessStrategyTest {
         float automaticScreenBrightness = 0.3f;
         AutomaticBrightnessController automaticBrightnessController = mock(
                 AutomaticBrightnessController.class);
-        when(automaticBrightnessController.getAutomaticScreenBrightness()).thenReturn(
-                automaticScreenBrightness);
+        when(automaticBrightnessController.getAutomaticScreenBrightness(any(BrightnessEvent.class)))
+                .thenReturn(automaticScreenBrightness);
         mAutomaticBrightnessStrategy.setAutomaticBrightnessController(
                 automaticBrightnessController);
         assertEquals(automaticScreenBrightness,
-                mAutomaticBrightnessStrategy.getAutomaticScreenBrightness(), 0.0f);
+                mAutomaticBrightnessStrategy.getAutomaticScreenBrightness(
+                        new BrightnessEvent(DISPLAY_ID)), 0.0f);
     }
 
     @Test
