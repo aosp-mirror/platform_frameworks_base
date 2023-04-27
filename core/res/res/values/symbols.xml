@@ -283,7 +283,6 @@
   <java-symbol type="attr" name="autofillSaveCustomSubtitleMaxHeight"/>
   <java-symbol type="bool" name="action_bar_embed_tabs" />
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
-  <java-symbol type="bool" name="config_audio_csd_enabled_default" />
   <java-symbol type="integer" name="config_audio_notif_vol_default" />
   <java-symbol type="integer" name="config_audio_notif_vol_steps" />
   <java-symbol type="integer" name="config_audio_ring_vol_default" />
@@ -349,6 +348,7 @@
   <java-symbol type="bool" name="config_useDevInputEventForAudioJack" />
   <java-symbol type="bool" name="config_safe_media_volume_enabled" />
   <java-symbol type="bool" name="config_safe_media_disable_on_volume_up" />
+  <java-symbol type="bool" name="config_safe_sound_dosage_enabled" />
   <java-symbol type="bool" name="config_camera_sound_forced" />
   <java-symbol type="bool" name="config_dontPreferApn" />
   <java-symbol type="bool" name="config_restartRadioAfterProvisioning" />
