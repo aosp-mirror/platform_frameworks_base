@@ -24,9 +24,11 @@ import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
@@ -42,6 +44,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -77,7 +80,8 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
                 dismissCallbackRegistry,
                 context,
                 keyguardUpdateMonitor,
-                keyguardBypassController,
+                Mockito.mock(TrustRepository::class.java),
+                FakeFeatureFlags(),
             )
         underTest = KeyguardBouncerViewModel(bouncerView, bouncerInteractor)
     }

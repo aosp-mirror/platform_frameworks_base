@@ -45,4 +45,6 @@ interface KeyguardRepositoryModule {
 
     @Binds
     fun keyguardBouncerRepository(impl: KeyguardBouncerRepositoryImpl): KeyguardBouncerRepository
+
+    @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
 }

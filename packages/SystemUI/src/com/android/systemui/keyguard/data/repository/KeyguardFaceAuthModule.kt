@@ -46,8 +46,6 @@ interface KeyguardFaceAuthModule {
         impl: SystemUIKeyguardFaceAuthInteractor
     ): KeyguardFaceAuthInteractor
 
-    @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
-
     companion object {
         @Provides
         @SysUISingleton

@@ -2884,7 +2884,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
     }
 
+    /**
+     * If the current state of the device allows for triggering active unlock. This does not
+     * include active unlock availability.
+     */
+    public boolean canTriggerActiveUnlockBasedOnDeviceState() {
+        return shouldTriggerActiveUnlock(/* shouldLog */ false);
+    }
+
     private boolean shouldTriggerActiveUnlock() {
+        return shouldTriggerActiveUnlock(/* shouldLog */ true);
+    }
+
+    private boolean shouldTriggerActiveUnlock(boolean shouldLog) {
         // Triggers:
         final boolean triggerActiveUnlockForAssistant = shouldTriggerActiveUnlockForAssistant();
         final boolean awakeKeyguard = mPrimaryBouncerFullyShown || mAlternateBouncerShowing
@@ -2914,19 +2926,21 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         && !mKeyguardGoingAway
                         && !mSecureCameraLaunched;
 
-        // Aggregate relevant fields for debug logging.
-        logListenerModelData(
-                new KeyguardActiveUnlockModel(
-                        System.currentTimeMillis(),
-                        user,
-                        shouldTriggerActiveUnlock,
-                        awakeKeyguard,
-                        mAuthInterruptActive,
-                        fpLockedOut,
-                        primaryAuthRequired,
-                        mSwitchingUser,
-                        triggerActiveUnlockForAssistant,
-                        userCanDismissLockScreen));
+        if (shouldLog) {
+            // Aggregate relevant fields for debug logging.
+            logListenerModelData(
+                    new KeyguardActiveUnlockModel(
+                            System.currentTimeMillis(),
+                            user,
+                            shouldTriggerActiveUnlock,
+                            awakeKeyguard,
+                            mAuthInterruptActive,
+                            fpLockedOut,
+                            primaryAuthRequired,
+                            mSwitchingUser,
+                            triggerActiveUnlockForAssistant,
+                            userCanDismissLockScreen));
+        }
 
         return shouldTriggerActiveUnlock;
     }
