@@ -55,6 +55,7 @@ import com.airbnb.lottie.model.KeyPath
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.R
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -84,6 +85,7 @@ constructor(
     private val activityTaskManager: ActivityTaskManager,
     overviewProxyService: OverviewProxyService,
     displayManager: DisplayManager,
+    private val displayStateInteractor: DisplayStateInteractor,
     @Main private val mainExecutor: DelayableExecutor,
     @Main private val handler: Handler,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
@@ -203,14 +205,16 @@ constructor(
         request: SideFpsUiRequestSource,
         @BiometricOverlayConstants.ShowReason reason: Int = BiometricOverlayConstants.REASON_UNKNOWN
     ) {
-        requests.add(request)
-        mainExecutor.execute {
-            if (overlayView == null) {
-                traceSection("SideFpsController#show(request=${request.name}, reason=$reason") {
-                    createOverlayForDisplay(reason)
+        if (!displayStateInteractor.isInRearDisplayMode.value) {
+            requests.add(request)
+            mainExecutor.execute {
+                if (overlayView == null) {
+                    traceSection("SideFpsController#show(request=${request.name}, reason=$reason") {
+                        createOverlayForDisplay(reason)
+                    }
+                } else {
+                    Log.v(TAG, "overlay already shown")
                 }
-            } else {
-                Log.v(TAG, "overlay already shown")
             }
         }
     }

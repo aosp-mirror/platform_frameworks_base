@@ -93,6 +93,7 @@ import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
+import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.CommandQueue;
@@ -171,6 +172,8 @@ public class AuthControllerTest extends SysuiTestCase {
     private InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private BiometricPromptCredentialInteractor mBiometricPromptCredentialInteractor;
+    @Mock
+    private AuthBiometricFingerprintViewModel mAuthBiometricFingerprintViewModel;
     @Mock
     private CredentialViewModel mCredentialViewModel;
     @Mock
@@ -995,8 +998,9 @@ public class AuthControllerTest extends SysuiTestCase {
                     () -> mSideFpsController, mDisplayManager, mWakefulnessLifecycle,
                     mPanelInteractionDetector, mUserManager, mLockPatternUtils, mUdfpsLogger,
                     mLogContextInteractor, () -> mBiometricPromptCredentialInteractor,
-                    () -> mCredentialViewModel, mInteractionJankMonitor, mHandler,
-                    mBackgroundExecutor, mVibratorHelper, mUdfpsUtils);
+                    () -> mAuthBiometricFingerprintViewModel, () -> mCredentialViewModel,
+                    mInteractionJankMonitor, mHandler, mBackgroundExecutor, mVibratorHelper,
+                    mUdfpsUtils);
         }
 
         @Override
