@@ -697,8 +697,6 @@ public final class CredentialManagerService
                 initMetric.setCredentialServiceBeginQueryTimeNanoseconds(System.nanoTime());
                 MetricUtilities.logApiCalledInitialPhase(initMetric,
                         session.mRequestSessionMetric.returnIncrementSequence());
-                session.mRequestSessionMetric.getCandidateAggregateMetric().setSessionId(
-                        initMetric.getSessionId());
             } catch (Exception e) {
                 Slog.i(TAG, "Unexpected error during metric logging: ", e);
             }

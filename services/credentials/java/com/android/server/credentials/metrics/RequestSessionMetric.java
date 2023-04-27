@@ -27,7 +27,6 @@ import android.credentials.GetCredentialRequest;
 import android.credentials.ui.UserSelectionDialogResult;
 import android.util.Slog;
 
-import com.android.server.credentials.MetricUtilities;
 import com.android.server.credentials.ProviderSession;
 
 import java.util.ArrayList;
@@ -49,17 +48,24 @@ public class RequestSessionMetric {
     // As emits occur in sequential order, increment this counter and utilize
     protected int mSequenceCounter = 0;
 
-    protected final InitialPhaseMetric mInitialPhaseMetric = new InitialPhaseMetric();
+    protected final InitialPhaseMetric mInitialPhaseMetric;
     protected final ChosenProviderFinalPhaseMetric
-            mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric();
+            mChosenProviderFinalPhaseMetric;
     // TODO(b/271135048) - Replace this with a new atom per each browsing emit (V4)
     protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric = new ArrayList<>();
     // Specific aggregate candidate provider metric for the provider this session handles
     @NonNull
-    protected final CandidateAggregateMetric mCandidateAggregateMetric =
-            new CandidateAggregateMetric();
+    protected final CandidateAggregateMetric mCandidateAggregateMetric;
+    // Since track two is shared, this allows provider sessions to capture a metric-specific
+    // session token for the flow where the provider is known
+    private final int mSessionIdTrackTwo;
 
-    public RequestSessionMetric() {
+    public RequestSessionMetric(int sessionIdTrackOne, int sessionIdTrackTwo) {
+        mSessionIdTrackTwo = sessionIdTrackTwo;
+        mInitialPhaseMetric = new InitialPhaseMetric(sessionIdTrackOne);
+        mCandidateAggregateMetric = new CandidateAggregateMetric(sessionIdTrackOne);
+        mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric(
+                sessionIdTrackOne, sessionIdTrackTwo);
     }
 
     /**
@@ -93,12 +99,13 @@ public class RequestSessionMetric {
      * @param timestampStarted the timestamp the service begins at
      * @param mCallingUid      the calling process's uid
      * @param metricCode       typically pulled from {@link ApiName}
+     * @param callingAppFlowUniqueInt the unique integer used as the session id for the calling app
+     *                                known flow
      */
     public void collectInitialPhaseMetricInfo(long timestampStarted,
-            int mCallingUid, int metricCode) {
+            int mCallingUid, int metricCode, int callingAppFlowUniqueInt) {
         try {
             mInitialPhaseMetric.setCredentialServiceStartedTimeNanoseconds(timestampStarted);
-            mInitialPhaseMetric.setSessionId(MetricUtilities.getHighlyUniqueInteger());
             mInitialPhaseMetric.setCallerUid(mCallingUid);
             mInitialPhaseMetric.setApiName(metricCode);
         } catch (Exception e) {
@@ -284,7 +291,6 @@ public class RequestSessionMetric {
      */
     public void collectChosenMetricViaCandidateTransfer(CandidatePhaseMetric candidatePhaseMetric) {
         try {
-            mChosenProviderFinalPhaseMetric.setSessionId(candidatePhaseMetric.getSessionId());
             mChosenProviderFinalPhaseMetric.setChosenUid(candidatePhaseMetric.getCandidateUid());
 
             mChosenProviderFinalPhaseMetric.setQueryPhaseLatencyMicroseconds(
@@ -370,4 +376,7 @@ public class RequestSessionMetric {
         }
     }
 
+    public int getSessionIdTrackTwo() {
+        return mSessionIdTrackTwo;
+    }
 }

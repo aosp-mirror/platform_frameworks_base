@@ -33,7 +33,7 @@ public class InitialPhaseMetric {
     // The caller uid of the calling application, default to -1
     private int mCallerUid = -1;
     // The session id to unite multiple atom emits, default to -1
-    private int mSessionId = -1;
+    private final int mSessionId;
 
     // Raw timestamps in nanoseconds, *the only* one logged as such (i.e. 64 bits) since it is a
     // reference point.
@@ -50,7 +50,8 @@ public class InitialPhaseMetric {
     private Map<String, Integer> mRequestCounts = new LinkedHashMap<>();
 
 
-    public InitialPhaseMetric() {
+    public InitialPhaseMetric(int sessionIdTrackOne) {
+        mSessionId = sessionIdTrackOne;
     }
 
     /* ---------- Latencies ---------- */
@@ -104,10 +105,6 @@ public class InitialPhaseMetric {
     }
 
     /* ------ SessionId ------ */
-
-    public void setSessionId(int sessionId) {
-        mSessionId = sessionId;
-    }
 
     public int getSessionId() {
         return mSessionId;

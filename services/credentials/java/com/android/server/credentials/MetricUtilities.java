@@ -141,7 +141,7 @@ public class MetricUtilities {
                 index++;
             }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED,
-                    /* session_id */ finalPhaseMetric.getSessionId(),
+                    /* session_id */ finalPhaseMetric.getSessionIdTrackTwo(),
                     /* sequence_num */ emitSequenceId,
                     /* ui_returned_final_start */ finalPhaseMetric.isUiReturned(),
                     /* chosen_provider_uid */ finalPhaseMetric.getChosenUid(),
@@ -181,8 +181,7 @@ public class MetricUtilities {
                     finalPhaseMetric.getResponseCollective().getUniqueResponseCounts(),
                     /* framework_exception_unique_classtype */
                     finalPhaseMetric.getFrameworkException(),
-                    /* primary_indicated */
-                    false
+                    /* primary_indicated */ false
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during final provider uid emit: " + e);
@@ -226,7 +225,7 @@ public class MetricUtilities {
                 CandidatePhaseMetric metric = session.mProviderSessionMetric
                         .getCandidatePhasePerProviderMetric();
                 if (sessionId == -1) {
-                    sessionId = metric.getSessionId();
+                    sessionId = metric.getSessionIdTrackTwo();
                 }
                 if (!queryReturned) {
                     queryReturned = metric.isQueryReturned();
@@ -363,8 +362,8 @@ public class MetricUtilities {
                 FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_TOTAL_REPORTED,
                         /*session_id*/ candidateAggregateMetric.getSessionId(),
                         /*sequence_num*/ sequenceNum,
-                        /*query_returned*/ true,
-                        /*num_query_providers*/ DEFAULT_INT_32,
+                        /*query_returned*/ candidateAggregateMetric.isQueryReturned(),
+                        /*num_providers*/ candidateAggregateMetric.getNumProviders(),
                         /*min_query_start_timestamp_microseconds*/
                         DEFAULT_INT_32,
                         /*max_query_end_timestamp_microseconds*/

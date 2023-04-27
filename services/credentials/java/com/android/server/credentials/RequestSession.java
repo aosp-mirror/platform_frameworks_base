@@ -75,6 +75,8 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     protected final Handler mHandler;
     @UserIdInt
     protected final int mUserId;
+
+    protected final int mUniqueSessionInteger;
     private final int mCallingUid;
     @NonNull
     protected final CallingAppInfo mClientAppInfo;
@@ -82,7 +84,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     protected final CancellationSignal mCancellationSignal;
 
     protected final Map<String, ProviderSession> mProviders = new ConcurrentHashMap<>();
-    protected final RequestSessionMetric mRequestSessionMetric = new RequestSessionMetric();
+    protected final RequestSessionMetric mRequestSessionMetric;
     protected final String mHybridService;
 
     protected final Object mLock;
@@ -132,8 +134,12 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
                 mUserId, this, mEnabledProviders);
         mHybridService = context.getResources().getString(
                 R.string.config_defaultCredentialManagerHybridService);
+        mUniqueSessionInteger = MetricUtilities.getHighlyUniqueInteger();
+        mRequestSessionMetric = new RequestSessionMetric(mUniqueSessionInteger,
+                MetricUtilities.getHighlyUniqueInteger());
         mRequestSessionMetric.collectInitialPhaseMetricInfo(timestampStarted,
-                mCallingUid, ApiName.getMetricCodeFromRequestInfo(mRequestType));
+                mCallingUid, ApiName.getMetricCodeFromRequestInfo(mRequestType),
+                mUniqueSessionInteger);
         setCancellationListener();
     }
 

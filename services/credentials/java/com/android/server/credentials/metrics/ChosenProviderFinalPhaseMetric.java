@@ -32,8 +32,12 @@ import java.util.Map;
  */
 public class ChosenProviderFinalPhaseMetric {
     private static final String TAG = "ChosenFinalPhaseMetric";
-    // The session id associated with this API call, used to unite split emits
-    private int mSessionId = -1;
+    // The session id associated with this API call, used to unite split emits, for the flow
+    // where we know the calling app
+    private final int mSessionIdTrackOne;
+    // The session id associated with this API call, used to unite split emits, for the flow
+    // where we know the provider apps
+    private final int mSessionIdTrackTwo;
     // Reveals if the UI was returned, false by default
     private boolean mUiReturned = false;
     private int mChosenUid = -1;
@@ -74,7 +78,9 @@ public class ChosenProviderFinalPhaseMetric {
     private ResponseCollective mResponseCollective = new ResponseCollective(Map.of(), Map.of());
 
 
-    public ChosenProviderFinalPhaseMetric() {
+    public ChosenProviderFinalPhaseMetric(int sessionIdTrackOne, int sessionIdTrackTwo) {
+        mSessionIdTrackOne = sessionIdTrackOne;
+        mSessionIdTrackTwo = sessionIdTrackTwo;
     }
 
     /* ------------------- UID ------------------- */
@@ -237,12 +243,8 @@ public class ChosenProviderFinalPhaseMetric {
 
     /* ----------- Session ID -------------- */
 
-    public void setSessionId(int sessionId) {
-        mSessionId = sessionId;
-    }
-
-    public int getSessionId() {
-        return mSessionId;
+    public int getSessionIdTrackTwo() {
+        return mSessionIdTrackTwo;
     }
 
     /* ----------- UI Returned Successfully -------------- */
