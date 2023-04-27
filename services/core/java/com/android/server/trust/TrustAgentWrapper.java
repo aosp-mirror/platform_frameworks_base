@@ -667,6 +667,10 @@ public class TrustAgentWrapper {
         return mTrustable && mManagingTrust && !mTrustDisabledByDpm;
     }
 
+    public boolean isTrustableOrWaitingForDowngrade() {
+        return mWaitingForTrustableDowngrade || isTrustable();
+    }
+
     /** Set the trustagent as not trustable */
     public void setUntrustable() {
         mTrustable = false;
