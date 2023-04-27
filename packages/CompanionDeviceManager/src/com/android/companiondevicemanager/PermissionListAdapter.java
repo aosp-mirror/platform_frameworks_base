@@ -124,7 +124,7 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         }
 
         setAccessibility(view, viewType,
-                AccessibilityNodeInfo.ACTION_CLICK, R.string.permission_expand);
+                AccessibilityNodeInfo.ACTION_CLICK, R.string.permission_expand, 0);
 
         // Add expand buttons if the permissions are more than PERMISSION_SIZE in this list also
         // make the summary invisible by default.
@@ -137,18 +137,16 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
                     viewHolder.mExpandButton.setImageResource(R.drawable.btn_expand_less);
                     viewHolder.mPermissionSummary.setVisibility(View.VISIBLE);
                     viewHolder.mExpandButton.setTag(R.drawable.btn_expand_less);
-                    view.setContentDescription(mContext.getString(R.string.permission_expanded));
                     setAccessibility(view, viewType,
-                            AccessibilityNodeInfo.ACTION_CLICK, R.string.permission_collapse);
-                    viewHolder.mPermissionSummary.setFocusable(true);
+                            AccessibilityNodeInfo.ACTION_CLICK,
+                            R.string.permission_collapse, R.string.permission_expand);
                 } else {
                     viewHolder.mExpandButton.setImageResource(R.drawable.btn_expand_more);
                     viewHolder.mPermissionSummary.setVisibility(View.GONE);
                     viewHolder.mExpandButton.setTag(R.drawable.btn_expand_more);
-                    view.setContentDescription(mContext.getString(R.string.permission_collapsed));
                     setAccessibility(view, viewType,
-                            AccessibilityNodeInfo.ACTION_CLICK, R.string.permission_expanded);
-                    viewHolder.mPermissionSummary.setFocusable(false);
+                            AccessibilityNodeInfo.ACTION_CLICK,
+                            R.string.permission_expand, R.string.permission_collapse);
                 }
             });
         } else {
@@ -200,14 +198,20 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
         }
     }
 
-    private void setAccessibility(View view, int viewType, int action, int resourceId) {
-        final String actionString = mContext.getString(resourceId);
+    private void setAccessibility(View view, int viewType, int action, int statusResourceId,
+            int actionResourceId) {
         final String permission = mContext.getString(sTitleMap.get(viewType));
+
+        if (actionResourceId != 0) {
+            view.announceForAccessibility(
+                    getHtmlFromResources(mContext, actionResourceId, permission));
+        }
+
         view.setAccessibilityDelegate(new View.AccessibilityDelegate() {
             public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
                 info.addAction(new AccessibilityNodeInfo.AccessibilityAction(action,
-                        actionString + permission));
+                        getHtmlFromResources(mContext, statusResourceId, permission)));
             }
         });
     }
