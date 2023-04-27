@@ -18,9 +18,9 @@ import androidx.annotation.VisibleForTesting;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.log.LogBuffer;
-import com.android.systemui.log.LogLevel;
 import com.android.systemui.plugins.ClockController;
+import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.plugins.log.LogLevel;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
