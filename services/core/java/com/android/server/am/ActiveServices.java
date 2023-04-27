@@ -3356,10 +3356,9 @@ public final class ActiveServices {
                 return;
             }
             Slog.e(TAG_SERVICE, "Short FGS timed out: " + sr);
-            final long now = SystemClock.uptimeMillis();
             logFGSStateChangeLocked(sr,
                     FOREGROUND_SERVICE_STATE_CHANGED__STATE__TIMED_OUT,
-                    now > sr.mFgsEnterTime ? (int) (now - sr.mFgsEnterTime) : 0,
+                    nowUptime > sr.mFgsEnterTime ? (int) (nowUptime - sr.mFgsEnterTime) : 0,
                     FGS_STOP_REASON_UNKNOWN,
                     FGS_TYPE_POLICY_CHECK_UNKNOWN);
             try {
