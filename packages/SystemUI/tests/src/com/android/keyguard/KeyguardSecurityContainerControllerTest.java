@@ -682,8 +682,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testReinflateViewFlipper_asyncBouncerFlagOn() {
-        when(mFeatureFlags.isEnabled(Flags.ASYNC_INFLATE_BOUNCER)).thenReturn(true);
+    public void testReinflateViewFlipper() {
         KeyguardSecurityViewFlipperController.OnViewInflatedCallback onViewInflatedCallback =
                 controller -> {
                 };
