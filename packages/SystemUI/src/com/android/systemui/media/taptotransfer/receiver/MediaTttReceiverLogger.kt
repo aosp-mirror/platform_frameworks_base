@@ -18,8 +18,8 @@ package com.android.systemui.media.taptotransfer.receiver
 
 import android.app.StatusBarManager
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.media.taptotransfer.common.MediaTttLoggerUtils
-import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.temporarydisplay.TemporaryViewLogger
 import javax.inject.Inject
 

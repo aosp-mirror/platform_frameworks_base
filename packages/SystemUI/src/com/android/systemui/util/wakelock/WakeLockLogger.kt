@@ -17,8 +17,8 @@
 package com.android.systemui.util.wakelock
 
 import android.os.PowerManager
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import javax.inject.Inject
 
 class WakeLockLogger @Inject constructor(@WakeLockLog private val buffer: LogBuffer) {
