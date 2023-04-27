@@ -175,9 +175,9 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Нема поставено стандардни вредности"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Поставки на текст-во-говор"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Претворање текст во говор"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Брзина на говор"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Брзина на говорот"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Брзина со која се кажува текстот"</string>
-    <string name="tts_default_pitch_title" msgid="6988592215554485479">"Интензитет"</string>
+    <string name="tts_default_pitch_title" msgid="6988592215554485479">"Висина на тонот"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Влијае на тонот на синтетизираниот говор"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Јазик"</string>
     <string name="tts_lang_use_system" msgid="6312945299804012406">"Користи системски јазик"</string>
@@ -587,7 +587,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Додај"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Нов корисник"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Нов профил"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Информации за корисникот"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Податоци за корисникот"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Информации за профил"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Пред да може да создадете ограничен профил, треба да поставите заклучување на екранот за да ги заштити вашите апликации и лични податоци."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Постави заклучување"</string>
@@ -609,7 +609,7 @@
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Да се ресетира гостинската сесија?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Ова ќе започне нова гостинска сесија и ќе ги избрише сите апликации и податоци од тековната сесија"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Да се излезе од режим на гостин?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ова ќе ги избрише сите апликации и податоци од тековната гостинска сесија"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ова ќе ги избрише апликациите и податоците од тековната гостинска сесија"</string>
     <string name="grant_admin" msgid="4323199171790522574">"Да, направи да биде администратор"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"Не, не прави да биде администратори"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Излези"</string>

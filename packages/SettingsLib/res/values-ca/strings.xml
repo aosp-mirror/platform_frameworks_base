@@ -395,9 +395,9 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostra avisos del canal de notificacions"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostra un avís en pantalla quan una aplicació publica una notificació sense un canal vàlid"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Força permetre aplicacions de manera externa"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors del manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Força l\'ajust de la mida de les activitats"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors definits"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors del manifest"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activa les finestres de forma lliure"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activa la compatibilitat amb finestres de forma lliure experimentals"</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Mode d\'escriptori"</string>
@@ -619,7 +619,7 @@
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Desa"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Surt del mode de convidat"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Restableix la sessió de convidat"</string>
-    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Surt del mode de convidat"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Tanca com a convidat"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Se suprimirà tota l\'activitat en sortir"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Pots desar o suprimir l\'activitat en sortir"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restableix la sessió per suprimir l\'activitat ara, o desa o suprimeix l\'activitat en sortir."</string>

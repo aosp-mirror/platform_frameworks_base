@@ -326,7 +326,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिंग्जला अनुमती द्यायची?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डिव्हाइस आणि त्यावरील ॲप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB वर अ‍ॅप्स पडताळून पहा"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अ‍ॅप्स तपासा."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल केलेली अ‍ॅप्स तपासा."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस (फक्‍त MAC अ‍ॅड्रेस) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा व्हॉल्यूम किंवा नियंत्रणाचा अभाव यासारखी व्हॉल्यूमची समस्या असल्यास ब्लूटूथ संपूर्ण व्हॉल्यूम वैशिष्ट्य बंद करते."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लूटूथ गाबलडॉर्ष वैशिष्‍ट्य स्टॅक सुरू करा."</string>
@@ -366,7 +366,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्थान सिम्युलेट करा"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ट्रेस सुरू करा"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ऑडिओ राउटिंग बंद करा"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ऑडिओ उपकरणांवरील ऑटेमॅटिक राउटिंग बंद करा"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ऑडिओ उपकरणांवरील ऑटोमॅटिक राउटिंग बंद करा"</string>
     <string name="debug_layout" msgid="1659216803043339741">"लेआउट सीमा दाखवा"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, समास इत्यादी दर्शवा."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL लेआउट दिशानिर्देशाची सक्ती करा"</string>
@@ -376,7 +376,7 @@
     <string name="window_blurs" msgid="6831008984828425106">"विंडो पातळीवरील ब्लरना अनुमती द्या"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ची सक्ती करा"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ॲप्समध्ये 4x MSAA सुरू करा"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"आयताकृती नसलेले क्लिप ऑपरेशन डीबग करा"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"आयताकृती नसलेली क्लिप ऑपरेशन डीबग करा"</string>
     <string name="track_frame_time" msgid="522674651937771106">"प्रोफाइल HWUI रेंडरिंग"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU डीबग स्तर सुरू करा"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डीबग अ‍ॅप्ससाठी GPU डीबग स्तर लोड करण्याची अनुमती द्या"</string>

@@ -56,7 +56,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"ప్రామాణీకరణ సమస్య"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"కనెక్ట్ చేయడం సాధ్యపడదు"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'కు కనెక్ట్ చేయడం సాధ్యపడదు"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"పాస్‌వర్డ్‌ను చెక్ చేసి, మళ్లీ ప్రయత్నించండి"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"పాస్‌వర్డ్‌ను చెక్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"పరిధిలో లేదు"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ఆటోమేటిక్‌గా కనెక్ట్ కాదు"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
@@ -432,7 +432,7 @@
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ప్రస్తుతం అమలులో ఉన్న సర్వీస్‌లను చూడండి, కంట్రోల్‌ చేయండి"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"వెబ్ వీక్షణ అమలు"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"వెబ్ వీక్షణ అమలుని సెట్ చేయండి"</string>
-    <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ఈ ఎంపిక ఇప్పుడు లేదు. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ఈ ఎంపిక ఇప్పుడు లేదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"చిత్రం రంగు మోడ్"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ఉపయోగిస్తుంది"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"డిజేబుల్ చేయబడింది"</string>
@@ -441,7 +441,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ప్రొటానోమలీ (ఎరుపు-ఆకుపచ్చ రంగు)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ట్రైటనోమలీ (నీలం-పసుపు రంగు)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"కలర్ కరెక్షన్"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"మీరు కింది వాటిని చేయాలనుకున్నప్పుడు కలర్ కరెక్షన్ సహాయకరంగా ఉంటుంది:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;రంగులను మరింత ఖచ్చితంగా చూడండి&lt;/li&gt; &lt;li&gt;&amp;nbsp;మీరు ఫోకస్ చేయడంలో సహాయపడటానికి రంగులను తీసివేయండి&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"మీరు కింది వాటిని చేయాలనుకున్నప్పుడు కలర్ కరెక్షన్ సహాయకరంగా ఉంటుంది:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;రంగులను మరింత ఖచ్చితంగా చూసేందుకు సహాయపడుతుంది&lt;/li&gt; &lt;li&gt;&amp;nbsp;మీరు ఫోకస్ చేయడంలో సహాయపడటానికి రంగులను తీసివేయండి&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
@@ -539,7 +539,7 @@
     <string name="alarm_template" msgid="3346777418136233330">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"వ్యవధి"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ప్రతిసారి అడుగు"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ప్రతిసారి అడగాలి"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"మీరు ఆఫ్‌ చేసే వరకు"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ఇప్పుడే"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ఈ ఫోన్"</string>
@@ -585,9 +585,9 @@
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ఇప్పుడే సెట‌ప్ చేయి"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ఇప్పుడు కాదు"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"జోడించండి"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"కొత్త వినియోగదారు"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"కొత్త యూజర్"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"కొత్త ప్రొఫైల్"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"వినియోగదారు సమాచారం"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"యూజర్ సమాచారం"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"ప్రొఫైల్ సమాచారం"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"మీరు పరిమితం చేయబడిన ప్రొఫైల్‌ను క్రియేట్ చేయడానికి ముందు, మీ యాప్‌లు మరియు వ్యక్తిగత డేటాను రక్షించడానికి స్క్రీన్ లాక్‌ను సెటప్ చేయాల్సి ఉంటుంది."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"లాక్‌ను సెట్ చేయి"</string>

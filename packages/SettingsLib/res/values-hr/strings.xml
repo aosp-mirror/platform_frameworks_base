@@ -573,7 +573,7 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"Možete ograničiti pristup aplikacijama i sadržaju sa svojeg računa"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Korisnik"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Ograničeni profil"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"Dodati novog korisnika?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"Želite li dodati novog korisnika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Da biste ovaj uređaj dijelili s drugima, možete napraviti dodatne korisnike. Svaki korisnik ima svoj prostor koji može prilagoditi pomoću vlastitih aplikacija, pozadine i tako dalje. Korisnici mogu prilagoditi i postavke uređaja koje utječu na sve ostale korisnike, na primjer Wi‑Fi.\n\nKada dodate novog korisnika, ta osoba mora postaviti svoj prostor.\n\nBilo koji korisnik može ažurirati aplikacije za sve ostale korisnike. Postavke i usluge pristupačnosti možda se neće prenijeti na novog korisnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kada dodate novog korisnika, ta osoba mora postaviti vlastiti prostor.\n\nBilo koji korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Želite li ovom korisniku dodijeliti status administratora?"</string>
@@ -607,8 +607,8 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Ukloni"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Poništavanje gostujuće sesije…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Želite li poništiti gostujuću sesiju?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Time će se pokrenuti nova gostujuća sesija i izbrisati sve aplikacije i podaci iz trenutačne sesije."</string>
-    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Napustiti način rada za goste?"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Time će se pokrenuti nova gostujuća sesija te izbrisati sve aplikacije i podaci iz trenutačne sesije."</string>
+    <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Želite li izaći iz načina rada za goste?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Time će se izbrisati aplikacije i podaci iz trenutačne gostujuće sesije."</string>
     <string name="grant_admin" msgid="4323199171790522574">"Da, dodijeli status administratora"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"Ne, nemoj dodijeliti status administratora"</string>
