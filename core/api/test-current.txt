@@ -536,6 +536,12 @@ package android.app.admin {
     field @NonNull public static final android.app.admin.DeviceAdminAuthority DEVICE_ADMIN_AUTHORITY;
   }
 
+  public final class DevicePolicyIdentifiers {
+    field public static final String PERMITTED_INPUT_METHODS_POLICY = "permittedInputMethods";
+    field public static final String PERSONAL_APPS_SUSPENDED_POLICY = "personalAppsSuspended";
+    field public static final String SCREEN_CAPTURE_DISABLED_POLICY = "screenCaptureDisabled";
+  }
+
   public class DevicePolicyManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void acknowledgeNewUserDisclaimer();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void calculateHasIncompatibleAccounts();
@@ -3783,6 +3789,7 @@ package android.view.inputmethod {
     method @NonNull @RequiresPermission(value=android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional=true) public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodListAsUser(int);
     method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean hasPendingImeVisibilityRequests();
+    method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean isCurrentRootView(@NonNull android.view.View);
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean isInputMethodPickerShown();
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public void setStylusWindowIdleTimeoutForTest(long);
     field public static final long CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING = 214016041L; // 0xcc1a029L

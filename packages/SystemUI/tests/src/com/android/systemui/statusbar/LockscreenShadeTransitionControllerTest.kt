@@ -15,6 +15,7 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.statusbar.notification.stack.AmbientState
@@ -127,6 +128,7 @@ class LockscreenShadeTransitionControllerTest : SysuiTestCase() {
                 },
                 qsTransitionControllerFactory = { qsTransitionController },
                 activityStarter = activityStarter,
+                shadeRepository = FakeShadeRepository(),
             )
         transitionController.addCallback(transitionControllerCallback)
         whenever(nsslController.view).thenReturn(stackscroller)

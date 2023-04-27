@@ -1716,6 +1716,11 @@ public class ShortcutService extends IShortcutService.Stub {
         if (si == null) {
             return;
         }
+
+        if (isCallerSystem()) {
+            return; // no check
+        }
+
         if (!Objects.equals(callerPackage, si.getPackage())) {
             android.util.EventLog.writeEvent(0x534e4554, "109824443", -1, "");
             throw new SecurityException("Shortcut package name mismatch");

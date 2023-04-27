@@ -32,6 +32,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -74,6 +75,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     falsingManager: FalsingManager,
     dumpManager: DumpManager,
     qsTransitionControllerFactory: LockscreenShadeQsTransitionController.Factory,
+    private val shadeRepository: ShadeRepository,
 ) : Dumpable {
     private var pulseHeight: Float = 0f
     @get:VisibleForTesting
@@ -449,6 +451,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
 
         val udfpsProgress = MathUtils.saturate(dragDownAmount / udfpsTransitionDistance)
+        shadeRepository.setUdfpsTransitionToFullShadeProgress(udfpsProgress)
         udfpsKeyguardViewController?.setTransitionToFullShadeProgress(udfpsProgress)
 
         val statusBarProgress = MathUtils.saturate(dragDownAmount / statusBarTransitionDistance)

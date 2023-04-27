@@ -17,6 +17,7 @@
 package android.app.admin;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 import android.os.UserManager;
 
 import java.util.Objects;
@@ -118,6 +119,7 @@ public final class DevicePolicyIdentifiers {
      *
      * @hide
      */
+    @TestApi
     public static final String PERMITTED_INPUT_METHODS_POLICY = "permittedInputMethods";
 
     /**
@@ -125,6 +127,7 @@ public final class DevicePolicyIdentifiers {
      *
      * @hide
      */
+    @TestApi
     public static final String PERSONAL_APPS_SUSPENDED_POLICY = "personalAppsSuspended";
 
     /**
@@ -132,6 +135,7 @@ public final class DevicePolicyIdentifiers {
      *
      * @hide
      */
+    @TestApi
     public static final String SCREEN_CAPTURE_DISABLED_POLICY = "screenCaptureDisabled";
 
     /**

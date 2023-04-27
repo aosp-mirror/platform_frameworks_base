@@ -39,18 +39,24 @@ public final class RadioServiceUserController {
      */
     public static boolean isCurrentOrSystemUser() {
         int callingUser = Binder.getCallingUserHandle().getIdentifier();
+        return callingUser == getCurrentUser() || callingUser == UserHandle.USER_SYSTEM;
+    }
+
+    /**
+     * Get current foreground user for Broadcast Radio Service
+     *
+     * @return foreground user id.
+     */
+    public static int getCurrentUser() {
         final long identity = Binder.clearCallingIdentity();
+        int userId = UserHandle.USER_NULL;
         try {
-            int currentUser = ActivityManager.getCurrentUser();
-            if (callingUser != currentUser && callingUser != UserHandle.USER_SYSTEM) {
-                return false;
-            }
-            return true;
+            userId = ActivityManager.getCurrentUser();
         } catch (RuntimeException e) {
             // Activity manager not running, nothing we can do assume user 0.
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        return false;
+        return userId;
     }
 }

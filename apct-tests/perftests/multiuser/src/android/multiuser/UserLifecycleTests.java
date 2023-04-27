@@ -24,11 +24,9 @@ import static org.junit.Assume.assumeTrue;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
-import android.app.WaitResult;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -70,7 +68,6 @@ import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Perf tests for user life cycle events.
@@ -1262,15 +1259,13 @@ public class UserLifecycleTests {
      * <p> This should always be used for profiles since profiles cannot be started in foreground.
      */
     private void startUserInBackgroundAndWaitForUnlock(int userId) {
-        final ProgressWaiter waiter = new ProgressWaiter();
-        boolean success = false;
         try {
-            mIam.startUserInBackgroundWithListener(userId, waiter);
-            success = waiter.waitForFinish(TIMEOUT_IN_SECOND);
-        } catch (RemoteException e) {
-            Log.e(TAG, "startUserInBackgroundAndWaitForUnlock failed", e);
+            attestTrue("Failed to start user " + userId + " in background.",
+                    ShellHelper.runShellCommandWithTimeout("am start-user -w " + userId,
+                            TIMEOUT_IN_SECOND).startsWith("Success:"));
+        } catch (TimeoutException e) {
+            fail("Could not start user " + userId + " in " + TIMEOUT_IN_SECOND + " seconds");
         }
-        attestTrue("Failed to start user " + userId + " in background.", success);
     }
 
     /** Starts the given user in the foreground. */
@@ -1390,14 +1385,20 @@ public class UserLifecycleTests {
      * Launches the given package in the given user.
      * Make sure the keyguard has been dismissed prior to calling.
      */
-    private void startApp(int userId, String packageName) throws RemoteException {
-        final Context context = InstrumentationRegistry.getContext();
-        final WaitResult result = ActivityTaskManager.getService().startActivityAndWait(null,
-                context.getPackageName(), context.getAttributionTag(),
-                context.getPackageManager().getLaunchIntentForPackage(packageName), null, null,
-                null, 0, 0, null, null, userId);
-        attestTrue("User " + userId + " failed to start " + packageName,
-                result.result == ActivityManager.START_SUCCESS);
+    private void startApp(int userId, String packageName) {
+        final String failMessage = "User " + userId + " failed to start " + packageName;
+        final String component = InstrumentationRegistry.getContext().getPackageManager()
+                .getLaunchIntentForPackage(packageName).getComponent().flattenToShortString();
+        try {
+            final String result = ShellHelper.runShellCommandWithTimeout(
+                    "am start -W -n " + component + " --user " + userId, TIMEOUT_IN_SECOND);
+            assertTrue(failMessage + ", component=" + component + ", result=" + result,
+                    result.contains("Status: ok")
+                    && !result.contains("Warning:")
+                    && !result.contains("Error:"));
+        } catch (TimeoutException e) {
+            fail(failMessage + " in " + TIMEOUT_IN_SECOND + " seconds");
+        }
     }
 
     private class ProgressWaiter extends IProgressListener.Stub {
@@ -1472,7 +1473,8 @@ public class UserLifecycleTests {
     private void removeUser(int userId) throws RemoteException {
         stopUserAfterWaitingForBroadcastIdle(userId, true);
         try {
-            runShellCommandWithTimeout("pm remove-user -w " + userId, TIMEOUT_IN_SECOND);
+            ShellHelper.runShellCommandWithTimeout("pm remove-user -w " + userId,
+                    TIMEOUT_IN_SECOND);
         } catch (TimeoutException e) {
             Log.e(TAG, String.format("Could not remove user %d in %d seconds",
                     userId, TIMEOUT_IN_SECOND), e);
@@ -1539,7 +1541,7 @@ public class UserLifecycleTests {
 
     private void waitForBroadcastIdle() {
         try {
-            runShellCommandWithTimeout("am wait-for-broadcast-idle", TIMEOUT_IN_SECOND);
+            ShellHelper.runShellCommandWithTimeout("am wait-for-broadcast-idle", TIMEOUT_IN_SECOND);
         } catch (TimeoutException e) {
             Log.e(TAG, "Ending waitForBroadcastIdle because it is taking too long", e);
         }
@@ -1557,42 +1559,5 @@ public class UserLifecycleTests {
         final int tenSeconds = 1000 * 10;
         waitForBroadcastIdle();
         sleep(tenSeconds);
-    }
-
-    /**
-     * Runs a Shell command with a timeout, returning a trimmed response.
-     */
-    private String runShellCommandWithTimeout(String command, long timeoutInSecond)
-            throws TimeoutException {
-        AtomicReference<Exception> exception = new AtomicReference<>(null);
-        AtomicReference<String> result = new AtomicReference<>(null);
-
-        CountDownLatch latch = new CountDownLatch(1);
-
-        new Thread(() -> {
-            try {
-                result.set(ShellHelper.runShellCommandRaw(command));
-            } catch (Exception e) {
-                exception.set(e);
-            } finally {
-                latch.countDown();
-            }
-        }).start();
-
-        try {
-            if (!latch.await(timeoutInSecond, TimeUnit.SECONDS)) {
-                throw new TimeoutException("Command: '" + command + "' could not run in "
-                        + timeoutInSecond + " seconds");
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        if (exception.get() != null) {
-            Log.e(TAG, "Command: '" + command + "' failed.", exception.get());
-            throw new RuntimeException(exception.get());
-        }
-
-        return result.get();
     }
 }

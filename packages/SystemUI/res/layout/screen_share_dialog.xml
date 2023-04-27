@@ -63,7 +63,7 @@
             android:id="@+id/text_warning"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/screenrecord_description"
+            android:text="@string/screenrecord_permission_dialog_warning_entire_screen"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="?android:textColorSecondary"
             android:gravity="start"
@@ -91,7 +91,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0"
-                android:text="@string/screenrecord_start"
+                android:text="@string/screenrecord_continue"
                 style="@style/Widget.Dialog.Button" />
         </LinearLayout>
     </LinearLayout>

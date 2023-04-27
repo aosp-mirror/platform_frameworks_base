@@ -141,8 +141,16 @@ interface ClockAnimations {
     /** Runs the battery animation (if any). */
     fun charge() {}
 
-    /** Move the clock, for example, if the notification tray appears in split-shade mode. */
-    fun onPositionUpdated(fromRect: Rect, toRect: Rect, fraction: Float) {}
+    /**
+     * Runs when the clock's position changed during the move animation.
+     *
+     * @param fromLeft the [View.getLeft] position of the clock, before it started moving.
+     * @param direction the direction in which it is moving. A positive number means right, and
+     *   negative means left.
+     * @param fraction fraction of the clock movement. 0 means it is at the beginning, and 1 means
+     *   it finished moving.
+     */
+    fun onPositionUpdated(fromLeft: Int, direction: Int, fraction: Float) {}
 
     /**
      * Runs when swiping clock picker, swipingFraction: 1.0 -> clock is scaled up in the preview,

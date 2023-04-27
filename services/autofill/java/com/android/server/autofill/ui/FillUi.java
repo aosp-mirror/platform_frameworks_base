@@ -22,7 +22,6 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
@@ -61,6 +60,7 @@ import com.android.internal.R;
 import com.android.server.UiThread;
 import com.android.server.autofill.AutofillManagerService;
 import com.android.server.autofill.Helper;
+import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -134,14 +134,15 @@ final class FillUi {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LEANBACK);
     }
 
-    FillUi(@NonNull Context systemContext, @UserIdInt int userId, @NonNull FillResponse response,
+    FillUi(@NonNull Context context, @NonNull FillResponse response,
             @NonNull AutofillId focusedViewId, @Nullable String filterText,
             @NonNull OverlayControl overlayControl, @NonNull CharSequence serviceLabel,
             @NonNull Drawable serviceIcon, boolean nightMode, @NonNull Callback callback) {
-        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+        if (sVerbose) {
+            Slogf.v(TAG, "nightMode: %b displayId: %d", nightMode, context.getDisplayId());
+        }
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mCallback = callback;
-        Context context = DisplayHelper.getDisplayContext(systemContext, userId);
         mFullScreen = isFullScreen(context);
         mContext = new ContextThemeWrapper(context, mThemeId);
 

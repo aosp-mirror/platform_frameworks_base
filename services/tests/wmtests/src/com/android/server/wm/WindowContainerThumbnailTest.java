@@ -26,7 +26,6 @@ import static org.mockito.ArgumentMatchers.any;
 import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
@@ -55,7 +54,6 @@ public class WindowContainerThumbnailTest extends WindowTestsBase {
     }
 
     @Test
-    @FlakyTest(bugId = 131005232)
     public void testDestroy_nullsSurface() {
         final WindowContainerThumbnail t = buildThumbnail();
         assertNotNull(t.getSurfaceControl());

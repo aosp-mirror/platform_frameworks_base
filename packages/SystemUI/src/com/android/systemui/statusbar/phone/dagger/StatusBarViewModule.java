@@ -16,26 +16,15 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
-import android.content.ContentResolver;
-import android.os.Handler;
 import android.view.LayoutInflater;
-import android.view.ViewStub;
-
-import androidx.constraintlayout.motion.widget.MotionLayout;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
-import com.android.systemui.battery.BatteryMeterView;
-import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.privacy.OngoingPrivacyChip;
-import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.CombinedShadeHeadersConstraintManager;
-import com.android.systemui.shade.CombinedShadeHeadersConstraintManagerImpl;
 import com.android.systemui.shade.NotificationPanelView;
 import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
@@ -59,17 +48,13 @@ import com.android.systemui.statusbar.phone.StatusBarBoundsProvider;
 import com.android.systemui.statusbar.phone.StatusBarHideIconsForBouncerManager;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
-import com.android.systemui.statusbar.phone.StatusIconContainer;
 import com.android.systemui.statusbar.phone.SystemBarAttributesListener;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
-import com.android.systemui.statusbar.policy.BatteryController;
-import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.CarrierConfigTracker;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -90,7 +75,6 @@ import javax.inject.Provider;
         })
 public abstract class StatusBarViewModule {
 
-    public static final String SHADE_HEADER = "large_screen_shade_header";
     public static final String STATUS_BAR_FRAGMENT = "status_bar_fragment";
 
     /** */
@@ -135,76 +119,6 @@ public abstract class StatusBarViewModule {
     @CentralSurfacesComponent.CentralSurfacesScope
     abstract ShadeViewController bindsShadeViewController(
             NotificationPanelViewController notificationPanelViewController);
-
-    @Provides
-    @Named(SHADE_HEADER)
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static MotionLayout getLargeScreenShadeHeaderBarView(
-            NotificationShadeWindowView notificationShadeWindowView,
-            FeatureFlags featureFlags) {
-        ViewStub stub = notificationShadeWindowView.findViewById(R.id.qs_header_stub);
-        int layoutId = R.layout.combined_qs_header;
-        stub.setLayoutResource(layoutId);
-        MotionLayout v = (MotionLayout) stub.inflate();
-        return v;
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static CombinedShadeHeadersConstraintManager
-            provideCombinedShadeHeadersConstraintManager() {
-        return CombinedShadeHeadersConstraintManagerImpl.INSTANCE;
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    public static OngoingPrivacyChip getSplitShadeOngoingPrivacyChip(
-            @Named(SHADE_HEADER) MotionLayout header) {
-        return header.findViewById(R.id.privacy_chip);
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    static StatusIconContainer providesStatusIconContainer(
-            @Named(SHADE_HEADER) MotionLayout header) {
-        return header.findViewById(R.id.statusIcons);
-    }
-
-    /** */
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    @Named(SHADE_HEADER)
-    static BatteryMeterView getBatteryMeterView(@Named(SHADE_HEADER) MotionLayout view) {
-        return view.findViewById(R.id.batteryRemainingIcon);
-    }
-
-    @Provides
-    @CentralSurfacesComponent.CentralSurfacesScope
-    @Named(SHADE_HEADER)
-    static BatteryMeterViewController getBatteryMeterViewController(
-            @Named(SHADE_HEADER) BatteryMeterView batteryMeterView,
-            UserTracker userTracker,
-            ConfigurationController configurationController,
-            TunerService tunerService,
-            @Main Handler mainHandler,
-            ContentResolver contentResolver,
-            FeatureFlags featureFlags,
-            BatteryController batteryController
-    ) {
-        return new BatteryMeterViewController(
-                batteryMeterView,
-                userTracker,
-                configurationController,
-                tunerService,
-                mainHandler,
-                contentResolver,
-                featureFlags,
-                batteryController);
-
-    }
 
     /** */
     @Provides
