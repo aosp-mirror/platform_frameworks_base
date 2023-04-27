@@ -112,6 +112,7 @@ public class BugreportManagerTest {
             Paths.get("/data/misc/wmtrace/layers_trace.winscope"),
             Paths.get("/data/misc/wmtrace/transactions_trace.winscope"),
             Paths.get("/data/misc/wmtrace/transition_trace.winscope"),
+            Paths.get("/data/misc/wmtrace/shell_transition_trace.winscope"),
     };
     private static final Path[] UI_TRACES_GENERATED_DURING_BUGREPORT = {
             Paths.get("/data/misc/wmtrace/layers_trace_from_transactions.winscope"),

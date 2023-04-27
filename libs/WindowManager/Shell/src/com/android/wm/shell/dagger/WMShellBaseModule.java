@@ -544,13 +544,14 @@ public abstract class WMShellBaseModule {
             DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
-            @ShellAnimationThread ShellExecutor animExecutor) {
+            @ShellAnimationThread ShellExecutor animExecutor,
+            ShellCommandHandler shellCommandHandler) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTransitionsOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
         return new Transitions(context, shellInit, shellController, organizer, pool,
-                displayController, mainExecutor, mainHandler, animExecutor);
+                displayController, mainExecutor, mainHandler, animExecutor, shellCommandHandler);
     }
 
     @WMSingleton
