@@ -1060,13 +1060,22 @@ public class PipController implements PipTransitionController.PipTransitionCallb
     /** Save the state to restore to on re-entry. */
     public void saveReentryState(Rect pipBounds) {
         float snapFraction = mPipBoundsAlgorithm.getSnapFraction(pipBounds);
-        if (mPipBoundsState.hasUserResizedPip()) {
-            final Rect reentryBounds = mTouchHandler.getUserResizeBounds();
-            final Size reentrySize = new Size(reentryBounds.width(), reentryBounds.height());
-            mPipBoundsState.saveReentryState(reentrySize, snapFraction);
-        } else {
+
+        if (!mPipBoundsState.hasUserResizedPip()) {
             mPipBoundsState.saveReentryState(null /* bounds */, snapFraction);
+            return;
         }
+
+        Size reentrySize = new Size(pipBounds.width(), pipBounds.height());
+
+        // TODO: b/279937014 Investigate why userResizeBounds are empty with shell transitions on
+        // fallback to using the userResizeBounds if userResizeBounds are not empty
+        if (!mTouchHandler.getUserResizeBounds().isEmpty()) {
+            Rect userResizeBounds = mTouchHandler.getUserResizeBounds();
+            reentrySize = new Size(userResizeBounds.width(), userResizeBounds.height());
+        }
+
+        mPipBoundsState.saveReentryState(reentrySize, snapFraction);
     }
 
     @Override
