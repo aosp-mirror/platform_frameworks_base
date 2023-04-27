@@ -80,7 +80,7 @@ final class AidlTestUtils {
                 /* vendorIds= */ null);
     }
 
-    static android.hardware.broadcastradio.ProgramSelector makeHalFmSelector(int freq) {
+    static android.hardware.broadcastradio.ProgramSelector makeHalFmSelector(long freq) {
         ProgramIdentifier halId = makeHalIdentifier(IdentifierType.AMFM_FREQUENCY_KHZ, freq);
         return makeHalSelector(halId, /* secondaryIds= */ new ProgramIdentifier[0]);
     }
