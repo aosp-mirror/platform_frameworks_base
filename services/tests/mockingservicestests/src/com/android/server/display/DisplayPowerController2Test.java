@@ -596,17 +596,17 @@ public final class DisplayPowerController2Test {
         // We should still set screen state for the default display
         DisplayPowerRequest dpr = new DisplayPowerRequest();
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        advanceTime(1);
+        advanceTime(1); // Run updatePowerState
         verify(mHolder.displayPowerState, times(2)).setScreenState(anyInt());
 
         mHolder = createDisplayPowerController(42, UNIQUE_ID);
 
         mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
-        advanceTime(1);
+        advanceTime(1); // Run updatePowerState
         verify(mHolder.displayPowerState, never()).setScreenState(anyInt());
 
         mHolder.dpc.onBootCompleted();
-        advanceTime(1);
+        advanceTime(1); // Run updatePowerState
         verify(mHolder.displayPowerState).setScreenState(anyInt());
     }
 
@@ -822,6 +822,21 @@ public final class DisplayPowerController2Test {
         );
     }
 
+    @Test
+    public void testUpdateBrightnessThrottlingDataId() {
+        mHolder.display.getDisplayInfoLocked().thermalBrightnessThrottlingDataId =
+                "throttling-data-id";
+        clearInvocations(mHolder.display.getPrimaryDisplayDeviceLocked().getDisplayDeviceConfig());
+
+        mHolder.dpc.onDisplayChanged(mHolder.hbmMetadata, Layout.NO_LEAD_DISPLAY);
+        DisplayPowerRequest dpr = new DisplayPowerRequest();
+        mHolder.dpc.requestPowerState(dpr, /* waitForNegativeProximity= */ false);
+        advanceTime(1); // Run updatePowerState
+
+        verify(mHolder.display.getPrimaryDisplayDeviceLocked().getDisplayDeviceConfig())
+                .getThermalBrightnessThrottlingDataMapByThrottlingId();
+    }
+
     /**
      * Creates a mock and registers it to {@link LocalServices}.
      */
@@ -862,8 +877,6 @@ public final class DisplayPowerController2Test {
         when(logicalDisplayMock.getDisplayInfoLocked()).thenReturn(info);
         when(logicalDisplayMock.isEnabledLocked()).thenReturn(isEnabled);
         when(logicalDisplayMock.isInTransitionLocked()).thenReturn(false);
-        when(logicalDisplayMock.getThermalBrightnessThrottlingDataIdLocked()).thenReturn(
-                DisplayDeviceConfig.DEFAULT_ID);
         when(displayDeviceMock.getDisplayDeviceInfoLocked()).thenReturn(deviceInfo);
         when(displayDeviceMock.getUniqueId()).thenReturn(uniqueId);
         when(displayDeviceMock.getDisplayDeviceConfig()).thenReturn(displayDeviceConfigMock);

@@ -85,6 +85,7 @@ import com.android.server.display.whitebalance.DisplayWhiteBalanceSettings;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 
 /**
  * Controls the power state of the display.
@@ -488,7 +489,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         mAutomaticBrightnessStrategy = new AutomaticBrightnessStrategy(context, mDisplayId);
         mTag = "DisplayPowerController2[" + mDisplayId + "]";
         mThermalBrightnessThrottlingDataId =
-            logicalDisplay.getThermalBrightnessThrottlingDataIdLocked();
+                logicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId;
 
         mDisplayDevice = mLogicalDisplay.getPrimaryDisplayDeviceLocked();
         mUniqueDisplayId = logicalDisplay.getPrimaryDisplayDeviceLocked().getUniqueId();
@@ -760,7 +761,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 && mLogicalDisplay.getPrimaryDisplayDeviceLocked()
                 .getDisplayDeviceInfoLocked().type == Display.TYPE_INTERNAL;
         final String thermalBrightnessThrottlingDataId =
-                mLogicalDisplay.getThermalBrightnessThrottlingDataIdLocked();
+                mLogicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId;
 
         mHandler.postAtTime(() -> {
             boolean changed = false;
@@ -778,8 +779,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 // last command that was sent to change it's state. Let's assume it is unknown so
                 // that we trigger a change immediately.
                 mPowerState.resetScreenState();
-            } else if (
-                    !mThermalBrightnessThrottlingDataId.equals(thermalBrightnessThrottlingDataId)) {
+            } else if (!Objects.equals(mThermalBrightnessThrottlingDataId,
+                    thermalBrightnessThrottlingDataId)) {
                 changed = true;
                 mThermalBrightnessThrottlingDataId = thermalBrightnessThrottlingDataId;
                 mBrightnessThrottler.loadThermalBrightnessThrottlingDataFromDisplayDeviceConfig(
@@ -1820,7 +1821,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 () -> {
                     sendUpdatePowerState();
                     postBrightnessChangeRunnable();
-                }, mUniqueDisplayId, mLogicalDisplay.getThermalBrightnessThrottlingDataIdLocked(),
+                }, mUniqueDisplayId,
+                mLogicalDisplay.getDisplayInfoLocked().thermalBrightnessThrottlingDataId,
                 ddConfig.getThermalBrightnessThrottlingDataMapByThrottlingId());
     }
 
