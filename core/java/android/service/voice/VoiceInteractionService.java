@@ -913,8 +913,6 @@ public class VoiceInteractionService extends Service {
      * sandboxed process.
      * @param callback The callback to notify of detection events.
      * @return An instanece of {@link VisualQueryDetector}.
-     * @throws UnsupportedOperationException if only single detector is supported. Multiple detector
-     * is only available for apps targeting {@link Build.VERSION_CODES#TIRAMISU} and above.
      * @throws IllegalStateException when there is an existing {@link VisualQueryDetector}, or when
      * there is a non-trusted hotword detector running.
      *
@@ -935,21 +933,16 @@ public class VoiceInteractionService extends Service {
             throw new IllegalStateException("Not available until onReady() is called");
         }
         synchronized (mLock) {
-            if (!CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
-                throw new UnsupportedOperationException("VisualQueryDetector is only available if "
-                        + "multiple detectors are allowed");
-            } else {
-                if (mActiveVisualQueryDetector != null) {
+            if (mActiveVisualQueryDetector != null) {
+                throw new IllegalStateException(
+                            "There is already an active VisualQueryDetector. "
+                                    + "It must be destroyed to create a new one.");
+            }
+            for (HotwordDetector detector : mActiveDetectors) {
+                if (!detector.isUsingSandboxedDetectionService()) {
                     throw new IllegalStateException(
-                                "There is already an active VisualQueryDetector. "
-                                        + "It must be destroyed to create a new one.");
-                }
-                for (HotwordDetector detector : mActiveDetectors) {
-                    if (!detector.isUsingSandboxedDetectionService()) {
-                        throw new IllegalStateException(
-                                "It disallows to create trusted and non-trusted detectors "
-                                        + "at the same time.");
-                    }
+                            "It disallows to create trusted and non-trusted detectors "
+                                    + "at the same time.");
                 }
             }
 
