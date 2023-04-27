@@ -1339,9 +1339,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         void complete() {
             // Only changes from home+lock to just home or lock need attention
-            // If setting the wallpaper fails, this callback will be called
-            // when the wallpaper is detached, in which case wallpapers may have
-            // already changed. Make sure we're not overwriting a more recent wallpaper.
             if (mNewWallpaper.mSystemWasBoth) {
                 if (DEBUG) {
                     Slog.v(TAG, "Handling change from system+lock wallpaper");
@@ -1364,7 +1361,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                     mOriginalSystem.wallpaperComponent;
                             lockWp.connection = mOriginalSystem.connection;
                             lockWp.connection.mWallpaper = lockWp;
-                            updateEngineFlags(mOriginalSystem, FLAG_LOCK);
+                            mOriginalSystem.mWhich = FLAG_LOCK;
+                            updateEngineFlags(mOriginalSystem);
                             notifyWallpaperColorsChanged(lockWp, FLAG_LOCK);
                         } else {
                             // Failed rename, use current system wp for both
@@ -1373,7 +1371,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             }
                             WallpaperData currentSystem = mWallpaperMap.get(mNewWallpaper.userId);
                             currentSystem.mWhich = FLAG_SYSTEM | FLAG_LOCK;
-                            updateEngineFlags(currentSystem, FLAG_SYSTEM | FLAG_LOCK);
+                            updateEngineFlags(currentSystem);
                             mLockWallpaperMap.remove(mNewWallpaper.userId);
                         }
                     } else {
@@ -1382,7 +1380,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             Slog.v(TAG, "live system+lock to system success");
                         }
                         mOriginalSystem.mWhich = FLAG_LOCK;
-                        updateEngineFlags(mOriginalSystem, FLAG_LOCK);
+                        updateEngineFlags(mOriginalSystem);
                         mLockWallpaperMap.put(mNewWallpaper.userId, mOriginalSystem);
                         mLastLockWallpaper = mOriginalSystem;
                         notifyWallpaperColorsChanged(mOriginalSystem, FLAG_LOCK);
@@ -1395,7 +1393,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     WallpaperData currentSystem = mWallpaperMap.get(mNewWallpaper.userId);
                     if (currentSystem.wallpaperId == mOriginalSystem.wallpaperId) {
                         currentSystem.mWhich = FLAG_SYSTEM;
-                        updateEngineFlags(currentSystem, FLAG_SYSTEM);
+                        updateEngineFlags(currentSystem);
                     }
                 }
             }
@@ -1407,24 +1405,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 Slog.v(TAG, "new lastWp: " + mLastWallpaper);
                 Slog.v(TAG, "new lastLockWp: " + mLastLockWallpaper);
             }
-        }
-
-        private void updateEngineFlags(WallpaperData wallpaper, @SetWallpaperFlags int which) {
-            if (wallpaper.connection == null) {
-                return;
-            }
-            wallpaper.connection.forEachDisplayConnector(
-                    connector -> {
-                        try {
-                            if (connector.mEngine != null) {
-                                connector.mEngine.setWallpaperFlags(which);
-                                mWindowManagerInternal.setWallpaperShowWhenLocked(
-                                        connector.mToken, (which & FLAG_LOCK) != 0);
-                            }
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Failed to update wallpaper engine flags", e);
-                        }
-                    });
         }
     }
 
@@ -3008,6 +2988,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                 newWallpaper.userId);
                         if (lockedWallpaper != null) {
                             detachWallpaperLocked(lockedWallpaper);
+                            if (same) {
+                                updateEngineFlags(newWallpaper);
+                            }
                         }
                         mLockWallpaperMap.remove(newWallpaper.userId);
                     }
@@ -3341,6 +3324,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 mLastLockWallpaper = null;
             }
         }
+    }
+
+    // Updates the given wallpaper's Engine so that its destination flags are the same as those of
+    // the wallpaper, e.g., after a wallpaper has been changed from displaying on home+lock to home
+    // or lock only.
+    private void updateEngineFlags(WallpaperData wallpaper) {
+        if (wallpaper.connection == null) {
+            return;
+        }
+        wallpaper.connection.forEachDisplayConnector(
+                connector -> {
+                    try {
+                        if (connector.mEngine != null) {
+                            connector.mEngine.setWallpaperFlags(wallpaper.mWhich);
+                            mWindowManagerInternal.setWallpaperShowWhenLocked(
+                                    connector.mToken, (wallpaper.mWhich & FLAG_LOCK) != 0);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to update wallpaper engine flags", e);
+                    }
+                });
     }
 
     private void clearWallpaperComponentLocked(WallpaperData wallpaper) {
