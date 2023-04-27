@@ -274,7 +274,7 @@ object Flags {
         )
 
     @JvmField
-    val QS_PIPELINE_NEW_HOST = unreleasedFlag(504, "qs_pipeline_new_host", teamfood = false)
+    val QS_PIPELINE_NEW_HOST = unreleasedFlag(504, "qs_pipeline_new_host", teamfood = true)
 
     // TODO(b/278068252): Tracking Bug
     @JvmField
