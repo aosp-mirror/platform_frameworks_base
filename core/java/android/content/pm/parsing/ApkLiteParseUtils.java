@@ -109,7 +109,7 @@ public class ApkLiteParseUtils {
     }
 
     /**
-     * Parse lightweight details about a single APK files.
+     * Parse lightweight details about a single APK file.
      */
     public static ParseResult<PackageLite> parseMonolithicPackageLite(ParseInput input,
             File packageFile, int flags) {
@@ -122,6 +122,33 @@ public class ApkLiteParseUtils {
 
             final ApkLite baseApk = result.getResult();
             final String packagePath = packageFile.getAbsolutePath();
+            return input.success(
+                    new PackageLite(packagePath, baseApk.getPath(), baseApk, null /* splitNames */,
+                            null /* isFeatureSplits */, null /* usesSplitNames */,
+                            null /* configForSplit */, null /* splitApkPaths */,
+                            null /* splitRevisionCodes */, baseApk.getTargetSdkVersion(),
+                            null /* requiredSplitTypes */, null, /* splitTypes */
+                            baseApk.isAllowUpdateOwnership()));
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
+    /**
+     * Parse lightweight details about a single APK file passed as an FD.
+     */
+    public static ParseResult<PackageLite> parseMonolithicPackageLite(ParseInput input,
+            FileDescriptor packageFd, String debugPathName, int flags) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parseApkLite");
+        try {
+            final ParseResult<ApkLite> result = parseApkLite(input, packageFd, debugPathName,
+                    flags);
+            if (result.isError()) {
+                return input.error(result);
+            }
+
+            final ApkLite baseApk = result.getResult();
+            final String packagePath = debugPathName;
             return input.success(
                     new PackageLite(packagePath, baseApk.getPath(), baseApk, null /* splitNames */,
                             null /* isFeatureSplits */, null /* usesSplitNames */,
