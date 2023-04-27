@@ -19,7 +19,7 @@ package com.android.systemui.dump
 import android.content.Context
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.log.LogBuffer
+import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.util.io.Files
 import com.android.systemui.util.time.SystemClock
 import java.io.IOException
