@@ -17,6 +17,7 @@
 package com.android.settingslib.applications;
 
 import android.app.AppGlobals;
+import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -92,6 +93,10 @@ public class DefaultAppInfo extends CandidateInfo {
             return null;
         }
 
+    }
+
+    public @Nullable String getSummary() {
+        return this.summary;
     }
 
     @Override
