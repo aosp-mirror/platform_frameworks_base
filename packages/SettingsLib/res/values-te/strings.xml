@@ -56,7 +56,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"ప్రామాణీకరణ సమస్య"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"కనెక్ట్ చేయడం సాధ్యపడదు"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\'కు కనెక్ట్ చేయడం సాధ్యపడదు"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"పాస్‌వర్డ్‌ను చెక్ చేసి, మళ్లీ ప్రయత్నించండి"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"పాస్‌వర్డ్‌ను చెక్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"పరిధిలో లేదు"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"ఆటోమేటిక్‌గా కనెక్ట్ కాదు"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"ఇంటర్నెట్ యాక్సెస్ లేదు"</string>
@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"రద్దు చేయండి"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"పెయిర్ చేయడం వలన కనెక్ట్ చేయబడినప్పుడు మీ కాంటాక్ట్‌లకు అలాగే కాల్ హిస్టరీకి యాక్సెస్‌ను మంజూరు చేస్తుంది."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో జత చేయడం సాధ్యపడలేదు."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"పిన్ లేదా పాస్‌కీ చెల్లని కారణంగా <xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో పెయిర్ చేయడం సాధ్యపడలేదు."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"PIN లేదా పాస్‌కీ చెల్లని కారణంగా <xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో పెయిర్ చేయడం సాధ్యపడలేదు."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>తో కమ్యూనికేట్ చేయడం సాధ్యపడదు."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> జత చేయడాన్ని తిరస్కరించింది."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"కంప్యూటర్"</string>
@@ -310,7 +310,7 @@
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"లాగర్ నిరంతర నిల్వలోని డేటాను తీసివేయాలా?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"మేము నిరంతర లాగర్‌తో ఇక పర్యవేక్షించనప్పుడు, మీ పరికరంలోని లాగర్ డేటాను మేము తొలగించాల్సి ఉంటుంది."</string>
     <string name="select_logpersist_title" msgid="447071974007104196">"పరికరంలో లాగర్ డేటా నిరంతరం స్టోర్ చేయి"</string>
-    <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"పరికరంలో నిరంతరం నిల్వ చేయాల్సిన లాగ్ బఫర్‌లను ఎంచుకోండి"</string>
+    <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"పరికరంలో నిరంతరం స్టోరేజ్‌ చేయాల్సిన లాగ్ బఫర్‌లను ఎంచుకోండి"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"USB కాన్ఫిగరేషన్‌ని ఎంచుకోండి"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"డమ్మీ లొకేషన్లను అనుమతించండి"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"క్లిప్ సరిహద్దులు, అంచులు మొ. చూపు"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL లేఅవుట్ దిశను నిర్బంధం చేయండి"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"అన్ని లొకేల్‌ల కోసం RTLకి స్క్రీన్ లేఅవుట్ దిశను నిర్భందించు"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"పారదర్శక నావిగేషన్ బార్"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"నావిగేషన్ బార్ బ్యాక్‌గ్రౌండ్ రంగును ఆటోమేటిక్‌గా పారదర్శకంగా చేయండి"</string>
     <string name="window_blurs" msgid="6831008984828425106">"విండో-స్థాయి బ్లర్ అనుమతించండి"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA అమలు తప్పనిసరి"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 యాప్‌లలో 4x MSAAను ప్రారంభించండి"</string>
@@ -430,7 +432,7 @@
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"ప్రస్తుతం అమలులో ఉన్న సర్వీస్‌లను చూడండి, కంట్రోల్‌ చేయండి"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"వెబ్ వీక్షణ అమలు"</string>
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"వెబ్ వీక్షణ అమలుని సెట్ చేయండి"</string>
-    <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ఈ ఎంపిక ఇప్పుడు లేదు. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"ఈ ఎంపిక ఇప్పుడు లేదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"చిత్రం రంగు మోడ్"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"sRGB ఉపయోగిస్తుంది"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"డిజేబుల్ చేయబడింది"</string>
@@ -439,7 +441,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"ప్రొటానోమలీ (ఎరుపు-ఆకుపచ్చ రంగు)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"ట్రైటనోమలీ (నీలం-పసుపు రంగు)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"కలర్ కరెక్షన్"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"మీరు కింది వాటిని చేయాలనుకున్నప్పుడు కలర్ కరెక్షన్ సహాయకరంగా ఉంటుంది:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;రంగులను మరింత ఖచ్చితంగా చూడండి&lt;/li&gt; &lt;li&gt;&amp;nbsp;మీరు ఫోకస్ చేయడంలో సహాయపడటానికి రంగులను తీసివేయండి&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"మీరు కింది వాటిని చేయాలనుకున్నప్పుడు కలర్ కరెక్షన్ సహాయకరంగా ఉంటుంది:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;రంగులను మరింత ఖచ్చితంగా చూసేందుకు సహాయపడుతుంది&lt;/li&gt; &lt;li&gt;&amp;nbsp;మీరు ఫోకస్ చేయడంలో సహాయపడటానికి రంగులను తీసివేయండి&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> ద్వారా భర్తీ చేయబడింది"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> సమయం మిగిలి ఉంది"</string>
@@ -517,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ఎక్కువ సమయం."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"తక్కువ సమయం."</string>
     <string name="cancel" msgid="5665114069455378395">"రద్దు చేయండి"</string>
+    <string name="next" msgid="2699398661093607009">"తర్వాత"</string>
+    <string name="back" msgid="5554327870352703710">"వెనుకకు"</string>
+    <string name="save" msgid="3745809743277153149">"సేవ్ చేయండి"</string>
     <string name="okay" msgid="949938843324579502">"సరే"</string>
     <string name="done" msgid="381184316122520313">"పూర్తయింది"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"అలారాలు, రిమైండర్‌లు"</string>
@@ -534,7 +539,7 @@
     <string name="alarm_template" msgid="3346777418136233330">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="alarm_template_far" msgid="6382760514842998629">"<xliff:g id="WHEN">%1$s</xliff:g>కి"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"వ్యవధి"</string>
-    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ప్రతిసారి అడుగు"</string>
+    <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"ప్రతిసారి అడగాలి"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"మీరు ఆఫ్‌ చేసే వరకు"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"ఇప్పుడే"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"ఈ ఫోన్"</string>
@@ -571,17 +576,18 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"కొత్త యూజర్‌ను జోడించాలా?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"అదనపు యూజర్‌లను క్రియేట్ చేయడం ద్వారా మీరు ఈ పరికరాన్ని ఇతరులతో షేర్ చేయవచ్చు. ప్రతి యూజర్‌కు‌ వారికంటూ ప్రత్యేక స్థలం ఉంటుంది, వారు ఆ స్థలాన్ని యాప్‌లు, వాల్‌పేపర్ మొదలైనవాటితో అనుకూలంగా మార్చవచ్చు. యూజర్‌లు ప్రతి ఒక్కరిపై ప్రభావం చూపే Wi‑Fi వంటి పరికర సెట్టింగ్‌లను కూడా సర్దుబాటు చేయవచ్చు.\n\nమీరు కొత్త యూజర్‌ను జోడించినప్పుడు, ఆ వ్యక్తి వారికంటూ స్వంత స్థలం సెట్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగిలిన యూజర్‌లందరి కోసం యాప్‌లను అప్‌డేట్ చేయవచ్చు. యాక్సెసిబిలిటీ సెట్టింగ్‌లు, సర్వీస్‌లు కొత్త యూజర్‌కి బదిలీ కాకపోవచ్చు."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"మీరు కొత్త యూజర్‌ను జోడించినప్పుడు, ఆ వ్యక్తి తన స్పేస్‌ను సెటప్ చేసుకోవాలి.\n\nఏ యూజర్ అయినా మిగతా యూజర్ల కోసం యాప్‌లను అప్‌డేట్‌ చేయగలరు."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"వీరికి అడ్మిన్ హక్కు ఇవ్వాలా?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"ఒక అడ్మిన్‌గా, వారు ఇతర యూజర్‌లను మేనేజ్ చేయగలరు, పరికర సెట్టింగ్‌లను ఎడిట్ చేయగలరు, పరికరాన్ని ఫ్యాక్టరీ రీసెట్ చేయగలరు."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ఈ యూజర్‌ను అడ్మిన్ చేయాలా?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"యూజర్‌లకు లేని ప్రత్యేక హక్కులు అడ్మిన్‌లకు ఉంటాయి. అడ్మిన్, యూజర్‌లందరినీ మేనేజ్ చేయగలరు, ఈ పరికరాన్ని అప్‌డేట్ లేదా రీసెట్ చేయగలరు, సెట్టింగ్‌లను మార్చగలరు, ఇన్‌స్టాల్ అయ్యి ఉండే యాప్‌లన్నింటినీ చూడగలరు, ఇతరులకు అడ్మిన్ హక్కులను ఇవ్వగలరు, లేదా ఉపసంహరించగలరు."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"అడ్మిన్‌గా చేయాలి"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"యూజర్‌ను ఇప్పుడే సెటప్ చేయాలా?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి నిల్వ స్థలాన్ని సెటప్ చేయండి"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"పరికరాన్ని తీసుకోవడానికి వ్యక్తి అందుబాటులో ఉన్నారని నిర్ధారించుకొని, ఆపై వారికి స్టోరేజ్‌ స్థలాన్ని సెటప్ చేయండి"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ఇప్పుడు ప్రొఫైల్‌ను సెటప్ చేయాలా?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ఇప్పుడే సెట‌ప్ చేయి"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ఇప్పుడు కాదు"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"జోడించండి"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"కొత్త వినియోగదారు"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"కొత్త యూజర్"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"కొత్త ప్రొఫైల్"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"వినియోగదారు సమాచారం"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"యూజర్ సమాచారం"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"ప్రొఫైల్ సమాచారం"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"మీరు పరిమితం చేయబడిన ప్రొఫైల్‌ను క్రియేట్ చేయడానికి ముందు, మీ యాప్‌లు మరియు వ్యక్తిగత డేటాను రక్షించడానికి స్క్రీన్ లాక్‌ను సెటప్ చేయాల్సి ఉంటుంది."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"లాక్‌ను సెట్ చేయి"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ఇది కొత్త గెస్ట్ సెషన్‌ను ప్రారంభిస్తుంది, ప్రస్తుత సెషన్ నుండి అన్ని యాప్‌లు, డేటాను తొలగిస్తుంది."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"గెస్ట్ మోడ్ నుండి వైదొలగాలా?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ఇది ప్రస్తుత గెస్ట్ సెషన్ నుండి యాప్‌లను వాటితో పాటు డేటాను తొలగిస్తుంది"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"ఈ యూజర్‌కు అడ్మిన్ హక్కులను ఇవ్వండి"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"యూజర్‌కు అడ్మిన్ హక్కులను ఇవ్వకండి"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"అవును, వారిని అడ్మిన్ చేయాలి"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"వద్దు, వారిని అడ్మిన్ చేయవద్దు"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"వైదొలగండి"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"గెస్ట్ యాక్టివిటీని సేవ్ చేయాలా?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"మీరు సెషన్ నుండి యాక్టివిటీని సేవ్ చేయవచ్చు, అన్ని యాప్‌లు, డేటాను తొలగించవచ్చు"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"కుడి వైపుగా జరపండి"</item>
     <item msgid="324200556467459329">"పైకి జరపండి"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

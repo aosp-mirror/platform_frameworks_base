@@ -326,7 +326,7 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"विकास सेटिंग्जला अनुमती द्यायची?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"या सेटिंग्जचा हेतू फक्त विकास वापरासाठी आहे. त्यामुळे तुमचे डिव्हाइस आणि त्यावरील ॲप्लिकेशन ब्रेक होऊ शकतात किंवा नेहमीपेक्षा वेगळे वर्तन करू शकतात."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB वर अ‍ॅप्स पडताळून पहा"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल अ‍ॅप्स तपासा."</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"हानिकारक वर्तनासाठी ADB/ADT द्वारे इंस्टॉल केलेली अ‍ॅप्स तपासा."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"नावांशिवाय ब्‍लूटूथ डिव्‍हाइस (फक्‍त MAC अ‍ॅड्रेस) दाखवले जातील"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"रिमोट डिव्हाइसमध्ये सहन न होणारा मोठा व्हॉल्यूम किंवा नियंत्रणाचा अभाव यासारखी व्हॉल्यूमची समस्या असल्यास ब्लूटूथ संपूर्ण व्हॉल्यूम वैशिष्ट्य बंद करते."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"ब्लूटूथ गाबलडॉर्ष वैशिष्‍ट्य स्टॅक सुरू करा."</string>
@@ -366,15 +366,17 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"रंग स्थान सिम्युलेट करा"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"OpenGL ट्रेस सुरू करा"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"USB ऑडिओ राउटिंग बंद करा"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ऑडिओ उपकरणांवरील ऑटेमॅटिक राउटिंग बंद करा"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"USB ऑडिओ उपकरणांवरील ऑटोमॅटिक राउटिंग बंद करा"</string>
     <string name="debug_layout" msgid="1659216803043339741">"लेआउट सीमा दाखवा"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"क्लिप सीमा, समास इत्यादी दर्शवा."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL लेआउट दिशानिर्देशाची सक्ती करा"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"सर्व लोकॅलसाठी RTL स्क्रीन लेआउट दिशानिर्देशाची सक्ती करा"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"पारदर्शक नेव्हिगेशन बार"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"नेव्हिगेशन बार बॅकग्राउंडचा रंग बाय डीफॉल्ट पारदर्शक करा"</string>
     <string name="window_blurs" msgid="6831008984828425106">"विंडो पातळीवरील ब्लरना अनुमती द्या"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ची सक्ती करा"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 ॲप्समध्ये 4x MSAA सुरू करा"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"आयताकृती नसलेले क्लिप ऑपरेशन डीबग करा"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"आयताकृती नसलेली क्लिप ऑपरेशन डीबग करा"</string>
     <string name="track_frame_time" msgid="522674651937771106">"प्रोफाइल HWUI रेंडरिंग"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU डीबग स्तर सुरू करा"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"डीबग अ‍ॅप्ससाठी GPU डीबग स्तर लोड करण्याची अनुमती द्या"</string>
@@ -517,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"जास्त वेळ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"कमी वेळ."</string>
     <string name="cancel" msgid="5665114069455378395">"रद्द करा"</string>
+    <string name="next" msgid="2699398661093607009">"पुढील"</string>
+    <string name="back" msgid="5554327870352703710">"मागे जा"</string>
+    <string name="save" msgid="3745809743277153149">"सेव्ह करा"</string>
     <string name="okay" msgid="949938843324579502">"ठीक आहे"</string>
     <string name="done" msgid="381184316122520313">"पूर्ण झाले"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"अलार्म आणि रिमाइंडर"</string>
@@ -571,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"नवीन वापरकर्ता जोडायचा?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"अतिरिक्त वापरकर्ते तयार करून तुम्ही इतर लोकांसोबत हे डिव्हाइस शेअर करू शकता. प्रत्येक वापरकर्त्यास त्यांची स्वतःची स्पेस असते, जी ते अ‍ॅप्स, वॉलपेपर आणि यासारख्या गोष्टींनी कस्टमाइझ करू शकतात. वापरकर्ते प्रत्येकाला प्रभावित करणाऱ्या वाय-फाय सारख्या डिव्हाइस सेटिंग्ज अ‍ॅडजस्ट देखील करू शकतात.\n\nतुम्ही एक नवीन वापरकर्ता जोडता, तेव्हा त्या व्यक्तीला त्याची स्पेस सेट अप करण्याची आवश्यकता असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप अपडेट करू शकतो. अ‍ॅक्सेसिबिलिटी सेटिंग्ज आणि सेवा नवीन वापरकर्त्याला कदाचित ट्रान्सफर होणार नाहीत."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"तुम्ही एक नवीन वापरकर्ता जोडता तेव्हा, त्या व्यक्तीस त्यांचे स्थान सेट करण्याची आवश्यकता असते.\n\nकोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"वापरकर्त्याला ॲडमिन विशेषाधिकार द्यायचे?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"ॲडमिन असल्याने ते इतर वापरकर्त्यांना व्यवस्थापित करू शकतात, डिव्हाइस सेटिंग्ज सुधारित करू शकतात आणि डिव्हाइसला फॅक्टरी रीसेट करू शकतात."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"या वापरकर्त्याला ॲडमिन करायचे का?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ॲडमिनकडे खास विशेषाधिकार आहेत जे इतर वापरकर्त्यांकडे नसतात. ॲडमिन सर्व वापरकर्ते व्यवस्थापित करू शकतो, हे डिव्हाइस अपडेट करू शकतो किंवा रीसेट करू शकतो, सेटिंग्जमध्ये सुधारणा करू शकतो, सर्व इंस्टॉल केलेली अ‍ॅप्स पाहू शकतो आणि इतरांसाठी ॲडमिनचे विशेषाधिकार मंजूर करू शकतो किंवा रद्द करू शकतो."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ॲडमिन करा"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"आता वापरकर्ता सेट करायचा?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"तो वापरकर्ता डिव्हाइसजवळ आहे आणि त्याचे स्थान सेट करण्यासाठी उपलब्ध आहे याची खात्री करा"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"आता प्रोफाईल सेट करायचा?"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"हे नवीन अतिथी सत्र सुरू करेल आणि सध्याच्या सत्रातील सर्व अ‍ॅप्स व डेटा हटवेल"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"अतिथी मोडमधून बाहेर पडायचे का?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"हे सध्याच्या अतिथी सत्रातील अ‍ॅप्स आणि डेटा हटवेल"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"या वापरकर्त्याला ॲडमिनचे विशेषाधिकार द्या"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"या वापरकर्त्याला ॲडमिनचे विशेषाधिकार देऊ नका"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"होय, त्यांना ॲडमिन करा"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"नाही, त्यांना ॲडमिन करू नका"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"बाहेर पडा"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"अतिथी अ‍ॅक्टिव्हिटी सेव्ह करायची का?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"सध्याच्या सत्रातील अ‍ॅक्टिव्हिटी सेव्ह करू किंवा सर्व अ‍ॅप्स व डेटा हटवू शकता"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"उजवीकडे हलवा"</item>
     <item msgid="324200556467459329">"वरती हलवा"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

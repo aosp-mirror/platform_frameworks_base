@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Wys snitgrense, kantlyne, ens."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Dwing RTL-uitlegrigting"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Dwing skermuitlegrigting na RTL vir alle locales"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Deursigtige navigasiebalk"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Maak navigasiebalk se agtergrondkleur by verstek deursigtig"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Laat venstervlakwasighede toe"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Dwing 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Aktiveer 4x MSAA in OpenGL ES 2.0-programme"</string>
@@ -517,12 +519,15 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Meer tyd."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Minder tyd."</string>
     <string name="cancel" msgid="5665114069455378395">"Kanselleer"</string>
+    <string name="next" msgid="2699398661093607009">"Volgende"</string>
+    <string name="back" msgid="5554327870352703710">"Terug"</string>
+    <string name="save" msgid="3745809743277153149">"Stoor"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Klaar"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Wekkers en onthounotas"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Laat toe dat wekkers en onthounotas gestel word"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Wekkers en onthounotas"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Laat hierdie program toe om wekkers te stel en tydsensitiewe handelinge te skeduleer. Dit laat die program op die agtergrond werk, wat meer batterykrag kan gebruik.\n\nAs hierdie toestemming af is, sal bestaande wekkers en tydgegronde geleenthede wat deur hierdie program geskeduleer is, nie werk nie."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Laat hierdie app toe om wekkers te stel en tydsensitiewe handelinge te skeduleer. Dit laat die app op die agtergrond werk, wat meer batterykrag kan gebruik.\n\nAs hierdie toestemming af is, sal bestaande wekkers en tydgegronde geleenthede wat deur hierdie app geskeduleer is, nie werk nie."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"skedule, wekker, onthounota, horlosie"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Skakel aan"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Skakel Moenie steur nie aan"</string>
@@ -571,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Voeg nuwe gebruiker by?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Jy kan hierdie toestel met ander mense deel deur bykomende gebruikers te skep. Elke gebruiker het sy eie spasie wat hulle kan pasmaak met programme, muurpapier en so meer. Gebruikers kan ook toestelinstellings wat almal raak, soos Wi-Fi, aanpas.\n\nWanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul eie spasie opstel.\n\nEnige gebruiker kan programme vir alle ander gebruikers opdateer. Toeganklikheidinstellings en -dienste sal dalk nie na die nuwe gebruiker oorgedra word nie."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Wanneer jy \'n nuwe gebruiker byvoeg, moet daardie persoon hul spasie opstel.\n\nEnige gebruiker kan programme vir al die ander gebruikers opdateer."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Gee gebruiker adminvoorregte?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"As ’n admin sal hulle ander gebruikers kan bestuur, toestelinstellings kan wysig, en ’n fabriekterugstelling van die toestel kan doen."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Maak hierdie gebruiker ’n admin?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Admins het spesiale voorregte wat ander gebruikers nie het nie. ’n Admin kan alle gebruikers bestuur, hierdie toestel opdateer of terugstel, instellings wysig, alle geïnstalleerde apps sien, en adminvoorregte vir ander mense gee of herroep."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Maak admin"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Moet die gebruiker nou opgestel word?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Maak seker die persoon is beskikbaar om die toestel te vat en hul spasie op te stel"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Stel profiel nou op?"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dit sal ’n nuwe gastesessie begin en alle programme en data van die huidige sessie uitvee"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Verlaat gasmodus?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dit sal programme en data in die huidige gastesessie uitvee"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Gee hierdie gebruiker adminvoorregte"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Moenie vir gebruiker adminvoorregte gee nie"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Ja, maak hulle ’n admin"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nee, moet hulle nie ’n admin maak nie"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Gaan uit"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Stoor gasaktiwiteit?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Jy kan aktiwiteit in die huidige sessie stoor of alle programme en data uitvee"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"Skuif regs"</item>
     <item msgid="324200556467459329">"Skuif op"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

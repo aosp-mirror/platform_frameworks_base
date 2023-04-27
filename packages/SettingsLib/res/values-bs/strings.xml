@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Prikaz granica isječka, margina itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Prisilno postavi raspored s desna ulijevo"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Prisilno postavljanje rasporeda ekrana s desna ulijevo za sve regije"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Providna navigacijska traka"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Postavite boju pozadine navigacijske trake na providno prema zadanim postavkama"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Dozvoli zamućenja prozora"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Prinudno primijeni 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Omogućava 4x MSAA u OpenGL ES 2.0 aplikacijama"</string>
@@ -517,12 +519,15 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Više vremena."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Manje vremena."</string>
     <string name="cancel" msgid="5665114069455378395">"Otkaži"</string>
+    <string name="next" msgid="2699398661093607009">"Naprijed"</string>
+    <string name="back" msgid="5554327870352703710">"Nazad"</string>
+    <string name="save" msgid="3745809743277153149">"Sačuvaj"</string>
     <string name="okay" msgid="949938843324579502">"Uredu"</string>
     <string name="done" msgid="381184316122520313">"Gotovo"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmi i podsjetnici"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Dozvoli postavljanje alarma i podsjetnika"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmi i podsjetnici"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Dozvolite ovoj aplikaciji da postavlja alarme i zakazuje vremenski osjetljive radnje. Ovim će se omogućiti aplikaciji da radi u pozadini, čime se može povećati potrošnja baterije.\n\nAko je ovo odobrenje isključeno, postojeći alarmi i događaji zasnovani na vremenu koje je ova aplikacija zakazala neće funkcionirati."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Dozvolite ovoj aplikaciji da postavlja alarme i zakazuje vremenski osjetljive radnje. Ovim će se omogućiti aplikaciji da radi u pozadini, čime se može povećati potrošnja baterije.\n\nAko je ovo odobrenje isključeno, postojeći alarmi i događaji zasnovani na vremenu, a koje je ova aplikacija zakazala, neće funkcionirati."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"raspored, alarm, podsjetnik, sat"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Uključi"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Uključi način rada Ne ometaj"</string>
@@ -571,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Dodati novog korisnika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Ovaj uređaj možete dijeliti s drugima ako napravite dodatne korisnike. Svaki korisnik ima svoj prostor koji može prilagoditi pomoću aplikacija, pozadinske slike i slično. Korisnici također mogu prilagoditi postavke uređaja koje utiču na sve ostale korisnike, kao što je WiFi.\n\nKada dodate novog korisnika, ta osoba treba postaviti svoj prostor.\n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike. Postavke i usluge pristupačnosti možda se neće prenijeti na novog korisnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kada dodate novog korisnika, ta osoba treba postaviti svoj prostor. \n\nSvaki korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Dati privilegije administratora?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Kao administrator će moći upravljati drugim korisnicima, promijeniti postavke uređaja i vratiti uređaj na fabričke postavke."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Postaviti korisnika kao administratora?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratori imaju posebna prava koja drugi korisnici nemaju. Administrator može upravljati svim korisnicima, ažurirati ili vratiti ovaj uređaj na zadano, izmijeniti postavke, vidjeti sve instalirane aplikacije i dodijeliti ili povući administratorska prava za druge."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Postavi kao administratora"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Postaviti korisnika sada?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Provjerite može li osoba uzeti uređaj i postaviti svoj prostor"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Postaviti profil sada?"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Ovim ćete pokrenuti novu sesiju gosta i izbrisati sve aplikacije i podatke iz trenutne sesije"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Napustiti način rada za gosta?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ovim ćete izbrisati aplikacije i podatke iz trenutne sesije gosta"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Dajte korisniku privilegije administratora"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Nemojte dati korisniku privilegije administratora"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Da, postavi korisnika kao administratora"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Ne, nemoj postaviti korisnika kao administratora"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Napusti"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Sačuvati aktivnost gosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Možete sačuvati aktivnost iz ove sesije ili izbrisati sve aplikacije i podatke"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"Pomjeranje udesno"</item>
     <item msgid="324200556467459329">"Pomjeranje nagore"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

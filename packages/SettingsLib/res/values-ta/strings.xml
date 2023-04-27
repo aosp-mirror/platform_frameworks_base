@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"கிளிப் எல்லைகள், ஓரங்கள், மேலும் பலவற்றைக் காட்டு"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL தளவமைப்பின் திசையை வலியுறுத்து"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"எல்லா மொழிகளுக்கும் திரையின் தளவமைப்பு திசையை RTL க்கு மாற்றும்"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"தெளிவுத்திறனுடன் இருக்கும் வழிசெலுத்தல் பட்டி"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"வழிசெலுத்தல் பட்டியின் பின்னணி வண்ணத்தை இயல்பாகவே தெளிவுத்திறன் உடையதாக அமைக்கவும்"</string>
     <string name="window_blurs" msgid="6831008984828425106">"திரை-நிலை மங்கலை அனுமதி"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA ஐ வலியுறுத்து"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 பயன்பாடுகளில் 4x MSAA ஐ இயக்கு"</string>
@@ -517,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"நேரத்தை அதிகரிக்கும்."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"நேரத்தைக் குறைக்கும்."</string>
     <string name="cancel" msgid="5665114069455378395">"ரத்துசெய்"</string>
+    <string name="next" msgid="2699398661093607009">"அடுத்து"</string>
+    <string name="back" msgid="5554327870352703710">"பின்செல்"</string>
+    <string name="save" msgid="3745809743277153149">"சேமி"</string>
     <string name="okay" msgid="949938843324579502">"சரி"</string>
     <string name="done" msgid="381184316122520313">"முடிந்தது"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"அலாரங்களும் நினைவூட்டல்களும்"</string>
@@ -571,15 +576,16 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"புதியவரைச் சேர்க்கவா?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"கூடுதல் பயனர்களை உருவாக்குவதன் மூலம், பிறருடன் இந்தச் சாதனத்தைப் பகிர்ந்துகொள்ளலாம். ஒவ்வொரு பயனருக்கும் அவர்களுக்கென ஒரு இடம் இருக்கும், அதில் அவர்கள் ஆப்ஸ், வால்பேப்பர் மற்றும் பலவற்றைப் பயன்படுத்திப் பிரத்தியேகப்படுத்தலாம். வைஃபை போன்ற மற்ற சாதன அமைப்புகளைப் பயனர்கள் மாற்றலாம், இந்த மாற்றம் அனைவருக்கும் பொருந்தும்.\n\nநீங்கள் புதிய பயனரைச் சேர்க்கும்போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஎந்தவொரு பயனரும், பிற எல்லாப் பயனர்களுக்குமான ஆப்ஸைப் புதுப்பிக்கலாம். அணுகல்தன்மை அமைப்புகளையும் சேவைகளையும், புதிய பயனருக்கு இடமாற்ற முடியாமல் போகலாம்."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"புதியவரைச் சேர்க்கும் போது, அவர் தனக்கான இடத்தை அமைக்க வேண்டும்.\n\nஇருக்கும் ஆப்ஸை எவரும் புதுப்பிக்கலாம்."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"நிர்வாக சிறப்புரிமைகளை வழங்கவா?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"நிர்வாகியாக, மற்ற பயனர்களை நிர்வகிக்கலாம் சாதன அமைப்புகளை மாற்றலாம் சாதனத்தை ஆரம்பநிலைக்கு மீட்டமைக்கலாம்."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"இந்தப் பயனரை நிர்வாகியாக்கவா?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"மற்ற பயனர்களுக்கு இல்லாத சிறப்புரிமைகள் நிர்வாகிகளுக்கு உண்டு. நிர்வாகி அனைத்துப் பயனர்களையும் நிர்வகிக்கலாம், இந்தச் சாதனத்தைப் புதுப்பிக்கலாம் அல்லது ரீசெட் செய்யலாம், அமைப்புகளை மாற்றலாம், நிறுவப்பட்ட அனைத்து ஆப்ஸையும் பார்க்கலாம், பிறருக்கு நிர்வாகி சிறப்புரிமைகளை வழங்கலாம் அல்லது அகற்றலாம்."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"நிர்வாகியாக்கு"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"இப்போது பயனரை அமைக்கவா?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"இந்தச் சாதனத்தை இவர் பயன்படுத்தும் நிலையிலும், அவருக்கான அமைப்புகளை அவரே செய்து கொள்பவராகவும் இருக்க வேண்டும்."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"இப்போது சுயவிவரத்தை அமைக்கவா?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"இப்போது அமை"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"இப்போது இல்லை"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"சேர்"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"புதியவர்"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"புதிய பயனர்"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"புதிய சுயவிவரம்"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"பயனர் தகவல்"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"சுயவிவரத் தகவல்"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"புதிய கெஸ்ட் அமர்வு தொடங்கப்படும், மேலும் தற்போதைய கெஸ்ட் அமர்வின் ஆப்ஸ் மற்றும் தரவு அனைத்தும் நீக்கப்படும்"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"கெஸ்ட் முறையிலிருந்து வெளியேறவா?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"தற்போதைய கெஸ்ட் அமர்வின் ஆப்ஸ் மற்றும் தரவு அனைத்தும் நீக்கப்படும்"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"இந்தப் பயனருக்கு நிர்வாகச் சிறப்புரிமைகளை வழங்கவும்"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"பயனருக்கு நிர்வாகச் சிறப்புரிமைகளை வழங்க வேண்டாம்"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"ஆம். அவரை நிர்வாகியாக்கு"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"இல்லை. அவரை நிர்வாகியாக்காதே"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"வெளியேறு"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"கெஸ்ட் செயல்பாடுகளைச் சேமிக்கவா?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"தற்போதைய அமர்வின் செயல்பாடுகளைச் சேமிக்கலாம் அல்லது ஆப்ஸையும் தரவையும் நீக்கலாம்"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"வலதுபுறம் நகர்த்துங்கள்"</item>
     <item msgid="324200556467459329">"மேலே நகர்த்துங்கள்"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>
