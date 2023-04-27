@@ -2383,8 +2383,7 @@ public class VoiceInteractionManagerService extends SystemService {
                     }
                 }
                 if (hitInt && doit) {
-                    // The user is force stopping our current interactor.
-                    // Clear the current settings and restore default state.
+                    // The user is force stopping our current interactor, restart the service.
                     synchronized (VoiceInteractionManagerServiceStub.this) {
                         Slog.i(TAG, "Force stopping current voice interactor: "
                                 + getCurInteractor(userHandle));
@@ -2393,28 +2392,7 @@ public class VoiceInteractionManagerService extends SystemService {
                             mImpl.shutdownLocked();
                             setImplLocked(null);
                         }
-
-                        setCurInteractor(null, userHandle);
-                        // TODO: should not reset null here. But even remove this line, the
-                        // initForUser() still reset it because the interactor will be null. Keep
-                        // it now but we should still need to fix it.
-                        setCurRecognizer(null, userHandle);
-                        resetCurAssistant(userHandle);
-                        initForUser(userHandle);
                         switchImplementationIfNeededLocked(true);
-
-                        // When resetting the interactor, the recognizer and the assistant settings
-                        // value, we also need to reset the assistant role to keep the values
-                        // consistent. Clear the assistant role will reset to the default value.
-                        Context context = getContext();
-                        context.getSystemService(RoleManager.class).clearRoleHoldersAsUser(
-                                RoleManager.ROLE_ASSISTANT, 0, UserHandle.of(userHandle),
-                                context.getMainExecutor(), successful -> {
-                                    if (!successful) {
-                                        Slog.e(TAG,
-                                                "Failed to clear default assistant for force stop");
-                                    }
-                                });
                     }
                 } else if (hitRec && doit) {
                     // We are just force-stopping the current recognizer, which is not
