@@ -130,6 +130,7 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IpcDataCache;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -8524,6 +8525,46 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         verify(getServices().locationManager, never()).getCurrentLocation(
                 eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
+    }
+
+    /**
+     * Verifies that bundles with tons of moderately long strings are persisted correctly.
+     *
+     * Policy is serialized into binary XML and there is a limit on the max string length: 65535.
+     * This test ensures that as long as each string in the trust agent configuration is below this
+     * limit, the policy can be serialized and deserialized correctly, even when the total length
+     * of the configuration is above that limit. This should be the case because PersistableBundle
+     * contents are stored as XML subtrees rather than as strings.
+     */
+    @Test
+    public void testSetTrustAgentConfiguration_largeBundlePersisted() {
+        setAsProfileOwner(admin1);
+
+        ComponentName agent = new ComponentName("some.trust.agent", "some.trust.agent.Agent");
+        PersistableBundle configIn = new PersistableBundle();
+        String kilobyteString = new String(new char[1024]).replace('\0', 'A');
+        for (int i = 0; i < 1024; i++) {
+            configIn.putString("key-" + i, kilobyteString);
+        }
+
+        runAsCaller(mAdmin1Context, dpms, dpm -> {
+            dpm.setTrustAgentConfiguration(admin1, agent, configIn);
+        });
+
+        // Re-read policies to see if they were serialized/deserialized correctly.
+        initializeDpms();
+
+        List<PersistableBundle> configsOut = new ArrayList<>();
+        runAsCaller(mAdmin1Context, dpms, dpm -> {
+            configsOut.addAll(dpm.getTrustAgentConfiguration(admin1, agent));
+        });
+
+        assertThat(configsOut.size()).isEqualTo(1);
+        PersistableBundle configOut = configsOut.get(0);
+        assertThat(configOut.size()).isEqualTo(1024);
+        for (int i = 0; i < 1024; i++) {
+            assertThat(configOut.getString("key-" + i, null)).isEqualTo(kilobyteString);
+        }
     }
 
     private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {
