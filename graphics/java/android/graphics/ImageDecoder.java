@@ -2084,7 +2084,7 @@ public final class ImageDecoder implements AutoCloseable {
             }
             MediaFormat format = new MediaFormat();
             format.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_HEVC);
-            MediaCodecList mcl = new MediaCodecList(MediaCodecList.ALL_CODECS);
+            MediaCodecList mcl = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
             sIsHevcDecoderSupported = mcl.findDecoderForFormat(format) != null;
             sIsHevcDecoderSupportedInitialized = true;
             return sIsHevcDecoderSupported;
@@ -2129,7 +2129,7 @@ public final class ImageDecoder implements AutoCloseable {
      * Checks if the device supports decoding 10-bit for the given mime type.
      */
     private static void checkP010SupportforAV1HEVC() {
-        MediaCodecList codecList = new MediaCodecList(MediaCodecList.ALL_CODECS);
+        MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
         for (MediaCodecInfo mediaCodecInfo : codecList.getCodecInfos()) {
             if (mediaCodecInfo.isEncoder()) {
                 continue;
