@@ -141,6 +141,13 @@ public abstract class ActivityTaskManagerInternal {
         void acquire(int displayId);
 
         /**
+         * Acquires a sleep token.
+         * @param displayId The display to apply to.
+         * @param isSwappingDisplay Whether the display is swapping to another physical display.
+         */
+        void acquire(int displayId, boolean isSwappingDisplay);
+
+        /**
          * Releases the sleep token.
          * @param displayId The display to apply to.
          */
