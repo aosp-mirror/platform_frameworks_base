@@ -20,8 +20,8 @@ import android.os.Trace
 import com.android.systemui.Dumpable
 import com.android.systemui.common.buffer.RingBuffer
 import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.plugins.log.LogcatEchoTracker
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
@@ -35,7 +35,7 @@ import kotlinx.coroutines.launch
  * A logger that logs changes in table format.
  *
  * Some parts of System UI maintain a lot of pieces of state at once.
- * [com.android.systemui.log.LogBuffer] allows us to easily log change events:
+ * [com.android.systemui.plugins.log.LogBuffer] allows us to easily log change events:
  * - 10-10 10:10:10.456: state2 updated to newVal2
  * - 10-10 10:11:00.000: stateN updated to StateN(val1=true, val2=1)
  * - 10-10 10:11:02.123: stateN updated to StateN(val1=true, val2=2)

@@ -24,8 +24,8 @@ import com.android.keyguard.logging.TrustRepositoryLogger
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogcatEchoTracker
 import com.android.systemui.user.data.repository.FakeUserRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
