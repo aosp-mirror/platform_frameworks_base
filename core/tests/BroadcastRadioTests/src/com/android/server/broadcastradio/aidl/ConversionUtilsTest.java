@@ -27,11 +27,13 @@ import android.hardware.broadcastradio.ProgramIdentifier;
 import android.hardware.broadcastradio.ProgramInfo;
 import android.hardware.broadcastradio.ProgramListChunk;
 import android.hardware.broadcastradio.Properties;
+import android.hardware.broadcastradio.Result;
 import android.hardware.broadcastradio.VendorKeyValue;
 import android.hardware.radio.Announcement;
 import android.hardware.radio.ProgramList;
 import android.hardware.radio.ProgramSelector;
 import android.hardware.radio.RadioManager;
+import android.os.ServiceSpecificException;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSessionBuilder;
 import com.android.server.broadcastradio.ExtendedRadioMockitoTestCase;
@@ -150,6 +152,16 @@ public final class ConversionUtilsTest extends ExtendedRadioMockitoTestCase {
     public void isAtLeastU_withCurrentSdkVersion_returnsTrue() {
         expect.withMessage("Target SDK version of U")
                 .that(ConversionUtils.isAtLeastU(U_APP_UID)).isTrue();
+    }
+
+    @Test
+    public void throwOnError_withCancelException() {
+        ServiceSpecificException halException = new ServiceSpecificException(Result.CANCELED);
+
+        RuntimeException thrown = ConversionUtils.throwOnError(halException, "tune");
+
+        expect.withMessage("Exception thrown for canceling error").that(thrown)
+                .hasMessageThat().contains("tune: CANCELED");
     }
 
     @Test
