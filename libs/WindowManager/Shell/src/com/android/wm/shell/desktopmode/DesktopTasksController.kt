@@ -30,6 +30,7 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.IBinder
 import android.os.SystemProperties
+import android.view.Display.DEFAULT_DISPLAY
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
@@ -97,10 +98,11 @@ class DesktopTasksController(
     }
 
     /** Show all tasks, that are part of the desktop, on top of launcher */
-    fun showDesktopApps() {
+    fun showDesktopApps(displayId: Int) {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "showDesktopApps")
         val wct = WindowContainerTransaction()
-        bringDesktopAppsToFront(wct)
+        // TODO(b/278084491): pass in display id
+        bringDesktopAppsToFront(displayId, wct)
 
         // Execute transaction if there are pending operations
         if (!wct.isEmpty) {
@@ -114,8 +116,8 @@ class DesktopTasksController(
     }
 
     /** Get number of tasks that are marked as visible */
-    fun getVisibleTaskCount(): Int {
-        return desktopModeTaskRepository.getVisibleTaskCount()
+    fun getVisibleTaskCount(displayId: Int): Int {
+        return desktopModeTaskRepository.getVisibleTaskCount(displayId)
     }
 
     /** Move a task with given `taskId` to desktop */
@@ -129,7 +131,7 @@ class DesktopTasksController(
 
         val wct = WindowContainerTransaction()
         // Bring other apps to front first
-        bringDesktopAppsToFront(wct)
+        bringDesktopAppsToFront(task.displayId, wct)
         addMoveToDesktopChanges(wct, task.token)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
@@ -165,7 +167,7 @@ class DesktopTasksController(
             freeformBounds: Rect
     ) {
         val wct = WindowContainerTransaction()
-        bringDesktopAppsToFront(wct)
+        bringDesktopAppsToFront(taskInfo.displayId, wct)
         addMoveToDesktopChanges(wct, taskInfo.getToken())
         wct.setBounds(taskInfo.token, freeformBounds)
 
@@ -244,9 +246,9 @@ class DesktopTasksController(
             ?: WINDOWING_MODE_UNDEFINED
     }
 
-    private fun bringDesktopAppsToFront(wct: WindowContainerTransaction) {
+    private fun bringDesktopAppsToFront(displayId: Int, wct: WindowContainerTransaction) {
         ProtoLog.v(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront")
-        val activeTasks = desktopModeTaskRepository.getActiveTasks()
+        val activeTasks = desktopModeTaskRepository.getActiveTasks(displayId)
 
         // First move home to front and then other tasks on top of it
         moveHomeTaskToFront(wct)
@@ -290,18 +292,17 @@ class DesktopTasksController(
         request: TransitionRequestInfo
     ): WindowContainerTransaction? {
         // Check if we should skip handling this transition
-        val task: RunningTaskInfo? = request.triggerTask
         val shouldHandleRequest =
             when {
                 // Only handle open or to front transitions
                 request.type != TRANSIT_OPEN && request.type != TRANSIT_TO_FRONT -> false
                 // Only handle when it is a task transition
-                task == null -> false
+                request.triggerTask == null -> false
                 // Only handle standard type tasks
-                task.activityType != ACTIVITY_TYPE_STANDARD -> false
+                request.triggerTask.activityType != ACTIVITY_TYPE_STANDARD -> false
                 // Only handle fullscreen or freeform tasks
-                task.windowingMode != WINDOWING_MODE_FULLSCREEN &&
-                    task.windowingMode != WINDOWING_MODE_FREEFORM -> false
+                request.triggerTask.windowingMode != WINDOWING_MODE_FULLSCREEN &&
+                        request.triggerTask.windowingMode != WINDOWING_MODE_FREEFORM -> false
                 // Otherwise process it
                 else -> true
             }
@@ -310,10 +311,11 @@ class DesktopTasksController(
             return null
         }
 
-        val activeTasks = desktopModeTaskRepository.getActiveTasks()
+        val task: RunningTaskInfo = request.triggerTask
+        val activeTasks = desktopModeTaskRepository.getActiveTasks(task.displayId)
 
         // Check if we should switch a fullscreen task to freeform
-        if (task?.windowingMode == WINDOWING_MODE_FULLSCREEN) {
+        if (task.windowingMode == WINDOWING_MODE_FULLSCREEN) {
             // If there are any visible desktop tasks, switch the task to freeform
             if (activeTasks.any { desktopModeTaskRepository.isVisibleTask(it) }) {
                 ProtoLog.d(
@@ -329,7 +331,7 @@ class DesktopTasksController(
         }
 
         // CHeck if we should switch a freeform task to fullscreen
-        if (task?.windowingMode == WINDOWING_MODE_FREEFORM) {
+        if (task.windowingMode == WINDOWING_MODE_FREEFORM) {
             // If no visible desktop tasks, switch this task to freeform as the transition came
             // outside of this controller
             if (activeTasks.none { desktopModeTaskRepository.isVisibleTask(it) }) {
@@ -559,20 +561,21 @@ class DesktopTasksController(
             controller = null
         }
 
+        // TODO(b/278084491): pass in display id
         override fun showDesktopApps() {
             ExecutorUtils.executeRemoteCallWithTaskPermission(
                 controller,
-                "showDesktopApps",
-                Consumer(DesktopTasksController::showDesktopApps)
-            )
+                "showDesktopApps"
+            ) { c -> c.showDesktopApps(DEFAULT_DISPLAY) }
         }
 
+        // TODO(b/278084491): pass in display id
         override fun getVisibleTaskCount(): Int {
             val result = IntArray(1)
             ExecutorUtils.executeRemoteCallWithTaskPermission(
                 controller,
                 "getVisibleTaskCount",
-                { controller -> result[0] = controller.getVisibleTaskCount() },
+                { controller -> result[0] = controller.getVisibleTaskCount(DEFAULT_DISPLAY) },
                 true /* blocking */
             )
             return result[0]
