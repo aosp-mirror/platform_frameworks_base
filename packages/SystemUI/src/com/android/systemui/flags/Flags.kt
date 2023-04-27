@@ -624,10 +624,12 @@ object Flags {
     val APP_PANELS_REMOVE_APPS_ALLOWED =
         unreleasedFlag(2003, "app_panels_remove_apps_allowed", teamfood = true)
 
-    // 2200 - udfps
+    // 2200 - biometrics (udfps, sfps, BiometricPrompt, etc.)
     // TODO(b/259264861): Tracking Bug
     @JvmField val UDFPS_NEW_TOUCH_DETECTION = releasedFlag(2200, "udfps_new_touch_detection")
     @JvmField val UDFPS_ELLIPSE_DETECTION = releasedFlag(2201, "udfps_ellipse_detection")
+    // TODO(b/278622168): Tracking Bug
+    @JvmField val BIOMETRIC_BP_STRONG = unreleasedFlag(2202, "biometric_bp_strong")
 
     // 2300 - stylus
     @JvmField val TRACK_STYLUS_EVER_USED = releasedFlag(2300, "track_stylus_ever_used")
