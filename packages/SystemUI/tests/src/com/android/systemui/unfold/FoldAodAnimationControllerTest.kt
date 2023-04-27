@@ -146,7 +146,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
     fun onFolded_aodDisabled_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
             val job = underTest.listenForDozing(this)
-            keyguardRepository.setDozing(true)
+            keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = false)
 
             yield()
@@ -163,7 +163,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
     fun onFolded_aodEnabled_logsLatency() =
         runBlocking(IMMEDIATE) {
             val job = underTest.listenForDozing(this)
-            keyguardRepository.setDozing(true)
+            keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = true)
 
             yield()
@@ -181,7 +181,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
     fun onFolded_onScreenTurningOnInvokedTwice_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
             val job = underTest.listenForDozing(this)
-            keyguardRepository.setDozing(true)
+            keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = true)
 
             yield()
@@ -203,7 +203,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
     fun onFolded_onScreenTurningOnWithoutDozingThenWithDozing_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
             val job = underTest.listenForDozing(this)
-            keyguardRepository.setDozing(false)
+            keyguardRepository.setIsDozing(false)
             setAodEnabled(enabled = true)
 
             yield()
@@ -214,7 +214,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
 
             // Now enable dozing and trigger a second run through the aod animation code. It should
             // not rerun the animation
-            keyguardRepository.setDozing(true)
+            keyguardRepository.setIsDozing(true)
             yield()
             simulateScreenTurningOn()
 
@@ -228,7 +228,7 @@ class FoldAodAnimationControllerTest : SysuiTestCase() {
     fun onFolded_animationCancelled_doesNotLogLatency() =
         runBlocking(IMMEDIATE) {
             val job = underTest.listenForDozing(this)
-            keyguardRepository.setDozing(true)
+            keyguardRepository.setIsDozing(true)
             setAodEnabled(enabled = true)
 
             yield()
