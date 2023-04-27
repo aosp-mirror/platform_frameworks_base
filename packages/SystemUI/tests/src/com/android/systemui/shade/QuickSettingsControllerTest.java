@@ -83,6 +83,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -133,6 +134,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
     @Mock private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock private LightBarController mLightBarController;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
@@ -223,6 +225,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mNotificationRemoteInputManager,
                 mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
+                mLightBarController,
                 mNotificationStackScrollLayoutController,
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
