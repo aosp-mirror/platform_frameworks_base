@@ -804,7 +804,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"자세히 보려면 스와이프하세요."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"추천 제어 기능 로드 중"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"미디어"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g>에 대한 미디어 컨트롤을 숨길까요?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 미디어 컨트롤을 숨길까요?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"현재 미디어 세션은 숨길 수 없습니다."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"숨기기"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"다시 시작"</string>
@@ -833,7 +833,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"통계를 로드할 수 없음"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"오류. 다시 시도하세요."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"컨트롤 추가"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"제어 설정 수정"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"컨트롤 수정"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"출력 추가"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"그룹"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"기기 1대 선택됨"</string>

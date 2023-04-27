@@ -1274,13 +1274,13 @@
     <string name="volume_call" msgid="7625321655265747433">"Jačina zvuka poziva"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Jačina zvuka poziva putem Bluetootha"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Jačina zvuka alarma"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Jačina zvuka za obavještenja"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Jačina zvuka obavještenja"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Jačina zvuka"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Jačina zvuka za Bluetooth vezu"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Jačina zvuka melodije"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Jačina zvuka poziva"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Jačina zvuka medija"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Jačina zvuka za obavještenja"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Jačina zvuka obavještenja"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Zadana melodija zvona"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Zadano (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Bez zvuka"</string>
@@ -1593,8 +1593,8 @@
     <string name="expires_on" msgid="1623640879705103121">"Ističe:"</string>
     <string name="serial_number" msgid="3479576915806623429">"Serijski broj:"</string>
     <string name="fingerprints" msgid="148690767172613723">"Otisci prstiju:"</string>
-    <string name="sha256_fingerprint" msgid="7103976380961964600">"SHA-256 otisak prsta:"</string>
-    <string name="sha1_fingerprint" msgid="2339915142825390774">"SHA-1 otisak prsta:"</string>
+    <string name="sha256_fingerprint" msgid="7103976380961964600">"Digitalni otisak SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="2339915142825390774">"Digitalni otisak SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Prikaži sve"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Odaberite aktivnost"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Podijeliti sa"</string>
@@ -1854,7 +1854,7 @@
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Uredu"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Ušteda baterije uključuje tamnu temu i ograničava ili isključuje aktivnost u pozadini, određene vizuelne efekte i funkcije te neke mrežne veze."</string>
-    <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupiti podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
+    <string name="data_saver_description" msgid="4995164271550590517">"Radi smanjenja prijenosa podataka, Ušteda podataka sprečava da neke aplikacije šalju ili primaju podatke u pozadini. Aplikacija koju trenutno koristite može pristupati podacima, ali će to činiti rjeđe. Naprimjer, to može značiti da se slike ne prikazuju dok ih ne dodirnete."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Uključiti Uštedu podataka?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Uključi"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{Traje jednu minutu (do {formattedTime})}one{Traje # min (do {formattedTime})}few{Traje # min (do {formattedTime})}other{Traje # min (do {formattedTime})}}"</string>
@@ -1890,7 +1890,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS zahtjev je promijenjen u USSD zahtjev"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Promijenjeno u novi SS zahtjev"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Upozorenje o krađi identiteta"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profil za posao"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Radni profil"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Upozoreni"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Potvrđeno"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Proširi"</string>

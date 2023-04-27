@@ -544,8 +544,8 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"တွဲချိတ်ထားသော ဘလူးတုသ်သုံးစက်များနှင့် ချိတ်ဆက်ရန် အက်ပ်ကိုခွင့်ပြုမည်"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များတွင် ကြော်ငြာခြင်း"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"အနီးတစ်ဝိုက်ရှိ ဘလူးတုသ်သုံးစက်များတွင် ကြော်ငြာရန် အက်ပ်အား ခွင့်ပြုမည်"</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ခြင်း"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးတစ်ဝိုက်ရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား ဆက်စပ်နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"အနီးရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား မှန်းခြေနေရာကို သတ်မှတ်ခြင်း"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"အနီးရှိ ‘အလွန်ကျယ်ပြန့်သော လှိုင်းအလျားသုံးစက်များ’ ကြား မှန်းခြေနေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုမည်"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"အနီးရှိ Wi-Fi စက်များနှင့် ပြန်လှန်တုံ့ပြန်ခြင်း"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ကြော်ငြာရန်၊ ချိတ်ဆက်ရန်နှင့် အနီးတစ်ဝိုက်ရှိ Wi-Fi စက်များ၏ နေရာကို သတ်မှတ်ရန် အက်ပ်ကို ခွင့်ပြုသည်"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ဦးစားပေး NFC ငွေပေးချေမှုဆိုင်ရာ ဝန်ဆောင်မှု အချက်အလက်များ"</string>
@@ -1273,13 +1273,13 @@
     <string name="volume_call" msgid="7625321655265747433">"ခေါ်ဆိုနေခြင်းအသံအတိုးအကျယ်"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ဘလူးတုသ်ဖြင့် ခေါ်ဆိုနေခြင်းအသံအတိုးအကျယ်"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"နှိုးစက်သံအတိုးအကျယ်"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"အကြောင်းကြားသံအတိုးအကျယ်"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"အကြောင်းကြားသံ အတိုးအကျယ်"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"အသံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ဘလူးတုသ်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ဖုန်းမြည်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"ဖုန်းခေါ်သံအတိုးအကျယ်"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"မီဒီယာအသံအတိုးအကျယ်"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"အကြောင်းကြားသံအတိုးအကျယ်"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"အကြောင်းကြားသံ အတိုးအကျယ်"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"မူရင်းမြည်သံ"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"မူရင်း (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"မရှိ"</string>
@@ -1350,7 +1350,7 @@
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"USB မှတစ်ဆင့် ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB ဖြင့် ဖိုင်လွှဲပြောင်းခြင်းကို ဖွင့်ထားသည်"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB မှတစ်ဆင့် PTP ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
-    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB မှတစ်ဆင့် မိုဘိုင်းဖုန်းကို မိုဒမ်အဖြစ်သုံးရန် ဖွင့်ထားသည်"</string>
+    <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB သုံး၍ ချိတ်ဆက်ခြင်း ဖွင့်ထားသည်"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB မှတစ်ဆင့် MIDI ကို အသုံးပြုရန် ဖွင့်ထားသည်"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB တွဲဖက်ပစ္စည်းကို ချိတ်ဆက်ထားသည်"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
@@ -1696,7 +1696,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ပြီးပြီ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ဖြတ်လမ်းလင့်ခ်ကို ပိတ်ရန်"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ဖြတ်လမ်းလင့်ခ်ကို သုံးရန်"</string>
-    <string name="color_inversion_feature_name" msgid="326050048927789012">"အရောင် ပြောင်းပြန်လှန်ခြင်း"</string>
+    <string name="color_inversion_feature_name" msgid="326050048927789012">"အရောင်ပြောင်းပြန်ပြုလုပ်ခြင်း"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"အရောင်ပြင်ဆင်ခြင်း"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"လက်တစ်ဖက်သုံးမုဒ်"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ပိုမှိန်ခြင်း"</string>
@@ -1889,7 +1889,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS တောင်းဆိုမှုကို USSD တောင်းဆိုမှုအဖြစ် ပြောင်းထားသည်"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"SS တောင်းဆိုမှုအသစ်သို့ ပြောင်းထားသည်"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"အယောင်ဆောင်ဖြားယောင်းခြင်း သတိပေးချက်"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"အလုပ်ကိုယ်ရေးအချက်အလက်"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"အလုပ်ပရိုဖိုင်"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"သတိပေးထားသည်"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"စိစစ်ထားသည်"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ချဲ့ရန်"</string>

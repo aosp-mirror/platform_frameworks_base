@@ -323,7 +323,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"អាន និងសរសេរ​កំណត់​ហេតុ​ហៅ​ទូរសព្ទ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ទូរសព្ទ"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ឧបករណ៍​ចាប់សញ្ញា​រាងកាយ"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"សេនស័រ​រាងកាយ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"ការ​ជូនដំណឹង"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"បង្ហាញ​ការជូនដំណឹង"</string>
@@ -1889,7 +1889,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"សំណើ SS ត្រូវបាន​ប្ដូរ​ទៅ​សំណើ USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"បាន​ប្ដូរ​ទៅ​សំណើ SS ថ្មី"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ការជូនដំណឹង​អំពីការ​ដាក់នុយ"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ប្រវត្តិរូបការងារ"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"កម្រងព័ត៌មានការងារ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"បាន​ជូនដំណឹង"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"បាន​ផ្ទៀងផ្ទាត់​"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ពង្រីក"</string>
