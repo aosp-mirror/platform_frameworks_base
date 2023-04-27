@@ -158,6 +158,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -306,6 +307,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ActivityStarter mActivityStarter;
     @Mock protected KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     @Mock protected ShadeRepository mShadeRepository;
+    @Mock private CastController mCastController;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
@@ -675,7 +677,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mInteractionJankMonitor,
                 mShadeLog,
                 mKeyguardFaceAuthInteractor,
-                mShadeRepository
+                mShadeRepository,
+                mCastController
         );
     }
 
