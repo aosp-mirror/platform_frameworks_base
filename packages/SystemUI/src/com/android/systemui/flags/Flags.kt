@@ -63,7 +63,7 @@ object Flags {
 
     // TODO(b/279735475): Tracking Bug
     @JvmField
-    val NEW_LIGHT_BAR_LOGIC = unreleasedFlag(279735475, "new_light_bar_logic", teamfood = true)
+    val NEW_LIGHT_BAR_LOGIC = releasedFlag(279735475, "new_light_bar_logic")
 
     /**
      * This flag is server-controlled and should stay as [unreleasedFlag] since we never want to
