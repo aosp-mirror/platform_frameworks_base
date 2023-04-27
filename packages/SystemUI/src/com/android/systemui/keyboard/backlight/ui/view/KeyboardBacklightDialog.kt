@@ -159,6 +159,7 @@ class KeyboardBacklightDialog(
     private fun buildRootView(): LinearLayout {
         val linearLayout =
             LinearLayout(context).apply {
+                id = R.id.keyboard_backlight_dialog_container
                 orientation = LinearLayout.HORIZONTAL
                 layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
                 setPadding(
