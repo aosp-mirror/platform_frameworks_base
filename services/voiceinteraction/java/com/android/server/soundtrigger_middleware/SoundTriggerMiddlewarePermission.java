@@ -78,7 +78,7 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
     public @NonNull
     SoundTriggerModuleDescriptor[] listModules() {
         Identity identity = getIdentity();
-        enforcePermissionsForPreflight(identity);
+        enforcePermissionForPreflight(mContext, identity, CAPTURE_AUDIO_HOTWORD);
         return mDelegate.listModules();
     }
 

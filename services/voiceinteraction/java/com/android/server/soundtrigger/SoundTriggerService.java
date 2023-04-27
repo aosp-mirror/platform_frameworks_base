@@ -296,7 +296,10 @@ public class SoundTriggerService extends SystemService {
 
     // Helper to add session logger to the capacity limited detached list.
     // If we are at capacity, remove the oldest, and retry
-    private void addDetachedSessionLogger(EventLogger logger) {
+    private void detachSessionLogger(EventLogger logger) {
+        if (!mSessionEventLoggers.remove(logger)) {
+            return;
+        }
         // Attempt to push to the top of the queue
         while (!mDetachedSessionEventLoggers.offerFirst(logger)) {
             // Remove the oldest element, if one still exists
@@ -872,8 +875,7 @@ public class SoundTriggerService extends SystemService {
 
         private void detach() {
             mSoundTriggerHelper.detach();
-            mSessionEventLoggers.remove(mEventLogger);
-            addDetachedSessionLogger(mEventLogger);
+            detachSessionLogger(mEventLogger);
         }
 
         private void enforceCallingPermission(String permission) {
@@ -1659,8 +1661,7 @@ public class SoundTriggerService extends SystemService {
 
             private void detachInternal() {
                 mEventLogger.enqueue(new SessionEvent(Type.DETACH, null));
-                mSessionEventLoggers.remove(mEventLogger);
-                addDetachedSessionLogger(mEventLogger);
+                detachSessionLogger(mEventLogger);
                 mSoundTriggerHelper.detach();
             }
         }
