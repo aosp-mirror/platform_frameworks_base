@@ -385,6 +385,11 @@ open class QSTileViewImpl @JvmOverloads constructor(
         super.onInitializeAccessibilityNodeInfo(info)
         // Clear selected state so it is not announce by talkback.
         info.isSelected = false
+        info.text = if (TextUtils.isEmpty(secondaryLabel.text)) {
+            "${label.text}"
+        } else {
+            "${label.text}, ${secondaryLabel.text}"
+        }
         if (lastDisabledByPolicy) {
             info.addAction(
                     AccessibilityNodeInfo.AccessibilityAction(
@@ -402,12 +407,6 @@ open class QSTileViewImpl @JvmOverloads constructor(
                 accessibilityClass
             }
             if (Switch::class.java.name == accessibilityClass) {
-                val label = resources.getString(
-                        if (tileState) R.string.switch_bar_on else R.string.switch_bar_off)
-                // Set the text here for tests in
-                // android.platform.test.scenario.sysui.quicksettings. Can be removed when
-                // UiObject2 has a new getStateDescription() API and tests are updated.
-                info.text = label
                 info.isChecked = tileState
                 info.isCheckable = true
                 if (isLongClickable) {

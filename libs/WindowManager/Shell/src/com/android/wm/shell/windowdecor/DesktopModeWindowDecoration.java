@@ -74,14 +74,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             new WindowDecoration.RelayoutResult<>();
 
     private final Point mPositionInParent = new Point();
-    private final PointF mHandleMenuAppInfoPillPosition = new PointF();
-    private final PointF mHandleMenuWindowingPillPosition = new PointF();
-    private final PointF mHandleMenuMoreActionsPillPosition = new PointF();
-
-    // Collection of additional windows that comprise the handle menu.
-    private AdditionalWindow mHandleMenuAppInfoPill;
-    private AdditionalWindow mHandleMenuWindowingPill;
-    private AdditionalWindow mHandleMenuMoreActionsPill;
     private HandleMenu mHandleMenu;
 
     private ResizeVeil mResizeVeil;
@@ -90,16 +82,6 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private CharSequence mAppName;
 
     private TaskCornersListener mCornersListener;
-
-    private int mMenuWidth;
-    private int mMarginMenuTop;
-    private int mMarginMenuStart;
-    private int mMarginMenuSpacing;
-    private int mAppInfoPillHeight;
-    private int mWindowingPillHeight;
-    private int mMoreActionsPillHeight;
-    private int mShadowRadius;
-    private int mMenuCornerRadius;
 
     DesktopModeWindowDecoration(
             Context context,

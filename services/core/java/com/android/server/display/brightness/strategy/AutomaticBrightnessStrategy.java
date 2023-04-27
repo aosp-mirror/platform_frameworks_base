@@ -25,6 +25,7 @@ import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.AutomaticBrightnessController;
+import com.android.server.display.brightness.BrightnessEvent;
 import com.android.server.display.brightness.BrightnessReason;
 import com.android.server.display.brightness.BrightnessUtils;
 
@@ -252,10 +253,12 @@ public class AutomaticBrightnessStrategy {
 
     /**
      * Evaluates the target automatic brightness of the associated display.
+     * @param brightnessEvent Event object to populate with details about why the specific
+     *                        brightness was chosen.
      */
-    public float getAutomaticScreenBrightness() {
+    public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
         float brightness = (mAutomaticBrightnessController != null)
-                ? mAutomaticBrightnessController.getAutomaticScreenBrightness()
+                ? mAutomaticBrightnessController.getAutomaticScreenBrightness(brightnessEvent)
                 : PowerManager.BRIGHTNESS_INVALID_FLOAT;
         adjustAutomaticBrightnessStateIfValid(brightness);
         return brightness;

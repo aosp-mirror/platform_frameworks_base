@@ -18,8 +18,8 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.View
 import com.android.internal.annotations.Keep
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.annotations.ProvidesInterface
-import com.android.systemui.plugins.log.LogBuffer
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone

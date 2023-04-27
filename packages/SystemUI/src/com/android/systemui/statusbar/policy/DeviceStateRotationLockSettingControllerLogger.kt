@@ -21,9 +21,9 @@ import android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_IGNORED
 import android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_LOCKED
 import android.provider.Settings.Secure.DEVICE_STATE_ROTATION_LOCK_UNLOCKED
 import com.android.internal.R
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel.VERBOSE
 import com.android.systemui.log.dagger.DeviceStateAutoRotationLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel.VERBOSE
 import javax.inject.Inject
 
 class DeviceStateRotationLockSettingControllerLogger
@@ -34,6 +34,8 @@ constructor(@DeviceStateAutoRotationLog private val logBuffer: LogBuffer, contex
     private val halfFoldedStates =
         context.resources.getIntArray(R.array.config_halfFoldedDeviceStates)
     private val unfoldedStates = context.resources.getIntArray(R.array.config_openDeviceStates)
+    private val rearDisplayStates =
+        context.resources.getIntArray(R.array.config_rearDisplayDeviceStates)
 
     fun logListeningChange(listening: Boolean) {
         logBuffer.log(TAG, VERBOSE, { bool1 = listening }, { "setListening: $bool1" })
@@ -122,6 +124,7 @@ constructor(@DeviceStateAutoRotationLog private val logBuffer: LogBuffer, contex
             in foldedStates -> "Folded"
             in unfoldedStates -> "Unfolded"
             in halfFoldedStates -> "Half-Folded"
+            in rearDisplayStates -> "Rear display"
             -1 -> "Uninitialized"
             else -> "Unknown"
         }
