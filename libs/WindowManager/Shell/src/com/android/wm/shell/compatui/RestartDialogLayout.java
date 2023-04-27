@@ -95,6 +95,9 @@ public class RestartDialogLayout extends ConstraintLayout implements DialogConta
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        final View checkboxContainer = findViewById(
+                R.id.letterbox_restart_dialog_checkbox_container);
+        final CheckBox checkbox = findViewById(R.id.letterbox_restart_dialog_checkbox);
         mDialogContainer = findViewById(R.id.letterbox_restart_dialog_container);
         mDialogTitle = findViewById(R.id.letterbox_restart_dialog_title);
         mBackgroundDim = getBackground().mutate();
@@ -103,5 +106,6 @@ public class RestartDialogLayout extends ConstraintLayout implements DialogConta
         // We add a no-op on-click listener to the dialog container so that clicks on it won't
         // propagate to the listener of the layout (which represents the background dim).
         mDialogContainer.setOnClickListener(view -> {});
+        checkboxContainer.setOnClickListener(view -> checkbox.performClick());
     }
 }
