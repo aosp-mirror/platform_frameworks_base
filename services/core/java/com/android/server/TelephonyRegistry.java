@@ -1578,57 +1578,62 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             return;
         }
 
-        synchronized (mRecords) {
-            String str = "notifyServiceStateForSubscriber: subId=" + subId + " phoneId=" + phoneId
-                    + " state=" + state;
-            if (VDBG) {
-                log(str);
-            }
-            mLocalLog.log(str);
-            // for service state updates, don't notify clients when subId is invalid. This prevents
-            // us from sending incorrect notifications like b/133140128
-            // In the future, we can remove this logic for every notification here and add a
-            // callback so listeners know when their PhoneStateListener's subId becomes invalid, but
-            // for now we use the simplest fix.
-            if (validatePhoneId(phoneId) && SubscriptionManager.isValidSubscriptionId(subId)) {
-                mServiceState[phoneId] = state;
+        final long callingIdentity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mRecords) {
+                String str = "notifyServiceStateForSubscriber: subId=" + subId + " phoneId="
+                        + phoneId + " state=" + state;
+                if (VDBG) {
+                    log(str);
+                }
+                mLocalLog.log(str);
+                // for service state updates, don't notify clients when subId is invalid. This
+                // prevents us from sending incorrect notifications like b/133140128
+                // In the future, we can remove this logic for every notification here and add a
+                // callback so listeners know when their PhoneStateListener's subId becomes invalid,
+                // but for now we use the simplest fix.
+                if (validatePhoneId(phoneId) && SubscriptionManager.isValidSubscriptionId(subId)) {
+                    mServiceState[phoneId] = state;
 
-                for (Record r : mRecords) {
-                    if (VDBG) {
-                        log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
-                                + " phoneId=" + phoneId + " state=" + state);
-                    }
-                    if (r.matchTelephonyCallbackEvent(
-                            TelephonyCallback.EVENT_SERVICE_STATE_CHANGED)
-                            && idMatch(r, subId, phoneId)) {
+                    for (Record r : mRecords) {
+                        if (VDBG) {
+                            log("notifyServiceStateForSubscriber: r=" + r + " subId=" + subId
+                                    + " phoneId=" + phoneId + " state=" + state);
+                        }
+                        if (r.matchTelephonyCallbackEvent(
+                                TelephonyCallback.EVENT_SERVICE_STATE_CHANGED)
+                                && idMatch(r, subId, phoneId)) {
 
-                        try {
-                            ServiceState stateToSend;
-                            if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                stateToSend = new ServiceState(state);
-                            } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
-                                stateToSend = state.createLocationInfoSanitizedCopy(false);
-                            } else {
-                                stateToSend = state.createLocationInfoSanitizedCopy(true);
+                            try {
+                                ServiceState stateToSend;
+                                if (checkFineLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                    stateToSend = new ServiceState(state);
+                                } else if (checkCoarseLocationAccess(r, Build.VERSION_CODES.Q)) {
+                                    stateToSend = state.createLocationInfoSanitizedCopy(false);
+                                } else {
+                                    stateToSend = state.createLocationInfoSanitizedCopy(true);
+                                }
+                                if (DBG) {
+                                    log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
+                                            + " subId=" + subId + " phoneId=" + phoneId
+                                            + " state=" + stateToSend);
+                                }
+                                r.callback.onServiceStateChanged(stateToSend);
+                            } catch (RemoteException ex) {
+                                mRemoveList.add(r.binder);
                             }
-                            if (DBG) {
-                                log("notifyServiceStateForSubscriber: callback.onSSC r=" + r
-                                        + " subId=" + subId + " phoneId=" + phoneId
-                                        + " state=" + state);
-                            }
-                            r.callback.onServiceStateChanged(stateToSend);
-                        } catch (RemoteException ex) {
-                            mRemoveList.add(r.binder);
                         }
                     }
+                } else {
+                    log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId
+                            + " or subId=" + subId);
                 }
-            } else {
-                log("notifyServiceStateForSubscriber: INVALID phoneId=" + phoneId
-                        + " or subId=" + subId);
+                handleRemoveListLocked();
             }
-            handleRemoveListLocked();
+            broadcastServiceStateChanged(state, phoneId, subId);
+        } finally {
+            Binder.restoreCallingIdentity(callingIdentity);
         }
-        broadcastServiceStateChanged(state, phoneId, subId);
     }
 
     public void notifySimActivationStateChangedForPhoneId(int phoneId, int subId,
@@ -3161,13 +3166,10 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     public static final String ACTION_SIGNAL_STRENGTH_CHANGED = "android.intent.action.SIG_STR";
 
     private void broadcastServiceStateChanged(ServiceState state, int phoneId, int subId) {
-        final long ident = Binder.clearCallingIdentity();
         try {
             mBatteryStats.notePhoneState(state.getState());
         } catch (RemoteException re) {
             // Can't do much
-        } finally {
-            Binder.restoreCallingIdentity(ident);
         }
 
         // Send the broadcast exactly once to all possible disjoint sets of apps.
@@ -3184,8 +3186,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         // - Sanitized ServiceState sent to all other apps with READ_PHONE_STATE
         // - Sanitized ServiceState sent to all other apps with READ_PRIVILEGED_PHONE_STATE but not
         //   READ_PHONE_STATE
-        if (Binder.withCleanCallingIdentity(() ->
-                LocationAccessPolicy.isLocationModeEnabled(mContext, mContext.getUserId()))) {
+        if (LocationAccessPolicy.isLocationModeEnabled(mContext, mContext.getUserId())) {
             Intent fullIntent = createServiceStateIntent(state, subId, phoneId, false);
             mContext.createContextAsUser(UserHandle.ALL, 0).sendBroadcastMultiplePermissions(
                     fullIntent,
