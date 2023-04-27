@@ -56,11 +56,11 @@ public class WorkLockActivityController {
         tscl.registerTaskStackListener(mLockListener);
     }
 
-    private void startWorkChallengeInTask(ActivityManager.RunningTaskInfo info) {
+    private void startWorkChallengeInTask(ActivityManager.RunningTaskInfo info, int userId) {
         String packageName = info.baseActivity != null ? info.baseActivity.getPackageName() : "";
         Intent intent = new Intent(KeyguardManager.ACTION_CONFIRM_DEVICE_CREDENTIAL_WITH_USER)
                 .setComponent(new ComponentName(mContext, WorkLockActivity.class))
-                .putExtra(Intent.EXTRA_USER_ID, info.userId)
+                .putExtra(Intent.EXTRA_USER_ID, userId)
                 .putExtra(Intent.EXTRA_PACKAGE_NAME, packageName)
                 .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                         | Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -76,10 +76,11 @@ public class WorkLockActivityController {
         } else {
             // Starting the activity inside the task failed. We can't be sure why, so to be
             // safe just remove the whole task if it still exists.
+            Log.w(TAG, "Failed to start work lock activity, will remove task=" + info.taskId);
             try {
                 mIatm.removeTask(info.taskId);
             } catch (RemoteException e) {
-                Log.w(TAG, "Failed to get description for task=" + info.taskId);
+                Log.e(TAG, "Failed to remove task=" + info.taskId);
             }
         }
     }
@@ -112,8 +113,8 @@ public class WorkLockActivityController {
 
     private final TaskStackChangeListener mLockListener = new TaskStackChangeListener() {
         @Override
-        public void onTaskProfileLocked(ActivityManager.RunningTaskInfo info) {
-            startWorkChallengeInTask(info);
+        public void onTaskProfileLocked(ActivityManager.RunningTaskInfo info, int userId) {
+            startWorkChallengeInTask(info, userId);
         }
     };
 }
