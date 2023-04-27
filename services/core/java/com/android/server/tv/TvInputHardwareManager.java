@@ -1124,18 +1124,6 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
 
-        private boolean setTvMessageEnabled(int deviceId, TvStreamConfig streamConfig, int type,
-                boolean enabled) {
-            synchronized (mImplLock) {
-                if (mReleased) {
-                    return false;
-                }
-
-                return mHal.setTvMessageEnabled(deviceId, streamConfig, type, enabled)
-                        == TvInputHal.SUCCESS;
-            }
-        }
-
         private boolean startCapture(Surface surface, TvStreamConfig config) {
             synchronized (mImplLock) {
                 if (mReleased) {
