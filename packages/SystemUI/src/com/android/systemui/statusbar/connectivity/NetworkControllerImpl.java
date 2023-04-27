@@ -73,9 +73,9 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.LogLevel;
 import com.android.systemui.log.dagger.StatusBarNetworkControllerLog;
-import com.android.systemui.plugins.log.LogBuffer;
-import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.qs.tiles.dialog.InternetDialogFactory;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
@@ -86,6 +86,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.CarrierConfigTracker;
+
+import kotlin.Unit;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -100,8 +102,6 @@ import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
-import kotlin.Unit;
 
 /** Platform implementation of the network controller. **/
 @SysUISingleton
