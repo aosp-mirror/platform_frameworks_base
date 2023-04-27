@@ -2109,9 +2109,6 @@
     <!-- The default volume for the ring stream -->
     <integer name="config_audio_ring_vol_default">5</integer>
 
-    <!-- Enable sound dose computation and warnings -->
-    <bool name="config_audio_csd_enabled_default">true</bool>
-
     <!-- The default value for whether head tracking for
          spatial audio is enabled for a newly connected audio device -->
     <bool name="config_spatial_audio_head_tracking_enabled_default">false</bool>
@@ -2942,6 +2939,9 @@
 
     <!-- Whether safe headphone volume is enabled or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
+
+    <!-- Whether safe headphone sound dosage warning is enabled or not (country specific). -->
+    <bool name="config_safe_sound_dosage_enabled">true</bool>
 
     <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
     <bool name="config_safe_media_disable_on_volume_up">true</bool>
