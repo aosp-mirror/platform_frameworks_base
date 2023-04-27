@@ -1302,7 +1302,8 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         int brightnessAdjustmentFlags = 0;
         if (Float.isNaN(brightnessState)) {
             if (mAutomaticBrightnessStrategy.isAutoBrightnessEnabled()) {
-                brightnessState = mAutomaticBrightnessStrategy.getAutomaticScreenBrightness();
+                brightnessState = mAutomaticBrightnessStrategy.getAutomaticScreenBrightness(
+                        mTempBrightnessEvent);
                 if (BrightnessUtils.isValidBrightnessValue(brightnessState)
                         || brightnessState == PowerManager.BRIGHTNESS_OFF_FLOAT) {
                     rawBrightnessState = mAutomaticBrightnessController
