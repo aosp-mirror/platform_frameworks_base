@@ -5400,7 +5400,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         if (inFinishingTransition) {
-            // Let the finishing transition commit the visibility.
+            // Let the finishing transition commit the visibility, but let the controller know
+            // about it so that we can recover from degenerate cases.
+            mTransitionController.mValidateCommitVis.add(this);
             return;
         }
         // If we are preparing an app transition, then delay changing
