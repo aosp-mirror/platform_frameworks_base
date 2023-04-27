@@ -79,6 +79,8 @@ import com.android.server.pm.permission.PermissionManagerServiceInternal.Hotword
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1762,5 +1764,11 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             }
             return false;
         }
+    }
+
+    @Override
+    protected void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer,
+            @Nullable String[] args) {
+        mPermissionManagerServiceImpl.dump(fd, writer, args);
     }
 }

@@ -610,6 +610,40 @@ public class PermissionInfo extends PackageItemInfo implements Parcelable {
         return protLevel.toString();
     }
 
+    /** @hide */
+    public static @NonNull String flagsToString(@Flags int flags) {
+        StringBuilder sb = new StringBuilder("[");
+        while (flags != 0) {
+            final int flag = 1 << Integer.numberOfTrailingZeros(flags);
+            flags &= ~flag;
+            switch (flag) {
+                case PermissionInfo.FLAG_COSTS_MONEY:
+                    sb.append("costsMoney");
+                    break;
+                case PermissionInfo.FLAG_REMOVED:
+                    sb.append("removed");
+                    break;
+                case PermissionInfo.FLAG_HARD_RESTRICTED:
+                    sb.append("hardRestricted");
+                    break;
+                case PermissionInfo.FLAG_SOFT_RESTRICTED:
+                    sb.append("softRestricted");
+                    break;
+                case PermissionInfo.FLAG_IMMUTABLY_RESTRICTED:
+                    sb.append("immutablyRestricted");
+                    break;
+                case PermissionInfo.FLAG_INSTALLED:
+                    sb.append("installed");
+                    break;
+                default: sb.append(flag);
+            }
+            if (flags != 0) {
+                sb.append("|");
+            }
+        }
+        return sb.append("]").toString();
+    }
+
     /**
      * @hide
      */
