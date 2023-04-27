@@ -9425,12 +9425,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (getLockObject()) {
             if (who != null) {
                 if (isPermissionCheckFlagEnabled()) {
-                    EnforcingAdmin admin = getEnforcingAdminForCaller(
-                            who, who.getPackageName());
+                    EnforcingAdmin admin = getEnforcingAdminForPackage(
+                            who, who.getPackageName(), userHandle);
                     Integer features = mDevicePolicyEngine.getLocalPolicySetByAdmin(
                             PolicyDefinition.KEYGUARD_DISABLED_FEATURES,
                             admin,
                             affectedUserId);
+
                     return features == null ? 0 : features;
                 } else {
                     ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle, parent);
@@ -23564,6 +23565,30 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         admin = getUserData(userId).createOrGetPermissionBasedAdmin(userId);
         return  EnforcingAdmin.createEnforcingAdmin(caller.getPackageName(), userId, admin);
+    }
+
+    private EnforcingAdmin getEnforcingAdminForPackage(@Nullable ComponentName who,
+            String packageName, int userId) {
+        ActiveAdmin admin;
+        if (who != null) {
+            if (isDeviceOwner(who, userId) || isProfileOwner(who, userId)) {
+                synchronized (getLockObject()) {
+                    admin = getActiveAdminUncheckedLocked(who, userId);
+                }
+                if (admin != null) {
+                    return EnforcingAdmin.createEnterpriseEnforcingAdmin(who, userId, admin);
+                }
+            } else {
+                // Check for non-DPC active admins.
+                admin = getActiveAdminUncheckedLocked(who, userId);
+                if (admin != null) {
+                    return EnforcingAdmin.createDeviceAdminEnforcingAdmin(who, userId, admin);
+                }
+            }
+        }
+
+        admin = getUserData(userId).createOrGetPermissionBasedAdmin(userId);
+        return  EnforcingAdmin.createEnforcingAdmin(packageName, userId, admin);
     }
 
     private int getAffectedUser(boolean calledOnParent) {
