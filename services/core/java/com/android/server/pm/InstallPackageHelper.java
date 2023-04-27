@@ -58,6 +58,7 @@ import static com.android.server.pm.PackageManagerService.DEBUG_REMOVE;
 import static com.android.server.pm.PackageManagerService.DEBUG_UPGRADE;
 import static com.android.server.pm.PackageManagerService.DEBUG_VERIFY;
 import static com.android.server.pm.PackageManagerService.EMPTY_INT_ARRAY;
+import static com.android.server.pm.PackageManagerService.MIN_INSTALLABLE_TARGET_SDK;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.PackageManagerService.POST_INSTALL;
 import static com.android.server.pm.PackageManagerService.PRECOMPILE_LAYOUTS;
@@ -144,7 +145,6 @@ import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
-import android.provider.DeviceConfig;
 import android.stats.storage.StorageEnums;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -1138,73 +1138,27 @@ final class InstallPackageHelper {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
-        // If the minimum installable SDK version enforcement is enabled, block the install
-        // of apps using a lower target SDK version than required. This helps improve security
-        // and privacy as malware can target older SDK versions to avoid enforcement of new API
-        // behavior.
-        if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                "MinInstallableTargetSdk__install_block_enabled",
-                false)) {
-            int minInstallableTargetSdk =
-                    DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                            "MinInstallableTargetSdk__min_installable_target_sdk",
-                            0);
+        // Block the install of apps using a lower target SDK version than required.
+        // This helps improve security and privacy as malware can target older SDK versions
+        // to avoid enforcement of new API behavior.
+        boolean bypassLowTargetSdkBlock =
+                ((installFlags & PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK) != 0);
 
-            // Determine if enforcement is in strict mode
-            boolean strictMode = false;
+        // Skip enforcement when the testOnly flag is set
+        if (!bypassLowTargetSdkBlock && parsedPackage.isTestOnly()) {
+            bypassLowTargetSdkBlock = true;
+        }
 
-            if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                    "MinInstallableTargetSdk__install_block_strict_mode_enabled",
-                    false)) {
-                if (parsedPackage.getTargetSdkVersion()
-                        < DeviceConfig.getInt(DeviceConfig.NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                        "MinInstallableTargetSdk__strict_mode_target_sdk",
-                        0)) {
-                    strictMode = true;
-                }
-            }
-
-            // Skip enforcement when the bypass flag is set
-            boolean bypassLowTargetSdkBlock =
-                    ((installFlags & PackageManager.INSTALL_BYPASS_LOW_TARGET_SDK_BLOCK) != 0);
-
-            // Skip enforcement for tests that were installed from adb
-            if (!strictMode && !bypassLowTargetSdkBlock
-                    && ((installFlags & PackageManager.INSTALL_FROM_ADB) != 0)) {
-                bypassLowTargetSdkBlock = true;
-            }
-
-            // Skip enforcement if the installer package name is not set
-            // (e.g. "pm install" from shell)
-            if (!strictMode && !bypassLowTargetSdkBlock) {
-                if (request.getInstallerPackageName() == null) {
-                    bypassLowTargetSdkBlock = true;
-                } else {
-                    // Also skip if the install is occurring from an app that was installed from adb
-                    if (mContext
-                            .getPackageManager()
-                            .getInstallerPackageName(request.getInstallerPackageName()) == null) {
-                        bypassLowTargetSdkBlock = true;
-                    }
-                }
-            }
-
-            // Skip enforcement when the testOnly flag is set
-            if (!bypassLowTargetSdkBlock && parsedPackage.isTestOnly()) {
-                bypassLowTargetSdkBlock = true;
-            }
-
-            // Enforce the low target sdk install block except when
-            // the --bypass-low-target-sdk-block is set for the install
-            if (!bypassLowTargetSdkBlock
-                    && parsedPackage.getTargetSdkVersion() < minInstallableTargetSdk) {
-                Slog.w(TAG, "App " + parsedPackage.getPackageName()
-                        + " targets deprecated sdk version");
-                throw new PrepareFailure(INSTALL_FAILED_DEPRECATED_SDK_VERSION,
-                        "App package must target at least SDK version "
-                                + minInstallableTargetSdk + ", but found "
-                                + parsedPackage.getTargetSdkVersion());
-            }
+        // Enforce the low target sdk install block except when
+        // the --bypass-low-target-sdk-block is set for the install
+        if (!bypassLowTargetSdkBlock
+                && parsedPackage.getTargetSdkVersion() < MIN_INSTALLABLE_TARGET_SDK) {
+            Slog.w(TAG, "App " + parsedPackage.getPackageName()
+                    + " targets deprecated sdk version");
+            throw new PrepareFailure(INSTALL_FAILED_DEPRECATED_SDK_VERSION,
+                    "App package must target at least SDK version "
+                            + MIN_INSTALLABLE_TARGET_SDK + ", but found "
+                            + parsedPackage.getTargetSdkVersion());
         }
 
         // Instant apps have several additional install-time checks.
