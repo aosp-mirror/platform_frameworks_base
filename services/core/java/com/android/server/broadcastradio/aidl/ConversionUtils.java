@@ -102,6 +102,8 @@ final class ConversionUtils {
                 return new UnsupportedOperationException(action + ": NOT_SUPPORTED");
             case Result.TIMEOUT:
                 return new ParcelableException(new RuntimeException(action + ": TIMEOUT"));
+            case Result.CANCELED:
+                return new IllegalStateException(action + ": CANCELED");
             default:
                 return new ParcelableException(new RuntimeException(
                         action + ": unknown error (" + result + ")"));
@@ -123,6 +125,8 @@ final class ConversionUtils {
                 return RadioTuner.TUNER_RESULT_NOT_SUPPORTED;
             case Result.TIMEOUT:
                 return RadioTuner.TUNER_RESULT_TIMEOUT;
+            case Result.CANCELED:
+                return RadioTuner.TUNER_RESULT_CANCELED;
             case Result.UNKNOWN_ERROR:
             default:
                 return RadioTuner.TUNER_RESULT_UNKNOWN_ERROR;

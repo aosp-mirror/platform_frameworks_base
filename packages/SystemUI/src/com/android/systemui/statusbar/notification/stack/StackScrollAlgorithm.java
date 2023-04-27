@@ -34,7 +34,6 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -75,7 +74,6 @@ public class StackScrollAlgorithm {
     private float mQuickQsOffsetHeight;
     private float mSmallCornerRadius;
     private float mLargeCornerRadius;
-    private boolean mUseRoundnessSourceTypes;
 
     public StackScrollAlgorithm(
             Context context,
@@ -836,12 +834,8 @@ public class StackScrollAlgorithm {
                 row.isLastInSection() ? 1f : (mSmallCornerRadius / mLargeCornerRadius);
         final float bottomValue = computeCornerRoundnessForPinnedHun(mHostView.getHeight(),
                 ambientState.getStackY(), getMaxAllowedChildHeight(row), originalCornerRadius);
-        if (mUseRoundnessSourceTypes) {
-            row.requestBottomRoundness(bottomValue, STACK_SCROLL_ALGO);
-            row.addOnDetachResetRoundness(STACK_SCROLL_ALGO);
-        } else {
-            row.requestBottomRoundness(bottomValue, LegacySourceType.OnScroll);
-        }
+        row.requestBottomRoundness(bottomValue, STACK_SCROLL_ALGO);
+        row.addOnDetachResetRoundness(STACK_SCROLL_ALGO);
     }
 
     @VisibleForTesting
@@ -977,14 +971,6 @@ public class StackScrollAlgorithm {
 
     public void setIsExpanded(boolean isExpanded) {
         this.mIsExpanded = isExpanded;
-    }
-
-    /**
-     * Enable the support for rounded corner based on the SourceType
-     * @param enabled true if is supported
-     */
-    public void useRoundnessSourceTypes(boolean enabled) {
-        mUseRoundnessSourceTypes = enabled;
     }
 
     public static class StackScrollAlgorithmState {

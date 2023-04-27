@@ -154,8 +154,18 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
+    public void onTaskProfileLocked(RunningTaskInfo taskInfo, int userId)
+            throws RemoteException {
+        onTaskProfileLocked(taskInfo);
+    }
+
+    /**
+     * @deprecated see {@link #onTaskProfileLocked(RunningTaskInfo, int)}
+     */
+    @Deprecated
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void onTaskProfileLocked(RunningTaskInfo taskInfo) throws RemoteException {
+    public void onTaskProfileLocked(RunningTaskInfo taskInfo)
+            throws RemoteException {
     }
 
     @Override

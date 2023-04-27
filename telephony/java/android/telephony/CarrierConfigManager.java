@@ -5773,14 +5773,15 @@ public class CarrierConfigManager {
          * </ul>
          * @hide
          */
-        public static final String KEY_SA_DISABLE_POLICY_INT = KEY_PREFIX + "sa_disable_policy_int";
+        public static final String KEY_NR_SA_DISABLE_POLICY_INT =
+                KEY_PREFIX + "sa_disable_policy_int";
 
         /** @hide */
         @IntDef({
-                SA_DISABLE_POLICY_NONE,
-                SA_DISABLE_POLICY_WFC_ESTABLISHED,
-                SA_DISABLE_POLICY_WFC_ESTABLISHED_WHEN_VONR_DISABLED,
-                SA_DISABLE_POLICY_VOWIFI_REGISTERED
+                NR_SA_DISABLE_POLICY_NONE,
+                NR_SA_DISABLE_POLICY_WFC_ESTABLISHED,
+                NR_SA_DISABLE_POLICY_WFC_ESTABLISHED_WHEN_VONR_DISABLED,
+                NR_SA_DISABLE_POLICY_VOWIFI_REGISTERED
         })
         public @interface NrSaDisablePolicy {}
 
@@ -5788,14 +5789,14 @@ public class CarrierConfigManager {
          * Do not disables NR SA mode.
          * @hide
          */
-        public static final int SA_DISABLE_POLICY_NONE = 0;
+        public static final int NR_SA_DISABLE_POLICY_NONE = 0;
 
         /**
          * Disables NR SA mode when VoWiFi call is established in order to improve the delay or
          * voice mute when the handover from ePDG to NR is not supported in UE or network.
          * @hide
          */
-        public static final int SA_DISABLE_POLICY_WFC_ESTABLISHED = 1;
+        public static final int NR_SA_DISABLE_POLICY_WFC_ESTABLISHED = 1;
 
         /**
          * Disables NR SA mode when VoWiFi call is established when VoNR is disabled in order to
@@ -5803,14 +5804,14 @@ public class CarrierConfigManager {
          * in UE or network.
          * @hide
          */
-        public static final int SA_DISABLE_POLICY_WFC_ESTABLISHED_WHEN_VONR_DISABLED = 2;
+        public static final int NR_SA_DISABLE_POLICY_WFC_ESTABLISHED_WHEN_VONR_DISABLED = 2;
 
         /**
          * Disables NR SA mode when IMS is registered over WiFi in order to improve the delay or
          * voice mute when the handover from ePDG to NR is not supported in UE or network.
          * @hide
          */
-        public static final int SA_DISABLE_POLICY_VOWIFI_REGISTERED = 3;
+        public static final int NR_SA_DISABLE_POLICY_VOWIFI_REGISTERED = 3;
 
         private Ims() {}
 
@@ -5883,7 +5884,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT, 30000);
             defaults.putInt(KEY_REGISTRATION_RETRY_MAX_TIMER_MILLIS_INT, 1800000);
             defaults.putInt(KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT, 600000);
-            defaults.putInt(KEY_SA_DISABLE_POLICY_INT, SA_DISABLE_POLICY_NONE);
+            defaults.putInt(KEY_NR_SA_DISABLE_POLICY_INT, NR_SA_DISABLE_POLICY_NONE);
 
             defaults.putIntArray(
                     KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY,
