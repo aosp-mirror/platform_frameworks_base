@@ -22,6 +22,7 @@
     <!-- Keyguard PIN pad styles -->
     <style name="Keyguard.TextView" parent="@android:style/Widget.DeviceDefault.TextView">
         <item name="android:textSize">@dimen/kg_status_line_font_size</item>
+        <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
     </style>
     <style name="Keyguard.TextView.EmergencyButton" parent="Theme.SystemUI">
         <item name="android:textColor">?androidprv:attr/materialColorOnTertiaryFixed</item>
