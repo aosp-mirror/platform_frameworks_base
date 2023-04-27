@@ -61,6 +61,9 @@ object Flags {
     // TODO(b/254512538): Tracking Bug
     val INSTANT_VOICE_REPLY = unreleasedFlag(111, "instant_voice_reply")
 
+    // TODO(b/279735475): Tracking Bug
+    @JvmField val NEW_LIGHT_BAR_LOGIC = unreleasedFlag(279735475, "new_light_bar_logic")
+
     /**
      * This flag is server-controlled and should stay as [unreleasedFlag] since we never want to
      * enable it on release builds.
