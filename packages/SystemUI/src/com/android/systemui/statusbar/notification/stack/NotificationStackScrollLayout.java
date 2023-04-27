@@ -200,7 +200,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
     private Set<Integer> mDebugTextUsedYPositions;
     private final boolean mDebugRemoveAnimation;
     private final boolean mSimplifiedAppearFraction;
-    private final boolean mUseRoundnessSourceTypes;
     private final boolean mSensitiveRevealAnimEndabled;
     private boolean mAnimatedInsets;
 
@@ -625,7 +624,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mDebugLines = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
         mDebugRemoveAnimation = featureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
         mSimplifiedAppearFraction = featureFlags.isEnabled(Flags.SIMPLIFIED_APPEAR_FRACTION);
-        mUseRoundnessSourceTypes = true;
         mSensitiveRevealAnimEndabled = featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         setAnimatedInsetsEnabled(featureFlags.isEnabled(Flags.ANIMATED_NOTIFICATION_SHADE_INSETS));
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
@@ -3134,10 +3132,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             mAnimateNextSectionBoundsChange = false;
         }
         mAmbientState.setLastVisibleBackgroundChild(lastChild);
-        if (!mUseRoundnessSourceTypes) {
-            // TODO: Refactor SectionManager and put the RoundnessManager there.
-            mController.getNotificationRoundnessManager().updateRoundedChildren(mSections);
-        }
         mAnimateBottomOnLayout = false;
         invalidate();
     }
@@ -3584,9 +3578,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
 
     @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
     protected StackScrollAlgorithm createStackScrollAlgorithm(Context context) {
-        StackScrollAlgorithm stackScrollAlgorithm = new StackScrollAlgorithm(context, this);
-        stackScrollAlgorithm.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
-        return stackScrollAlgorithm;
+        return new StackScrollAlgorithm(context, this);
     }
 
     /**
