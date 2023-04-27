@@ -268,11 +268,8 @@ public abstract class ProviderSession<T, R>
                     /*pId=*/-1, appInfo.uid) == PackageManager.PERMISSION_GRANTED) {
                 return true;
             }
-        } catch (SecurityException e) {
+        } catch (SecurityException | PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "Error getting info for " + mComponentName.flattenToString(), e);
-            return false;
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.i(TAG, "Error getting info for " + mComponentName.flattenToString(), e);
             return false;
         }
         return false;
