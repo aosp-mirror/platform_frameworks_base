@@ -208,6 +208,50 @@ class AppIdPermissionPolicy : SchemePolicy() {
         }
     }
 
+    override fun MutateStateScope.onPackageInstalled(packageState: PackageState, userId: Int) {
+        // Clear UPGRADE_EXEMPT for all permissions requested by this package since there's
+        // an installer and the installer has made a decision.
+        clearRestrictedPermissionImplicitExemption(packageState, userId)
+    }
+
+    private fun MutateStateScope.clearRestrictedPermissionImplicitExemption(
+        packageState: PackageState,
+        userId: Int
+    ) {
+        // System apps can always retain their UPGRADE_EXEMPT.
+        if (packageState.isSystem) {
+            return
+        }
+        val androidPackage = packageState.androidPackage ?: return
+        val appId = packageState.appId
+        androidPackage.requestedPermissions.forEachIndexed { _, permissionName ->
+            val permission = newState.systemState.permissions[permissionName]
+                ?: return@forEachIndexed
+            if (!permission.isHardOrSoftRestricted) {
+                return@forEachIndexed
+            }
+            val isRequestedBySystemPackage =
+                anyRequestingPackageInAppId(appId, permissionName) { it.isSystem }
+            if (isRequestedBySystemPackage) {
+                return@forEachIndexed
+            }
+            val oldFlags = getPermissionFlags(appId, userId, permissionName)
+            var newFlags = oldFlags andInv PermissionFlags.UPGRADE_EXEMPT
+            val isExempt = newFlags.hasAnyBit(PermissionFlags.MASK_EXEMPT)
+            newFlags = if (permission.isHardRestricted && !isExempt) {
+                newFlags or PermissionFlags.RESTRICTION_REVOKED
+            } else {
+                newFlags andInv PermissionFlags.RESTRICTION_REVOKED
+            }
+            newFlags = if (permission.isSoftRestricted && !isExempt) {
+                newFlags or PermissionFlags.SOFT_RESTRICTED
+            } else {
+                newFlags andInv PermissionFlags.SOFT_RESTRICTED
+            }
+            setPermissionFlags(appId, userId, permissionName, newFlags)
+        }
+    }
+
     override fun MutateStateScope.onPackageUninstalled(
         packageName: String,
         appId: Int,

@@ -1886,7 +1886,7 @@ class PermissionService(
         if (params === PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT) {
             // TODO: We should actually stop calling onPackageInstalled() when we are passing
             //  PackageInstalledParams.DEFAULT in InstallPackageHelper, because there's actually no
-            //  installer in those  cases of system app installs, and the default params won't
+            //  installer in those cases of system app installs, and the default params won't
             //  allowlist any permissions which means the original UPGRADE_EXEMPT will be dropped
             //  without any INSTALLER_EXEMPT added. However, we can't do that right now because the
             //  old permission subsystem still depends on this method being called to set up the
@@ -1920,14 +1920,6 @@ class PermissionService(
                 packageManagerInternal.getPackageStateInternal(androidPackage.packageName)!!
             addAllowlistedRestrictedPermissionsUnchecked(androidPackage, packageState.appId,
                 params.allowlistedRestrictedPermissions, userId)
-            if (!packageState.isSystem()) {
-                // Drop UPGRADE_EXEMPT for all permissions requested by this package since there's
-                // an installer and the installer has made a decision.
-                setAllowlistedRestrictedPermissionsUnchecked(
-                    androidPackage, packageState.appId, emptyList(),
-                    PackageManager.FLAG_PERMISSION_WHITELIST_UPGRADE, userId
-                )
-            }
             setRequestedPermissionStates(packageState, userId, params.permissionStates)
         }
     }
