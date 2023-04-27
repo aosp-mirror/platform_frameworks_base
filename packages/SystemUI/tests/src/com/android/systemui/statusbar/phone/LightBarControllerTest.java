@@ -22,21 +22,31 @@ import static com.android.systemui.statusbar.phone.BarTransitions.MODE_TRANSPARE
 
 import static junit.framework.Assert.assertTrue;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import androidx.annotation.ColorInt;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.colorextraction.ColorExtractor.GradientColors;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FakeFeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -53,13 +63,25 @@ import java.util.ArrayList;
 @TestableLooper.RunWithLooper
 public class LightBarControllerTest extends SysuiTestCase {
 
+    private static final GradientColors COLORS_LIGHT = makeColors(Color.WHITE);
+    private static final GradientColors COLORS_DARK = makeColors(Color.BLACK);
+    private final FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
     private LightBarTransitionsController mLightBarTransitionsController;
+    private LightBarTransitionsController mNavBarController;
     private SysuiDarkIconDispatcher mStatusBarIconController;
     private LightBarController mLightBarController;
 
+    /** Allow testing with NEW_LIGHT_BAR_LOGIC flag in different states */
+    protected boolean testNewLightBarLogic() {
+        return false;
+    }
+
     @Before
     public void setup() {
+        mFeatureFlags.set(Flags.NEW_LIGHT_BAR_LOGIC, testNewLightBarLogic());
         mStatusBarIconController = mock(SysuiDarkIconDispatcher.class);
+        mNavBarController = mock(LightBarTransitionsController.class);
+        when(mNavBarController.supportsIconTintForNavMode(anyInt())).thenReturn(true);
         mLightBarTransitionsController = mock(LightBarTransitionsController.class);
         when(mStatusBarIconController.getTransitionsController()).thenReturn(
                 mLightBarTransitionsController);
@@ -68,8 +90,17 @@ public class LightBarControllerTest extends SysuiTestCase {
                 mStatusBarIconController,
                 mock(BatteryController.class),
                 mock(NavigationModeController.class),
+                mFeatureFlags,
                 mock(DumpManager.class),
                 new FakeDisplayTracker(mContext));
+    }
+
+    private static GradientColors makeColors(@ColorInt int bgColor) {
+        GradientColors colors = new GradientColors();
+        colors.setMainColor(bgColor);
+        colors.setSecondaryColor(bgColor);
+        colors.setSupportsDarkText(!ContrastColorUtil.isColorDark(bgColor));
+        return colors;
     }
 
     @Test
@@ -176,5 +207,55 @@ public class LightBarControllerTest extends SysuiTestCase {
                 appearanceRegions, true /* sbModeChanged */, MODE_TRANSPARENT,
                 false /* navbarColorManagedByIme */);
         verify(mLightBarTransitionsController).setIconsDark(eq(false), anyBoolean());
+    }
+
+    @Test
+    public void validateNavBarChangesUpdateIcons() {
+        assumeTrue(testNewLightBarLogic());  // Only run in the new suite
+
+        // On the launcher in dark mode buttons are light
+        mLightBarController.setScrimState(ScrimState.UNLOCKED, 0f, COLORS_DARK);
+        mLightBarController.onNavigationBarAppearanceChanged(
+                0, /* nbModeChanged = */ true,
+                MODE_TRANSPARENT, /* navbarColorManagedByIme = */ false);
+        verifyNavBarIconsUnchanged(); // no changes yet; not attached
+
+        // Initial state is set when controller is set
+        mLightBarController.setNavigationBar(mNavBarController);
+        verifyNavBarIconsDarkSetTo(false);
+
+        // Changing the color of the transparent scrim has no effect
+        mLightBarController.setScrimState(ScrimState.UNLOCKED, 0f, COLORS_LIGHT);
+        verifyNavBarIconsUnchanged(); // still light
+
+        // Showing the notification shade with white scrim requires dark icons
+        mLightBarController.setScrimState(ScrimState.UNLOCKED, 1f, COLORS_LIGHT);
+        verifyNavBarIconsDarkSetTo(true);
+
+        // Expanded QS always provides a black background, so icons become light again
+        mLightBarController.setQsExpanded(true);
+        verifyNavBarIconsDarkSetTo(false);
+
+        // Tapping the QS tile to change to dark theme has no effect in this state
+        mLightBarController.setScrimState(ScrimState.UNLOCKED, 1f, COLORS_DARK);
+        verifyNavBarIconsUnchanged(); // still light
+
+        // collapsing QS in dark mode doesn't affect button color
+        mLightBarController.setQsExpanded(false);
+        verifyNavBarIconsUnchanged(); // still light
+
+        // Closing the shade has no affect
+        mLightBarController.setScrimState(ScrimState.UNLOCKED, 0f, COLORS_DARK);
+        verifyNavBarIconsUnchanged(); // still light
+    }
+
+    private void verifyNavBarIconsUnchanged() {
+        verify(mNavBarController, never()).setIconsDark(anyBoolean(), anyBoolean());
+    }
+
+    private void verifyNavBarIconsDarkSetTo(boolean iconsDark) {
+        verify(mNavBarController).setIconsDark(eq(iconsDark), anyBoolean());
+        verify(mNavBarController, never()).setIconsDark(eq(!iconsDark), anyBoolean());
+        clearInvocations(mNavBarController);
     }
 }

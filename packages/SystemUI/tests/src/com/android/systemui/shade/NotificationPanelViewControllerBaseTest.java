@@ -151,6 +151,7 @@ import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -240,6 +241,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardStatusBarViewComponent mKeyguardStatusBarViewComponent;
     @Mock protected KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock protected KeyguardStatusBarViewController mKeyguardStatusBarViewController;
+    @Mock protected LightBarController mLightBarController;
     @Mock protected NotificationStackScrollLayoutController
             mNotificationStackScrollLayoutController;
     @Mock protected NotificationShadeDepthController mNotificationShadeDepthController;
@@ -655,6 +657,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNotificationRemoteInputManager,
                 mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
+                mLightBarController,
                 mNotificationStackScrollLayoutController,
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
