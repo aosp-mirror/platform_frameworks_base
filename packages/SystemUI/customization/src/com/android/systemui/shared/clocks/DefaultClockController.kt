@@ -24,7 +24,6 @@ import android.view.View
 import android.widget.FrameLayout
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.customization.R
-import com.android.systemui.log.LogBuffer
 import com.android.systemui.plugins.ClockAnimations
 import com.android.systemui.plugins.ClockConfig
 import com.android.systemui.plugins.ClockController
@@ -33,6 +32,7 @@ import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockSettings
+import com.android.systemui.plugins.log.LogBuffer
 import java.io.PrintWriter
 import java.util.Locale
 import java.util.TimeZone

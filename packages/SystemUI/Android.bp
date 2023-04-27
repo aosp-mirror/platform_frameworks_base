@@ -158,7 +158,6 @@ android_library {
         "SystemUIAnimationLib",
         "SystemUICommon",
         "SystemUICustomizationLib",
-        "SystemUILogLib",
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SystemUI-statsd",

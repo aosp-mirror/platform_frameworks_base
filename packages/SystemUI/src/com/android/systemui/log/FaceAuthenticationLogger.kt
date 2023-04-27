@@ -6,8 +6,9 @@ import com.android.keyguard.FaceAuthUiEvent
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.dagger.FaceAuthLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel.DEBUG
 import javax.inject.Inject
 
 private const val TAG = "DeviceEntryFaceAuthRepositoryLog"
