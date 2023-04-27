@@ -245,7 +245,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     }
 
     @Override
-    public void onActiveTasksChanged() {
+    public void onActiveTasksChanged(int displayId) {
         notifyRecentTasksChanged();
     }
 
