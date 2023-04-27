@@ -42,6 +42,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor.GradientColors;
 import com.android.internal.graphics.ColorUtils;
+import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.util.function.TriConsumer;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -249,6 +250,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final TriConsumer<ScrimState, Float, GradientColors> mScrimStateListener;
     private final LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
     private final FeatureFlags mFeatureFlags;
+    private final boolean mUseNewLightBarLogic;
     private Consumer<Integer> mScrimVisibleListener;
     private boolean mBlankScreen;
     private boolean mScreenBlankingCallbackCalled;
@@ -306,6 +308,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         mScrimStateListener = lightBarController::setScrimState;
         mLargeScreenShadeInterpolator = largeScreenShadeInterpolator;
         mFeatureFlags = featureFlags;
+        mUseNewLightBarLogic = featureFlags.isEnabled(Flags.NEW_LIGHT_BAR_LOGIC);
         mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
 
         mKeyguardStateController = keyguardStateController;
@@ -1159,7 +1162,13 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (mClipsQsScrim && mQsBottomVisible) {
             alpha = mNotificationsAlpha;
         }
-        mScrimStateListener.accept(mState, alpha, mScrimInFront.getColors());
+        if (mUseNewLightBarLogic) {
+            mScrimStateListener.accept(mState, alpha, mColors);
+        } else {
+            // NOTE: This wasn't wrong, but it implied that each scrim might have different colors,
+            //  when in fact they all share the same GradientColors instance, which we own.
+            mScrimStateListener.accept(mState, alpha, mScrimInFront.getColors());
+        }
     }
 
     private void dispatchScrimsVisible() {
@@ -1487,8 +1496,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         int accent = Utils.getColorAccent(mScrimBehind.getContext()).getDefaultColor();
         mColors.setMainColor(background);
         mColors.setSecondaryColor(accent);
-        mColors.setSupportsDarkText(
-                ColorUtils.calculateContrast(mColors.getMainColor(), Color.WHITE) > 4.5);
+        if (mUseNewLightBarLogic) {
+            final boolean isBackgroundLight = !ContrastColorUtil.isColorDark(background);
+            mColors.setSupportsDarkText(isBackgroundLight);
+        } else {
+            // NOTE: This was totally backward, but LightBarController was flipping it back.
+            // There may be other consumers of this which would struggle though
+            mColors.setSupportsDarkText(
+                    ColorUtils.calculateContrast(mColors.getMainColor(), Color.WHITE) > 4.5);
+        }
         mNeedsDrawableColorUpdate = true;
     }
 

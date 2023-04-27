@@ -70,6 +70,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.telephony.TelephonyListenerManager;
@@ -115,6 +116,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private IStatusBarService mStatusBarService;
+    @Mock private LightBarController mLightBarController;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private IWindowManager mWindowManager;
     @Mock private Executor mBackgroundExecutor;
@@ -166,6 +168,7 @@ public class GlobalActionsDialogLiteTest extends SysuiTestCase {
                 mMetricsLogger,
                 mColorExtractor,
                 mStatusBarService,
+                mLightBarController,
                 mNotificationShadeWindowController,
                 mWindowManager,
                 mBackgroundExecutor,
