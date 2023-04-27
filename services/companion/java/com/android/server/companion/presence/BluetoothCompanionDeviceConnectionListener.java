@@ -27,23 +27,17 @@ import android.companion.AssociationInfo;
 import android.net.MacAddress;
 import android.os.Handler;
 import android.os.HandlerExecutor;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
-import android.util.SparseArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.server.companion.AssociationStore;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @SuppressLint("LongLogTag")
-public class BluetoothCompanionDeviceConnectionListener
+class BluetoothCompanionDeviceConnectionListener
         extends BluetoothAdapter.BluetoothConnectionCallback
         implements AssociationStore.OnChangeListener {
     private static final String TAG = "CDM_BluetoothCompanionDeviceConnectionListener";
@@ -54,23 +48,15 @@ public class BluetoothCompanionDeviceConnectionListener
         void onBluetoothCompanionDeviceDisconnected(int associationId);
     }
 
-    private final UserManager mUserManager;
     private final @NonNull AssociationStore mAssociationStore;
     private final @NonNull Callback mCallback;
     /** A set of ALL connected BT device (not only companion.) */
     private final @NonNull Map<MacAddress, BluetoothDevice> mAllConnectedDevices = new HashMap<>();
 
-
-    @GuardedBy("mPendingReportConnectedDevices")
-    @NonNull
-    final SparseArray<Set<BluetoothDevice>> mPendingReportConnectedDevices =
-            new SparseArray<>();
-
-    BluetoothCompanionDeviceConnectionListener(UserManager userManager,
-            @NonNull AssociationStore associationStore, @NonNull Callback callback) {
+    BluetoothCompanionDeviceConnectionListener(@NonNull AssociationStore associationStore,
+            @NonNull Callback callback) {
         mAssociationStore = associationStore;
         mCallback = callback;
-        mUserManager = userManager;
     }
 
     public void init(@NonNull BluetoothAdapter btAdapter) {
@@ -90,32 +76,12 @@ public class BluetoothCompanionDeviceConnectionListener
         if (DEBUG) Log.i(TAG, "onDevice_Connected() " + btDeviceToString(device));
 
         final MacAddress macAddress = MacAddress.fromString(device.getAddress());
-        final int userId = UserHandle.myUserId();
-
         if (mAllConnectedDevices.put(macAddress, device) != null) {
             if (DEBUG) Log.w(TAG, "Device " + btDeviceToString(device) + " is already connected.");
             return;
         }
-        // Try to bind and notify the app after the phone is unlocked.
-        if (!mUserManager.isUserUnlockingOrUnlocked(UserHandle.myUserId())) {
-            if (DEBUG) {
-                Log.i(TAG, "Current user is not in unlocking or unlocked stage yet. Notify "
-                        + "the application when the phone is unlocked");
-            }
-            synchronized (mPendingReportConnectedDevices) {
-                Set<BluetoothDevice> bluetoothDevices = mPendingReportConnectedDevices.get(userId);
 
-                if (bluetoothDevices == null) {
-                    bluetoothDevices = new HashSet<>();
-                    mPendingReportConnectedDevices.put(userId, bluetoothDevices);
-                }
-
-                bluetoothDevices.add(device);
-            }
-
-        } else {
-            onDeviceConnectivityChanged(device, true);
-        }
+        onDeviceConnectivityChanged(device, true);
     }
 
     /**
@@ -132,25 +98,10 @@ public class BluetoothCompanionDeviceConnectionListener
         }
 
         final MacAddress macAddress = MacAddress.fromString(device.getAddress());
-        final int userId = UserHandle.myUserId();
-
         if (mAllConnectedDevices.remove(macAddress) == null) {
             if (DEBUG) {
                 Log.w(TAG, "The device wasn't tracked as connected " + btDeviceToString(device));
             }
-            return;
-        }
-
-        // Do not need to report the connectivity since the user is not unlock the phone so
-        // that cdm is not bind with the app yet.
-        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
-            synchronized (mPendingReportConnectedDevices) {
-                Set<BluetoothDevice> bluetoothDevices = mPendingReportConnectedDevices.get(userId);
-                if (bluetoothDevices != null) {
-                    bluetoothDevices.remove(device);
-                }
-            }
-
             return;
         }
 
