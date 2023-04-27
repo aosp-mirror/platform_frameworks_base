@@ -17,10 +17,10 @@
 package com.android.systemui.toast
 
 import com.android.systemui.log.dagger.ToastLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.plugins.log.LogLevel.DEBUG
-import com.android.systemui.plugins.log.LogMessage
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
+import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.LogMessage
 import javax.inject.Inject
 
 private const val TAG = "ToastLog"

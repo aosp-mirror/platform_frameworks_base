@@ -21,10 +21,9 @@ import android.graphics.Rect
 import android.graphics.RectF
 import androidx.core.graphics.toRectF
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.LogLevel.ERROR
 import com.android.systemui.log.dagger.ScreenDecorationsLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel.DEBUG
-import com.android.systemui.plugins.log.LogLevel.ERROR
 import javax.inject.Inject
 
 private const val TAG = "ScreenDecorationsLog"

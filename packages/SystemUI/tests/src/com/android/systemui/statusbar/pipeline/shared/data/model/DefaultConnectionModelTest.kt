@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.pipeline.shared.data.model
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.plugins.log.LogMessageImpl
+import com.android.systemui.log.LogMessageImpl
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
