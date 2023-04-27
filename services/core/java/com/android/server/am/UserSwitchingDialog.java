@@ -19,7 +19,6 @@ package com.android.server.am;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.UserInfo;
@@ -38,6 +37,7 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.View;
@@ -51,6 +51,7 @@ import android.widget.TextView;
 import com.android.internal.R;
 import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.UserIcons;
+import com.android.server.wm.WindowManagerService;
 
 /**
  * Dialog to show during the user switch. This dialog shows target user's name and their profile
@@ -70,11 +71,14 @@ class UserSwitchingDialog extends Dialog {
     protected final UserInfo mNewUser;
     private final String mSwitchingFromSystemUserMessage;
     private final String mSwitchingToSystemUserMessage;
+    private final WindowManagerService mWindowManager;
     protected final Context mContext;
     private final int mTraceCookie;
+    private final boolean mNeedToFreezeScreen;
 
     UserSwitchingDialog(Context context, UserInfo oldUser, UserInfo newUser,
-            String switchingFromSystemUserMessage, String switchingToSystemUserMessage) {
+            String switchingFromSystemUserMessage, String switchingToSystemUserMessage,
+            WindowManagerService windowManager) {
         // TODO(b/278857848): Make full screen user switcher cover top part of the screen as well.
         //                    This problem is seen only on phones, it works fine on tablets.
         super(context, R.style.Theme_Material_NoActionBar_Fullscreen);
@@ -84,8 +88,10 @@ class UserSwitchingDialog extends Dialog {
         mNewUser = newUser;
         mSwitchingFromSystemUserMessage = switchingFromSystemUserMessage;
         mSwitchingToSystemUserMessage = switchingToSystemUserMessage;
-        mDisableAnimations = ActivityManager.isLowRamDeviceStatic() || SystemProperties.getBoolean(
+        mDisableAnimations = SystemProperties.getBoolean(
                 "debug.usercontroller.disable_user_switching_dialog_animations", false);
+        mWindowManager = windowManager;
+        mNeedToFreezeScreen = !mDisableAnimations && !isUserSetupComplete(newUser);
         mTraceCookie = UserHandle.MAX_SECONDARY_USER_ID * oldUser.id + newUser.id;
 
         inflateContent();
@@ -167,6 +173,11 @@ class UserSwitchingDialog extends Dialog {
                 : res.getString(R.string.user_switching_message, mNewUser.name);
     }
 
+    private boolean isUserSetupComplete(UserInfo user) {
+        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, /* default= */ 0, user.id) == 1;
+    }
+
     @Override
     public void show() {
         asyncTraceBegin("", 0);
@@ -176,29 +187,24 @@ class UserSwitchingDialog extends Dialog {
     @Override
     public void dismiss() {
         super.dismiss();
+        stopFreezingScreen();
         asyncTraceEnd("", 0);
     }
 
     public void show(@NonNull Runnable onShown) {
         if (DEBUG) Slog.d(TAG, "show called");
         show();
-
-        if (mDisableAnimations) {
+        startShowAnimation(() -> {
+            startFreezingScreen();
             onShown.run();
-        } else {
-            startShowAnimation(onShown);
-        }
+        });
     }
 
     public void dismiss(@Nullable Runnable onDismissed) {
         if (DEBUG) Slog.d(TAG, "dismiss called");
-
         if (onDismissed == null) {
             // no animation needed
             dismiss();
-        } else if (mDisableAnimations) {
-            dismiss();
-            onDismissed.run();
         } else {
             startDismissAnimation(() -> {
                 dismiss();
@@ -207,7 +213,31 @@ class UserSwitchingDialog extends Dialog {
         }
     }
 
+    private void startFreezingScreen() {
+        if (!mNeedToFreezeScreen) {
+            return;
+        }
+        if (DEBUG) Slog.d(TAG, "startFreezingScreen");
+        Trace.traceBegin(TRACE_TAG, "startFreezingScreen");
+        mWindowManager.startFreezingScreen(0, 0);
+        Trace.traceEnd(TRACE_TAG);
+    }
+
+    private void stopFreezingScreen() {
+        if (!mNeedToFreezeScreen) {
+            return;
+        }
+        if (DEBUG) Slog.d(TAG, "stopFreezingScreen");
+        Trace.traceBegin(TRACE_TAG, "stopFreezingScreen");
+        mWindowManager.stopFreezingScreen();
+        Trace.traceEnd(TRACE_TAG);
+    }
+
     private void startShowAnimation(Runnable onAnimationEnd) {
+        if (mDisableAnimations) {
+            onAnimationEnd.run();
+            return;
+        }
         asyncTraceBegin("-showAnimation", 1);
         startDialogAnimation(new AlphaAnimation(0, 1), () -> {
             asyncTraceEnd("-showAnimation", 1);
@@ -222,6 +252,11 @@ class UserSwitchingDialog extends Dialog {
     }
 
     private void startDismissAnimation(Runnable onAnimationEnd) {
+        if (mDisableAnimations || mNeedToFreezeScreen) {
+            // animations are disabled or screen is frozen, no need to play an animation
+            onAnimationEnd.run();
+            return;
+        }
         asyncTraceBegin("-dismissAnimation", 3);
         startDialogAnimation(new AlphaAnimation(1, 0), () -> {
             asyncTraceEnd("-dismissAnimation", 3);
@@ -231,6 +266,10 @@ class UserSwitchingDialog extends Dialog {
     }
 
     private void startProgressAnimation(Runnable onAnimationEnd) {
+        if (mDisableAnimations) {
+            onAnimationEnd.run();
+            return;
+        }
         final ImageView progressCircular = findViewById(R.id.progress_circular);
         final AnimatedVectorDrawable avd = (AnimatedVectorDrawable) progressCircular.getDrawable();
         avd.registerAnimationCallback(new Animatable2.AnimationCallback() {
