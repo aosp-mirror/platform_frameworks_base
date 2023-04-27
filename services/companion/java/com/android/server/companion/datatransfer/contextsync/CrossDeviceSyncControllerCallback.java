@@ -16,12 +16,14 @@
 
 package com.android.server.companion.datatransfer.contextsync;
 
+import android.companion.AssociationInfo;
+
 /** Callback for call metadata syncing. */
-public abstract class CallMetadataSyncCallback {
+public abstract class CrossDeviceSyncControllerCallback {
 
-    abstract void processCallControlAction(int crossDeviceCallId, int callControlAction);
+    void processContextSyncMessage(int associationId, CallMetadataSyncData callMetadataSyncData) {}
 
-    abstract void requestCrossDeviceSync(int userId);
+    void requestCrossDeviceSync(AssociationInfo associationInfo) {}
 
-    abstract void updateStatus(int userId, boolean shouldSyncCallMetadata);
+    void updateNumberOfActiveSyncAssociations(int userId, boolean added) {}
 }
