@@ -1004,7 +1004,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
 
-        final boolean interactive = Display.isOnState(mDefaultDisplay.getState());
+        final boolean interactive = mDefaultDisplayPolicy.isAwake();
 
         Slog.d(TAG, "powerPress: eventTime=" + eventTime + " interactive=" + interactive
                 + " count=" + count + " beganFromNonInteractive=" + beganFromNonInteractive
@@ -2201,8 +2201,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Match current screen state.
         if (!mPowerManager.isInteractive()) {
-            startedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
-            finishedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+            startedGoingToSleep(Display.DEFAULT_DISPLAY_GROUP,
+                    PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+            finishedGoingToSleep(Display.DEFAULT_DISPLAY_GROUP,
+                    PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
         }
 
         mWindowManagerInternal.registerAppTransitionListener(new AppTransitionListener() {
@@ -4095,7 +4097,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // This could prevent some wrong state in multi-displays environment,
         // the default display may turned off but interactive is true.
-        final boolean isDefaultDisplayOn = Display.isOnState(mDefaultDisplay.getState());
+        final boolean isDefaultDisplayOn = mDefaultDisplayPolicy.isAwake();
         final boolean interactiveAndOn = interactive && isDefaultDisplayOn;
         if ((event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
             handleKeyGesture(event, interactiveAndOn);
@@ -4795,17 +4797,40 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     };
 
+    @Override
+    public void startedWakingUpGlobal(@WakeReason int reason) {
+
+    }
+
+    @Override
+    public void finishedWakingUpGlobal(@WakeReason int reason) {
+
+    }
+
+    @Override
+    public void startedGoingToSleepGlobal(@PowerManager.GoToSleepReason int reason) {
+        mDeviceGoingToSleep = true;
+    }
+
+    @Override
+    public void finishedGoingToSleepGlobal(@PowerManager.GoToSleepReason int reason) {
+        mDeviceGoingToSleep = false;
+    }
+
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void startedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
+    public void startedGoingToSleep(int displayGroupId,
+            @PowerManager.GoToSleepReason int pmSleepReason) {
         if (DEBUG_WAKEUP) {
-            Slog.i(TAG, "Started going to sleep... (why="
+            Slog.i(TAG, "Started going to sleep... (groupId=" + displayGroupId + " why="
                     + WindowManagerPolicyConstants.offReasonToString(
                             WindowManagerPolicyConstants.translateSleepReasonToOffReason(
                                     pmSleepReason)) + ")");
         }
+        if (displayGroupId != Display.DEFAULT_DISPLAY_GROUP) {
+            return;
+        }
 
-        mDeviceGoingToSleep = true;
         mRequestedOrSleepingDefaultDisplay = true;
 
         if (mKeyguardDelegate != null) {
@@ -4815,17 +4840,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void finishedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
+    public void finishedGoingToSleep(int displayGroupId,
+            @PowerManager.GoToSleepReason int pmSleepReason) {
+        if (displayGroupId != Display.DEFAULT_DISPLAY_GROUP) {
+            return;
+        }
         EventLogTags.writeScreenToggled(0);
         if (DEBUG_WAKEUP) {
-            Slog.i(TAG, "Finished going to sleep... (why="
+            Slog.i(TAG, "Finished going to sleep... (groupId=" + displayGroupId + " why="
                     + WindowManagerPolicyConstants.offReasonToString(
                             WindowManagerPolicyConstants.translateSleepReasonToOffReason(
                                     pmSleepReason)) + ")");
         }
         MetricsLogger.histogram(mContext, "screen_timeout", mLockScreenTimeout / 1000);
 
-        mDeviceGoingToSleep = false;
         mRequestedOrSleepingDefaultDisplay = false;
         mDefaultDisplayPolicy.setAwake(false);
 
@@ -4850,26 +4878,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
-            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness) {
-        if (wakefulness != globalWakefulness
-                && wakefulness != PowerManagerInternal.WAKEFULNESS_AWAKE
-                && groupId == Display.DEFAULT_DISPLAY_GROUP
-                && mKeyguardDelegate != null) {
-            mKeyguardDelegate.doKeyguardTimeout(null);
-        }
-    }
-
-    // Called on the PowerManager's Notifier thread.
-    @Override
-    public void startedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
-        EventLogTags.writeScreenToggled(1);
+    public void startedWakingUp(int displayGroupId, @WakeReason int pmWakeReason) {
         if (DEBUG_WAKEUP) {
-            Slog.i(TAG, "Started waking up... (why="
+            Slog.i(TAG, "Started waking up... (groupId=" + displayGroupId + " why="
                     + WindowManagerPolicyConstants.onReasonToString(
-                            WindowManagerPolicyConstants.translateWakeReasonToOnReason(
-                                    pmWakeReason)) + ")");
+                    WindowManagerPolicyConstants.translateWakeReasonToOnReason(
+                            pmWakeReason)) + ")");
         }
+        if (displayGroupId != Display.DEFAULT_DISPLAY_GROUP) {
+            return;
+        }
+        EventLogTags.writeScreenToggled(1);
+
 
         mDefaultDisplayPolicy.setAwake(true);
 
@@ -4892,12 +4912,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void finishedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
+    public void finishedWakingUp(int displayGroupId, @WakeReason int pmWakeReason) {
         if (DEBUG_WAKEUP) {
-            Slog.i(TAG, "Finished waking up... (why="
+            Slog.i(TAG, "Finished waking up... (groupId=" + displayGroupId + " why="
                     + WindowManagerPolicyConstants.onReasonToString(
                             WindowManagerPolicyConstants.translateWakeReasonToOnReason(
                                     pmWakeReason)) + ")");
+        }
+        if (displayGroupId != Display.DEFAULT_DISPLAY_GROUP) {
+            return;
         }
 
         if (mKeyguardDelegate != null) {
@@ -5378,8 +5401,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
         mSideFpsEventHandler.onFingerprintSensorReady();
-        startedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
-        finishedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
+        startedWakingUp(Display.DEFAULT_DISPLAY_GROUP, PowerManager.WAKE_REASON_UNKNOWN);
+        finishedWakingUp(Display.DEFAULT_DISPLAY_GROUP, PowerManager.WAKE_REASON_UNKNOWN);
 
         int defaultDisplayState = mDisplayManager.getDisplay(DEFAULT_DISPLAY).getState();
         boolean defaultDisplayOn = defaultDisplayState == Display.STATE_ON;
