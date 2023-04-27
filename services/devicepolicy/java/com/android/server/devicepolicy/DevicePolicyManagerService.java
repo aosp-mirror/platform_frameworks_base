@@ -6041,7 +6041,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void lockNow(int flags, String callerPackageName, boolean parent) {
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(callerPackageName);
         } else {
             caller = getCallerIdentity();
@@ -6053,7 +6053,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin admin;
             // Make sure the caller has any active admin with the right policy or
             // the required permission.
-            if (isPolicyEngineForFinanceFlagEnabled()) {
+            if (isPermissionCheckFlagEnabled()) {
                 admin = enforcePermissionAndGetEnforcingAdmin(
                         /* admin= */ null,
                         /* permission= */ MANAGE_DEVICE_POLICY_LOCK,
@@ -8907,13 +8907,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             // The effect of this policy is device-wide.
             enforcePermission(SET_TIME, caller.getPackageName(), UserHandle.USER_ALL);
         } else {
@@ -8941,13 +8941,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             enforceCanQuery(SET_TIME, caller.getPackageName(), UserHandle.USER_ALL);
         } else {
             Objects.requireNonNull(who, "ComponentName is null");
@@ -8976,7 +8976,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             caller = getCallerIdentity(who);
         }
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             // The effect of this policy is device-wide.
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     who,
@@ -9016,13 +9016,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             // The effect of this policy is device-wide.
             enforceCanQuery(SET_TIME_ZONE, caller.getPackageName(), UserHandle.USER_ALL);
         } else {
@@ -9325,7 +9325,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
@@ -9335,7 +9335,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userHandle = caller.getUserId();
         int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
         synchronized (getLockObject()) {
-            if (isPolicyEngineForFinanceFlagEnabled()) {
+            if (isPermissionCheckFlagEnabled()) {
                 // SUPPORT USES_POLICY_DISABLE_KEYGUARD_FEATURES
                 EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(
                         who, MANAGE_DEVICE_POLICY_KEYGUARD, caller.getPackageName(),
@@ -9414,7 +9414,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (getLockObject()) {
             if (who != null) {
-                if (isPolicyEngineForFinanceFlagEnabled()) {
+                if (isPermissionCheckFlagEnabled()) {
                     EnforcingAdmin admin = getEnforcingAdminForCaller(
                             who, who.getPackageName());
                     Integer features = mDevicePolicyEngine.getLocalPolicySetByAdmin(
@@ -9428,7 +9428,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
 
-            if (isPolicyEngineForFinanceFlagEnabled()) {
+            if (isPermissionCheckFlagEnabled()) {
                 Integer features = mDevicePolicyEngine.getResolvedPolicy(
                         PolicyDefinition.KEYGUARD_DISABLED_FEATURES,
                         affectedUserId);
@@ -11625,7 +11625,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_APPLICATION_RESTRICTIONS);
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     who,
                     MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
@@ -13034,7 +13034,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String packageName) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             EnforcingAdmin enforcingAdmin = enforceCanQueryAndGetEnforcingAdmin(
                     who,
                     MANAGE_DEVICE_POLICY_APP_RESTRICTIONS,
@@ -13104,7 +13104,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
         ActiveAdmin admin;
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     who,
                     MANAGE_DEVICE_POLICY_PACKAGE_STATE,
@@ -13201,7 +13201,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean isPackageSuspended(ComponentName who, String callerPackage, String packageName) {
         final CallerIdentity caller = getCallerIdentity(who, callerPackage);
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             enforcePermission(
                     MANAGE_DEVICE_POLICY_PACKAGE_STATE,
                     caller.getPackageName(),
@@ -13807,7 +13807,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             boolean hidden, boolean parent) {
         CallerIdentity caller = getCallerIdentity(who, callerPackage);
         final int userId = parent ? getProfileParentId(caller.getUserId()) : caller.getUserId();
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             // TODO: We need to ensure the delegate with DELEGATION_PACKAGE_ACCESS can do this
             enforcePermission(MANAGE_DEVICE_POLICY_PACKAGE_STATE, caller.getPackageName(), userId);
         } else {
@@ -13826,7 +13826,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         boolean result;
         synchronized (getLockObject()) {
             if (parent) {
-                if (!isPolicyEngineForFinanceFlagEnabled()) {
+                if (!isPermissionCheckFlagEnabled()) {
                     Preconditions.checkCallAuthorization(
                             isProfileOwnerOfOrganizationOwnedDevice(
                                     caller.getUserId()) && isManagedProfile(caller.getUserId()));
@@ -13843,7 +13843,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slogf.v(LOG_TAG, "calling pm.setApplicationHiddenSettingAsUser(%s, %b, %d)",
                         packageName, hidden, userId);
             }
-            if (isPolicyEngineForFinanceFlagEnabled()) {
+            if (isPermissionCheckFlagEnabled()) {
                 EnforcingAdmin admin = getEnforcingAdminForCaller(who, callerPackage);
                 mDevicePolicyEngine.setLocalPolicy(
                         PolicyDefinition.APPLICATION_HIDDEN(packageName),
@@ -13882,7 +13882,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             String packageName, boolean parent) {
         CallerIdentity caller = getCallerIdentity(who, callerPackage);
         int userId = parent ? getProfileParentId(caller.getUserId()) : caller.getUserId();
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             // TODO: Also support DELEGATION_PACKAGE_ACCESS
             enforcePermission(MANAGE_DEVICE_POLICY_PACKAGE_STATE, caller.getPackageName(), userId);
         } else {
@@ -13894,7 +13894,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         synchronized (getLockObject()) {
             if (parent) {
-                if (!isPolicyEngineForFinanceFlagEnabled()) {
+                if (!isPermissionCheckFlagEnabled()) {
                     Preconditions.checkCallAuthorization(
                             isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId())
                                     && isManagedProfile(caller.getUserId()));
@@ -14083,13 +14083,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
         synchronized (getLockObject()) {
-            if (isPolicyEngineForFinanceFlagEnabled()) {
+            if (isPermissionCheckFlagEnabled()) {
                 int affectedUser = getAffectedUser(parent);
                 EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                         who,
@@ -14152,7 +14152,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         CallerIdentity caller;
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
         final ArraySet<String> resultSet = new ArraySet<>();
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             int affectedUser = parent ? getProfileParentId(userId) : userId;
             caller = getCallerIdentity(callerPackageName);
             if (!hasPermission(MANAGE_DEVICE_POLICY_ACCOUNT_MANAGEMENT,
@@ -15519,12 +15519,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public boolean setStatusBarDisabled(ComponentName who, String callerPackageName,
             boolean disabled) {
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
         }
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             enforcePermission(MANAGE_DEVICE_POLICY_STATUS_BAR, caller.getPackageName(),
                     UserHandle.USER_ALL);
         } else {
@@ -15535,7 +15535,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         int userId = caller.getUserId();
         synchronized (getLockObject()) {
-            if (!isPolicyEngineForFinanceFlagEnabled()) {
+            if (!isPermissionCheckFlagEnabled()) {
                 Preconditions.checkCallAuthorization(isUserAffiliatedWithDeviceLocked(userId),
                         "Admin " + who + " is neither the device owner or affiliated "
                                 + "user's profile owner.");
@@ -15594,7 +15594,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public boolean isStatusBarDisabled(String callerPackage) {
         final CallerIdentity caller = getCallerIdentity(callerPackage);
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             enforceCanQuery(
                     MANAGE_DEVICE_POLICY_STATUS_BAR, caller.getPackageName(), caller.getUserId());
         } else {
@@ -15604,7 +15604,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         int userId = caller.getUserId();
         synchronized (getLockObject()) {
-            if (!isPolicyEngineForFinanceFlagEnabled()) {
+            if (!isPermissionCheckFlagEnabled()) {
                 Preconditions.checkCallAuthorization(isUserAffiliatedWithDeviceLocked(userId),
                         "Admin " + callerPackage
                                 + " is neither the device owner or affiliated user's profile owner.");
@@ -16764,7 +16764,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             }
         }
         EnforcingAdmin enforcingAdmin;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS,
@@ -16935,7 +16935,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public int getPermissionGrantState(ComponentName admin, String callerPackage,
             String packageName, String permission) throws RemoteException {
         final CallerIdentity caller = getCallerIdentity(admin, callerPackage);
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             enforceCanQuery(MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS, caller.getPackageName(),
                     caller.getUserId());
         } else {
@@ -19067,14 +19067,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             throw new IllegalArgumentException("token must be at least 32-byte long");
         }
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(admin, callerPackageName);
         } else {
             caller = getCallerIdentity(admin);
         }
         final int userId = caller.getUserId();
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
@@ -19130,7 +19130,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(admin, callerPackageName);
         } else {
             caller = getCallerIdentity(admin);
@@ -19138,7 +19138,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int userId = caller.getUserId();
         boolean result = false;
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
@@ -19177,14 +19177,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return false;
         }
         CallerIdentity caller;
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             caller = getCallerIdentity(admin, callerPackageName);
         } else {
             caller = getCallerIdentity(admin);
         }
         int userId = caller.getUserId();
 
-        if (isPolicyEngineForFinanceFlagEnabled()) {
+        if (isPermissionCheckFlagEnabled()) {
             EnforcingAdmin enforcingAdmin = enforcePermissionAndGetEnforcingAdmin(
                     admin,
                     MANAGE_DEVICE_POLICY_RESET_PASSWORD,
