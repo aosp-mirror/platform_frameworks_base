@@ -336,6 +336,19 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                 tv.prepareOpenAnimation(taskIsNew, startTransaction, finishTransaction,
                         chg.getTaskInfo(), chg.getLeash(), wct);
                 changesHandled++;
+            } else if (chg.getMode() == TRANSIT_CHANGE) {
+                TaskViewTaskController tv = findTaskView(chg.getTaskInfo());
+                if (tv == null) {
+                    if (pending != null) {
+                        Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "
+                                + "shouldn't happen, so there may be a visual artifact: "
+                                + chg.getTaskInfo().taskId);
+                    }
+                    continue;
+                }
+                startTransaction.reparent(chg.getLeash(), tv.getSurfaceControl());
+                finishTransaction.reparent(chg.getLeash(), tv.getSurfaceControl());
+                changesHandled++;
             }
         }
         if (stillNeedsMatchingLaunch) {
