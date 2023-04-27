@@ -41,10 +41,10 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
-import java.util.Optional;
-
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
 
 /**
  * Provides dependencies from {@link com.android.wm.shell}, these dependencies are only
@@ -81,7 +81,7 @@ public class TvWMShellModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
