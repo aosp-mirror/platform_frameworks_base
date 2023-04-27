@@ -12783,7 +12783,6 @@ public class Notification implements Parcelable
                 } else {
                     mBackgroundColor = rawColor;
                 }
-                mProtectionColor = COLOR_INVALID;  // filled in at the end
                 mPrimaryTextColor = ContrastColorUtil.findAlphaToMeetContrast(
                         ContrastColorUtil.resolvePrimaryColor(ctx, mBackgroundColor, nightMode),
                         mBackgroundColor, 4.5);
@@ -12800,7 +12799,6 @@ public class Notification implements Parcelable
             } else {
                 int[] attrs = {
                         R.attr.colorSurface,
-                        R.attr.colorBackgroundFloating,
                         R.attr.textColorPrimary,
                         R.attr.textColorSecondary,
                         R.attr.colorAccent,
@@ -12812,15 +12810,14 @@ public class Notification implements Parcelable
                 };
                 try (TypedArray ta = obtainDayNightAttributes(ctx, attrs)) {
                     mBackgroundColor = getColor(ta, 0, nightMode ? Color.BLACK : Color.WHITE);
-                    mProtectionColor = getColor(ta, 1, COLOR_INVALID);
-                    mPrimaryTextColor = getColor(ta, 2, COLOR_INVALID);
-                    mSecondaryTextColor = getColor(ta, 3, COLOR_INVALID);
-                    mPrimaryAccentColor = getColor(ta, 4, COLOR_INVALID);
-                    mSecondaryAccentColor = getColor(ta, 5, COLOR_INVALID);
-                    mTertiaryAccentColor = getColor(ta, 6, COLOR_INVALID);
-                    mOnAccentTextColor = getColor(ta, 7, COLOR_INVALID);
-                    mErrorColor = getColor(ta, 8, COLOR_INVALID);
-                    mRippleAlpha = Color.alpha(getColor(ta, 9, 0x33ffffff));
+                    mPrimaryTextColor = getColor(ta, 1, COLOR_INVALID);
+                    mSecondaryTextColor = getColor(ta, 2, COLOR_INVALID);
+                    mPrimaryAccentColor = getColor(ta, 3, COLOR_INVALID);
+                    mSecondaryAccentColor = getColor(ta, 4, COLOR_INVALID);
+                    mTertiaryAccentColor = getColor(ta, 5, COLOR_INVALID);
+                    mOnAccentTextColor = getColor(ta, 6, COLOR_INVALID);
+                    mErrorColor = getColor(ta, 7, COLOR_INVALID);
+                    mRippleAlpha = Color.alpha(getColor(ta, 8, 0x33ffffff));
                 }
                 mContrastColor = calculateContrastColor(ctx, rawColor, mPrimaryAccentColor,
                         mBackgroundColor, nightMode);
@@ -12853,9 +12850,7 @@ public class Notification implements Parcelable
                 }
             }
             // make sure every color has a valid value
-            if (mProtectionColor == COLOR_INVALID) {
-                mProtectionColor = ColorUtils.blendARGB(mPrimaryTextColor, mBackgroundColor, 0.8f);
-            }
+            mProtectionColor = ColorUtils.blendARGB(mPrimaryTextColor, mBackgroundColor, 0.9f);
         }
 
         /** calculates the contrast color for the non-colorized notifications */
