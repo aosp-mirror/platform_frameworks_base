@@ -82,6 +82,10 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         mGuard.open("release");
     }
 
+    SurfaceControl getSurfaceControl() {
+        return mSurfaceControl;
+    }
+
     /**
      * Sets the provided {@link TaskViewBase}, which is used to notify the client part about the
      * task related changes and getting the current bounds.
