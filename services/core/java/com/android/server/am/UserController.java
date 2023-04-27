@@ -3584,7 +3584,8 @@ class UserController implements Handler.Callback {
             synchronized (mUserSwitchingDialogLock) {
                 dismissUserSwitchingDialog(null);
                 mUserSwitchingDialog = new UserSwitchingDialog(mService.mContext, fromUser, toUser,
-                        switchingFromSystemUserMessage, switchingToSystemUserMessage);
+                        switchingFromSystemUserMessage, switchingToSystemUserMessage,
+                        getWindowManager());
                 mUserSwitchingDialog.show(onShown);
             }
         }
