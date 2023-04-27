@@ -2548,7 +2548,6 @@ public final class DisplayManagerService extends SystemService {
             final DisplayInfo displayInfo = logicalDisplay.getDisplayInfoLocked();
             captureArgs = new ScreenCapture.DisplayCaptureArgs.Builder(token)
                     .setSize(displayInfo.getNaturalWidth(), displayInfo.getNaturalHeight())
-                    .setUseIdentityTransform(true)
                     .setCaptureSecureLayers(true)
                     .setAllowProtected(true)
                     .build();
