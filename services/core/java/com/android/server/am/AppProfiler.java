@@ -1199,6 +1199,9 @@ public class AppProfiler {
                     .sendToTarget();
         }
 
+        mCachedAppsWatermarkData.updateCachedAppsHighWatermarkIfNecessaryLocked(
+                numCached + numEmpty, now);
+
         if (mService.mConstants.USE_MODERN_TRIM) {
             // Modern trim is not sent based on lowmem state
             // Dispatch UI_HIDDEN to processes that need it
@@ -1316,8 +1319,6 @@ public class AppProfiler {
                 profile.setTrimMemoryLevel(0);
             });
         }
-        mCachedAppsWatermarkData.updateCachedAppsHighWatermarkIfNecessaryLocked(
-                numCached + numEmpty, now);
         return allChanged;
     }
 
