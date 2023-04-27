@@ -102,9 +102,7 @@ sealed class ExternalState(
     privilegedPermissionAllowlistPackages: IndexedListSet<String>,
     permissionAllowlist: PermissionAllowlist,
     implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>,
-    isSystemReady: Boolean,
-    // TODO: STOPSHIP: Get and watch the state for deviceAndProfileOwners
-    deviceAndProfileOwners: IntMap<String>
+    isSystemReady: Boolean
 ) : Immutable<MutableExternalState> {
     val userIds: IntSet
         get() = userIdsReference.get()
@@ -141,9 +139,6 @@ sealed class ExternalState(
     var isSystemReady: Boolean = isSystemReady
         protected set
 
-    var deviceAndProfileOwners: IntMap<String> = deviceAndProfileOwners
-        protected set
-
     override fun toMutable(): MutableExternalState = MutableExternalState(this)
 }
 
@@ -158,8 +153,7 @@ class MutableExternalState private constructor(
     privilegedPermissionAllowlistPackages: IndexedListSet<String>,
     permissionAllowlist: PermissionAllowlist,
     implicitToSourcePermissions: IndexedMap<String, IndexedListSet<String>>,
-    isSystemReady: Boolean,
-    deviceAndProfileOwners: IntMap<String>
+    isSystemReady: Boolean
 ) : ExternalState(
     userIdsReference,
     packageStates,
@@ -171,8 +165,7 @@ class MutableExternalState private constructor(
     privilegedPermissionAllowlistPackages,
     permissionAllowlist,
     implicitToSourcePermissions,
-    isSystemReady,
-    deviceAndProfileOwners
+    isSystemReady
 ) {
     constructor() : this(
         UserIdsReference(MutableIntSet()),
@@ -185,8 +178,7 @@ class MutableExternalState private constructor(
         MutableIndexedListSet(),
         PermissionAllowlist(),
         MutableIndexedMap(),
-        false,
-        MutableIntMap()
+        false
     )
 
     internal constructor(externalState: ExternalState) : this(
@@ -200,8 +192,7 @@ class MutableExternalState private constructor(
         externalState.privilegedPermissionAllowlistPackages,
         externalState.permissionAllowlist,
         externalState.implicitToSourcePermissions,
-        externalState.isSystemReady,
-        externalState.deviceAndProfileOwners
+        externalState.isSystemReady
     )
 
     fun mutateUserIds(): MutableIntSet = userIdsReference.mutate()
@@ -255,11 +246,6 @@ class MutableExternalState private constructor(
     @JvmName("setSystemReadyPublic")
     fun setSystemReady(isSystemReady: Boolean) {
         this.isSystemReady = isSystemReady
-    }
-
-    @JvmName("setDeviceAndProfileOwnersPublic")
-    fun setDeviceAndProfileOwners(deviceAndProfileOwners: IntMap<String>) {
-        this.deviceAndProfileOwners = deviceAndProfileOwners
     }
 }
 
