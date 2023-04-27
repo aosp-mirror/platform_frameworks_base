@@ -17,6 +17,7 @@
 package android.app.backup;
 
 import android.annotation.SystemApi;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.os.Bundle;
 
 /**
@@ -135,6 +136,13 @@ public class BackupManagerMonitor {
    */
   public static final String EXTRA_LOG_AGENT_LOGGING_RESULTS =
           "android.app.backup.extra.LOG_AGENT_LOGGING_RESULTS";
+
+  /**
+   * The operation type this log is associated with. See {@link OperationType}.
+   *
+   * @hide
+   */
+  public static final String EXTRA_LOG_OPERATION_TYPE = "android.app.backup.extra.OPERATION_TYPE";
 
   // TODO complete this list with all log messages. And document properly.
   public static final int LOG_EVENT_ID_FULL_BACKUP_CANCEL = 4;

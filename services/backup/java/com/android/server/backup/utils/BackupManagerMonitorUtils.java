@@ -18,6 +18,7 @@ package com.android.server.backup.utils;
 
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_AGENT_LOGGING_RESULTS;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS;
 
@@ -27,6 +28,7 @@ import static com.android.server.backup.BackupManagerService.TAG;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.IBackupAgent;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.IBackupManagerMonitor;
@@ -122,9 +124,13 @@ public class BackupManagerMonitorUtils {
         try {
             AndroidFuture<List<DataTypeResult>> resultsFuture =
                     new AndroidFuture<>();
+            AndroidFuture<Integer> operationTypeFuture = new AndroidFuture<>();
             agent.getLoggerResults(resultsFuture);
+            agent.getOperationType(operationTypeFuture);
             return sendAgentLoggingResults(monitor, pkg,
-                    resultsFuture.get(AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS));
+                    resultsFuture.get(AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS),
+                    operationTypeFuture.get(AGENT_LOGGER_RESULTS_TIMEOUT_MILLIS,
+                            TimeUnit.MILLISECONDS));
         } catch (TimeoutException e) {
             Slog.w(TAG, "Timeout while waiting to retrieve logging results from agent", e);
         } catch (Exception e) {
@@ -134,10 +140,12 @@ public class BackupManagerMonitorUtils {
     }
 
     public static IBackupManagerMonitor sendAgentLoggingResults(
-            @NonNull IBackupManagerMonitor monitor, PackageInfo pkg, List<DataTypeResult> results) {
+            @NonNull IBackupManagerMonitor monitor, PackageInfo pkg, List<DataTypeResult> results,
+            @OperationType int operationType) {
         Bundle loggerResultsBundle = new Bundle();
         loggerResultsBundle.putParcelableList(
                 EXTRA_LOG_AGENT_LOGGING_RESULTS, results);
+        loggerResultsBundle.putInt(EXTRA_LOG_OPERATION_TYPE, operationType);
         return monitorEvent(
                 monitor,
                 LOG_EVENT_ID_AGENT_LOGGING_RESULTS,

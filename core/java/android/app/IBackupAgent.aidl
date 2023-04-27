@@ -208,6 +208,12 @@ oneway interface IBackupAgent {
             in AndroidFuture<List<BackupRestoreEventLogger.DataTypeResult>> resultsFuture);
 
     /**
+    * Provides the operation type (backup or restore) the agent is created for. See
+    * {@link android.app.backup.BackupAnnotations.OperationType}.
+    */
+    void getOperationType(in AndroidFuture<int> operationTypeFuture);
+
+    /**
      * Clears the logs accumulated by the BackupAgent during a backup or restore operation.
      */
     void clearBackupRestoreEventLogger();

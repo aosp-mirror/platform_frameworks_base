@@ -21,6 +21,7 @@ import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_ID;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_LONG_VERSION;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_NAME;
 import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_EVENT_PACKAGE_VERSION;
+import static android.app.backup.BackupManagerMonitor.EXTRA_LOG_OPERATION_TYPE;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_CATEGORY_AGENT;
 import static android.app.backup.BackupManagerMonitor.LOG_EVENT_ID_AGENT_LOGGING_RESULTS;
 
@@ -33,6 +34,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import android.app.IBackupAgent;
+import android.app.backup.BackupAnnotations;
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.BackupManagerMonitor;
 import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.IBackupManagerMonitor;
@@ -155,50 +158,94 @@ public class BackupManagerMonitorUtilsTest {
     }
 
     @Test
-    public void monitorAgentLoggingResults_fillsBundleCorrectly() throws Exception {
+    public void monitorAgentLoggingResults_onBackup_fillsBundleCorrectly() throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test.package";
         // Mock an agent that returns a logging result.
-        IBackupAgent agent = spy(IBackupAgent.class);
-        List<BackupRestoreEventLogger.DataTypeResult> loggingResults = new ArrayList<>();
-        loggingResults.add(new BackupRestoreEventLogger.DataTypeResult("testLoggingResult"));
-        doAnswer(
-                        invocation -> {
-                            AndroidFuture<List<BackupRestoreEventLogger.DataTypeResult>> in =
-                                    invocation.getArgument(0);
-                            in.complete(loggingResults);
-                            return null;
-                        })
-                .when(agent)
-                .getLoggerResults(any());
+        IBackupAgent agent = setUpLoggingAgentForOperation(OperationType.BACKUP);
 
         IBackupManagerMonitor monitor =
                 BackupManagerMonitorUtils.monitorAgentLoggingResults(
                         mMonitorMock, packageInfo, agent);
 
-        assertCorrectBundleSentToMonitor(monitor);
+        assertCorrectBundleSentToMonitor(monitor, OperationType.BACKUP);
     }
 
     @Test
-    public void sendAgentLoggingResults_fillsBundleCorrectly() throws Exception {
+    public void monitorAgentLoggingResults_onRestore_fillsBundleCorrectly() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test.package";
+        // Mock an agent that returns a logging result.
+        IBackupAgent agent = setUpLoggingAgentForOperation(OperationType.RESTORE);
+
+        IBackupManagerMonitor monitor =
+                BackupManagerMonitorUtils.monitorAgentLoggingResults(
+                        mMonitorMock, packageInfo, agent);
+
+        assertCorrectBundleSentToMonitor(monitor, OperationType.RESTORE);
+    }
+
+    private IBackupAgent setUpLoggingAgentForOperation(@OperationType int operationType)
+            throws Exception {
+        IBackupAgent agent = spy(IBackupAgent.class);
+        List<BackupRestoreEventLogger.DataTypeResult> loggingResults = new ArrayList<>();
+        loggingResults.add(new BackupRestoreEventLogger.DataTypeResult("testLoggingResult"));
+        doAnswer(
+                invocation -> {
+                    AndroidFuture<List<BackupRestoreEventLogger.DataTypeResult>> in =
+                            invocation.getArgument(0);
+                    in.complete(loggingResults);
+                    return null;
+                })
+                .when(agent)
+                .getLoggerResults(any());
+        doAnswer(
+                invocation -> {
+                    AndroidFuture<Integer> in = invocation.getArgument(0);
+                    in.complete(operationType);
+                    return null;
+                })
+                .when(agent)
+                .getOperationType(any());
+        return agent;
+    }
+
+    @Test
+    public void sendAgentLoggingResults_onBackup_fillsBundleCorrectly() throws Exception {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.packageName = "test.package";
         List<BackupRestoreEventLogger.DataTypeResult> loggingResults = new ArrayList<>();
         loggingResults.add(new BackupRestoreEventLogger.DataTypeResult("testLoggingResult"));
 
         IBackupManagerMonitor monitor = BackupManagerMonitorUtils.sendAgentLoggingResults(
-                mMonitorMock, packageInfo, loggingResults);
+                mMonitorMock, packageInfo, loggingResults, OperationType.BACKUP);
 
-        assertCorrectBundleSentToMonitor(monitor);
+        assertCorrectBundleSentToMonitor(monitor, OperationType.BACKUP);
     }
 
-    private void assertCorrectBundleSentToMonitor(IBackupManagerMonitor monitor) throws Exception {
+    @Test
+    public void sendAgentLoggingResults_onRestore_fillsBundleCorrectly() throws Exception {
+        PackageInfo packageInfo = new PackageInfo();
+        packageInfo.packageName = "test.package";
+        List<BackupRestoreEventLogger.DataTypeResult> loggingResults = new ArrayList<>();
+        loggingResults.add(new BackupRestoreEventLogger.DataTypeResult("testLoggingResult"));
+
+        IBackupManagerMonitor monitor = BackupManagerMonitorUtils.sendAgentLoggingResults(
+                mMonitorMock, packageInfo, loggingResults, OperationType.RESTORE);
+
+        assertCorrectBundleSentToMonitor(monitor, OperationType.RESTORE);
+    }
+
+    private void assertCorrectBundleSentToMonitor(IBackupManagerMonitor monitor,
+            @OperationType int operationType) throws Exception {
 
 
         assertThat(monitor).isEqualTo(mMonitorMock);
         ArgumentCaptor<Bundle> bundleCaptor = ArgumentCaptor.forClass(Bundle.class);
         verify(mMonitorMock).onEvent(bundleCaptor.capture());
         Bundle eventBundle = bundleCaptor.getValue();
+        assertThat(eventBundle.getInt(EXTRA_LOG_OPERATION_TYPE))
+                .isEqualTo(operationType);
         assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_ID))
                 .isEqualTo(LOG_EVENT_ID_AGENT_LOGGING_RESULTS);
         assertThat(eventBundle.getInt(EXTRA_LOG_EVENT_CATEGORY))
