@@ -23,12 +23,6 @@ import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.OpenForTesting
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogMessage
-import com.android.systemui.log.LogMessageImpl
-import com.android.systemui.log.MessageInitializer
-import com.android.systemui.log.MessagePrinter
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockId
 import com.android.systemui.plugins.ClockMetadata
@@ -38,6 +32,12 @@ import com.android.systemui.plugins.ClockSettings
 import com.android.systemui.plugins.PluginLifecycleManager
 import com.android.systemui.plugins.PluginListener
 import com.android.systemui.plugins.PluginManager
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.plugins.log.LogMessage
+import com.android.systemui.plugins.log.LogMessageImpl
+import com.android.systemui.plugins.log.MessageInitializer
+import com.android.systemui.plugins.log.MessagePrinter
 import com.android.systemui.util.Assert
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap

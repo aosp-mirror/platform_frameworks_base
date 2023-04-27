@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.notification.collection.coordinator
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.UnseenNotificationLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 private const val TAG = "KeyguardCoordinator"
