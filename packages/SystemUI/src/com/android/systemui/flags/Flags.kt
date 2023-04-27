@@ -386,7 +386,7 @@ object Flags {
     val MEDIA_TAP_TO_TRANSFER_DISMISS_GESTURE = releasedFlag(912, "media_ttt_dismiss_gesture")
 
     // TODO(b/266157412): Tracking Bug
-    val MEDIA_RETAIN_SESSIONS = releasedFlag(913, "media_retain_sessions")
+    val MEDIA_RETAIN_SESSIONS = unreleasedFlag(913, "media_retain_sessions")
 
     // TODO(b/266739309): Tracking Bug
     @JvmField
@@ -396,10 +396,10 @@ object Flags {
     val MEDIA_RESUME_PROGRESS = releasedFlag(915, "media_resume_progress")
 
     // TODO(b/267166152) : Tracking Bug
-    val MEDIA_RETAIN_RECOMMENDATIONS = releasedFlag(916, "media_retain_recommendations")
+    val MEDIA_RETAIN_RECOMMENDATIONS = unreleasedFlag(916, "media_retain_recommendations")
 
     // TODO(b/270437894): Tracking Bug
-    val MEDIA_REMOTE_RESUME = releasedFlag(917, "media_remote_resume")
+    val MEDIA_REMOTE_RESUME = unreleasedFlag(917, "media_remote_resume")
 
     // 1000 - dock
     val SIMULATE_DOCK_THROUGH_CHARGING = releasedFlag(1000, "simulate_dock_through_charging")
