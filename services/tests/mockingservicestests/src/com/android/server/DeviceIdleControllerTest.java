@@ -154,6 +154,7 @@ public class DeviceIdleControllerTest {
         // Freeze time for testing.
         long nowElapsed;
         boolean useMotionSensor = true;
+        boolean isLocationPrefetchEnabled = true;
 
         InjectorForTest(Context ctx) {
             super(ctx);
@@ -220,6 +221,11 @@ public class DeviceIdleControllerTest {
         @Override
         Sensor getMotionSensor() {
             return mMotionSensor;
+        }
+
+        @Override
+        boolean isLocationPrefetchEnabled() {
+            return isLocationPrefetchEnabled;
         }
 
         @Override
@@ -991,6 +997,43 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
+    public void testStepIdleStateLocked_ValidStates_LocationPrefetchDisabled() {
+        mInjector.locationManager = mLocationManager;
+        mInjector.isLocationPrefetchEnabled = false;
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+        doReturn(mock(LocationProvider.class)).when(mLocationManager).getProvider(anyString());
+        // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
+        setAlarmSoon(false);
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyStateConditions(STATE_INACTIVE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_PENDING);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_SENSING);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        // Prefetch location is off, so SENSING should go straight through to IDLE.
+        verifyStateConditions(STATE_IDLE);
+
+        // Should just alternate between IDLE and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
     public void testStepIdleStateLocked_ValidStates_WithLocationManager_NoProviders() {
         // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
         setAlarmSoon(false);
@@ -1009,6 +1052,46 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.stepIdleStateLocked("testing");
         // Location manager exists but there isn't a network or GPS provider,
         // so SENSING should go straight to IDLE.
+        verifyStateConditions(STATE_IDLE);
+
+        // Should just alternate between IDLE and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testStepIdleStateLocked_ValidStates_WithLocationManager_MissingProviders() {
+        mInjector.locationManager = mLocationManager;
+        doReturn(null).when(mLocationManager)
+                .getProvider(eq(LocationManager.FUSED_PROVIDER));
+        doReturn(null).when(mLocationManager)
+                .getProvider(eq(LocationManager.GPS_PROVIDER));
+        doReturn(mock(LocationProvider.class)).when(mLocationManager)
+                .getProvider(eq(LocationManager.NETWORK_PROVIDER));
+        // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
+        setAlarmSoon(false);
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyStateConditions(STATE_INACTIVE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_PENDING);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_SENSING);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        // Location manager exists, but the required providers don't exist,
+        // so SENSING should go straight through to IDLE.
         verifyStateConditions(STATE_IDLE);
 
         // Should just alternate between IDLE and IDLE_MAINTENANCE now.
