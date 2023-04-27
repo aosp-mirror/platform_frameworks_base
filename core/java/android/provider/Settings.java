@@ -11496,6 +11496,8 @@ public final class Settings {
         public static final int DEVICE_STATE_ROTATION_KEY_HALF_FOLDED = 1;
         /** @hide */
         public static final int DEVICE_STATE_ROTATION_KEY_UNFOLDED = 2;
+        /** @hide */
+        public static final int DEVICE_STATE_ROTATION_KEY_REAR_DISPLAY = 3;
 
         /**
          * The different postures that can be used as keys with
@@ -11507,6 +11509,7 @@ public final class Settings {
                 DEVICE_STATE_ROTATION_KEY_FOLDED,
                 DEVICE_STATE_ROTATION_KEY_HALF_FOLDED,
                 DEVICE_STATE_ROTATION_KEY_UNFOLDED,
+                DEVICE_STATE_ROTATION_KEY_REAR_DISPLAY,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface DeviceStateRotationLockKey {
