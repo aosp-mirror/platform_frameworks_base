@@ -85,6 +85,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -117,6 +118,7 @@ public class QuickSettingsController {
     private final PulseExpansionHandler mPulseExpansionHandler;
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    private final LightBarController mLightBarController;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final NotificationShadeDepthController mDepthController;
@@ -304,6 +306,7 @@ public class QuickSettingsController {
             NotificationRemoteInputManager remoteInputManager,
             ShadeExpansionStateManager shadeExpansionStateManager,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
+            LightBarController lightBarController,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             NotificationShadeDepthController notificationShadeDepthController,
@@ -346,6 +349,7 @@ public class QuickSettingsController {
         mRemoteInputManager = remoteInputManager;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
+        mLightBarController = lightBarController;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mDepthController = notificationShadeDepthController;
@@ -1018,6 +1022,9 @@ public class QuickSettingsController {
         mShadeHeaderController.setShadeExpandedFraction(shadeExpandedFraction);
         mShadeHeaderController.setQsExpandedFraction(qsExpansionFraction);
         mShadeHeaderController.setQsVisible(mVisible);
+
+        // Update the light bar
+        mLightBarController.setQsExpanded(mFullyExpanded);
     }
 
     float getLockscreenShadeDragProgress() {
