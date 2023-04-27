@@ -25,13 +25,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.IActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -59,13 +57,14 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class WorkLockActivityControllerTest extends SysuiTestCase {
-    private static final int USER_ID = 333;
+    private static final int TASK_USER_ID = 333;
+    private static final int PROFILE_USER_ID = 555;
     private static final int TASK_ID = 444;
     private static final ActivityManager.RunningTaskInfo TASK_INFO =
             new ActivityManager.RunningTaskInfo();
 
     static {
-        TASK_INFO.userId = USER_ID;
+        TASK_INFO.userId = TASK_USER_ID;
         TASK_INFO.taskId = TASK_ID;
     }
 
@@ -101,10 +100,10 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         setActivityStartCode(TASK_ID, true /*taskOverlay*/, ActivityManager.START_SUCCESS);
 
         // And the controller receives a message saying the profile is locked,
-        mTaskStackListener.onTaskProfileLocked(TASK_INFO);
+        mTaskStackListener.onTaskProfileLocked(TASK_INFO, PROFILE_USER_ID);
 
         // The overlay should start and the task the activity started in should not be removed.
-        verifyStartActivity(TASK_ID, true /*taskOverlay*/);
+        verifyStartActivity(TASK_ID, true /*taskOverlay*/, PROFILE_USER_ID);
         verify(mIActivityTaskManager, never()).removeTask(anyInt() /*taskId*/);
     }
 
@@ -114,11 +113,11 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
         setActivityStartCode(TASK_ID, true /*taskOverlay*/, ActivityManager.START_CLASS_NOT_FOUND);
 
         // And the controller receives a message saying the profile is locked,
-        mTaskStackListener.onTaskProfileLocked(TASK_INFO);
+        mTaskStackListener.onTaskProfileLocked(TASK_INFO, PROFILE_USER_ID);
 
         // The task the activity started in should be removed to prevent the locked task from
         // being shown.
-        verifyStartActivity(TASK_ID, true /*taskOverlay*/);
+        verifyStartActivity(TASK_ID, true /*taskOverlay*/, PROFILE_USER_ID);
         verify(mIActivityTaskManager).removeTask(TASK_ID);
     }
 
@@ -141,12 +140,13 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
                 eq(ActivityManager.getCurrentUser()));
     }
 
-    private void verifyStartActivity(int taskId, boolean taskOverlay) throws Exception {
+    private void verifyStartActivity(int taskId, boolean taskOverlay, int profileUserId)
+            throws Exception {
         verify(mIActivityTaskManager).startActivityAsUser(
                 eq((IApplicationThread) null),
                 eq((String) null),
                 eq((String) null),
-                any(Intent.class),
+                argThat(hasUserId(profileUserId)),
                 eq((String) null),
                 eq((IBinder) null),
                 eq((String) null),
@@ -157,24 +157,15 @@ public class WorkLockActivityControllerTest extends SysuiTestCase {
                 eq(ActivityManager.getCurrentUser()));
     }
 
-    private static ArgumentMatcher<Intent> hasComponent(final Context context,
-            final Class<? extends Activity> activityClass) {
-        return new ArgumentMatcher<Intent>() {
-            @Override
-            public boolean matches(Intent intent) {
-                return new ComponentName(context, activityClass).equals(intent.getComponent());
-            }
-        };
+    private static ArgumentMatcher<Intent> hasUserId(int userId) {
+        return intent -> intent.getIntExtra(Intent.EXTRA_USER_ID, -1) == userId;
     }
 
     private static ArgumentMatcher<Bundle> hasOptions(final int taskId, final boolean overlay) {
-        return new ArgumentMatcher<Bundle>() {
-            @Override
-            public boolean matches(Bundle item) {
-                final ActivityOptions options = ActivityOptions.fromBundle(item);
-                return (options.getLaunchTaskId() == taskId)
-                        && (options.getTaskOverlay() == overlay);
-            }
+        return item -> {
+            final ActivityOptions options = ActivityOptions.fromBundle(item);
+            return (options.getLaunchTaskId() == taskId)
+                    && (options.getTaskOverlay() == overlay);
         };
     }
 }
