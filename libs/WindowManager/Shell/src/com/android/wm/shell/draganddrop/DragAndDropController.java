@@ -94,7 +94,24 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         void onDragStarted();
     }
 
-    public DragAndDropController(Context context,
+    /**
+     * Creates {@link DragAndDropController}. Returns {@code null} if the feature is disabled.
+     */
+    public static DragAndDropController create(Context context,
+            ShellInit shellInit,
+            ShellController shellController,
+            DisplayController displayController,
+            UiEventLogger uiEventLogger,
+            IconProvider iconProvider,
+            ShellExecutor mainExecutor) {
+        if (!context.getResources().getBoolean(R.bool.config_enableShellDragDrop)) {
+            return null;
+        }
+        return new DragAndDropController(context, shellInit, shellController, displayController,
+                uiEventLogger, iconProvider, mainExecutor);
+    }
+
+    DragAndDropController(Context context,
             ShellInit shellInit,
             ShellController shellController,
             DisplayController displayController,
