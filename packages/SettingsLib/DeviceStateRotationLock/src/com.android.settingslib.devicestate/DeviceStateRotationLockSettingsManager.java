@@ -62,7 +62,6 @@ public final class DeviceStateRotationLockSettingsManager {
     private SparseIntArray mPostureRotationLockSettings;
     private SparseIntArray mPostureDefaultRotationLockSettings;
     private SparseIntArray mPostureRotationLockFallbackSettings;
-    private String mLastSettingValue;
     private List<SettableDeviceState> mSettableDeviceStates;
 
     @VisibleForTesting
@@ -209,10 +208,7 @@ public final class DeviceStateRotationLockSettingsManager {
     }
 
     private void initializeInMemoryMap() {
-        String serializedSetting =
-                mSecureSettings.getStringForUser(
-                        Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
-                        UserHandle.USER_CURRENT);
+        String serializedSetting = getPersistedSettingValue();
         if (TextUtils.isEmpty(serializedSetting)) {
             // No settings saved, we should load the defaults and persist them.
             fallbackOnDefaults();
@@ -290,16 +286,22 @@ public final class DeviceStateRotationLockSettingsManager {
     }
 
     private void persistSettingIfChanged(String newSettingValue) {
+        String lastSettingValue = getPersistedSettingValue();
         Log.v(TAG, "persistSettingIfChanged: "
-                + "last=" + mLastSettingValue + ", "
+                + "last=" + lastSettingValue + ", "
                 + "new=" + newSettingValue);
-        if (TextUtils.equals(mLastSettingValue, newSettingValue)) {
+        if (TextUtils.equals(lastSettingValue, newSettingValue)) {
             return;
         }
-        mLastSettingValue = newSettingValue;
         mSecureSettings.putStringForUser(
                 Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
                 /* value= */ newSettingValue,
+                UserHandle.USER_CURRENT);
+    }
+
+    private String getPersistedSettingValue() {
+        return mSecureSettings.getStringForUser(
+                Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
                 UserHandle.USER_CURRENT);
     }
 
@@ -351,7 +353,6 @@ public final class DeviceStateRotationLockSettingsManager {
         pw.println("mDeviceStateRotationLockSettings: " + mPostureRotationLockSettings);
         pw.println("mPostureRotationLockFallbackSettings: " + mPostureRotationLockFallbackSettings);
         pw.println("mSettableDeviceStates: " + mSettableDeviceStates);
-        pw.println("mLastSettingValue: " + mLastSettingValue);
         pw.decreaseIndent();
     }
 
