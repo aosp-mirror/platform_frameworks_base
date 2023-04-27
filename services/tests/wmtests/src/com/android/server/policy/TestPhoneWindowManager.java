@@ -246,8 +246,8 @@ class TestPhoneWindowManager {
         doNothing().when(mPhoneWindowManager).updateSettings();
         doNothing().when(mPhoneWindowManager).screenTurningOn(anyInt(), any());
         doNothing().when(mPhoneWindowManager).screenTurnedOn(anyInt());
-        doNothing().when(mPhoneWindowManager).startedWakingUp(anyInt());
-        doNothing().when(mPhoneWindowManager).finishedWakingUp(anyInt());
+        doNothing().when(mPhoneWindowManager).startedWakingUp(anyInt(), anyInt());
+        doNothing().when(mPhoneWindowManager).finishedWakingUp(anyInt(), anyInt());
 
         mPhoneWindowManager.init(new TestInjector(mContext, mWindowManagerFuncsImpl));
         mPhoneWindowManager.systemReady();
