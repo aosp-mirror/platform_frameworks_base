@@ -695,7 +695,9 @@
             android:relinquishTaskIdentity="true"
             android:configChanges=
                 "screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-            android:visibleToInstantApps="true"/>
+            android:visibleToInstantApps="true"
+            android:exported="false"
+            android:permission="android.permission.MANAGE_MEDIA_PROJECTION"/>
 
         <!-- started from TvNotificationPanel -->
         <activity
