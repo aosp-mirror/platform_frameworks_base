@@ -437,6 +437,16 @@ public class DefaultCrossProfileIntentFiltersUtils {
                     .addCategory(Intent.CATEGORY_DEFAULT)
                     .build();
 
+    private static final DefaultCrossProfileIntentFilter CLONE_TO_PARENT_PHOTOPICKER_SELECTION =
+            new DefaultCrossProfileIntentFilter.Builder(
+                    DefaultCrossProfileIntentFilter.Direction.TO_PARENT,
+                    /* flags= */ 0x00000018, // 0x00000018 means FLAG_IS_PACKAGE_FOR_FILTER
+                    // and FLAG_ALLOW_CHAINED_RESOLUTION set
+                    /* letsPersonalDataIntoProfile= */ false)
+                    .addAction(MediaStore.ACTION_USER_SELECT_IMAGES_FOR_APP)
+                    .addCategory(Intent.CATEGORY_DEFAULT)
+                    .build();
+
     /*
      Allowing send action from clone to parent profile to share content from clone apps to parent
      apps
@@ -611,7 +621,8 @@ public class DefaultCrossProfileIntentFiltersUtils {
                 CLONE_TO_PARENT_VIEW_ACTION,
                 CLONE_TO_PARENT_PICK_INSERT_ACTION,
                 CLONE_TO_PARENT_DIAL_DATA,
-                CLONE_TO_PARENT_SMS_MMS
+                CLONE_TO_PARENT_SMS_MMS,
+                CLONE_TO_PARENT_PHOTOPICKER_SELECTION
         );
     }
 }
