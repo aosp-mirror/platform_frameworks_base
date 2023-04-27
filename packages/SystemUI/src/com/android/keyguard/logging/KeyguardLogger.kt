@@ -18,9 +18,9 @@ package com.android.keyguard.logging
 
 import com.android.systemui.biometrics.AuthRippleController
 import com.android.systemui.keyguard.KeyguardIndicationRotateTextViewController
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.KeyguardLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.statusbar.KeyguardIndicationController
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
