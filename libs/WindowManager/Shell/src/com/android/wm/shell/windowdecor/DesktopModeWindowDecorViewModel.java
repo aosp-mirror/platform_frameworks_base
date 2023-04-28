@@ -333,6 +333,13 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 decoration.closeHandleMenu();
             } else if (id == R.id.collapse_menu_button) {
                 decoration.closeHandleMenu();
+            } else if (id == R.id.select_button) {
+                if (DesktopModeStatus.IS_DISPLAY_CHANGE_ENABLED) {
+                    // TODO(b/278084491): dev option to enable display switching
+                    //  remove when select is implemented
+                    mDesktopTasksController.ifPresent(c -> c.moveToNextDisplay(mTaskId));
+                    decoration.closeHandleMenu();
+                }
             }
         }
 
