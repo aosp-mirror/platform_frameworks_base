@@ -21,8 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"ඔබේ PIN ඇතුළු කරන්න"</string>
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN ඇතුළු කරන්න"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"ඔබගේ රටාව ඇතුළු කරන්න"</string>
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"රටාව අඳින්න"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ඔබේ මුරපදය ඇතුළු කරන්න"</string>
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"මුරපදය ඇතුළු කරන්න"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"වලංගු නොවන කාඩ්පත."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"අරෝපිතයි"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • නොරැහැන්ව ආරෝපණ කෙරේ"</string>
@@ -31,6 +34,7 @@
     <string name="keyguard_plugged_in_charging_fast" msgid="4386594091107340426">"<xliff:g id="PERCENTAGE">%s</xliff:g> • වේගයෙන් ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_slowly" msgid="217655355424210">"<xliff:g id="PERCENTAGE">%s</xliff:g> • සෙමින් ආරෝපණය වෙමින්"</string>
     <string name="keyguard_plugged_in_charging_limited" msgid="1053130519456324630">"<xliff:g id="PERCENTAGE">%s</xliff:g> • බැටරිය ආරක්ෂා කිරීම සඳහා ආරෝපණය ප්‍රශස්ත කර ඇත"</string>
+    <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • ආරෝපණ උපාංගයේ ගැටලුව"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"අගුලු හැරීමට මෙනුව ඔබන්න."</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ජාලය අගුළු දමා ඇත"</string>
     <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"SIM නැත"</string>
@@ -51,8 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"දෝෂයක් හේතුවෙන් eSIM අබල කළ නොහැකිය."</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"ඇතුල් කරන්න"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"වැරදි රටාවකි"</string>
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"වැරදි රටාවකි. නැවත උත්සාහ කරන්න."</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"වැරදි මුරපදයකි"</string>
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"මුරපදය වැරදියි. නැවත උත්සාහ කරන්න."</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN එක වැරදියි"</string>
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN වැරදියි. නැවත උත්සාහ කරන්න."</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"නැතහොත් ඇඟිලි සලකුණ සමග අගුළු හරින්න"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"ඇඟිලි සලකුණ හඳුනා නොගැනිණි"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"මුහුණ හඳුනා නොගන්නා ලදි"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"නැවත උත්සාහ කරන්න හෝ PIN ඇතුළු කරන්න"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"නැවත උත්සාහ කරන්න හෝ මුරපදය ඇතුළු කරන්න"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"නැවත උත්සාහ කරන්න හෝ රටාව අඳින්න"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"බොහෝ උත්සාහයන්ට පසුව PIN අවශ්‍ය වේ"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"බොහෝ උත්සාහයන්ගෙන් පසුව මුරපදය අවශ්‍ය වේ"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"බොහෝ උත්සාහයන්ගෙන් පසුව රටාව අවශ්‍ය වේ"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"PIN හෝ ඇඟිලි සලකුණ සමග අගුළු හරින්න"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"මුරපදය හෝ ඇඟිලි සලකුණ සමග අගුළු හරින්න"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"රටාව හෝ ඇඟිලි සලකුණ සමග අගුළු හරින්න"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"අමතර ආරක්ෂාව සඳහා, වැඩ ප්‍රතිපත්තියෙන් උපාංගය අගුළු දමා ඇත"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"අගුළු දැමීමෙන් පසු PIN අවශ්‍ය වේ"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"අගුළු දැමීමෙන් පසු මුරපදය අවශ්‍ය වේ"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"අගුළු දැමීමෙන් පසු රටාව අවශ්‍ය වේ"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"යාවත්කාලීනය අක්‍රිය පැය තුළ ස්ථාපනය වනු ඇත"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"අමතර ආරක්ෂාවක් අවශ්‍යයි. PIN ටික කලකට භාවිතා කර නැත."</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"අමතර ආරක්ෂාවක් අවශ්‍යයි. මුරපදය ටික කලකට භාවිතා කර නැත."</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"අමතර ආරක්ෂාවක් අවශ්‍යයි. රටාව ටික කලකට භාවිතා කර නැත."</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"අමතර ආරක්ෂාවක් අවශ්‍යයි. උපාංගය ටික කලකට අගුළු හරිනු ලැබුවේ නැත."</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"මුහුණ සමග අගුළු හැරිය නොහැක. උත්සාහ ගණන ඉතා වැඩියි."</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"ඇඟිලි සලකුණ සමග අගුළු හැරිය නොහැක. උත්සාහ ගණන ඉතා වැඩියි."</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"විශ්වාස නියෝජිතයා නොමැත"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"වැරදි PIN එකක් සමග බොහෝ උත්සාහයන් ගණනකි"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"වැරදි රටාවක් සමග බොහෝ උත්සාහයන් ගණනකි"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"වැරදි මුරපදයක් සමග බොහෝ උත්සාහයන් ගණනකි"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{තත්පර #කින් නැවත උත්සාහ කරන්න.}one{තත්පර #කින් නැවත උත්සාහ කරන්න.}other{තත්පර #කින් නැවත උත්සාහ කරන්න.}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"SIM PIN ඇතුළු කරන්න"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"\"<xliff:g id="CARRIER">%1$s</xliff:g>\" සඳහා SIM PIN ඇතුළු කරන්න"</string>
@@ -75,9 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK මෙහෙයුම අසාර්ථක විය!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ආදාන ක්‍රමය මාරු කිරීම"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"ගුවන් යානා ප්‍රකාරය"</string>
-    <string name="kg_prompt_reason_restart_pattern" msgid="4720554342633852066">"උපාංගය නැවත ආරම්භ වූ පසු රටාව අවශ්‍යයි"</string>
-    <string name="kg_prompt_reason_restart_pin" msgid="1587671566498057656">"උපාංගය නැවත ආරම්භ වූ පසු PIN අංකය අවශ්‍යයි"</string>
-    <string name="kg_prompt_reason_restart_password" msgid="8061279087240952002">"උපාංගය නැවත ආරම්භ වූ පසු මුරපදය අවශ්‍යයි"</string>
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"උපාංගය යළි ඇරඹීමෙන් පසු රටාව අවශ්‍ය වේ"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"උපාංගය යළි ඇරඹීමෙන් පසු PIN අවශ්‍ය වේ"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"උපාංගය යළි ඇරඹීමෙන් පසු මුරපදය අවශ්‍ය වේ"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"අතිරේක ආරක්ෂාව සඳහා, ඒ වෙනුවට රටාව භාවිතා කරන්න"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"අතිරේක ආරක්ෂාව සඳහා, ඒ වෙනුවට PIN භාවිතා කරන්න"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"අතිරේක ආරක්ෂාව සඳහා, ඒ වෙනුවට මුරපදය භාවිතා කරන්න"</string>
