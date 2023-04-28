@@ -4,6 +4,9 @@
       "name": "CtsAccessibilityServiceTestCases",
       "options": [
         {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
+        {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
@@ -11,6 +14,9 @@
     {
       "name": "CtsAccessibilityTestCases",
       "options": [
+        {
+          "include-annotation": "android.platform.test.annotations.Presubmit"
+        },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
