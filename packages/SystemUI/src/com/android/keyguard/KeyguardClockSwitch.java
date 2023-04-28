@@ -15,7 +15,6 @@ import android.widget.RelativeLayout;
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
 
-import com.android.keyguard.clock.DefaultClockController;
 import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
@@ -47,9 +46,6 @@ public class KeyguardClockSwitch extends RelativeLayout {
 
     public static final int LARGE = 0;
     public static final int SMALL = 1;
-    // compensate for translation of parents subject to device screen
-    // In this case, the translation comes from KeyguardStatusView
-    public int screenOffsetYPadding = 0;
 
     /** Returns a region for the large clock to position itself, based on the given parent. */
     public static Rect getLargeClockRegion(ViewGroup parent) {
@@ -165,18 +161,8 @@ public class KeyguardClockSwitch extends RelativeLayout {
             }
 
             if (mLargeClockFrame.isLaidOut()) {
-                Rect targetRegion = getLargeClockRegion(mLargeClockFrame);
-                if (mClock instanceof DefaultClockController) {
-                    mClock.getLargeClock().getEvents().onTargetRegionChanged(
-                            targetRegion);
-                } else {
-                    mClock.getLargeClock().getEvents().onTargetRegionChanged(
-                            new Rect(
-                                    targetRegion.left,
-                                    targetRegion.top - screenOffsetYPadding,
-                                    targetRegion.right,
-                                    targetRegion.bottom - screenOffsetYPadding));
-                }
+                mClock.getLargeClock().getEvents().onTargetRegionChanged(
+                        getLargeClockRegion(mLargeClockFrame));
             }
         }
     }
