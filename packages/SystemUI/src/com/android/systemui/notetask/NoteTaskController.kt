@@ -30,6 +30,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
+import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.UserHandle
 import android.os.UserManager
@@ -41,7 +42,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
-import com.android.systemui.notetask.shortcut.CreateNoteTaskShortcutActivity
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.system.ActivityManagerKt.isInForeground
@@ -84,12 +84,12 @@ constructor(
     fun onBubbleExpandChanged(isExpanding: Boolean, key: String?) {
         if (!isEnabled) return
 
-        if (key != Bubble.KEY_APP_BUBBLE) return
+        val info = infoReference.getAndSet(null) ?: return
 
-        val info = infoReference.getAndSet(null)
+        if (key != Bubble.getAppBubbleKeyForApp(info.packageName, info.user)) return
 
         // Safe guard mechanism, this callback should only be called for app bubbles.
-        if (info?.launchMode != NoteTaskLaunchMode.AppBubble) return
+        if (info.launchMode != NoteTaskLaunchMode.AppBubble) return
 
         if (isExpanding) {
             logDebug { "onBubbleExpandChanged - expanding: $info" }
@@ -172,7 +172,7 @@ constructor(
             return
         }
 
-        val info = resolver.resolveInfo(entryPoint, isKeyguardLocked)
+        val info = resolver.resolveInfo(entryPoint, isKeyguardLocked, user)
 
         if (info == null) {
             logDebug { "Default notes app isn't set" }
@@ -187,9 +187,10 @@ constructor(
             logDebug { "onShowNoteTask - start: $info on user#${user.identifier}" }
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
-                    // TODO: provide app bubble icon
                     val intent = createNoteTaskIntent(info)
-                    bubbles.showOrHideAppBubble(intent, user, null /* icon */)
+                    val icon =
+                        Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
+                    bubbles.showOrHideAppBubble(intent, user, icon)
                     // App bubble logging happens on `onBubbleExpandChanged`.
                     logDebug { "onShowNoteTask - opened as app bubble: $info" }
                 }
@@ -229,8 +230,6 @@ constructor(
      * Widget Picker to all users.
      */
     fun setNoteTaskShortcutEnabled(value: Boolean, user: UserHandle) {
-        val componentName = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
-
         val enabledState =
             if (value) {
                 PackageManager.COMPONENT_ENABLED_STATE_ENABLED
@@ -247,8 +246,9 @@ constructor(
             } else {
                 context.createContextAsUser(user, /* flags= */ 0)
             }
+
         userContext.packageManager.setComponentEnabledSetting(
-            componentName,
+            SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT,
             enabledState,
             PackageManager.DONT_KILL_APP,
         )
@@ -282,11 +282,32 @@ constructor(
 
     /** @see OnRoleHoldersChangedListener */
     fun onRoleHoldersChanged(roleName: String, user: UserHandle) {
-        if (roleName == ROLE_NOTES) updateNoteTaskAsUser(user)
+        if (roleName != ROLE_NOTES) return
+
+        if (user == userTracker.userHandle) {
+            updateNoteTaskAsUser(user)
+        } else {
+            // TODO(b/278729185): Replace fire and forget service with a bounded service.
+            val intent = NoteTaskControllerUpdateService.createIntent(context)
+            context.startServiceAsUser(intent, user)
+        }
     }
 
     companion object {
         val TAG = NoteTaskController::class.simpleName.orEmpty()
+
+        /**
+         * IMPORTANT! The shortcut package name and class should be synchronized with Settings:
+         * [com.android.settings.notetask.shortcut.CreateNoteTaskShortcutActivity].
+         *
+         * Changing the package name or class is a breaking change.
+         */
+        @VisibleForTesting
+        val SETTINGS_CREATE_NOTE_TASK_SHORTCUT_COMPONENT =
+            ComponentName(
+                "com.android.settings",
+                "com.android.settings.notetask.shortcut.CreateNoteTaskShortcutActivity",
+            )
 
         const val SHORTCUT_ID = "note_task_shortcut_id"
 

@@ -349,7 +349,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
         ClockController clock = mKeyguardClockSwitchController.getClock();
         boolean customClockAnimation = clock != null
-                && clock.getConfig().getHasCustomPositionUpdatedAnimation();
+                && clock.getLargeClock().getConfig().getHasCustomPositionUpdatedAnimation();
 
         if (mFeatureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION) && customClockAnimation) {
             // Find the clock, so we can exclude it from this transition.
@@ -362,8 +362,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                 TransitionManager.beginDelayedTransition(notifContainerParent, transition);
             } else {
                 View clockView = clockContainerView.getChildAt(0);
-
-                transition.excludeTarget(clockView, /* exclude= */ true);
 
                 TransitionSet set = new TransitionSet();
                 set.addTransition(transition);
@@ -389,8 +387,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
 
     @VisibleForTesting
     static class SplitShadeTransitionAdapter extends Transition {
-        private static final String PROP_BOUNDS = "splitShadeTransitionAdapter:bounds";
-        private static final String[] TRANSITION_PROPERTIES = { PROP_BOUNDS };
+        private static final String PROP_BOUNDS_LEFT = "splitShadeTransitionAdapter:boundsLeft";
+        private static final String PROP_X_IN_WINDOW = "splitShadeTransitionAdapter:xInWindow";
+        private static final String[] TRANSITION_PROPERTIES = { PROP_BOUNDS_LEFT, PROP_X_IN_WINDOW};
 
         private final KeyguardClockSwitchController mController;
 
@@ -400,12 +399,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         }
 
         private void captureValues(TransitionValues transitionValues) {
-            Rect boundsRect = new Rect();
-            boundsRect.left = transitionValues.view.getLeft();
-            boundsRect.top = transitionValues.view.getTop();
-            boundsRect.right = transitionValues.view.getRight();
-            boundsRect.bottom = transitionValues.view.getBottom();
-            transitionValues.values.put(PROP_BOUNDS, boundsRect);
+            transitionValues.values.put(PROP_BOUNDS_LEFT, transitionValues.view.getLeft());
+            int[] locationInWindowTmp = new int[2];
+            transitionValues.view.getLocationInWindow(locationInWindowTmp);
+            transitionValues.values.put(PROP_X_IN_WINDOW, locationInWindowTmp[0]);
         }
 
         @Override
@@ -427,8 +424,12 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             }
             ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
 
-            Rect from = (Rect) startValues.values.get(PROP_BOUNDS);
-            Rect to = (Rect) endValues.values.get(PROP_BOUNDS);
+            int fromLeft = (int) startValues.values.get(PROP_BOUNDS_LEFT);
+            int fromWindowX = (int) startValues.values.get(PROP_X_IN_WINDOW);
+            int toWindowX = (int) endValues.values.get(PROP_X_IN_WINDOW);
+            // Using windowX, to determine direction, instead of left, as in RTL the difference of
+            // toLeft - fromLeft is always positive, even when moving left.
+            int direction = toWindowX - fromWindowX > 0 ? 1 : -1;
 
             anim.addUpdateListener(animation -> {
                 ClockController clock = mController.getClock();
@@ -436,7 +437,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                     return;
                 }
 
-                clock.getAnimations().onPositionUpdated(from, to, animation.getAnimatedFraction());
+                clock.getLargeClock().getAnimations()
+                        .onPositionUpdated(fromLeft, direction, animation.getAnimatedFraction());
             });
 
             return anim;

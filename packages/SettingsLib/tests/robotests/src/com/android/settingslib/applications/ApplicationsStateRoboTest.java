@@ -89,6 +89,7 @@ import org.robolectric.util.ReflectionHelpers;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -800,5 +801,22 @@ public class ApplicationsStateRoboTest {
 
         assertThat(nonPrimaryUserApp1.shouldShowInPersonalTab(um, appInfo1.uid)).isTrue();
         assertThat(nonPrimaryUserApp2.shouldShowInPersonalTab(um, appInfo2.uid)).isFalse();
+    }
+
+    @Test
+    public void getEntry_validUserId_shouldReturnEntry() {
+        mApplicationsState.mEntriesMap.put(/* userId= */ 0, new HashMap<>());
+        addApp(PKG_1, /* id= */ 1);
+
+        assertThat(mApplicationsState.getEntry(PKG_1, /* userId= */ 0).info.packageName)
+                .isEqualTo(PKG_1);
+    }
+
+    @Test
+    public void getEntry_invalidUserId_shouldReturnNull() {
+        mApplicationsState.mEntriesMap.put(/* userId= */ 0, new HashMap<>());
+        addApp(PKG_1, /* id= */ 1);
+
+        assertThat(mApplicationsState.getEntry(PKG_1, /* userId= */ -1)).isNull();
     }
 }

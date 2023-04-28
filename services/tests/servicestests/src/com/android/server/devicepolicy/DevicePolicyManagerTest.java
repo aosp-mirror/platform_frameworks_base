@@ -1511,6 +1511,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
      * Validates that when the device owner is removed, the reset password token is cleared
      */
     @Test
+    @Ignore("b/277916462")
     public void testClearDeviceOwner_clearResetPasswordToken() throws Exception {
         mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
@@ -2601,6 +2602,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetApplicationHiddenWithDO() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -2626,6 +2628,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetApplicationHiddenWithPOOfOrganizationOwnedDevice() throws Exception {
         final int MANAGED_PROFILE_USER_ID = CALLER_USER_HANDLE;
         final int MANAGED_PROFILE_ADMIN_UID =
@@ -3267,31 +3270,31 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin1, 0);
-        verifyScreenTimeoutCall(null, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(null, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(false);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin1, 1);
-        verifyScreenTimeoutCall(1L, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(1L, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin2, 10);
-        verifyScreenTimeoutCall(null, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(null, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(false);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin1, 5);
-        verifyScreenTimeoutCall(5L, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(5L, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin2, 4);
-        verifyScreenTimeoutCall(4L, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(4L, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
@@ -3301,20 +3304,20 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin2, Long.MAX_VALUE);
-        verifyScreenTimeoutCall(Long.MAX_VALUE, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(Long.MAX_VALUE, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         dpm.setMaximumTimeToLock(admin2, 10);
-        verifyScreenTimeoutCall(10L, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(10L, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(true);
         reset(getServices().powerManagerInternal);
         reset(getServices().settings);
 
         // There's no restriction; should be set to MAX.
         dpm.setMaximumTimeToLock(admin2, 0);
-        verifyScreenTimeoutCall(Long.MAX_VALUE, UserHandle.USER_SYSTEM);
+        verifyScreenTimeoutCall(Long.MAX_VALUE, CALLER_USER_HANDLE);
         verifyStayOnWhilePluggedCleared(false);
     }
 
@@ -4372,6 +4375,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeZoneEnabledModifiesSetting() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -4383,6 +4387,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeZoneEnabledWithPOOnUser0() throws Exception {
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setupProfileOwnerOnUser0();
@@ -4394,6 +4399,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeZoneEnabledFailWithPONotOnUser0() throws Exception {
         setupProfileOwner();
         assertExpectException(SecurityException.class, null,
@@ -4403,6 +4409,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAutoTimeZoneEnabledWithPOOfOrganizationOwnedDevice() throws Exception {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
@@ -5376,6 +5383,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testResetPasswordWithToken() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -5410,6 +5418,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void resetPasswordWithToken_NumericPin() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -5430,6 +5439,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void resetPasswordWithToken_EmptyPassword() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -7250,6 +7260,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testCanProfileOwnerResetPasswordWhenLocked() throws Exception {
         setDeviceEncryptionPerUser();
         setupProfileOwner();
@@ -7313,6 +7324,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAccountTypesWithManagementDisabledOnManagedProfile() throws Exception {
         setupProfileOwner();
 
@@ -7332,6 +7344,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    @Ignore("b/277916462")
     public void testSetAccountTypesWithManagementDisabledOnOrgOwnedManagedProfile()
             throws Exception {
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);

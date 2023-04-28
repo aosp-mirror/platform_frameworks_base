@@ -18,6 +18,7 @@ package com.android.systemui.biometrics;
 
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
 import static android.hardware.biometrics.BiometricManager.BiometricMultiSensorMode;
+import static android.hardware.biometrics.SensorProperties.STRENGTH_STRONG;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_BIOMETRIC_PROMPT_TRANSITION;
 
@@ -383,6 +384,8 @@ public class AuthContainerView extends LinearLayout
                 fingerprintAndFaceView.setSensorProperties(fpProperties);
                 fingerprintAndFaceView.setScaleFactorProvider(config.mScaleProvider);
                 fingerprintAndFaceView.updateOverrideIconLayoutParamsSize();
+                fingerprintAndFaceView.setFaceClass3(
+                        faceProperties.sensorStrength == STRENGTH_STRONG);
                 mBiometricView = fingerprintAndFaceView;
             } else if (fpProperties != null) {
                 final AuthBiometricFingerprintView fpView =
@@ -877,7 +880,7 @@ public class AuthContainerView extends LinearLayout
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL,
+                WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
                 windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;

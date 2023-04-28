@@ -138,8 +138,8 @@ public class ChosenProviderFinalPhaseMetric {
     }
 
     public int getUiPhaseLatencyMicroseconds() {
-        return (int) ((this.mUiCallEndTimeNanoseconds
-                - this.mUiCallStartTimeNanoseconds) / 1000);
+        return (int) ((mUiCallEndTimeNanoseconds
+                - mUiCallStartTimeNanoseconds) / 1000);
     }
 
     /**
@@ -147,8 +147,8 @@ public class ChosenProviderFinalPhaseMetric {
      * start time to be provided, such as from {@link CandidatePhaseMetric}.
      */
     public int getEntireProviderLatencyMicroseconds() {
-        return (int) ((this.mFinalFinishTimeNanoseconds
-                - this.mQueryStartTimeNanoseconds) / 1000);
+        return (int) ((mFinalFinishTimeNanoseconds
+                - mQueryStartTimeNanoseconds) / 1000);
     }
 
     /**
@@ -156,8 +156,8 @@ public class ChosenProviderFinalPhaseMetric {
      * start time to be provided, such as from {@link InitialPhaseMetric}.
      */
     public int getEntireLatencyMicroseconds() {
-        return (int) ((this.mFinalFinishTimeNanoseconds
-                - this.mServiceBeganTimeNanoseconds) / 1000);
+        return (int) ((mFinalFinishTimeNanoseconds
+                - mServiceBeganTimeNanoseconds) / 1000);
     }
 
     /* ----- Timestamps for Latency ----- */
@@ -183,11 +183,11 @@ public class ChosenProviderFinalPhaseMetric {
     }
 
     public void setUiCallStartTimeNanoseconds(long uiCallStartTimeNanoseconds) {
-        this.mUiCallStartTimeNanoseconds = uiCallStartTimeNanoseconds;
+        mUiCallStartTimeNanoseconds = uiCallStartTimeNanoseconds;
     }
 
     public void setUiCallEndTimeNanoseconds(long uiCallEndTimeNanoseconds) {
-        this.mUiCallEndTimeNanoseconds = uiCallEndTimeNanoseconds;
+        mUiCallEndTimeNanoseconds = uiCallEndTimeNanoseconds;
     }
 
     public void setFinalFinishTimeNanoseconds(long finalFinishTimeNanoseconds) {
@@ -229,12 +229,12 @@ public class ChosenProviderFinalPhaseMetric {
      * @return the microsecond integer timestamp from service start to query began
      */
     public int getTimestampFromReferenceStartMicroseconds(long specificTimestamp) {
-        if (specificTimestamp < this.mServiceBeganTimeNanoseconds) {
+        if (specificTimestamp < mServiceBeganTimeNanoseconds) {
             Log.i(TAG, "The timestamp is before service started, falling back to default int");
             return MetricUtilities.DEFAULT_INT_32;
         }
         return (int) ((specificTimestamp
-                - this.mServiceBeganTimeNanoseconds) / 1000);
+                - mServiceBeganTimeNanoseconds) / 1000);
     }
 
     /* ----------- Provider Status -------------- */
@@ -334,7 +334,7 @@ public class ChosenProviderFinalPhaseMetric {
      * chosen phase in a semantically correct way.
      */
     public void setAvailableEntries(List<Integer> entries) {
-        this.mAvailableEntries = new ArrayList<>(entries); // no alias copy
+        mAvailableEntries = new ArrayList<>(entries); // no alias copy
     }
 
     /**
@@ -345,7 +345,7 @@ public class ChosenProviderFinalPhaseMetric {
      * candidate phase.
      */
     public List<Integer> getAvailableEntries() {
-        return new ArrayList<>(this.mAvailableEntries); // no alias copy
+        return new ArrayList<>(mAvailableEntries); // no alias copy
     }
 
     /* -------------- Has Exception ---------------- */

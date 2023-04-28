@@ -29,6 +29,7 @@ import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.graphics.Point;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.MotionEvent;
@@ -61,6 +63,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
+import com.android.systemui.statusbar.phone.KeyguardClockPositionAlgorithm;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -249,6 +252,43 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
         verify(mNotificationStackScrollLayoutController).setDozing(eq(true), eq(false));
         assertThat(mStatusBarStateController.getDozeAmount()).isEqualTo(1f);
     }
+
+    @Test
+    public void testOnDozeAmountChanged_positionClockAndNotificationsUsesUdfpsLocation() {
+        // GIVEN UDFPS is enrolled and we're on the keyguard
+        final Point udfpsLocationCenter = new Point(0, 100);
+        final float udfpsRadius = 10f;
+        when(mUpdateMonitor.isUdfpsEnrolled()).thenReturn(true);
+        when(mAuthController.getUdfpsLocation()).thenReturn(udfpsLocationCenter);
+        when(mAuthController.getUdfpsRadius()).thenReturn(udfpsRadius);
+        mNotificationPanelViewController.getStatusBarStateListener().onStateChanged(KEYGUARD);
+
+        // WHEN the doze amount changes
+        mNotificationPanelViewController.mClockPositionAlgorithm = mock(
+                KeyguardClockPositionAlgorithm.class);
+        mNotificationPanelViewController.getStatusBarStateListener().onDozeAmountChanged(1f, 1f);
+
+        // THEN the clock positions accounts for the UDFPS location & its worst case burn in
+        final float udfpsTop = udfpsLocationCenter.y - udfpsRadius - mMaxUdfpsBurnInOffsetY;
+        verify(mNotificationPanelViewController.mClockPositionAlgorithm).setup(
+                anyInt(),
+                anyFloat(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                /* darkAmount */ eq(1f),
+                anyFloat(),
+                anyBoolean(),
+                anyInt(),
+                anyFloat(),
+                anyInt(),
+                anyBoolean(),
+                /* udfpsTop */ eq(udfpsTop),
+                anyFloat(),
+                anyBoolean()
+        );
+    }
+
 
     @Test
     public void testSetExpandedHeight() {

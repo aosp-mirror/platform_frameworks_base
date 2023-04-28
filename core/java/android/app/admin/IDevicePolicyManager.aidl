@@ -608,4 +608,6 @@ interface IDevicePolicyManager {
 
     boolean isDeviceFinanced(String callerPackageName);
     String getFinancedDeviceKioskRoleHolder(String callerPackageName);
+
+    void calculateHasIncompatibleAccounts();
 }

@@ -48,10 +48,51 @@ constructor(
 
     override fun start() {
         listenForPrimaryBouncerToGone()
-        listenForPrimaryBouncerToLockscreenAodOrDozing()
+        listenForPrimaryBouncerToAodOrDozing()
+        listenForPrimaryBouncerToLockscreenOrOccluded()
     }
 
-    private fun listenForPrimaryBouncerToLockscreenAodOrDozing() {
+    private fun listenForPrimaryBouncerToLockscreenOrOccluded() {
+        scope.launch {
+            keyguardInteractor.primaryBouncerShowing
+                .sample(
+                    combine(
+                        keyguardInteractor.wakefulnessModel,
+                        keyguardTransitionInteractor.startedKeyguardTransitionStep,
+                        keyguardInteractor.isKeyguardOccluded,
+                        ::toTriple
+                    ),
+                    ::toQuad
+                )
+                .collect { (isBouncerShowing, wakefulnessState, lastStartedTransitionStep, occluded)
+                    ->
+                    if (
+                        !isBouncerShowing &&
+                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER &&
+                            (wakefulnessState.state == WakefulnessState.AWAKE ||
+                                wakefulnessState.state == WakefulnessState.STARTING_TO_WAKE)
+                    ) {
+                        val to =
+                            if (occluded) {
+                                KeyguardState.OCCLUDED
+                            } else {
+                                KeyguardState.LOCKSCREEN
+                            }
+
+                        keyguardTransitionRepository.startTransition(
+                            TransitionInfo(
+                                ownerName = name,
+                                from = KeyguardState.PRIMARY_BOUNCER,
+                                to = to,
+                                animator = getAnimator(),
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun listenForPrimaryBouncerToAodOrDozing() {
         scope.launch {
             keyguardInteractor.primaryBouncerShowing
                 .sample(
@@ -68,21 +109,17 @@ constructor(
                     ->
                     if (
                         !isBouncerShowing &&
-                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER
+                            lastStartedTransitionStep.to == KeyguardState.PRIMARY_BOUNCER &&
+                            (wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP ||
+                                wakefulnessState.state == WakefulnessState.ASLEEP)
                     ) {
                         val to =
-                            if (
-                                wakefulnessState.state == WakefulnessState.STARTING_TO_SLEEP ||
-                                    wakefulnessState.state == WakefulnessState.ASLEEP
-                            ) {
-                                if (isAodAvailable) {
-                                    KeyguardState.AOD
-                                } else {
-                                    KeyguardState.DOZING
-                                }
+                            if (isAodAvailable) {
+                                KeyguardState.AOD
                             } else {
-                                KeyguardState.LOCKSCREEN
+                                KeyguardState.DOZING
                             }
+
                         keyguardTransitionRepository.startTransition(
                             TransitionInfo(
                                 ownerName = name,

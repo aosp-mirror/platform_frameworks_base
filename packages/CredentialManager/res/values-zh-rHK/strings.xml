@@ -9,16 +9,16 @@
     <string name="content_description_show_password" msgid="3283502010388521607">"顯示密碼"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"隱藏密碼"</string>
     <string name="passkey_creation_intro_title" msgid="4251037543787718844">"使用密鑰確保帳戶安全"</string>
-    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"有了密鑰，您便無需建立或記住複雜的密碼"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"密鑰是您使用指紋、面孔或螢幕鎖定時建立的加密數碼鑰匙"</string>
-    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"密鑰已儲存至密碼管理工具，方便您在其他裝置上登入"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"有了密鑰，你便無需建立或記住複雜的密碼"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"密鑰是你使用指紋、面孔或螢幕鎖定時建立的加密數碼鑰匙"</string>
+    <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"密鑰已儲存至密碼管理工具，方便你在其他裝置上登入"</string>
     <string name="more_about_passkeys_title" msgid="7797903098728837795">"進一步瞭解密鑰"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"無密碼技術"</string>
     <string name="passwordless_technology_detail" msgid="6853928846532955882">"只要有密鑰，就無需使用密碼登入。使用指紋、面孔識別、PIN 或滑動畫出圖案，便可驗證身分並建立密鑰。"</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"公開金鑰加密技術"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"密鑰根據 FIDO 聯盟 (包括 Google、Apple、Microsoft 等) 及 W3C 標準，使用加密配對金鑰技術。私密 - 公開金鑰組專為應用程式或網站建立，與建立密碼時使用的使用者名稱和作為密碼的字元字串不同。私密金鑰會安全地儲存在裝置或密碼管理工具上，用來確認您的身分。公開金鑰會與應用程式或網站伺服器共用。只要有對應的金鑰，就能立即註冊和登入。"</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"密鑰根據 FIDO 聯盟 (包括 Google、Apple、Microsoft 等) 及 W3C 標準，使用加密配對金鑰技術。私密 - 公開金鑰組專為應用程式或網站建立，與建立密碼時使用的使用者名稱和作為密碼的字元字串不同。私密金鑰會安全地儲存在裝置或密碼管理工具上，用來確認你的身分。公開金鑰會與應用程式或網站伺服器共用。只要有對應的金鑰，就能立即註冊和登入。"</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"提升帳戶安全性"</string>
-    <string name="improved_account_security_detail" msgid="9123750251551844860">"系統會為應用程式或網站建立專用的對應金鑰，因此您不會錯誤登入欺詐的應用程式或網站。此外，伺服器上只會保留公開金鑰，因此可大幅降低駭客入侵的風險。"</string>
+    <string name="improved_account_security_detail" msgid="9123750251551844860">"系統會為應用程式或網站建立專用的對應金鑰，因此你不會錯誤登入欺詐的應用程式或網站。此外，伺服器上只會保留公開金鑰，因此可大幅降低駭客入侵的風險。"</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"流暢轉換"</string>
     <string name="seamless_transition_detail" msgid="4475509237171739843">"我們將會改用無密碼技術，而密碼仍可與密鑰並行使用。"</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"選擇儲存<xliff:g id="CREATETYPES">%1$s</xliff:g>的位置"</string>
@@ -35,7 +35,7 @@
     <string name="save_credential_to_title" msgid="3172811692275634301">"將<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>儲存至"</string>
     <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"要在其他裝置上建立密鑰嗎？"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"要將「<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>」用於所有的登入資料嗎？"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"此密碼管理工具將儲存「<xliff:g id="USERNAME">%1$s</xliff:g>」的密碼和密鑰，協助您輕鬆登入"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"此密碼管理工具將儲存「<xliff:g id="USERNAME">%1$s</xliff:g>」的密碼和密鑰，協助你輕鬆登入"</string>
     <string name="set_as_default" msgid="4415328591568654603">"設定為預設"</string>
     <string name="use_once" msgid="9027366575315399714">"單次使用"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> 個密碼 • <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g> 個密鑰"</string>
@@ -58,8 +58,7 @@
     <string name="snackbar_action" msgid="37373514216505085">"查看選項"</string>
     <string name="get_dialog_button_label_continue" msgid="6446201694794283870">"繼續"</string>
     <string name="get_dialog_title_sign_in_options" msgid="2092876443114893618">"登入選項"</string>
-    <!-- no translation found for button_label_view_more (3429098227286495651) -->
-    <skip />
+    <string name="button_label_view_more" msgid="3429098227286495651">"查看更多"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"<xliff:g id="USERNAME">%1$s</xliff:g> 專用"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"已鎖定的密碼管理工具"</string>
     <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"輕按即可解鎖"</string>

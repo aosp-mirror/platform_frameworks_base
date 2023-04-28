@@ -93,7 +93,7 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `state - has wallet cards- callbacks called`() = runTest {
+    fun state_hasWalletCardsCallbacksCalled() = runTest {
         setUpWalletClient(listOf(CARD_1, CARD_2, PAYMENT_CARD))
         val controller = createWalletContextualSuggestionsController(backgroundScope)
         var latest1 = emptyList<WalletCard>()
@@ -115,7 +115,7 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `state - no wallet cards - set suggestion cards`() = runTest {
+    fun state_noWalletCards_setSuggestionCards() = runTest {
         setUpWalletClient(emptyList())
         val controller = createWalletContextualSuggestionsController(backgroundScope)
         val latest =
@@ -132,7 +132,7 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `state - has wallet cards - set and update suggestion cards`() = runTest {
+    fun state_hasWalletCards_setAndUpdateSuggestionCards() = runTest {
         setUpWalletClient(listOf(CARD_1, CARD_2, PAYMENT_CARD))
         val controller = createWalletContextualSuggestionsController(backgroundScope)
         val latest =
@@ -151,7 +151,7 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `state - wallet cards error`() = runTest {
+    fun state_walletCardsError() = runTest {
         setUpWalletClient(shouldFail = true)
         val controller = createWalletContextualSuggestionsController(backgroundScope)
         val latest =
@@ -167,7 +167,7 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `state - has wallet cards - received contextual cards - feature disabled`() = runTest {
+    fun state_hasWalletCards_receivedContextualCards_featureDisabled() = runTest {
         whenever(featureFlags.isEnabled(eq(Flags.ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS)))
             .thenReturn(false)
         setUpWalletClient(listOf(CARD_1, CARD_2, PAYMENT_CARD))

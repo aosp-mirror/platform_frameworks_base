@@ -113,6 +113,15 @@ final class SoundTriggerSessionPermissionsDecorator implements
                 "This object isn't intended to be used as a Binder.");
     }
 
+    @Override
+    public void detach() {
+        try {
+            mDelegate.detach();
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
     // TODO: Share this code with SoundTriggerMiddlewarePermission.
     private boolean isHoldingPermissions() {
         try {

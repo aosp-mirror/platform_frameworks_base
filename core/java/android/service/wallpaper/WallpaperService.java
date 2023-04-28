@@ -512,7 +512,6 @@ public abstract class WallpaperService extends Service {
         public Engine(Supplier<Long> clockFunction, Handler handler) {
             mClockFunction = clockFunction;
             mHandler = handler;
-            mMergedConfiguration.setOverrideConfiguration(getResources().getConfiguration());
         }
 
         /**
@@ -1502,6 +1501,8 @@ public abstract class WallpaperService extends Service {
             mWallpaperDimAmount = mDefaultDimAmount;
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
             mDisplayState = mDisplay.getCommittedState();
+            mMergedConfiguration.setOverrideConfiguration(
+                    mDisplayContext.getResources().getConfiguration());
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
             Trace.beginSection("WPMS.Engine.onCreate");
@@ -2737,7 +2738,12 @@ public abstract class WallpaperService extends Service {
             engineWrapper.destroy();
         }
         mActiveEngines.clear();
-        mBackgroundThread.quitSafely();
+        if (mBackgroundThread != null) {
+            // onDestroy might be called without a previous onCreate if WallpaperService was
+            // instantiated manually. While this is a misuse of the API, some things break
+            // if here we don't take into consideration this scenario.
+            mBackgroundThread.quitSafely();
+        }
         Trace.endSection();
     }
 

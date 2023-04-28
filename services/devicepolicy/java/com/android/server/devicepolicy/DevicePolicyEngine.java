@@ -130,12 +130,11 @@ final class DevicePolicyEngine {
     <V> void setLocalPolicy(
             @NonNull PolicyDefinition<V> policyDefinition,
             @NonNull EnforcingAdmin enforcingAdmin,
-            @NonNull PolicyValue<V> value,
+            @Nullable PolicyValue<V> value,
             int userId,
             boolean skipEnforcePolicy) {
         Objects.requireNonNull(policyDefinition);
         Objects.requireNonNull(enforcingAdmin);
-        Objects.requireNonNull(value);
 
         synchronized (mLock) {
             PolicyState<V> localPolicyState = getLocalPolicyStateLocked(policyDefinition, userId);
@@ -632,6 +631,38 @@ final class DevicePolicyEngine {
     }
 
     /**
+     * Returns all the {@code policyKeys} set by any admin that share the same
+     * {@link PolicyKey#getIdentifier()} as the provided {@code policyDefinition}.
+     *
+     * <p>For example, getLocalPolicyKeysSetByAllAdmins(PERMISSION_GRANT) returns all permission
+     * grants set by any admin.
+     *
+     * <p>Note that this will always return at most one item for policies that do not require
+     * additional params (e.g. {@link PolicyDefinition#LOCK_TASK} vs
+     * {@link PolicyDefinition#PERMISSION_GRANT(String, String)}).
+     *
+     */
+    @NonNull
+    <V> Set<PolicyKey> getLocalPolicyKeysSetByAllAdmins(
+            @NonNull PolicyDefinition<V> policyDefinition,
+            int userId) {
+        Objects.requireNonNull(policyDefinition);
+
+        synchronized (mLock) {
+            if (policyDefinition.isGlobalOnlyPolicy() || !mLocalPolicies.contains(userId)) {
+                return Set.of();
+            }
+            Set<PolicyKey> keys = new HashSet<>();
+            for (PolicyKey key : mLocalPolicies.get(userId).keySet()) {
+                if (key.hasSameIdentifierAs(policyDefinition.getPolicyKey())) {
+                    keys.add(key);
+                }
+            }
+            return keys;
+        }
+    }
+
+    /**
      * Returns all user restriction policies set by the given admin.
      *
      * <p>Pass in {@link UserHandle#USER_ALL} for {@code userId} to get global restrictions set by
@@ -985,8 +1016,12 @@ final class DevicePolicyEngine {
             int userId = user.id;
             // Apply local policies present on parent to newly created child profile.
             UserInfo parentInfo = mUserManager.getProfileParent(userId);
-            if (parentInfo == null || parentInfo.getUserHandle().getIdentifier() == userId) return;
-
+            if (parentInfo == null || parentInfo.getUserHandle().getIdentifier() == userId) {
+                return;
+            }
+            if (!mLocalPolicies.contains(parentInfo.getUserHandle().getIdentifier())) {
+                return;
+            }
             for (Map.Entry<PolicyKey, PolicyState<?>> entry : mLocalPolicies.get(
                     parentInfo.getUserHandle().getIdentifier()).entrySet()) {
                 enforcePolicyOnUser(userId, entry.getValue());
@@ -1210,6 +1245,31 @@ final class DevicePolicyEngine {
         synchronized (mLock) {
             clear();
             new DevicePoliciesReaderWriter().readFromFileLocked();
+            reapplyAllPolicies();
+        }
+    }
+
+    private <V> void reapplyAllPolicies() {
+        for (PolicyKey policy : mGlobalPolicies.keySet()) {
+            PolicyState<?> policyState = mGlobalPolicies.get(policy);
+            // Policy definition and value will always be of the same type
+            PolicyDefinition<V> policyDefinition =
+                    (PolicyDefinition<V>) policyState.getPolicyDefinition();
+            PolicyValue<V> policyValue = (PolicyValue<V>) policyState.getCurrentResolvedPolicy();
+            enforcePolicy(policyDefinition, policyValue, UserHandle.USER_ALL);
+        }
+        for (int i = 0; i < mLocalPolicies.size(); i++) {
+            int userId = mLocalPolicies.keyAt(i);
+            for (PolicyKey policy : mLocalPolicies.get(userId).keySet()) {
+                PolicyState<?> policyState = mLocalPolicies.get(userId).get(policy);
+                // Policy definition and value will always be of the same type
+                PolicyDefinition<V> policyDefinition =
+                        (PolicyDefinition<V>) policyState.getPolicyDefinition();
+                PolicyValue<V> policyValue =
+                        (PolicyValue<V>) policyState.getCurrentResolvedPolicy();
+                enforcePolicy(policyDefinition, policyValue, userId);
+
+            }
         }
     }
 

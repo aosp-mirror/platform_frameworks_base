@@ -374,11 +374,10 @@ public class SwipeHelper implements Gefingerpoken {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 final boolean captured = (mIsSwiping || mLongPressSent || mMenuRowIntercepting);
-                mIsSwiping = false;
-                mTouchedView = null;
                 mLongPressSent = false;
                 mCallback.onLongPressSent(null);
                 mMenuRowIntercepting = false;
+                resetSwipeState();
                 cancelLongPress();
                 if (captured) return true;
                 break;
@@ -491,7 +490,7 @@ public class SwipeHelper implements Gefingerpoken {
                 }
                 if (!mCancelled || wasRemoved) {
                     mCallback.onChildDismissed(animView);
-                    resetSwipeState();
+                    resetSwipeOfView(animView);
                 }
                 if (endAction != null) {
                     endAction.accept(mCancelled);
@@ -546,7 +545,7 @@ public class SwipeHelper implements Gefingerpoken {
 
             if (!cancelled) {
                 updateSwipeProgressFromOffset(animView, canBeDismissed);
-                resetSwipeState();
+                resetSwipeOfView(animView);
             }
             onChildSnappedBack(animView, targetLeft);
         });
@@ -806,9 +805,20 @@ public class SwipeHelper implements Gefingerpoken {
         return mIsSwiping ? mTouchedView : null;
     }
 
+    protected void resetSwipeOfView(View view) {
+        if (getSwipedView() == view) {
+            resetSwipeState();
+        }
+    }
+
     public void resetSwipeState() {
+        View swipedView = getSwipedView();
         mTouchedView = null;
         mIsSwiping = false;
+        if (swipedView != null) {
+            snapChildIfNeeded(swipedView, false, 0);
+            onChildSnappedBack(swipedView, 0);
+        }
     }
 
     private float getTouchSlop(MotionEvent event) {

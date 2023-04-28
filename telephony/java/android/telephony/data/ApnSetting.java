@@ -1186,6 +1186,7 @@ public class ApnSetting implements Parcelable {
         ApnSetting other = (ApnSetting) o;
 
         return mEntryName.equals(other.mEntryName)
+                && Objects.equals(mId, other.mId)
                 && Objects.equals(mOperatorNumeric, other.mOperatorNumeric)
                 && Objects.equals(mApnName, other.mApnName)
                 && Objects.equals(mProxyAddress, other.mProxyAddress)
@@ -1337,6 +1338,14 @@ public class ApnSetting implements Parcelable {
     public ContentValues toContentValues() {
         ContentValues apnValue = new ContentValues();
         apnValue.put(Telephony.Carriers.NUMERIC, nullToEmpty(mOperatorNumeric));
+        // If the APN is editable, the user may be able to set an invalid numeric. The numeric must
+        // always be 5 or 6 characters (depending on the length of the MNC), so skip if it is
+        // potentially invalid.
+        if (!TextUtils.isEmpty(mOperatorNumeric)
+                && (mOperatorNumeric.length() == 5 || mOperatorNumeric.length() == 6)) {
+            apnValue.put(Telephony.Carriers.MCC, mOperatorNumeric.substring(0, 3));
+            apnValue.put(Telephony.Carriers.MNC, mOperatorNumeric.substring(3));
+        }
         apnValue.put(Telephony.Carriers.NAME, nullToEmpty(mEntryName));
         apnValue.put(Telephony.Carriers.APN, nullToEmpty(mApnName));
         apnValue.put(Telephony.Carriers.PROXY, nullToEmpty(mProxyAddress));
@@ -1356,6 +1365,7 @@ public class ApnSetting implements Parcelable {
                 getProtocolStringFromInt(mRoamingProtocol));
         apnValue.put(Telephony.Carriers.CARRIER_ENABLED, mCarrierEnabled);
         apnValue.put(Telephony.Carriers.MVNO_TYPE, getMvnoTypeStringFromInt(mMvnoType));
+        apnValue.put(Telephony.Carriers.MVNO_MATCH_DATA, nullToEmpty(mMvnoMatchData));
         apnValue.put(Telephony.Carriers.NETWORK_TYPE_BITMASK, mNetworkTypeBitmask);
         apnValue.put(Telephony.Carriers.LINGERING_NETWORK_TYPE_BITMASK,
                 mLingeringNetworkTypeBitmask);

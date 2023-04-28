@@ -604,25 +604,21 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void addOnTransportsChangedListener(IOnTransportsChangedListener listener) {
             mTransportManager.addListener(listener);
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void removeOnTransportsChangedListener(IOnTransportsChangedListener listener) {
             mTransportManager.removeListener(listener);
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void sendMessage(int messageType, byte[] data, int[] associationIds) {
             mTransportManager.sendMessage(messageType, data, associationIds);
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void addOnMessageReceivedListener(int messageType,
                 IOnMessageReceivedListener listener) {
             mTransportManager.addListener(messageType, listener);
@@ -899,12 +895,9 @@ public class CompanionDeviceManagerService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            enforceCallerCanManageCompanionDevice(getContext(), "onShellCommand");
-            final CompanionDeviceShellCommand cmd = new CompanionDeviceShellCommand(
-                    CompanionDeviceManagerService.this,
-                    mAssociationStore,
-                    mDevicePresenceMonitor);
-            cmd.exec(this, in, out, err, args, callback, resultReceiver);
+            new CompanionDeviceShellCommand(CompanionDeviceManagerService.this, mAssociationStore,
+                    mDevicePresenceMonitor, mTransportManager, mSystemDataTransferRequestStore)
+                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override

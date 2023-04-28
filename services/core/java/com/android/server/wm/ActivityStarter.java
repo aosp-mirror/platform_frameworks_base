@@ -2926,8 +2926,7 @@ class ActivityStarter {
         // If the matching task is already in the adjacent task of the launch target. Adjust to use
         // the adjacent task as its launch target. So the existing task will be launched into the
         // closer one and won't be reparent redundantly.
-        final Task adjacentTargetTask = mTargetRootTask.getAdjacentTaskFragment() != null
-                ? mTargetRootTask.getAdjacentTaskFragment().asTask() : null;
+        final Task adjacentTargetTask = mTargetRootTask.getAdjacentTask();
         if (adjacentTargetTask != null && intentActivity.isDescendantOf(adjacentTargetTask)) {
             mTargetRootTask = adjacentTargetTask;
         }

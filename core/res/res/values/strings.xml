@@ -861,6 +861,12 @@
     <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
     <string name="managed_profile_label">Switch to work profile</string>
 
+    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <string name="user_owner_app_label">Switch to personal <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
+
+    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <string name="managed_profile_app_label">Switch to work <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
+
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_contacts">Contacts</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1452,7 +1458,8 @@
       without your intervention. This may result in unexpected charges or calls.
       Note that this doesn\'t allow the app to call emergency numbers.
       Malicious apps may cost you money by making calls without your
-      confirmation.</string>
+      confirmation, or dial carrier codes which cause incoming calls to be
+      automatically forwarded to another number.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessImsCallService">access IMS call service</string>
@@ -1970,8 +1977,8 @@
     <string name="face_error_user_canceled">Face Unlock canceled by user</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
-    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=90] -->
-    <string name="face_error_lockout_permanent">Too many attempts. Face Unlock disabled.</string>
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=100] -->
+    <string name="face_error_lockout_permanent">Too many attempts. Face Unlock unavailable.</string>
     <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=90] -->
     <string name="face_error_lockout_screen_lock">Too many attempts. Enter screen lock instead.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
@@ -5896,9 +5903,9 @@
     <string name="resolver_cant_access_personal_apps_explanation">This content can\u2019t be opened with personal apps</string>
 
     <!-- Error message. This text lets the user know that they need to turn on work apps in order to share or open content. There's also a button a user can tap to turn on the apps. [CHAR LIMIT=NONE] -->
-    <string name="resolver_turn_on_work_apps">Work profile is paused</string>
-    <!-- Button text. This button turns on a user's work profile so they can access their work apps and data. [CHAR LIMIT=NONE] -->
-    <string name="resolver_switch_on_work">Tap to turn on</string>
+    <string name="resolver_turn_on_work_apps">Work apps are paused</string>
+    <!-- Button text. This button unpauses a user's work apps and data. [CHAR LIMIT=NONE] -->
+    <string name="resolver_switch_on_work">Unpause</string>
 
     <!-- Error message. This text lets the user know that their current work apps don't support the specific content. [CHAR LIMIT=NONE] -->
     <string name="resolver_no_work_apps_available">No work apps</string>
@@ -5907,9 +5914,9 @@
     <string name="resolver_no_personal_apps_available">No personal apps</string>
 
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
-    <string name="miniresolver_open_in_personal">Open <xliff:g id="app" example="YouTube">%s</xliff:g> in your personal profile?</string>
+    <string name="miniresolver_open_in_personal">Open personal <xliff:g id="app" example="YouTube">%s</xliff:g></string>
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
-    <string name="miniresolver_open_in_work">Open <xliff:g id="app" example="YouTube">%s</xliff:g> in your work profile?</string>
+    <string name="miniresolver_open_in_work">Open work <xliff:g id="app" example="YouTube">%s</xliff:g></string>
     <!-- Button option. Open the link in the personal browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_personal_browser">Use personal browser</string>
     <!-- Button option. Open the link in the work browser. [CHAR LIMIT=NONE] -->

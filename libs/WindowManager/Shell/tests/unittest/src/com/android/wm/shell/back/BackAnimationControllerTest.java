@@ -135,12 +135,15 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mShellExecutor.flushAll();
     }
 
-    private void createNavigationInfo(int backType, boolean enableAnimation) {
+    private void createNavigationInfo(int backType,
+            boolean enableAnimation,
+            boolean isAnimationCallback) {
         BackNavigationInfo.Builder builder = new BackNavigationInfo.Builder()
                 .setType(backType)
                 .setOnBackNavigationDone(new RemoteCallback((bundle) -> {}))
                 .setOnBackInvokedCallback(mAppCallback)
-                .setPrepareRemoteAnimation(enableAnimation);
+                .setPrepareRemoteAnimation(enableAnimation)
+                .setAnimationCallback(isAnimationCallback);
 
         createNavigationInfo(builder);
     }
@@ -218,12 +221,40 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Test
     public void backToHome_dispatchesEvents() throws RemoteException {
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
-        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME, true);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
 
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
 
         // Check that back start and progress is dispatched when first move.
         doMotionEvent(MotionEvent.ACTION_MOVE, 100);
+
+        simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+
+        verify(mAnimatorCallback).onBackStarted(any(BackMotionEvent.class));
+        verify(mBackAnimationRunner).onAnimationStart(anyInt(), any(), any(), any(), any());
+        ArgumentCaptor<BackMotionEvent> backEventCaptor =
+                ArgumentCaptor.forClass(BackMotionEvent.class);
+        verify(mAnimatorCallback, atLeastOnce()).onBackProgressed(backEventCaptor.capture());
+
+        // Check that back invocation is dispatched.
+        mController.setTriggerBack(true);   // Fake trigger back
+        doMotionEvent(MotionEvent.ACTION_UP, 0);
+        verify(mAnimatorCallback).onBackInvoked();
+    }
+
+    @Test
+    public void backToHomeWithAnimationCallback_dispatchesEvents() throws RemoteException {
+        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ true);
+
+        doMotionEvent(MotionEvent.ACTION_DOWN, 0);
+
+        // Check that back start and progress is dispatched when first move.
+        doMotionEvent(MotionEvent.ACTION_MOVE, 100, 3000);
 
         simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 
@@ -254,7 +285,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
         ArgumentCaptor<BackMotionEvent> backEventCaptor =
                 ArgumentCaptor.forClass(BackMotionEvent.class);
 
-        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME, false);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ false,
+                /* isAnimationCallback = */ false);
 
         triggerBackGesture();
         releaseBackGesture();
@@ -271,7 +304,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Test
     public void ignoresGesture_transitionInProgress() throws RemoteException {
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
-        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME, true);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
 
         triggerBackGesture();
         simulateRemoteAnimationStart(BackNavigationInfo.TYPE_RETURN_TO_HOME);
@@ -309,7 +344,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     @Test
     public void acceptsGesture_transitionTimeout() throws RemoteException {
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
-        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME, true);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
 
         // In case it is still running in animation.
         doNothing().when(mAnimatorCallback).onBackInvoked();
@@ -334,7 +371,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
     public void cancelBackInvokeWhenLostFocus() throws RemoteException {
         registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
 
-        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME, true);
+        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
 
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
         // Check that back start and progress is dispatched when first move.
@@ -454,7 +493,9 @@ public class BackAnimationControllerTest extends ShellTestCase {
 
         mController.registerAnimation(type, animationRunner);
 
-        createNavigationInfo(type, true);
+        createNavigationInfo(type,
+                /* enableAnimation = */ true,
+                /* isAnimationCallback = */ false);
 
         doMotionEvent(MotionEvent.ACTION_DOWN, 0);
 
@@ -473,11 +514,15 @@ public class BackAnimationControllerTest extends ShellTestCase {
     }
 
     private void doMotionEvent(int actionDown, int coordinate) {
+        doMotionEvent(actionDown, coordinate, 0);
+    }
+
+    private void doMotionEvent(int actionDown, int coordinate, float velocity) {
         mController.onMotionEvent(
                 /* touchX */ coordinate,
                 /* touchY */ coordinate,
-                /* velocityX = */ 0,
-                /* velocityY = */ 0,
+                /* velocityX = */ velocity,
+                /* velocityY = */ velocity,
                 /* keyAction */ actionDown,
                 /* swipeEdge */ BackEvent.EDGE_LEFT);
     }

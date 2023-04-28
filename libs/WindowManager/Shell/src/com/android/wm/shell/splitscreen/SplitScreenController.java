@@ -359,6 +359,9 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         if (task == null) {
             throw new IllegalArgumentException("Unknown taskId" + taskId);
         }
+        if (isTaskInSplitScreen(taskId)) {
+            throw new IllegalArgumentException("taskId is in split" + taskId);
+        }
         return mStageCoordinator.moveToStage(task, stagePosition, wct);
     }
 
@@ -457,7 +460,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
                 }
             }
             @Override
-            public void onAnimationCancelled(boolean isKeyguardOccluded) {
+            public void onAnimationCancelled() {
                 final WindowContainerTransaction evictWct = new WindowContainerTransaction();
                 mStageCoordinator.prepareEvictInvisibleChildTasks(evictWct);
                 mSyncQueue.queue(evictWct);

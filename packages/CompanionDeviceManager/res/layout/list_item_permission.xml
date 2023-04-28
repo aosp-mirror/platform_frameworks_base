@@ -22,7 +22,8 @@
               android:orientation="horizontal"
               android:paddingStart="32dp"
               android:paddingEnd="32dp"
-              android:paddingTop="12dp">
+              android:paddingTop="6dp"
+              android:paddingBottom="6dp">
 
     <ImageView
         android:id="@+id/permission_icon"

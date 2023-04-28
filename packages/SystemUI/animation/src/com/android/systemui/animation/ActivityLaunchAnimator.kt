@@ -436,8 +436,8 @@ class ActivityLaunchAnimator(
         }
 
         @BinderThread
-        override fun onAnimationCancelled(isKeyguardOccluded: Boolean) {
-            context.mainExecutor.execute { delegate.onAnimationCancelled(isKeyguardOccluded) }
+        override fun onAnimationCancelled() {
+            context.mainExecutor.execute { delegate.onAnimationCancelled() }
         }
     }
 
@@ -744,7 +744,7 @@ class ActivityLaunchAnimator(
         }
 
         @UiThread
-        override fun onAnimationCancelled(isKeyguardOccluded: Boolean) {
+        override fun onAnimationCancelled() {
             if (timedOut) {
                 return
             }
@@ -754,7 +754,7 @@ class ActivityLaunchAnimator(
             removeTimeout()
 
             animation?.cancel()
-            controller.onLaunchAnimationCancelled(newKeyguardOccludedState = isKeyguardOccluded)
+            controller.onLaunchAnimationCancelled()
         }
 
         private fun IRemoteAnimationFinishedCallback.invoke() {

@@ -1748,6 +1748,21 @@ public final class Settings {
     public static final String ACTION_DREAM_SETTINGS = "android.settings.DREAM_SETTINGS";
 
     /**
+     * Activity Action: Show Communal settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_COMMUNAL_SETTING = "android.settings.COMMUNAL_SETTINGS";
+
+    /**
      * Activity Action: Show Notification assistant settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -3022,12 +3037,21 @@ public final class Settings {
         public void destroy() {
             try {
                 // If this process is the system server process, mArray is the same object as
-                // the memory int array kept inside SetingsProvider, so skipping the close()
-                if (!Settings.isInSystemServer()) {
+                // the memory int array kept inside SettingsProvider, so skipping the close()
+                if (!Settings.isInSystemServer() && !mArray.isClosed()) {
                     mArray.close();
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Error closing backing array", e);
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                destroy();
+            } finally {
+                super.finalize();
             }
         }
     }
@@ -4653,22 +4677,16 @@ public final class Settings {
                 "display_color_mode_vendor_hint";
 
         /**
-         * The user selected min refresh rate in frames per second.
-         *
-         * If this isn't set, 0 will be used.
+         * Whether or not the peak refresh rate should be forced. 0=no, 1=yes
          * @hide
          */
-        @Readable
-        public static final String MIN_REFRESH_RATE = "min_refresh_rate";
+        public static final String FORCE_PEAK_REFRESH_RATE = "force_peak_refresh_rate";
 
         /**
-         * The user selected peak refresh rate in frames per second.
-         *
-         * If this isn't set, the system falls back to a device specific default.
+         * Whether or not the peak refresh rate should be used for some content. 0=no, 1=yes
          * @hide
          */
-        @Readable
-        public static final String PEAK_REFRESH_RATE = "peak_refresh_rate";
+        public static final String SMOOTH_DISPLAY = "smooth_display";
 
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins
@@ -10178,9 +10196,7 @@ public final class Settings {
          *
          * Face unlock re enroll.
          *  0 = No re enrollment.
-         *  1 = Re enrollment is suggested.
-         *  2 = Re enrollment is required after a set time period.
-         *  3 = Re enrollment is required immediately.
+         *  1 = Re enrollment is required.
          *
          * @hide
          */
@@ -14889,6 +14905,14 @@ public final class Settings {
          * @hide
          */
         public static final String ENABLE_TARE = "enable_tare";
+
+        /**
+         * Whether to show the TARE page in Developer Options or not.
+         * 1 = true, everything else = false
+         *
+         * @hide
+         */
+        public static final String SHOW_TARE_DEVELOPER_OPTIONS = "show_tare_developer_options";
 
         /**
          * Settings for AlarmManager's TARE EconomicPolicy (list of its economic factors).

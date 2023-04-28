@@ -26,6 +26,7 @@ import android.app.admin.PackagePermissionPolicyKey;
 import android.app.admin.PackagePolicyKey;
 import android.app.admin.PolicyKey;
 import android.app.admin.UserRestrictionPolicyKey;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IntentFilter;
@@ -38,6 +39,7 @@ import android.os.UserHandle;
 import android.permission.AdminPermissionControlParams;
 import android.permission.PermissionControllerManager;
 import android.provider.Settings;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.server.LocalServices;
@@ -84,6 +86,7 @@ final class PolicyEnforcerCallbacks {
                     ? DevicePolicyManager.PERMISSION_GRANT_STATE_DEFAULT
                     : grantState;
 
+            // TODO(b/278710449): stop blocking in the main thread
             BlockingCallback callback = new BlockingCallback();
             // TODO: remove canAdminGrantSensorPermissions once we expose a new method in
             //  permissionController that doesn't need it.
@@ -150,11 +153,15 @@ final class PolicyEnforcerCallbacks {
 
     static boolean setUserControlDisabledPackages(
             @Nullable Set<String> packages, int userId) {
-        Binder.withCleanCallingIdentity(() ->
-                LocalServices.getService(PackageManagerInternal.class)
-                        .setOwnerProtectedPackages(
-                                userId,
-                                packages == null ? null : packages.stream().toList()));
+        Binder.withCleanCallingIdentity(() -> {
+            LocalServices.getService(PackageManagerInternal.class)
+                    .setOwnerProtectedPackages(
+                            userId,
+                            packages == null ? null : packages.stream().toList());
+            LocalServices.getService(UsageStatsManagerInternal.class)
+                            .setAdminProtectedPackages(
+                            packages == null ? null : new ArraySet(packages), userId);
+        });
         return true;
     }
 

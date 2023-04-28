@@ -28,12 +28,15 @@ import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__A
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__START_FOREGROUND_SERVICE;
 import static com.android.internal.util.FrameworkStatsLog.ANRLATENCY_REPORTED__ANR_TYPE__UNKNOWN_ANR_TYPE;
 
+import android.annotation.IntDef;
 import android.os.SystemClock;
 import android.os.Trace;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -43,6 +46,22 @@ import java.util.concurrent.atomic.AtomicInteger;
  * dumpAsCommaSeparatedArrayWithHeader and as an atom to statsd on being closed.
  */
 public class AnrLatencyTracker implements AutoCloseable {
+
+    /** Status of the early dumped pid. */
+    @IntDef(value = {
+            EarlyDumpStatus.UNKNOWN,
+            EarlyDumpStatus.SUCCEEDED,
+            EarlyDumpStatus.FAILED_TO_CREATE_FILE,
+            EarlyDumpStatus.TIMED_OUT
+    })
+
+    @Retention(RetentionPolicy.SOURCE)
+    private @interface EarlyDumpStatus {
+        int UNKNOWN = 1;
+        int SUCCEEDED = 2;
+        int FAILED_TO_CREATE_FILE = 3;
+        int TIMED_OUT = 4;
+    }
 
     private static final AtomicInteger sNextAnrRecordPlacedOnQueueCookieGenerator =
             new AtomicInteger();
@@ -77,7 +96,16 @@ public class AnrLatencyTracker implements AutoCloseable {
 
     private int mAnrQueueSize;
     private int mAnrType;
-    private int mDumpedProcessesCount = 0;
+    private final AtomicInteger mDumpedProcessesCount = new AtomicInteger(0);
+
+    private volatile @EarlyDumpStatus int mEarlyDumpStatus =
+            EarlyDumpStatus.UNKNOWN;
+    private volatile long mTempFileDumpingStartUptime;
+    private volatile long mTempFileDumpingDuration = 0;
+    private long mCopyingFirstPidStartUptime;
+    private long mCopyingFirstPidDuration = 0;
+    private long mEarlyDumpRequestSubmissionUptime = 0;
+    private long mEarlyDumpExecutorPidCount = 0;
 
     private long mFirstPidsDumpingStartUptime;
     private long mFirstPidsDumpingDuration = 0;
@@ -88,7 +116,7 @@ public class AnrLatencyTracker implements AutoCloseable {
 
     private boolean mIsPushed = false;
     private boolean mIsSkipped = false;
-
+    private boolean mCopyingFirstPidSucceeded = false;
 
     private final int mAnrRecordPlacedOnQueueCookie =
             sNextAnrRecordPlacedOnQueueCookieGenerator.incrementAndGet();
@@ -109,6 +137,15 @@ public class AnrLatencyTracker implements AutoCloseable {
     /** Records the end of AnrHelper#appNotResponding. */
     public void appNotRespondingEnded() {
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /**
+     * Records the number of processes we are currently early-dumping, this number includes the
+     * current ANR's main process.
+     */
+    public void earlyDumpRequestSubmittedWithSize(int currentProcessedPidCount) {
+        mEarlyDumpRequestSubmissionUptime = getUptimeMillis();
+        mEarlyDumpExecutorPidCount = currentProcessedPidCount;
     }
 
     /** Records the placing of the AnrHelper.AnrRecord instance on the processing queue. */
@@ -210,48 +247,89 @@ public class AnrLatencyTracker implements AutoCloseable {
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    /** Records the start of pid dumping to file (subject and criticalEventSection). */
+    /** Records the start of pid dumping to file. */
     public void dumpingPidStarted(int pid) {
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dumpingPid#" + pid);
     }
 
-    /** Records the end of pid dumping to file (subject and criticalEventSection). */
+    /** Records the end of pid dumping to file. */
     public void dumpingPidEnded() {
-        mDumpedProcessesCount++;
+        mDumpedProcessesCount.incrementAndGet();
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    /** Records the start of pid dumping to file (subject and criticalEventSection). */
+    /** Records the start of first pids dumping to file. */
     public void dumpingFirstPidsStarted() {
         mFirstPidsDumpingStartUptime = getUptimeMillis();
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dumpingFirstPids");
     }
 
-    /** Records the end of pid dumping to file (subject and criticalEventSection). */
+    /** Records the end of first pids dumping to file. */
     public void dumpingFirstPidsEnded() {
         mFirstPidsDumpingDuration = getUptimeMillis() - mFirstPidsDumpingStartUptime;
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    /** Records the start of pid dumping to file (subject and criticalEventSection). */
+
+    /** Records the start of the copying of the pre-dumped first pid. */
+    public void copyingFirstPidStarted() {
+        mCopyingFirstPidStartUptime = getUptimeMillis();
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "copyingFirstPid");
+    }
+
+    /** Records the end of the copying of the pre-dumped first pid. */
+    public void copyingFirstPidEnded(boolean copySucceeded) {
+        mCopyingFirstPidDuration = getUptimeMillis() - mCopyingFirstPidStartUptime;
+        mCopyingFirstPidSucceeded = copySucceeded;
+        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /** Records the start of pre-dumping. */
+    public void dumpStackTracesTempFileStarted() {
+        mTempFileDumpingStartUptime = getUptimeMillis();
+        Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dumpStackTracesTempFile");
+    }
+
+    /** Records the end of pre-dumping. */
+    public void dumpStackTracesTempFileEnded() {
+        mTempFileDumpingDuration = getUptimeMillis() - mTempFileDumpingStartUptime;
+        if (mEarlyDumpStatus == EarlyDumpStatus.UNKNOWN) {
+            mEarlyDumpStatus = EarlyDumpStatus.SUCCEEDED;
+        }
+        Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /** Records file creation failure events in dumpStackTracesTempFile. */
+    public void dumpStackTracesTempFileCreationFailed() {
+        mEarlyDumpStatus = EarlyDumpStatus.FAILED_TO_CREATE_FILE;
+        Trace.instant(TRACE_TAG_ACTIVITY_MANAGER, "dumpStackTracesTempFileCreationFailed");
+    }
+
+    /** Records timeout events in dumpStackTracesTempFile. */
+    public void dumpStackTracesTempFileTimedOut() {
+        mEarlyDumpStatus = EarlyDumpStatus.TIMED_OUT;
+        Trace.instant(TRACE_TAG_ACTIVITY_MANAGER, "dumpStackTracesTempFileTimedOut");
+    }
+
+    /** Records the start of native pids dumping to file. */
     public void dumpingNativePidsStarted() {
         mNativePidsDumpingStartUptime = getUptimeMillis();
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dumpingNativePids");
     }
 
-    /** Records the end of pid dumping to file (subject and criticalEventSection). */
+    /** Records the end of native pids dumping to file . */
     public void dumpingNativePidsEnded() {
         mNativePidsDumpingDuration =  getUptimeMillis() - mNativePidsDumpingStartUptime;
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
     }
 
-    /** Records the start of pid dumping to file (subject and criticalEventSection). */
+    /** Records the start of extra pids dumping to file. */
     public void dumpingExtraPidsStarted() {
         mExtraPidsDumpingStartUptime = getUptimeMillis();
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "dumpingExtraPids");
     }
 
-    /** Records the end of pid dumping to file (subject and criticalEventSection). */
+    /** Records the end of extra pids dumping to file. */
     public void dumpingExtraPidsEnded() {
         mExtraPidsDumpingDuration =  getUptimeMillis() - mExtraPidsDumpingStartUptime;
         Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
@@ -337,7 +415,7 @@ public class AnrLatencyTracker implements AutoCloseable {
      * Returns latency data as a comma separated value string for inclusion in ANR report.
      */
     public String dumpAsCommaSeparatedArrayWithHeader() {
-        return "DurationsV2: " + mAnrTriggerUptime
+        return "DurationsV3: " + mAnrTriggerUptime
                 /* triggering_to_app_not_responding_duration = */
                 + "," + (mAppNotRespondingStartUptime -  mAnrTriggerUptime)
                 /* app_not_responding_duration = */
@@ -370,7 +448,22 @@ public class AnrLatencyTracker implements AutoCloseable {
                 /* anr_queue_size_when_pushed = */
                 + "," + mAnrQueueSize
                 /* dump_stack_traces_io_time = */
-                + "," + (mFirstPidsDumpingStartUptime - mDumpStackTracesStartUptime)
+                // We use copyingFirstPidUptime if we're dumping the durations list before the
+                // first pids ie after copying the early dump stacks.
+                + "," + ((mFirstPidsDumpingStartUptime > 0 ? mFirstPidsDumpingStartUptime
+                        : mCopyingFirstPidStartUptime) - mDumpStackTracesStartUptime)
+                /* temp_file_dump_duration = */
+                + "," + mTempFileDumpingDuration
+                /* temp_dump_request_on_queue_duration = */
+                + "," + (mTempFileDumpingStartUptime - mEarlyDumpRequestSubmissionUptime)
+                /* temp_dump_pid_count_when_pushed = */
+                + "," + mEarlyDumpExecutorPidCount
+                /* first_pid_copying_time = */
+                + "," + mCopyingFirstPidDuration
+                /* early_dump_status = */
+                + "," + mEarlyDumpStatus
+                /* copying_first_pid_succeeded = */
+                + "," + (mCopyingFirstPidSucceeded ? 1 : 0)
                 + "\n\n";
 
     }
@@ -449,7 +542,7 @@ public class AnrLatencyTracker implements AutoCloseable {
 
             /* anr_queue_size_when_pushed = */ mAnrQueueSize,
             /* anr_type = */ mAnrType,
-            /* dumped_processes_count = */ mDumpedProcessesCount);
+            /* dumped_processes_count = */ mDumpedProcessesCount.get());
     }
 
     private void anrSkipped(String method) {

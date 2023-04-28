@@ -19,8 +19,8 @@ package com.android.wm.shell.flicker.splitscreen
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.common.datatypes.component.EdgeExtensionComponentMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.common.traces.component.EdgeExtensionComponentMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest

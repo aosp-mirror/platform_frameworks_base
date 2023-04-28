@@ -140,34 +140,39 @@ abstract public class ManagedServices {
      * The services that have been bound by us. If the service is also connected, it will also
      * be in {@link #mServices}.
      */
+    @GuardedBy("mMutex")
     private final ArrayList<Pair<ComponentName, Integer>> mServicesBound = new ArrayList<>();
+    @GuardedBy("mMutex")
     private final ArraySet<Pair<ComponentName, Integer>> mServicesRebinding = new ArraySet<>();
     // we need these packages to be protected because classes that inherit from it need to see it
     protected final Object mDefaultsLock = new Object();
+    @GuardedBy("mDefaultsLock")
     protected final ArraySet<ComponentName> mDefaultComponents = new ArraySet<>();
+    @GuardedBy("mDefaultsLock")
     protected final ArraySet<String> mDefaultPackages = new ArraySet<>();
 
     // lists the component names of all enabled (and therefore potentially connected)
     // app services for current profiles.
-    private ArraySet<ComponentName> mEnabledServicesForCurrentProfiles
-            = new ArraySet<>();
+    @GuardedBy("mMutex")
+    private final ArraySet<ComponentName> mEnabledServicesForCurrentProfiles = new ArraySet<>();
     // Just the packages from mEnabledServicesForCurrentProfiles
-    private ArraySet<String> mEnabledServicesPackageNames = new ArraySet<>();
+    @GuardedBy("mMutex")
+    private final ArraySet<String> mEnabledServicesPackageNames = new ArraySet<>();
     // Per user id, list of enabled packages that have nevertheless asked not to be run
-    private final android.util.SparseSetArray<ComponentName> mSnoozing =
-            new android.util.SparseSetArray<>();
+    @GuardedBy("mSnoozing")
+    private final SparseSetArray<ComponentName> mSnoozing = new SparseSetArray<>();
 
     // List of approved packages or components (by user, then by primary/secondary) that are
     // allowed to be bound as managed services. A package or component appearing in this list does
     // not mean that we are currently bound to said package/component.
+    @GuardedBy("mApproved")
     protected final ArrayMap<Integer, ArrayMap<Boolean, ArraySet<String>>> mApproved =
             new ArrayMap<>();
-
     // List of packages or components (by user) that are configured to be enabled/disabled
     // explicitly by the user
     @GuardedBy("mApproved")
     protected ArrayMap<Integer, ArraySet<String>> mUserSetServices = new ArrayMap<>();
-
+    @GuardedBy("mApproved")
     protected ArrayMap<Integer, Boolean> mIsUserChanged = new ArrayMap<>();
 
     // True if approved services are stored in xml, not settings.
@@ -262,20 +267,18 @@ abstract public class ManagedServices {
     @NonNull
     ArrayMap<Boolean, ArrayList<ComponentName>> resetComponents(String packageName, int userId) {
         // components that we want to enable
-        ArrayList<ComponentName> componentsToEnable =
-                new ArrayList<>(mDefaultComponents.size());
-
+        ArrayList<ComponentName> componentsToEnable;
         // components that were removed
-        ArrayList<ComponentName> disabledComponents =
-                new ArrayList<>(mDefaultComponents.size());
-
+        ArrayList<ComponentName> disabledComponents;
         // all components that are enabled now
-        ArraySet<ComponentName> enabledComponents =
-                new ArraySet<>(getAllowedComponents(userId));
+        ArraySet<ComponentName> enabledComponents = new ArraySet<>(getAllowedComponents(userId));
 
         boolean changed = false;
 
         synchronized (mDefaultsLock) {
+            componentsToEnable = new ArrayList<>(mDefaultComponents.size());
+            disabledComponents = new ArrayList<>(mDefaultComponents.size());
+
             // record all components that are enabled but should not be by default
             for (int i = 0; i < mDefaultComponents.size() && enabledComponents.size() > 0; i++) {
                 ComponentName currentDefault = mDefaultComponents.valueAt(i);
@@ -374,14 +377,14 @@ abstract public class ManagedServices {
             }
         }
 
-        pw.println("    All " + getCaption() + "s (" + mEnabledServicesForCurrentProfiles.size()
-                + ") enabled for current profiles:");
-        for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
-            if (filter != null && !filter.matches(cmpt)) continue;
-            pw.println("      " + cmpt);
-        }
-
         synchronized (mMutex) {
+            pw.println("    All " + getCaption() + "s (" + mEnabledServicesForCurrentProfiles.size()
+                    + ") enabled for current profiles:");
+            for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
+                if (filter != null && !filter.matches(cmpt)) continue;
+                pw.println("      " + cmpt);
+            }
+
             pw.println("    Live " + getCaption() + "s (" + mServices.size() + "):");
             for (ManagedServiceInfo info : mServices) {
                 if (filter != null && !filter.matches(info.component)) continue;
@@ -434,12 +437,12 @@ abstract public class ManagedServices {
             }
         }
 
-        for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
-            if (filter != null && !filter.matches(cmpt)) continue;
-            cmpt.dumpDebug(proto, ManagedServicesProto.ENABLED);
-        }
 
         synchronized (mMutex) {
+            for (ComponentName cmpt : mEnabledServicesForCurrentProfiles) {
+                if (filter != null && !filter.matches(cmpt)) continue;
+                cmpt.dumpDebug(proto, ManagedServicesProto.ENABLED);
+            }
             for (ManagedServiceInfo info : mServices) {
                 if (filter != null && !filter.matches(info.component)) continue;
                 info.dumpDebug(proto, ManagedServicesProto.LIVE_SERVICES, this);
@@ -677,7 +680,9 @@ abstract public class ManagedServices {
                         if (isUserChanged == null) { //NLS
                             userSetComponent = TextUtils.emptyIfNull(userSetComponent);
                         } else { //NAS
-                            mIsUserChanged.put(resolvedUserId, Boolean.valueOf(isUserChanged));
+                            synchronized (mApproved) {
+                                mIsUserChanged.put(resolvedUserId, Boolean.valueOf(isUserChanged));
+                            }
                             userSetComponent = Boolean.valueOf(isUserChanged) ? approved : "";
                         }
                     } else {
@@ -688,7 +693,9 @@ abstract public class ManagedServices {
                             if (isUserChanged_Old != null && Boolean.valueOf(isUserChanged_Old)) {
                                 //user_set = true
                                 userSetComponent = approved;
-                                mIsUserChanged.put(resolvedUserId, true);
+                                synchronized (mApproved) {
+                                    mIsUserChanged.put(resolvedUserId, true);
+                                }
                                 needUpgradeUserset = false;
                             } else {
                                 userSetComponent = "";
@@ -724,8 +731,11 @@ abstract public class ManagedServices {
     }
 
     void upgradeDefaultsXmlVersion() {
-        // check if any defaults are loaded
-        int defaultsSize = mDefaultComponents.size() + mDefaultPackages.size();
+        int defaultsSize;
+        synchronized (mDefaultsLock) {
+            // check if any defaults are loaded
+            defaultsSize = mDefaultComponents.size() + mDefaultPackages.size();
+        }
         if (defaultsSize == 0) {
             // load defaults from current allowed
             if (this.mApprovalLevel == APPROVAL_BY_COMPONENT) {
@@ -741,8 +751,10 @@ abstract public class ManagedServices {
                 }
             }
         }
+        synchronized (mDefaultsLock) {
+            defaultsSize = mDefaultComponents.size() + mDefaultPackages.size();
+        }
         // if no defaults are loaded, then load from config
-        defaultsSize = mDefaultComponents.size() + mDefaultPackages.size();
         if (defaultsSize == 0) {
             loadDefaultsFromConfig();
         }
@@ -806,7 +818,9 @@ abstract public class ManagedServices {
     }
 
     protected boolean isComponentEnabledForPackage(String pkg) {
-        return mEnabledServicesPackageNames.contains(pkg);
+        synchronized (mMutex) {
+            return mEnabledServicesPackageNames.contains(pkg);
+        }
     }
 
     protected void setPackageOrComponentEnabled(String pkgOrComponent, int userId,
@@ -959,9 +973,13 @@ abstract public class ManagedServices {
     }
 
     public void onPackagesChanged(boolean removingPackage, String[] pkgList, int[] uidList) {
-        if (DEBUG) Slog.d(TAG, "onPackagesChanged removingPackage=" + removingPackage
-                + " pkgList=" + (pkgList == null ? null : Arrays.asList(pkgList))
-                + " mEnabledServicesPackageNames=" + mEnabledServicesPackageNames);
+        if (DEBUG) {
+            synchronized (mMutex) {
+                Slog.d(TAG, "onPackagesChanged removingPackage=" + removingPackage
+                        + " pkgList=" + (pkgList == null ? null : Arrays.asList(pkgList))
+                        + " mEnabledServicesPackageNames=" + mEnabledServicesPackageNames);
+            }
+        }
 
         if (pkgList != null && (pkgList.length > 0)) {
             boolean anyServicesInvolved = false;
@@ -975,7 +993,7 @@ abstract public class ManagedServices {
                 }
             }
             for (String pkgName : pkgList) {
-                if (mEnabledServicesPackageNames.contains(pkgName)) {
+                if (isComponentEnabledForPackage(pkgName)) {
                     anyServicesInvolved = true;
                 }
                 if (uidList != null && uidList.length > 0) {
@@ -1299,9 +1317,11 @@ abstract public class ManagedServices {
             }
 
             final Set<ComponentName> add = new HashSet<>(userComponents);
-            ArraySet<ComponentName> snoozed = mSnoozing.get(userId);
-            if (snoozed != null) {
-                add.removeAll(snoozed);
+            synchronized (mSnoozing) {
+                ArraySet<ComponentName> snoozed = mSnoozing.get(userId);
+                if (snoozed != null) {
+                    add.removeAll(snoozed);
+                }
             }
 
             componentsToBind.put(userId, add);
@@ -1605,9 +1625,12 @@ abstract public class ManagedServices {
         }
     }
 
+    @VisibleForTesting
     boolean isBound(ComponentName cn, int userId) {
         final Pair<ComponentName, Integer> servicesBindingTag = Pair.create(cn, userId);
-        return mServicesBound.contains(servicesBindingTag);
+        synchronized (mMutex) {
+            return mServicesBound.contains(servicesBindingTag);
+        }
     }
 
     protected boolean isBoundOrRebinding(final ComponentName cn, final int userId) {
@@ -1833,7 +1856,9 @@ abstract public class ManagedServices {
         public boolean isEnabledForCurrentProfiles() {
             if (this.isSystem) return true;
             if (this.connection == null) return false;
-            return mEnabledServicesForCurrentProfiles.contains(this.component);
+            synchronized (mMutex) {
+                return mEnabledServicesForCurrentProfiles.contains(this.component);
+            }
         }
 
         /**
@@ -1877,7 +1902,9 @@ abstract public class ManagedServices {
 
     /** convenience method for looking in mEnabledServicesForCurrentProfiles */
     public boolean isComponentEnabledForCurrentProfiles(ComponentName component) {
-        return mEnabledServicesForCurrentProfiles.contains(component);
+        synchronized (mMutex) {
+            return mEnabledServicesForCurrentProfiles.contains(component);
+        }
     }
 
     public static class UserProfiles {

@@ -70,8 +70,6 @@ import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FakeFeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -453,17 +451,13 @@ public class RemoteInputViewTest extends SysuiTestCase {
     private RemoteInputViewController bindController(
             RemoteInputView view,
             NotificationEntry entry) {
-        FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
-        fakeFeatureFlags.set(Flags.NOTIFICATION_INLINE_REPLY_ANIMATION, true);
         RemoteInputViewControllerImpl viewController = new RemoteInputViewControllerImpl(
                 view,
                 entry,
                 mRemoteInputQuickSettingsDisabler,
                 mController,
                 mShortcutManager,
-                mUiEventLoggerFake,
-                fakeFeatureFlags
-                );
+                mUiEventLoggerFake);
         viewController.bind();
         return viewController;
     }

@@ -331,8 +331,8 @@ public final class TelephonyPermissions {
      * Same as {@link #checkCallingOrSelfReadSubscriberIdentifiers(Context, int, String, String,
      * String)} except this allows an additional parameter reportFailure. Caller may not want to
      * report a failure when this is an internal/intermediate check, for example,
-     * SubscriptionController calls this with an INVALID_SUBID to check if caller has the required
-     * permissions to bypass carrier privilege checks.
+     * SubscriptionManagerService calls this with an INVALID_SUBID to check if caller has the
+     * required permissions to bypass carrier privilege checks.
      * @param reportFailure Indicates if failure should be reported.
      */
     public static boolean checkCallingOrSelfReadSubscriberIdentifiers(Context context, int subId,

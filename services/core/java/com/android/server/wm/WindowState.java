@@ -166,6 +166,7 @@ import static com.android.server.wm.WindowStateProto.IS_ON_SCREEN;
 import static com.android.server.wm.WindowStateProto.IS_READY_FOR_DISPLAY;
 import static com.android.server.wm.WindowStateProto.IS_VISIBLE;
 import static com.android.server.wm.WindowStateProto.KEEP_CLEAR_AREAS;
+import static com.android.server.wm.WindowStateProto.MERGED_LOCAL_INSETS_SOURCES;
 import static com.android.server.wm.WindowStateProto.PENDING_SEAMLESS_ROTATION;
 import static com.android.server.wm.WindowStateProto.REMOVED;
 import static com.android.server.wm.WindowStateProto.REMOVE_ON_EXIT;
@@ -353,6 +354,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     // overlay window is hidden because the owning app is suspended
     private boolean mHiddenWhileSuspended;
     private boolean mAppOpVisibility = true;
+
     boolean mPermanentlyHidden; // the window should never be shown again
     // This is a non-system overlay window that is currently force hidden.
     private boolean mForceHideNonSystemOverlayWindow;
@@ -1832,13 +1834,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mPolicyVisibility & POLICY_VISIBILITY_ALL) == POLICY_VISIBILITY_ALL;
     }
 
-    boolean providesNonDecorInsets() {
+    boolean providesDisplayDecorInsets() {
         if (mInsetsSourceProviders == null) {
             return false;
         }
         for (int i = mInsetsSourceProviders.size() - 1; i >= 0; i--) {
             final InsetsSource source = mInsetsSourceProviders.valueAt(i).getSource();
-            if (source.getType() == WindowInsets.Type.navigationBars()) {
+            if ((source.getType() & DisplayPolicy.DecorInsets.CONFIG_TYPES) != 0) {
                 return true;
             }
         }
@@ -2349,6 +2351,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         super.removeImmediately();
 
+        if (isImeOverlayLayeringTarget()) {
+            mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(),
+                    false /* visible */, true /* removed */);
+        }
         final DisplayContent dc = getDisplayContent();
         if (isImeLayeringTarget()) {
             // Remove the attached IME screenshot surface.
@@ -2359,6 +2365,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             dc.computeImeTarget(true /* updateImeTarget */);
         }
         if (dc.getImeInputTarget() == this && !inRelaunchingActivity()) {
+            mWmService.dispatchImeInputTargetVisibilityChanged(mClient.asBinder(),
+                    false /* visible */, true /* removed */);
             dc.updateImeInputAndControlTarget(null);
         }
 
@@ -2499,13 +2507,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
 
             // Check if window provides non decor insets before clearing its provided insets.
-            final boolean windowProvidesNonDecorInsets = providesNonDecorInsets();
+            final boolean windowProvidesDisplayDecorInsets = providesDisplayDecorInsets();
 
             removeImmediately();
             // Removing a visible window may affect the display orientation so just update it if
             // needed. Also recompute configuration if it provides screen decor insets.
             boolean needToSendNewConfiguration = wasVisible && displayContent.updateOrientation();
-            if (windowProvidesNonDecorInsets) {
+            if (windowProvidesDisplayDecorInsets) {
                 needToSendNewConfiguration |=
                         displayContent.getDisplayPolicy().updateDecorInsetsInfo();
             }
@@ -4027,6 +4035,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         for (Rect r : mUnrestrictedKeepClearAreas) {
             r.dumpDebug(proto, UNRESTRICTED_KEEP_CLEAR_AREAS);
         }
+        if (mMergedLocalInsetsSources != null) {
+            for (int i = 0; i < mMergedLocalInsetsSources.size(); ++i) {
+                mMergedLocalInsetsSources.valueAt(i).dumpDebug(proto, MERGED_LOCAL_INSETS_SOURCES);
+            }
+        }
         proto.end(token);
     }
 
@@ -5330,6 +5343,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     && imeTarget.compareTo(this) <= 0;
             return inTokenWithAndAboveImeTarget;
         }
+
+        // The condition is for the system dialog not belonging to any Activity.
+        // (^FLAG_NOT_FOCUSABLE & FLAG_ALT_FOCUSABLE_IM) means the dialog is still focusable but
+        // should be placed above the IME window.
+        if ((mAttrs.flags & (FLAG_NOT_FOCUSABLE | FLAG_ALT_FOCUSABLE_IM))
+                == FLAG_ALT_FOCUSABLE_IM && isTrustedOverlay() && canAddInternalSystemWindow()) {
+            // Check the current IME target so that it does not lift this window above the IME if
+            // the Z-order of the current IME layering target is greater than it.
+            final WindowState imeTarget = getImeLayeringTarget();
+            return imeTarget != null && imeTarget != this && imeTarget.compareTo(this) <= 0;
+        }
         return false;
     }
 
@@ -5482,6 +5506,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().getImeTarget(IME_TARGET_LAYERING) == this;
     }
 
+    /**
+     * Whether the window is non-focusable IME overlay layering target.
+     */
+    boolean isImeOverlayLayeringTarget() {
+        return isImeLayeringTarget()
+                && (mAttrs.flags & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0;
+    }
+
     WindowState getImeLayeringTarget() {
         final InsetsControlTarget target = getDisplayContent().getImeTarget(IME_TARGET_LAYERING);
         return target != null ? target.getWindow() : null;
@@ -5602,7 +5634,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private void dropBufferFrom(Transaction t) {
         SurfaceControl viewSurface = getClientViewRootSurface();
         if (viewSurface == null) return;
-        t.setBuffer(viewSurface, (android.hardware.HardwareBuffer) null);
+        t.unsetBuffer(viewSurface);
     }
 
     @Override
@@ -5646,7 +5678,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
-    boolean isSyncFinished() {
+    boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
         if (!isVisibleRequested() || isFullyTransparent()) {
             // Don't wait for invisible windows. However, we don't alter the state in case the
             // window becomes visible while the sync group is still active.
@@ -5657,11 +5689,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Complete the sync state immediately for a drawn window that doesn't need to redraw.
             onSyncFinishedDrawing();
         }
-        return super.isSyncFinished();
+        return super.isSyncFinished(group);
     }
 
     @Override
-    void finishSync(Transaction outMergedTransaction, boolean cancel) {
+    void finishSync(Transaction outMergedTransaction, BLASTSyncEngine.SyncGroup group,
+            boolean cancel) {
+        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
+        if (syncGroup != null && group != syncGroup) return;
         mPrepareSyncSeqId = 0;
         if (cancel) {
             // This is leaving sync so any buffers left in the sync have a chance of
@@ -5669,7 +5704,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // window. To prevent this, drop the buffer.
             dropBufferFrom(mSyncTransaction);
         }
-        super.finishSync(outMergedTransaction, cancel);
+        super.finishSync(outMergedTransaction, group, cancel);
     }
 
     boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction, int syncSeqId) {

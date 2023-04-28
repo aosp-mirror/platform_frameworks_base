@@ -39,7 +39,7 @@ import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
 import android.view.View;
 
-import androidx.test.filters.SmallTest;
+import androidx.test.filters.MediumTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
@@ -65,7 +65,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@SmallTest
+@MediumTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class MediaOutputDialogTest extends SysuiTestCase {

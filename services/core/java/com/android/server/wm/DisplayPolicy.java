@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.Display.TYPE_INTERNAL;
 import static android.view.InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE;
 import static android.view.InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS;
@@ -128,7 +127,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenshotRequest;
-import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.TriFunction;
 import com.android.internal.view.AppearanceRegion;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
@@ -1081,11 +1080,11 @@ public class DisplayPolicy {
                 // The index of the provider and corresponding insets types cannot change at
                 // runtime as ensured in WMS. Make use of the index in the provider directly
                 // to access the latest provided size at runtime.
-                final TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider =
+                final TriFunction<DisplayFrames, WindowContainer, Rect, Integer> frameProvider =
                         getFrameProvider(win, i, INSETS_OVERRIDE_INDEX_INVALID);
                 final InsetsFrameProvider.InsetsSizeOverride[] overrides =
                         provider.getInsetsSizeOverrides();
-                final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
+                final SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
                         overrideProviders;
                 if (overrides != null) {
                     overrideProviders = new SparseArray<>();
@@ -1106,7 +1105,7 @@ public class DisplayPolicy {
         }
     }
 
-    private static TriConsumer<DisplayFrames, WindowContainer, Rect> getFrameProvider(
+    private static TriFunction<DisplayFrames, WindowContainer, Rect, Integer> getFrameProvider(
             WindowState win, int index, int overrideIndex) {
         return (displayFrames, windowContainer, inOutFrame) -> {
             final LayoutParams lp = win.mAttrs.forRotation(displayFrames.mRotation);
@@ -1152,6 +1151,7 @@ public class DisplayPolicy {
                     inOutFrame.set(sTmpRect2);
                 }
             }
+            return ifp.getFlags();
         };
     }
 
@@ -1179,7 +1179,7 @@ public class DisplayPolicy {
         }
     }
 
-    TriConsumer<DisplayFrames, WindowContainer, Rect> getImeSourceFrameProvider() {
+    TriFunction<DisplayFrames, WindowContainer, Rect, Integer> getImeSourceFrameProvider() {
         return (displayFrames, windowContainer, inOutFrame) -> {
             WindowState windowState = windowContainer.asWindowState();
             if (windowState == null) {
@@ -1198,6 +1198,7 @@ public class DisplayPolicy {
             } else {
                 inOutFrame.inset(windowState.mGivenContentInsets);
             }
+            return 0;
         };
     }
 
@@ -1881,6 +1882,12 @@ public class DisplayPolicy {
 
         static final int DECOR_TYPES = Type.displayCutout() | Type.navigationBars();
 
+        /**
+         * The types that may affect display configuration. This excludes cutout because it is
+         * known from display info.
+         */
+        static final int CONFIG_TYPES = Type.statusBars() | Type.navigationBars();
+
         private final DisplayContent mDisplayContent;
         private final Info[] mInfoForRotation = new Info[4];
         final Info mTmpInfo = new Info();
@@ -1920,7 +1927,7 @@ public class DisplayPolicy {
         final DecorInsets.Info newInfo = mDecorInsets.mTmpInfo;
         newInfo.update(mDisplayContent, rotation, dw, dh);
         final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
-        if (newInfo.mNonDecorFrame.equals(currentInfo.mNonDecorFrame)) {
+        if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)) {
             return false;
         }
         mDecorInsets.invalidate();
@@ -2206,16 +2213,15 @@ public class DisplayPolicy {
 
     private int updateSystemBarsLw(WindowState win, int disableFlags) {
         final TaskDisplayArea defaultTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
-        final boolean multiWindowTaskVisible =
+        final boolean adjacentTasksVisible =
                 defaultTaskDisplayArea.getRootTask(task -> task.isVisible()
-                        && task.getTopLeafTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW)
+                        && task.getTopLeafTask().getAdjacentTask() != null)
                         != null;
         final boolean freeformRootTaskVisible =
                 defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_FREEFORM);
 
-        // We need to force showing system bars when the multi-window or freeform root task is
-        // visible.
-        mForceShowSystemBars = multiWindowTaskVisible || freeformRootTaskVisible;
+        // We need to force showing system bars when adjacent tasks or freeform roots visible.
+        mForceShowSystemBars = adjacentTasksVisible || freeformRootTaskVisible;
         // We need to force the consumption of the system bars if they are force shown or if they
         // are controlled by a remote insets controller.
         mForceConsumeSystemBars = mForceShowSystemBars
@@ -2236,7 +2242,7 @@ public class DisplayPolicy {
 
         int appearance = APPEARANCE_OPAQUE_NAVIGATION_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
         appearance = configureStatusBarOpacity(appearance);
-        appearance = configureNavBarOpacity(appearance, multiWindowTaskVisible,
+        appearance = configureNavBarOpacity(appearance, adjacentTasksVisible,
                 freeformRootTaskVisible);
 
         // Show immersive mode confirmation if needed.

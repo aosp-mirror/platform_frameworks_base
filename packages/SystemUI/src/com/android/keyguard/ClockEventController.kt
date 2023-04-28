@@ -99,8 +99,10 @@ constructor(
                 value.initialize(resources, dozeAmount, 0f)
 
                 if (regionSamplingEnabled) {
-                    clock?.smallClock?.view?.addOnLayoutChangeListener(mLayoutChangedListener)
-                    clock?.largeClock?.view?.addOnLayoutChangeListener(mLayoutChangedListener)
+                    clock?.run {
+                        smallClock.view.addOnLayoutChangeListener(mLayoutChangedListener)
+                        largeClock.view.addOnLayoutChangeListener(mLayoutChangedListener)
+                    }
                 } else {
                     updateColors()
                 }
@@ -175,15 +177,17 @@ constructor(
     private fun updateColors() {
         val wallpaperManager = WallpaperManager.getInstance(context)
         if (regionSamplingEnabled && !wallpaperManager.lockScreenWallpaperExists()) {
-            if (regionSampler != null) {
-                if (regionSampler?.sampledView == clock?.smallClock?.view) {
-                    smallClockIsDark = regionSampler!!.currentRegionDarkness().isDark
-                    clock?.smallClock?.events?.onRegionDarknessChanged(smallClockIsDark)
-                    return
-                } else if (regionSampler?.sampledView == clock?.largeClock?.view) {
-                    largeClockIsDark = regionSampler!!.currentRegionDarkness().isDark
-                    clock?.largeClock?.events?.onRegionDarknessChanged(largeClockIsDark)
-                    return
+            regionSampler?.let { regionSampler ->
+                clock?.let { clock ->
+                    if (regionSampler.sampledView == clock.smallClock.view) {
+                        smallClockIsDark = regionSampler.currentRegionDarkness().isDark
+                        clock.smallClock.events.onRegionDarknessChanged(smallClockIsDark)
+                        return@updateColors
+                    } else if (regionSampler.sampledView == clock.largeClock.view) {
+                        largeClockIsDark = regionSampler.currentRegionDarkness().isDark
+                        clock.largeClock.events.onRegionDarknessChanged(largeClockIsDark)
+                        return@updateColors
+                    }
                 }
             }
         }
@@ -193,8 +197,10 @@ constructor(
         smallClockIsDark = isLightTheme.data == 0
         largeClockIsDark = isLightTheme.data == 0
 
-        clock?.smallClock?.events?.onRegionDarknessChanged(smallClockIsDark)
-        clock?.largeClock?.events?.onRegionDarknessChanged(largeClockIsDark)
+        clock?.run {
+            smallClock.events.onRegionDarknessChanged(smallClockIsDark)
+            largeClock.events.onRegionDarknessChanged(largeClockIsDark)
+        }
     }
 
     private fun updateRegionSampler(sampledRegion: View) {
@@ -240,7 +246,7 @@ constructor(
     private val configListener =
         object : ConfigurationController.ConfigurationListener {
             override fun onThemeChanged() {
-                clock?.events?.onColorPaletteChanged(resources)
+                clock?.run { events.onColorPaletteChanged(resources) }
                 updateColors()
             }
 
@@ -253,7 +259,10 @@ constructor(
         object : BatteryStateChangeCallback {
             override fun onBatteryLevelChanged(level: Int, pluggedIn: Boolean, charging: Boolean) {
                 if (isKeyguardVisible && !isCharging && charging) {
-                    clock?.animations?.charge()
+                    clock?.run {
+                        smallClock.animations.charge()
+                        largeClock.animations.charge()
+                    }
                 }
                 isCharging = charging
             }
@@ -262,7 +271,7 @@ constructor(
     private val localeBroadcastReceiver =
         object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                clock?.events?.onLocaleChanged(Locale.getDefault())
+                clock?.run { events.onLocaleChanged(Locale.getDefault()) }
             }
         }
 
@@ -272,7 +281,10 @@ constructor(
                 isKeyguardVisible = visible
                 if (!featureFlags.isEnabled(DOZING_MIGRATION_1)) {
                     if (!isKeyguardVisible) {
-                        clock?.animations?.doze(if (isDozing) 1f else 0f)
+                        clock?.run {
+                            smallClock.animations.doze(if (isDozing) 1f else 0f)
+                            largeClock.animations.doze(if (isDozing) 1f else 0f)
+                        }
                     }
                 }
 
@@ -281,19 +293,19 @@ constructor(
             }
 
             override fun onTimeFormatChanged(timeFormat: String?) {
-                clock?.events?.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                clock?.run { events.onTimeFormatChanged(DateFormat.is24HourFormat(context)) }
             }
 
             override fun onTimeZoneChanged(timeZone: TimeZone) {
-                clock?.events?.onTimeZoneChanged(timeZone)
+                clock?.run { events.onTimeZoneChanged(timeZone) }
             }
 
             override fun onUserSwitchComplete(userId: Int) {
-                clock?.events?.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                clock?.run { events.onTimeFormatChanged(DateFormat.is24HourFormat(context)) }
             }
 
             override fun onWeatherDataChanged(data: WeatherData) {
-                clock?.events?.onWeatherDataChanged(data)
+                clock?.run { events.onWeatherDataChanged(data) }
             }
         }
 
@@ -349,34 +361,33 @@ constructor(
         smallTimeListener = null
         largeTimeListener = null
 
-        clock?.smallClock?.let {
-            smallTimeListener = TimeListener(it, mainExecutor)
-            smallTimeListener?.update(shouldTimeListenerRun)
-        }
-        clock?.largeClock?.let {
-            largeTimeListener = TimeListener(it, mainExecutor)
-            largeTimeListener?.update(shouldTimeListenerRun)
+        clock?.let {
+            smallTimeListener = TimeListener(it.smallClock, mainExecutor).apply {
+                update(shouldTimeListenerRun)
+            }
+            largeTimeListener = TimeListener(it.largeClock, mainExecutor).apply {
+                update(shouldTimeListenerRun)
+            }
         }
     }
 
     private fun updateFontSizes() {
-        clock
-            ?.smallClock
-            ?.events
-            ?.onFontSettingChanged(
+        clock?.run {
+            smallClock.events.onFontSettingChanged(
                 resources.getDimensionPixelSize(R.dimen.small_clock_text_size).toFloat()
             )
-        clock
-            ?.largeClock
-            ?.events
-            ?.onFontSettingChanged(
+            largeClock.events.onFontSettingChanged(
                 resources.getDimensionPixelSize(R.dimen.large_clock_text_size).toFloat()
             )
+        }
     }
 
     private fun handleDoze(doze: Float) {
         dozeAmount = doze
-        clock?.animations?.doze(dozeAmount)
+        clock?.run {
+            smallClock.animations.doze(dozeAmount)
+            largeClock.animations.doze(dozeAmount)
+        }
         smallTimeListener?.update(doze < DOZE_TICKRATE_THRESHOLD)
         largeTimeListener?.update(doze < DOZE_TICKRATE_THRESHOLD)
     }

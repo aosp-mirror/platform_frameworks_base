@@ -70,6 +70,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.UiThread;
 import com.android.server.autofill.Helper;
+import com.android.server.utils.Slogf;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -178,7 +179,9 @@ final class SaveUi {
            @NonNull SaveInfo info, @NonNull ValueFinder valueFinder,
            @NonNull OverlayControl overlayControl, @NonNull OnSaveListener listener,
            boolean nightMode, boolean isUpdate, boolean compatMode, boolean showServiceIcon) {
-        if (sVerbose) Slog.v(TAG, "nightMode: " + nightMode);
+        if (sVerbose) {
+            Slogf.v(TAG, "nightMode: %b displayId: %d", nightMode, context.getDisplayId());
+        }
         mThemeId = nightMode ? THEME_ID_DARK : THEME_ID_LIGHT;
         mPendingUi = pendingUi;
         mListener = new OneActionThenDestroyListener(listener);
@@ -361,6 +364,7 @@ final class SaveUi {
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.accessibilityTitle = context.getString(R.string.autofill_save_accessibility_title);
         params.windowAnimations = R.style.AutofillSaveAnimation;
+        params.setTrustedOverlay();
 
         show();
     }

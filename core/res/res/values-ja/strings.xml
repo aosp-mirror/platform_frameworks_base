@@ -209,7 +209,7 @@
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"個人用アプリは、<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> にブロックされます。仕事用プロファイルを <xliff:g id="NUMBER">%3$d</xliff:g> 日を超えて OFF にすることは、IT 管理者から許可されていません。"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ON にする"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"通話とメッセージ: OFF"</string>
-    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"仕事用アプリを一時停止しました。電話やテキスト メッセージを受信できなくなります。"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"仕事用アプリを一時停止しました。電話やテキスト メッセージを受信しなくなります。"</string>
     <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"仕事用アプリを停止解除"</string>
     <string name="me" msgid="6207584824693813140">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"タブレットオプション"</string>
@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"アプリの使用時に、心拍数、体温、血中酸素濃度など、ボディセンサー データにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"バックグラウンド動作時の、心拍数などのボディセンサー データへのアクセス"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"バックグラウンドでのアプリの動作時に、心拍数、体温、血中酸素濃度など、ボディセンサー データにアクセスすることをアプリに許可します。"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"アプリの使用中にボディセンサーの手首の体温データにアクセスします。"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"アプリの使用中に、ボディセンサーの手首の体温データへのアクセスをアプリに許可します。"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"アプリのバックグラウンド実行中に、ボディセンサーの手首の体温データにアクセスします。"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"アプリのバックグラウンド実行中に、ボディセンサーの手首の体温データへのアクセスをアプリに許可します。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"カレンダーの予定と詳細を読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"このアプリは、お使いのタブレットに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"このアプリは、Android TV デバイスに保存されているカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
@@ -507,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションのオン / オフ状態の把握をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"電話番号発信"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS通話サービスへのアクセス"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"IMSサービスがユーザー操作なしで電話をかけることをアプリに許可します。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"デバイス情報と ID の読み取り"</string>
@@ -688,7 +685,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"スマートフォンを左に動かしてください"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"スマートフォンを右に動かしてください"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"もっとまっすぐデバイスに顔を向けてください。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"顔を確認できません。スマートフォンを目の高さに合わせて持ってください。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"顔を確認できません。スマートフォンを目の高さに合わせます。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"あまり動かさないでください。安定させてください。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"顔を登録し直してください。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"顔を認識できません。もう一度お試しください。"</string>
@@ -713,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"顔の操作をキャンセルしました。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"顔認証はユーザーによりキャンセルされました"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"試行回数の上限です。後でもう一度お試しください。"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"試行回数が上限を超えました。顔認証が無効になりました。"</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"試行回数が上限を超えました。顔認証を利用できません。"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"試行回数が上限を超えました。代わりに画面ロック解除を入力してください。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"顔を確認できません。もう一度お試しください。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"顔認証を設定していません"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"現在、<xliff:g id="APP_NAME_0">%1$s</xliff:g> は使用できません。このアプリの使用は [<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理されています。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"詳細"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"アプリの一時停止を解除"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"仕事用アプリを ON にしますか？"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"仕事用のアプリを利用し、通知を受け取れるようになります"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"仕事用アプリの停止解除"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"停止解除"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"緊急通報"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"仕事用アプリを利用し、通話を行えるようになります"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>は利用できません"</string>
@@ -2164,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"このコンテンツを仕事用アプリで開くことはできません"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"このコンテンツを個人用アプリと共有することはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"このコンテンツを個人用アプリで開くことはできません"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップして ON にする"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"個人用アプリはありません"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"個人用プロファイルで <xliff:g id="APP">%s</xliff:g> を開きますか？"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"仕事用プロファイルで <xliff:g id="APP">%s</xliff:g> を開きますか？"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"個人用 <xliff:g id="APP">%s</xliff:g> を開く"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"仕事用 <xliff:g id="APP">%s</xliff:g> を開く"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"個人用ブラウザを使用"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"仕事用ブラウザを使用"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM のネットワーク ロック解除 PIN"</string>

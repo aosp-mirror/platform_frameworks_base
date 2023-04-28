@@ -61,6 +61,16 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
 
+    private val tableLogBuffer =
+        TableLogBuffer(
+            8,
+            "MobileIconsInteractorTest",
+            FakeSystemClock(),
+            mock(),
+            testDispatcher,
+            testScope.backgroundScope,
+        )
+
     @Mock private lateinit var carrierConfigTracker: CarrierConfigTracker
 
     @Before
@@ -520,7 +530,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     // is private and can only be tested by looking at [isDefaultConnectionFailed].
 
     @Test
-    fun `data switch - in same group - validated matches previous value - expires after 2s`() =
+    fun dataSwitch_inSameGroup_validatedMatchesPreviousValue_expiresAfter2s() =
         testScope.runTest {
             var latestConnectionFailed: Boolean? = null
             val job =
@@ -548,7 +558,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `data switch - in same group - not validated - immediately marked as failed`() =
+    fun dataSwitch_inSameGroup_notValidated_immediatelyMarkedAsFailed() =
         testScope.runTest {
             var latestConnectionFailed: Boolean? = null
             val job =
@@ -567,7 +577,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `data switch - lose validation - then switch happens - clears forced bit`() =
+    fun dataSwitch_loseValidation_thenSwitchHappens_clearsForcedBit() =
         testScope.runTest {
             var latestConnectionFailed: Boolean? = null
             val job =
@@ -602,7 +612,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `data switch - while already forcing validation - resets clock`() =
+    fun dataSwitch_whileAlreadyForcingValidation_resetsClock() =
         testScope.runTest {
             var latestConnectionFailed: Boolean? = null
             val job =
@@ -687,16 +697,14 @@ class MobileIconsInteractorTest : SysuiTestCase() {
     }
 
     companion object {
-        private val tableLogBuffer =
-            TableLogBuffer(8, "MobileIconsInteractorTest", FakeSystemClock())
 
         private const val SUB_1_ID = 1
         private val SUB_1 = SubscriptionModel(subscriptionId = SUB_1_ID)
-        private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID, tableLogBuffer)
+        private val CONNECTION_1 = FakeMobileConnectionRepository(SUB_1_ID, mock())
 
         private const val SUB_2_ID = 2
         private val SUB_2 = SubscriptionModel(subscriptionId = SUB_2_ID)
-        private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID, tableLogBuffer)
+        private val CONNECTION_2 = FakeMobileConnectionRepository(SUB_2_ID, mock())
 
         private const val SUB_3_ID = 3
         private val SUB_3_OPP =
@@ -705,7 +713,7 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 isOpportunistic = true,
                 groupUuid = ParcelUuid(UUID.randomUUID()),
             )
-        private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID, tableLogBuffer)
+        private val CONNECTION_3 = FakeMobileConnectionRepository(SUB_3_ID, mock())
 
         private const val SUB_4_ID = 4
         private val SUB_4_OPP =
@@ -714,6 +722,6 @@ class MobileIconsInteractorTest : SysuiTestCase() {
                 isOpportunistic = true,
                 groupUuid = ParcelUuid(UUID.randomUUID()),
             )
-        private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID, tableLogBuffer)
+        private val CONNECTION_4 = FakeMobileConnectionRepository(SUB_4_ID, mock())
     }
 }

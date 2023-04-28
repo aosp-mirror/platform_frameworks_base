@@ -506,10 +506,10 @@ public final class SystemServiceRegistry {
 
         // InputManager stores its own static instance for historical purposes.
         registerService(Context.INPUT_SERVICE, InputManager.class,
-                new ServiceFetcher<InputManager>() {
+                new CachedServiceFetcher<InputManager>() {
             @Override
-            public InputManager getService(ContextImpl ctx) {
-                return InputManager.getInstance(ctx.getOuterContext());
+            public InputManager createService(ContextImpl ctx) {
+                return new InputManager(ctx.getOuterContext());
             }});
 
         registerService(Context.DISPLAY_SERVICE, DisplayManager.class,

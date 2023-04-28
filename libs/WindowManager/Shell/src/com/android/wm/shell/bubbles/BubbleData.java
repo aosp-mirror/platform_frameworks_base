@@ -17,7 +17,6 @@ package com.android.wm.shell.bubbles;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
-import static com.android.wm.shell.bubbles.Bubble.KEY_APP_BUBBLE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_DATA;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
@@ -38,6 +37,7 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.Bubbles.DismissReason;
 import com.android.wm.shell.common.bubbles.BubbleBarUpdate;
@@ -779,7 +779,7 @@ public class BubbleData {
                 || !(reason == Bubbles.DISMISS_AGED
                 || reason == Bubbles.DISMISS_USER_GESTURE
                 || reason == Bubbles.DISMISS_RELOAD_FROM_DISK)
-                || KEY_APP_BUBBLE.equals(bubble.getKey())) {
+                || bubble.isAppBubble()) {
             return;
         }
         if (DEBUG_BUBBLE_DATA) {

@@ -25,6 +25,7 @@ import android.content.pm.ResolveInfo
 import android.content.pm.ServiceInfo
 import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
+import android.hardware.input.InputManagerGlobal
 import android.hardware.input.KeyboardLayout
 import android.icu.util.ULocale
 import android.os.Bundle
@@ -144,7 +145,8 @@ class KeyboardLayoutManagerTests {
     }
 
     private fun setupInputDevices() {
-        val inputManager = InputManager.resetInstance(iInputManager)
+        InputManagerGlobal.resetInstance(iInputManager)
+        val inputManager = InputManager(context)
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)
 
@@ -630,6 +632,30 @@ class KeyboardLayoutManagerTests {
                         "supported layouts with matching script code for ja-JP",
                 0,
                 keyboardLayouts.size
+            )
+
+            // If IME doesn't have a corresponding language tag, then should show all available
+            // layouts no matter the script code.
+            keyboardLayouts =
+                keyboardLayoutManager.getKeyboardLayoutListForInputDevice(
+                    keyboardDevice.identifier, USER_ID, imeInfo, null
+                )
+            assertNotEquals(
+                "New UI: getKeyboardLayoutListForInputDevice API should return all layouts if" +
+                    "language tag or subtype not provided",
+                0,
+                keyboardLayouts.size
+            )
+            assertTrue("New UI: getKeyboardLayoutListForInputDevice API should contain Latin " +
+                "layouts if language tag or subtype not provided",
+                containsLayout(keyboardLayouts, ENGLISH_US_LAYOUT_DESCRIPTOR)
+            )
+            assertTrue("New UI: getKeyboardLayoutListForInputDevice API should contain Cyrillic " +
+                "layouts if language tag or subtype not provided",
+                containsLayout(
+                    keyboardLayouts,
+                    createLayoutDescriptor("keyboard_layout_russian")
+                )
             )
         }
     }

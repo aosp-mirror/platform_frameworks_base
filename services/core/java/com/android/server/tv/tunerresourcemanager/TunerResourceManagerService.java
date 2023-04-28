@@ -2237,7 +2237,14 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
         clearAllResourcesAndClientMapping(getClientProfile(clientId));
         mClientProfiles.remove(clientId);
-        mListeners.remove(clientId);
+
+        // it may be called by unregisterClientProfileInternal under test
+        synchronized (mLock) {
+            ResourcesReclaimListenerRecord record = mListeners.remove(clientId);
+            if (record != null) {
+                record.getListener().asBinder().unlinkToDeath(record, 0);
+            }            
+        }
     }
 
     private void clearFrontendAndClientMapping(ClientProfile profile) {

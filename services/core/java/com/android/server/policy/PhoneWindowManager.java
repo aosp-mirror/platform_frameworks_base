@@ -710,7 +710,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     final int deviceId = msg.arg1;
                     final Long eventTime = (Long) msg.obj;
                     launchAssistAction(null /* hint */, deviceId, eventTime,
-                            AssistUtils.INVOCATION_TYPE_UNKNOWN);
+                            AssistUtils.INVOCATION_TYPE_ASSIST_BUTTON);
                     break;
                 case MSG_LAUNCH_VOICE_ASSIST_WITH_WAKE_LOCK:
                     launchVoiceAssistWithWakeLock();
@@ -2186,12 +2186,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     Intent.EXTRA_DOCK_STATE_UNDOCKED));
         }
 
-        // register for dream-related broadcasts
-        filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_DREAMING_STARTED);
-        filter.addAction(Intent.ACTION_DREAMING_STOPPED);
-        mContext.registerReceiver(mDreamReceiver, filter);
-
         // register for multiuser-relevant broadcasts
         filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
         mContext.registerReceiver(mMultiuserReceiver, filter);
@@ -2993,6 +2987,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 }
                 break;
             case KeyEvent.KEYCODE_H:
+            case KeyEvent.KEYCODE_ENTER:
                 if (event.isMetaPressed()) {
                     return handleHomeShortcuts(displayId, focusedToken, event);
                 }
@@ -3482,6 +3477,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_SYSRQ:
                 if (down && repeatCount == 0) {
                     interceptScreenshotChord(SCREENSHOT_KEY_OTHER, 0 /*pressDelay*/);
+                }
+                return true;
+            case KeyEvent.KEYCODE_ESCAPE:
+                if (down && repeatCount == 0) {
+                    mContext.closeSystemDialogs();
                 }
                 return true;
         }
@@ -4571,6 +4571,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
             case KeyEvent.KEYCODE_BACK:
                 return mWakeOnBackKeyPress;
+
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_PRIMARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_SECONDARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_TERTIARY:
+            case KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL:
+                return mStylusButtonsEnabled;
         }
 
         return true;
@@ -4771,21 +4777,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
             updateRotation(true);
             mDefaultDisplayRotation.updateOrientationListener();
-        }
-    };
-
-    BroadcastReceiver mDreamReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_DREAMING_STARTED.equals(intent.getAction())) {
-                if (mKeyguardDelegate != null) {
-                    mKeyguardDelegate.onDreamingStarted();
-                }
-            } else if (Intent.ACTION_DREAMING_STOPPED.equals(intent.getAction())) {
-                if (mKeyguardDelegate != null) {
-                    mKeyguardDelegate.onDreamingStopped();
-                }
-            }
         }
     };
 
@@ -4996,11 +4987,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the DisplayManager's DisplayPowerController thread.
     @Override
-    public void screenTurnedOff(int displayId) {
+    public void screenTurnedOff(int displayId, boolean isSwappingDisplay) {
         if (DEBUG_WAKEUP) Slog.i(TAG, "Display" + displayId + " turned off...");
 
         if (displayId == DEFAULT_DISPLAY) {
-            updateScreenOffSleepToken(true);
+            updateScreenOffSleepToken(true, isSwappingDisplay);
             mRequestedOrSleepingDefaultDisplay = false;
             mDefaultDisplayPolicy.screenTurnedOff();
             synchronized (mLock) {
@@ -5051,7 +5042,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (displayId == DEFAULT_DISPLAY) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "screenTurningOn",
                     0 /* cookie */);
-            updateScreenOffSleepToken(false);
+            updateScreenOffSleepToken(false /* acquire */, false /* isSwappingDisplay */);
             mDefaultDisplayPolicy.screenTurnedOn(screenOnListener);
             mBootAnimationDismissable = false;
 
@@ -5570,9 +5561,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     // TODO (multidisplay): Support multiple displays in WindowManagerPolicy.
-    private void updateScreenOffSleepToken(boolean acquire) {
+    private void updateScreenOffSleepToken(boolean acquire, boolean isSwappingDisplay) {
         if (acquire) {
-            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY);
+            mScreenOffSleepTokenAcquirer.acquire(DEFAULT_DISPLAY, isSwappingDisplay);
         } else {
             mScreenOffSleepTokenAcquirer.release(DEFAULT_DISPLAY);
         }

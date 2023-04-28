@@ -16,6 +16,7 @@
 
 package com.android.credentialmanager
 
+import android.app.Activity
 import android.content.Intent
 import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.RequestInfo
@@ -40,15 +41,15 @@ import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.createflow.hasContentToDisplay
 import com.android.credentialmanager.getflow.GetCredentialScreen
-import com.android.credentialmanager.getflow.GetGenericCredentialScreen
 import com.android.credentialmanager.getflow.hasContentToDisplay
-import com.android.credentialmanager.getflow.isFallbackScreen
 import com.android.credentialmanager.ui.theme.PlatformTheme
 
 @ExperimentalMaterialApi
 class CredentialSelectorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN,
+            0, 0)
         Log.d(Constants.LOG_TAG, "Creating new CredentialSelectorActivity")
         try {
             val (isCancellationRequest, shouldShowCancellationUi, _) =
@@ -161,19 +162,11 @@ class CredentialSelectorActivity : ComponentActivity() {
                 providerActivityLauncher = launcher
             )
         } else if (getCredentialUiState != null && hasContentToDisplay(getCredentialUiState)) {
-            if (isFallbackScreen(getCredentialUiState)) {
-                GetGenericCredentialScreen(
-                    viewModel = viewModel,
-                    getCredentialUiState = getCredentialUiState,
-                    providerActivityLauncher = launcher
-                )
-            } else {
-                GetCredentialScreen(
-                    viewModel = viewModel,
-                    getCredentialUiState = getCredentialUiState,
-                    providerActivityLauncher = launcher
-                )
-            }
+            GetCredentialScreen(
+                viewModel = viewModel,
+                getCredentialUiState = getCredentialUiState,
+                providerActivityLauncher = launcher
+            )
         } else {
             Log.d(Constants.LOG_TAG, "UI wasn't able to render neither get nor create flow")
             reportInstantiationErrorAndFinishActivity(credManRepo)

@@ -99,13 +99,15 @@ public class ActivityServiceConnectionsHolder<T> {
     }
 
     public void forEachConnection(Consumer<T> consumer) {
+        final ArraySet<T> connections;
         synchronized (mActivity) {
             if (mConnections == null || mConnections.isEmpty()) {
                 return;
             }
-            for (int i = mConnections.size() - 1; i >= 0; i--) {
-                consumer.accept(mConnections.valueAt(i));
-            }
+            connections = new ArraySet<>(mConnections);
+        }
+        for (int i = connections.size() - 1; i >= 0; i--) {
+            consumer.accept(connections.valueAt(i));
         }
     }
 

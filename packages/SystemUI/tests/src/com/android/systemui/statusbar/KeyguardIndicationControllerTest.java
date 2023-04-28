@@ -325,6 +325,21 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void createController_setIndicationAreaAgain_destroysPreviousRotateTextViewController() {
+        // GIVEN a controller with a mocked rotate text view controlller
+        final KeyguardIndicationRotateTextViewController mockedRotateTextViewController =
+                mock(KeyguardIndicationRotateTextViewController.class);
+        createController();
+        mController.mRotateTextViewController = mockedRotateTextViewController;
+
+        // WHEN a new indication area is set
+        mController.setIndicationArea(mIndicationArea);
+
+        // THEN the previous rotateTextViewController is destroyed
+        verify(mockedRotateTextViewController).destroy();
+    }
+
+    @Test
     public void createController_addsAlignmentListener() {
         createController();
 

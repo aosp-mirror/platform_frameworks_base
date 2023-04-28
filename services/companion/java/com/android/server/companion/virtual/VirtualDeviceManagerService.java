@@ -202,8 +202,19 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
-    void removeVirtualDevice(int deviceId) {
+    /**
+     * Remove the virtual device. Sends the
+     * {@link VirtualDeviceManager#ACTION_VIRTUAL_DEVICE_REMOVED} broadcast as a result.
+     *
+     * @param deviceId deviceId to be removed
+     * @return {@code true} if the device was removed, {@code false} if the operation was a no-op
+     */
+    boolean removeVirtualDevice(int deviceId) {
         synchronized (mVirtualDeviceManagerLock) {
+            if (!mVirtualDevices.contains(deviceId)) {
+                return false;
+            }
+
             mAppsOnVirtualDevices.remove(deviceId);
             mVirtualDevices.remove(deviceId);
         }
@@ -223,6 +234,7 @@ public class VirtualDeviceManagerService extends SystemService {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+        return true;
     }
 
     private void syncVirtualDevicesToCdmAssociations(List<AssociationInfo> associations) {
@@ -248,7 +260,6 @@ public class VirtualDeviceManagerService extends SystemService {
         for (VirtualDeviceImpl virtualDevice : virtualDevicesToRemove) {
             virtualDevice.close();
         }
-
     }
 
     private void registerCdmAssociationListener() {

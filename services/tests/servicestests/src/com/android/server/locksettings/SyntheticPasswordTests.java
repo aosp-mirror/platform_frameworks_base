@@ -607,6 +607,24 @@ public class SyntheticPasswordTests extends BaseLockSettingsServiceTests {
     }
 
     @Test
+    public void testStorePinLengthOnDisk() {
+        int userId = 1;
+        LockscreenCredential lockscreenCredentialPin = LockscreenCredential.createPin("123456");
+        MockSyntheticPasswordManager manager = new MockSyntheticPasswordManager(mContext, mStorage,
+                mGateKeeperService, mUserManager, mPasswordSlotManager);
+        SyntheticPassword sp = manager.newSyntheticPassword(userId);
+        long protectorId = manager.createLskfBasedProtector(mGateKeeperService,
+                lockscreenCredentialPin, sp,
+                userId);
+        PasswordMetrics passwordMetrics =
+                PasswordMetrics.computeForCredential(lockscreenCredentialPin);
+        boolean result = manager.refreshPinLengthOnDisk(passwordMetrics, protectorId, userId);
+
+        assertEquals(manager.getPinLength(protectorId, userId), lockscreenCredentialPin.size());
+        assertTrue(result);
+    }
+
+    @Test
     public void testPasswordDataV2VersionCredentialTypePin_deserialize() {
         // Test that we can deserialize existing PasswordData and don't inadvertently change the
         // wire format.

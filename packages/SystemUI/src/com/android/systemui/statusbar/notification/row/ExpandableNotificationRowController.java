@@ -261,8 +261,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mStatusBarStateController.removeCallback(mStatusBarStateListener);
             }
         });
-        mView.useRoundnessSourceTypes(
-                mFeatureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES));
+        mView.useRoundnessSourceTypes(true);
     }
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =
@@ -376,8 +375,7 @@ public class ExpandableNotificationRowController implements NotifViewController 
     public boolean offerToKeepInParentForAnimation() {
         //If the User dismissed the notification's parent, we want to keep it attached until the
         //dismiss animation is ongoing. Therefore we don't want to remove it in the ShadeViewDiffer.
-        if (mFeatureFlags.isEnabled(Flags.NOTIFICATION_GROUP_DISMISSAL_ANIMATION)
-                && mView.isParentDismissed()) {
+        if (mView.isParentDismissed()) {
             mView.setKeepInParentForDismissAnimation(true);
             return true;
         }

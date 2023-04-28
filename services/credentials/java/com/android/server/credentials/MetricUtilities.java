@@ -43,11 +43,15 @@ public class MetricUtilities {
     public static final String USER_CANCELED_SUBSTRING = "TYPE_USER_CANCELED";
 
     public static final int DEFAULT_INT_32 = -1;
+    public static final String DEFAULT_STRING = "";
     public static final int[] DEFAULT_REPEATED_INT_32 = new int[0];
+    public static final String[] DEFAULT_REPEATED_STR = new String[0];
     // Used for single count metric emits, such as singular amounts of various types
     public static final int UNIT = 1;
     // Used for zero count metric emits, such as zero amounts of various types
     public static final int ZERO = 0;
+    // The number of characters at the end of the string to use as a key
+    public static final int DELTA_CUT = 20;
 
     /**
      * This retrieves the uid of any package name, given a context and a component name for the
@@ -82,6 +86,18 @@ public class MetricUtilities {
             throw new ArithmeticException("Input timestamps are too far apart and unsupported");
         }
         return (int) ((t2 - t1) / 1000);
+    }
+
+    /**
+     * Given the current design, we can designate how the strings in the backend should appear.
+     * This helper method lets us cut strings for our class types.
+     *
+     * @param classtype the classtype string we want to cut to generate a key
+     * @param deltaFromEnd the starting point from the end of the string we wish to begin at
+     * @return the cut up string key we want to use for metric logs
+     */
+    public static String generateMetricKey(String classtype, int deltaFromEnd) {
+        return classtype.substring(classtype.length() - deltaFromEnd);
     }
 
     /**
@@ -143,7 +159,12 @@ public class MetricUtilities {
                     finalPhaseMetric.getAuthenticationEntryCount(),
                     /* clicked_entries */ browsedClickedEntries,
                     /* provider_of_clicked_entry */ browsedProviderUid,
-                    /* api_status */ apiStatus
+                    /* api_status */ apiStatus,
+                    DEFAULT_REPEATED_INT_32,
+                    DEFAULT_REPEATED_INT_32,
+                    DEFAULT_REPEATED_STR,
+                    DEFAULT_REPEATED_INT_32,
+                    DEFAULT_STRING
             );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
@@ -151,13 +172,17 @@ public class MetricUtilities {
     }
 
     /**
-     * A logging utility used primarily for the candidate phase of the current metric setup.
+     * A logging utility used primarily for the candidate phase of the current metric setup. This
+     * will primarily focus on track 2, where the session id is associated with known providers,
+     * but NOT the calling app.
      *
      * @param providers      a map with known providers and their held metric objects
      * @param emitSequenceId an emitted sequence id for the current session
+     * @param initialPhaseMetric contains initial phase data to avoid repetition for candidate
+     *                           phase, track 2, logging
      */
     public static void logApiCalledCandidatePhase(Map<String, ProviderSession> providers,
-            int emitSequenceId) {
+            int emitSequenceId, InitialPhaseMetric initialPhaseMetric) {
         try {
             if (!LOG_FLAG) {
                 return;
@@ -177,6 +202,7 @@ public class MetricUtilities {
             int[] candidateActionEntryCountList = new int[providerSize];
             int[] candidateAuthEntryCountList = new int[providerSize];
             int[] candidateRemoteEntryCountList = new int[providerSize];
+            String[] frameworkExceptionList = new String[providerSize];
             int index = 0;
             for (var session : providerSessions) {
                 CandidatePhaseMetric metric = session.mProviderSessionMetric
@@ -202,6 +228,7 @@ public class MetricUtilities {
                 candidateActionEntryCountList[index] = metric.getActionEntryCount();
                 candidateAuthEntryCountList[index] = metric.getAuthenticationEntryCount();
                 candidateRemoteEntryCountList[index] = metric.getRemoteEntryCount();
+                frameworkExceptionList[index] = metric.getFrameworkException();
                 index++;
             }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_CANDIDATE_PHASE_REPORTED,
@@ -222,7 +249,16 @@ public class MetricUtilities {
                     /* candidate_provider_credential_entry_type_count */
                     candidateCredentialTypeCountList,
                     /* candidate_provider_remote_entry_count */ candidateRemoteEntryCountList,
-                    /* candidate_provider_authentication_entry_count */ candidateAuthEntryCountList
+                    /* candidate_provider_authentication_entry_count */
+                    candidateAuthEntryCountList,
+                    /* framework_exception_per_provider */
+                    frameworkExceptionList,
+                    /* origin_specified originSpecified */
+                    initialPhaseMetric.isOriginSpecified(),
+                    /* request_unique_classtypes */
+                    initialPhaseMetric.getUniqueRequestStrings(),
+                    /* per_classtype_counts */
+                    initialPhaseMetric.getUniqueRequestCounts()
             );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);
@@ -285,8 +321,13 @@ public class MetricUtilities {
                     /* initial_timestamp_reference_nanoseconds */
                     initialPhaseMetric.getCredentialServiceStartedTimeNanoseconds(),
                     /* count_credential_request_classtypes */
-                    initialPhaseMetric.getCountRequestClassType()
-                    // TODO(b/271135048) - add total count of request options
+                    initialPhaseMetric.getCountRequestClassType(),
+                    /* request_unique_classtypes */
+                    initialPhaseMetric.getUniqueRequestStrings(),
+                    /* per_classtype_counts */
+                    initialPhaseMetric.getUniqueRequestCounts(),
+                    /* origin_specified */
+                    initialPhaseMetric.isOriginSpecified()
             );
         } catch (Exception e) {
             Log.w(TAG, "Unexpected error during metric logging: " + e);

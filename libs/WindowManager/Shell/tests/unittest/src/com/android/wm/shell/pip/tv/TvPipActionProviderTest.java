@@ -158,19 +158,73 @@ public class TvPipActionProviderTest extends ShellTestCase {
                 new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE}));
     }
 
-    @Test
-    public void expandedPip_toggleExpansion() {
-        assumeTelevision();
-        // PiP has expanded PiP enabled, but is in a collapsed state
+    private void check_expandedPip_updateExpansionState(
+            boolean startExpansion, boolean endExpansion, boolean updateExpected) {
+
         mActionsProvider.updateExpansionEnabled(true);
-        mActionsProvider.onPipExpansionToggled(/* expanded= */ false);
+        mActionsProvider.updatePipExpansionState(startExpansion);
 
         mActionsProvider.addListener(mMockListener);
-        mActionsProvider.onPipExpansionToggled(/* expanded= */ true);
+        mActionsProvider.updatePipExpansionState(endExpansion);
 
         assertTrue(checkActionsMatch(mActionsProvider.getActionsList(),
                 new int[]{ACTION_FULLSCREEN, ACTION_CLOSE, ACTION_MOVE, ACTION_EXPAND_COLLAPSE}));
-        verify(mMockListener).onActionsChanged(0, 1, 3);
+
+        if (updateExpected) {
+            verify(mMockListener).onActionsChanged(0, 1, 3);
+        } else {
+            verify(mMockListener, times(0))
+                    .onActionsChanged(anyInt(), anyInt(), anyInt());
+        }
+    }
+
+    @Test
+    public void expandedPip_toggleExpansion_collapse() {
+        assumeTelevision();
+        check_expandedPip_updateExpansionState(
+                /* startExpansion= */ true,
+                /* endExpansion= */ false,
+                /* updateExpected= */ true);
+    }
+
+    @Test
+    public void expandedPip_toggleExpansion_expand() {
+        assumeTelevision();
+        check_expandedPip_updateExpansionState(
+                /* startExpansion= */ false,
+                /* endExpansion= */ true,
+                /* updateExpected= */ true);
+    }
+
+    @Test
+    public void expandedPiP_updateExpansionState_alreadyExpanded() {
+        assumeTelevision();
+        check_expandedPip_updateExpansionState(
+                /* startExpansion= */ true,
+                /* endExpansion= */ true,
+                /* updateExpected= */ false);
+    }
+
+    @Test
+    public void expandedPiP_updateExpansionState_alreadyCollapsed() {
+        assumeTelevision();
+        check_expandedPip_updateExpansionState(
+                /* startExpansion= */ false,
+                /* endExpansion= */ false,
+                /* updateExpected= */ false);
+    }
+
+    @Test
+    public void regularPiP_updateExpansionState_setCollapsed() {
+        assumeTelevision();
+        mActionsProvider.updateExpansionEnabled(false);
+        mActionsProvider.updatePipExpansionState(/* expanded= */ false);
+
+        mActionsProvider.addListener(mMockListener);
+        mActionsProvider.updatePipExpansionState(/* expanded= */ false);
+
+        verify(mMockListener, times(0))
+                .onActionsChanged(anyInt(), anyInt(), anyInt());
     }
 
     @Test

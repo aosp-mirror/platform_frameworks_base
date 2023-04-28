@@ -19,14 +19,16 @@ package com.android.systemui.common.buffer
 import kotlin.math.max
 
 /**
- * A simple ring buffer implementation
+ * A simple ring buffer of recycled items
  *
- * Use [advance] to get the least recent item in the buffer (and then presumably fill it with
- * appropriate data). This will cause it to become the most recent item.
+ * Use [advance] to add items to the buffer.
  *
  * As the buffer is used, it will grow, allocating new instances of T using [factory] until it
- * reaches [maxSize]. After this point, no new instances will be created. Instead, the "oldest"
- * instances will be recycled from the back of the buffer and placed at the front.
+ * reaches [maxSize]. After this point, no new instances will be created. Instead, calls to
+ * [advance] will recycle the "oldest" instance from the start of the buffer, placing it at the end.
+ *
+ * The items in the buffer are "recycled" in that they are reused, but it is up to the caller of
+ * [advance] to properly reset any data that was previously stored on those items.
  *
  * @param maxSize The maximum size the buffer can grow to before it begins functioning as a ring.
  * @param factory A function that creates a fresh instance of T. Used by the buffer while it's
@@ -37,11 +39,13 @@ class RingBuffer<T>(private val maxSize: Int, private val factory: () -> T) : It
     private val buffer = MutableList<T?>(maxSize) { null }
 
     /**
-     * An abstract representation that points to the "end" of the buffer. Increments every time
-     * [advance] is called and never wraps. Use [indexOf] to calculate the associated index into the
-     * backing array. Always points to the "next" available slot in the buffer. Before the buffer
-     * has completely filled, the value pointed to will be null. Afterward, it will be the value at
-     * the "beginning" of the buffer.
+     * An abstract representation that points to the "end" of the buffer, i.e. one beyond the
+     * location of the last item. Increments every time [advance] is called and is never wrapped.
+     *
+     * Use [indexOf] to calculate the associated index into the backing array. Before the buffer has
+     * been completely filled, this will point to the next empty slot to fill; afterwards it will
+     * point to the next item that should be recycled (which, because the buffer is a ring, is the
+     * "start" of the buffer).
      *
      * This value is unlikely to overflow. Assuming [advance] is called at rate of 100 calls/ms,
      * omega will overflow after a little under three million years of continuous operation.
@@ -56,12 +60,15 @@ class RingBuffer<T>(private val maxSize: Int, private val factory: () -> T) : It
         get() = if (omega < maxSize) omega.toInt() else maxSize
 
     /**
-     * Advances the buffer's position by one and returns the value that is now present at the "end"
-     * of the buffer. If the buffer is not yet full, uses [factory] to create a new item. Otherwise,
-     * reuses the value that was previously at the "beginning" of the buffer.
+     * Adds an item to the end of the buffer. The caller should reset the returned item's contents
+     * and then fill it with appropriate data.
      *
-     * IMPORTANT: The value is returned as-is, without being reset. It will retain any data that was
-     * previously stored on it.
+     * If the buffer is not yet full, uses [factory] to create a new item. Otherwise, it recycles
+     * the oldest item from the front of the buffer and moves it to the end.
+     *
+     * Importantly, recycled items are returned as-is, without being reset. They will retain any
+     * data that was previously stored on them. Callers must make sure to clear any historical data,
+     * if necessary.
      */
     fun advance(): T {
         val index = indexOf(omega)
@@ -72,8 +79,7 @@ class RingBuffer<T>(private val maxSize: Int, private val factory: () -> T) : It
 
     /**
      * Returns the value stored at [index], which can range from 0 (the "start", or oldest element
-     * of the buffer) to [size]
-     * - 1 (the "end", or newest element of the buffer).
+     * of the buffer) to [size] - 1 (the "end", or newest element of the buffer).
      */
     operator fun get(index: Int): T {
         if (index < 0 || index >= size) {
@@ -87,12 +93,6 @@ class RingBuffer<T>(private val maxSize: Int, private val factory: () -> T) : It
         val start = max(omega, maxSize.toLong())
 
         return buffer[indexOf(start + index)]!!
-    }
-
-    inline fun forEach(action: (T) -> Unit) {
-        for (i in 0 until size) {
-            action(get(i))
-        }
     }
 
     override fun iterator(): Iterator<T> {

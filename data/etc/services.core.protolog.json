@@ -307,6 +307,12 @@
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
     },
+    "-1828118576": {
+      "message": "SyncGroup %d: Started %sfor listener: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "-1824578273": {
       "message": "Reporting new frame to %s: %s",
       "level": "VERBOSE",
@@ -1488,6 +1494,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-741766551": {
+      "message": "Content Recording: Ignoring session on invalid virtual display",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_CONTENT_RECORDING",
+      "at": "com\/android\/server\/wm\/ContentRecordingController.java"
     },
     "-732715767": {
       "message": "Unable to retrieve window container to start recording for display %d",
@@ -2893,12 +2905,6 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "550717438": {
-      "message": "SyncGroup %d: Started for listener: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
-    },
     "556758086": {
       "message": "Applying new update lock state '%s' for %s",
       "level": "DEBUG",
@@ -3805,6 +3811,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "1463355909": {
+      "message": "Queueing legacy sync-set: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "1469310004": {
       "message": "          SKIP: common mode mismatch. was %s",
       "level": "VERBOSE",
@@ -4122,6 +4134,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
+    },
+    "1820873642": {
+      "message": "SyncGroup %d:  Unfinished dependencies: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "1822314934": {
       "message": "Expected target rootTask=%s to restored behind rootTask=%s but it is behind rootTask=%s",

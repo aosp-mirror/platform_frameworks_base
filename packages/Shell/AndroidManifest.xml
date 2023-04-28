@@ -23,7 +23,9 @@
         >
 
         <!-- Standard permissions granted to the shell. -->
+    <uses-permission android:name="android.permission.MANAGE_HEALTH_PERMISSIONS" />
     <uses-permission android:name="android.permission.MANAGE_HEALTH_DATA" />
+    <uses-permission android:name="android.permission.health.READ_EXERCISE_ROUTE" />
     <uses-permission android:name="android.permission.MIGRATE_HEALTH_CONNECT_DATA" />
     <uses-permission android:name="android.permission.LAUNCH_DEVICE_MANAGER_SETUP" />
     <uses-permission android:name="android.permission.GET_RUNTIME_PERMISSIONS" />
@@ -633,6 +635,9 @@
     <!-- Permission required for hotword detection service CTS tests -->
     <uses-permission android:name="android.permission.MANAGE_HOTWORD_DETECTION" />
     <uses-permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
+
+    <!-- Permission required for CTS test - CtsVoiceInteractionTestCases -->
+    <uses-permission android:name="android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER"/>
 
     <uses-permission android:name="android.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE" />
 

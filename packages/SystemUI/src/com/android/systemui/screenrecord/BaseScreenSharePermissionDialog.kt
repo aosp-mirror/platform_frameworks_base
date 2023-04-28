@@ -43,6 +43,7 @@ open class BaseScreenSharePermissionDialog(
 ) : SystemUIDialog(context), AdapterView.OnItemSelectedListener {
     private lateinit var dialogTitle: TextView
     private lateinit var startButton: TextView
+    private lateinit var cancelButton: TextView
     private lateinit var warning: TextView
     private lateinit var screenShareModeSpinner: Spinner
     var selectedScreenShareOption: ScreenShareOption = screenShareOptions.first()
@@ -57,7 +58,7 @@ open class BaseScreenSharePermissionDialog(
         dialogTitle = findViewById(R.id.screen_share_dialog_title)
         warning = findViewById(R.id.text_warning)
         startButton = findViewById(R.id.button_start)
-        findViewById<TextView>(R.id.button_cancel).setOnClickListener { dismiss() }
+        cancelButton = findViewById(R.id.button_cancel)
         updateIcon()
         initScreenShareOptions()
         createOptionsView(getOptionsViewLayoutId())
@@ -115,6 +116,10 @@ open class BaseScreenSharePermissionDialog(
 
     protected fun setStartButtonOnClickListener(listener: View.OnClickListener?) {
         startButton.setOnClickListener(listener)
+    }
+
+    protected fun setCancelButtonOnClickListener(listener: View.OnClickListener?) {
+        cancelButton.setOnClickListener(listener)
     }
 
     // Create additional options that is shown under the share mode spinner

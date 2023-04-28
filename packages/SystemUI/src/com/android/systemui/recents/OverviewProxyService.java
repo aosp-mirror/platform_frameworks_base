@@ -99,7 +99,7 @@ import com.android.systemui.navigationbar.buttons.KeyButtonView;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -205,7 +205,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 // TODO move this logic to message queue
                 mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
                     if (event.getActionMasked() == ACTION_DOWN) {
-                        centralSurfaces.getNotificationPanelViewController()
+                        centralSurfaces.getShadeViewController()
                                         .startExpandLatencyTracking();
                     }
                     mHandler.post(() -> {
@@ -676,9 +676,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 mNavBarControllerLazy.get().getDefaultNavigationBar();
         final NavigationBarView navBarView =
                 mNavBarControllerLazy.get().getNavigationBarView(mContext.getDisplayId());
-        final NotificationPanelViewController panelController =
+        final ShadeViewController panelController =
                 mCentralSurfacesOptionalLazy.get()
-                        .map(CentralSurfaces::getNotificationPanelViewController)
+                        .map(CentralSurfaces::getShadeViewController)
                         .orElse(null);
         if (SysUiState.DEBUG) {
             Log.d(TAG_OPS, "Updating sysui state flags: navBarFragment=" + navBarFragment

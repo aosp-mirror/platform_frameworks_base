@@ -163,6 +163,7 @@ public class NotificationShadeWindowViewController {
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
         mStatusBarWindowStateController = statusBarWindowStateController;
         mLockIconViewController = lockIconViewController;
+        mLockIconViewController.init();
         mService = centralSurfaces;
         mNotificationShadeWindowController = controller;
         mKeyguardUnlockAnimationController = keyguardUnlockAnimationController;
@@ -288,7 +289,6 @@ public class NotificationShadeWindowViewController {
                             mService.userActivity();
                             mService.wakeUpIfDozing(
                                     mClock.uptimeMillis(),
-                                    mView,
                                     "LOCK_ICON_TOUCH",
                                     PowerManager.WAKE_REASON_GESTURE);
                         }

@@ -35,7 +35,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
@@ -81,7 +80,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
             NotificationRoundnessManager notificationRoundnessManager) {
         super(callback, resources, viewConfiguration, falsingManager, featureFlags);
         mNotificationRoundnessManager = notificationRoundnessManager;
-        mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
+        mUseRoundnessSourceTypes = true;
         mMenuListener = menuListener;
         mCallback = callback;
         mFalsingCheck = () -> resetExposedMenuView(true /* animate */, true /* force */);

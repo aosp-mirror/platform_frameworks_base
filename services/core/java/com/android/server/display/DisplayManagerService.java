@@ -119,7 +119,6 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.IntArray;
@@ -298,11 +297,10 @@ public final class DisplayManagerService extends SystemService {
             mDisplayWindowPolicyControllers = new SparseArray<>();
 
     /**
-     *  Map of every internal primary display device {@link HighBrightnessModeMetadata}s indexed by
-     *  {@link DisplayDevice#mUniqueId}.
+     * Provides {@link HighBrightnessModeMetadata}s for {@link DisplayDevice}s.
      */
-    public final ArrayMap<String, HighBrightnessModeMetadata> mHighBrightnessModeMetadataMap =
-            new ArrayMap<>();
+    private final HighBrightnessModeMetadataMapper mHighBrightnessModeMetadataMapper =
+            new HighBrightnessModeMetadataMapper();
 
     // List of all currently registered display adapters.
     private final ArrayList<DisplayAdapter> mDisplayAdapters = new ArrayList<DisplayAdapter>();
@@ -1783,7 +1781,24 @@ public final class DisplayManagerService extends SystemService {
         } else {
             configurePreferredDisplayModeLocked(display);
         }
-        addDisplayPowerControllerLocked(display);
+        DisplayPowerControllerInterface dpc = addDisplayPowerControllerLocked(display);
+
+        if (dpc != null) {
+            final int leadDisplayId = display.getLeadDisplayIdLocked();
+            updateDisplayPowerControllerLeaderLocked(dpc, leadDisplayId);
+
+            // Loop through all the displays and check if any should follow this one - it could be
+            // that the follower display was added before the lead display.
+            mLogicalDisplayMapper.forEachLocked(d -> {
+                if (d.getLeadDisplayIdLocked() == displayId) {
+                    DisplayPowerControllerInterface followerDpc =
+                            mDisplayPowerControllers.get(d.getDisplayIdLocked());
+                    if (followerDpc != null) {
+                        updateDisplayPowerControllerLeaderLocked(followerDpc, displayId);
+                    }
+                }
+            });
+        }
 
         mDisplayStates.append(displayId, Display.STATE_UNKNOWN);
 
@@ -1823,24 +1838,19 @@ public final class DisplayManagerService extends SystemService {
 
         DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
-            final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
-            if (device == null) {
-                Slog.wtf(TAG, "Display Device is null in DisplayManagerService for display: "
-                        + display.getDisplayIdLocked());
-                return;
-            }
-
             final int leadDisplayId = display.getLeadDisplayIdLocked();
             updateDisplayPowerControllerLeaderLocked(dpc, leadDisplayId);
 
-            final String uniqueId = device.getUniqueId();
-            HighBrightnessModeMetadata hbmMetadata = mHighBrightnessModeMetadataMap.get(uniqueId);
-            dpc.onDisplayChanged(hbmMetadata, leadDisplayId);
+            HighBrightnessModeMetadata hbmMetadata =
+                    mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(display);
+            if (hbmMetadata != null) {
+                dpc.onDisplayChanged(hbmMetadata, leadDisplayId);
+            }
         }
     }
 
-    private void updateDisplayPowerControllerLeaderLocked(DisplayPowerControllerInterface dpc,
-            int leadDisplayId) {
+    private void updateDisplayPowerControllerLeaderLocked(
+            @NonNull DisplayPowerControllerInterface dpc, int leadDisplayId) {
         if (dpc.getLeadDisplayId() == leadDisplayId) {
             // Lead display hasn't changed, nothing to do.
             return;
@@ -1858,9 +1868,11 @@ public final class DisplayManagerService extends SystemService {
 
         // And then, if it's following, register it with the new one.
         if (leadDisplayId != Layout.NO_LEAD_DISPLAY) {
-            final DisplayPowerControllerInterface newLead =
+            final DisplayPowerControllerInterface newLeader =
                     mDisplayPowerControllers.get(leadDisplayId);
-            newLead.addDisplayBrightnessFollower(dpc);
+            if (newLeader != null) {
+                newLeader.addDisplayBrightnessFollower(dpc);
+            }
         }
     }
 
@@ -1879,6 +1891,7 @@ public final class DisplayManagerService extends SystemService {
         final DisplayPowerControllerInterface dpc =
                 mDisplayPowerControllers.removeReturnOld(displayId);
         if (dpc != null) {
+            updateDisplayPowerControllerLeaderLocked(dpc, Layout.NO_LEAD_DISPLAY);
             dpc.stop();
         }
         mDisplayStates.delete(displayId);
@@ -1922,19 +1935,14 @@ public final class DisplayManagerService extends SystemService {
         final int displayId = display.getDisplayIdLocked();
         final DisplayPowerControllerInterface dpc = mDisplayPowerControllers.get(displayId);
         if (dpc != null) {
-            final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
-            if (device == null) {
-                Slog.wtf(TAG, "Display Device is null in DisplayManagerService for display: "
-                        + display.getDisplayIdLocked());
-                return;
-            }
-
             final int leadDisplayId = display.getLeadDisplayIdLocked();
             updateDisplayPowerControllerLeaderLocked(dpc, leadDisplayId);
 
-            final String uniqueId = device.getUniqueId();
-            HighBrightnessModeMetadata hbmMetadata = mHighBrightnessModeMetadataMap.get(uniqueId);
-            dpc.onDisplayChanged(hbmMetadata, leadDisplayId);
+            HighBrightnessModeMetadata hbmMetadata =
+                    mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(display);
+            if (hbmMetadata != null) {
+                dpc.onDisplayChanged(hbmMetadata, leadDisplayId);
+            }
         }
     }
 
@@ -3073,31 +3081,12 @@ public final class DisplayManagerService extends SystemService {
         mLogicalDisplayMapper.forEachLocked(this::addDisplayPowerControllerLocked);
     }
 
-    private HighBrightnessModeMetadata getHighBrightnessModeMetadata(LogicalDisplay display) {
-        final DisplayDevice device = display.getPrimaryDisplayDeviceLocked();
-        if (device == null) {
-            Slog.wtf(TAG, "Display Device is null in DisplayPowerController for display: "
-                    + display.getDisplayIdLocked());
-            return null;
-        }
-
-        final String uniqueId = device.getUniqueId();
-
-        if (mHighBrightnessModeMetadataMap.containsKey(uniqueId)) {
-            return mHighBrightnessModeMetadataMap.get(uniqueId);
-        }
-
-        // HBM Time info not present. Create a new one for this physical display.
-        HighBrightnessModeMetadata hbmInfo = new HighBrightnessModeMetadata();
-        mHighBrightnessModeMetadataMap.put(uniqueId, hbmInfo);
-        return hbmInfo;
-    }
-
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
-    private void addDisplayPowerControllerLocked(LogicalDisplay display) {
+    private DisplayPowerControllerInterface addDisplayPowerControllerLocked(
+            LogicalDisplay display) {
         if (mPowerHandler == null) {
             // initPowerManagement has not yet been called.
-            return;
+            return null;
         }
 
         if (mBrightnessTracker == null && display.getDisplayIdLocked() == Display.DEFAULT_DISPLAY) {
@@ -3113,7 +3102,13 @@ public final class DisplayManagerService extends SystemService {
         // We also need to pass a mapping of the HighBrightnessModeTimeInfoMap to
         // displayPowerController, so the hbm info can be correctly associated
         // with the corresponding displaydevice.
-        HighBrightnessModeMetadata hbmMetadata = getHighBrightnessModeMetadata(display);
+        HighBrightnessModeMetadata hbmMetadata =
+                mHighBrightnessModeMetadataMapper.getHighBrightnessModeMetadataLocked(display);
+        if (hbmMetadata == null) {
+            Slog.wtf(TAG, "High Brightness Mode Metadata is null in DisplayManagerService for "
+                    + "display: " + display.getDisplayIdLocked());
+            return null;
+        }
         if (DeviceConfig.getBoolean("display_manager",
                 "use_newly_structured_display_power_controller", true)) {
             displayPowerController = new DisplayPowerController2(
@@ -3127,6 +3122,7 @@ public final class DisplayManagerService extends SystemService {
                     () -> handleBrightnessChange(display), hbmMetadata, mBootCompleted);
         }
         mDisplayPowerControllers.append(display.getDisplayIdLocked(), displayPowerController);
+        return displayPowerController;
     }
 
     private void handleBrightnessChange(LogicalDisplay display) {

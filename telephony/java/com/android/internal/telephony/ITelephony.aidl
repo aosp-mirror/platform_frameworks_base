@@ -2991,6 +2991,15 @@ interface ITelephony {
     boolean setSatelliteServicePackageName(in String servicePackageName);
 
     /**
+     * This API can be used by only CTS to update satellite gateway service package name.
+     *
+     * @param servicePackageName The package name of the satellite gateway service.
+     * @return {@code true} if the satellite gateway service is set successfully,
+     * {@code false} otherwise.
+     */
+    boolean setSatelliteGatewayServicePackageName(in String servicePackageName);
+
+    /**
      * This API can be used by only CTS to update the timeout duration in milliseconds that
      * satellite should stay at listening mode to wait for the next incoming page before disabling
      * listening mode.
@@ -2999,4 +3008,14 @@ interface ITelephony {
      * @return {@code true} if the timeout duration is set successfully, {@code false} otherwise.
      */
     boolean setSatelliteListeningTimeoutDuration(in long timeoutMillis);
+
+    /**
+     * This API can be used by only CTS to update satellite pointing UI app package and class names.
+     *
+     * @param packageName The package name of the satellite pointing UI app.
+     * @param className The class name of the satellite pointing UI app.
+     * @return {@code true} if the satellite pointing UI app package and class is set successfully,
+     * {@code false} otherwise.
+     */
+    boolean setSatellitePointingUiClassName(in String packageName, in String className);
 }

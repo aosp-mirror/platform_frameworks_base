@@ -52,7 +52,7 @@ static JNIEnv* getenv(JavaVM* vm) {
     return env;
 }
 
-  struct {
+struct {
     jmethodID onTransactionHang;
 } gTransactionHangCallback;
 
@@ -72,12 +72,14 @@ public:
     }
 
     void onTransactionHang(const std::string& reason) {
-        if (mTransactionHangObject) {
-            JNIEnv* env = getenv(mVm);
-            ScopedLocalRef<jstring> jReason(env, env->NewStringUTF(reason.c_str()));
-            getenv(mVm)->CallVoidMethod(mTransactionHangObject,
-                                        gTransactionHangCallback.onTransactionHang, jReason.get());
+        if (!mTransactionHangObject) {
+            return;
         }
+        JNIEnv* env = getenv(mVm);
+        ScopedLocalRef<jstring> jReason(env, env->NewStringUTF(reason.c_str()));
+        getenv(mVm)->CallVoidMethod(mTransactionHangObject,
+                                    gTransactionHangCallback.onTransactionHang, jReason.get());
+        DieIfException(env, "Uncaught exception in TransactionHangCallback.");
     }
 
 private:

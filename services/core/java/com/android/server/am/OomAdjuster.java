@@ -1401,7 +1401,7 @@ public class OomAdjuster {
 
         mLastFreeSwapPercent = freeSwapPercent;
 
-        return mService.mAppProfiler.updateLowMemStateLSP(numCached, numEmpty, numTrimming);
+        return mService.mAppProfiler.updateLowMemStateLSP(numCached, numEmpty, numTrimming, now);
     }
 
     @GuardedBy({"mService", "mProcLock"})
@@ -1482,7 +1482,10 @@ public class OomAdjuster {
                         }
                         if (uidRec.isIdle() && !uidRec.isSetIdle()) {
                             uidChange |= UidRecord.CHANGE_IDLE;
-                            becameIdle.add(uidRec);
+                            if (uidRec.getSetProcState() != PROCESS_STATE_NONEXISTENT) {
+                                // don't stop the bg services if it's just started.
+                                becameIdle.add(uidRec);
+                            }
                         }
                     } else {
                         if (uidRec.isIdle()) {

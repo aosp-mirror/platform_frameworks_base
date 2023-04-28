@@ -59,4 +59,5 @@ class NoopKeyguardFaceAuthInteractor @Inject constructor() : KeyguardFaceAuthInt
     override fun onNotificationPanelClicked() {}
 
     override fun onSwipeUpOnBouncer() {}
+    override fun onPrimaryBouncerUserInput() {}
 }

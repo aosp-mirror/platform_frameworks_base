@@ -16,8 +16,6 @@
 
 package com.android.keyguard;
 
-import static android.view.WindowInsets.Type.ime;
-
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_DEFAULT;
 import static com.android.keyguard.KeyguardSecurityContainer.MODE_ONE_HANDED;
 
@@ -29,9 +27,9 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -164,6 +162,10 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Captor
     private ArgumentCaptor<KeyguardSecurityContainer.SwipeListener> mSwipeListenerArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<KeyguardSecurityViewFlipperController.OnViewInflatedCallback>
+            mOnViewInflatedCallbackArgumentCaptor;
+
     private KeyguardSecurityContainerController mKeyguardSecurityContainerController;
     private KeyguardPasswordViewController mKeyguardPasswordViewController;
     private KeyguardPasswordView mKeyguardPasswordView;
@@ -184,8 +186,6 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         when(mAdminSecondaryLockScreenControllerFactory.create(any(KeyguardSecurityCallback.class)))
                 .thenReturn(mAdminSecondaryLockScreenController);
         when(mSecurityViewFlipper.getWindowInsetsController()).thenReturn(mWindowInsetsController);
-        when(mKeyguardSecurityViewFlipperController.getSecurityView(any(SecurityMode.class),
-                any(KeyguardSecurityCallback.class))).thenReturn(mInputViewController);
         mKeyguardPasswordView = spy((KeyguardPasswordView) LayoutInflater.from(mContext).inflate(
                 R.layout.keyguard_password_view, null));
         when(mKeyguardPasswordView.getRootView()).thenReturn(mSecurityViewFlipper);
@@ -230,26 +230,16 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
             mKeyguardSecurityContainerController.showSecurityScreen(mode);
             if (mode == SecurityMode.Invalid) {
                 verify(mKeyguardSecurityViewFlipperController, never()).getSecurityView(
-                        any(SecurityMode.class), any(KeyguardSecurityCallback.class));
+                        any(SecurityMode.class), any(KeyguardSecurityCallback.class), any(
+                                KeyguardSecurityViewFlipperController.OnViewInflatedCallback.class)
+                );
             } else {
                 verify(mKeyguardSecurityViewFlipperController).getSecurityView(
-                        eq(mode), any(KeyguardSecurityCallback.class));
+                        eq(mode), any(KeyguardSecurityCallback.class), any(
+                                KeyguardSecurityViewFlipperController.OnViewInflatedCallback.class)
+                );
             }
         }
-    }
-
-    @Test
-    public void startDisappearAnimation_animatesKeyboard() {
-        when(mKeyguardSecurityModel.getSecurityMode(anyInt())).thenReturn(
-                SecurityMode.Password);
-        when(mKeyguardSecurityViewFlipperController.getSecurityView(
-                eq(SecurityMode.Password), any(KeyguardSecurityCallback.class)))
-                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
-        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Password);
-
-        mKeyguardSecurityContainerController.startDisappearAnimation(null);
-        verify(mWindowInsetsController).controlWindowInsetsAnimation(
-                eq(ime()), anyLong(), any(), any(), any());
     }
 
     @Test
@@ -300,9 +290,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Test
     public void showSecurityScreen_oneHandedMode_flagDisabled_noOneHandedMode() {
         mTestableResources.addOverride(R.bool.can_use_one_handed_bouncer, false);
-        when(mKeyguardSecurityViewFlipperController.getSecurityView(
-                eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
-                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
+        setupGetSecurityView(SecurityMode.Pattern);
 
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
         verify(mView).initMode(eq(MODE_DEFAULT), eq(mGlobalSettings), eq(mFalsingManager),
@@ -314,11 +302,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Test
     public void showSecurityScreen_oneHandedMode_flagEnabled_oneHandedMode() {
         mTestableResources.addOverride(R.bool.can_use_one_handed_bouncer, true);
-        when(mKeyguardSecurityViewFlipperController.getSecurityView(
-                eq(SecurityMode.Pattern), any(KeyguardSecurityCallback.class)))
-                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewController);
-
-        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Pattern);
+        setupGetSecurityView(SecurityMode.Pattern);
         verify(mView).initMode(eq(MODE_ONE_HANDED), eq(mGlobalSettings), eq(mFalsingManager),
                 eq(mUserSwitcherController),
                 any(KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class),
@@ -328,9 +312,8 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Test
     public void showSecurityScreen_twoHandedMode_flagEnabled_noOneHandedMode() {
         mTestableResources.addOverride(R.bool.can_use_one_handed_bouncer, true);
-        setupGetSecurityView();
+        setupGetSecurityView(SecurityMode.Password);
 
-        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Password);
         verify(mView).initMode(eq(MODE_DEFAULT), eq(mGlobalSettings), eq(mFalsingManager),
                 eq(mUserSwitcherController),
                 any(KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class),
@@ -342,17 +325,18 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         ArgumentCaptor<KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback>
                 captor = ArgumentCaptor.forClass(
                 KeyguardSecurityContainer.UserSwitcherViewMode.UserSwitcherCallback.class);
+        setupGetSecurityView(SecurityMode.Password);
 
-        setupGetSecurityView();
-
-        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.Password);
         verify(mView).initMode(anyInt(), any(GlobalSettings.class), any(FalsingManager.class),
                 any(UserSwitcherController.class),
                 captor.capture(),
                 eq(mFalsingA11yDelegate));
         captor.getValue().showUnlockToContinueMessage();
+        getViewControllerImmediately();
         verify(mKeyguardPasswordViewControllerMock).showMessage(
-                getContext().getString(R.string.keyguard_unlock_to_continue), null);
+                /* message= */ getContext().getString(R.string.keyguard_unlock_to_continue),
+                /* colorState= */ null,
+                /* animated= */ true);
     }
 
     @Test
@@ -455,7 +439,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         KeyguardSecurityContainer.SwipeListener registeredSwipeListener =
                 getRegisteredSwipeListener();
         when(mKeyguardUpdateMonitor.isFaceDetectionRunning()).thenReturn(false);
-        setupGetSecurityView();
+        setupGetSecurityView(SecurityMode.Password);
 
         registeredSwipeListener.onSwipeUp();
 
@@ -481,11 +465,14 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 getRegisteredSwipeListener();
         when(mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER))
                 .thenReturn(true);
-        setupGetSecurityView();
+        setupGetSecurityView(SecurityMode.Password);
 
+        clearInvocations(mKeyguardSecurityViewFlipperController);
         registeredSwipeListener.onSwipeUp();
+        getViewControllerImmediately();
 
-        verify(mKeyguardPasswordViewControllerMock).showMessage(null, null);
+        verify(mKeyguardPasswordViewControllerMock).showMessage(/* message= */
+                null, /* colorState= */ null, /* animated= */ true);
     }
 
     @Test
@@ -494,11 +481,12 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
                 getRegisteredSwipeListener();
         when(mKeyguardUpdateMonitor.requestFaceAuth(FaceAuthApiRequestReason.SWIPE_UP_ON_BOUNCER))
                 .thenReturn(false);
-        setupGetSecurityView();
+        setupGetSecurityView(SecurityMode.Password);
 
         registeredSwipeListener.onSwipeUp();
 
-        verify(mKeyguardPasswordViewControllerMock, never()).showMessage(null, null);
+        verify(mKeyguardPasswordViewControllerMock, never()).showMessage(/* message= */
+                null, /* colorState= */ null, /* animated= */ true);
     }
 
     @Test
@@ -512,10 +500,15 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         configurationListenerArgumentCaptor.getValue().onDensityOrFontScaleChanged();
 
-        verify(mView).onDensityOrFontScaleChanged();
         verify(mKeyguardSecurityViewFlipperController).clearViews();
-        verify(mKeyguardSecurityViewFlipperController).getSecurityView(eq(SecurityMode.PIN),
-                any(KeyguardSecurityCallback.class));
+        verify(mKeyguardSecurityViewFlipperController).asynchronouslyInflateView(
+                eq(SecurityMode.PIN),
+                any(KeyguardSecurityCallback.class),
+                mOnViewInflatedCallbackArgumentCaptor.capture());
+
+        mOnViewInflatedCallbackArgumentCaptor.getValue().onViewInflated(mInputViewController);
+
+        verify(mView).onDensityOrFontScaleChanged();
     }
 
     @Test
@@ -529,12 +522,17 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         configurationListenerArgumentCaptor.getValue().onThemeChanged();
 
-        verify(mView).reloadColors();
         verify(mKeyguardSecurityViewFlipperController).clearViews();
-        verify(mKeyguardSecurityViewFlipperController).getSecurityView(eq(SecurityMode.PIN),
-                any(KeyguardSecurityCallback.class));
+        verify(mKeyguardSecurityViewFlipperController).asynchronouslyInflateView(
+                eq(SecurityMode.PIN),
+                any(KeyguardSecurityCallback.class),
+                mOnViewInflatedCallbackArgumentCaptor.capture());
+
+        mOnViewInflatedCallbackArgumentCaptor.getValue().onViewInflated(mInputViewController);
+
         verify(mView).reset();
         verify(mKeyguardSecurityViewFlipperController).reset();
+        verify(mView).reloadColors();
     }
 
     @Test
@@ -548,10 +546,15 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
         configurationListenerArgumentCaptor.getValue().onUiModeChanged();
 
-        verify(mView).reloadColors();
         verify(mKeyguardSecurityViewFlipperController).clearViews();
-        verify(mKeyguardSecurityViewFlipperController).getSecurityView(eq(SecurityMode.PIN),
-                any(KeyguardSecurityCallback.class));
+        verify(mKeyguardSecurityViewFlipperController).asynchronouslyInflateView(
+                eq(SecurityMode.PIN),
+                any(KeyguardSecurityCallback.class),
+                mOnViewInflatedCallbackArgumentCaptor.capture());
+
+        mOnViewInflatedCallbackArgumentCaptor.getValue().onViewInflated(mInputViewController);
+
+        verify(mView).reloadColors();
     }
 
     @Test
@@ -614,6 +617,11 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     @Test
     public void testOnStartingToHide() {
         mKeyguardSecurityContainerController.onStartingToHide();
+        verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
+                any(KeyguardSecurityCallback.class),
+                mOnViewInflatedCallbackArgumentCaptor.capture());
+
+        mOnViewInflatedCallbackArgumentCaptor.getValue().onViewInflated(mInputViewController);
         verify(mInputViewController).onStartingToHide();
     }
 
@@ -673,26 +681,17 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         verify(mView).updatePositionByTouchX(1.0f);
     }
 
-
-    @Test
-    public void testReinflateViewFlipper() {
-        mKeyguardSecurityContainerController.reinflateViewFlipper(() -> {});
-        verify(mKeyguardSecurityViewFlipperController).clearViews();
-        verify(mKeyguardSecurityViewFlipperController).getSecurityView(any(SecurityMode.class),
-                any(KeyguardSecurityCallback.class));
-    }
-
     @Test
     public void testReinflateViewFlipper_asyncBouncerFlagOn() {
         when(mFeatureFlags.isEnabled(Flags.ASYNC_INFLATE_BOUNCER)).thenReturn(true);
-        KeyguardSecurityViewFlipperController.OnViewInflatedListener onViewInflatedListener =
-                () -> {
+        KeyguardSecurityViewFlipperController.OnViewInflatedCallback onViewInflatedCallback =
+                controller -> {
                 };
-        mKeyguardSecurityContainerController.reinflateViewFlipper(onViewInflatedListener);
+        mKeyguardSecurityContainerController.reinflateViewFlipper(onViewInflatedCallback);
         verify(mKeyguardSecurityViewFlipperController).clearViews();
         verify(mKeyguardSecurityViewFlipperController).asynchronouslyInflateView(
                 any(SecurityMode.class),
-                any(KeyguardSecurityCallback.class), eq(onViewInflatedListener));
+                any(KeyguardSecurityCallback.class), eq(onViewInflatedCallback));
     }
 
     @Test
@@ -715,14 +714,17 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
         return mSwipeListenerArgumentCaptor.getValue();
     }
 
-    private void attachView() {
-        mKeyguardSecurityContainerController.onViewAttached();
-        verify(mKeyguardUpdateMonitor).registerCallback(mKeyguardUpdateMonitorCallback.capture());
+    private void setupGetSecurityView(SecurityMode securityMode) {
+        mKeyguardSecurityContainerController.showSecurityScreen(securityMode);
+        getViewControllerImmediately();
     }
 
-    private void setupGetSecurityView() {
-        when(mKeyguardSecurityViewFlipperController.getSecurityView(
-                any(), any(KeyguardSecurityCallback.class)))
-                .thenReturn((KeyguardInputViewController) mKeyguardPasswordViewControllerMock);
+    private void getViewControllerImmediately() {
+        verify(mKeyguardSecurityViewFlipperController, atLeastOnce()).getSecurityView(
+                any(SecurityMode.class), any(),
+                mOnViewInflatedCallbackArgumentCaptor.capture());
+        mOnViewInflatedCallbackArgumentCaptor.getValue().onViewInflated(
+                (KeyguardInputViewController) mKeyguardPasswordViewControllerMock);
+
     }
 }

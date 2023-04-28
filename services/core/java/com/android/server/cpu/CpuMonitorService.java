@@ -653,8 +653,17 @@ public final class CpuMonitorService extends SystemService {
             }
 
             public int getAverageAvailableCpuFreqPercent() {
-                return (int) ((totalNormalizedAvailableCpuFreqKHz * 100.0)
+                int percent = (int) ((totalNormalizedAvailableCpuFreqKHz * 100.0)
                         / totalOnlineMaxCpuFreqKHz);
+                if (percent < 0) {
+                    // TODO(b/279478586): This case should never happen. But this case happens
+                    // rarely on certain hardware, which indicates a deeper issue. Once this
+                    // issue is reproduced, use this log to debug the issue and fix it.
+                    Slogf.wtf(TAG, "Computed negative CPU availability percent(%d) for %s ",
+                            percent, toString());
+                    return 0;
+                }
+                return percent;
             }
 
             @Override

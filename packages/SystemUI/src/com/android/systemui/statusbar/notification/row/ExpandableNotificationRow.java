@@ -272,7 +272,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnFeedbackClickListener;
     private Path mExpandingClipPath;
-    private boolean mIsInlineReplyAnimationFlagEnabled = false;
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -966,15 +965,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         } else {
             return false;
         }
-    }
-
-    @Override
-    protected boolean handleSlideBack() {
-        if (mMenuRow != null && mMenuRow.isMenuVisible()) {
-            animateResetTranslation();
-            return true;
-        }
-        return false;
     }
 
     @Override
@@ -3095,10 +3085,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return showingLayout != null && showingLayout.requireRowToHaveOverlappingRendering();
     }
 
-    public void setInlineReplyAnimationFlagEnabled(boolean isEnabled) {
-        mIsInlineReplyAnimationFlagEnabled = isEnabled;
-    }
-
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
         boolean changed = height != getActualHeight();
@@ -3118,11 +3104,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         int contentHeight = Math.max(getMinHeight(), height);
         for (NotificationContentView l : mLayouts) {
-            if (mIsInlineReplyAnimationFlagEnabled) {
-                l.setContentHeight(height);
-            } else {
-                l.setContentHeight(contentHeight);
-            }
+            l.setContentHeight(height);
         }
         if (mIsSummaryWithChildren) {
             mChildrenContainer.setActualHeight(height);
@@ -3667,16 +3649,12 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             } else {
                 pw.println("no viewState!!!");
             }
-            pw.println("Roundness: " + getRoundableState().debugString());
+            pw.println(getRoundableState().debugString());
 
             int transientViewCount = mChildrenContainer == null
                     ? 0 : mChildrenContainer.getTransientViewCount();
             if (mIsSummaryWithChildren || transientViewCount > 0) {
-                pw.println();
-                pw.print("ChildrenContainer");
-                pw.print(" visibility: " + mChildrenContainer.getVisibility());
-                pw.print(", alpha: " + mChildrenContainer.getAlpha());
-                pw.print(", translationY: " + mChildrenContainer.getTranslationY());
+                pw.println(mChildrenContainer.debugString());
                 pw.println();
                 List<ExpandableNotificationRow> notificationChildren = getAttachedChildren();
                 pw.print("Children: " + notificationChildren.size() + " {");
@@ -3741,12 +3719,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (mChildrenContainer != null) {
             mChildrenContainer.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
         }
-    }
-
-    @Override
-    public String toString() {
-        String roundableStateDebug = "RoundableState = " + getRoundableState().debugString();
-        return "ExpandableNotificationRow:" + hashCode() + " { " + roundableStateDebug + " }";
     }
 
     @Override

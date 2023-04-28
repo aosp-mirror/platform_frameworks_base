@@ -7613,7 +7613,7 @@ public abstract class Context {
      * the device association is changed by the system.
      * <p>
      * The callback can be called when an app is moved to a different device and the {@code Context}
-     * is not explicily associated with a specific device.
+     * is not explicitly associated with a specific device.
      * </p>
      * <p> When an application receives a device id update callback, this Context is guaranteed to
      * also have an updated display ID(if any) and {@link Configuration}.

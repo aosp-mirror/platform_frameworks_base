@@ -115,6 +115,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -304,7 +305,9 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
             mEmptySpaceClickListenerCaptor;
     @Mock protected ActivityStarter mActivityStarter;
     @Mock protected KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    @Mock protected ShadeRepository mShadeRepository;
 
+    protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
     protected KeyguardInteractor mKeyguardInteractor;
     protected NotificationPanelViewController.TouchHandler mTouchHandler;
@@ -365,6 +368,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
         when(mResources.getDisplayMetrics()).thenReturn(mDisplayMetrics);
         mDisplayMetrics.density = 100;
         when(mResources.getBoolean(R.bool.config_enableNotificationShadeDrag)).thenReturn(true);
+        when(mResources.getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y))
+                .thenReturn(mMaxUdfpsBurnInOffsetY);
         when(mResources.getDimensionPixelSize(R.dimen.notifications_top_padding_split_shade))
                 .thenReturn(NOTIFICATION_SCRIM_TOP_PADDING_IN_SPLIT_SHADE);
         when(mResources.getDimensionPixelSize(R.dimen.notification_panel_margin_horizontal))
@@ -669,7 +674,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mFeatureFlags,
                 mInteractionJankMonitor,
                 mShadeLog,
-                mKeyguardFaceAuthInteractor
+                mKeyguardFaceAuthInteractor,
+                mShadeRepository
         );
     }
 

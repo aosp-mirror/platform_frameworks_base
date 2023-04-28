@@ -119,6 +119,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private final QSLogger mLogger;
     private final FooterActionsController mFooterActionsController;
     private final FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
+    private final FooterActionsViewBinder mFooterActionsViewBinder;
     private final ListeningAndVisibilityLifecycleOwner mListeningAndVisibilityLifecycleOwner;
     private boolean mShowCollapsedOnKeyguard;
     private boolean mLastKeyguardAndExpanded;
@@ -176,6 +177,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             DumpManager dumpManager, QSLogger qsLogger,
             FooterActionsController footerActionsController,
             FooterActionsViewModel.Factory footerActionsViewModelFactory,
+            FooterActionsViewBinder footerActionsViewBinder,
             LargeScreenShadeInterpolator largeScreenShadeInterpolator,
             FeatureFlags featureFlags) {
         mRemoteInputQuickSettingsDisabler = remoteInputQsDisabler;
@@ -192,6 +194,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mDumpManager = dumpManager;
         mFooterActionsController = footerActionsController;
         mFooterActionsViewModelFactory = footerActionsViewModelFactory;
+        mFooterActionsViewBinder = footerActionsViewBinder;
         mListeningAndVisibilityLifecycleOwner = new ListeningAndVisibilityLifecycleOwner();
     }
 
@@ -284,7 +287,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
         if (!ComposeFacade.INSTANCE.isComposeAvailable()) {
             Log.d(TAG, "Binding the View implementation of the QS footer actions");
-            FooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
+            mFooterActionsViewBinder.bind(footerActionsView, mQSFooterActionsViewModel,
                     mListeningAndVisibilityLifecycleOwner);
             return;
         }

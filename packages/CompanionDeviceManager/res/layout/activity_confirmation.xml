@@ -16,13 +16,15 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        style="@style/ScrollViewStyle">
+        style="@style/ScrollViewStyle"
+        android:importantForAccessibility="no">
 
     <LinearLayout
             android:id="@+id/activity_confirmation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:baselineAligned="false">
+            android:baselineAligned="false"
+            android:importantForAccessibility="no">
 
         <LinearLayout android:id="@+id/association_confirmation"
                       style="@style/ContainerLayout">
@@ -153,7 +155,8 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1">
+            android:layout_weight="1"
+            android:importantForAccessibility="noHideDescendants">
 
             <ProgressBar
                 android:id="@+id/spinner_single_device"

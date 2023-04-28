@@ -97,8 +97,7 @@ public class SettingsBackupTest {
                     Settings.System.WHEN_TO_MAKE_WIFI_CALLS, // bug?
                     Settings.System.WINDOW_ORIENTATION_LISTENER_LOG, // used for debugging only
                     Settings.System.DESKTOP_MODE, // developer setting for internal prototyping
-                    Settings.System.MIN_REFRESH_RATE, // depends on hardware capabilities
-                    Settings.System.PEAK_REFRESH_RATE, // depends on hardware capabilities
+                    Settings.System.FORCE_PEAK_REFRESH_RATE, // depends on hardware capabilities
                     Settings.System.SCREEN_BRIGHTNESS_FLOAT,
                     Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ,
                     Settings.System.MULTI_AUDIO_FOCUS_ENABLED // form-factor/OEM specific
@@ -449,6 +448,7 @@ public class SettingsBackupTest {
                     Settings.Global.SHOW_PEOPLE_SPACE,
                     Settings.Global.SHOW_NEW_NOTIF_DISMISS,
                     Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
+                    Settings.Global.SHOW_TARE_DEVELOPER_OPTIONS,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
                     Settings.Global.SIGNED_CONFIG_VERSION,

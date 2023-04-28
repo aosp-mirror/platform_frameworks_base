@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -92,13 +93,15 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     private val mobileMappings = FakeMobileMappingsProxy()
     private val subscriptionManagerProxy = FakeSubscriptionManagerProxy()
 
+    private val testDispatcher = UnconfinedTestDispatcher()
     private val scope = CoroutineScope(IMMEDIATE)
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        logFactory = TableLogBufferFactory(dumpManager, FakeSystemClock())
+        logFactory =
+            TableLogBufferFactory(dumpManager, FakeSystemClock(), mock(), testDispatcher, scope)
 
         // Never start in demo mode
         whenever(demoModeController.isInDemoMode).thenReturn(false)
@@ -156,7 +159,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
     }
 
     @Test
-    fun `active repo matches demo mode setting`() =
+    fun activeRepoMatchesDemoModeSetting() =
         runBlocking(IMMEDIATE) {
             whenever(demoModeController.isInDemoMode).thenReturn(false)
 
@@ -177,7 +180,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
         }
 
     @Test
-    fun `subscription list updates when demo mode changes`() =
+    fun subscriptionListUpdatesWhenDemoModeChanges() =
         runBlocking(IMMEDIATE) {
             whenever(demoModeController.isInDemoMode).thenReturn(false)
 

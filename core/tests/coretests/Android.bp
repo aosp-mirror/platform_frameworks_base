@@ -59,6 +59,7 @@ android_test {
         "print-test-util-lib",
         "testng",
         "servicestests-utils",
+        "device-time-shell-utils",
     ],
 
     libs: [
@@ -73,6 +74,7 @@ android_test {
     ],
     jni_libs: [
         "libpowermanagertest_jni",
+        "libworksourceparceltest_jni",
     ],
 
     sdk_version: "core_platform",
@@ -91,8 +93,8 @@ android_test {
         ":BstatsTestApp",
         ":BinderDeathRecipientHelperApp1",
         ":BinderDeathRecipientHelperApp2",
+        ":com.android.cts.helpers.aosp",
     ],
-    required: ["com.android.cts.helpers.aosp"],
 }
 
 // Rules to copy all the test apks to the intermediate raw resource directory

@@ -181,6 +181,19 @@ final class LogicalDisplay {
      */
     private String mThermalBrightnessThrottlingDataId;
 
+    /**
+     * Refresh rate range limitation based on the current device layout
+     */
+    @Nullable
+    private SurfaceControl.RefreshRateRange mLayoutLimitedRefreshRate;
+
+    /**
+     * RefreshRateRange limitation for @Temperature.ThrottlingStatus
+     */
+    @NonNull
+    private SparseArray<SurfaceControl.RefreshRateRange> mThermalRefreshRateThrottling =
+            new SparseArray<>();
+
     public LogicalDisplay(int displayId, int layerStack, DisplayDevice primaryDisplayDevice) {
         mDisplayId = displayId;
         mLayerStack = layerStack;
@@ -339,24 +352,24 @@ final class LogicalDisplay {
      */
     public void updateLayoutLimitedRefreshRateLocked(
             @Nullable SurfaceControl.RefreshRateRange layoutLimitedRefreshRate) {
-        if (!Objects.equals(layoutLimitedRefreshRate, mBaseDisplayInfo.layoutLimitedRefreshRate)) {
-            mBaseDisplayInfo.layoutLimitedRefreshRate = layoutLimitedRefreshRate;
-            mInfo.set(null);
+        if (!Objects.equals(layoutLimitedRefreshRate, mLayoutLimitedRefreshRate)) {
+            mLayoutLimitedRefreshRate = layoutLimitedRefreshRate;
+            mDirty = true;
         }
     }
     /**
-     * Updates refreshRateThermalThrottling
+     * Updates thermalRefreshRateThrottling
      *
-     * @param refreshRanges new refreshRateThermalThrottling ranges limited by layout or default
+     * @param refreshRanges new thermalRefreshRateThrottling ranges limited by layout or default
      */
     public void updateThermalRefreshRateThrottling(
             @Nullable SparseArray<SurfaceControl.RefreshRateRange> refreshRanges) {
         if (refreshRanges == null) {
             refreshRanges = new SparseArray<>();
         }
-        if (!mBaseDisplayInfo.refreshRateThermalThrottling.contentEquals(refreshRanges)) {
-            mBaseDisplayInfo.refreshRateThermalThrottling = refreshRanges;
-            mInfo.set(null);
+        if (!mThermalRefreshRateThrottling.contentEquals(refreshRanges)) {
+            mThermalRefreshRateThrottling = refreshRanges;
+            mDirty = true;
         }
     }
 
@@ -498,6 +511,9 @@ final class LogicalDisplay {
                 mBaseDisplayInfo.flags |= Display.FLAG_PRESENTATION;
                 mBaseDisplayInfo.removeMode = Display.REMOVE_MODE_DESTROY_CONTENT;
             }
+
+            mBaseDisplayInfo.layoutLimitedRefreshRate = mLayoutLimitedRefreshRate;
+            mBaseDisplayInfo.thermalRefreshRateThrottling = mThermalRefreshRateThrottling;
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
@@ -952,6 +968,8 @@ final class LogicalDisplay {
         pw.println("mDisplayGroupName=" + mDisplayGroupName);
         pw.println("mThermalBrightnessThrottlingDataId=" + mThermalBrightnessThrottlingDataId);
         pw.println("mLeadDisplayId=" + mLeadDisplayId);
+        pw.println("mLayoutLimitedRefreshRate=" + mLayoutLimitedRefreshRate);
+        pw.println("mThermalRefreshRateThrottling=" + mThermalRefreshRateThrottling);
     }
 
     @Override

@@ -17,7 +17,9 @@
 package com.android.systemui.media.controls.ui
 
 import android.app.PendingIntent
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.os.LocaleList
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.util.MathUtils.abs
@@ -26,6 +28,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.qualifiers.Main
@@ -50,9 +53,11 @@ import com.android.systemui.statusbar.notification.collection.provider.OnReorder
 import com.android.systemui.statusbar.notification.collection.provider.VisualStabilityProvider
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
+import java.util.Locale
 import javax.inject.Provider
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
@@ -68,6 +73,7 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.floatThat
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -77,6 +83,8 @@ import org.mockito.MockitoAnnotations
 private val DATA = MediaTestUtils.emptyMediaData
 
 private val SMARTSPACE_KEY = "smartspace"
+private const val PAUSED_LOCAL = "paused local"
+private const val PLAYING_LOCAL = "playing local"
 
 @SmallTest
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -110,6 +118,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     lateinit var configListener: ArgumentCaptor<ConfigurationController.ConfigurationListener>
     @Captor lateinit var visualStabilityCallback: ArgumentCaptor<OnReorderingAllowedListener>
     @Captor lateinit var keyguardCallback: ArgumentCaptor<KeyguardUpdateMonitorCallback>
+    @Captor lateinit var hostStateCallback: ArgumentCaptor<MediaHostStatesManager.Callback>
 
     private val clock = FakeSystemClock()
     private lateinit var mediaCarouselController: MediaCarouselController
@@ -117,6 +126,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
+        context.resources.configuration.locales = LocaleList(Locale.US, Locale.UK)
         transitionRepository = FakeKeyguardTransitionRepository()
         mediaCarouselController =
             MediaCarouselController(
@@ -143,6 +153,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         verify(visualStabilityProvider)
             .addPersistentReorderingAllowedListener(capture(visualStabilityCallback))
         verify(keyguardUpdateMonitor).registerCallback(capture(keyguardCallback))
+        verify(mediaHostStatesManager).addCallback(capture(hostStateCallback))
         whenever(mediaControlPanelFactory.get()).thenReturn(panel)
         whenever(panel.mediaViewController).thenReturn(mediaViewController)
         whenever(mediaDataManager.smartspaceMediaData).thenReturn(smartspaceMediaData)
@@ -155,7 +166,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // Test values: key, data, last active time
         val playingLocal =
             Triple(
-                "playing local",
+                PLAYING_LOCAL,
                 DATA.copy(
                     active = true,
                     isPlaying = true,
@@ -179,7 +190,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
         val pausedLocal =
             Triple(
-                "paused local",
+                PAUSED_LOCAL,
                 DATA.copy(
                     active = true,
                     isPlaying = false,
@@ -382,8 +393,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         testPlayerOrdering()
         // playing paused player
         listener.value.onMediaDataLoaded(
-            "paused local",
-            "paused local",
+            PAUSED_LOCAL,
+            PAUSED_LOCAL,
             DATA.copy(
                 active = true,
                 isPlaying = true,
@@ -392,8 +403,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             )
         )
         listener.value.onMediaDataLoaded(
-            "playing local",
-            "playing local",
+            PLAYING_LOCAL,
+            PLAYING_LOCAL,
             DATA.copy(
                 active = true,
                 isPlaying = false,
@@ -403,7 +414,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         )
 
         assertEquals(
-            MediaPlayerData.getMediaPlayerIndex("paused local"),
+            MediaPlayerData.getMediaPlayerIndex(PAUSED_LOCAL),
             mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
         )
         // paused player order should stays the same in visibleMediaPLayer map.
@@ -484,7 +495,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
     @Test
     fun testMediaLoaded_ScrollToActivePlayer() {
         listener.value.onMediaDataLoaded(
-            "playing local",
+            PLAYING_LOCAL,
             null,
             DATA.copy(
                 active = true,
@@ -494,7 +505,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             )
         )
         listener.value.onMediaDataLoaded(
-            "paused local",
+            PAUSED_LOCAL,
             null,
             DATA.copy(
                 active = true,
@@ -512,8 +523,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         mediaCarouselController.shouldScrollToKey = true
         // switching between media players.
         listener.value.onMediaDataLoaded(
-            "playing local",
-            "playing local",
+            PLAYING_LOCAL,
+            PLAYING_LOCAL,
             DATA.copy(
                 active = true,
                 isPlaying = false,
@@ -522,8 +533,8 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             )
         )
         listener.value.onMediaDataLoaded(
-            "paused local",
-            "paused local",
+            PAUSED_LOCAL,
+            PAUSED_LOCAL,
             DATA.copy(
                 active = true,
                 isPlaying = true,
@@ -533,7 +544,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         )
 
         assertEquals(
-            MediaPlayerData.getMediaPlayerIndex("paused local"),
+            MediaPlayerData.getMediaPlayerIndex(PAUSED_LOCAL),
             mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
         )
     }
@@ -546,7 +557,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             false
         )
         listener.value.onMediaDataLoaded(
-            "playing local",
+            PLAYING_LOCAL,
             null,
             DATA.copy(
                 active = true,
@@ -556,7 +567,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
             )
         )
 
-        var playerIndex = MediaPlayerData.getMediaPlayerIndex("playing local")
+        var playerIndex = MediaPlayerData.getMediaPlayerIndex(PLAYING_LOCAL)
         assertEquals(
             playerIndex,
             mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
@@ -567,7 +578,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
         // And check that the card stays in its position.
         mediaCarouselController.shouldScrollToKey = true
         listener.value.onMediaDataLoaded(
-            "playing local",
+            PLAYING_LOCAL,
             null,
             DATA.copy(
                 active = true,
@@ -577,7 +588,7 @@ class MediaCarouselControllerTest : SysuiTestCase() {
                 packageName = "PACKAGE_NAME"
             )
         )
-        playerIndex = MediaPlayerData.getMediaPlayerIndex("playing local")
+        playerIndex = MediaPlayerData.getMediaPlayerIndex(PLAYING_LOCAL)
         assertEquals(playerIndex, 0)
     }
 
@@ -674,36 +685,52 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
     @Test
     fun testOnConfigChanged_playersAreAddedBack() {
-        listener.value.onMediaDataLoaded(
-            "playing local",
-            null,
-            DATA.copy(
-                active = true,
-                isPlaying = true,
-                playbackLocation = MediaData.PLAYBACK_LOCAL,
-                resumption = false
-            )
-        )
-        listener.value.onMediaDataLoaded(
-            "paused local",
-            null,
-            DATA.copy(
-                active = true,
-                isPlaying = false,
-                playbackLocation = MediaData.PLAYBACK_LOCAL,
-                resumption = false
-            )
-        )
+        testConfigurationChange { configListener.value.onConfigChanged(Configuration()) }
+    }
 
-        val playersSize = MediaPlayerData.players().size
+    @Test
+    fun testOnUiModeChanged_playersAreAddedBack() {
+        testConfigurationChange(configListener.value::onUiModeChanged)
 
-        configListener.value.onConfigChanged(Configuration())
+        verify(pageIndicator).tintList =
+            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+        verify(pageIndicator, times(2)).setNumPages(any())
+    }
 
-        assertEquals(playersSize, MediaPlayerData.players().size)
-        assertEquals(
-            MediaPlayerData.getMediaPlayerIndex("playing local"),
-            mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
-        )
+    @Test
+    fun testOnDensityOrFontScaleChanged_playersAreAddedBack() {
+        testConfigurationChange(configListener.value::onDensityOrFontScaleChanged)
+
+        verify(pageIndicator).tintList =
+            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+        // when recreateMedia is set to true, page indicator is updated on removal and addition.
+        verify(pageIndicator, times(4)).setNumPages(any())
+    }
+
+    @Test
+    fun testOnThemeChanged_playersAreAddedBack() {
+        testConfigurationChange(configListener.value::onThemeChanged)
+
+        verify(pageIndicator).tintList =
+            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+        verify(pageIndicator, times(2)).setNumPages(any())
+    }
+
+    @Test
+    fun testOnLocaleListChanged_playersAreAddedBack() {
+        context.resources.configuration.locales = LocaleList(Locale.US, Locale.UK, Locale.CANADA)
+        testConfigurationChange(configListener.value::onLocaleListChanged)
+
+        verify(pageIndicator, never()).tintList =
+            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+
+        context.resources.configuration.locales = LocaleList(Locale.UK, Locale.US, Locale.CANADA)
+        testConfigurationChange(configListener.value::onLocaleListChanged)
+
+        verify(pageIndicator).tintList =
+            ColorStateList.valueOf(context.getColor(R.color.media_paging_indicator))
+        // When recreateMedia is set to true, page indicator is updated on removal and addition.
+        verify(pageIndicator, times(4)).setNumPages(any())
     }
 
     @Test
@@ -831,5 +858,56 @@ class MediaCarouselControllerTest : SysuiTestCase() {
 
         // Verify that seekbar listening attribute in media control panel is set to false.
         verify(panel, times(MediaPlayerData.players().size)).listening = false
+    }
+
+    @Test
+    fun testOnHostStateChanged_updateVisibility() {
+        var stateUpdated = false
+        mediaCarouselController.updateUserVisibility = { stateUpdated = true }
+
+        // When the host state updates
+        hostStateCallback.value!!.onHostStateChanged(LOCATION_QS, mediaHostState)
+
+        // Then the carousel visibility is updated
+        assertTrue(stateUpdated)
+    }
+
+    /**
+     * Helper method when a configuration change occurs.
+     *
+     * @param function called when a certain configuration change occurs.
+     */
+    private fun testConfigurationChange(function: () -> Unit) {
+        mediaCarouselController.pageIndicator = pageIndicator
+        listener.value.onMediaDataLoaded(
+            PLAYING_LOCAL,
+            null,
+            DATA.copy(
+                active = true,
+                isPlaying = true,
+                playbackLocation = MediaData.PLAYBACK_LOCAL,
+                resumption = false
+            )
+        )
+        listener.value.onMediaDataLoaded(
+            PAUSED_LOCAL,
+            null,
+            DATA.copy(
+                active = true,
+                isPlaying = false,
+                playbackLocation = MediaData.PLAYBACK_LOCAL,
+                resumption = false
+            )
+        )
+
+        val playersSize = MediaPlayerData.players().size
+        reset(pageIndicator)
+        function()
+
+        assertEquals(playersSize, MediaPlayerData.players().size)
+        assertEquals(
+            MediaPlayerData.getMediaPlayerIndex(PLAYING_LOCAL),
+            mediaCarouselController.mediaCarouselScrollHandler.visibleMediaIndex
+        )
     }
 }

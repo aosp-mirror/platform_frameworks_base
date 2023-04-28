@@ -26,11 +26,13 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.media.controls.ui.MediaHierarchyManager
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QS
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.shade.ShadeViewController
+import com.android.systemui.shade.data.repository.ShadeRepository
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
@@ -62,16 +64,18 @@ class LockscreenShadeTransitionController @Inject constructor(
     private val mediaHierarchyManager: MediaHierarchyManager,
     private val scrimTransitionController: LockscreenShadeScrimTransitionController,
     private val keyguardTransitionControllerFactory:
-        LockscreenShadeKeyguardTransitionController.Factory,
+    LockscreenShadeKeyguardTransitionController.Factory,
     private val depthController: NotificationShadeDepthController,
     private val context: Context,
     private val splitShadeOverScrollerFactory: SplitShadeLockScreenOverScroller.Factory,
     private val singleShadeOverScrollerFactory: SingleShadeLockScreenOverScroller.Factory,
+    private val activityStarter: ActivityStarter,
     wakefulnessLifecycle: WakefulnessLifecycle,
     configurationController: ConfigurationController,
     falsingManager: FalsingManager,
     dumpManager: DumpManager,
     qsTransitionControllerFactory: LockscreenShadeQsTransitionController.Factory,
+    private val shadeRepository: ShadeRepository,
 ) : Dumpable {
     private var pulseHeight: Float = 0f
     @get:VisibleForTesting
@@ -79,7 +83,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         private set
     private var useSplitShade: Boolean = false
     private lateinit var nsslController: NotificationStackScrollLayoutController
-    lateinit var notificationPanelController: NotificationPanelViewController
+    lateinit var shadeViewController: ShadeViewController
     lateinit var centralSurfaces: CentralSurfaces
     lateinit var qS: QS
 
@@ -182,7 +186,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     }
 
     private val keyguardTransitionController by lazy {
-        keyguardTransitionControllerFactory.create(notificationPanelController)
+        keyguardTransitionControllerFactory.create(shadeViewController)
     }
 
     private val qsTransitionController = qsTransitionControllerFactory.create { qS }
@@ -276,7 +280,6 @@ class LockscreenShadeTransitionController @Inject constructor(
             if (statusBarStateController.state == StatusBarState.KEYGUARD) {
                 centralSurfaces.wakeUpIfDozing(
                         SystemClock.uptimeMillis(),
-                        it,
                         "SHADE_CLICK",
                         PowerManager.WAKE_REASON_GESTURE,
                 )
@@ -306,7 +309,7 @@ class LockscreenShadeTransitionController @Inject constructor(
             if (nsslController.isInLockedDownShade()) {
                 logger.logDraggedDownLockDownShade(startingChild)
                 statusBarStateController.setLeaveOpenOnKeyguardHide(true)
-                centralSurfaces.dismissKeyguardThenExecute(OnDismissAction {
+                activityStarter.dismissKeyguardThenExecute(OnDismissAction {
                     nextHideKeyguardNeedsNoAnimation = true
                     false
                 }, cancelRunnable, false /* afterKeyguardGone */)
@@ -320,7 +323,7 @@ class LockscreenShadeTransitionController @Inject constructor(
                             startingChild.onExpandedByGesture(
                                     true /* drag down is always an open */)
                         }
-                        notificationPanelController.transitionToExpandedShade(delay)
+                        shadeViewController.transitionToExpandedShade(delay)
                         callbacks.forEach { it.setTransitionToFullShadeAmount(0f,
                                 true /* animated */, delay) }
 
@@ -448,6 +451,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         }
 
         val udfpsProgress = MathUtils.saturate(dragDownAmount / udfpsTransitionDistance)
+        shadeRepository.setUdfpsTransitionToFullShadeProgress(udfpsProgress)
         udfpsKeyguardViewController?.setTransitionToFullShadeProgress(udfpsProgress)
 
         val statusBarProgress = MathUtils.saturate(dragDownAmount / statusBarTransitionDistance)
@@ -531,7 +535,7 @@ class LockscreenShadeTransitionController @Inject constructor(
             } else {
                 // Let's only animate notifications
                 animationHandler = { delay: Long ->
-                    notificationPanelController.transitionToExpandedShade(delay)
+                    shadeViewController.transitionToExpandedShade(delay)
                 }
             }
             goToLockedShadeInternal(expandedView, animationHandler,
@@ -649,7 +653,7 @@ class LockscreenShadeTransitionController @Inject constructor(
      */
     private fun performDefaultGoToFullShadeAnimation(delay: Long) {
         logger.logDefaultGoToFullShadeAnimation(delay)
-        notificationPanelController.transitionToExpandedShade(delay)
+        shadeViewController.transitionToExpandedShade(delay)
         animateAppear(delay)
     }
 
@@ -674,7 +678,7 @@ class LockscreenShadeTransitionController @Inject constructor(
         } else {
             pulseHeight = height
             val overflow = nsslController.setPulseHeight(height)
-            notificationPanelController.setOverStretchAmount(overflow)
+            shadeViewController.setOverStretchAmount(overflow)
             val transitionHeight = if (keyguardBypassController.bypassEnabled) height else 0.0f
             transitionToShadeAmountCommon(transitionHeight)
         }

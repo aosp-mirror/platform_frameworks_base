@@ -87,10 +87,11 @@ public class SoundDoseHelper {
     private static final int SAFE_MEDIA_VOLUME_ACTIVE = 3;  // unconfirmed
 
     private static final int MSG_CONFIGURE_SAFE_MEDIA = SAFE_MEDIA_VOLUME_MSG_START + 1;
-    private static final int MSG_PERSIST_SAFE_VOLUME_STATE = SAFE_MEDIA_VOLUME_MSG_START + 2;
-    private static final int MSG_PERSIST_MUSIC_ACTIVE_MS = SAFE_MEDIA_VOLUME_MSG_START + 3;
-    private static final int MSG_PERSIST_CSD_VALUES = SAFE_MEDIA_VOLUME_MSG_START + 4;
-    /*package*/ static final int MSG_CSD_UPDATE_ATTENUATION = SAFE_MEDIA_VOLUME_MSG_START + 5;
+    private static final int MSG_CONFIGURE_SAFE_MEDIA_FORCED = SAFE_MEDIA_VOLUME_MSG_START + 2;
+    private static final int MSG_PERSIST_SAFE_VOLUME_STATE = SAFE_MEDIA_VOLUME_MSG_START + 3;
+    private static final int MSG_PERSIST_MUSIC_ACTIVE_MS = SAFE_MEDIA_VOLUME_MSG_START + 4;
+    private static final int MSG_PERSIST_CSD_VALUES = SAFE_MEDIA_VOLUME_MSG_START + 5;
+    /*package*/ static final int MSG_CSD_UPDATE_ATTENUATION = SAFE_MEDIA_VOLUME_MSG_START + 6;
 
     private static final int UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX = (20 * 3600 * 1000); // 20 hours
 
@@ -303,8 +304,9 @@ public class SoundDoseHelper {
                 SAFE_MEDIA_VOLUME_UNINITIALIZED);
         mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES,
                 SAFE_MEDIA_VOLUME_UNINITIALIZED);
-        mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
-                SAFE_MEDIA_VOLUME_UNINITIALIZED);
+        // TODO(b/278265907): enable A2DP when we can distinguish A2DP headsets
+        // mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
+        //        SAFE_MEDIA_VOLUME_UNINITIALIZED);
     }
 
     float getOutputRs2UpperBound() {
@@ -610,8 +612,7 @@ public class SoundDoseHelper {
     }
 
     /*package*/ void configureSafeMedia(boolean forced, String caller) {
-        int msg = MSG_CONFIGURE_SAFE_MEDIA;
-
+        int msg = forced ? MSG_CONFIGURE_SAFE_MEDIA_FORCED : MSG_CONFIGURE_SAFE_MEDIA;
         mAudioHandler.removeMessages(msg);
 
         long time = 0;
@@ -621,7 +622,7 @@ public class SoundDoseHelper {
         }
 
         mAudioHandler.sendMessageAtTime(
-                mAudioHandler.obtainMessage(msg, /*arg1=*/forced ? 1 : 0, /*arg2=*/0, caller),
+                mAudioHandler.obtainMessage(msg, /*arg1=*/0, /*arg2=*/0, caller),
                 time);
     }
 
@@ -663,8 +664,10 @@ public class SoundDoseHelper {
 
     /*package*/ void handleMessage(Message msg) {
         switch (msg.what) {
+            case MSG_CONFIGURE_SAFE_MEDIA_FORCED:
             case MSG_CONFIGURE_SAFE_MEDIA:
-                onConfigureSafeMedia((msg.arg1 == 1), (String) msg.obj);
+                onConfigureSafeMedia((msg.what == MSG_CONFIGURE_SAFE_MEDIA_FORCED),
+                        (String) msg.obj);
                 break;
             case MSG_PERSIST_SAFE_VOLUME_STATE:
                 onPersistSafeVolumeState(msg.arg1);

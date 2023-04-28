@@ -93,6 +93,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     private final SparseArray<DisableMagnificationCallback>
             mMagnificationEndRunnableSparseArray = new SparseArray();
 
+    private final AlwaysOnMagnificationFeatureFlag mAlwaysOnMagnificationFeatureFlag;
     private final MagnificationScaleProvider mScaleProvider;
     private FullScreenMagnificationController mFullScreenMagnificationController;
     private WindowMagnificationManager mWindowMagnificationMgr;
@@ -151,7 +152,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
                 FEATURE_WINDOW_MAGNIFICATION);
 
-        AlwaysOnMagnificationFeatureFlag.addOnChangedListener(
+        mAlwaysOnMagnificationFeatureFlag = new AlwaysOnMagnificationFeatureFlag();
+        mAlwaysOnMagnificationFeatureFlag.addOnChangedListener(
                 ConcurrentUtils.DIRECT_EXECUTOR, mAms::updateAlwaysOnMagnification);
     }
 
@@ -231,6 +233,12 @@ public class MagnificationController implements WindowMagnificationManager.Callb
      */
     public void transitionMagnificationModeLocked(int displayId, int targetMode,
             @NonNull TransitionCallBack transitionCallBack) {
+        // check if target mode is already activated
+        if (isActivated(displayId, targetMode)) {
+            transitionCallBack.onResult(displayId, true);
+            return;
+        }
+
         final PointF currentCenter = getCurrentMagnificationCenterLocked(displayId, targetMode);
         final DisableMagnificationCallback animationCallback =
                 getDisableMagnificationEndRunnableLocked(displayId);
@@ -322,13 +330,16 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                     : config.getScale();
             try {
                 setTransitionState(displayId, targetMode);
+                final MagnificationAnimationCallback magnificationAnimationCallback = animate
+                        ? success -> mAms.changeMagnificationMode(displayId, targetMode)
+                        : null;
                 // Activate or deactivate target mode depending on config activated value
                 if (targetMode == MAGNIFICATION_MODE_WINDOW) {
                     screenMagnificationController.reset(displayId, false);
                     if (targetActivated) {
                         windowMagnificationMgr.enableWindowMagnification(displayId,
                                 targetScale, magnificationCenter.x, magnificationCenter.y,
-                                animate ? STUB_ANIMATION_CALLBACK : null, id);
+                                magnificationAnimationCallback, id);
                     } else {
                         windowMagnificationMgr.disableWindowMagnification(displayId, false);
                     }
@@ -339,8 +350,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                             screenMagnificationController.register(displayId);
                         }
                         screenMagnificationController.setScaleAndCenter(displayId, targetScale,
-                                magnificationCenter.x, magnificationCenter.y, animate,
-                                id);
+                                magnificationCenter.x, magnificationCenter.y,
+                                magnificationAnimationCallback, id);
                     } else {
                         if (screenMagnificationController.isRegistered(displayId)) {
                             screenMagnificationController.reset(displayId, false);
@@ -348,6 +359,9 @@ public class MagnificationController implements WindowMagnificationManager.Callb
                     }
                 }
             } finally {
+                if (!animate) {
+                    mAms.changeMagnificationMode(displayId, targetMode);
+                }
                 // Reset transition state after enabling target mode.
                 setTransitionState(displayId, null);
             }
@@ -698,7 +712,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     }
 
     public boolean isAlwaysOnMagnificationFeatureFlagEnabled() {
-        return AlwaysOnMagnificationFeatureFlag.isAlwaysOnMagnificationEnabled();
+        return mAlwaysOnMagnificationFeatureFlag.isFeatureFlagEnabled();
     }
 
     private DisableMagnificationCallback getDisableMagnificationEndRunnableLocked(

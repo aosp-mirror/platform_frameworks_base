@@ -45,6 +45,8 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.R;
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
+import com.android.internal.accessibility.util.AccessibilityUtils;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
@@ -520,8 +522,11 @@ public class SystemActions implements CoreStartable {
                 SCREENSHOT_ACCESSIBILITY_ACTIONS, new Handler(Looper.getMainLooper()), null);
     }
 
-    private void handleHeadsetHook() {
-        sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
+    @VisibleForTesting
+    void handleHeadsetHook() {
+        if (!AccessibilityUtils.interceptHeadsetHookForActiveCall(mContext)) {
+            sendDownAndUpKeyEvents(KeyEvent.KEYCODE_HEADSETHOOK);
+        }
     }
 
     private void handleAccessibilityButton() {

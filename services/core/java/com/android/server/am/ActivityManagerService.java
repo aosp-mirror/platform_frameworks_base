@@ -382,6 +382,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.StatsEvent;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -1595,6 +1596,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int SERVICE_SHORT_FGS_TIMEOUT_MSG = 76;
     static final int SERVICE_SHORT_FGS_PROCSTATE_TIMEOUT_MSG = 77;
     static final int SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG = 78;
+    static final int UPDATE_CACHED_APP_HIGH_WATERMARK = 79;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1937,6 +1939,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } break;
                 case SERVICE_SHORT_FGS_ANR_TIMEOUT_MSG: {
                     mServices.onShortFgsAnrTimeout((ServiceRecord) msg.obj);
+                } break;
+                case UPDATE_CACHED_APP_HIGH_WATERMARK: {
+                    mAppProfiler.mCachedAppsWatermarkData.updateCachedAppsSnapshot((long) msg.obj);
                 } break;
             }
         }
@@ -4598,8 +4603,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             boolean isRestrictedBackupMode = false;
             if (backupTarget != null && backupTarget.appInfo.packageName.equals(processName)) {
                 isRestrictedBackupMode = backupTarget.appInfo.uid >= FIRST_APPLICATION_UID
-                        && ((backupTarget.backupMode == BackupRecord.RESTORE)
-                                || (backupTarget.backupMode == BackupRecord.RESTORE_FULL)
+                        && ((backupTarget.backupMode == BackupRecord.RESTORE_FULL)
                                 || (backupTarget.backupMode == BackupRecord.BACKUP_FULL));
             }
 
@@ -7021,7 +7025,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void notifyLockedProfile(@UserIdInt int userId) {
-        mAtmInternal.notifyLockedProfile(userId, mUserController.getCurrentUserId());
+        mAtmInternal.notifyLockedProfile(userId);
     }
 
     @Override
@@ -7311,7 +7315,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Send broadcast to shell to trigger bugreport using Bugreport API
             // Always start the shell process on the current user to ensure that
             // the foreground user can see all bugreport notifications.
-            mContext.sendBroadcastAsUser(triggerShellBugreport, getCurrentUser().getUserHandle());
+            // In case of BUGREPORT_MODE_REMOTE send the broadcast to SYSTEM user as the device
+            // owner apps are running on the SYSTEM user.
+            if (bugreportType == BugreportParams.BUGREPORT_MODE_REMOTE) {
+                mContext.sendBroadcastAsUser(triggerShellBugreport, UserHandle.SYSTEM);
+            } else {
+                mContext.sendBroadcastAsUser(triggerShellBugreport,
+                        getCurrentUser().getUserHandle());
+            }
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -13382,7 +13393,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             BackupRecord r = new BackupRecord(app, backupMode, targetUserId, backupDestination);
             ComponentName hostingName =
-                    (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL)
+                    (backupMode == ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL
+                            || backupMode == ApplicationThreadConstants.BACKUP_MODE_RESTORE)
                             ? new ComponentName(app.packageName, app.backupAgentName)
                             : new ComponentName("android", "FullBackupAgent");
 
@@ -16695,6 +16707,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             pw.println(String.format("Resources History for %s (%s)",
                     app.processName,
                     app.info.packageName));
+            if (app.mOptRecord.isFrozen()) {
+                pw.println("  Skipping frozen process");
+                pw.flush();
+                continue;
+            }
             pw.flush();
             try {
                 TransferPipe tp = new TransferPipe("  ");
@@ -18597,6 +18614,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         public void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
                 @MediaProjectionTokenEvent int event) {
             ActivityManagerService.this.notifyMediaProjectionEvent(uid, projectionToken, event);
+        }
+
+        @Override
+        @NonNull
+        public StatsEvent getCachedAppsHighWatermarkStats(int atomTag, boolean resetAfterPull) {
+            return mAppProfiler.mCachedAppsWatermarkData.getCachedAppsHighWatermarkStats(
+                    atomTag, resetAfterPull);
         }
     }
 

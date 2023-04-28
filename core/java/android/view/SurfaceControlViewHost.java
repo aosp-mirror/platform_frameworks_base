@@ -410,6 +410,13 @@ public class SurfaceControlViewHost {
     }
 
     /**
+     * @hide
+     */
+    public @NonNull AttachedSurfaceControl getRootSurfaceControl() {
+        return mViewRoot;
+    }
+
+    /**
      * Set the root view of the SurfaceControlViewHost. This view will render in to
      * the SurfaceControl, and receive input based on the SurfaceControls positioning on
      * screen. It will be laid as if it were in a window of the passed in width and height.

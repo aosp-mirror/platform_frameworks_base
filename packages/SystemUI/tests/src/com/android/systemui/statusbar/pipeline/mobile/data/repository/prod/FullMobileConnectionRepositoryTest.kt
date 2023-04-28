@@ -66,7 +66,15 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
     private val systemClock = FakeSystemClock()
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
-    private val tableLogBuffer = TableLogBuffer(maxSize = 100, name = "TestName", systemClock)
+    private val tableLogBuffer =
+        TableLogBuffer(
+            maxSize = 100,
+            name = "TestName",
+            systemClock,
+            mock(),
+            testDispatcher,
+            testScope.backgroundScope,
+        )
     private val mobileFactory = mock<MobileConnectionRepositoryImpl.Factory>()
     private val carrierMergedFactory = mock<CarrierMergedConnectionRepository.Factory>()
 
@@ -292,9 +300,16 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `factory - reuses log buffers for same connection`() =
+    fun factory_reusesLogBuffersForSameConnection() =
         testScope.runTest {
-            val realLoggerFactory = TableLogBufferFactory(mock(), FakeSystemClock())
+            val realLoggerFactory =
+                TableLogBufferFactory(
+                    mock(),
+                    FakeSystemClock(),
+                    mock(),
+                    testDispatcher,
+                    testScope.backgroundScope,
+                )
 
             val factory =
                 FullMobileConnectionRepository.Factory(
@@ -327,9 +342,16 @@ class FullMobileConnectionRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun `factory - reuses log buffers for same sub ID even if carrier merged`() =
+    fun factory_reusesLogBuffersForSameSubIDevenIfCarrierMerged() =
         testScope.runTest {
-            val realLoggerFactory = TableLogBufferFactory(mock(), FakeSystemClock())
+            val realLoggerFactory =
+                TableLogBufferFactory(
+                    mock(),
+                    FakeSystemClock(),
+                    mock(),
+                    testDispatcher,
+                    testScope.backgroundScope,
+                )
 
             val factory =
                 FullMobileConnectionRepository.Factory(

@@ -47,7 +47,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.InstanceId;
-import com.android.launcher3.icons.BubbleBadgeIconFactory;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
@@ -65,7 +64,11 @@ import java.util.concurrent.Executor;
 public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
-    public static final String KEY_APP_BUBBLE = "key_app_bubble";
+    /** A string suffix used in app bubbles' {@link #mKey}. */
+    private static final String KEY_APP_BUBBLE = "key_app_bubble";
+
+    /** Whether the bubble is an app bubble. */
+    private final boolean mIsAppBubble;
 
     private final String mKey;
     @Nullable
@@ -182,7 +185,7 @@ public class Bubble implements BubbleViewProvider {
     private PendingIntent mDeleteIntent;
 
     /**
-     * Used only for a special bubble in the stack that has the key {@link #KEY_APP_BUBBLE}.
+     * Used only for a special bubble in the stack that has {@link #mIsAppBubble} set to true.
      * There can only be one of these bubbles in the stack and this intent will be populated for
      * that bubble.
      */
@@ -217,24 +220,54 @@ public class Bubble implements BubbleViewProvider {
         mMainExecutor = mainExecutor;
         mTaskId = taskId;
         mBubbleMetadataFlagListener = listener;
+        mIsAppBubble = false;
     }
 
-    public Bubble(Intent intent,
+    private Bubble(
+            Intent intent,
             UserHandle user,
             @Nullable Icon icon,
+            boolean isAppBubble,
+            String key,
             Executor mainExecutor) {
-        mKey = KEY_APP_BUBBLE;
         mGroupKey = null;
         mLocusId = null;
         mFlags = 0;
         mUser = user;
         mIcon = icon;
+        mIsAppBubble = isAppBubble;
+        mKey = key;
         mShowBubbleUpdateDot = false;
         mMainExecutor = mainExecutor;
         mTaskId = INVALID_TASK_ID;
         mAppIntent = intent;
         mDesiredHeight = Integer.MAX_VALUE;
         mPackageName = intent.getPackage();
+
+    }
+
+    /** Creates an app bubble. */
+    public static Bubble createAppBubble(
+            Intent intent,
+            UserHandle user,
+            @Nullable Icon icon,
+            Executor mainExecutor) {
+        return new Bubble(intent,
+                user,
+                icon,
+                /* isAppBubble= */ true,
+                /* key= */ getAppBubbleKeyForApp(intent.getPackage(), user),
+                mainExecutor);
+    }
+
+    /**
+     * Returns the key for an app bubble from an app with package name, {@code packageName} on an
+     * Android user, {@code user}.
+     */
+    public static String getAppBubbleKeyForApp(String packageName, UserHandle user) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(user);
+        return KEY_APP_BUBBLE + ":" + user.getIdentifier()  + ":" + packageName;
     }
 
     @VisibleForTesting(visibility = PRIVATE)
@@ -242,6 +275,7 @@ public class Bubble implements BubbleViewProvider {
             final Bubbles.BubbleMetadataFlagListener listener,
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
             Executor mainExecutor) {
+        mIsAppBubble = false;
         mKey = entry.getKey();
         mGroupKey = entry.getGroupKey();
         mLocusId = entry.getLocusId();
@@ -436,7 +470,6 @@ public class Bubble implements BubbleViewProvider {
      * @param stackView the view the bubble is added to, iff showing as floating.
      * @param layerView the layer the bubble is added to, iff showing in the bubble bar.
      * @param iconFactory the icon factory use to create images for the bubble.
-     * @param badgeIconFactory the icon factory to create app badges for the bubble.
      */
     void inflate(BubbleViewInfoTask.Callback callback,
             Context context,
@@ -444,7 +477,6 @@ public class Bubble implements BubbleViewProvider {
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory iconFactory,
-            BubbleBadgeIconFactory badgeIconFactory,
             boolean skipInflation) {
         if (isBubbleLoading()) {
             mInflationTask.cancel(true /* mayInterruptIfRunning */);
@@ -455,7 +487,6 @@ public class Bubble implements BubbleViewProvider {
                 stackView,
                 layerView,
                 iconFactory,
-                badgeIconFactory,
                 skipInflation,
                 callback,
                 mMainExecutor);
@@ -819,7 +850,7 @@ public class Bubble implements BubbleViewProvider {
     }
 
     boolean isAppBubble() {
-        return KEY_APP_BUBBLE.equals(mKey);
+        return mIsAppBubble;
     }
 
     Intent getSettingsIntent(final Context context) {

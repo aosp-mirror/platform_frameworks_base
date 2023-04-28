@@ -21,6 +21,11 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
+import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_BOTTOM;
+import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_LEFT;
+import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT;
+import static com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP;
+
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -134,13 +139,14 @@ class DragResizeInputListener implements AutoCloseable {
      * @param cornerSize The size of the resize handle centered in each corner.
      * @param touchSlop The distance in pixels user has to drag with touch for it to register as
      *                  a resize action.
+     * @return whether the geometry has changed or not
      */
-    void setGeometry(int taskWidth, int taskHeight, int resizeHandleThickness, int cornerSize,
+    boolean setGeometry(int taskWidth, int taskHeight, int resizeHandleThickness, int cornerSize,
             int touchSlop) {
         if (mTaskWidth == taskWidth && mTaskHeight == taskHeight
                 && mResizeHandleThickness == resizeHandleThickness
                 && mCornerSize == cornerSize) {
-            return;
+            return false;
         }
 
         mTaskWidth = taskWidth;
@@ -220,6 +226,19 @@ class DragResizeInputListener implements AutoCloseable {
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }
+        return true;
+    }
+
+    /**
+     * Generate a Region that encapsulates all 4 corner handles
+     */
+    Region getCornersRegion() {
+        Region region = new Region();
+        region.union(mLeftTopCornerBounds);
+        region.union(mLeftBottomCornerBounds);
+        region.union(mRightTopCornerBounds);
+        region.union(mRightBottomCornerBounds);
+        return region;
     }
 
     @Override
@@ -353,7 +372,7 @@ class DragResizeInputListener implements AutoCloseable {
             return calculateResizeHandlesCtrlType(x, y) != 0;
         }
 
-        @TaskPositioner.CtrlType
+        @DragPositioningCallback.CtrlType
         private int calculateCtrlType(boolean isTouch, float x, float y) {
             if (isTouch) {
                 return calculateCornersCtrlType(x, y);
@@ -361,62 +380,62 @@ class DragResizeInputListener implements AutoCloseable {
             return calculateResizeHandlesCtrlType(x, y);
         }
 
-        @TaskPositioner.CtrlType
+        @DragPositioningCallback.CtrlType
         private int calculateResizeHandlesCtrlType(float x, float y) {
             int ctrlType = 0;
             if (x < 0) {
-                ctrlType |= TaskPositioner.CTRL_TYPE_LEFT;
+                ctrlType |= CTRL_TYPE_LEFT;
             }
             if (x > mTaskWidth) {
-                ctrlType |= TaskPositioner.CTRL_TYPE_RIGHT;
+                ctrlType |= CTRL_TYPE_RIGHT;
             }
             if (y < 0) {
-                ctrlType |= TaskPositioner.CTRL_TYPE_TOP;
+                ctrlType |= CTRL_TYPE_TOP;
             }
             if (y > mTaskHeight) {
-                ctrlType |= TaskPositioner.CTRL_TYPE_BOTTOM;
+                ctrlType |= CTRL_TYPE_BOTTOM;
             }
             return ctrlType;
         }
 
-        @TaskPositioner.CtrlType
+        @DragPositioningCallback.CtrlType
         private int calculateCornersCtrlType(float x, float y) {
             int xi = (int) x;
             int yi = (int) y;
             if (mLeftTopCornerBounds.contains(xi, yi)) {
-                return TaskPositioner.CTRL_TYPE_LEFT | TaskPositioner.CTRL_TYPE_TOP;
+                return CTRL_TYPE_LEFT | CTRL_TYPE_TOP;
             }
             if (mLeftBottomCornerBounds.contains(xi, yi)) {
-                return TaskPositioner.CTRL_TYPE_LEFT | TaskPositioner.CTRL_TYPE_BOTTOM;
+                return CTRL_TYPE_LEFT | CTRL_TYPE_BOTTOM;
             }
             if (mRightTopCornerBounds.contains(xi, yi)) {
-                return TaskPositioner.CTRL_TYPE_RIGHT | TaskPositioner.CTRL_TYPE_TOP;
+                return CTRL_TYPE_RIGHT | CTRL_TYPE_TOP;
             }
             if (mRightBottomCornerBounds.contains(xi, yi)) {
-                return TaskPositioner.CTRL_TYPE_RIGHT | TaskPositioner.CTRL_TYPE_BOTTOM;
+                return CTRL_TYPE_RIGHT | CTRL_TYPE_BOTTOM;
             }
             return 0;
         }
 
         private void updateCursorType(float x, float y) {
-            @TaskPositioner.CtrlType int ctrlType = calculateResizeHandlesCtrlType(x, y);
+            @DragPositioningCallback.CtrlType int ctrlType = calculateResizeHandlesCtrlType(x, y);
 
             int cursorType = PointerIcon.TYPE_DEFAULT;
             switch (ctrlType) {
-                case TaskPositioner.CTRL_TYPE_LEFT:
-                case TaskPositioner.CTRL_TYPE_RIGHT:
+                case CTRL_TYPE_LEFT:
+                case CTRL_TYPE_RIGHT:
                     cursorType = PointerIcon.TYPE_HORIZONTAL_DOUBLE_ARROW;
                     break;
-                case TaskPositioner.CTRL_TYPE_TOP:
-                case TaskPositioner.CTRL_TYPE_BOTTOM:
+                case CTRL_TYPE_TOP:
+                case CTRL_TYPE_BOTTOM:
                     cursorType = PointerIcon.TYPE_VERTICAL_DOUBLE_ARROW;
                     break;
-                case TaskPositioner.CTRL_TYPE_LEFT | TaskPositioner.CTRL_TYPE_TOP:
-                case TaskPositioner.CTRL_TYPE_RIGHT | TaskPositioner.CTRL_TYPE_BOTTOM:
+                case CTRL_TYPE_LEFT | CTRL_TYPE_TOP:
+                case CTRL_TYPE_RIGHT | CTRL_TYPE_BOTTOM:
                     cursorType = PointerIcon.TYPE_TOP_LEFT_DIAGONAL_DOUBLE_ARROW;
                     break;
-                case TaskPositioner.CTRL_TYPE_LEFT | TaskPositioner.CTRL_TYPE_BOTTOM:
-                case TaskPositioner.CTRL_TYPE_RIGHT | TaskPositioner.CTRL_TYPE_TOP:
+                case CTRL_TYPE_LEFT | CTRL_TYPE_BOTTOM:
+                case CTRL_TYPE_RIGHT | CTRL_TYPE_TOP:
                     cursorType = PointerIcon.TYPE_TOP_RIGHT_DIAGONAL_DOUBLE_ARROW;
                     break;
             }

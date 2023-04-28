@@ -105,7 +105,7 @@ class WifiRepositorySwitcherTest : SysuiTestCase() {
     }
 
     @Test
-    fun `switcher active repo - updates when demo mode changes`() =
+    fun switcherActiveRepo_updatesWhenDemoModeChanges() =
         testScope.runTest {
             assertThat(underTest.activeRepo.value).isSameInstanceAs(realImpl)
 

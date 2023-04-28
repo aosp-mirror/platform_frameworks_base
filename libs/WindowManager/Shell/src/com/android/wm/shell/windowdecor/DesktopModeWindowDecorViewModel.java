@@ -36,6 +36,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.IBinder;
@@ -69,6 +70,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration.TaskCornersListener;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -94,6 +96,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private boolean mTransitionDragActive;
 
     private SparseArray<EventReceiver> mEventReceiversByDisplay = new SparseArray<>();
+
+    private final TaskCornersListener mCornersListener = new TaskCornersListenerImpl();
 
     private final SparseArray<DesktopModeWindowDecoration> mWindowDecorByTaskId =
             new SparseArray<>();
@@ -247,7 +251,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         if (decoration == null) {
             createWindowDecoration(taskInfo, taskSurface, startT, finishT);
         } else {
-            decoration.relayout(taskInfo, startT, finishT);
+            decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */);
         }
     }
 
@@ -259,7 +263,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskInfo.taskId);
         if (decoration == null) return;
 
-        decoration.relayout(taskInfo, startT, finishT);
+        decoration.relayout(taskInfo, startT, finishT, false /* applyStartTransactionOnDraw */);
     }
 
     @Override
@@ -335,7 +339,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         @Override
         public boolean onTouch(View v, MotionEvent e) {
             final int id = v.getId();
-            if (id != R.id.caption_handle && id != R.id.desktop_mode_caption) {
+            if (id != R.id.caption_handle && id != R.id.desktop_mode_caption
+                    && id != R.id.open_menu_button && id != R.id.close_window) {
                 return false;
             }
             moveTaskToFront(mTaskOrganizer.getRunningTaskInfo(mTaskId));
@@ -772,19 +777,32 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final TaskPositioner taskPositioner =
-                new TaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController,
-                        mDragStartListener);
+        final DragPositioningCallback dragPositioningCallback;
+        if (!DesktopModeStatus.isVeiledResizeEnabled()) {
+            dragPositioningCallback =
+                    new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration,
+                            mDisplayController, mDragStartListener);
+        } else {
+            windowDecoration.createResizeVeil();
+            dragPositioningCallback =
+                    new VeiledResizeTaskPositioner(mTaskOrganizer, windowDecoration,
+                            mDisplayController, mDragStartListener);
+        }
         final DesktopModeTouchEventListener touchEventListener =
-                new DesktopModeTouchEventListener(taskInfo, taskPositioner);
+                new DesktopModeTouchEventListener(taskInfo, dragPositioningCallback);
+
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
-        windowDecoration.setDragPositioningCallback(taskPositioner);
+        windowDecoration.setCornersListener(mCornersListener);
+        windowDecoration.setDragPositioningCallback(dragPositioningCallback);
         windowDecoration.setDragDetector(touchEventListener.mDragDetector);
-        windowDecoration.relayout(taskInfo, startT, finishT);
+        windowDecoration.relayout(taskInfo, startT, finishT,
+                false /* applyStartTransactionOnDraw */);
         incrementEventReceiverTasks(taskInfo.displayId);
     }
 
-    private class DragStartListenerImpl implements TaskPositioner.DragStartListener {
+
+    private class DragStartListenerImpl
+            implements DragPositioningCallbackUtility.DragStartListener {
         @Override
         public void onDragStart(int taskId) {
             mWindowDecorByTaskId.get(taskId).closeHandleMenu();
@@ -794,6 +812,22 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     static class InputMonitorFactory {
         InputMonitor create(InputManager inputManager, Context context) {
             return inputManager.monitorGestureInput("caption-touch", context.getDisplayId());
+        }
+    }
+
+    private class TaskCornersListenerImpl
+            implements DesktopModeWindowDecoration.TaskCornersListener {
+
+        @Override
+        public void onTaskCornersChanged(int taskId, Region corner) {
+            mDesktopModeController.ifPresent(d -> d.onTaskCornersChanged(taskId, corner));
+            mDesktopTasksController.ifPresent(d -> d.onTaskCornersChanged(taskId, corner));
+        }
+
+        @Override
+        public void onTaskCornersRemoved(int taskId) {
+            mDesktopModeController.ifPresent(d -> d.removeCornersForTask(taskId));
+            mDesktopTasksController.ifPresent(d -> d.removeCornersForTask(taskId));
         }
     }
 }

@@ -123,7 +123,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(false);
         when(mUserTracker.getUserId()).thenReturn(ActivityManager.getCurrentUser());
 
         mUiEventLoggerFake = new UiEventLoggerFake();
@@ -544,12 +543,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_notPendingIntent_withStrictFlag() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
-        testShouldNotFullScreen_notPendingIntent();
-    }
-
-    @Test
     public void testShouldNotFullScreen_notPendingIntent() throws RemoteException {
         NotificationEntry entry = createNotification(IMPORTANCE_HIGH);
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -604,12 +597,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_notHighImportance_withStrictFlag() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
-        testShouldNotFullScreen_notHighImportance();
-    }
-
-    @Test
     public void testShouldNotFullScreen_notHighImportance() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_DEFAULT, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -623,12 +610,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         verify(mLogger).logNoFullscreen(entry, "NO_FSI_NOT_IMPORTANT_ENOUGH");
         verify(mLogger, never()).logNoFullscreenWarning(any(), any());
         verify(mLogger, never()).logFullscreen(any(), any());
-    }
-
-    @Test
-    public void testShouldNotFullScreen_isGroupAlertSilenced_withStrictFlag() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
-        testShouldNotFullScreen_isGroupAlertSilenced();
     }
 
     @Test
@@ -653,12 +634,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
                 NotificationInterruptEvent.FSI_SUPPRESSED_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR.getId());
         assertThat(fakeUiEvent.uid).isEqualTo(entry.getSbn().getUid());
         assertThat(fakeUiEvent.packageName).isEqualTo(entry.getSbn().getPackageName());
-    }
-
-    @Test
-    public void testShouldNotFullScreen_isSuppressedByBubbleMetadata_withStrictFlag() {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
-        testShouldNotFullScreen_isSuppressedByBubbleMetadata();
     }
 
     @Test
@@ -689,12 +664,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldFullScreen_notInteractive_withStrictFlag() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
-        testShouldFullScreen_notInteractive();
-    }
-
-    @Test
     public void testShouldFullScreen_notInteractive() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         Notification.BubbleMetadata bubbleMetadata = new Notification.BubbleMetadata.Builder("foo")
@@ -714,12 +683,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldFullScreen_isDreaming_withStrictFlag() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
-        testShouldFullScreen_isDreaming();
-    }
-
-    @Test
     public void testShouldFullScreen_isDreaming() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -736,12 +699,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldFullScreen_onKeyguard_withStrictFlag() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
-        testShouldFullScreen_onKeyguard();
-    }
-
-    @Test
     public void testShouldFullScreen_onKeyguard() throws RemoteException {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
@@ -755,12 +712,6 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
         verify(mLogger, never()).logNoFullscreen(any(), any());
         verify(mLogger, never()).logNoFullscreenWarning(any(), any());
         verify(mLogger).logFullscreen(entry, "FSI_KEYGUARD_SHOWING");
-    }
-
-    @Test
-    public void testShouldNotFullScreen_willHun_withStrictFlag() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
-        testShouldNotFullScreen_willHun();
     }
 
     @Test
@@ -781,26 +732,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldFullScreen_packageSnoozed() throws RemoteException {
-        NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
-        when(mPowerManager.isInteractive()).thenReturn(true);
-        when(mPowerManager.isScreenOn()).thenReturn(true);
-        when(mStatusBarStateController.isDreaming()).thenReturn(false);
-        when(mStatusBarStateController.getState()).thenReturn(SHADE);
-        when(mHeadsUpManager.isSnoozed("a")).thenReturn(true);
-
-        assertThat(mNotifInterruptionStateProvider.getFullScreenIntentDecision(entry))
-                .isEqualTo(FullScreenIntentDecision.FSI_EXPECTED_NOT_TO_HUN);
-        assertThat(mNotifInterruptionStateProvider.shouldLaunchFullScreenIntentWhenAdded(entry))
-                .isTrue();
-        verify(mLogger, never()).logNoFullscreen(any(), any());
-        verify(mLogger, never()).logNoFullscreenWarning(any(), any());
-        verify(mLogger).logFullscreen(entry, "FSI_EXPECTED_NOT_TO_HUN");
-    }
-
-    @Test
-    public void testShouldNotFullScreen_snoozed_occluding_withStrictRules() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+    public void testShouldNotFullScreen_snoozed_occluding() throws Exception {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -820,8 +752,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_snoozed_occluding_withStrictRules() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+    public void testShouldHeadsUp_snoozed_occluding() throws Exception {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -845,8 +776,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_snoozed_lockedShade_withStrictRules() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+    public void testShouldNotFullScreen_snoozed_lockedShade() throws Exception {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -866,8 +796,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_snoozed_lockedShade_withStrictRules() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+    public void testShouldHeadsUp_snoozed_lockedShade() throws Exception {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -891,8 +820,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotFullScreen_snoozed_unlocked_withStrictRules() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+    public void testShouldNotFullScreen_snoozed_unlocked() throws Exception {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);
@@ -955,8 +883,7 @@ public class NotificationInterruptStateProviderImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldHeadsUp_snoozed_unlocked_withStrictRules() throws Exception {
-        when(mFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+    public void testShouldHeadsUp_snoozed_unlocked() throws Exception {
         NotificationEntry entry = createFsiNotification(IMPORTANCE_HIGH, /* silenced */ false);
         when(mPowerManager.isInteractive()).thenReturn(true);
         when(mPowerManager.isScreenOn()).thenReturn(true);

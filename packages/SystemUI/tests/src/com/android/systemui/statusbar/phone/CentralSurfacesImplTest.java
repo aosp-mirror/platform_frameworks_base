@@ -44,6 +44,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static java.util.Collections.emptySet;
+
 import android.app.ActivityManager;
 import android.app.IWallpaperManager;
 import android.app.Notification;
@@ -99,6 +101,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.floatingmenu.AccessibilityFloatingMenuController;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
+import com.android.systemui.biometrics.AuthRippleController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.charging.WiredChargingRippleController;
 import com.android.systemui.classifier.FalsingCollectorFake;
@@ -136,6 +139,7 @@ import com.android.systemui.shade.ShadeExpansionStateManager;
 import com.android.systemui.shade.ShadeLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
@@ -147,6 +151,7 @@ import com.android.systemui.statusbar.OperatorNameViewController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.core.StatusBarInitializer;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -228,10 +233,12 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     @Mock private IStatusBarService mBarService;
     @Mock private IDreamManager mDreamManager;
     @Mock private LightRevealScrimViewModel mLightRevealScrimViewModel;
+    @Mock private LightRevealScrim mLightRevealScrim;
     @Mock private ScrimController mScrimController;
     @Mock private DozeScrimController mDozeScrimController;
     @Mock private Lazy<BiometricUnlockController> mBiometricUnlockControllerLazy;
     @Mock private BiometricUnlockController mBiometricUnlockController;
+    @Mock private AuthRippleController mAuthRippleController;
     @Mock private NotificationListener mNotificationListener;
     @Mock private KeyguardViewMediator mKeyguardViewMediator;
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
@@ -342,6 +349,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         mFeatureFlags.set(Flags.WM_SHADE_ALLOW_BACK_GESTURE, true);
         // For the Shade to animate during the Back gesture, we must enable the animation flag.
         mFeatureFlags.set(Flags.WM_SHADE_ANIMATE_BACK_GESTURE, true);
+        mFeatureFlags.set(Flags.LIGHT_REVEAL_MIGRATION, true);
 
         IThermalService thermalService = mock(IThermalService.class);
         mPowerManager = new PowerManager(mContext, mPowerManagerService, thermalService,
@@ -387,7 +395,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         when(mStackScroller.generateLayoutParams(any())).thenReturn(new LayoutParams(0, 0));
         when(mNotificationPanelView.getLayoutParams()).thenReturn(new LayoutParams(0, 0));
         when(mPowerManagerService.isInteractive()).thenReturn(true);
-        when(mStackScroller.getActivatedChild()).thenReturn(null);
 
         doAnswer(invocation -> {
             OnDismissAction onDismissAction = (OnDismissAction) invocation.getArguments()[0];
@@ -451,6 +458,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mock(FragmentService.class),
                 mLightBarController,
                 mAutoHideController,
+                new StatusBarInitializer(mStatusBarWindowController, emptySet()),
                 mStatusBarWindowController,
                 mStatusBarWindowStateController,
                 mKeyguardUpdateMonitor,
@@ -494,6 +502,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mScrimController,
                 mLockscreenWallpaperLazy,
                 mBiometricUnlockControllerLazy,
+                mAuthRippleController,
                 mDozeServiceHost,
                 mPowerManager, mScreenPinningRequest,
                 mDozeScrimController,
@@ -535,6 +544,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 mDreamManager,
                 mCameraLauncherLazy,
                 () -> mLightRevealScrimViewModel,
+                mLightRevealScrim,
                 mAlternateBouncerInteractor,
                 mUserTracker,
                 () -> mFingerprintManager
@@ -562,7 +572,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
         // TODO: we should be able to call mCentralSurfaces.start() and have all the below values
         // initialized automatically and make NPVC private.
         mCentralSurfaces.mNotificationShadeWindowView = mNotificationShadeWindowView;
-        mCentralSurfaces.mNotificationPanelViewController = mNotificationPanelViewController;
+        mCentralSurfaces.mShadeSurface = mNotificationPanelViewController;
         mCentralSurfaces.mQsController = mQuickSettingsController;
         mCentralSurfaces.mDozeScrimController = mDozeScrimController;
         mCentralSurfaces.mPresenter = mNotificationPresenter;
@@ -1206,34 +1216,6 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
     }
 
     @Test
-    public void collapseShadeForBugReport_callsanimateCollapseShade_whenFlagDisabled() {
-        // GIVEN the shade is expanded & flag enabled
-        mCentralSurfaces.onShadeExpansionFullyChanged(true);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-        mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, false);
-
-        // WHEN collapseShadeForBugreport is called
-        mCentralSurfaces.collapseShadeForBugreport();
-
-        // VERIFY that animateCollapseShade is called
-        verify(mShadeController).animateCollapseShade();
-    }
-
-    @Test
-    public void collapseShadeForBugReport_doesNotCallanimateCollapseShade_whenFlagEnabled() {
-        // GIVEN the shade is expanded & flag enabled
-        mCentralSurfaces.onShadeExpansionFullyChanged(true);
-        mCentralSurfaces.setBarStateForTest(SHADE);
-        mFeatureFlags.set(Flags.LEAVE_SHADE_OPEN_FOR_BUGREPORT, true);
-
-        // WHEN collapseShadeForBugreport is called
-        mCentralSurfaces.collapseShadeForBugreport();
-
-        // VERIFY that animateCollapseShade is called
-        verify(mShadeController, never()).animateCollapseShade();
-    }
-
-    @Test
     public void deviceStateChange_unfolded_shadeOpen_setsLeaveOpenOnKeyguardHide() {
         setFoldedStates(FOLD_STATE_FOLDED);
         setGoToSleepStates(FOLD_STATE_FOLDED);
@@ -1278,12 +1260,13 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
                 new Intent(),
                 /* onlyProvisioned = */false,
                 /* dismissShade = */false);
-        verify(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any(Runnable.class));
         ArgumentCaptor<OnDismissAction> onDismissActionCaptor =
                 ArgumentCaptor.forClass(OnDismissAction.class);
         verify(mStatusBarKeyguardViewManager)
-                .dismissWithAction(onDismissActionCaptor.capture(), any(Runnable.class), eq(true));
+                .dismissWithAction(onDismissActionCaptor.capture(), any(Runnable.class), eq(true),
+                        eq(null));
         assertThat(onDismissActionCaptor.getValue().onDismiss()).isFalse();
+        verify(mStatusBarKeyguardViewManager).addAfterKeyguardGoneRunnable(any(Runnable.class));
     }
 
     @Test
@@ -1326,7 +1309,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         // WHEN wakeup is requested
         final int wakeReason = PowerManager.WAKE_REASON_TAP;
-        mCentralSurfaces.wakeUpIfDozing(0, null, "", wakeReason);
+        mCentralSurfaces.wakeUpIfDozing(0, "", wakeReason);
 
         // THEN power manager receives wakeup
         verify(mPowerManagerService).wakeUp(eq(0L), eq(wakeReason), anyString(), anyString());
@@ -1340,7 +1323,7 @@ public class CentralSurfacesImplTest extends SysuiTestCase {
 
         // WHEN wakeup is requested
         final int wakeReason = PowerManager.WAKE_REASON_TAP;
-        mCentralSurfaces.wakeUpIfDozing(0, null, "", wakeReason);
+        mCentralSurfaces.wakeUpIfDozing(0, "", wakeReason);
 
         // THEN power manager receives wakeup
         verify(mPowerManagerService, never()).wakeUp(anyLong(), anyInt(), anyString(), anyString());

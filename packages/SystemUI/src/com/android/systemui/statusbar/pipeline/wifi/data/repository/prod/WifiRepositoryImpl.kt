@@ -160,8 +160,10 @@ constructor(
 
                             val wifi = currentWifi
                             if (
-                                wifi is WifiNetworkModel.Active &&
-                                    wifi.networkId == network.getNetId()
+                                (wifi is WifiNetworkModel.Active &&
+                                    wifi.networkId == network.getNetId()) ||
+                                    (wifi is WifiNetworkModel.CarrierMerged &&
+                                        wifi.networkId == network.getNetId())
                             ) {
                                 val newNetworkModel = WifiNetworkModel.Inactive
                                 currentWifi = newNetworkModel

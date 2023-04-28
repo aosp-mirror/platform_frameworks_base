@@ -24,7 +24,7 @@
     <string name="pip_menu_title" msgid="5393619322111827096">"Меню"</string>
     <string name="pip_menu_accessibility_title" msgid="8129016817688656249">"Сүрөт ичиндеги сүрөт менюсу"</string>
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> – сүрөт ичиндеги сүрөт"</string>
-    <string name="pip_notification_message" msgid="8854051911700302620">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
+    <string name="pip_notification_message" msgid="8854051911700302620">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, параметрлерди ачып туруп, аны өчүрүп коюңуз."</string>
     <string name="pip_play" msgid="3496151081459417097">"Ойнотуу"</string>
     <string name="pip_pause" msgid="690688849510295232">"Тындыруу"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"Кийинкисине өткөрүп жиберүү"</string>
@@ -68,7 +68,6 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"Төмөнкү оң жакка жылдыруу"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> параметрлери"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Калкып чыкма билдирмени жабуу"</string>
-    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"Калкып чыкма билдирмелер көрсөтүлбөсүн"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Жазышууда калкып чыкма билдирмелер көрүнбөсүн"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Калкып чыкма билдирмелер аркылуу маектешүү"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Жаңы жазышуулар калкыма сүрөтчөлөр же калкып чыкма билдирмелер түрүндө көрүнөт. Калкып чыкма билдирмелерди ачуу үчүн таптап коюңуз. Жылдыруу үчүн сүйрөңүз."</string>

@@ -26,15 +26,17 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 
+import dagger.Lazy;
+
 import java.util.Optional;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
-
 /**
  * Single common instance of ActivityStarter that can be gotten and referenced from anywhere, but
  * delegates to an actual implementation (CentralSurfaces).
+ *
+ * @deprecated Migrating to ActivityStarterImpl
  */
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 @SysUISingleton
@@ -92,6 +94,14 @@ public class ActivityStarterDelegate implements ActivityStarter {
     }
 
     @Override
+    public void startActivity(Intent intent,
+            boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.startActivity(intent, dismissShade, animationController));
+    }
+
+    @Override
     public void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked) {
@@ -142,6 +152,14 @@ public class ActivityStarterDelegate implements ActivityStarter {
     }
 
     @Override
+    public void postStartActivityDismissingKeyguard(Intent intent, int delay,
+            @Nullable ActivityLaunchAnimator.Controller animationController, String customMessage) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.postStartActivityDismissingKeyguard(intent, delay,
+                        animationController, customMessage));
+    }
+
+    @Override
     public void postStartActivityDismissingKeyguard(PendingIntent intent,
             ActivityLaunchAnimator.Controller animationController) {
         mActualStarterOptionalLazy.get().ifPresent(
@@ -160,5 +178,44 @@ public class ActivityStarterDelegate implements ActivityStarter {
             boolean afterKeyguardGone) {
         mActualStarterOptionalLazy.get().ifPresent(
                 starter -> starter.dismissKeyguardThenExecute(action, cancel, afterKeyguardGone));
+    }
+
+    @Override
+    public void dismissKeyguardThenExecute(OnDismissAction action, @Nullable Runnable cancel,
+            boolean afterKeyguardGone, String customMessage) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.dismissKeyguardThenExecute(action, cancel, afterKeyguardGone,
+                        customMessage));
+    }
+
+    @Override
+    public void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
+            boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
+            Callback callback, int flags,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            UserHandle userHandle) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.startActivityDismissingKeyguard(intent, onlyProvisioned,
+                        dismissShade, disallowEnterPictureInPictureWhileLaunching, callback,
+                        flags, animationController, userHandle));
+    }
+
+    @Override
+    public void executeRunnableDismissingKeyguard(Runnable runnable,
+            Runnable cancelAction, boolean dismissShade,
+            boolean afterKeyguardGone, boolean deferred) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.executeRunnableDismissingKeyguard(runnable, cancelAction,
+                        dismissShade, afterKeyguardGone, deferred));
+    }
+
+    @Override
+    public void executeRunnableDismissingKeyguard(Runnable runnable, Runnable cancelAction,
+            boolean dismissShade, boolean afterKeyguardGone, boolean deferred,
+            boolean willAnimateOnKeyguard, @Nullable String customMessage) {
+        mActualStarterOptionalLazy.get().ifPresent(
+                starter -> starter.executeRunnableDismissingKeyguard(runnable, cancelAction,
+                        dismissShade, afterKeyguardGone, deferred, willAnimateOnKeyguard,
+                        customMessage));
     }
 }

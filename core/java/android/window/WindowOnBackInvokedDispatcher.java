@@ -193,7 +193,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                                 ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
                                         callback).getIOnBackInvokedCallback()
                                 : new OnBackInvokedCallbackWrapper(callback);
-                callbackInfo = new OnBackInvokedCallbackInfo(iCallback, priority);
+                callbackInfo = new OnBackInvokedCallbackInfo(
+                        iCallback,
+                        priority,
+                        callback instanceof OnBackAnimationCallback);
             }
             mWindowSession.setOnBackInvokedCallbackInfo(mWindow, callbackInfo);
         } catch (RemoteException e) {

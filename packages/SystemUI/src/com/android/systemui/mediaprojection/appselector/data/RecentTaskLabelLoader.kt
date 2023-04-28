@@ -20,6 +20,7 @@ import android.annotation.UserIdInt
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.os.UserHandle
+import android.util.Log
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -36,18 +37,27 @@ constructor(
     private val packageManager: PackageManager
 ) : RecentTaskLabelLoader {
 
+    private val TAG = "RecentTaskLabelLoader"
+
     override suspend fun loadLabel(
         @UserIdInt userId: Int,
         componentName: ComponentName
     ): CharSequence? =
         withContext(coroutineDispatcher) {
-            val userHandle = UserHandle(userId)
-            val appInfo =
-                packageManager.getApplicationInfo(
-                    componentName.packageName,
-                    PackageManager.ApplicationInfoFlags.of(0 /* no flags */)
-                )
-            val label = packageManager.getApplicationLabel(appInfo)
-            return@withContext packageManager.getUserBadgedLabel(label, userHandle)
+            var badgedLabel: CharSequence? = null
+            try {
+                val appInfo =
+                    packageManager.getApplicationInfoAsUser(
+                        componentName.packageName,
+                        PackageManager.ApplicationInfoFlags.of(0 /* no flags */),
+                        userId
+                    )
+                val label = packageManager.getApplicationLabel(appInfo)
+                val userHandle = UserHandle(userId)
+                badgedLabel = packageManager.getUserBadgedLabel(label, userHandle)
+            } catch (e: PackageManager.NameNotFoundException) {
+                Log.e(TAG, "Unable to get application info", e)
+            }
+            return@withContext badgedLabel
         }
 }

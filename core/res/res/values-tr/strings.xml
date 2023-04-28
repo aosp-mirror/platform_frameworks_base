@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Kullanımdaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Arka plandayken nabız gibi vücut sensörü verilerine erişme"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Arka plandaki uygulamanın nabız, vücut ısısı, kandaki oksijen yüzdesi gibi vücut sensörü verilerine erişmesine izin verir."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Uygulama kullanımdayken bilek ısısı gibi vücut sensörü verilerine erişme."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Kullanımdaki uygulamanın bilek ısısı gibi vücut sensörü verilerine erişmesine izin verir."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Uygulama arka plandayken bilek ısısı gibi vücut sensörü verilerine erişme."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Arka plandaki uygulamanın bilek ısısı gibi vücut sensörü verilerine erişmesine izin verir."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Takvim etkinlikleri ve ayrıntılarını okuma"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Bu uygulama, tabletinizde kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Bu uygulama, Android TV cihazınızda kayıtlı tüm takvim etkinliklerini okuyabilir ve takvim verilerinizi paylaşabilir ya da kaydedebilir."</string>
@@ -507,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Uygulamaya, titreşimi denetleme izni verir."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Uygulamanın titreşim durumuna erişimesine izni verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon numaralarına doğrudan çağrı yap"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Uygulamaya sizin müdahaleniz olmadan telefon numaralarını arama izni verir. Bu durum beklenmeyen ödemelere veya aramalara neden olabilir. Ancak bu iznin, uygulamanın acil numaraları aramasına olanak sağlamadığını unutmayın. Kötü amaçlı uygulamalar onayınız olmadan aramalar yaparak sizi zarara sokabilir."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS çağrı hizmetine erişme"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Uygulamanın, sizin müdahaleniz olmadan telefon etmek için IMS hizmetini kullanmasına izin verir."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefonun durumunu ve kimliğini okuma"</string>
@@ -713,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Yüz işlemi iptal edildi."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Yüz Tanıma Kilidi kullanıcı tarafından iptal edildi"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Çok fazla deneme yapıldı. Daha sonra tekrar deneyin."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Çok fazla deneme yapıldı. Yüz Tanıma Kilidi devre dışı."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Çok deneme yapıldı. Yüz Tanıma Kilidi kullanılamıyor."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Çok fazla deneme yapıldı. Bunun yerine ekran kilidini girin."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Yüz doğrulanamıyor. Tekrar deneyin."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Yüz Tanıma Kilidi ayarlamadınız"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"İzin sahibinin, bir uygulamanın özellik bilgilerini görüntülemeye başlamasına izin verir."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"sensör verilerine daha yüksek örnekleme hızında eriş"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Uygulamanın, sensör verilerini 200 Hz\'den daha yüksek bir hızda örneklemesine olanak tanır"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"uygulamayı kullanıcı işlemi olmadan güncelleme"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"İzin sahibinin, daha önce yüklediği uygulamayı kullanıcı işlemi olmadan güncellemesine izin verir"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Şifre kuralları ayarla"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ekran kilidini açma şifrelerinde ve PIN\'lerde izin verilen uzunluğu ve karakterleri denetler."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Ekran kilidini açma denemelerini izle"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> uygulaması şu anda kullanılamıyor. Uygulamanın kullanım durumu <xliff:g id="APP_NAME_1">%2$s</xliff:g> tarafından yönetiliyor."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Daha fazla bilgi"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Uygulamanın duraklatmasını kaldır"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"İş uygulamaları açılsın mı?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"İş uygulamalarınıza ve bildirimlerinize erişin"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Aç"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"İş uygulamaları devam ettirilsin mi?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Devam ettir"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Acil durum"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"İş uygulamalarınıza ve telefon aramalarınıza erişin"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Uygulama kullanılamıyor"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> uygulaması şu anda kullanılamıyor."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> kullanılamıyor"</string>
@@ -2166,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bu içerik, iş uygulamalarıyla açılamaz"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bu içerik, kişisel uygulamalarla paylaşılamaz"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bu içerik, kişisel uygulamalarla açılamaz"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"İş profili duraklatıldı"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Açmak için dokunun"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"İş uygulaması yok"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Kişisel uygulama yok"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> uygulaması kişisel profilinizde açılsın mı?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> uygulaması iş profilinizde açılsın mı?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Kişisel uygulamayı (<xliff:g id="APP">%s</xliff:g>) aç"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"İş uygulamasını (<xliff:g id="APP">%s</xliff:g>) aç"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kişisel tarayıcıyı kullan"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"İş tarayıcısını kullan"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ağ kilidi açma PIN kodu"</string>

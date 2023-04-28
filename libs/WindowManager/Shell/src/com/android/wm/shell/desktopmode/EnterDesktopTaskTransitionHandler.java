@@ -193,8 +193,11 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             // This Transition animates a task to fullscreen after being dragged from the status
             // bar and then released back into the status bar area
             final SurfaceControl sc = change.getLeash();
-            startT.setWindowCrop(sc, null);
-            startT.apply();
+            // Hide the first (fullscreen) frame because the animation will start from the smaller
+            // scale size.
+            startT.hide(sc)
+                    .setWindowCrop(sc, endBounds.width(), endBounds.height())
+                    .apply();
 
             final ValueAnimator animator = new ValueAnimator();
             animator.setFloatValues(DRAG_FREEFORM_SCALE, 1f);
@@ -202,10 +205,10 @@ public class EnterDesktopTaskTransitionHandler implements Transitions.Transition
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
             animator.addUpdateListener(animation -> {
                 final float scale = animation.getAnimatedFraction();
-                t.setPosition(sc, mStartPosition.x * (1 - scale),
-                        mStartPosition.y * (1 - scale));
-                t.setScale(sc, scale, scale);
-                t.apply();
+                t.setPosition(sc, mStartPosition.x * (1 - scale), mStartPosition.y * (1 - scale))
+                        .setScale(sc, scale, scale)
+                        .show(sc)
+                        .apply();
             });
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override

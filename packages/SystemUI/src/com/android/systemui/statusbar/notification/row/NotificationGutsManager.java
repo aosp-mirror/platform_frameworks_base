@@ -49,6 +49,7 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.UserContextProvider;
@@ -72,8 +73,6 @@ import com.android.systemui.wmshell.BubblesManager;
 import java.util.Optional;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
 
 /**
  * Handles various NotificationGuts related tasks, such as binding guts to a row, opening and
@@ -107,7 +106,6 @@ public class NotificationGutsManager implements NotifGutsViewManager {
     private NotificationListContainer mListContainer;
     private OnSettingsClickListener mOnSettingsClickListener;
 
-    private final Lazy<Optional<CentralSurfaces>> mCentralSurfacesOptionalLazy;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
     private final Optional<BubblesManager> mBubblesManagerOptional;
@@ -121,10 +119,10 @@ public class NotificationGutsManager implements NotifGutsViewManager {
     private final ShadeController mShadeController;
     private NotifGutsViewListener mGutsListener;
     private final HeadsUpManagerPhone mHeadsUpManagerPhone;
+    private final ActivityStarter mActivityStarter;
 
     @Inject
     public NotificationGutsManager(Context context,
-            Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
             AccessibilityManager accessibilityManager,
@@ -144,9 +142,9 @@ public class NotificationGutsManager implements NotifGutsViewManager {
             StatusBarStateController statusBarStateController,
             DeviceProvisionedController deviceProvisionedController,
             MetricsLogger metricsLogger,
-            HeadsUpManagerPhone headsUpManagerPhone) {
+            HeadsUpManagerPhone headsUpManagerPhone,
+            ActivityStarter activityStarter) {
         mContext = context;
-        mCentralSurfacesOptionalLazy = centralSurfacesOptionalLazy;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
         mAccessibilityManager = accessibilityManager;
@@ -167,6 +165,7 @@ public class NotificationGutsManager implements NotifGutsViewManager {
         mDeviceProvisionedController = deviceProvisionedController;
         mMetricsLogger = metricsLogger;
         mHeadsUpManagerPhone = headsUpManagerPhone;
+        mActivityStarter = activityStarter;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -551,19 +550,15 @@ public class NotificationGutsManager implements NotifGutsViewManager {
                             .setLeaveOpenOnKeyguardHide(true);
                 }
 
-                Optional<CentralSurfaces> centralSurfacesOptional =
-                        mCentralSurfacesOptionalLazy.get();
-                if (centralSurfacesOptional.isPresent()) {
-                    Runnable r = () -> mMainHandler.post(
-                            () -> openGutsInternal(view, x, y, menuItem));
-                    centralSurfacesOptional.get().executeRunnableDismissingKeyguard(
-                            r,
-                            null /* cancelAction */,
-                            false /* dismissShade */,
-                            true /* afterKeyguardGone */,
-                            true /* deferred */);
-                    return true;
-                }
+                Runnable r = () -> mMainHandler.post(
+                        () -> openGutsInternal(view, x, y, menuItem));
+                mActivityStarter.executeRunnableDismissingKeyguard(
+                        r,
+                        null /* cancelAction */,
+                        false /* dismissShade */,
+                        true /* afterKeyguardGone */,
+                        true /* deferred */);
+                return true;
                 /**
                  * When {@link CentralSurfaces} doesn't exist, falling through to call
                  * {@link #openGutsInternal(View,int,int,NotificationMenuRowPlugin.MenuItem)}.

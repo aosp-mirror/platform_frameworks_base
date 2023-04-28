@@ -851,7 +851,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                     }
 
                     @Override
-                    public void onAnimationCancelled(boolean isKeyguardOccluded) {
+                    public void onAnimationCancelled() {
                     }
                 }, 0, 0));
         activity.updateOptionsLocked(opts);
@@ -2399,7 +2399,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         holder.addConnection(connection);
         assertTrue(holder.isActivityVisible());
         final int[] count = new int[1];
-        final Consumer<Object> c = conn -> count[0]++;
+        final Consumer<Object> c = conn -> {
+            count[0]++;
+            assertFalse(Thread.holdsLock(activity));
+        };
         holder.forEachConnection(c);
         assertEquals(1, count[0]);
 
@@ -3121,7 +3124,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setSystemDecorations(true).build();
         // Add a decor insets provider window.
         final WindowState navbar = createNavBarWithProvidedInsets(squareDisplay);
-        assertTrue(navbar.providesNonDecorInsets()
+        assertTrue(navbar.providesDisplayDecorInsets()
                 && squareDisplay.getDisplayPolicy().updateDecorInsetsInfo());
         squareDisplay.sendNewConfiguration();
         final Task task = new TaskBuilder(mSupervisor).setDisplay(squareDisplay).build();

@@ -61,6 +61,18 @@ public class ProviderSessionMetric {
     }
 
     /**
+     * Collects the framework only exception encountered in a candidate flow.
+     * @param exceptionType the string, cut to desired length, of the exception type
+     */
+    public void collectCandidateFrameworkException(String exceptionType) {
+        try {
+            mCandidatePhasePerProviderMetric.setFrameworkException(exceptionType);
+        } catch (Exception e) {
+            Log.w(TAG, "Unexpected error during metric logging: " + e);
+        }
+    }
+
+    /**
      * Used to collect metrics at the update stage when a candidate provider gives back an update.
      *
      * @param isFailureStatus indicates the candidate provider sent back a terminated response

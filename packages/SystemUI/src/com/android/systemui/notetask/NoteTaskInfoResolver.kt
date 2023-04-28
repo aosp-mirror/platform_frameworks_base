@@ -25,7 +25,6 @@ import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.os.UserHandle
 import android.util.Log
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
-import com.android.systemui.settings.UserTracker
 import javax.inject.Inject
 
 class NoteTaskInfoResolver
@@ -33,15 +32,13 @@ class NoteTaskInfoResolver
 constructor(
     private val roleManager: RoleManager,
     private val packageManager: PackageManager,
-    private val userTracker: UserTracker,
 ) {
 
     fun resolveInfo(
         entryPoint: NoteTaskEntryPoint? = null,
         isKeyguardLocked: Boolean = false,
+        user: UserHandle,
     ): NoteTaskInfo? {
-        val user = userTracker.userHandle
-
         val packageName = roleManager.getDefaultRoleHolderAsUser(ROLE_NOTES, user)
 
         if (packageName.isNullOrEmpty()) return null
@@ -49,6 +46,7 @@ constructor(
         return NoteTaskInfo(
             packageName = packageName,
             uid = packageManager.getUidOf(packageName, user),
+            user = user,
             entryPoint = entryPoint,
             isKeyguardLocked = isKeyguardLocked,
         )

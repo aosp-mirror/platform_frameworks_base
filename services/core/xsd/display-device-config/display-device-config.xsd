@@ -153,12 +153,6 @@
                 <xs:annotation name="nullable"/>
                 <xs:annotation name="final"/>
             </xs:element>
-            <!-- The highest (most severe) thermal status at which high-brightness-mode is allowed
-                 to operate. -->
-            <xs:element name="thermalStatusLimit" type="thermalStatus" minOccurs="0" maxOccurs="1">
-                <xs:annotation name="nonnull"/>
-                <xs:annotation name="final"/>
-            </xs:element>
             <xs:element name="allowInLowPowerMode" type="xs:boolean" minOccurs="0" maxOccurs="1">
                 <xs:annotation name="nonnull"/>
                 <xs:annotation name="final"/>

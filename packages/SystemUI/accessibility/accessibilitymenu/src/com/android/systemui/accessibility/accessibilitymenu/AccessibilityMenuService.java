@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.accessibilitymenu;
 import android.Manifest;
 import android.accessibilityservice.AccessibilityButtonController;
 import android.accessibilityservice.AccessibilityService;
+import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -82,6 +83,9 @@ public class AccessibilityMenuService extends AccessibilityService
 
     // TODO(b/136716947): Support multi-display once a11y framework side is ready.
     private DisplayManager mDisplayManager;
+
+    private KeyguardManager mKeyguardManager;
+
     private final DisplayManager.DisplayListener mDisplayListener =
             new DisplayManager.DisplayListener() {
         int mRotation;
@@ -114,7 +118,7 @@ public class AccessibilityMenuService extends AccessibilityService
     private final BroadcastReceiver mToggleMenuReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mA11yMenuLayout.toggleVisibility();
+            toggleVisibility();
         }
     };
 
@@ -159,10 +163,7 @@ public class AccessibilityMenuService extends AccessibilityService
                      */
                     @Override
                     public void onClicked(AccessibilityButtonController controller) {
-                        if (SystemClock.uptimeMillis() - mLastTimeTouchedOutside
-                                > BUTTON_CLICK_TIMEOUT) {
-                            mA11yMenuLayout.toggleVisibility();
-                        }
+                        toggleVisibility();
                     }
 
                     /**
@@ -209,6 +210,7 @@ public class AccessibilityMenuService extends AccessibilityService
         mDisplayManager = getSystemService(DisplayManager.class);
         mDisplayManager.registerDisplayListener(mDisplayListener, null);
         mAudioManager = getSystemService(AudioManager.class);
+        mKeyguardManager = getSystemService(KeyguardManager.class);
 
         sInitialized = true;
     }
@@ -378,5 +380,13 @@ public class AccessibilityMenuService extends AccessibilityService
             }
         }
         return false;
+    }
+
+    private void toggleVisibility() {
+        boolean locked = mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
+        if (!locked && SystemClock.uptimeMillis() - mLastTimeTouchedOutside
+                        > BUTTON_CLICK_TIMEOUT) {
+            mA11yMenuLayout.toggleVisibility();
+        }
     }
 }

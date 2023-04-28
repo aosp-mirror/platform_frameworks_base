@@ -18,7 +18,7 @@
 
 package com.android.wm.shell.flicker
 
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 
 const val SYSTEM_UI_PACKAGE_NAME = "com.android.systemui"
 const val LAUNCHER_UI_PACKAGE_NAME = "com.google.android.apps.nexuslauncher"

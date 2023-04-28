@@ -277,7 +277,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
 
                     // Show AOD. That'll cause the KeyguardVisibilityHelper to call
                     // #animateInKeyguard.
-                    mCentralSurfaces.notificationPanelViewController.showAodUi()
+                    mCentralSurfaces.shadeViewController.showAodUi()
                 }
             }, (ANIMATE_IN_KEYGUARD_DELAY * animatorDurationScale).toLong())
 
@@ -326,7 +326,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
         // already expanded and showing notifications/QS, the animation looks really messy. For now,
         // disable it if the notification panel is expanded.
         if ((!this::mCentralSurfaces.isInitialized ||
-                mCentralSurfaces.notificationPanelViewController.isPanelExpanded) &&
+                mCentralSurfaces.shadeViewController.isPanelExpanded) &&
                 // Status bar might be expanded because we have started
                 // playing the animation already
                 !isAnimationPlaying()

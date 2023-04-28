@@ -44,6 +44,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.companion.AssociationStore;
 
+import java.io.FileDescriptor;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -95,27 +96,29 @@ public class CompanionTransportManager {
     /**
      * Add a listener to receive callbacks when a message is received for the message type
      */
-    @GuardedBy("mTransports")
     public void addListener(int message, @NonNull IOnMessageReceivedListener listener) {
         mMessageListeners.put(message, listener);
-        for (int i = 0; i < mTransports.size(); i++) {
-            mTransports.valueAt(i).addListener(message, listener);
+        synchronized (mTransports) {
+            for (int i = 0; i < mTransports.size(); i++) {
+                mTransports.valueAt(i).addListener(message, listener);
+            }
         }
     }
 
     /**
      * Add a listener to receive callbacks when any of the transports is changed
      */
-    @GuardedBy("mTransports")
     public void addListener(IOnTransportsChangedListener listener) {
         Slog.i(TAG, "Registering OnTransportsChangedListener");
         mTransportsListeners.register(listener);
         List<AssociationInfo> associations = new ArrayList<>();
-        for (int i = 0; i < mTransports.size(); i++) {
-            AssociationInfo association = mAssociationStore.getAssociationById(
-                    mTransports.keyAt(i));
-            if (association != null) {
-                associations.add(association);
+        synchronized (mTransports) {
+            for (int i = 0; i < mTransports.size(); i++) {
+                AssociationInfo association = mAssociationStore.getAssociationById(
+                        mTransports.keyAt(i));
+                if (association != null) {
+                    associations.add(association);
+                }
             }
         }
         mTransportsListeners.broadcast(listener1 -> {
@@ -147,18 +150,19 @@ public class CompanionTransportManager {
     /**
      * Send a message to remote devices through the transports
      */
-    @GuardedBy("mTransports")
     public void sendMessage(int message, byte[] data, int[] associationIds) {
         Slog.i(TAG, "Sending message 0x" + Integer.toHexString(message)
                 + " data length " + data.length);
-        for (int i = 0; i < associationIds.length; i++) {
-            if (mTransports.contains(associationIds[i])) {
-                try {
-                    mTransports.get(associationIds[i]).sendMessage(message, data);
-                } catch (IOException e) {
-                    Slog.e(TAG, "Failed to send message 0x" + Integer.toHexString(message)
-                            + " data length " + data.length + " to association "
-                            + associationIds[i]);
+        synchronized (mTransports) {
+            for (int i = 0; i < associationIds.length; i++) {
+                if (mTransports.contains(associationIds[i])) {
+                    try {
+                        mTransports.get(associationIds[i]).sendMessage(message, data);
+                    } catch (IOException e) {
+                        Slog.e(TAG, "Failed to send message 0x" + Integer.toHexString(message)
+                                + " data length " + data.length + " to association "
+                                + associationIds[i]);
+                    }
                 }
             }
         }
@@ -214,14 +218,15 @@ public class CompanionTransportManager {
         }
     }
 
-    @GuardedBy("mTransports")
     private void notifyOnTransportsChanged() {
         List<AssociationInfo> associations = new ArrayList<>();
-        for (int i = 0; i < mTransports.size(); i++) {
-            AssociationInfo association = mAssociationStore.getAssociationById(
-                    mTransports.keyAt(i));
-            if (association != null) {
-                associations.add(association);
+        synchronized (mTransports) {
+            for (int i = 0; i < mTransports.size(); i++) {
+                AssociationInfo association = mAssociationStore.getAssociationById(
+                        mTransports.keyAt(i));
+                if (association != null) {
+                    associations.add(association);
+                }
             }
         }
         mTransportsListeners.broadcast(listener -> {
@@ -232,14 +237,15 @@ public class CompanionTransportManager {
         });
     }
 
-    @GuardedBy("mTransports")
     private void initializeTransport(int associationId, ParcelFileDescriptor fd) {
         Slog.i(TAG, "Initializing transport");
         if (!isSecureTransportEnabled()) {
             Transport transport = new RawTransport(associationId, fd, mContext);
             addMessageListenersToTransport(transport);
             transport.start();
-            mTransports.put(associationId, transport);
+            synchronized (mTransports) {
+                mTransports.put(associationId, transport);
+            }
             Slog.i(TAG, "RawTransport is created");
             return;
         }
@@ -282,7 +288,6 @@ public class CompanionTransportManager {
     /**
      * Depending on the remote platform info to decide which transport should be created
      */
-    @GuardedBy("CompanionTransportManager.this.mTransports")
     private void onPlatformInfoReceived(int associationId, byte[] data) {
         if (mTempTransport.getAssociationId() != associationId) {
             return;
@@ -329,7 +334,9 @@ public class CompanionTransportManager {
         }
         addMessageListenersToTransport(transport);
         transport.start();
-        mTransports.put(transport.getAssociationId(), transport);
+        synchronized (mTransports) {
+            mTransports.put(transport.getAssociationId(), transport);
+        }
         // Doesn't need to notifyTransportsChanged here, it'll be done in attachSystemDataTransport
     }
 
@@ -348,6 +355,21 @@ public class CompanionTransportManager {
      */
     public void enableSecureTransport(boolean enabled) {
         this.mSecureTransportEnabled = enabled;
+    }
+
+    /**
+     * For testing purpose only.
+     *
+     * Create a dummy RawTransport and notify onTransportChanged listeners.
+     */
+    public void createDummyTransport(int associationId) {
+        synchronized (mTransports) {
+            FileDescriptor fd = new FileDescriptor();
+            ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd);
+            Transport transport = new RawTransport(associationId, pfd, mContext);
+            mTransports.put(associationId, transport);
+            notifyOnTransportsChanged();
+        }
     }
 
     private boolean isSecureTransportEnabled() {

@@ -23,6 +23,7 @@ import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.POWER_SAVER;
 import static android.Manifest.permission.UPDATE_DEVICE_STATS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.os.BatteryStats.POWER_DATA_UNAVAILABLE;
@@ -37,6 +38,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.State;
 import android.hardware.power.stats.StateResidency;
@@ -49,6 +52,7 @@ import android.os.BatteryConsumer;
 import android.os.BatteryManagerInternal;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
+import android.os.BatteryStatsInternal.CpuWakeupSubsystem;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.Binder;
@@ -149,7 +153,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     private final PowerProfile mPowerProfile;
     final BatteryStatsImpl mStats;
-    @GuardedBy("mWakeupStats")
     final CpuWakeupStats mCpuWakeupStats;
     private final BatteryUsageStatsStore mBatteryUsageStatsStore;
     private final BatteryStatsImpl.UserInfoProvider mUserManagerUserInfoProvider;
@@ -164,7 +167,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     .onMalformedInput(CodingErrorAction.REPLACE)
                     .onUnmappableCharacter(CodingErrorAction.REPLACE)
                     .replaceWith("?");
-    private static final int MAX_LOW_POWER_STATS_SIZE = 16384;
+    private static final int MAX_LOW_POWER_STATS_SIZE = 32768;
     private static final int POWER_STATS_QUERY_TIMEOUT_MILLIS = 2000;
     private static final String EMPTY = "Empty";
 
@@ -473,6 +476,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         private int transportToSubsystem(NetworkCapabilities nc) {
             if (nc.hasTransport(TRANSPORT_WIFI)) {
                 return CPU_WAKEUP_SUBSYSTEM_WIFI;
+            } else if (nc.hasTransport(TRANSPORT_CELLULAR)) {
+                return CPU_WAKEUP_SUBSYSTEM_CELLULAR_DATA;
             }
             return CPU_WAKEUP_SUBSYSTEM_UNKNOWN;
         }
@@ -513,14 +518,32 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
 
         @Override
-        public void noteCpuWakingActivity(int subsystem, long elapsedMillis, int... uids) {
-            Objects.requireNonNull(uids);
-            mHandler.post(() -> mCpuWakeupStats.noteWakingActivity(subsystem, elapsedMillis, uids));
-        }
-        @Override
         public void noteWakingSoundTrigger(long elapsedMillis, int uid) {
             noteCpuWakingActivity(CPU_WAKEUP_SUBSYSTEM_SOUND_TRIGGER, elapsedMillis, uid);
         }
+
+        @Override
+        public void noteWakingAlarmBatch(long elapsedMillis, int... uids) {
+            noteCpuWakingActivity(CPU_WAKEUP_SUBSYSTEM_ALARM, elapsedMillis, uids);
+        }
+    }
+
+    /**
+     * Reports any activity that could potentially have caused the CPU to wake up.
+     * Accepts a timestamp to allow free ordering between the event and its reporting.
+     *
+     * <p>
+     * This method can be called multiple times for the same wakeup and then all attribution
+     * reported will be unioned as long as all reports are made within a small amount of cpu uptime
+     * after the wakeup is reported to batterystats.
+     *
+     * @param subsystem The subsystem this activity should be attributed to.
+     * @param elapsedMillis The time when this activity happened in the elapsed timebase.
+     * @param uids The uid (or uids) that should be blamed for this activity.
+     */
+    void noteCpuWakingActivity(@CpuWakeupSubsystem int subsystem, long elapsedMillis, int... uids) {
+        Objects.requireNonNull(uids);
+        mHandler.post(() -> mCpuWakeupStats.noteWakingActivity(subsystem, elapsedMillis, uids));
     }
 
     @Override
@@ -1258,6 +1281,29 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
         FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SENSOR_STATE_CHANGED, uid,
                 null, sensor, FrameworkStatsLog.SENSOR_STATE_CHANGED__STATE__ON);
+    }
+
+    @Override
+    public void noteWakeupSensorEvent(long elapsedNanos, int uid, int sensorHandle) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != Process.SYSTEM_UID) {
+            throw new SecurityException("Calling uid " + callingUid + " is not system uid");
+        }
+        final long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(elapsedNanos);
+
+        final SensorManager sm = mContext.getSystemService(SensorManager.class);
+        final Sensor sensor = sm.getSensorByHandle(sensorHandle);
+        if (sensor == null) {
+            Slog.w(TAG, "Unknown sensor handle " + sensorHandle
+                    + " received in noteWakeupSensorEvent");
+            return;
+        }
+        if (uid < 0) {
+            Slog.wtf(TAG, "Invalid uid " + uid + " for sensor event with sensor: " + sensor);
+            return;
+        }
+        // TODO (b/278319756): Also pipe in Sensor type for more usefulness.
+        noteCpuWakingActivity(BatteryStatsInternal.CPU_WAKEUP_SUBSYSTEM_SENSOR, elapsedMillis, uid);
     }
 
     @Override

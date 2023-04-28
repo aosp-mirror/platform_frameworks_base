@@ -485,17 +485,7 @@ void NativeInputManager::dump(std::string& dump) {
     }
     dump += "\n";
 
-    mInputManager->getReader().dump(dump);
-    dump += "\n";
-
-    mInputManager->getBlocker().dump(dump);
-    dump += "\n";
-
-    mInputManager->getProcessor().dump(dump);
-    dump += "\n";
-
-    mInputManager->getDispatcher().dump(dump);
-    dump += "\n";
+    mInputManager->dump(dump);
 }
 
 bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
@@ -539,7 +529,7 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChannel(
@@ -760,7 +750,6 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
 
 void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
     ATRACE_CALL();
-    mInputManager->getBlocker().notifyInputDevicesChanged(inputDevices);
     JNIEnv* env = jniEnv();
 
     size_t count = inputDevices.size();
@@ -1090,7 +1079,7 @@ void NativeInputManager::setPointerDisplayId(int32_t displayId) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {
@@ -1106,7 +1095,7 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_POINTER_SPEED);
+            InputReaderConfiguration::Change::POINTER_SPEED);
 }
 
 void NativeInputManager::setPointerAcceleration(float acceleration) {
@@ -1122,7 +1111,7 @@ void NativeInputManager::setPointerAcceleration(float acceleration) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_POINTER_SPEED);
+            InputReaderConfiguration::Change::POINTER_SPEED);
 }
 
 void NativeInputManager::setTouchpadPointerSpeed(int32_t speed) {
@@ -1138,7 +1127,7 @@ void NativeInputManager::setTouchpadPointerSpeed(int32_t speed) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
 }
 
 void NativeInputManager::setTouchpadNaturalScrollingEnabled(bool enabled) {
@@ -1154,7 +1143,7 @@ void NativeInputManager::setTouchpadNaturalScrollingEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
 }
 
 void NativeInputManager::setTouchpadTapToClickEnabled(bool enabled) {
@@ -1170,7 +1159,7 @@ void NativeInputManager::setTouchpadTapToClickEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
 }
 
 void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
@@ -1186,7 +1175,7 @@ void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
 }
 
 void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) {
@@ -1204,7 +1193,7 @@ void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) 
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_ENABLED_STATE);
+            InputReaderConfiguration::Change::ENABLED_STATE);
 }
 
 void NativeInputManager::setShowTouches(bool enabled) {
@@ -1220,7 +1209,7 @@ void NativeInputManager::setShowTouches(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
+            InputReaderConfiguration::Change::SHOW_TOUCHES);
 }
 
 void NativeInputManager::requestPointerCapture(const sp<IBinder>& windowToken, bool enabled) {
@@ -1233,7 +1222,7 @@ void NativeInputManager::setInteractive(bool interactive) {
 
 void NativeInputManager::reloadCalibration() {
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCH_AFFINE_TRANSFORMATION);
+            InputReaderConfiguration::Change::TOUCH_AFFINE_TRANSFORMATION);
 }
 
 void NativeInputManager::setPointerIconType(PointerIconStyle iconId) {
@@ -1311,17 +1300,17 @@ bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t
 
     JNIEnv* env = jniEnv();
     switch (inputEvent->getType()) {
-    case AINPUT_EVENT_TYPE_KEY:
-        inputEventObj = android_view_KeyEvent_fromNative(env,
-                static_cast<const KeyEvent*>(inputEvent));
-        break;
-    case AINPUT_EVENT_TYPE_MOTION:
-        inputEventObj =
-                android_view_MotionEvent_obtainAsCopy(env,
-                                                      static_cast<const MotionEvent&>(*inputEvent));
-        break;
-    default:
-        return true; // dispatch the event normally
+        case InputEventType::KEY:
+            inputEventObj =
+                    android_view_KeyEvent_fromNative(env, static_cast<const KeyEvent*>(inputEvent));
+            break;
+        case InputEventType::MOTION:
+            inputEventObj = android_view_MotionEvent_obtainAsCopy(env,
+                                                                  static_cast<const MotionEvent&>(
+                                                                          *inputEvent));
+            break;
+        default:
+            return true; // dispatch the event normally
     }
 
     if (!inputEventObj) {
@@ -1527,7 +1516,7 @@ void NativeInputManager::setPointerCapture(const PointerCaptureRequest& request)
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_POINTER_CAPTURE);
+            InputReaderConfiguration::Change::POINTER_CAPTURE);
 }
 
 void NativeInputManager::loadPointerIcon(SpriteIcon* icon, int32_t displayId) {
@@ -1637,7 +1626,7 @@ void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_STYLUS_BUTTON_REPORTING);
+            InputReaderConfiguration::Change::STYLUS_BUTTON_REPORTING);
 }
 
 FloatPoint NativeInputManager::getMouseCursorPosition() {
@@ -1660,7 +1649,7 @@ void NativeInputManager::setStylusPointerIconEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 // ----------------------------------------------------------------------------
@@ -2311,14 +2300,14 @@ static void nativeReloadKeyboardLayouts(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS);
+            InputReaderConfiguration::Change::KEYBOARD_LAYOUTS);
 }
 
 static void nativeReloadDeviceAliases(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DEVICE_ALIAS);
+            InputReaderConfiguration::Change::DEVICE_ALIAS);
 }
 
 static void nativeSysfsNodeChanged(JNIEnv* env, jobject nativeImplObj, jstring path) {
@@ -2414,7 +2403,7 @@ static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jobject nativeImplObj, j
 static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 static void nativeSetDisplayEligibilityForPointerCapture(JNIEnv* env, jobject nativeImplObj,
@@ -2427,19 +2416,19 @@ static void nativeSetDisplayEligibilityForPointerCapture(JNIEnv* env, jobject na
 static void nativeChangeUniqueIdAssociation(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 static void nativeChangeTypeAssociation(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DEVICE_TYPE);
+            InputReaderConfiguration::Change::DEVICE_TYPE);
 }
 
 static void changeKeyboardLayoutAssociation(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUT_ASSOCIATION);
+            InputReaderConfiguration::Change::KEYBOARD_LAYOUT_ASSOCIATION);
 }
 
 static void nativeSetMotionClassifierEnabled(JNIEnv* env, jobject nativeImplObj, jboolean enabled) {

@@ -21,8 +21,6 @@ import android.view.View
 import android.view.View.OnClickListener
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView.OnActivatedListener
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.stack.AmbientState
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
@@ -42,9 +40,6 @@ interface NotificationShelfController {
 
     /** Whether or not the shelf can modify the color of notifications in the shade. */
     fun canModifyColorOfNotifications(): Boolean
-
-    /** @see ActivatableNotificationView.setOnActivatedListener */
-    fun setOnActivatedListener(listener: OnActivatedListener)
 
     /** Binds the shelf to the host [NotificationStackScrollLayout], via its Controller. */
     fun bind(

@@ -62,7 +62,6 @@ import android.util.MergedConfiguration;
 import android.view.Display;
 import android.view.View;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.rule.ActivityTestRule;
@@ -71,6 +70,7 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.content.ReferrerIntent;
 
 import org.junit.After;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -95,7 +95,8 @@ public class ActivityThreadTest {
     // few sequence numbers the framework used to launch the test activity.
     private static final int BASE_SEQ = 10000;
 
-    private final ActivityTestRule<TestActivity> mActivityTestRule =
+    @Rule
+    public final ActivityTestRule<TestActivity> mActivityTestRule =
             new ActivityTestRule<>(TestActivity.class, true /* initialTouchMode */,
                     false /* launchActivity */);
 
@@ -614,7 +615,6 @@ public class ActivityThreadTest {
     }
 
     @Test
-    @FlakyTest(bugId = 176134235)
     public void testHandleConfigurationChanged_DoesntOverrideActivityConfig() {
         final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
 

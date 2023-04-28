@@ -262,7 +262,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         Resources res = getResources();
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
-                getString(R.string.screenrecord_name),
+                getString(R.string.screenrecord_title),
                 NotificationManager.IMPORTANCE_DEFAULT);
         channel.setDescription(getString(R.string.screenrecord_channel_description));
         channel.enableVibration(true);
@@ -270,7 +270,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
 
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                res.getString(R.string.screenrecord_name));
+                res.getString(R.string.screenrecord_title));
         String notificationTitle = res.getString(R.string.screenrecord_start_error);
 
         Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
@@ -290,7 +290,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         Resources res = getResources();
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
-                getString(R.string.screenrecord_name),
+                getString(R.string.screenrecord_title),
                 NotificationManager.IMPORTANCE_DEFAULT);
         channel.setDescription(getString(R.string.screenrecord_channel_description));
         channel.enableVibration(true);
@@ -298,7 +298,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
 
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                res.getString(R.string.screenrecord_name));
+                res.getString(R.string.screenrecord_title));
 
         String notificationTitle = mAudioSource == ScreenRecordingAudioSource.NONE
                 ? res.getString(R.string.screenrecord_ongoing_screen_only)
@@ -335,7 +335,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
 
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                res.getString(R.string.screenrecord_name));
+                res.getString(R.string.screenrecord_title));
 
         Notification.Builder builder = new Notification.Builder(getApplicationContext(), CHANNEL_ID)
                 .setContentTitle(notificationTitle)
@@ -365,7 +365,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
 
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
-                getResources().getString(R.string.screenrecord_name));
+                getResources().getString(R.string.screenrecord_title));
 
         Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_screenrecord)

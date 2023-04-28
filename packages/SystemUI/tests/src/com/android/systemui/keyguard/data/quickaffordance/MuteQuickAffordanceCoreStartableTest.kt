@@ -101,7 +101,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun `feature flag is OFF - do nothing with keyguardQuickAffordanceRepository`() = testScope.runTest {
+    fun featureFlagIsOFF_doNothingWithKeyguardQuickAffordanceRepository() = testScope.runTest {
         //given
         whenever(featureFlags.isEnabled(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES)).thenReturn(false)
 
@@ -114,7 +114,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun `feature flag is ON - call to keyguardQuickAffordanceRepository`() = testScope.runTest {
+    fun featureFlagIsON_callToKeyguardQuickAffordanceRepository() = testScope.runTest {
         //given
         val ringerModeInternal = mock<MutableLiveData<Int>>()
         whenever(ringerModeTracker.ringerModeInternal).thenReturn(ringerModeInternal)
@@ -129,7 +129,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun `ringer mode is changed to SILENT - do not save to shared preferences`() = testScope.runTest {
+    fun ringerModeIsChangedToSILENT_doNotSaveToSharedPreferences() = testScope.runTest {
         //given
         val ringerModeInternal = mock<MutableLiveData<Int>>()
         val observerCaptor = argumentCaptor<Observer<Int>>()
@@ -147,7 +147,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun `ringerModeInternal changes to something not SILENT - is set in sharedpreferences`() = testScope.runTest {
+    fun ringerModeInternalChangesToSomethingNotSILENT_isSetInSharedpreferences() = testScope.runTest {
         //given
         val newRingerMode = 99
         val observerCaptor = argumentCaptor<Observer<Int>>()
@@ -172,7 +172,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun `MUTE is in selections - observe ringerModeInternal`() = testScope.runTest {
+    fun MUTEisInSelections_observeRingerModeInternal() = testScope.runTest {
         //given
         val ringerModeInternal = mock<MutableLiveData<Int>>()
         whenever(ringerModeTracker.ringerModeInternal).thenReturn(ringerModeInternal)
@@ -187,7 +187,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun `MUTE is in selections 2x - observe ringerModeInternal`() = testScope.runTest {
+    fun MUTEisInSelections2x_observeRingerModeInternal() = testScope.runTest {
         //given
         val config: KeyguardQuickAffordanceConfig = mock()
         whenever(config.key).thenReturn(BuiltInKeyguardQuickAffordanceKeys.MUTE)
@@ -206,7 +206,7 @@ class MuteQuickAffordanceCoreStartableTest : SysuiTestCase() {
     }
 
     @Test
-    fun `MUTE is not in selections - stop observing ringerModeInternal`() = testScope.runTest {
+    fun MUTEisNotInSelections_stopObservingRingerModeInternal() = testScope.runTest {
         //given
         val config: KeyguardQuickAffordanceConfig = mock()
         whenever(config.key).thenReturn("notmutequickaffordance")

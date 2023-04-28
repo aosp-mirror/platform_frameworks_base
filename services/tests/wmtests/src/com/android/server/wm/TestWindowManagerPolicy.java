@@ -147,7 +147,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public void screenTurnedOff(int displayId) {
+    public void screenTurnedOff(int displayId, boolean isSwappingDisplay) {
     }
 
     @Override

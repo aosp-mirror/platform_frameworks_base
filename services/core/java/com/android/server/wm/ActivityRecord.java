@@ -306,7 +306,6 @@ import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
-import android.os.LocaleList;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -2822,6 +2821,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
     }
 
+    @Override
+    void waitForSyncTransactionCommit(ArraySet<WindowContainer> wcAwaitingCommit) {
+        super.waitForSyncTransactionCommit(wcAwaitingCommit);
+        if (mStartingData != null) {
+            mStartingData.mWaitForSyncTransactionCommit = true;
+        }
+    }
+
+    @Override
+    void onSyncTransactionCommitted(SurfaceControl.Transaction t) {
+        super.onSyncTransactionCommitted(t);
+        if (mStartingData == null) {
+            return;
+        }
+        mStartingData.mWaitForSyncTransactionCommit = false;
+        if (mStartingData.mRemoveAfterTransaction) {
+            mStartingData.mRemoveAfterTransaction = false;
+            removeStartingWindowAnimation(mStartingData.mPrepareRemoveAnimation);
+        }
+    }
+
     void removeStartingWindowAnimation(boolean prepareAnimation) {
         mTransferringSplashScreenState = TRANSFER_SPLASH_SCREEN_IDLE;
         if (task != null) {
@@ -2844,6 +2864,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final WindowState startingWindow = mStartingWindow;
         final boolean animate;
         if (mStartingData != null) {
+            if (mStartingData.mWaitForSyncTransactionCommit
+                    || mTransitionController.inCollectingTransition(startingWindow)) {
+                mStartingData.mRemoveAfterTransaction = true;
+                mStartingData.mPrepareRemoveAnimation = prepareAnimation;
+                return;
+            }
             animate = prepareAnimation && mStartingData.needRevealAnimation()
                     && mStartingWindow.isVisibleByPolicy();
             ProtoLog.v(WM_DEBUG_STARTING_WINDOW, "Schedule remove starting %s startingWindow=%s"
@@ -2864,18 +2890,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     this);
             return;
         }
-
-        if (animate && mTransitionController.inCollectingTransition(startingWindow)) {
-            // Defer remove starting window after transition start.
-            // The surface of app window could really show after the transition finish.
-            startingWindow.mSyncTransaction.addTransactionCommittedListener(Runnable::run, () -> {
-                synchronized (mAtmService.mGlobalLock) {
-                    surface.remove(true);
-                }
-            });
-        } else {
-            surface.remove(animate);
-        }
+        surface.remove(animate);
     }
 
     /**
@@ -4145,7 +4160,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     void handleAppDied() {
         final boolean remove;
-        if ((mRelaunchReason == RELAUNCH_REASON_WINDOWING_MODE_RESIZE
+        if (Process.isSdkSandboxUid(getUid())) {
+            // Sandbox activities are created for SDKs run in the sandbox process, when the sandbox
+            // process dies, the SDKs are unloaded and can not handle the activity, so sandbox
+            // activity records should be removed.
+            remove = true;
+        } else if ((mRelaunchReason == RELAUNCH_REASON_WINDOWING_MODE_RESIZE
                 || mRelaunchReason == RELAUNCH_REASON_FREE_RESIZE)
                 && launchCount < 3 && !finishing) {
             // If the process crashed during a resize, always try to relaunch it, unless it has
@@ -5276,6 +5296,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (isCollecting) {
                 mTransitionController.collect(this);
             } else {
+                // Failsafe to make sure that we show any activities that were incorrectly hidden
+                // during a transition. If this vis-change is a result of finishing, ignore it.
+                // Finish should only ever commit visibility=false, so we can check full containment
+                // rather than just direct membership.
                 inFinishingTransition = mTransitionController.inFinishingTransition(this);
                 if (!inFinishingTransition && !mDisplayContent.isSleeping()) {
                     Slog.e(TAG, "setVisibility=" + visible
@@ -5310,6 +5334,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // keep the user waiting for the next transition to start.
             if (finishing || isState(STOPPED)) {
                 displayContent.mUnknownAppVisibilityController.appRemovedOrHidden(this);
+            }
+            // Because starting window was transferred, this activity may be a trampoline which has
+            // been occluded by next activity. If it has added windows, set client visibility
+            // immediately to avoid the client getting RELAYOUT_RES_FIRST_TIME from relayout and
+            // drawing an unnecessary frame.
+            if (startingMoved && !firstWindowDrawn && hasChild()) {
+                setClientVisible(false);
             }
         } else {
             if (!appTransition.isTransitionSet()
@@ -8498,6 +8529,16 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         return inTransitionSelfOrParent();
     }
 
+    boolean isDisplaySleepingAndSwapping() {
+        for (int i = mDisplayContent.mAllSleepTokens.size() - 1; i >= 0; i--) {
+            RootWindowContainer.SleepToken sleepToken = mDisplayContent.mAllSleepTokens.get(i);
+            if (sleepToken.isDisplaySwapping()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Whether this activity is letterboxed for fixed orientation. If letterboxed due to fixed
      * orientation then aspect ratio restrictions are also already respected.
@@ -10524,8 +10565,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    boolean isSyncFinished() {
-        if (!super.isSyncFinished()) return false;
+    boolean isSyncFinished(BLASTSyncEngine.SyncGroup group) {
+        if (!super.isSyncFinished(group)) return false;
         if (mDisplayContent != null && mDisplayContent.mUnknownAppVisibilityController
                 .isVisibilityUnknown(this)) {
             return false;
@@ -10545,11 +10586,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     @Override
-    void finishSync(Transaction outMergedTransaction, boolean cancel) {
+    void finishSync(Transaction outMergedTransaction, BLASTSyncEngine.SyncGroup group,
+            boolean cancel) {
         // This override is just for getting metrics. allFinished needs to be checked before
         // finish because finish resets all the states.
+        final BLASTSyncEngine.SyncGroup syncGroup = getSyncGroup();
+        if (syncGroup != null && group != getSyncGroup()) return;
         mLastAllReadyAtSync = allSyncFinished();
-        super.finishSync(outMergedTransaction, cancel);
+        super.finishSync(outMergedTransaction, group, cancel);
     }
 
     @Nullable
@@ -10589,17 +10633,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
 
-        LocaleList locale;
         final ActivityTaskManagerInternal.PackageConfig appConfig =
                 mAtmService.mPackageConfigPersister.findPackageConfiguration(
                         task.realActivity.getPackageName(), mUserId);
-        // if there is no app locale for the package, clear the target activity's locale.
-        if (appConfig == null || appConfig.mLocales == null || appConfig.mLocales.isEmpty()) {
-            locale = LocaleList.getEmptyLocaleList();
-        } else {
-            locale = appConfig.mLocales;
+        // If package lookup yields locales, set the target activity's locales to match,
+        // otherwise leave target activity as-is.
+        if (appConfig != null && appConfig.mLocales != null && !appConfig.mLocales.isEmpty()) {
+            resolvedConfig.setLocales(appConfig.mLocales);
         }
-        resolvedConfig.setLocales(locale);
     }
 
     /**

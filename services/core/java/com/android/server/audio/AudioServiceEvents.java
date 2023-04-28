@@ -147,20 +147,45 @@ public class AudioServiceEvents {
         }
     }
 
+    static final class VolChangedBroadcastEvent extends EventLogger.Event {
+        final int mStreamType;
+        final int mAliasStreamType;
+        final int mIndex;
+
+        VolChangedBroadcastEvent(int stream, int alias, int index) {
+            mStreamType = stream;
+            mAliasStreamType = alias;
+            mIndex = index;
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("sending VOLUME_CHANGED stream:")
+                    .append(AudioSystem.streamToString(mStreamType))
+                    .append(" index:").append(mIndex)
+                    .append(" alias:").append(AudioSystem.streamToString(mAliasStreamType))
+                    .toString();
+        }
+    }
+
     static final class DeviceVolumeEvent extends EventLogger.Event {
         final int mStream;
         final int mVolIndex;
         final String mDeviceNativeType;
         final String mDeviceAddress;
         final String mCaller;
+        final int mDeviceForStream;
+        final boolean mSkipped;
 
         DeviceVolumeEvent(int streamType, int index, @NonNull AudioDeviceAttributes device,
-                String callingPackage) {
+                int deviceForStream, String callingPackage, boolean skipped) {
             mStream = streamType;
             mVolIndex = index;
             mDeviceNativeType = "0x" + Integer.toHexString(device.getInternalType());
             mDeviceAddress = device.getAddress();
+            mDeviceForStream = deviceForStream;
             mCaller = callingPackage;
+            mSkipped = skipped;
             // log metrics
             new MediaMetrics.Item(MediaMetrics.Name.AUDIO_VOLUME_EVENT)
                     .set(MediaMetrics.Property.EVENT, "setDeviceVolume")
@@ -175,12 +200,18 @@ public class AudioServiceEvents {
 
         @Override
         public String eventToString() {
-            return new StringBuilder("setDeviceVolume(stream:")
+            final StringBuilder sb = new StringBuilder("setDeviceVolume(stream:")
                     .append(AudioSystem.streamToString(mStream))
                     .append(" index:").append(mVolIndex)
                     .append(" device:").append(mDeviceNativeType)
                     .append(" addr:").append(mDeviceAddress)
-                    .append(") from ").append(mCaller).toString();
+                    .append(") from ").append(mCaller);
+            if (mSkipped) {
+                sb.append(" skipped [device in use]");
+            } else {
+                sb.append(" currDevForStream:Ox").append(Integer.toHexString(mDeviceForStream));
+            }
+            return sb.toString();
         }
     }
 

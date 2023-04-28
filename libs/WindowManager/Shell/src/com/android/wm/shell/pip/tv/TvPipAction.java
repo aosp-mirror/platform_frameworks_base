@@ -31,6 +31,12 @@ import java.util.Objects;
 
 abstract class TvPipAction {
 
+    /**
+     * Extras key for adding a boolean to the {@link Notification.Action} to differentiate custom
+     * from system actions, most importantly to identify custom close actions.
+     **/
+    public static final String EXTRA_IS_PIP_CUSTOM_ACTION = "EXTRA_IS_PIP_CUSTOM_ACTION";
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"ACTION_"}, value = {
             ACTION_FULLSCREEN,

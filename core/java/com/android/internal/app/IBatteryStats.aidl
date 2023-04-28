@@ -63,6 +63,7 @@ interface IBatteryStats {
     void noteResetCamera();
     @EnforcePermission("UPDATE_DEVICE_STATS")
     void noteResetFlashlight();
+    void noteWakeupSensorEvent(long elapsedNanos, int uid, int handle);
 
     // Remaining methods are only used in Java.
     @EnforcePermission("BATTERY_STATS")

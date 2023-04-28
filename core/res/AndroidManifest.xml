@@ -1036,9 +1036,9 @@
         android:protectionLevel="dangerous" />
 
     <!-- @SystemApi @hide Allows an application to communicate over satellite.
-         Only granted if the application is a system app. -->
+         Only granted if the application is a system app or privileged app. -->
     <permission android:name="android.permission.SATELLITE_COMMUNICATION"
-                android:protectionLevel="internal|role" />
+                android:protectionLevel="role|signature|privileged" />
 
     <!-- ====================================================================== -->
     <!-- Permissions for accessing external storage                             -->
@@ -1466,6 +1466,9 @@
 
     <!-- Allows an application to initiate a phone call without going through
         the Dialer user interface for the user to confirm the call.
+        <p>
+        <em>Note: An app holding this permission can also call carrier MMI codes to change settings
+        such as call forwarding or call waiting preferences.
         <p>Protection level: dangerous
     -->
     <permission android:name="android.permission.CALL_PHONE"
@@ -2539,7 +2542,7 @@
     <permission android:name="android.permission.TURN_SCREEN_ON"
         android:label="@string/permlab_turnScreenOn"
         android:description="@string/permdesc_turnScreenOn"
-        android:protectionLevel="normal|appop" />
+        android:protectionLevel="signature|privileged|appop" />
 
     <!-- ==================================================== -->
     <!-- Permissions related to changing audio settings   -->
@@ -2916,6 +2919,14 @@
     -->
     <permission android:name="android.permission.BIND_SATELLITE_SERVICE"
         android:protectionLevel="signature|privileged|vendorPrivileged" />
+
+    <!-- Must be required by a SatelliteGatewayService to ensure that only the
+         system can bind to it.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_SATELLITE_GATEWAY_SERVICE"
+        android:protectionLevel="signature" />
 
     <!-- Must be required by a telephony data service to ensure that only the
          system can bind to it.
@@ -5407,6 +5418,15 @@
     <permission android:name="android.permission.INSTALL_DPC_PACKAGES"
                 android:protectionLevel="signature|role" />
 
+    <!-- Allows an application to read resolved paths to the APKs (Base and any splits)
+         of a session based install.
+         <p>Not for use by third-party applications.
+         @hide
+    -->
+    <permission android:name="android.permission.READ_INSTALLED_SESSION_PATHS"
+                android:protectionLevel="signature|installer" />
+    <uses-permission android:name="android.permission.READ_INSTALLED_SESSION_PATHS" />
+
     <!-- Allows an application to use System Data Loaders.
          <p>Not for use by third-party applications.
          @hide
@@ -7618,6 +7638,13 @@
     <permission android:name="android.permission.LOG_FOREGROUND_RESOURCE_USE"
                 android:protectionLevel="signature|module" />
 
+    <!-- @hide Allows the settings app to access GPU service APIs".
+        <p>Not for use by third-party applications.
+        <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.ACCESS_GPU_SERVICE"
+                android:protectionLevel="signature" />
+
     <!-- @hide Allows an application to get type of any provider uri.
          <p>Not for use by third-party applications.
          <p>Protection level: signature
@@ -8040,16 +8067,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- Broadcast Receiver listen to sufficient verifier requests from Package Manager
-             when install new SDK, to verifier SDK code during installation time
-             and terminate install if SDK not compatible with privacy sandbox restrictions. -->
-        <receiver android:name="com.android.server.sdksandbox.SdkSandboxVerifierReceiver"
-                 android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_NEEDS_VERIFICATION"/>
-            </intent-filter>
-        </receiver>
-
         <service android:name="android.hardware.location.GeofenceHardwareService"
             android:permission="android.permission.LOCATION_HARDWARE"
             android:exported="false" />
@@ -8177,6 +8194,10 @@
             android:permission="android.permission.BIND_JOB_SERVICE">
         </service>
 
+        <service android:name="com.android.server.healthconnect.backuprestore.BackupRestore$BackupRestoreJobService"
+            android:permission="android.permission.BIND_JOB_SERVICE">
+        </service>
+
         <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader"
             android:exported="false">
             <intent-filter>
@@ -8201,8 +8222,18 @@
         <service android:name="com.android.server.companion.datatransfer.contextsync.CallMetadataSyncInCallService"
                  android:permission="android.permission.BIND_INCALL_SERVICE"
                  android:exported="true">
+            <meta-data android:name="android.telecom.INCLUDE_SELF_MANAGED_CALLS"
+                       android:value="true" />
             <intent-filter>
                 <action android:name="android.telecom.InCallService"/>
+            </intent-filter>
+        </service>
+
+        <service android:name="com.android.server.companion.datatransfer.contextsync.CallMetadataSyncConnectionService"
+                 android:permission="android.permission.BIND_CONNECTION_SERVICE"
+                 android:exported="true">
+            <intent-filter>
+                <action android:name="android.telecom.ConnectionService"/>
             </intent-filter>
         </service>
 

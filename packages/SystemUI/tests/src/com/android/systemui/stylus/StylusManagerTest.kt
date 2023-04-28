@@ -101,9 +101,12 @@ class StylusManagerTest : SysuiTestCase() {
         whenever(stylusDevice.supportsSource(InputDevice.SOURCE_STYLUS)).thenReturn(true)
         whenever(btStylusDevice.supportsSource(InputDevice.SOURCE_STYLUS)).thenReturn(true)
 
+        whenever(btStylusDevice.isExternal).thenReturn(true)
+
         whenever(stylusDevice.bluetoothAddress).thenReturn(null)
         whenever(btStylusDevice.bluetoothAddress).thenReturn(STYLUS_BT_ADDRESS)
 
+        whenever(btStylusDevice.batteryState).thenReturn(batteryState)
         whenever(stylusDevice.batteryState).thenReturn(batteryState)
         whenever(batteryState.capacity).thenReturn(0.5f)
 
@@ -145,6 +148,27 @@ class StylusManagerTest : SysuiTestCase() {
         stylusManager.startListener()
 
         verify(inputManager, times(1)).registerInputDeviceListener(any(), any())
+    }
+
+    @Test
+    fun startListener_hasNotStarted_registersExistingBluetoothDevice() {
+        whenever(inputManager.inputDeviceIds).thenReturn(intArrayOf(BT_STYLUS_DEVICE_ID))
+
+        stylusManager =
+            StylusManager(
+                mContext,
+                inputManager,
+                bluetoothAdapter,
+                handler,
+                EXECUTOR,
+                featureFlags,
+                uiEventLogger
+            )
+
+        stylusManager.startListener()
+
+        verify(bluetoothAdapter, times(1))
+            .addOnMetadataChangedListener(bluetoothDevice, EXECUTOR, stylusManager)
     }
 
     @Test

@@ -53,12 +53,16 @@ import android.view.Surface;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 
+import libcore.util.EmptyArray;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
 
 /**
@@ -85,9 +89,6 @@ public final class DisplayManager {
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final WeakDisplayCache mDisplayCache = new WeakDisplayCache();
-
-    @GuardedBy("mLock")
-    private final ArrayList<Display> mTempDisplays = new ArrayList<Display>();
 
     /**
      * Broadcast receiver that indicates when the Wifi display status changes.
@@ -627,9 +628,7 @@ public final class DisplayManager {
      * @return The display object, or null if there is no valid display with the given id.
      */
     public Display getDisplay(int displayId) {
-        synchronized (mLock) {
-            return getOrCreateDisplayLocked(displayId, false /*assumeValid*/);
-        }
+        return getOrCreateDisplay(displayId, false /*assumeValid*/);
     }
 
     /**
@@ -661,75 +660,67 @@ public final class DisplayManager {
         boolean includeDisabled = (category != null
                 && category.equals(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED));
         final int[] displayIds = mGlobal.getDisplayIds(includeDisabled);
-        synchronized (mLock) {
-            try {
-                if (DISPLAY_CATEGORY_PRESENTATION.equals(category)) {
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI,
-                            Display.FLAG_PRESENTATION);
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL,
-                            Display.FLAG_PRESENTATION);
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY,
-                            Display.FLAG_PRESENTATION);
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL,
-                            Display.FLAG_PRESENTATION);
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL,
-                            Display.FLAG_PRESENTATION);
-                } else if (DISPLAY_CATEGORY_REAR.equals(category)) {
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL,
-                            Display.FLAG_REAR);
-                } else if (category == null
-                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
-                    addAllDisplaysLocked(mTempDisplays, displayIds);
-                }
-                return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
-            } finally {
-                mTempDisplays.clear();
-            }
+        if (DISPLAY_CATEGORY_PRESENTATION.equals(category)) {
+            return getDisplays(displayIds, DisplayManager::isPresentationDisplay);
+        } else if (DISPLAY_CATEGORY_REAR.equals(category)) {
+            return getDisplays(displayIds, DisplayManager::isRearDisplay);
+        } else if (category == null || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
+            return getDisplays(displayIds, Objects::nonNull);
         }
+        return (Display[]) EmptyArray.OBJECT;
     }
 
-    @GuardedBy("mLock")
-    private void addAllDisplaysLocked(ArrayList<Display> displays, int[] displayIds) {
-        for (int i = 0; i < displayIds.length; i++) {
-            Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
-            if (display != null) {
-                displays.add(display);
-            }
-        }
-    }
-
-    @GuardedBy("mLock")
-    private void addDisplaysLocked(
-            ArrayList<Display> displays, int[] displayIds, int matchType, int flagMask) {
+    private Display[] getDisplays(int[] displayIds, Predicate<Display> predicate) {
+        ArrayList<Display> tmpDisplays = new ArrayList<>();
         for (int displayId : displayIds) {
-            if (displayId == DEFAULT_DISPLAY) {
-                continue;
+            Display display = getOrCreateDisplay(displayId, /*assumeValid=*/true);
+            if (predicate.test(display)) {
+                tmpDisplays.add(display);
             }
+        }
+        return tmpDisplays.toArray(new Display[tmpDisplays.size()]);
+    }
 
-            Display display = getOrCreateDisplayLocked(displayId, /* assumeValid= */ true);
-            if (display != null
-                    && (display.getFlags() & flagMask) == flagMask
-                    && display.getType() == matchType) {
-                displays.add(display);
-            }
+    private static boolean isPresentationDisplay(@Nullable Display display) {
+        if (display == null || (display.getDisplayId() == DEFAULT_DISPLAY)
+                || (display.getFlags() & Display.FLAG_PRESENTATION) == 0) {
+            return false;
+        }
+        switch (display.getType()) {
+            case Display.TYPE_INTERNAL:
+            case Display.TYPE_EXTERNAL:
+            case Display.TYPE_WIFI:
+            case Display.TYPE_OVERLAY:
+            case Display.TYPE_VIRTUAL:
+                return true;
+            default:
+                return false;
         }
     }
 
-    @GuardedBy("mLock")
-    private Display getOrCreateDisplayLocked(int displayId, boolean assumeValid) {
-        Display display = mDisplayCache.get(displayId);
-        if (display == null) {
-            // TODO: We cannot currently provide any override configurations for metrics on displays
-            // other than the display the context is associated with.
-            final Resources resources = mContext.getDisplayId() == displayId
-                    ? mContext.getResources() : null;
+    private static boolean isRearDisplay(@Nullable Display display) {
+        return display != null && display.getDisplayId() != DEFAULT_DISPLAY
+                && display.getType() == Display.TYPE_INTERNAL
+                && (display.getFlags() & Display.FLAG_REAR) != 0;
+    }
 
-            display = mGlobal.getCompatibleDisplay(displayId, resources);
-            if (display != null) {
-                mDisplayCache.put(display);
+    private Display getOrCreateDisplay(int displayId, boolean assumeValid) {
+        Display display;
+        synchronized (mLock) {
+            display = mDisplayCache.get(displayId);
+            if (display == null) {
+                // TODO: We cannot currently provide any override configurations for metrics on
+                // displays other than the display the context is associated with.
+                final Resources resources = mContext.getDisplayId() == displayId
+                        ? mContext.getResources() : null;
+
+                display = mGlobal.getCompatibleDisplay(displayId, resources);
+                if (display != null) {
+                    mDisplayCache.put(display);
+                }
+            } else if (!assumeValid && !display.isValid()) {
+                display = null;
             }
-        } else if (!assumeValid && !display.isValid()) {
-            display = null;
         }
         return display;
     }

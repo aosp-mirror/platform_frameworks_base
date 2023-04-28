@@ -21,7 +21,7 @@
     <string name="previous_button_content_description" msgid="840869171117765966">"Zpět na předchozí obrazovku"</string>
     <string name="next_button_content_description" msgid="6810058269847364406">"Přejít na další obrazovku"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Nabídka usnadnění přístupu zobrazuje na obrazovce velkou nabídku k ovládání zařízení. Můžete zamknout zařízení, upravit hlasitost a jas, pořídit snímek obrazovky apod."</string>
-    <string name="accessibility_menu_summary" msgid="340071398148208130">"Ovládejte zařízení pomocí velké nabídky"</string>
+    <string name="accessibility_menu_summary" msgid="340071398148208130">"Ovládat zařízení pomocí velké nabídky"</string>
     <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Nastavení nabídky usnadnění přístupu"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Velká tlačítka"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Zvětšit tlačítka v nabídce přístupnosti"</string>

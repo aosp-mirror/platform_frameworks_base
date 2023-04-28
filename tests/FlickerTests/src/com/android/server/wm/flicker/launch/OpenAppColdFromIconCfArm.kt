@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.test.annotations.FlakyTest
-import android.tools.common.NavBar
 import android.tools.device.flicker.annotation.FlickerServiceCompatible
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerTest
@@ -50,10 +49,7 @@ class OpenAppColdFromIconCfArm(flicker: FlickerTest) : OpenAppColdFromIcon(flick
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<FlickerTest> {
-            // TAPL fails on landscape mode b/240916028
-            return FlickerTestFactory.nonRotationTests(
-                supportedNavigationModes = listOf(NavBar.MODE_3BUTTON)
-            )
+            return FlickerTestFactory.nonRotationTests()
         }
     }
 }

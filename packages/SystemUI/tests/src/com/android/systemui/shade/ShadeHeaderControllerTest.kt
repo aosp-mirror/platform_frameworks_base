@@ -366,7 +366,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `battery mode controller called when qsExpandedFraction changes`() {
+    fun batteryModeControllerCalledWhenQsExpandedFractionChanges() {
         whenever(qsBatteryModeController.getBatteryMode(Mockito.same(null), eq(0f)))
             .thenReturn(BatteryMeterView.MODE_ON)
         whenever(qsBatteryModeController.getBatteryMode(Mockito.same(null), eq(1f)))
@@ -825,7 +825,7 @@ class ShadeHeaderControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `carrier left padding is set when clock layout changes`() {
+    fun carrierLeftPaddingIsSetWhenClockLayoutChanges() {
         val width = 200
         whenever(clock.width).thenReturn(width)
         whenever(clock.scaleX).thenReturn(2.57f) // 2.57 comes from qs_header.xml

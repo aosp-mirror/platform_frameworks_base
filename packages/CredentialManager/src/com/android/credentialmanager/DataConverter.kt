@@ -46,12 +46,11 @@ import com.android.credentialmanager.getflow.AuthenticationEntryInfo
 import com.android.credentialmanager.getflow.CredentialEntryInfo
 import com.android.credentialmanager.getflow.ProviderInfo
 import com.android.credentialmanager.getflow.RemoteEntryInfo
+import com.android.credentialmanager.getflow.TopBrandingContent
 import androidx.credentials.CreateCredentialRequest
 import androidx.credentials.CreateCustomCredentialRequest
 import androidx.credentials.CreatePasswordRequest
-import androidx.credentials.CredentialOption
 import androidx.credentials.CreatePublicKeyCredentialRequest
-import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.PublicKeyCredential.Companion.TYPE_PUBLIC_KEY_CREDENTIAL
 import androidx.credentials.provider.Action
 import androidx.credentials.provider.AuthenticationAction
@@ -193,20 +192,25 @@ class GetFlowUtils {
             originName: String?,
         ): com.android.credentialmanager.getflow.RequestDisplayInfo? {
             val getCredentialRequest = requestInfo?.getCredentialRequest ?: return null
-            val preferImmediatelyAvailableCredentials = getCredentialRequest.credentialOptions.any {
-                val credentialOptionJetpack = CredentialOption.createFrom(
-                    it.type,
-                    it.credentialRetrievalData,
-                    it.credentialRetrievalData,
-                    it.isSystemProviderRequired,
-                    it.allowedProviders,
+            val preferImmediatelyAvailableCredentials = getCredentialRequest.data.getBoolean(
+                "androidx.credentials.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS")
+            val preferUiBrandingComponentName =
+                getCredentialRequest.data.getParcelable(
+                    "androidx.credentials.BUNDLE_KEY_PREFER_UI_BRANDING_COMPONENT_NAME",
+                    ComponentName::class.java
                 )
-                if (credentialOptionJetpack is GetPublicKeyCredentialOption) {
-                    credentialOptionJetpack.preferImmediatelyAvailableCredentials
-                } else {
-                    false
+            val preferTopBrandingContent: TopBrandingContent? =
+                if (preferUiBrandingComponentName == null) null
+                else {
+                    val (displayName, icon) = getServiceLabelAndIcon(
+                        context.packageManager, preferUiBrandingComponentName.flattenToString())
+                        ?: Pair(null, null)
+                    if (displayName != null && icon != null) {
+                        TopBrandingContent(icon, displayName)
+                    } else {
+                        null
+                    }
                 }
-            }
             return com.android.credentialmanager.getflow.RequestDisplayInfo(
                 appName = originName
                     ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
@@ -216,6 +220,7 @@ class GetFlowUtils {
                     // TODO(b/276777444): replace with direct library constant reference once
                     // exposed.
                     "androidx.credentials.BUNDLE_KEY_PREFER_IDENTITY_DOC_UI"),
+                preferTopBrandingContent = preferTopBrandingContent,
             )
         }
 

@@ -21,6 +21,7 @@ import static android.os.Build.IS_USER;
 import static com.android.server.wm.shell.TransitionTraceProto.MAGIC_NUMBER;
 import static com.android.server.wm.shell.TransitionTraceProto.MAGIC_NUMBER_H;
 import static com.android.server.wm.shell.TransitionTraceProto.MAGIC_NUMBER_L;
+import static com.android.server.wm.shell.TransitionTraceProto.REAL_TO_ELAPSED_TIME_OFFSET_NANOS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +38,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Helper class to collect and dump transition traces.
@@ -154,6 +156,7 @@ public class TransitionTracer {
         }
 
         outputStream.write(com.android.server.wm.shell.Transition.TYPE, transition.mType);
+        outputStream.write(com.android.server.wm.shell.Transition.FLAGS, transition.getFlags());
 
         for (int i = 0; i < targets.size(); ++i) {
             final long changeToken = outputStream
@@ -162,6 +165,7 @@ public class TransitionTracer {
             final Transition.ChangeInfo target = targets.get(i);
 
             final int mode = target.getTransitMode(target.mContainer);
+            final int flags = target.getChangeFlags(target.mContainer);
             final int layerId;
             if (target.mContainer.mSurfaceControl.isValid()) {
                 layerId = target.mContainer.mSurfaceControl.getLayerId();
@@ -170,6 +174,7 @@ public class TransitionTracer {
             }
 
             outputStream.write(com.android.server.wm.shell.Target.MODE, mode);
+            outputStream.write(com.android.server.wm.shell.Target.FLAGS, flags);
             outputStream.write(com.android.server.wm.shell.Target.LAYER_ID, layerId);
 
             if (mActiveTracingEnabled) {
@@ -392,6 +397,10 @@ public class TransitionTracer {
         try {
             ProtoOutputStream proto = new ProtoOutputStream();
             proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
+            long timeOffsetNs =
+                    TimeUnit.MILLISECONDS.toNanos(System.currentTimeMillis())
+                            - SystemClock.elapsedRealtimeNanos();
+            proto.write(REAL_TO_ELAPSED_TIME_OFFSET_NANOS, timeOffsetNs);
             int pid = android.os.Process.myPid();
             LogAndPrintln.i(pw, "Writing file to " + file.getAbsolutePath()
                     + " from process " + pid);

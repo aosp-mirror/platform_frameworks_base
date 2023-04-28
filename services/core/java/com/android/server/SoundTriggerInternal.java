@@ -52,11 +52,6 @@ public interface SoundTriggerInternal {
     // Enumerate possible STModules to attach to
     List<ModuleProperties> listModuleProperties(Identity originatorIdentity);
 
-    /**
-     * Dumps service-wide information.
-     */
-    void dump(FileDescriptor fd, PrintWriter pw, String[] args);
-
     interface Session {
         /**
          * Starts recognition for the given keyphraseId.
@@ -142,13 +137,14 @@ public interface SoundTriggerInternal {
                 @ModelParams int modelParam);
 
         /**
+         * Invalidates the sound trigger session and clears any associated resources. Subsequent
+         * calls to this object will throw IllegalStateException.
+         */
+        void detach();
+
+        /**
          * Unloads (and stops if running) the given keyphraseId
          */
         int unloadKeyphraseModel(int keyphaseId);
-
-        /**
-         * Dumps session-wide information.
-         */
-        void dump(FileDescriptor fd, PrintWriter pw, String[] args);
     }
 }

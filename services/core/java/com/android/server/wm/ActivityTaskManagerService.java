@@ -38,7 +38,6 @@ import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
-import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
@@ -242,6 +241,7 @@ import android.window.SplashScreenView.SplashScreenViewParcelable;
 import android.window.TaskSnapshot;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.app.ProcessMap;
@@ -1244,9 +1244,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         assertPackageMatchesCallingUid(callingPackage);
         enforceNotIsolatedCaller("startActivityAsUser");
 
-        boolean isSandboxedActivity = (intent != null && intent.getAction() != null
-                && intent.getAction().equals(ACTION_START_SANDBOXED_ACTIVITY));
-        if (isSandboxedActivity) {
+        if (intent != null && intent.isSandboxActivity(mContext)) {
             SdkSandboxManagerLocal sdkSandboxManagerLocal = LocalManagerRegistry.getManager(
                     SdkSandboxManagerLocal.class);
             sdkSandboxManagerLocal.enforceAllowedToHostSandboxedActivity(
@@ -1503,7 +1501,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         .setCallingPid(callingPid)
                         .setCallingPackage(intent.getPackage())
                         .setActivityInfo(a)
-                        .setActivityOptions(options.toBundle())
+                        .setActivityOptions(createSafeActivityOptionsWithBalAllowed(options))
                         // To start the dream from background, we need to start it from a persistent
                         // system process. Here we set the real calling uid to the system server uid
                         .setRealCallingUid(Binder.getCallingUid())
@@ -1651,7 +1649,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setResultWho(resultWho)
                     .setRequestCode(requestCode)
                     .setStartFlags(startFlags)
-                    .setActivityOptions(bOptions)
+                    .setActivityOptions(createSafeActivityOptionsWithBalAllowed(bOptions))
                     .setUserId(userId)
                     .setIgnoreTargetSecurity(ignoreTargetSecurity)
                     .setFilterCallingUid(isResolver ? 0 /* system */ : targetUid)
@@ -1701,7 +1699,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 .setVoiceInteractor(interactor)
                 .setStartFlags(startFlags)
                 .setProfilerInfo(profilerInfo)
-                .setActivityOptions(bOptions)
+                .setActivityOptions(createSafeActivityOptionsWithBalAllowed(bOptions))
                 .setUserId(userId)
                 .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
                 .execute();
@@ -1728,7 +1726,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setCallingPackage(callingPackage)
                     .setCallingFeatureId(callingFeatureId)
                     .setResolvedType(resolvedType)
-                    .setActivityOptions(bOptions)
+                    .setActivityOptions(createSafeActivityOptionsWithBalAllowed(bOptions))
                     .setUserId(userId)
                     .setBackgroundStartPrivileges(BackgroundStartPrivileges.ALLOW_BAL)
                     .execute();
@@ -1999,6 +1997,24 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    @Override
+    public void focusTopTask(int displayId) {
+        enforceTaskPermission("focusTopTask()");
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRootWindowContainer.getDisplayContent(displayId);
+                if (dc == null) return;
+                final Task task = dc.getTask((t) -> t.isLeafTask() && t.isFocusable(),
+                        true /*  traverseTopToBottom */);
+                if (task == null) return;
+                setFocusedTask(task.mTaskId, null /* touchedActivity */);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
     void setFocusedTask(int taskId, ActivityRecord touchedActivity) {
         ProtoLog.d(WM_DEBUG_FOCUS, "setFocusedTask: taskId=%d touchedActivity=%s", taskId,
                 touchedActivity);
@@ -2011,7 +2027,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return;
         }
 
-        if (r.isState(RESUMED) && r == mRootWindowContainer.getTopResumedActivity()) {
+        if ((touchedActivity == null || r == touchedActivity) && r.isState(RESUMED)
+                && r == mRootWindowContainer.getTopResumedActivity()) {
             setLastResumedActivityUncheckLocked(r, "setFocusedTask-alreadyTop");
             return;
         }
@@ -2937,6 +2954,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     mKeyguardController.setKeyguardShown(displayContent.getDisplayId(),
                             keyguardShowing, aodShowing);
                 });
+                maybeHideLockedProfileActivityLocked();
             } finally {
                 Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
                 Binder.restoreCallingIdentity(ident);
@@ -2948,6 +2966,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mScreenObservers.get(i).onKeyguardStateChanged(keyguardShowing);
             }
         });
+    }
+
+    /**
+     * Hides locked profile activity by going to home screen to avoid showing the user two lock
+     * screens in a row.
+     */
+    @GuardedBy("mGlobalLock")
+    private void maybeHideLockedProfileActivityLocked() {
+        if (!mKeyguardController.isKeyguardLocked(DEFAULT_DISPLAY)
+                || mLastResumedActivity == null) {
+            return;
+        }
+        var userInfo = mUserManager.getUserInfo(mLastResumedActivity.mUserId);
+        if (userInfo == null || !userInfo.isManagedProfile()) {
+            return;
+        }
+        if (mAmInternal.shouldConfirmCredentials(mLastResumedActivity.mUserId)) {
+            mInternal.startHomeActivity(
+                    mAmInternal.getCurrentUserId(), "maybeHideLockedProfileActivityLocked");
+        }
     }
 
     // The caller MUST NOT hold the global lock.
@@ -4806,10 +4844,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public void acquire(int displayId) {
+            acquire(displayId, false /* isSwappingDisplay */);
+        }
+
+        @Override
+        public void acquire(int displayId, boolean isSwappingDisplay) {
             synchronized (mGlobalLock) {
                 if (!mSleepTokens.contains(displayId)) {
                     mSleepTokens.append(displayId,
-                            mRootWindowContainer.createSleepToken(mTag, displayId));
+                            mRootWindowContainer.createSleepToken(mTag, displayId,
+                                    isSwappingDisplay));
                     updateSleepIfNeededLocked();
                 }
             }
@@ -5356,7 +5400,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (app != null && app.getPid() > 0) {
                 ArrayList<Integer> firstPids = new ArrayList<Integer>();
                 firstPids.add(app.getPid());
-                dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, null, null, null);
+                dumpStackTraces(tracesFile.getAbsolutePath(), firstPids, null, null, null, null);
             }
 
             File lastTracesFile = null;
@@ -5505,6 +5549,31 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         final int sourceUid = process.getInstrumentationSourceUid();
         return checkPermission(permission, -1, sourceUid) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Wrap the {@link ActivityOptions} in {@link SafeActivityOptions} and attach caller options
+     * that allow using the callers permissions to start background activities.
+     */
+    private SafeActivityOptions createSafeActivityOptionsWithBalAllowed(
+            @Nullable ActivityOptions options) {
+        if (options == null) {
+            options = ActivityOptions.makeBasic().setPendingIntentBackgroundActivityStartMode(
+                ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+        } else if (options.getPendingIntentBackgroundActivityStartMode()
+                == ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_SYSTEM_DEFINED) {
+            options.setPendingIntentBackgroundActivityStartMode(
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+        }
+        return new SafeActivityOptions(options);
+    }
+
+    /**
+     * Wrap the options {@link Bundle} in {@link SafeActivityOptions} and attach caller options
+     * that allow using the callers permissions to start background activities.
+     */
+    private SafeActivityOptions createSafeActivityOptionsWithBalAllowed(@Nullable Bundle bOptions) {
+        return createSafeActivityOptionsWithBalAllowed(ActivityOptions.fromBundle(bOptions));
     }
 
     final class H extends Handler {
@@ -5743,6 +5812,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (r.moveFocusableActivityToTop("setFocusedActivity")) {
                     mRootWindowContainer.resumeFocusedTasksTopActivities();
                 }
+            }
+        }
+
+        @Override
+        public int getDisplayId(IBinder token) {
+            synchronized (mGlobalLock) {
+                ActivityRecord r = ActivityRecord.forTokenLocked(token);
+                if (r == null) {
+                    throw new IllegalArgumentException(
+                            "setFocusedActivity: No activity record matching token=" + token);
+                }
+                return r.getDisplayId();
             }
         }
 
@@ -6327,7 +6408,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void notifyLockedProfile(@UserIdInt int userId, int currentUserId) {
+        public void notifyLockedProfile(@UserIdInt int userId) {
             try {
                 if (!AppGlobals.getPackageManager().isUidPrivileged(Binder.getCallingUid())) {
                     throw new SecurityException("Only privileged app can call notifyLockedProfile");
@@ -6340,10 +6421,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (mAmInternal.shouldConfirmCredentials(userId)) {
-                        if (mKeyguardController.isKeyguardLocked(DEFAULT_DISPLAY)) {
-                            // Showing launcher to avoid user entering credential twice.
-                            startHomeActivity(currentUserId, "notifyLockedProfile");
-                        }
+                        maybeHideLockedProfileActivityLocked();
                         mRootWindowContainer.lockAllProfileTasks(userId);
                     }
                 } finally {

@@ -27,7 +27,7 @@ import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
 import com.android.systemui.animation.Interpolators;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
 
 /**
@@ -84,7 +84,7 @@ public class KeyguardClockPositionAlgorithm {
     private int mSplitShadeTargetTopMargin;
 
     /**
-     * @see NotificationPanelViewController#getExpandedFraction()
+     * @see ShadeViewController#getExpandedFraction()
      */
     private float mPanelExpansion;
 

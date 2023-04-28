@@ -21,6 +21,7 @@ import android.hardware.biometrics.BiometricSourceType
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.util.DisplayMetrics
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.keyguard.KeyguardUpdateMonitor
@@ -35,7 +36,6 @@ import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.commandline.CommandRegistry
 import com.android.systemui.statusbar.phone.BiometricUnlockController
-import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.leak.RotationUtils
@@ -66,7 +66,6 @@ class AuthRippleControllerTest : SysuiTestCase() {
     private lateinit var staticMockSession: MockitoSession
 
     private lateinit var controller: AuthRippleController
-    @Mock private lateinit var mCentralSurfaces: CentralSurfaces
     @Mock private lateinit var rippleView: AuthRippleView
     @Mock private lateinit var commandRegistry: CommandRegistry
     @Mock private lateinit var configurationController: ConfigurationController
@@ -92,6 +91,8 @@ class AuthRippleControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var fpSensorProp: FingerprintSensorPropertiesInternal
 
+    private val displayMetrics = DisplayMetrics()
+
     @Captor
     private lateinit var biometricUnlockListener:
             ArgumentCaptor<BiometricUnlockController.BiometricUnlockEventsListener>
@@ -109,7 +110,6 @@ class AuthRippleControllerTest : SysuiTestCase() {
         `when`(udfpsControllerProvider.get()).thenReturn(udfpsController)
 
         controller = AuthRippleController(
-            mCentralSurfaces,
             context,
             authController,
             configurationController,
@@ -120,13 +120,14 @@ class AuthRippleControllerTest : SysuiTestCase() {
             notificationShadeWindowController,
             udfpsControllerProvider,
             statusBarStateController,
+            displayMetrics,
             featureFlags,
             KeyguardLogger(logcatLogBuffer(AuthRippleController.TAG)),
             biometricUnlockController,
+            lightRevealScrim,
             rippleView,
         )
         controller.init()
-        `when`(mCentralSurfaces.lightRevealScrim).thenReturn(lightRevealScrim)
     }
 
     @After

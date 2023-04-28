@@ -58,7 +58,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.VibrationAttributes;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -68,6 +67,7 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceIdSequence;
@@ -76,6 +76,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.udfps.UdfpsOverlayParams;
 import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.R;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.biometrics.udfps.InteractionEvent;
@@ -125,7 +126,8 @@ import java.util.Optional;
 import javax.inject.Provider;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 public class UdfpsControllerTest extends SysuiTestCase {
 

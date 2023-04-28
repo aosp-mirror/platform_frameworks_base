@@ -1546,9 +1546,11 @@ public class NotificationChildrenContainer extends ViewGroup
         mUseRoundnessSourceTypes = enabled;
     }
 
-    @Override
-    public String toString() {
-        String roundableStateDebug = "RoundableState = " + getRoundableState().debugString();
-        return "NotificationChildrenContainer:" + hashCode() + " { " + roundableStateDebug + " }";
+    public String debugString() {
+        return TAG + " { "
+                + "visibility: " + getVisibility()
+                + ", alpha: " + getAlpha()
+                + ", translationY: " + getTranslationY()
+                + ", roundableState: " + getRoundableState().debugString() + "}";
     }
 }

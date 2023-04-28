@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.AccountTypePolicyKey;
 import android.app.admin.BooleanPolicyValue;
 import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
@@ -281,6 +282,39 @@ final class PolicyDefinition<V> {
                         DevicePolicyIdentifiers.APPLICATION_HIDDEN_POLICY, packageName));
     }
 
+    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
+    static PolicyDefinition<Boolean> GENERIC_ACCOUNT_MANAGEMENT_DISABLED =
+            new PolicyDefinition<>(
+                    new AccountTypePolicyKey(
+                            DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY),
+                    TRUE_MORE_RESTRICTIVE,
+                    POLICY_FLAG_LOCAL_ONLY_POLICY,
+                    // Nothing is enforced, we just need to store it
+                    (Boolean value, Context context, Integer userId, PolicyKey policyKey) -> true,
+                    new BooleanPolicySerializer());
+
+    /**
+     * Passing in {@code null} for {@code accountType} will return
+     * {@link #GENERIC_ACCOUNT_MANAGEMENT_DISABLED}.
+     */
+    static PolicyDefinition<Boolean> ACCOUNT_MANAGEMENT_DISABLED(String accountType) {
+        if (accountType == null) {
+            return GENERIC_ACCOUNT_MANAGEMENT_DISABLED;
+        }
+        return GENERIC_ACCOUNT_MANAGEMENT_DISABLED.createPolicyDefinition(
+                new AccountTypePolicyKey(
+                        DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY, accountType));
+    }
+
+    static PolicyDefinition<Set<String>> PERMITTED_INPUT_METHODS = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY),
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            (Set<String> value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            new StringSetPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -304,6 +338,10 @@ final class PolicyDefinition<V> {
                 KEYGUARD_DISABLED_FEATURES);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.APPLICATION_HIDDEN_POLICY,
                 GENERIC_APPLICATION_HIDDEN);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY,
+                GENERIC_ACCOUNT_MANAGEMENT_DISABLED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY,
+                PERMITTED_INPUT_METHODS);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);

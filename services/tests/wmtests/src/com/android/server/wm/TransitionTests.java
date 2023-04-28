@@ -23,6 +23,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
+import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
@@ -36,6 +37,7 @@ import static android.window.TransitionInfo.FLAG_FILLS_TASK;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 import static android.window.TransitionInfo.isIndependent;
@@ -74,6 +76,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
 import android.window.IDisplayAreaOrganizer;
 import android.window.IRemoteTransition;
 import android.window.ITaskFragmentOrganizer;
@@ -96,6 +99,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -109,14 +113,19 @@ public class TransitionTests extends WindowTestsBase {
     final SurfaceControl.Transaction mMockT = mock(SurfaceControl.Transaction.class);
     private BLASTSyncEngine mSyncEngine;
 
+    private Transition createTestTransition(int transitType, TransitionController controller) {
+        return new Transition(transitType, 0 /* flags */, controller, controller.mSyncEngine);
+    }
+
     private Transition createTestTransition(int transitType) {
         final TransitionController controller = new TestTransitionController(
                 mock(ActivityTaskManagerService.class));
 
         mSyncEngine = createTestBLASTSyncEngine();
-        final Transition t = new Transition(transitType, 0 /* flags */, controller, mSyncEngine);
-        t.startCollecting(0 /* timeoutMs */);
-        return t;
+        controller.setSyncEngine(mSyncEngine);
+        final Transition out = createTestTransition(transitType, controller);
+        out.startCollecting(0 /* timeoutMs */);
+        return out;
     }
 
     @Test
@@ -367,7 +376,6 @@ public class TransitionTests extends WindowTestsBase {
             final ActivityRecord act = createActivityRecord(tasks[i]);
             // alternate so that the transition doesn't get promoted to the display area
             act.setVisibleRequested((i % 2) == 0); // starts invisible
-            act.visibleIgnoringKeyguard = (i % 2) == 0;
             if (i == showWallpaperTask) {
                 doReturn(true).when(act).showWallpaper();
             }
@@ -754,10 +762,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord closing = createActivityRecord(oldTask);
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = createActivityRecord(newTask);
         opening.setOccludesParent(true);
-        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
         changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, false /* exChg */));
@@ -795,10 +801,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord closing = createActivityRecord(oldTask);
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = createActivityRecord(newTask);
         opening.setOccludesParent(false);
-        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(newTask, new Transition.ChangeInfo(newTask, false /* vis */, true /* exChg */));
         changes.put(oldTask, new Transition.ChangeInfo(oldTask, true /* vis */, false /* exChg */));
@@ -837,10 +841,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
         opening.setOccludesParent(true);
-        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
                 false /* vis */, true /* exChg */));
@@ -881,10 +883,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
         opening.setOccludesParent(false);
-        opening.visibleIgnoringKeyguard = true;
         // Start states.
         changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
                 false /* vis */, true /* exChg */));
@@ -925,10 +925,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
         opening.setOccludesParent(true);
-        opening.visibleIgnoringKeyguard = true;
         final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
         closing.setOccludesParent(true);
-        closing.visibleIgnoringKeyguard = true;
         closing.finishing = true;
         // Start states.
         changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
@@ -970,10 +968,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final ActivityRecord opening = openingTaskFragment.getTopMostActivity();
         opening.setOccludesParent(true);
-        opening.visibleIgnoringKeyguard = true;
         final ActivityRecord closing = closingTaskFragment.getTopMostActivity();
         closing.setOccludesParent(false);
-        closing.visibleIgnoringKeyguard = true;
         closing.finishing = true;
         // Start states.
         changes.put(openingTaskFragment, new Transition.ChangeInfo(openingTaskFragment,
@@ -1204,7 +1200,8 @@ public class TransitionTests extends WindowTestsBase {
 
         player.start();
         player.finish();
-        app.getTask().finishSync(mWm.mTransactionFactory.get(), false /* cancel */);
+        app.getTask().finishSync(mWm.mTransactionFactory.get(), app.getTask().getSyncGroup(),
+                false /* cancel */);
 
         // The open transition is finished. Continue to play seamless display change transition,
         // so the previous async rotation controller should still exist.
@@ -1282,6 +1279,7 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testIntermediateVisibility() {
         final TransitionController controller = new TestTransitionController(mAtm);
+        controller.setSyncEngine(mWm.mSyncEngine);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
@@ -1365,6 +1363,7 @@ public class TransitionTests extends WindowTestsBase {
                 super.dispatchLegacyAppTransitionFinished(ar);
             }
         };
+        controller.setSyncEngine(mWm.mSyncEngine);
         controller.mSnapshotController = mWm.mSnapshotController;
         final TaskSnapshotController taskSnapshotController = controller.mSnapshotController
                 .mTaskSnapshotController;
@@ -1462,6 +1461,7 @@ public class TransitionTests extends WindowTestsBase {
     @Test
     public void testNotReadyPushPop() {
         final TransitionController controller = new TestTransitionController(mAtm);
+        controller.setSyncEngine(mWm.mSyncEngine);
         final ITransitionPlayer player = new ITransitionPlayer.Default();
         controller.registerTransitionPlayer(player, null /* playerProc */);
         final Transition openTransition = controller.createTransition(TRANSIT_OPEN);
@@ -1907,7 +1907,7 @@ public class TransitionTests extends WindowTestsBase {
         assertTrue(targets.isEmpty());
 
         // After collecting order changes, it should recognize that a task moved to top.
-        transition.collectOrderChanges();
+        transition.collectOrderChanges(true);
         targets = Transition.calculateTargets(participants, changes);
         assertEquals(1, targets.size());
 
@@ -1916,6 +1916,384 @@ public class TransitionTests extends WindowTestsBase {
                 transition.mType, 0 /* flags */, targets, mMockT);
         assertTrue((info.getChanges().get(0).getFlags() & TransitionInfo.FLAG_MOVED_TO_TOP) != 0);
         assertEquals(TRANSIT_CHANGE, info.getChanges().get(0).getMode());
+    }
+
+    private class OrderChangeTestSetup {
+        final TransitionController mController;
+        final TestTransitionPlayer mPlayer;
+        final Transition mTransitA;
+        final Transition mTransitB;
+
+        OrderChangeTestSetup() {
+            mController = mAtm.getTransitionController();
+            mPlayer = registerTestTransitionPlayer();
+            mController.setSyncEngine(mWm.mSyncEngine);
+
+            mTransitA = createTestTransition(TRANSIT_OPEN, mController);
+            mTransitA.mParallelCollectType = Transition.PARALLEL_TYPE_MUTUAL;
+            mTransitB = createTestTransition(TRANSIT_OPEN, mController);
+            mTransitB.mParallelCollectType = Transition.PARALLEL_TYPE_MUTUAL;
+        }
+
+        void startParallelCollect(boolean activityLevelFirst) {
+            // Start with taskB on top and taskA on bottom but both visible.
+            final Task taskA = createTask(mDisplayContent);
+            taskA.setVisibleRequested(true);
+            final ActivityRecord actA = createActivityRecord(taskA);
+            final TestWindowState winA = createWindowState(
+                    new WindowManager.LayoutParams(TYPE_BASE_APPLICATION), actA);
+            actA.addWindow(winA);
+            final ActivityRecord actB = createActivityRecord(taskA);
+            final TestWindowState winB = createWindowState(
+                    new WindowManager.LayoutParams(TYPE_BASE_APPLICATION), actB);
+            actB.addWindow(winB);
+
+            final Task taskB = createTask(mDisplayContent);
+            actA.setVisibleRequested(true);
+            actB.setVisibleRequested(false);
+            taskB.setVisibleRequested(true);
+            assertTrue(actA.isAttached());
+
+            final Consumer<Boolean> startAndCollectA = (doReady) -> {
+                mController.startCollectOrQueue(mTransitA, (deferred) -> {
+                });
+
+                // Collect activity-level change into A
+                mTransitA.collect(actA);
+                actA.setVisibleRequested(false);
+                winA.onSyncFinishedDrawing();
+                mTransitA.collect(actB);
+                actB.setVisibleRequested(true);
+                winB.onSyncFinishedDrawing();
+                mTransitA.start();
+                if (doReady) {
+                    mTransitA.setReady(mDisplayContent, true);
+                }
+            };
+            final Consumer<Boolean> startAndCollectB = (doReady) -> {
+                mController.startCollectOrQueue(mTransitB, (deferred) -> {
+                });
+                mTransitB.collect(taskA);
+                taskA.moveToFront("test");
+                mTransitB.start();
+                if (doReady) {
+                    mTransitB.setReady(mDisplayContent, true);
+                }
+            };
+
+            if (activityLevelFirst) {
+                startAndCollectA.accept(true);
+                startAndCollectB.accept(false);
+            } else {
+                startAndCollectB.accept(true);
+                startAndCollectA.accept(false);
+            }
+        }
+    }
+
+    @Test
+    public void testMoveToTopStartAfterReadyAfterParallel() {
+        // Start collect activity-only transit A
+        // Start collect task transit B in parallel
+        // finish A first -> should not include order change from B.
+        final OrderChangeTestSetup setup = new OrderChangeTestSetup();
+        setup.startParallelCollect(true /* activity first */);
+
+        mWm.mSyncEngine.tryFinishForTest(setup.mTransitA.getSyncId());
+        waitUntilHandlersIdle();
+        for (int i = 0; i < setup.mPlayer.mLastReady.getChanges().size(); ++i) {
+            assertNull(setup.mPlayer.mLastReady.getChanges().get(i).getTaskInfo());
+        }
+
+        setup.mTransitB.setAllReady();
+        mWm.mSyncEngine.tryFinishForTest(setup.mTransitB.getSyncId());
+        waitUntilHandlersIdle();
+        boolean hasOrderChange = false;
+        for (int i = 0; i < setup.mPlayer.mLastReady.getChanges().size(); ++i) {
+            final TransitionInfo.Change chg = setup.mPlayer.mLastReady.getChanges().get(i);
+            if (chg.getTaskInfo() == null) continue;
+            hasOrderChange = hasOrderChange || (chg.getFlags() & FLAG_MOVED_TO_TOP) != 0;
+        }
+        assertTrue(hasOrderChange);
+    }
+
+    @Test
+    public void testMoveToTopStartAfterReadyBeforeParallel() {
+        // Start collect activity-only transit A
+        // Start collect task transit B in parallel
+        // finish B first -> should include order change
+        // then finish A -> should NOT include order change.
+        final OrderChangeTestSetup setup = new OrderChangeTestSetup();
+        setup.startParallelCollect(true /* activity first */);
+        // Make it unready now so that it doesn't get dequeued automatically.
+        setup.mTransitA.setReady(mDisplayContent, false);
+
+        // Make task change ready first
+        setup.mTransitB.setAllReady();
+        mWm.mSyncEngine.tryFinishForTest(setup.mTransitB.getSyncId());
+        waitUntilHandlersIdle();
+        boolean hasOrderChange = false;
+        for (int i = 0; i < setup.mPlayer.mLastReady.getChanges().size(); ++i) {
+            final TransitionInfo.Change chg = setup.mPlayer.mLastReady.getChanges().get(i);
+            if (chg.getTaskInfo() == null) continue;
+            hasOrderChange = hasOrderChange || (chg.getFlags() & FLAG_MOVED_TO_TOP) != 0;
+        }
+        assertTrue(hasOrderChange);
+
+        setup.mTransitA.setAllReady();
+        mWm.mSyncEngine.tryFinishForTest(setup.mTransitA.getSyncId());
+        waitUntilHandlersIdle();
+        for (int i = 0; i < setup.mPlayer.mLastReady.getChanges().size(); ++i) {
+            assertNull(setup.mPlayer.mLastReady.getChanges().get(i).getTaskInfo());
+        }
+    }
+
+    @Test
+    public void testMoveToTopStartBeforeReadyAfterParallel() {
+        // Start collect task transit B
+        // Start collect activity-only transit A in parallel
+        // finish A first -> should not include order change from B.
+        final OrderChangeTestSetup setup = new OrderChangeTestSetup();
+        setup.startParallelCollect(false /* activity first */);
+        // Make B unready now so that it doesn't get dequeued automatically.
+        setup.mTransitB.setReady(mDisplayContent, false);
+
+        setup.mTransitA.setAllReady();
+        mWm.mSyncEngine.tryFinishForTest(setup.mTransitA.getSyncId());
+        waitUntilHandlersIdle();
+        for (int i = 0; i < setup.mPlayer.mLastReady.getChanges().size(); ++i) {
+            assertNull(setup.mPlayer.mLastReady.getChanges().get(i).getTaskInfo());
+        }
+
+        setup.mTransitB.setAllReady();
+        mWm.mSyncEngine.tryFinishForTest(setup.mTransitB.getSyncId());
+        waitUntilHandlersIdle();
+        boolean hasOrderChange = false;
+        for (int i = 0; i < setup.mPlayer.mLastReady.getChanges().size(); ++i) {
+            final TransitionInfo.Change chg = setup.mPlayer.mLastReady.getChanges().get(i);
+            if (chg.getTaskInfo() == null) continue;
+            hasOrderChange = hasOrderChange || (chg.getFlags() & FLAG_MOVED_TO_TOP) != 0;
+        }
+        assertTrue(hasOrderChange);
+    }
+
+    @Test
+    public void testMoveToTopStartBeforeReadyBeforeParallel() {
+        // Start collect task transit B
+        // Start collect activity-only transit A in parallel
+        // finish B first -> should include order change
+        // then finish A -> should NOT include order change.
+        final OrderChangeTestSetup setup = new OrderChangeTestSetup();
+        setup.startParallelCollect(false /* activity first */);
+
+        mWm.mSyncEngine.tryFinishForTest(setup.mTransitB.getSyncId());
+        waitUntilHandlersIdle();
+        boolean hasOrderChange = false;
+        for (int i = 0; i < setup.mPlayer.mLastReady.getChanges().size(); ++i) {
+            final TransitionInfo.Change chg = setup.mPlayer.mLastReady.getChanges().get(i);
+            if (chg.getTaskInfo() == null) continue;
+            hasOrderChange = hasOrderChange || (chg.getFlags() & FLAG_MOVED_TO_TOP) != 0;
+        }
+        assertTrue(hasOrderChange);
+
+        setup.mTransitA.setAllReady();
+        mWm.mSyncEngine.tryFinishForTest(setup.mTransitA.getSyncId());
+        waitUntilHandlersIdle();
+        for (int i = 0; i < setup.mPlayer.mLastReady.getChanges().size(); ++i) {
+            assertNull(setup.mPlayer.mLastReady.getChanges().get(i).getTaskInfo());
+        }
+    }
+
+    @Test
+    public void testQueueStartCollect() {
+        final TransitionController controller = mAtm.getTransitionController();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        mSyncEngine = createTestBLASTSyncEngine();
+        controller.setSyncEngine(mSyncEngine);
+
+        final Transition transitA = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitB = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitC = createTestTransition(TRANSIT_OPEN, controller);
+
+        final boolean[] onStartA = new boolean[]{false, false};
+        final boolean[] onStartB = new boolean[]{false, false};
+        controller.startCollectOrQueue(transitA, (deferred) -> {
+            onStartA[0] = true;
+            onStartA[1] = deferred;
+        });
+        controller.startCollectOrQueue(transitB, (deferred) -> {
+            onStartB[0] = true;
+            onStartB[1] = deferred;
+        });
+        waitUntilHandlersIdle();
+
+        assertTrue(onStartA[0]);
+        assertFalse(onStartA[1]);
+        assertTrue(transitA.isCollecting());
+
+        // B should be queued, so no calls yet
+        assertFalse(onStartB[0]);
+        assertTrue(transitB.isPending());
+
+        // finish collecting A
+        transitA.start();
+        transitA.setAllReady();
+        mSyncEngine.tryFinishForTest(transitA.getSyncId());
+        waitUntilHandlersIdle();
+
+        assertTrue(transitA.isPlaying());
+        assertTrue(transitB.isCollecting());
+        assertTrue(onStartB[0]);
+        // Should receive deferred = true
+        assertTrue(onStartB[1]);
+
+        // finish collecting B
+        transitB.start();
+        transitB.setAllReady();
+        mSyncEngine.tryFinishForTest(transitB.getSyncId());
+        assertTrue(transitB.isPlaying());
+
+        // Now we should be able to start collecting directly a new transition
+        final boolean[] onStartC = new boolean[]{false, false};
+        controller.startCollectOrQueue(transitC, (deferred) -> {
+            onStartC[0] = true;
+            onStartC[1] = deferred;
+        });
+        waitUntilHandlersIdle();
+        assertTrue(onStartC[0]);
+        assertFalse(onStartC[1]);
+        assertTrue(transitC.isCollecting());
+    }
+
+    @Test
+    public void testQueueWithLegacy() {
+        final TransitionController controller = mAtm.getTransitionController();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        mSyncEngine = createTestBLASTSyncEngine();
+        controller.setSyncEngine(mSyncEngine);
+
+        final Transition transitA = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitB = createTestTransition(TRANSIT_OPEN, controller);
+
+        controller.startCollectOrQueue(transitA, (deferred) -> {});
+
+        BLASTSyncEngine.SyncGroup legacySync = mSyncEngine.prepareSyncSet(
+                mock(BLASTSyncEngine.TransactionReadyListener.class), "test");
+        final boolean[] applyLegacy = new boolean[]{false};
+        controller.startLegacySyncOrQueue(legacySync, () -> applyLegacy[0] = true);
+        assertFalse(applyLegacy[0]);
+        waitUntilHandlersIdle();
+
+        controller.startCollectOrQueue(transitB, (deferred) -> {});
+        assertTrue(transitA.isCollecting());
+
+        // finish collecting A
+        transitA.start();
+        transitA.setAllReady();
+        mSyncEngine.tryFinishForTest(transitA.getSyncId());
+        waitUntilHandlersIdle();
+
+        assertTrue(transitA.isPlaying());
+        // legacy sync should start now
+        assertTrue(applyLegacy[0]);
+        // transitB must wait
+        assertTrue(transitB.isPending());
+
+        // finish legacy sync
+        mSyncEngine.setReady(legacySync.mSyncId);
+        mSyncEngine.tryFinishForTest(legacySync.mSyncId);
+        // transitioncontroller should be notified so it can start collecting B
+        assertTrue(transitB.isCollecting());
+    }
+
+    @Test
+    public void testQueueParallel() {
+        final TransitionController controller = mAtm.getTransitionController();
+        final TestTransitionPlayer player = registerTestTransitionPlayer();
+
+        mSyncEngine = createTestBLASTSyncEngine();
+        controller.setSyncEngine(mSyncEngine);
+
+        final Transition transitA = createTestTransition(TRANSIT_OPEN, controller);
+        transitA.mParallelCollectType = Transition.PARALLEL_TYPE_MUTUAL;
+        final Transition transitB = createTestTransition(TRANSIT_OPEN, controller);
+        transitB.mParallelCollectType = Transition.PARALLEL_TYPE_MUTUAL;
+        final Transition transitC = createTestTransition(TRANSIT_OPEN, controller);
+        transitC.mParallelCollectType = Transition.PARALLEL_TYPE_MUTUAL;
+        final Transition transitSync = createTestTransition(TRANSIT_OPEN, controller);
+        final Transition transitD = createTestTransition(TRANSIT_OPEN, controller);
+
+        controller.startCollectOrQueue(transitA, (deferred) -> {});
+        controller.startCollectOrQueue(transitB, (deferred) -> {});
+        controller.startCollectOrQueue(transitC, (deferred) -> {});
+        controller.startCollectOrQueue(transitSync, (deferred) -> {});
+        controller.startCollectOrQueue(transitD, (deferred) -> {});
+
+        assertTrue(transitA.isCollecting() && !transitA.isStarted());
+        // We still serialize on readiness
+        assertTrue(transitB.isPending());
+        assertTrue(transitC.isPending());
+
+        transitA.start();
+        transitA.setAllReady();
+        transitB.start();
+        transitB.setAllReady();
+
+        // A, B, and C should be collecting in parallel now.
+        assertTrue(transitA.isStarted());
+        assertTrue(transitB.isStarted());
+        assertTrue(transitC.isCollecting() && !transitC.isStarted());
+
+        transitC.start();
+        transitC.setAllReady();
+
+        assertTrue(transitA.isStarted());
+        assertTrue(transitB.isStarted());
+        assertTrue(transitC.isStarted());
+        // Not parallel so should remain pending
+        assertTrue(transitSync.isPending());
+        // After Sync, so should also remain pending.
+        assertTrue(transitD.isPending());
+        // There should always be a collector, since Sync can't collect yet, C should remain.
+        assertEquals(transitC, controller.getCollectingTransition());
+
+        mSyncEngine.tryFinishForTest(transitB.getSyncId());
+
+        // The other transitions should remain waiting.
+        assertTrue(transitA.isStarted());
+        assertTrue(transitB.isPlaying());
+        assertTrue(transitC.isStarted());
+        assertEquals(transitC, controller.getCollectingTransition());
+
+        mSyncEngine.tryFinishForTest(transitC.getSyncId());
+        assertTrue(transitA.isStarted());
+        assertTrue(transitC.isPlaying());
+        // The "collecting" one became ready, so the first "waiting" should move back to collecting.
+        assertEquals(transitA, controller.getCollectingTransition());
+
+        assertTrue(transitSync.isPending());
+        assertTrue(transitD.isPending());
+        mSyncEngine.tryFinishForTest(transitA.getSyncId());
+
+        // Now all collectors are done, so sync can be pulled-off the queue.
+        assertTrue(transitSync.isCollecting() && !transitSync.isStarted());
+        transitSync.start();
+        transitSync.setAllReady();
+        // Since D can run in parallel, it should be pulled-off the queue.
+        assertTrue(transitSync.isStarted());
+        assertTrue(transitD.isPending());
+
+        mSyncEngine.tryFinishForTest(transitSync.getSyncId());
+        assertTrue(transitD.isCollecting());
+
+        transitD.start();
+        transitD.setAllReady();
+        mSyncEngine.tryFinishForTest(transitD.getSyncId());
+
+        // Now nothing should be collecting
+        assertFalse(controller.isCollecting());
     }
 
     private static void makeTaskOrganized(Task... tasks) {

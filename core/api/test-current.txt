@@ -536,8 +536,15 @@ package android.app.admin {
     field @NonNull public static final android.app.admin.DeviceAdminAuthority DEVICE_ADMIN_AUTHORITY;
   }
 
+  public final class DevicePolicyIdentifiers {
+    field public static final String PERMITTED_INPUT_METHODS_POLICY = "permittedInputMethods";
+    field public static final String PERSONAL_APPS_SUSPENDED_POLICY = "personalAppsSuspended";
+    field public static final String SCREEN_CAPTURE_DISABLED_POLICY = "screenCaptureDisabled";
+  }
+
   public class DevicePolicyManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void acknowledgeNewUserDisclaimer();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void calculateHasIncompatibleAccounts();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void clearOrganizationId();
     method @RequiresPermission(android.Manifest.permission.CLEAR_FREEZE_PERIOD) public void clearSystemUpdatePolicyFreezePeriodRecord();
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceNetworkLogs();
@@ -2074,6 +2081,14 @@ package android.media.soundtrigger {
 
   public final class SoundTriggerManager {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public static android.media.soundtrigger.SoundTriggerInstrumentation attachInstrumentation(@NonNull java.util.concurrent.Executor, @NonNull android.media.soundtrigger.SoundTriggerInstrumentation.GlobalCallback);
+    method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForModule(@NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties);
+    method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForTestModule();
+    method @NonNull public static java.util.List<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> listModuleProperties();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int loadSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.SoundModel);
+  }
+
+  public static class SoundTriggerManager.Model {
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.SoundModel getSoundModel();
   }
 
 }
@@ -3774,6 +3789,7 @@ package android.view.inputmethod {
     method @NonNull @RequiresPermission(value=android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional=true) public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodListAsUser(int);
     method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean hasPendingImeVisibilityRequests();
+    method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean isCurrentRootView(@NonNull android.view.View);
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean isInputMethodPickerShown();
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public void setStylusWindowIdleTimeoutForTest(long);
     field public static final long CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING = 214016041L; // 0xcc1a029L

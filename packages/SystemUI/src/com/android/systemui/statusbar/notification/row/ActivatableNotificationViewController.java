@@ -16,15 +16,12 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import android.os.SystemClock;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.systemui.Gefingerpoken;
-import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.statusbar.phone.NotificationTapHelper;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -37,44 +34,16 @@ public class ActivatableNotificationViewController
     private final ExpandableOutlineViewController mExpandableOutlineViewController;
     private final AccessibilityManager mAccessibilityManager;
     private final FalsingManager mFalsingManager;
-    private final FalsingCollector mFalsingCollector;
-    private final NotificationTapHelper mNotificationTapHelper;
     private final TouchHandler mTouchHandler = new TouchHandler();
-
-    private boolean mNeedsDimming;
 
     @Inject
     public ActivatableNotificationViewController(ActivatableNotificationView view,
-            NotificationTapHelper.Factory notificationTapHelpFactory,
             ExpandableOutlineViewController expandableOutlineViewController,
-            AccessibilityManager accessibilityManager, FalsingManager falsingManager,
-            FalsingCollector falsingCollector) {
+            AccessibilityManager accessibilityManager, FalsingManager falsingManager) {
         super(view);
         mExpandableOutlineViewController = expandableOutlineViewController;
         mAccessibilityManager = accessibilityManager;
         mFalsingManager = falsingManager;
-        mFalsingCollector = falsingCollector;
-
-        mNotificationTapHelper = notificationTapHelpFactory.create(
-                (active) -> {
-                    if (active) {
-                        mView.makeActive();
-                        mFalsingCollector.onNotificationActive();
-                    } else {
-                        mView.makeInactive(true /* animate */);
-                    }
-                }, mView::performClick, mView::handleSlideBack);
-
-        mView.setOnActivatedListener(new ActivatableNotificationView.OnActivatedListener() {
-            @Override
-            public void onActivated(ActivatableNotificationView view) {
-                mFalsingCollector.onNotificationActive();
-            }
-
-            @Override
-            public void onActivationReset(ActivatableNotificationView view) {
-            }
-        });
     }
 
     /**
@@ -85,7 +54,6 @@ public class ActivatableNotificationViewController
         mExpandableOutlineViewController.init();
         mView.setOnTouchListener(mTouchHandler);
         mView.setTouchHandler(mTouchHandler);
-        mView.setAccessibilityManager(mAccessibilityManager);
     }
 
     @Override
@@ -99,15 +67,9 @@ public class ActivatableNotificationViewController
     }
 
     class TouchHandler implements Gefingerpoken, View.OnTouchListener {
-        private boolean mBlockNextTouch;
-
         @Override
         public boolean onTouch(View v, MotionEvent ev) {
             boolean result = false;
-            if (mBlockNextTouch) {
-                mBlockNextTouch = false;
-                return true;
-            }
             if (ev.getAction() == MotionEvent.ACTION_UP) {
                 mView.setLastActionUpTime(ev.getEventTime());
             }

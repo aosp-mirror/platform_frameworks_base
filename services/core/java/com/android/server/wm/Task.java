@@ -2362,6 +2362,22 @@ class Task extends TaskFragment {
         return parentTask == null ? null : parentTask.getCreatedByOrganizerTask();
     }
 
+    /** @return the first adjacent task of this task or its parent. */
+    @Nullable
+    Task getAdjacentTask() {
+        final TaskFragment adjacentTaskFragment = getAdjacentTaskFragment();
+        if (adjacentTaskFragment != null && adjacentTaskFragment.asTask() != null) {
+            return adjacentTaskFragment.asTask();
+        }
+
+        final WindowContainer parent = getParent();
+        if (parent == null || parent.asTask() == null) {
+            return null;
+        }
+
+        return parent.asTask().getAdjacentTask();
+    }
+
     // TODO(task-merge): Figure out what's the right thing to do for places that used it.
     boolean isRootTask() {
         return getRootTask() == this;
@@ -2747,7 +2763,7 @@ class Task extends TaskFragment {
             Rect outSurfaceInsets) {
         // If this task has its adjacent task, it means they should animate together. Use display
         // bounds for them could move same as full screen task.
-        if (getAdjacentTaskFragment() != null && getAdjacentTaskFragment().asTask() != null) {
+        if (getAdjacentTask() != null) {
             super.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
             return;
         }
@@ -5636,7 +5652,7 @@ class Task extends TaskFragment {
                     (deferred) -> {
                         // Need to check again if deferred since the system might
                         // be in a different state.
-                        if (deferred && !canMoveTaskToBack(tr)) {
+                        if (!isAttached() || (deferred && !canMoveTaskToBack(tr))) {
                             Slog.e(TAG, "Failed to move task to back after saying we could: "
                                     + tr.mTaskId);
                             transition.abort();

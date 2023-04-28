@@ -18,6 +18,7 @@ package com.android.systemui.animation
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.fonts.Font
+import android.graphics.fonts.FontVariationAxis
 import android.graphics.text.PositionedGlyphs
 import android.text.Layout
 import android.text.TextPaint
@@ -27,8 +28,10 @@ import com.android.internal.graphics.ColorUtils
 import java.lang.Math.max
 
 /** Provide text style linear interpolation for plain text. */
-class TextInterpolator(layout: Layout) {
-
+class TextInterpolator(
+    layout: Layout,
+    var typefaceCache: TypefaceVariantCache,
+) {
     /**
      * Returns base paint used for interpolation.
      *
@@ -211,8 +214,17 @@ class TextInterpolator(layout: Layout) {
                     run.baseX[i] = MathUtils.lerp(run.baseX[i], run.targetX[i], progress)
                     run.baseY[i] = MathUtils.lerp(run.baseY[i], run.targetY[i], progress)
                 }
-                run.fontRuns.forEach {
-                    it.baseFont = fontInterpolator.lerp(it.baseFont, it.targetFont, progress)
+                run.fontRuns.forEach { fontRun ->
+                    fontRun.baseFont =
+                        fontInterpolator.lerp(fontRun.baseFont, fontRun.targetFont, progress)
+                    val fvar = run {
+                        val tmpFontVariationsArray = mutableListOf<FontVariationAxis>()
+                        fontRun.baseFont.axes.forEach {
+                            tmpFontVariationsArray.add(FontVariationAxis(it.tag, it.styleValue))
+                        }
+                        FontVariationAxis.toFontVariationSettings(tmpFontVariationsArray)
+                    }
+                    basePaint.typeface = typefaceCache.getTypefaceForVariant(fvar, basePaint)
                 }
             }
         }
