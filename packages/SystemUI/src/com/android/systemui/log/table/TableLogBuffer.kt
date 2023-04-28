@@ -291,7 +291,7 @@ class TableLogBuffer(
     private fun echoToDesiredEndpoints(change: TableChange) {
         if (
             logcatEchoTracker.isBufferLoggable(bufferName = name, LogLevel.DEBUG) ||
-                logcatEchoTracker.isTagLoggable(change.columnName, LogLevel.DEBUG)
+                logcatEchoTracker.isTagLoggable(change.getColumnName(), LogLevel.DEBUG)
         ) {
             if (change.hasData()) {
                 localLogcat.d(name, change.logcatRepresentation())
