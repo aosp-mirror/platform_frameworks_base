@@ -296,8 +296,8 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
         assertThat(underTest.getPickerScreenState())
             .isEqualTo(
                 KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
-                    listOf("Select a default notes app to use notetaking shortcut"),
-                    actionText = "Open settings",
+                    listOf("Select a default notes app to use the notetaking shortcut"),
+                    actionText = "Select app",
                     actionComponentName =
                         "${context.packageName}$COMPONENT_NAME_SEPARATOR" +
                             "$ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE"
