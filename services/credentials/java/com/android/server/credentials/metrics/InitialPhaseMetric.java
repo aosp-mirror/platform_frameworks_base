@@ -26,7 +26,6 @@ import java.util.Map;
  * Some types are redundant across these metric collectors, but that has debug use-cases as
  * these data-types are available at different moments of the flow (and typically, one can feed
  * into the next).
- * TODO(b/270403549) - iterate on this in V3+
  */
 public class InitialPhaseMetric {
     private static final String TAG = "InitialPhaseMetric";
@@ -47,7 +46,6 @@ public class InitialPhaseMetric {
     private long mCredentialServiceBeginQueryTimeNanoseconds = -1;
 
     // Indicates if the origin was specified when making this API request
-    // TODO(b/271135048) - Emit once metrics approved
     private boolean mOriginSpecified = false;
 
     // Stores the deduped request information, particularly {"req":5}.
