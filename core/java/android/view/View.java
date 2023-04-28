@@ -14944,8 +14944,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Notifies that the accessibility state of this view changed. The change
      * is local to this view and does not represent structural changes such
-     * as children and parent. For example, the view became focusable. The
-     * notification is at at most once every
+     * as children and parent. For example, the view became focusable. Some of
+     * the notification is at at most once every
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}
      * to avoid unnecessary load to the system. Also once a view has a pending
      * notification this method is a NOP until the notification has been sent.
@@ -15007,7 +15007,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Notifies that the accessibility state of this view changed. The change
      * is *not* local to this view and does represent structural changes such
-     * as children and parent. For example, the view size changed. The
+     * as children and parent. For example, the view size changed. Some of the
      * notification is at at most once every
      * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}
      * to avoid unnecessary load to the system. Also once a view has a pending
