@@ -30,6 +30,7 @@
 #include "renderthread/VulkanManager.h"
 #include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
+#include "effects/GainmapRenderer.h"
 
 namespace android {
 namespace uirenderer {
@@ -73,6 +74,7 @@ void VkFunctorDrawHandler::draw(const GrBackendDrawableInfo& info) {
             .clip_right = mClip.fRight,
             .clip_bottom = mClip.fBottom,
             .is_layer = !vulkan_info.fFromSwapchainOrAndroidWindow,
+            .currentHdrSdrRatio = getTargetHdrSdrRatio(mImageInfo.colorSpace()),
     };
     mat4.getColMajor(&params.transform[0]);
     params.secondary_command_buffer = vulkan_info.fSecondaryCommandBuffer;
