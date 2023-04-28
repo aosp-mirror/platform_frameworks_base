@@ -594,7 +594,6 @@ interface IActivityManager {
     void setHasTopUi(boolean hasTopUi);
 
     // Start of O transactions
-    int restartUserInBackground(int userId);
     /** Cancels the window transitions for the given task. */
     @UnsupportedAppUsage
     void cancelTaskWindowTransition(int taskId);
@@ -868,6 +867,8 @@ interface IActivityManager {
      * progress.
      */
     boolean startProfileWithListener(int userid, IProgressListener unlockProgressListener);
+
+    int restartUserInBackground(int userId, int userStartMode);
 
     /**
      * Gets the ids of displays that can be used on {@link #startUserInBackgroundVisibleOnDisplay(int userId, int displayId)}.
