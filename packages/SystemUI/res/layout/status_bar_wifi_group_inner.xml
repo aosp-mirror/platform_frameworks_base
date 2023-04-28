@@ -24,11 +24,11 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:gravity="center_vertical"
-        android:layout_marginStart="2.5dp"
+        android:layout_marginStart="2.5sp"
     >
         <FrameLayout
                 android:id="@+id/inout_container"
-                android:layout_height="17dp"
+                android:layout_height="@*android:dimen/status_bar_system_icon_intrinsic_size"
                 android:layout_width="wrap_content"
                 android:gravity="center_vertical" >
             <ImageView
@@ -37,14 +37,14 @@
                 android:layout_width="wrap_content"
                 android:src="@drawable/ic_activity_down"
                 android:visibility="gone"
-                android:paddingEnd="2dp"
+                android:paddingEnd="2sp"
             />
             <ImageView
                 android:id="@+id/wifi_out"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:src="@drawable/ic_activity_up"
-                android:paddingEnd="2dp"
+                android:paddingEnd="2sp"
                 android:visibility="gone"
             />
         </FrameLayout>
@@ -62,7 +62,7 @@
         <View
             android:id="@+id/wifi_signal_spacer"
             android:layout_width="@dimen/status_bar_wifi_signal_spacer_width"
-            android:layout_height="4dp"
+            android:layout_height="4sp"
             android:visibility="gone" />
 
         <!-- Looks like CarStatusBar uses this... -->
@@ -75,7 +75,7 @@
         <View
             android:id="@+id/wifi_airplane_spacer"
             android:layout_width="@dimen/status_bar_airplane_spacer_width"
-            android:layout_height="4dp"
+            android:layout_height="4sp"
             android:visibility="gone"
         />
     </com.android.keyguard.AlphaOptimizedLinearLayout>
