@@ -18,7 +18,7 @@ package com.android.systemui.media.taptotransfer.receiver;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.log.LogBuffer;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
