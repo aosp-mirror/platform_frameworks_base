@@ -25,6 +25,8 @@
 
 namespace android::uirenderer {
 
+float getTargetHdrSdrRatio(const SkColorSpace* destColorspace);
+
 void DrawGainmapBitmap(SkCanvas* c, const sk_sp<const SkImage>& image, const SkRect& src,
                        const SkRect& dst, const SkSamplingOptions& sampling, const SkPaint* paint,
                        SkCanvas::SrcRectConstraint constraint,

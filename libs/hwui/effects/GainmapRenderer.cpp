@@ -38,7 +38,7 @@ namespace android::uirenderer {
 
 using namespace renderthread;
 
-static float getTargetHdrSdrRatio(const SkColorSpace* destColorspace) {
+float getTargetHdrSdrRatio(const SkColorSpace* destColorspace) {
     // We should always have a known destination colorspace. If we don't we must be in some
     // legacy mode where we're lost and also definitely not going to HDR
     if (destColorspace == nullptr) {
