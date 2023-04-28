@@ -151,7 +151,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Odustani"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Uparivanje omogućuje pristup vašim kontaktima i povijesti poziva dok ste povezani."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Uparivanje s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije bilo moguće."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije uspjelo zbog netočnog PIN-a ili zaporke."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Uparivanje s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije uspjelo zbog netočnog PIN-a ili pristupnog ključa."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Komunikacija s uređajem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> nije moguća."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Uparivanje odbio uređaj <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Računalo"</string>
@@ -491,7 +491,7 @@
     <string name="disabled" msgid="8017887509554714950">"Onemogućeno"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dopušteno"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Nije dopušteno"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Instalacija nepoznatih apl."</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Instalacija nepoznatih aplikacija"</string>
     <string name="home" msgid="973834627243661438">"Početni zaslon postavki"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
@@ -542,7 +542,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Trajanje"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pitaj svaki put"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Dok ne isključite"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Do isključivanja"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Upravo sad"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Ovaj telefon"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Ovaj tablet"</string>

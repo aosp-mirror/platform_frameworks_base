@@ -175,7 +175,7 @@
     <string name="data_usage_ota" msgid="7984667793701597001">"Sistēmas atjauninājumi"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB saistīšana"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Pārnēsājams tīklājs"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth saistīšana"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth piesaiste"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Saistīšana"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Piesaiste un pārn. tīklājs"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Visas darba grupas"</string>

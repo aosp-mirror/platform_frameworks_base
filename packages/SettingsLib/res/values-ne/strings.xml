@@ -116,7 +116,7 @@
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"फोन कलहरू"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"फाइल स्थानान्तरण"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"इनपुट उपकरण"</string>
-    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इन्टरनेट पहुँच"</string>
+    <string name="bluetooth_profile_pan" msgid="1006235139308318188">"इन्टरनेट एक्सेस"</string>
     <string name="bluetooth_profile_pbap" msgid="7064307749579335765">"कन्ट्याक्ट सेयरिङ"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="2955819694801952056">"सम्पर्क साझेदारीका लागि प्रयोग"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"इन्टरनेट जडान साझेदारी गर्दै"</string>
@@ -133,7 +133,7 @@
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"फाइल ट्रान्सफर सर्भरमा जडान गरियो"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"नक्सासँग जडित"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"SAP मा जडित"</string>
-    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"फाइल ट्रान्सफर सर्भरसँग जडान गरिएको छैन"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"फाइल ट्रान्सफर सर्भरसँग कनेक्ट गरिएको छैन"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"इनपुट उपकरणसँग जोडिएको छ"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"इन्टरनेटमाथिको पहुँचका लागि डिभाइसमा जडान गरियो"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"यन्त्रसँग स्थानीय इन्टरनेट जडान साझा गर्दै"</string>

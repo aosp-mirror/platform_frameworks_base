@@ -224,8 +224,8 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"หมุนหน้าจออัตโนมัติ"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ตำแหน่ง"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"สิทธิ์เข้าถึงกล้อง"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"สิทธิ์เข้าถึงไมโครโฟน"</string>
-    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"พร้อมให้ใช้งาน"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"สิทธิ์เข้าถึงไมค์"</string>
+    <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"พร้อมใช้งาน"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"ถูกบล็อก"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"อุปกรณ์สื่อ"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ผู้ใช้"</string>
@@ -413,8 +413,8 @@
     <string name="zen_mode_and_condition" msgid="5043165189511223718">"<xliff:g id="ZEN_MODE">%1$s</xliff:g> <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"การตั้งค่าเสียง"</string>
     <string name="volume_odi_captions_tip" msgid="8825655463280990941">"แสดงคำบรรยายสื่อโดยอัตโนมัติ"</string>
-    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"เคล็ดลับเกี่ยวกับคำอธิบายภาพ"</string>
-    <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"การวางซ้อนคำบรรยายภาพ"</string>
+    <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"เคล็ดลับเกี่ยวกับคำบรรยายแทนเสียง"</string>
+    <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"การวางซ้อนคำบรรยายแทนเสียง"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"เปิดใช้"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ปิดใช้"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"ปักหมุดแอปอยู่"</string>

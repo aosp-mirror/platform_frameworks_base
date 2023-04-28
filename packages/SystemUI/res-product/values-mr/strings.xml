@@ -21,8 +21,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"फास्ट चार्ज करण्यासाठी फोन पुन्हा अलाइन करा"</string>
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"वायरलेस पद्धतीने चार्ज करण्यासाठी फोन पुन्हा अलाइन करा"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV डिव्हाइस लवकरच बंद होणार आहे; सुरू ठेवण्यासाठी बटण दाबा."</string>
-    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"डिव्हाइस लवकरच बंद होणार आहे; ते सुरू ठेवण्यासाठी दाबा."</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV डिव्हाइस लवकरच बंद होणार आहे; सुरू ठेवण्यासाठी बटण प्रेस करा."</string>
+    <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"डिव्हाइस लवकरच बंद होणार आहे; ते सुरू ठेवण्यासाठी प्रेस करा."</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"टॅबलेटमध्ये सिम कार्ड नाही."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"फोनमध्ये सिम कार्ड नाही."</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="6278551068943958651">"पिन कोड जुळत नाहीत"</string>

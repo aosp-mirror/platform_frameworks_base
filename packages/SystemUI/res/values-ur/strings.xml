@@ -111,7 +111,7 @@
     <string name="screenrecord_start_error" msgid="2200660692479682368">"اسکرین ریکارڈنگ شروع کرنے میں خرابی"</string>
     <string name="accessibility_back" msgid="6530104400086152611">"واپس جائیں"</string>
     <string name="accessibility_home" msgid="5430449841237966217">"ہوم"</string>
-    <string name="accessibility_menu" msgid="2701163794470513040">"مینو"</string>
+    <string name="accessibility_menu" msgid="2701163794470513040">"مینیو"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ایکسیسبیلٹی"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"اسکرین کو گھمائیں"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"عمومی جائزہ"</string>
@@ -660,7 +660,7 @@
     <string name="data_connection_no_internet" msgid="691058178914184544">"انٹرنیٹ نہیں ہے"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> ترتیبات کھولیں۔"</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"ترتیبات کی ترتیب میں ترمیم کریں۔"</string>
-    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"پاور مینو"</string>
+    <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"پاور مینیو"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"صفحہ <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"مقفل اسکرین"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"حرارت کی وجہ سے فون آف ہو گیا"</string>
@@ -686,7 +686,7 @@
     <string name="tuner_minus" msgid="5258518368944598545">"علامت تفریق"</string>
     <string name="tuner_left" msgid="5758862558405684490">"بائیں"</string>
     <string name="tuner_right" msgid="8247571132790812149">"دائیں"</string>
-    <string name="tuner_menu" msgid="363690665924769420">"مینو"</string>
+    <string name="tuner_menu" msgid="363690665924769420">"مینیو"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> ایپ"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"الرٹس"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"بیٹری"</string>

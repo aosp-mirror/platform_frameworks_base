@@ -78,6 +78,11 @@ class StrictJarVerifier {
         "SHA1",
     };
 
+    /**
+     * The maximum number of signers supported by the JAR signature scheme.
+     */
+    private static final int MAX_JAR_SIGNERS = 10;
+
     private final String jarName;
     private final StrictJarManifest manifest;
     private final HashMap<String, byte[]> metaEntries;
@@ -293,10 +298,16 @@ class StrictJarVerifier {
             return false;
         }
 
+        int signerCount = 0;
         Iterator<String> it = metaEntries.keySet().iterator();
         while (it.hasNext()) {
             String key = it.next();
             if (key.endsWith(".DSA") || key.endsWith(".RSA") || key.endsWith(".EC")) {
+                if (++signerCount > MAX_JAR_SIGNERS) {
+                    throw new SecurityException(
+                            "APK Signature Scheme v1 only supports a maximum of " + MAX_JAR_SIGNERS
+                                    + " signers");
+                }
                 verifyCertificate(key);
                 it.remove();
             }
