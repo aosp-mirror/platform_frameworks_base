@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.log
+package com.android.systemui.plugins.log
 
-/** Production version of [LogcatEchoTracker] that isn't configurable. */
-class LogcatEchoTrackerProd : LogcatEchoTracker {
-    override val logInBackgroundThread = false
+import android.util.Log
 
-    override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean {
-        return level >= LogLevel.WARNING
-    }
-
-    override fun isTagLoggable(tagName: String, level: LogLevel): Boolean {
-        return level >= LogLevel.WARNING
-    }
+/** Enum version of @Log.Level */
+enum class LogLevel(@Log.Level val nativeLevel: Int, val shortString: String) {
+    VERBOSE(Log.VERBOSE, "V"),
+    DEBUG(Log.DEBUG, "D"),
+    INFO(Log.INFO, "I"),
+    WARNING(Log.WARN, "W"),
+    ERROR(Log.ERROR, "E"),
+    WTF(Log.ASSERT, "WTF")
 }
