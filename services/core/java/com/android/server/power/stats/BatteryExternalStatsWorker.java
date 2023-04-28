@@ -54,6 +54,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
@@ -404,8 +405,10 @@ public class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStat
      * within the task, never wait on the resulting Future. This will result in a deadlock.
      */
     public synchronized void scheduleRunnable(Runnable runnable) {
-        if (!mExecutorService.isShutdown()) {
+        try {
             mExecutorService.submit(runnable);
+        } catch (RejectedExecutionException e) {
+            Slog.e(TAG, "Couldn't schedule " + runnable, e);
         }
     }
 
