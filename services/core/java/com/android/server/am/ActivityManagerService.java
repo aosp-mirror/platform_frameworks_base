@@ -5192,7 +5192,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         throw new IllegalArgumentException(
                                 "Can't use FLAG_RECEIVER_BOOT_UPGRADE here");
                     }
-                    if (PendingIntent.isNewMutableDisallowedImplicitPendingIntent(flags, intent)) {
+                    boolean isActivityResultType =
+                            type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT;
+                    if (PendingIntent.isNewMutableDisallowedImplicitPendingIntent(flags, intent,
+                            isActivityResultType)) {
                         boolean isChangeEnabled = CompatChanges.isChangeEnabled(
                                         PendingIntent.BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT,
                                         owningUid);
