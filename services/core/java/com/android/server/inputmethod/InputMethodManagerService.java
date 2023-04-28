@@ -856,13 +856,15 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("ImfLock.class")
     private final WeakHashMap<IBinder, IBinder> mImeTargetWindowMap = new WeakHashMap<>();
 
-    private static final class SoftInputShowHideHistory {
+    @VisibleForTesting
+    static final class SoftInputShowHideHistory {
         private final Entry[] mEntries = new Entry[16];
         private int mNextIndex = 0;
         private static final AtomicInteger sSequenceNumber = new AtomicInteger(0);
 
-        private static final class Entry {
+        static final class Entry {
             final int mSequenceNumber = sSequenceNumber.getAndIncrement();
+            @Nullable
             final ClientState mClientState;
             @SoftInputModeFlags
             final int mFocusedWindowSoftInputMode;
@@ -874,7 +876,7 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
             final boolean mInFullscreenMode;
             @NonNull
             final String mFocusedWindowName;
-            @NonNull
+            @Nullable
             final EditorInfo mEditorInfo;
             @NonNull
             final String mRequestWindowName;
@@ -953,9 +955,13 @@ public final class InputMethodManagerService extends IInputMethodManager.Stub
 
                 pw.print(prefix);
                 pw.print(" editorInfo: ");
-                pw.print(" inputType=" + entry.mEditorInfo.inputType);
-                pw.print(" privateImeOptions=" + entry.mEditorInfo.privateImeOptions);
-                pw.println(" fieldId (viewId)=" + entry.mEditorInfo.fieldId);
+                if (entry.mEditorInfo != null) {
+                    pw.print(" inputType=" + entry.mEditorInfo.inputType);
+                    pw.print(" privateImeOptions=" + entry.mEditorInfo.privateImeOptions);
+                    pw.println(" fieldId (viewId)=" + entry.mEditorInfo.fieldId);
+                } else {
+                    pw.println("null");
+                }
 
                 pw.print(prefix);
                 pw.println(" focusedWindowSoftInputMode=" + InputMethodDebug.softInputModeToString(
