@@ -124,5 +124,5 @@
     <string name="clock_title_default" msgid="6342735240617459864">"Әдепкі"</string>
     <string name="clock_title_bubble" msgid="2204559396790593213">"Көпіршік"</string>
     <string name="clock_title_analog" msgid="8409262532900918273">"Аналогтық"</string>
-    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Жалғастыру үшін құрылғының құлпын ашыңыз"</string>
+    <string name="keyguard_unlock_to_continue" msgid="7509503484250597743">"Жалғастыру үшін құлыпты ашыңыз"</string>
 </resources>
