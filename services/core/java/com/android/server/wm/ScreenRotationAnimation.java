@@ -193,6 +193,7 @@ class ScreenRotationAnimation {
                                 .setSourceCrop(new Rect(0, 0, width, height))
                                 .setAllowProtected(true)
                                 .setCaptureSecureLayers(true)
+                                .setHintForSeamlessTransition(true)
                                 .build();
                 screenshotBuffer = ScreenCapture.captureDisplay(captureArgs);
             } else {
@@ -202,6 +203,7 @@ class ScreenRotationAnimation {
                                 .setCaptureSecureLayers(true)
                                 .setAllowProtected(true)
                                 .setSourceCrop(new Rect(0, 0, width, height))
+                                .setHintForSeamlessTransition(true)
                                 .build();
                 screenshotBuffer = ScreenCapture.captureLayers(captureArgs);
             }
