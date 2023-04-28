@@ -46,6 +46,7 @@ static struct {
     jfieldID uid;
     jfieldID grayscale;
     jmethodID getNativeExcludeLayers;
+    jfieldID hintForSeamlessTransition;
 } gCaptureArgsClassInfo;
 
 static struct {
@@ -68,23 +69,6 @@ static struct {
     jclass clazz;
     jmethodID builder;
 } gScreenshotHardwareBufferClassInfo;
-
-enum JNamedColorSpace : jint {
-    // ColorSpace.Named.SRGB.ordinal() = 0;
-    SRGB = 0,
-
-    // ColorSpace.Named.DISPLAY_P3.ordinal() = 7;
-    DISPLAY_P3 = 7,
-};
-
-constexpr jint fromDataspaceToNamedColorSpaceValue(const ui::Dataspace dataspace) {
-    switch (dataspace) {
-        case ui::Dataspace::DISPLAY_P3:
-            return JNamedColorSpace::DISPLAY_P3;
-        default:
-            return JNamedColorSpace::SRGB;
-    }
-}
 
 static void checkAndClearException(JNIEnv* env, const char* methodName) {
     if (env->ExceptionCheck()) {
@@ -119,12 +103,11 @@ public:
         captureResults.fenceResult.value()->waitForever(LOG_TAG);
         jobject jhardwareBuffer = android_hardware_HardwareBuffer_createFromAHardwareBuffer(
                 env, captureResults.buffer->toAHardwareBuffer());
-        const jint namedColorSpace =
-                fromDataspaceToNamedColorSpaceValue(captureResults.capturedDataspace);
         jobject screenshotHardwareBuffer =
                 env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
                                             gScreenshotHardwareBufferClassInfo.builder,
-                                            jhardwareBuffer, namedColorSpace,
+                                            jhardwareBuffer,
+                                            static_cast<jint>(captureResults.capturedDataspace),
                                             captureResults.capturedSecureLayers,
                                             captureResults.capturedHdrLayers);
         checkAndClearException(env, "builder");
@@ -185,6 +168,9 @@ static void getCaptureArgs(JNIEnv* env, jobject captureArgsObject, CaptureArgs& 
             captureArgs.excludeHandles.emplace(excludeObject->getHandle());
         }
     }
+    captureArgs.hintForSeamlessTransition =
+            env->GetBooleanField(captureArgsObject,
+                                 gCaptureArgsClassInfo.hintForSeamlessTransition);
 }
 
 static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
@@ -318,9 +304,10 @@ int register_android_window_ScreenCapture(JNIEnv* env) {
             GetFieldIDOrDie(env, captureArgsClazz, "mAllowProtected", "Z");
     gCaptureArgsClassInfo.uid = GetFieldIDOrDie(env, captureArgsClazz, "mUid", "J");
     gCaptureArgsClassInfo.grayscale = GetFieldIDOrDie(env, captureArgsClazz, "mGrayscale", "Z");
-
     gCaptureArgsClassInfo.getNativeExcludeLayers =
             GetMethodIDOrDie(env, captureArgsClazz, "getNativeExcludeLayers", "()[J");
+    gCaptureArgsClassInfo.hintForSeamlessTransition =
+            GetFieldIDOrDie(env, captureArgsClazz, "mHintForSeamlessTransition", "Z");
 
     jclass displayCaptureArgsClazz =
             FindClassOrDie(env, "android/window/ScreenCapture$DisplayCaptureArgs");
