@@ -22,7 +22,6 @@ import com.android.settingslib.bluetooth.CachedBluetoothDevice;
 import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.policy.BluetoothController.Callback;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -38,13 +37,9 @@ public interface BluetoothController extends CallbackController<Callback>, Dumpa
     boolean isBluetoothAudioActive();
     String getConnectedDeviceName();
     void setBluetoothEnabled(boolean enabled);
-    Collection<CachedBluetoothDevice> getDevices();
-    void connect(CachedBluetoothDevice device);
-    void disconnect(CachedBluetoothDevice device);
+
     boolean canConfigBluetooth();
 
-    int getMaxConnectionState(CachedBluetoothDevice device);
-    int getBondState(CachedBluetoothDevice device);
     List<CachedBluetoothDevice> getConnectedDevices();
 
     void addOnMetadataChangedListener(CachedBluetoothDevice device, Executor executor,

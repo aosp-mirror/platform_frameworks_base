@@ -94,7 +94,6 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
                 mMockDumpManager,
                 mock(BluetoothLogger.class),
                 mTestableLooper.getLooper(),
-                mTestableLooper.getLooper(),
                 mMockBluetoothManager,
                 mMockAdapter);
     }
@@ -111,62 +110,6 @@ public class BluetoothControllerImplTest extends SysuiTestCase {
         mBluetoothControllerImpl.onConnectionStateChanged(null,
                 BluetoothAdapter.STATE_DISCONNECTED);
         assertTrue(mBluetoothControllerImpl.isBluetoothConnected());
-    }
-
-    @Test
-    public void testDefaultConnectionState() {
-        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
-        assertEquals(BluetoothDevice.BOND_NONE, mBluetoothControllerImpl.getBondState(device));
-        assertEquals(BluetoothProfile.STATE_DISCONNECTED,
-                mBluetoothControllerImpl.getMaxConnectionState(device));
-    }
-
-    @Test
-    public void testAsyncBondState() throws Exception {
-        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
-        when(device.getBondState()).thenReturn(BluetoothDevice.BOND_BONDED);
-        BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
-        mBluetoothControllerImpl.addCallback(callback);
-
-        // Trigger the state getting.
-        assertEquals(BluetoothDevice.BOND_NONE, mBluetoothControllerImpl.getBondState(device));
-
-        mTestableLooper.processAllMessages();
-
-        assertEquals(BluetoothDevice.BOND_BONDED, mBluetoothControllerImpl.getBondState(device));
-        verify(callback).onBluetoothDevicesChanged();
-    }
-
-    @Test
-    public void testAsyncConnectionState() throws Exception {
-        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
-        when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
-        BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
-        mBluetoothControllerImpl.addCallback(callback);
-
-        // Trigger the state getting.
-        assertEquals(BluetoothProfile.STATE_DISCONNECTED,
-                mBluetoothControllerImpl.getMaxConnectionState(device));
-
-        mTestableLooper.processAllMessages();
-
-        assertEquals(BluetoothProfile.STATE_CONNECTED,
-                mBluetoothControllerImpl.getMaxConnectionState(device));
-        verify(callback).onBluetoothDevicesChanged();
-    }
-
-    @Test
-    public void testNullAsync_DoesNotCrash() throws Exception {
-        CachedBluetoothDevice device = mock(CachedBluetoothDevice.class);
-        when(device.getMaxConnectionState()).thenReturn(BluetoothProfile.STATE_CONNECTED);
-        BluetoothController.Callback callback = mock(BluetoothController.Callback.class);
-        mBluetoothControllerImpl.addCallback(callback);
-
-        // Trigger the state getting.
-        assertEquals(BluetoothProfile.STATE_DISCONNECTED,
-                mBluetoothControllerImpl.getMaxConnectionState(null));
-
-        mTestableLooper.processAllMessages();
     }
 
     @Test
