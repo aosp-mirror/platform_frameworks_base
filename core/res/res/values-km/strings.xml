@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"ការហៅតាម Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"ការហៅ​ទូរសព្ទតាម Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"បិទ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"ហៅទូរសព្ទ​តាមរយៈ Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ហៅទូរសព្ទ​តាមរយៈបណ្តាញ​ទូរសព្ទ​ចល័ត"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"កម្មវិធីផ្ទាល់ខ្លួន​របស់អ្នកត្រូវ​បានទប់ស្កាត់ រហូតទាល់តែ​អ្នកបើក​កម្រងព័ត៌មាន​ការងាររបស់អ្នក"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"កម្មវិធីផ្ទាល់ខ្លួន​នឹងត្រូវបាន​ទប់ស្កាត់​នៅថ្ងៃទី <xliff:g id="DATE">%1$s</xliff:g> នៅម៉ោង <xliff:g id="TIME">%2$s</xliff:g>។ អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក​មិនអនុញ្ញាតឱ្យ​បន្តបិទ​កម្រងព័ត៌មាន​ការងារ​របស់អ្នក​លើសពី <xliff:g id="NUMBER">%3$d</xliff:g> ថ្ងៃ​ទេ។"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"បើក"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ការហៅទូរសព្ទ និងសារត្រូវបានបិទ"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"អ្នកបានផ្អាកកម្មវិធី​ការងារ។ អ្នកនឹងមិនទទួលការហៅទូរសព្ទ ឬសារជាអក្សរទេ។"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ឈប់ផ្អាកកម្មវិធី​ការងារ"</string>
     <string name="me" msgid="6207584824693813140">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ជម្រើស Android TV"</string>
@@ -294,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"ប្រព័ន្ធ​​ Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ប្តូរ​ទៅ​កម្រង​ព័ត៌មាន​ផ្ទាល់ខ្លួន"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ប្តូរ​ទៅ​កម្រង​ព័ត៌មាន​ការងារ"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ទំនាក់ទំនង"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ចូលប្រើទំនាក់ទំនងរបស់អ្នក"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ទីតាំង"</string>
@@ -320,7 +328,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"អាន និងសរសេរ​កំណត់​ហេតុ​ហៅ​ទូរសព្ទ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ទូរសព្ទ"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ឧបករណ៍​ចាប់សញ្ញា​រាងកាយ"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"សេនស័រ​រាងកាយ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"ការ​ជូនដំណឹង"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"បង្ហាញ​ការជូនដំណឹង"</string>
@@ -338,6 +346,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"អាចចាប់យក​ចលនា​ដែលធ្វើនៅលើ​នៅលើ​ឧបករណ៍​ចាប់​ស្នាម​ម្រាមដៃ​របស់ឧបករណ៍បាន។"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ថត​អេក្រង់"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"អាច​ថត​អេក្រង់​នៃ​ផ្ទាំង​អេក្រង់​បាន។"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"មើល​សាកល្បង <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"បិទ ឬ​កែ​របារ​ស្ថានភាព"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ឲ្យ​កម្មវិធី​បិទ​របារ​ស្ថានភាព ឬ​បន្ថែម និង​លុប​រូប​តំណាង​ប្រព័ន្ធ។"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ធ្វើជារបារស្ថានភាព"</string>
@@ -458,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"អនុញ្ញាតឱ្យកម្មវិធីចូលប្រើទិន្នន័យឧបករណ៍ចាប់សញ្ញារាងកាយ ដូចជាចង្វាក់បេះដូង សីតុណ្ហភាព និងភាគរយនៃអុកស៊ីសែនក្នុងឈាមជាដើម ខណៈពេលកំពុងប្រើកម្មវិធី។"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ចូលប្រើទិន្នន័យឧបករណ៍ចាប់សញ្ញារាងកាយ ដូចជាចង្វាក់បេះដូងជាដើម ខណៈពេលស្ថិតនៅផ្ទៃខាងក្រោយ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"អនុញ្ញាតឱ្យកម្មវិធីចូលប្រើទិន្នន័យឧបករណ៍ចាប់សញ្ញារាងកាយ ដូចជាចង្វាក់បេះដូង សីតុណ្ហភាព និងភាគរយនៃអុកស៊ីសែនក្នុងឈាមជាដើម ខណៈពេលដែលកម្មវិធីស្ថិតនៅផ្ទៃខាងក្រោយ។"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ចូលប្រើ​ទិន្នន័យសីតុណ្ហភាពកដៃ​ពីសេនស័ររាងកាយ នៅពេល​កំពុងប្រើកម្មវិធី។"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"អនុញ្ញាតឱ្យកម្មវិធីចូលប្រើ​ទិន្នន័យសីតុណ្ហភាពកដៃ​ពីសេនស័ររាងកាយ នៅពេល​កំពុងប្រើកម្មវិធី។"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ចូលប្រើ​ទិន្នន័យសីតុណ្ហភាព​កដៃពីសេនស័ររាងកាយ នៅពេល​កម្មវិធីស្ថិត​នៅផ្ទៃខាងក្រោយ។"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"អនុញ្ញាតឱ្យ​កម្មវិធីចូលប្រើ​ទិន្នន័យសីតុណ្ហភាព​កដៃពីសេនស័ររាងកាយ នៅពេល​កម្មវិធីស្ថិត​នៅផ្ទៃខាងក្រោយ។"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"អាន​ព្រឹត្តិការណ៍​ប្រតិទិន​ និង​ព័ត៌មាន​លម្អិត"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"កម្មវិធី​នេះ​អាច​ធ្វើការ​អាន​ព្រឹត្តិការណ៍​ប្រតិទិន​ទាំងអស់​ ដែល​ផ្ទុក​នៅលើ​ថេប្លេត​របស់​អ្នក​ និង​ចែករំលែក​ ឬ​រក្សាទុក​ទិន្នន័យ​ប្រតិទិន​របស់​អ្នក​។"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"កម្មវិធីនេះ​អាចអានព្រឹត្តិការណ៍​ក្នុងប្រតិទិន​ទាំងអស់​ដែលបានរក្សាទុក​នៅក្នុងឧបករណ៍ Android TV របស់អ្នក និង​ចែករំលែក ឬរក្សាទុក​ទិន្នន័យ​ប្រតិទិន​របស់អ្នក។"</string>
@@ -502,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​កម្មវិធី​ញ័រ។"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"អនុញ្ញាតឱ្យ​កម្មវិធី​ចូលប្រើ​ស្ថានភាពកម្មវិធី​ញ័រ។"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​ផ្ទាល់"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"ឲ្យ​កម្មវិធី​ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​គ្មាន​សកម្មភាព​របស់​អ្នក។​ វា​អាច​កាត់​លុយ​ ឬ​ហៅ​ដោយ​មិន​រំពឹង​ទុក។ ចំណាំ​ថា​ វា​មិន​អនុញ្ញាត​ឲ្យ​កម្មវិធី​ហៅ​លេខ​ពេល​អាសន្ន​ទេ។ កម្មវិធី​ព្យាបាទ​អាច​កាត់​លុយ​របស់​អ្នក​ ដោយ​ធ្វើការ​ហៅ​ដោយ​គ្មាន​ការ​បញ្ជាក់​របស់​អ្នក។"</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"អនុញ្ញាតឱ្យ​កម្មវិធីហៅទៅ​លេខទូរសព្ទ​ដោយគ្មាន​ការអន្តរាគមន៍​របស់អ្នក។ ការធ្វើបែបនេះ​អាចបណ្ដាលឱ្យមាន​ការហៅទូរសព្ទ ឬការគិតថ្លៃ​ដែលមិនបានរំពឹងទុក។ សូមចំណាំថា ការធ្វើបែបនេះ​មិនអនុញ្ញាតឱ្យ​កម្មវិធីហៅទូរសព្ទទៅ​លេខសង្គ្រោះបន្ទាន់ទេ។ កម្មវិធីគ្រោះថ្នាក់​អាចគិតប្រាក់ពីអ្នក​ដោយហៅទូរសព្ទដោយគ្មានការបញ្ជាក់របស់អ្នក ឬហៅទូរសព្ទទៅលេខកូដក្រុមហ៊ុនសេវាទូរសព្ទ ដែលបណ្តាលឱ្យការហៅចូល​ត្រូវបានបញ្ជូនបន្ត​ដោយស្វ័យប្រវត្តិទៅ​លេខផ្សេងទៀត។"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"ចូលដំណើរការសេវាកម្មការហៅតាម IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"អនុញ្ញាតឲ្យកម្មវិធីនេះប្រើសេវាកម្ម IMS ដើម្បីធ្វើការហៅដោយគ្មានការអន្តរាគមន៍ពីអ្នក។"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"អាន​ស្ថានភាព និង​អត្តសញ្ញាណ​ទូរស័ព្ទ"</string>
@@ -708,7 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"បាន​បោះបង់​ប្រតិបត្តិការចាប់​ផ្ទៃមុខ។"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"អ្នកប្រើប្រាស់​បានបោះបង់​ការដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ព្យាយាម​ដោះសោ​ច្រើនដងពេក។ ការដោះសោ​តាមទម្រង់មុខ​ត្រូវបានបិទ​។"</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"ព្យាយាម​ច្រើនដងពេក។ មិនអាចប្រើការដោះសោតាមទម្រង់មុខបានទេ។"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ព្យាយាម​ដោះសោ​ច្រើនដងពេក។ សូមបញ្ចូល​ការចាក់សោ​អេក្រង់​ជំនួសវិញ​។"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"មិន​អាច​ផ្ទៀងផ្ទាត់​មុខ​បាន​ទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"អ្នក​មិនបាន​រៀបចំ​ការដោះសោតាមទម្រង់មុខ​ទេ"</string>
@@ -795,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"អនុញ្ញាតឱ្យកម្មវិធី​ចាប់ផ្ដើម​មើលព័ត៌មានមុខងារ​សម្រាប់កម្មវិធី។"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ចូលប្រើទិន្នន័យ​ឧបករណ៍ចាប់សញ្ញា​នៅអត្រាសំណាកខ្ពស់"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"អនុញ្ញាតឱ្យកម្មវិធី​ធ្វើសំណាកទិន្នន័យ​ឧបករណ៍ចាប់សញ្ញា​នៅអត្រាលើសពី 200 Hz"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ដំឡើងកំណែកម្មវិធីដោយមិនចាំបាច់មានសកម្មភាពរបស់អ្នកប្រើប្រាស់"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"អនុញ្ញាតឱ្យម្ចាស់សិទ្ធិដំឡើងកំណែកម្មវិធីដែលខ្លួនបានដំឡើងពីមុនដោយមិនចាំបាច់មានសកម្មភាពរបស់អ្នកប្រើប្រាស់"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"កំណត់​ក្បួន​ពាក្យ​សម្ងាត់"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"គ្រប់គ្រងប្រវែង និងតួអក្សរដែលអនុញ្ញាតឲ្យប្រើក្នុងពាក្យសម្ងាត់ និងលេខសម្ងាត់ចាក់សោអេក្រង់។"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"តាមដាន​ការ​ព្យាយាម​ដោះ​សោ​អេក្រង់"</string>
@@ -1358,8 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"មុខងារ PTP តាម​ USB ត្រូវបានបើក"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"ការភ្ជាប់តាម USB ត្រូវបានបើក"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"មុខងារ​ MIDI តាម USB ត្រូវបានបើក"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"បានភ្ជាប់ឧបករណ៍ជា​កាមេរ៉ាបណ្ដាញ"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"បាន​ភ្ជាប់​ជាមួយ​គ្រឿង​បរិក្ខារ USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"ប៉ះសម្រាប់ជម្រើសជាច្រើនទៀត"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"កំពុងសាកថ្ម​ឧបករណ៍​ដែលបានភ្ជាប់។ សូមចុចសម្រាប់​ជម្រើសបន្ថែម។"</string>
@@ -1390,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"ជ្រើស​វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="show_ime" msgid="6406112007347443383">"ទុកវានៅលើអេក្រង់ខណៈពេលក្តារចុចពិតប្រាកដកំពុងសកម្ម"</string>
     <string name="hardware" msgid="1800597768237606953">"បង្ហាញក្ដារចុចនិម្មិត"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"កំណត់រចនាសម្ព័ន្ធក្តារចុច​រូបវន្ត"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"កំណត់រចនាសម្ព័ន្ធ <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"កំណត់រចនាសម្ព័ន្ធ​ក្ដារចុចរូបវន្ត"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ប៉ះដើម្បីជ្រើសភាសា និងប្លង់"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1697,7 +1704,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"មើល និង​គ្រប់គ្រងអេក្រង់"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"វា​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"មើល និង​ធ្វើសកម្មភាព"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬឧបករណ៍ចាប់​សញ្ញាហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬសេនស័រហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"អនុញ្ញាត"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"បដិសេធ"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ចុចមុខងារណាមួយ ដើម្បចាប់ផ្ដើមប្រើ៖"</string>
@@ -1708,15 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"រួចរាល់"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"បិទ​ផ្លូវកាត់"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ប្រើប្រាស់​ផ្លូវកាត់"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"ការបញ្ច្រាស​ពណ៌"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ការកែតម្រូវ​ពណ៌"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ពន្លឺតិចខ្លាំង"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ឧបករណ៍ស្តាប់"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"ចុចគ្រាប់ចុច​កម្រិត​សំឡេងទាំងពីរ​ឱ្យជាប់រយៈពេលបីវិនាទី ដើម្បីប្រើ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"លែង​គ្រាប់ចុចកម្រិតសំឡេង។ ដើម្បីបើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g> សូមចុច​គ្រាប់ចុចកម្រិតសំឡេងទាំងពីរឱ្យជាប់ម្ដងទៀត​រយៈពេល 3 វិនាទី។"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ជ្រើសរើស​មុខងារ​ដែលត្រូវប្រើ នៅពេល​ដែល​អ្នកចុច​ប៊ូតុង​ភាពងាយស្រួល៖"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ជ្រើសរើស​មុខងារ ដើម្បី​ប្រើជាមួយចលនា​ភាពងាយស្រួល (អូស​ឡើងលើ​ពី​ផ្នែកខាងក្រោម​នៃ​អេក្រង់​ដោយប្រើ​ម្រាមដៃ​ពីរ)៖"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ជ្រើសរើស​មុខងារ ដើម្បី​ប្រើជាមួយ​ចលនា​ភាពងាយស្រួល (អូស​ឡើងលើ​ពី​ផ្នែកខាងក្រោម​នៃ​អេក្រង់​ដោយប្រើ​ម្រាមដៃ​បី)៖"</string>
@@ -1906,7 +1912,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"សំណើ SS ត្រូវបាន​ប្ដូរ​ទៅ​សំណើ USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"បាន​ប្ដូរ​ទៅ​សំណើ SS ថ្មី"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ការជូនដំណឹង​អំពីការ​ដាក់នុយ"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ប្រវត្តិរូបការងារ"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"កម្រងព័ត៌មានការងារ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"បាន​ជូនដំណឹង"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"បាន​ផ្ទៀងផ្ទាត់​"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ពង្រីក"</string>
@@ -1948,11 +1954,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> មិន​អាច​ប្រើ​បាន​ទេនៅពេលនេះ។ វា​ស្ថិត​ក្រោម​ការគ្រប់គ្រងរបស់ <xliff:g id="APP_NAME_1">%2$s</xliff:g> ។"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ស្វែងយល់បន្ថែម"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ឈប់ផ្អាក​កម្មវិធី"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"បើក​កម្មវិធី​ការងារឬ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"ទទួលបានសិទ្ធិចូលប្រើការជូនដំណឹង និងកម្មវិធីការងាររបស់អ្នក"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"បើក"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ឈប់ផ្អាកកម្មវិធីការងារឬ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ឈប់ផ្អាក"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ពេលមានអាសន្ន"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"សុំសិទ្ធិចូលប្រើប្រាស់កម្មវិធី​ការងារ និងការហៅរបស់អ្នក"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"មិនអាច​ប្រើ​កម្មវិធី​នេះបានទេ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"មិនអាច​ប្រើ <xliff:g id="APP_NAME">%1$s</xliff:g> នៅពេល​នេះ​បានទេ​។"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"មិនអាចប្រើ <xliff:g id="ACTIVITY">%1$s</xliff:g> បានទេ"</string>
@@ -2158,12 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ខ្លឹមសារនេះ​មិនអាចបើក​តាមរយៈ​កម្មវិធី​ការងារ​បានទេ"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ខ្លឹមសារនេះ​មិនអាចចែករំលែក​តាមរយៈ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ខ្លឹមសារនេះ​មិនអាចបើក​តាមរយៈ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"កម្រងព័ត៌មានការងារត្រូវបាន​ផ្អាក"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ចុច​ដើម្បី​បើក"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"កម្មវិធី​ការងារ​ត្រូវបានផ្អាក"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ឈប់ផ្អាក"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"គ្មាន​កម្មវិធី​ការងារ​ទេ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"គ្មាន​កម្មវិធី​ផ្ទាល់ខ្លួន​ទេ"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"បើក <xliff:g id="APP">%s</xliff:g> នៅក្នុងកម្រង​ព័ត៌មាន​ផ្ទាល់​ខ្លួនរបស់អ្នកឬ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"បើក <xliff:g id="APP">%s</xliff:g> នៅក្នុងកម្រងព័ត៌មានការងាររបស់អ្នកឬ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"បើក <xliff:g id="APP">%s</xliff:g> ផ្ទាល់ខ្លួន"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"បើក <xliff:g id="APP">%s</xliff:g> សម្រាប់ការងារ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​ផ្ទាល់ខ្លួន"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​សម្រាប់​ការងារ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"កូដ PIN ដោះ​សោ​បណ្ដាញ​ស៊ីម"</string>
@@ -2320,5 +2324,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> កំពុងប្រើផ្ទាំងអេក្រង់ទាំងពីរដើម្បីបង្ហាញខ្លឹមសារ"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ឧបករណ៍ក្តៅពេក"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"អេក្រង់ពីរមិនអាចប្រើបានទេ ដោយសារទូរសព្ទរបស់អ្នកឡើងក្តៅពេក"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"មិនអាចប្រើ Dual Screen បានទេ"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"មិនអាចប្រើ Dual Screen បានទេ ដោយសារមុខងារ​សន្សំ​ថ្មត្រូវបានបើក។ អ្នកអាចបិទវា​បាននៅក្នុងការកំណត់។"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"ចូលទៅកាន់ \"ការកំណត់\""</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"បិទ"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"បានកំណត់​រចនាសម្ព័ន្ធ <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%s</xliff:g>។ សូមចុចដើម្បីប្ដូរ។"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>។ សូមចុចដើម្បីប្ដូរ។"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>។ សូមចុចដើម្បីប្ដូរ។"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"បានកំណត់ប្លង់ក្ដារចុចទៅ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… សូមចុចដើម្បីប្ដូរ។"</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"បានកំណត់រចនាសម្ព័ន្ធ​ក្ដារចុចរូបវន្ត"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ចុចដើម្បីមើលក្ដារចុច"</string>
 </resources>

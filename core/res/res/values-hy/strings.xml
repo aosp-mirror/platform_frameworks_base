@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Զանգեր Wi-Fi-ի միջոցով"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Զանգ Wi-Fi-ի միջոցով"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Անջատված է"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Զանգ Wi-Fi-ի միջոցով"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Զանգ բջջային ցանցի միջոցով"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Անձնական հավելվածներն արգելափակված կլինեն, մինչև չմիացնեք ձեր աշխատանքային պրոֆիլը"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Անձնական հավելվածները <xliff:g id="DATE">%1$s</xliff:g>-ին ժամը <xliff:g id="TIME">%2$s</xliff:g> կարգելափակվեն։ Ձեր ՏՏ ադմինիստրատորը չի թույլատրում, որ ձեր աշխատանքային պրոֆիլը <xliff:g id="NUMBER">%3$d</xliff:g> օրից ավել անջատված մնա։"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Միացնել"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Զանգերն ու SMS-ներն անջատված են"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Դուք դադարեցրել եք աշխատանքային հավելվածները։ Այդ պատճառով չեք ստանա հեռախոսազանգեր և տեքստային հաղորդագրություններ։"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Վերականգնել"</string>
     <string name="me" msgid="6207584824693813140">"Իմ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Պլանշետի ընտրանքները"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-ի կարգավորումներ"</string>
@@ -294,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android համակարգ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Բացել անձնական պրոֆիլը"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Բացել աշխատանքային պրոֆիլը"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Կոնտակտներ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"օգտագործել ձեր կոնտակտները"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղորոշում"</string>
@@ -338,6 +346,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Կարող է արձանագրել մատնահետքերի սկաների վրա կատարվող ժեստերը"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Սքրինշոթի ստեղծում"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Կարող է ստեղծել էկրանի սքրինշոթ։"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Նախադիտում, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"անջատել կամ փոփոխել կարգավիճակի գոտին"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Թույլ է տալիս հավելվածին անջատել կարգավիճակի գոտին կամ ավելացնել ու հեռացնել համակարգի պատկերակները:"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"լինել կարգավիճակի գոտի"</string>
@@ -458,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Հավելվածին հասանելի է դարձնում մարմնի սենսորների տվյալները (օրինակ՝ սրտի զարկերի հաճախականությունը, ջերմաստիճանը, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշները) հավելվածի օգտագործման ժամանակ։"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Մարմնի սենսորների տվյալների հասանելիություն ֆոնային ռեժիմում"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Հավելվածին հասանելի է դարձնում մարմնի սենսորների տվյալները (օրինակ՝ սրտի զարկերի հաճախականությունը, ջերմաստիճանը, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշները), երբ հավելվածն աշխատում է ֆոնային ռեժիմում։"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալների հասանելիություն հավելվածի օգտագործման ընթացքում։"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Գործարկված հավելվածին հասանելի է դարձնում մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալները։"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալների հասանելիություն ֆոնային ռեժիմում։"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Ֆոնային ռեժիմում գործարկված հավելվածին հասանելի է դարձնում մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալները։"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Կարդալ օրացույցի միջոցառումները և տվյալները"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր պլանշետում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր Android TV սարքում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
@@ -502,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Թույլ է տալիս հավելվածին կառավարել թրթռոցը:"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Հավելվածին թույլ է տալիս օգտագործել սարքի թրթռալու ռեժիմը։"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ուղղակիորեն զանգել հեռախոսահամարներին"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Թույլ է տալիս հավելվածին զանգել հեռախոսահամարներին առանց ձեր միջամտության: Սա կարող է հանգեցնել անկանխատեսելի գանձումների կամ զանգերի: Նկատի ունեցեք, որ սա թույլ չի տալիս հավելվածին զանգել արտակարգ իրավիճակների համարներին: Վնասարար հավելվածները կարող են ձեր հաշվից զանգեր կատարել` առանց ձեր հաստատման:"</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Թույլ է տալիս հավելվածին զանգել հեռախոսահամարների՝ առանց ձեր միջամտության։ Սա կարող է հանգեցնել անկանխատեսելի գանձումների կամ զանգերի: Նկատի ունեցեք, որ սա թույլ չի տալիս հավելվածին զանգել արտակարգ իրավիճակների համարներին: Վնասակար հավելվածները կարող են գումար կորզել՝ կատարելով զանգեր առանց ձեր հաստատման կամ հավաքել համարներ, որոնց արդյունքում ստանում եք մուտքային զանգեր՝ այլ համարի ավտոմատ փոխանցելու համար։"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"օգտվել IMS զանգերի ծառայությունից"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Թույլ է տալիս հավելվածին IMS ծառայության միջոցով կատարել զանգեր՝ առանց ձեր միջամտության:"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"կարդալ հեռախոսի կարգավիճակը և ինքնությունը"</string>
@@ -632,7 +637,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Շատ լուսավոր է"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Հայտնաբերվել է սնուցման կոճակի սեղմում"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Փորձեք փոխել մատի դիրքը"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ամեն անգամ թեթևակի փոխեք մատի դիրքը"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ամեն անգամ թեթևա­­կի փոխեք մատի դիրքը"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Մատնահետքը չի ճանաչվել"</string>
@@ -683,7 +688,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Տեղափոխեք հեռախոսը ձախ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Տեղափոխեք հեռախոսը աջ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Նայեք ուղիղ էկրանին։"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Ձեր դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մակարդակում։"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մա­­կարդակում։"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Նորից փորձեք։"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Դեմքը չի հաջողվում ճանաչել։ Նորից փորձեք։"</string>
@@ -699,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Չհաջողվեց ստեղծել ձեր դեմքի մոդելը։ Նորից փորձեք։"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Հանեք ակնոցը։ Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի։"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Դեմքի մի մասը ծածկված է։ Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի։"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Դեմքի մի մասը ծածկված է։ Ձեր դեմքը պետք է ամբող­ջովին տեսանելի լինի։"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Չհաջողվեց հաստատել դեմքը։ Սարքն անհասանելի է:"</string>
@@ -708,7 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Դեմքի ճանաչումը չեղարկվել է։"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Դեմքով ապակողմումը չեղարկվել է օգտատիրոջ կողմից"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Չափից շատ փորձեր եք կատարել: Փորձեք ավելի ուշ:"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Չափազանց շատ փորձեր են արվել։ Դեմքով ապակողպումն անջատված է։"</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Չափազանց շատ փորձեր են արվել։ Դեմքով ապակողպումն անհասանելի է։"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Չափազանց շատ փորձեր են արվել։ Օգտագործեք էկրանի կողպումը։"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Չհաջողվեց հաստատել դեմքը։ Նորից փորձեք։"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Դուք չեք կարգավորել դեմքով ապակողպումը։"</string>
@@ -795,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Թույլ է տալիս դիտել հավելվածի գործառույթների մասին տեղեկությունները։"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"օգտագործել սենսորների տվյալները բարձր հաճախականության վրա"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Թույլ է տալիս հավելվածին փորձել սենսորների տվյալները 200 Հց-ից բարձր հաճախականության վրա"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"թարմացնել հավելվածն առանց օգտատիրոջ գործողության"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Թույլ է տալիս թարմացնել նախկինում տեղադրված հավելվածները՝ առանց օգտատիրոջ գործողության"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Կառավարել էկրանի ապակողպման գաղտնաբառերի և PIN կոդերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
@@ -1358,8 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP ռեժիմը USB-ի միջոցով միացավ"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB մոդեմի ռեժիմը միացավ"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI ռեժիմը USB-ի միջոցով միացավ"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Սարքը միացած է որպես վեբ տեսախցիկ"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Միացվել է USB լրասարք"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Հպեք՝ լրացուցիչ ընտրանքների համար:"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Միացված սարքի լիցքավորում: Հպեք՝ ավելի շատ ընտրանքների համար:"</string>
@@ -1390,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Ընտրեք ներածման եղանակը"</string>
     <string name="show_ime" msgid="6406112007347443383">"Պահել էկրանին, երբ ֆիզիկական ստեղնաշարն ակտիվ է"</string>
     <string name="hardware" msgid="1800597768237606953">"Ցույց տալ վիրտուալ ստեղնաշարը"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Կազմաձևեք ֆիզիկական ստեղնաշարը"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Կարգավորեք <xliff:g id="DEVICE_NAME">%s</xliff:g> սարքը"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Կարգավորեք ֆիզիկական ստեղնաշարերը"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Հպեք՝ լեզուն և դասավորությունն ընտրելու համար"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ԱԲԳԴԵԶԷԸԹԺԻԼԽԾԿՀՁՂՃՄՅՆՇՈՉՊՋՌՍՎՏՐՑՈՒՓՔԵւՕՖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1708,15 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Պատրաստ է"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Անջատել դյուրանցումը"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Օգտագործել դյուրանցումը"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Գունաշրջում"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Գունաշտկում"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Մեկ ձեռքի ռեժիմ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Հավելյալ խամրեցում"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Լսողական սարքեր"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացավ։"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունն անջատվեց։"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"«<xliff:g id="SERVICE_NAME">%1$s</xliff:g>» ծառայությունն օգտագործելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակները"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Բաց թողեք ձայնի ուժգնության կոճակները։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացնելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակը։"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Ընտրեք գործառույթը, որը կգործարկվի «Հատուկ գործառույթներ» կոճակին հպելու դեպքում՝"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Ընտրեք գործառույթը, որը կգործարկվի հատուկ գործառույթների ժեստը (երկու մատը էկրանի ներքևից սահեցրեք վերև) անելու դեպքում՝"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Ընտրեք գործառույթը, որը կգործարկվի հատուկ գործառույթների ժեստը (երեք մատը էկրանի ներքևից սահեցրեք վերև) անելու դեպքում՝"</string>
@@ -1725,7 +1731,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Մի գործառույթից մյուսին անցնելու համար երեք մատը սահեցրեք վերև և պահեք։"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Խոշորացում"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Անցում հետևյալ պրոֆիլին՝ <xliff:g id="NAME">%1$s</xliff:g>..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Անցում <xliff:g id="NAME">%1$s</xliff:g> պրոֆիլին..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Ելք <xliff:g id="NAME">%1$s</xliff:g>-ից…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Սեփականատեր"</string>
     <string name="guest_name" msgid="8502103277839834324">"Հյուր"</string>
@@ -1948,17 +1954,15 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> հավելվածը հասանելի չէ։ Դրա աշխատանքը սահմանափակում է <xliff:g id="APP_NAME_1">%2$s</xliff:g> հավելվածը։"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Մանրամասն"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Չեղարկել դադարեցումը"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Միացնե՞լ հավելվածները"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Ձեզ հասանելի կդառնան ձեր աշխատանքային հավելվածներն ու ծանուցումները"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Վերսկսե՞լ աշխ. հավելվածները"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Վերսկսել"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Արտակարգ իրավիճակ"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Ստացեք ձեր աշխատանքային հավելվածների և զանգերի հասանելիություն"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>՝ անհասանելի է"</string>
     <string name="app_streaming_blocked_title_for_permission_dialog" msgid="4483161748582966785">"Անհրաժեշտ է թույլտվություն"</string>
     <string name="app_streaming_blocked_title_for_camera_dialog" msgid="3935701653713853065">"Տեսախցիկն անհասանելի է"</string>
-    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Շարունակեք հեռախոսով"</string>
+    <string name="app_streaming_blocked_title_for_fingerprint_dialog" msgid="3516853717714141951">"Շարու­նակեք հեռախոսով"</string>
     <string name="app_streaming_blocked_title_for_microphone_dialog" msgid="544822455127171206">"Խոսափողն անհասանելի է"</string>
     <string name="app_streaming_blocked_title_for_playstore_dialog" msgid="8149823099822897538">"Play Խանութը հասանելի չէ"</string>
     <string name="app_streaming_blocked_title_for_settings_dialog" product="tv" msgid="196994247017450357">"Android TV-ի կարգավորումներն անհասանելի են"</string>
@@ -2126,7 +2130,7 @@
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Հավելվածը ձայնագրելու թույլտվություն չունի, սակայն կկարողանա գրանցել ձայնն այս USB սարքի միջոցով։"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Սկիզբ"</string>
     <string name="accessibility_system_action_back_label" msgid="4205361367345537608">"Հետ"</string>
-    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Վերջին օգտագործած հավելվածները"</string>
+    <string name="accessibility_system_action_recents_label" msgid="4782875610281649728">"Վերջին հավելվածներ"</string>
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Ծանուցումներ"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Արագ կարգավորումներ"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Սնուցման պատուհան"</string>
@@ -2158,12 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Այս բովանդակությունը հնարավոր չէ բացել աշխատանքային հավելվածներով"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Այս բովանդակությունը հնարավոր չէ ուղարկել անձնական հավելվածներով"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Այս բովանդակությունը հնարավոր չէ բացել անձնական հավելվածներով"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Աշխատանքային պրոֆիլի ծառայությունը դադարեցված է"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Հպեք միացնելու համար"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Աշխատանքային հավելվածները դադարեցված են"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Վերսկսել"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Աշխատանքային հավելվածներ չկան"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Անձնական հավելվածներ չկան"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Բացե՞լ <xliff:g id="APP">%s</xliff:g> հավելվածը ձեր անձնական պրոֆիլում"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Բացե՞լ <xliff:g id="APP">%s</xliff:g> հավելվածը ձեր աշխատանքային պրոֆիլում"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Անձնական <xliff:g id="APP">%s</xliff:g> պրոֆիլի բացում"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Աշխատանքային <xliff:g id="APP">%s</xliff:g> պրոֆիլի բացում"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Օգտագործել անձնական դիտարկիչը"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Օգտագործել աշխատանքային դիտարկիչը"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM Network քարտի ապակողպման PIN"</string>
@@ -2317,8 +2321,18 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Խոսափողն արգելափակված է"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Կրկնակի էկրան"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Կրկնակի էկրանը միացված է"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը երկու էկրաններն էլ օգտագործում է բովանդակություն ցուցադրելու համար"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն օգտագործում է երկու էկրանները"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Սարքը գերտաքացել է"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Կրկնակի էկրանն անհասանելի է, քանի որ ձեր հեռախոսը գերտաքանում է"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen-ը հասանելի չէ"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen-ն անհասանելի է, քանի որ Մարտկոցի տնտեսումը միացված է։ Դուք կարող եք անջատել այս գործառույթը Կարգավորումներում։"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Անցնել Կարգավորումներ"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Անջատել"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> սարքը կարգավորված է"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Ստեղնաշարի համար կարգավորված է <xliff:g id="LAYOUT_1">%s</xliff:g> դասավորությունը։ Հպեք փոփոխելու համար։"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Ստեղնաշարի համար կարգավորված են <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> դասավորությունները։ Հպեք փոփոխելու համար։"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Ստեղնաշարի համար կարգավորված են <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> դասավորությունները։ Հպեք փոփոխելու համար։"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Ստեղնաշարի համար կարգավորված են <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> դասավորությունները։ Հպեք փոխելու համար։"</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Ֆիզիկական ստեղնաշարերը կարգավորված են"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Հպեք՝ ստեղնաշարերը դիտելու համար"</string>
 </resources>

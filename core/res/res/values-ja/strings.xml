@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi 通話"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi 通話"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"OFF"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi 経由で通話"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"モバイル ネットワーク経由で通話"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"個人用アプリは、仕事用プロファイルを ON にしない限りブロックされます"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"個人用アプリは、<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> にブロックされます。仕事用プロファイルを <xliff:g id="NUMBER">%3$d</xliff:g> 日を超えて OFF にすることは、IT 管理者から許可されていません。"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ON にする"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"通話とメッセージ: OFF"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"仕事用アプリを一時停止しました。電話やテキスト メッセージを受信しなくなります。"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"仕事用アプリを停止解除"</string>
     <string name="me" msgid="6207584824693813140">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"タブレットオプション"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV のオプション"</string>
@@ -294,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android システム"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"個人用プロファイルに切り替える"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"仕事用プロファイルに切り替える"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"個人用の <xliff:g id="APP_NAME">%1$s</xliff:g> に切り替える"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"仕事用の <xliff:g id="APP_NAME">%1$s</xliff:g> に切り替える"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"連絡先"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"連絡先へのアクセス"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"位置情報"</string>
@@ -338,6 +344,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"デバイスの指紋認証センサーで行われた操作をキャプチャできます。"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"スクリーンショットの撮影"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ディスプレイのスクリーンショットを撮影できます。"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"プレビュー - <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ステータスバーの無効化や変更"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ステータスバーの無効化、システムアイコンの追加や削除をアプリに許可します。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ステータスバーへの表示"</string>
@@ -458,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"アプリの使用時に、心拍数、体温、血中酸素濃度など、ボディセンサー データにアクセスすることをアプリに許可します。"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"バックグラウンド動作時の、心拍数などのボディセンサー データへのアクセス"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"バックグラウンドでのアプリの動作時に、心拍数、体温、血中酸素濃度など、ボディセンサー データにアクセスすることをアプリに許可します。"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"アプリの使用中にボディセンサーの手首の体温データにアクセスします。"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"アプリの使用中に、ボディセンサーの手首の体温データへのアクセスをアプリに許可します。"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"アプリのバックグラウンド実行中に、ボディセンサーの手首の体温データにアクセスします。"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"アプリのバックグラウンド実行中に、ボディセンサーの手首の体温データへのアクセスをアプリに許可します。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"カレンダーの予定と詳細を読み取り"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"このアプリは、お使いのタブレットに保存されたカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"このアプリは、Android TV デバイスに保存されているカレンダーの予定をすべて読み取り、カレンダーのデータを共有したり、保存したりできます。"</string>
@@ -502,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションのオン / オフ状態の把握をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"電話番号発信"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"電話番号への自動発信をアプリに許可します。これにより、予期せぬ発信や料金が発生する可能性があります。なお、緊急通報番号への発信は許可されません。悪意のあるアプリが確認なしで発信し、料金が発生する恐れがあります。"</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"電話番号への自動発信をアプリに許可します。許可することで、予期せぬ発信や料金が発生する恐れがあります。この場合、緊急通報への発信はアプリに許可されません。悪意のあるアプリが確認なしで発信して料金が発生したり、携帯通信会社のコードをダイヤルして着信を別の番号に自動転送したりする恐れがあります。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS通話サービスへのアクセス"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"IMSサービスがユーザー操作なしで電話をかけることをアプリに許可します。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"デバイス情報と ID の読み取り"</string>
@@ -683,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"スマートフォンを左に動かしてください"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"スマートフォンを右に動かしてください"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"もっとまっすぐデバイスに顔を向けてください。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"顔を確認できません。スマートフォンを目の高さに合わせて持ってください。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"顔を確認できません。スマートフォンを目の高さに合わせます。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"あまり動かさないでください。安定させてください。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"顔を登録し直してください。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"顔を認識できません。もう一度お試しください。"</string>
@@ -708,7 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"顔の操作をキャンセルしました。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"顔認証はユーザーによりキャンセルされました"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"試行回数の上限です。後でもう一度お試しください。"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"試行回数が上限を超えました。顔認証が無効になりました。"</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"試行回数が上限を超えました。顔認証を利用できません。"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"試行回数が上限を超えました。代わりに画面ロック解除を入力してください。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"顔を確認できません。もう一度お試しください。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"顔認証を設定していません"</string>
@@ -795,6 +798,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"アプリの機能情報の表示の開始を所有者に許可します。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"高サンプリング レートでセンサーデータにアクセスする"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz を超えるレートでセンサーデータをサンプリングすることをアプリに許可します"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ユーザーの操作なしでアプリを更新する"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ユーザーの操作なしで以前にインストールされたアプリの更新をホルダーに許可します"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"画面ロック解除試行の監視"</string>
@@ -1358,8 +1363,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB PTP モード ON"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB テザリング ON"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB MIDI モード ON"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ウェブカメラとしてデバイスを接続しました"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB アクセサリが接続されました"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"タップしてその他のオプションを表示します。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"接続されているデバイスを充電しています。タップすると、他の項目が表示されます。"</string>
@@ -1390,7 +1394,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"入力方法の選択"</string>
     <string name="show_ime" msgid="6406112007347443383">"物理キーボードが有効になっていても画面に表示させます"</string>
     <string name="hardware" msgid="1800597768237606953">"仮想キーボードの表示"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"物理キーボードの設定"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g>の設定"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"物理キーボードの設定"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"タップして言語とレイアウトを選択してください"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1708,15 +1713,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完了"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ショートカットを OFF にする"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ショートカットを使用"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"色反転"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"色補正"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"片手モード"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"さらに輝度を下げる"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"補聴器"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が ON になりました。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が OFF になりました。"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を使用するには、音量大と音量小の両方のボタンを 3 秒間長押ししてください"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"音量ボタンを離してください。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を有効にするには音量大と音量小の両方のボタンを 3 秒ほど長押ししてください。"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ユーザー補助機能ボタンをタップした場合に使用する機能を選択してください。"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ユーザー補助操作（2 本の指で画面の下から上にスワイプ）で使用する機能を選択してください。"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ユーザー補助操作（3 本の指で画面の下から上にスワイプ）で使用する機能を選択してください。"</string>
@@ -1948,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"現在、<xliff:g id="APP_NAME_0">%1$s</xliff:g> は使用できません。このアプリの使用は [<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理されています。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"詳細"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"アプリの一時停止を解除"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"仕事用アプリを ON にしますか？"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"仕事用のアプリを利用し、通知を受け取れるようになります"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"仕事用アプリの停止解除"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"停止解除"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"緊急通報"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"仕事用アプリを利用し、通話を行えるようになります"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"現在 <xliff:g id="APP_NAME">%1$s</xliff:g> はご利用になれません。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>は利用できません"</string>
@@ -2158,12 +2160,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"このコンテンツを仕事用アプリで開くことはできません"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"このコンテンツを個人用アプリと共有することはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"このコンテンツを個人用アプリで開くことはできません"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"仕事用プロファイルが一時停止しています"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"タップして ON にする"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"仕事用アプリ一時停止中"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"停止解除"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"個人用アプリはありません"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"個人用プロファイルで <xliff:g id="APP">%s</xliff:g> を開きますか？"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"仕事用プロファイルで <xliff:g id="APP">%s</xliff:g> を開きますか？"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"個人用 <xliff:g id="APP">%s</xliff:g> を開く"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"仕事用 <xliff:g id="APP">%s</xliff:g> を開く"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"個人用ブラウザを使用"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"仕事用ブラウザを使用"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM のネットワーク ロック解除 PIN"</string>
@@ -2320,5 +2322,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>は 2 画面でコンテンツを表示しています"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"デバイスが熱くなりすぎています"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"スマートフォンが熱くなりすぎているため、デュアル スクリーンを使用できません"</string>
-    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"オフにする"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"デュアル スクリーンを使用できません"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"バッテリー セーバーが ON のため、デュアル スクリーンを使用できません。この動作は設定で OFF にできます。"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"設定に移動"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"OFF にする"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>の設定完了"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%s</xliff:g>に設定されています。タップすると変更できます。"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>に設定されています。タップすると変更できます。"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>に設定されています。タップすると変更できます。"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>に設定されています。タップすると変更できます。"</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"物理キーボードの設定完了"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"タップするとキーボードを表示できます"</string>
 </resources>

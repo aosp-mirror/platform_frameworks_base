@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wifia"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi bidezko deiak"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wifi bidezko deia"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Desaktibatuta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Deitu wifi bidez"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Deitu sare mugikorraren bidez"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikazio pertsonalak blokeatuta egongo dira laneko profila aktibatzen duzun arte"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Aplikazio pertsonalak egun eta ordu honetan blokeatuko dira: <xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>. IKT saileko administratzaileak ez dizu ematen baimenik laneko profila <xliff:g id="NUMBER">%3$d</xliff:g> egunez baino gehiagoz desaktibatuta edukitzeko."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktibatu"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Deiak eta mezuak desaktibatuta daude"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Laneko aplikazioak pausatu dituzu. Ez duzu jasoko telefono-deirik edo testu-mezurik."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Berraktibatu laneko aplikazioak"</string>
     <string name="me" msgid="6207584824693813140">"Ni"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tabletaren aukerak"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV gailuaren aukerak"</string>
@@ -294,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android sistema"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Aldatu profil pertsonalera"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Aldatu laneko profilera"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Aldatu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazio pertsonalera"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Aldatu laneko <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziora"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktuak"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"atzitu kontaktuak"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Kokapena"</string>
@@ -338,6 +344,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Gailuaren hatz-marken sentsorean egindako keinuak atzeman ditzake."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Pantaila-argazkiak atera."</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Pantaila-argazkiak atera ditzake."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Aurrebista, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"desgaitu edo aldatu egoera-barra"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Egoera-barra desgaitzea edo sistema-ikonoak gehitzea edo kentzea baimentzen die aplikazioei."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"bihurtu egoera-barra"</string>
@@ -458,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Aplikazioak erabiltzen diren bitartean, gorputz-sentsoreen datuak (besteak beste, bihotz-maiztasuna, tenperatura eta odolean dagoen oxigenoaren ehunekoa) erabiltzeko baimena ematen die aplikazio horiei."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Atzitu gorputz-sentsoreen datuak (adib., bihotz-maiztasunarenak) atzeko planoan"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Aplikazioak atzeko planoan egon bitartean, gorputz-sentsoreen datuak (besteak beste, bihotz-maiztasuna, tenperatura eta odolean dagoen oxigenoaren ehunekoa) erabiltzeko baimena ematen die aplikazio horiei."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Atzitu gorputz-sentsoreek eskumuturrean neurtutako tenperaturaren datuak aplikazioak erabili bitartean."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Aplikazioak erabili bitartean, gorputz-sentsoreek eskumuturrean neurtutako tenperaturaren datuak erabiltzeko baimena ematen die aplikazioei."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Atzitu gorputz-sentsoreek eskumuturrean neurtutako tenperaturaren datuak aplikazioak atzeko planoan exekutatu bitartean."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Aplikazioak atzeko planoan exekutatu bitartean, gorputz-sentsoreek eskumuturrean neurtutako tenperaturaren datuak erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"irakurri egutegiko gertaerak eta xehetasunak"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Aplikazioak tabletan gordetako egutegiko gertaerak irakur ditzake eta egutegiko datuak parteka eta gorde ditzake."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Aplikazioak Android TV gailuan gordeta dituzun egutegiko gertaerak irakur ditzake, baita egutegiko datuak partekatu eta gorde ere."</string>
@@ -502,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dardara-egoera erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"deitu zuzenean telefono-zenbakietara"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Telefono-zenbakietara zuk esku hartu gabe deitzeko baimena ematen die aplikazioei. Horrela, ustekabeko gastuak edo deiak eragin daitezke. Asmo txarreko aplikazioek erabil dezakete zuk berretsi gabeko deiak eginda gastuak eragiteko."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Zuk ezer egin beharrik gabe, telefono-zenbakietara deitzeko baimena ematen die aplikazioei. Ondorioz, baliteke ustekabeko gastuak edo deiak eragitea. Kontuan izan aplikazioak ezingo duela deitu larrialdietarako zenbakietara. Zuk berretsi gabeko deiak eginda, asmo txarreko aplikazioek baimen hori erabil dezakete gastuak eragiteko edo operadore-kode jakin batzuk markatzeko, sarrerako deiak beste zenbaki batera automatikoki desbideratzeko asmoarekin."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"atzitu IMS dei-zerbitzua"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Zuk ezer egin beharrik gabe deiak egiteko IMS zerbitzua erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"irakurri telefonoaren egoera eta identitatea"</string>
@@ -665,7 +668,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Aurpegi bidez desblokeatzea"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Arazoak ditugu aurpegi bidez desblokeatzeko eginbidearekin"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Sakatu hau aurpegi-eredua ezabatzeko eta, gero, gehitu aurpegia berriro"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguratu aurpegi bidez desblokeatzeko eginbidea"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguratu Aurpegi bidez desblokeatzea"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonoa desblokeatzeko, begira iezaiozu"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aurpegi bidez desblokeatzeko aukera erabiltzeko, aktibatu "<b>"kamera erabiltzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguratu telefonoa desblokeatzeko modu gehiago"</string>
@@ -708,7 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Utzi da aurpegiaren bidezko eragiketa."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Erabiltzaileak aurpegi bidez desblokeatzeko aukera utzi du"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Saiakera gehiegi egin dira. Desgaitu egin da aurpegi bidez desblokeatzeko eginbidea."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Saiakera gehiegi egin dira. Aurpegi bidez desblokeatzeko eginbidea ez dago erabilgarri."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Saiakera gehiegi egin dira. Horren ordez, erabili pantailaren blokeoa."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ezin da egiaztatu aurpegia. Saiatu berriro."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Ez duzu konfiguratu aurpegi bidez desblokeatzeko eginbidea"</string>
@@ -795,6 +798,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Aplikazio baten eginbideei buruzko informazioa ikusten hasteko baimena ematen die titularrei."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"atzitu sentsoreen datuen laginak abiadura handian"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Aplikazioak 200 Hz-tik gorako abiaduran hartu ahal izango ditu sentsoreen datuen laginak"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"eguneratu aplikazioa erabiltzaileak ezer egin gabe"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Lehendik instalatu duen aplikazioa erabiltzaileak ezer egin gabe eguneratzeko baimena ematen dio titularrari"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ezarri pasahitzen arauak"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrolatu pantaila blokeoaren pasahitzen eta PINen luzera eta onartutako karaktereak."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Gainbegiratu pantaila desblokeatzeko saiakerak"</string>
@@ -1358,8 +1363,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Aktibatuta dago USB bidezko PTP modua"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Aktibatuta dago USB bidez konexioa partekatzeko aukera"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Aktibatuta dago USB bidezko MIDI modua"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Web-kamera gisa konektatu da gailua"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB osagarri bat konektatu da"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Sakatu aukera gehiago ikusteko."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Konektatutako gailua kargatzen ari da. Sakatu aukera gehiago ikusteko."</string>
@@ -1390,7 +1394,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Aukeratu idazketa-metodoa"</string>
     <string name="show_ime" msgid="6406112007347443383">"Erakutsi pantailan teklatu fisikoa aktibo dagoen bitartean"</string>
     <string name="hardware" msgid="1800597768237606953">"Erakutsi teklatu birtuala"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfiguratu teklatu fisikoa"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfiguratu <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Konfiguratu teklatu fisikoak"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Hizkuntza eta diseinua hautatzeko, sakatu hau"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1708,15 +1713,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Eginda"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desaktibatu lasterbidea"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Erabili lasterbidea"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Kolore-alderantzikatzea"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Koloreen zuzenketa"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Esku bakarreko modua"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Are ilunago"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Audifonoak"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Entzumen-gailuak"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatu egin da."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desaktibatu egin da."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> erabiltzeko, eduki sakatuta bi bolumen-botoiak hiru segundoz"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Askatu bolumen-botoiak. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatzeko, eduki sakatuta berriro bi bolumen-botoiak hiru segundoz."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Aukeratu zein eginbide erabili nahi duzun Erabilerraztasuna botoia sakatzean:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Aukeratu zein eginbide erabili nahi duzun erabilerraztasun-keinuarekin (hau da, bi hatz pantailaren behealdetik gora pasatzean):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Aukeratu zein eginbide erabili nahi duzun erabilerraztasun-keinuarekin (hau da, hiru hatz pantailaren behealdetik gora pasatzean):"</string>
@@ -1868,8 +1872,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Administratzaileak eguneratu du"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Administratzaileak ezabatu du"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"Ados"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Bateria-aurreztaileak gai iluna aktibatzen du, eta murriztu edo desaktibatu egiten ditu atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"Bateria-aurreztaileak gai iluna aktibatzen du, eta atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk murrizten edo desaktibatzen ditu."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Bateria-aurreztaileak gai iluna aktibatzen du, eta atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk mugatzen edo desaktibatzen ditu."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"Bateria-aurreztaileak gai iluna aktibatzen du, eta atzeko planoko jarduerak, zenbait efektu bisual, eta eginbide jakin eta sareko konexio batzuk mugatzen edo desaktibatzen ditu."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Datu-erabilera murrizteko, atzeko planoan datuak bidaltzea eta jasotzea galarazten die datu-aurreztaileak aplikazio batzuei. Erabiltzen ari zaren aplikazioek datuak atzitu ahalko dituzte, baina baliteke maiztasun txikiagoarekin atzitzea. Ondorioz, adibidez, baliteke irudiak ez erakustea haiek sakatu arte."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Datu-aurreztailea aktibatu nahi duzu?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Aktibatu"</string>
@@ -1906,7 +1910,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"SS eskaera USSD eskaerara aldatu da"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"SS eskaera berrira aldatu da"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"Phishing-alerta"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Work profila"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Laneko profila"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"Egin du soinua"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"Egiaztatuta"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"Zabaldu"</string>
@@ -1948,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ez dago erabilgarri une honetan. Haren erabilgarritasuna <xliff:g id="APP_NAME_1">%2$s</xliff:g> aplikazioak kudeatzen du."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Lortu informazio gehiago"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Kendu pausaldia"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Laneko aplikazioak aktibatu nahi dituzu?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Atzitu laneko aplikazioak eta jakinarazpenak"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktibatu"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Laneko aplikazioak berraktibatu?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Berraktibatu"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Larrialdia"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Atzitu laneko aplikazioak eta deiak"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikazioa ez dago erabilgarri"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ez dago erabilgarri une honetan."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ez dago erabilgarri"</string>
@@ -2158,12 +2160,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Eduki hau ezin da laneko aplikazioekin ireki"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Eduki hau ezin da aplikazio pertsonalekin partekatu"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Eduki hau ezin da aplikazio pertsonalekin ireki"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Laneko profila pausatuta dago"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Sakatu aktibatzeko"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Pausatuta daude laneko aplikazioak"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Berraktibatu"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ez dago laneko aplikaziorik"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ez dago aplikazio pertsonalik"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Profil pertsonalean ireki nahi duzu <xliff:g id="APP">%s</xliff:g>?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Laneko profilean ireki nahi duzu <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Ireki <xliff:g id="APP">%s</xliff:g> pertsonala"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Ireki lanerako <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Erabili arakatzaile pertsonala"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Erabili laneko arakatzailea"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIMaren sarearen bidez desblokeatzeko PINa"</string>
@@ -2320,5 +2322,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bi pantailak erabiltzen ari da edukia erakusteko"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Gailua beroegi dago"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Bi pantailako modua ez dago erabilgarri telefonoa berotzen ari delako"</string>
-    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Itzali"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ez dago erabilgarri"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen ez dago erabilgarri, bateria-aurreztailea aktibatuta dagoelako. Aukera hori desaktibatzeko, joan ezarpenetara."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Joan Ezarpenak atalera"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desaktibatu"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Konfiguratu da <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Ezarri da <xliff:g id="LAYOUT_1">%s</xliff:g> gisa teklatuaren diseinua. Diseinu hori aldatzeko, sakatu hau."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Ezarri da <xliff:g id="LAYOUT_1">%1$s</xliff:g> eta <xliff:g id="LAYOUT_2">%2$s</xliff:g> gisa teklatuaren diseinua. Diseinu hori aldatzeko, sakatu hau."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Ezarri da <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> eta <xliff:g id="LAYOUT_3">%3$s</xliff:g> gisa teklatuaren diseinua. Diseinu hori aldatzeko, sakatu hau."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Ezarri da <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> eta <xliff:g id="LAYOUT_3">%3$s</xliff:g> gisa teklatuaren diseinua… Diseinu hori aldatzeko, sakatu hau."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Konfiguratu dira teklatu fisikoak"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Sakatu hau teklatuak ikusteko"</string>
 </resources>
