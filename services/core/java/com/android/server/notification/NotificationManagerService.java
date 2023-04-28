@@ -316,7 +316,6 @@ import com.android.server.notification.toast.TextToastRecord;
 import com.android.server.notification.toast.ToastRecord;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.powerstats.StatsPullAtomCallbackImpl;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -2559,8 +2558,8 @@ public class NotificationManagerService extends SystemService {
                         Context.STATS_MANAGER),
                 getContext().getSystemService(TelephonyManager.class),
                 LocalServices.getService(ActivityManagerInternal.class),
-                createToastRateLimiter(), new PermissionHelper(LocalServices.getService(
-                        PermissionManagerServiceInternal.class), AppGlobals.getPackageManager(),
+                createToastRateLimiter(), new PermissionHelper(getContext(),
+                        AppGlobals.getPackageManager(),
                         AppGlobals.getPermissionManager()),
                 LocalServices.getService(UsageStatsManagerInternal.class),
                 getContext().getSystemService(TelecomManager.class),
