@@ -266,12 +266,11 @@ class UserSwitchingDialog extends Dialog {
     }
 
     private void startProgressAnimation(Runnable onAnimationEnd) {
-        if (mDisableAnimations) {
+        final AnimatedVectorDrawable avd = getSpinnerAVD();
+        if (mDisableAnimations || avd == null) {
             onAnimationEnd.run();
             return;
         }
-        final ImageView progressCircular = findViewById(R.id.progress_circular);
-        final AnimatedVectorDrawable avd = (AnimatedVectorDrawable) progressCircular.getDrawable();
         avd.registerAnimationCallback(new Animatable2.AnimationCallback() {
             @Override
             public void onAnimationEnd(Drawable drawable) {
@@ -281,7 +280,23 @@ class UserSwitchingDialog extends Dialog {
         avd.start();
     }
 
+    private AnimatedVectorDrawable getSpinnerAVD() {
+        final ImageView view = findViewById(R.id.progress_circular);
+        if (view != null) {
+            final Drawable drawable = view.getDrawable();
+            if (drawable instanceof AnimatedVectorDrawable) {
+                return (AnimatedVectorDrawable) drawable;
+            }
+        }
+        return null;
+    }
+
     private void startDialogAnimation(Animation animation, Runnable onAnimationEnd) {
+        final View view = findViewById(R.id.content);
+        if (mDisableAnimations || view == null) {
+            onAnimationEnd.run();
+            return;
+        }
         animation.setDuration(DIALOG_SHOW_HIDE_ANIMATION_DURATION_MS);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -299,7 +314,7 @@ class UserSwitchingDialog extends Dialog {
 
             }
         });
-        findViewById(R.id.content).startAnimation(animation);
+        view.startAnimation(animation);
     }
 
     private void asyncTraceBegin(String subTag, int subCookie) {
