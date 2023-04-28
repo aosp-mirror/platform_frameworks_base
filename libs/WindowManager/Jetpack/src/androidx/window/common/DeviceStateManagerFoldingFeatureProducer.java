@@ -38,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -129,14 +128,13 @@ public final class DeviceStateManagerFoldingFeatureProducer
     }
 
     @Override
-    protected void onListenersChanged(
-            @NonNull Set<Consumer<List<CommonFoldingFeature>>> callbacks) {
-        super.onListenersChanged(callbacks);
-        if (callbacks.isEmpty()) {
+    protected void onListenersChanged() {
+        super.onListenersChanged();
+        if (hasListeners()) {
+            mRawFoldSupplier.addDataChangedCallback(this::notifyFoldingFeatureChange);
+        } else {
             mCurrentDeviceState = INVALID_DEVICE_STATE;
             mRawFoldSupplier.removeDataChangedCallback(this::notifyFoldingFeatureChange);
-        } else {
-            mRawFoldSupplier.addDataChangedCallback(this::notifyFoldingFeatureChange);
         }
     }
 
