@@ -231,6 +231,11 @@ object Flags {
     val REVAMPED_BOUNCER_MESSAGES =
         unreleasedFlag(234, "revamped_bouncer_messages")
 
+    /** Whether to delay showing bouncer UI when face auth or active unlock are enrolled. */
+    // TODO(b/279794160): Tracking bug.
+    @JvmField
+    val DELAY_BOUNCER = unreleasedFlag(235, "delay_bouncer")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
