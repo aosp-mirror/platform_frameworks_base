@@ -38,7 +38,9 @@ import java.io.PrintWriter;
  */
 public class QSContainerImpl extends FrameLayout implements Dumpable {
 
+    private int mFancyClippingLeftInset;
     private int mFancyClippingTop;
+    private int mFancyClippingRightInset;
     private int mFancyClippingBottom;
     private final float[] mFancyClippingRadii = new float[] {0, 0, 0, 0, 0, 0, 0, 0};
     private  final Path mFancyClippingPath = new Path();
@@ -53,6 +55,7 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     private boolean mQsDisabled;
     private int mContentHorizontalPadding = -1;
     private boolean mClippingEnabled;
+    private boolean mIsFullWidth;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -237,7 +240,8 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
     /**
      * Clip QS bottom using a concave shape.
      */
-    public void setFancyClipping(int top, int bottom, int radius, boolean enabled) {
+    public void setFancyClipping(int leftInset, int top, int rightInset, int bottom, int radius,
+            boolean enabled, boolean fullWidth) {
         boolean updatePath = false;
         if (mFancyClippingRadii[0] != radius) {
             mFancyClippingRadii[0] = radius;
@@ -246,8 +250,16 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
             mFancyClippingRadii[3] = radius;
             updatePath = true;
         }
+        if (mFancyClippingLeftInset != leftInset) {
+            mFancyClippingLeftInset = leftInset;
+            updatePath = true;
+        }
         if (mFancyClippingTop != top) {
             mFancyClippingTop = top;
+            updatePath = true;
+        }
+        if (mFancyClippingRightInset != rightInset) {
+            mFancyClippingRightInset = rightInset;
             updatePath = true;
         }
         if (mFancyClippingBottom != bottom) {
@@ -256,6 +268,10 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
         }
         if (mClippingEnabled != enabled) {
             mClippingEnabled = enabled;
+            updatePath = true;
+        }
+        if (mIsFullWidth != fullWidth) {
+            mIsFullWidth = fullWidth;
             updatePath = true;
         }
 
@@ -281,15 +297,21 @@ public class QSContainerImpl extends FrameLayout implements Dumpable {
             return;
         }
 
-        mFancyClippingPath.addRoundRect(0, mFancyClippingTop, getWidth(),
+        int clippingLeft = mIsFullWidth ? -mFancyClippingLeftInset : 0;
+        int clippingRight = mIsFullWidth ? getWidth() + mFancyClippingRightInset : getWidth();
+        mFancyClippingPath.addRoundRect(clippingLeft, mFancyClippingTop, clippingRight,
                 mFancyClippingBottom, mFancyClippingRadii, Path.Direction.CW);
         invalidate();
     }
 
     @Override
     public void dump(PrintWriter pw, String[] args) {
-        pw.println(getClass().getSimpleName() + " updateClippingPath: top("
-                + mFancyClippingTop + ") bottom(" + mFancyClippingBottom  + ") mClippingEnabled("
-                + mClippingEnabled + ")");
+        pw.println(getClass().getSimpleName() + " updateClippingPath: "
+                + "leftInset(" + mFancyClippingLeftInset + ") "
+                + "top(" + mFancyClippingTop + ") "
+                + "rightInset(" + mFancyClippingRightInset + ") "
+                + "bottom(" + mFancyClippingBottom  + ") "
+                + "mClippingEnabled(" + mClippingEnabled + ") "
+                + "mIsFullWidth(" + mIsFullWidth + ")");
     }
 }
