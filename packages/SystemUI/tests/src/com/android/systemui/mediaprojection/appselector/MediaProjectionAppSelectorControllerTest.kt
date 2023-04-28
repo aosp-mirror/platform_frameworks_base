@@ -132,7 +132,7 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun initRecentTasksWithAppSelectorTasks_enterprisePoliciesDisabled_bindsOnlyTasksWithHostProfile() {
+    fun initRecentTasksWithAppSelectorTasks_enterprisePoliciesDisabled_bindsAllTasks() {
         givenEnterprisePoliciesFeatureFlag(enabled = false)
 
         val tasks =
@@ -147,11 +147,15 @@ class MediaProjectionAppSelectorControllerTest : SysuiTestCase() {
 
         controller.init()
 
+        // TODO (b/263950746): Cross-profile filtering is removed for now. This should be brought
+        // back with the future fix
         verify(view)
             .bind(
                 listOf(
                     createRecentTask(taskId = 1, userId = hostUserHandle.identifier),
+                    createRecentTask(taskId = 2, userId = otherUserHandle.identifier),
                     createRecentTask(taskId = 3, userId = hostUserHandle.identifier),
+                    createRecentTask(taskId = 4, userId = otherUserHandle.identifier),
                     createRecentTask(taskId = 5, userId = hostUserHandle.identifier),
                 )
             )
