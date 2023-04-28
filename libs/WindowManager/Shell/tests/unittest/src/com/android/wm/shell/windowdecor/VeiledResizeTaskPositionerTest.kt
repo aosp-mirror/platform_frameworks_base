@@ -34,7 +34,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
+import org.mockito.Mockito.`when` as whenever
 import org.mockito.Mockito.any
 import org.mockito.Mockito.argThat
 import org.mockito.Mockito.never
@@ -85,10 +85,10 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                 mockDragStartListener
             )
 
-        `when`(taskToken.asBinder()).thenReturn(taskBinder)
-        `when`(mockDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mockDisplayLayout)
-        `when`(mockDisplayLayout.densityDpi()).thenReturn(DENSITY_DPI)
-        `when`(mockDisplayLayout.getStableBounds(any())).thenAnswer { i ->
+        whenever(taskToken.asBinder()).thenReturn(taskBinder)
+        whenever(mockDisplayController.getDisplayLayout(DISPLAY_ID)).thenReturn(mockDisplayLayout)
+        whenever(mockDisplayLayout.densityDpi()).thenReturn(DENSITY_DPI)
+        whenever(mockDisplayLayout.getStableBounds(any())).thenAnswer { i ->
             (i.arguments.first() as Rect).set(STABLE_BOUNDS)
         }
 
@@ -102,7 +102,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             configuration.windowConfiguration.bounds = STARTING_BOUNDS
         }
         mockDesktopWindowDecoration.mDisplay = mockDisplay
-        `when`(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
+        whenever(mockDisplay.displayId).thenAnswer { DISPLAY_ID }
     }
 
     @Test
