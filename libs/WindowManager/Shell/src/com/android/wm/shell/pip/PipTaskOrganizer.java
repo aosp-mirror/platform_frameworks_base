@@ -72,7 +72,6 @@ import android.window.TaskOrganizer;
 import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -139,17 +138,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     // the runnable to execute after WindowContainerTransactions is applied to finish resizing pip
     private Runnable mPipFinishResizeWCTRunnable;
 
-    private final WindowContainerTransactionCallback mPipFinishResizeWCTCallback =
-            new WindowContainerTransactionCallback() {
-        @Override
-        public void onTransactionReady(int id, SurfaceControl.Transaction t) {
-            t.apply();
-
-            // execute the runnable if non-null after WCT is applied to finish resizing pip
-            maybePerformFinishResizeCallback();
-        }
-    };
-
     private void maybePerformFinishResizeCallback() {
         if (mPipFinishResizeWCTRunnable != null) {
             mPipFinishResizeWCTRunnable.run();
@@ -175,6 +163,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             final int direction = animator.getTransitionDirection();
             if (mIsCancelled) {
                 sendOnPipTransitionFinished(direction);
+                maybePerformFinishResizeCallback();
                 return;
             }
             final int animationType = animator.getAnimationType();
@@ -199,6 +188,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                     || isRemovePipDirection(direction);
             if (mPipTransitionState.getTransitionState() != PipTransitionState.EXITING_PIP
                     || isExitPipDirection) {
+                // execute the finish resize callback if needed after the transaction is committed
+                tx.addTransactionCommittedListener(mMainExecutor,
+                        PipTaskOrganizer.this::maybePerformFinishResizeCallback);
+
                 // Finish resize as long as we're not exiting PIP, or, if we are, only if this is
                 // the end of an exit PIP animation.
                 // This is necessary in case there was a resize animation ongoing when exit PIP
@@ -1614,12 +1607,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         if (direction == TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN) {
             mSplitScreenOptional.ifPresent(splitScreenController ->
                     splitScreenController.enterSplitScreen(mTaskInfo.taskId, wasPipTopLeft, wct));
-        } else if (direction == TRANSITION_DIRECTION_LEAVE_PIP) {
-            // when leaving PiP we can call the callback without sync
-            maybePerformFinishResizeCallback();
-            mTaskOrganizer.applyTransaction(wct);
         } else {
-            mTaskOrganizer.applySyncTransaction(wct, mPipFinishResizeWCTCallback);
+            mTaskOrganizer.applyTransaction(wct);
         }
     }
 
