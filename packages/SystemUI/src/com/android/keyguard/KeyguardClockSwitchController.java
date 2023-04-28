@@ -169,14 +169,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
     }
 
     /**
-     * Used for status view to pass the screen offset from parent view
-     */
-    public void setLockscreenClockY(int clockY) {
-        mView.screenOffsetYPadding = clockY;
-        mView.updateClockTargetRegions();
-    }
-
-    /**
      * Attach the controller to the view it relates to.
      */
     @Override
@@ -402,6 +394,13 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             PropertyAnimator.setProperty(mStatusArea, AnimatableProperty.TRANSLATION_X,
                     x, props, animate);
         }
+
+    }
+
+    void updateKeyguardStatusViewOffset() {
+        // updateClockTargetRegions will call onTargetRegionChanged
+        // which will require the correct translationY property of keyguardStatusView after updating
+        mView.updateClockTargetRegions();
     }
 
     /**

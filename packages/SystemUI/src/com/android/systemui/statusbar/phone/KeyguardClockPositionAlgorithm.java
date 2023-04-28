@@ -239,11 +239,7 @@ public class KeyguardClockPositionAlgorithm {
         }
     }
 
-    /**
-     * give the static topMargin, used for lockscreen clocks to get the initial translationY
-     * to do counter translation
-     */
-    public int getExpandedPreferredClockY() {
+    private int getExpandedPreferredClockY() {
         if (mIsSplitShade) {
             return mSplitShadeTargetTopMargin;
         } else {
