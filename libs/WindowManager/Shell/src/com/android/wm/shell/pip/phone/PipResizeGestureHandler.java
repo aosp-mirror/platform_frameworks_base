@@ -104,6 +104,7 @@ public class PipResizeGestureHandler {
     private boolean mAllowGesture;
     private boolean mIsAttached;
     private boolean mIsEnabled;
+    private boolean mEnableTouch;
     private boolean mEnablePinchResize;
     private boolean mEnableDragCornerResize;
     private boolean mIsSysUiStateValid;
@@ -138,6 +139,7 @@ public class PipResizeGestureHandler {
         mPhonePipMenuController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
         mPinchResizingAlgorithm = new PipPinchResizingAlgorithm();
+        mEnableTouch = true;
 
         mUpdateResizeBoundsCallback = (rect) -> {
             mUserResizeBounds.set(rect);
@@ -245,6 +247,11 @@ public class PipResizeGestureHandler {
     void onInputEvent(InputEvent ev) {
         if (!mEnableDragCornerResize && !mEnablePinchResize) {
             // No need to handle anything if neither form of resizing is enabled.
+            return;
+        }
+
+        if (!mEnableTouch) {
+            // No need to handle anything if touches are not enabled for resizing.
             return;
         }
 
@@ -581,14 +588,13 @@ public class PipResizeGestureHandler {
                         mLastResizeBounds, movementBounds);
                 mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds, snapFraction);
 
-                // disable the pinch resizing until the final bounds are updated
-                final boolean prevEnablePinchResize = mEnablePinchResize;
-                mEnablePinchResize = false;
+                // disable the resizing until the final bounds are updated
+                mEnableTouch = false;
 
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
                         PINCH_RESIZE_SNAP_DURATION, mAngle, mUpdateResizeBoundsCallback, () -> {
                             // reset the pinch resizing to its default state
-                            mEnablePinchResize = prevEnablePinchResize;
+                            mEnableTouch = true;
                         });
             } else {
                 mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
