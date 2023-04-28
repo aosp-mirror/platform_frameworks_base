@@ -31,15 +31,14 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ShortcutManager
 import android.graphics.drawable.Icon
-import android.os.Build
 import android.os.UserHandle
 import android.os.UserManager
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.devicepolicy.areKeyguardShortcutsDisabled
+import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.createNoteShortcutInfoAsUser
 import com.android.systemui.notetask.NoteTaskRoleManagerExt.getDefaultRoleHolderAsUser
 import com.android.systemui.notetask.shortcut.LaunchNoteTaskManagedProfileProxyActivity
@@ -92,10 +91,10 @@ constructor(
         if (info.launchMode != NoteTaskLaunchMode.AppBubble) return
 
         if (isExpanding) {
-            logDebug { "onBubbleExpandChanged - expanding: $info" }
+            debugLog { "onBubbleExpandChanged - expanding: $info" }
             eventLogger.logNoteTaskOpened(info)
         } else {
-            logDebug { "onBubbleExpandChanged - collapsing: $info" }
+            debugLog { "onBubbleExpandChanged - collapsing: $info" }
             eventLogger.logNoteTaskClosed(info)
         }
     }
@@ -188,14 +187,14 @@ constructor(
             isKeyguardLocked &&
                 devicePolicyManager.areKeyguardShortcutsDisabled(userId = user.identifier)
         ) {
-            logDebug { "Enterprise policy disallows launching note app when the screen is locked." }
+            debugLog { "Enterprise policy disallows launching note app when the screen is locked." }
             return
         }
 
         val info = resolver.resolveInfo(entryPoint, isKeyguardLocked, user)
 
         if (info == null) {
-            logDebug { "Default notes app isn't set" }
+            debugLog { "Default notes app isn't set" }
             showNoDefaultNotesAppToast()
             return
         }
@@ -204,7 +203,7 @@ constructor(
 
         try {
             // TODO(b/266686199): We should handle when app not available. For now, we log.
-            logDebug { "onShowNoteTask - start: $info on user#${user.identifier}" }
+            debugLog { "onShowNoteTask - start: $info on user#${user.identifier}" }
             when (info.launchMode) {
                 is NoteTaskLaunchMode.AppBubble -> {
                     val intent = createNoteTaskIntent(info)
@@ -212,7 +211,7 @@ constructor(
                         Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
                     bubbles.showOrHideAppBubble(intent, user, icon)
                     // App bubble logging happens on `onBubbleExpandChanged`.
-                    logDebug { "onShowNoteTask - opened as app bubble: $info" }
+                    debugLog { "onShowNoteTask - opened as app bubble: $info" }
                 }
                 is NoteTaskLaunchMode.Activity -> {
                     if (activityManager.isInForeground(info.packageName)) {
@@ -220,20 +219,20 @@ constructor(
                         val intent = createHomeIntent()
                         context.startActivityAsUser(intent, user)
                         eventLogger.logNoteTaskClosed(info)
-                        logDebug { "onShowNoteTask - closed as activity: $info" }
+                        debugLog { "onShowNoteTask - closed as activity: $info" }
                     } else {
                         val intent = createNoteTaskIntent(info)
                         context.startActivityAsUser(intent, user)
                         eventLogger.logNoteTaskOpened(info)
-                        logDebug { "onShowNoteTask - opened as activity: $info" }
+                        debugLog { "onShowNoteTask - opened as activity: $info" }
                     }
                 }
             }
-            logDebug { "onShowNoteTask - success: $info" }
+            debugLog { "onShowNoteTask - success: $info" }
         } catch (e: ActivityNotFoundException) {
-            logDebug { "onShowNoteTask - failed: $info" }
+            debugLog { "onShowNoteTask - failed: $info" }
         }
-        logDebug { "onShowNoteTask - completed: $info" }
+        debugLog { "onShowNoteTask - completed: $info" }
     }
 
     @VisibleForTesting
@@ -273,7 +272,7 @@ constructor(
             PackageManager.DONT_KILL_APP,
         )
 
-        logDebug { "setNoteTaskShortcutEnabled - completed: $isEnabled" }
+        debugLog { "setNoteTaskShortcutEnabled - completed: $isEnabled" }
     }
 
     /**
@@ -371,11 +370,6 @@ private fun createNoteTaskIntent(info: NoteTaskInfo): Intent =
             addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
         }
     }
-
-/** [Log.println] a [Log.DEBUG] message, only when [Build.IS_DEBUGGABLE]. */
-private inline fun Any.logDebug(message: () -> String) {
-    if (Build.IS_DEBUGGABLE) Log.d(this::class.java.simpleName.orEmpty(), message())
-}
 
 /** Creates an [Intent] which forces the current app to background by calling home. */
 private fun createHomeIntent(): Intent =
