@@ -32,6 +32,7 @@
 #include "renderthread/EglManager.h"
 #include "thread/ThreadBase.h"
 #include "utils/TimeUtils.h"
+#include "effects/GainmapRenderer.h"
 
 #include <SkBlendMode.h>
 
@@ -139,6 +140,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
         info.height = mFBInfo.height();
         mat4.getColMajor(&info.transform[0]);
         info.color_space_ptr = canvas->imageInfo().colorSpace();
+        info.currentHdrSdrRatio = getTargetHdrSdrRatio(info.color_space_ptr);
 
         glViewport(0, 0, info.width, info.height);
 
