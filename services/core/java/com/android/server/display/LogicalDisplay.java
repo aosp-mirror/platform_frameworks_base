@@ -203,6 +203,7 @@ final class LogicalDisplay {
         mIsEnabled = true;
         mIsInTransition = false;
         mThermalBrightnessThrottlingDataId = DisplayDeviceConfig.DEFAULT_ID;
+        mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
     }
 
     public void setDevicePositionLocked(int position) {
@@ -514,6 +515,7 @@ final class LogicalDisplay {
 
             mBaseDisplayInfo.layoutLimitedRefreshRate = mLayoutLimitedRefreshRate;
             mBaseDisplayInfo.thermalRefreshRateThrottling = mThermalRefreshRateThrottling;
+            mBaseDisplayInfo.thermalBrightnessThrottlingDataId = mThermalBrightnessThrottlingDataId;
 
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
@@ -886,19 +888,14 @@ final class LogicalDisplay {
     }
 
     /**
-     * @return The ID of the brightness throttling data that this display should use.
-     */
-    public String getThermalBrightnessThrottlingDataIdLocked() {
-        return mThermalBrightnessThrottlingDataId;
-    }
-
-    /**
      * @param brightnessThrottlingDataId The ID of the brightness throttling data that this
      *                                  display should use.
      */
     public void setThermalBrightnessThrottlingDataIdLocked(String brightnessThrottlingDataId) {
-        mThermalBrightnessThrottlingDataId =
-                brightnessThrottlingDataId;
+        if (!Objects.equals(brightnessThrottlingDataId, mThermalBrightnessThrottlingDataId)) {
+            mThermalBrightnessThrottlingDataId = brightnessThrottlingDataId;
+            mDirty = true;
+        }
     }
 
     /**

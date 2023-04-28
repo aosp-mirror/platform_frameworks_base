@@ -1725,16 +1725,17 @@ public class ResolverActivity extends Activity implements
 
         if (inWorkProfile) {
             ((TextView) findViewById(R.id.open_cross_profile)).setText(
-                    devicePolicyResourcesManager.getString(MINIRESOLVER_OPEN_IN_WORK,
-                            () -> getString(R.string.miniresolver_open_in_work, targetDisplayLabel),
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_OPEN_IN_PERSONAL,
+                            () -> getString(R.string.miniresolver_open_in_personal,
+                                    targetDisplayLabel),
                             targetDisplayLabel));
             ((Button) findViewById(R.id.use_same_profile_browser)).setText(
                     devicePolicyResourcesManager.getString(MINIRESOLVER_USE_WORK_BROWSER,
                             () -> getString(R.string.miniresolver_use_work_browser)));
         } else {
             ((TextView) findViewById(R.id.open_cross_profile)).setText(
-                    devicePolicyResourcesManager.getString(MINIRESOLVER_OPEN_IN_PERSONAL,
-                            () -> getString(R.string.miniresolver_open_in_personal,
+                    devicePolicyResourcesManager.getString(MINIRESOLVER_OPEN_IN_WORK,
+                            () -> getString(R.string.miniresolver_open_in_work,
                                     targetDisplayLabel),
                             targetDisplayLabel));
             ((Button) findViewById(R.id.use_same_profile_browser)).setText(

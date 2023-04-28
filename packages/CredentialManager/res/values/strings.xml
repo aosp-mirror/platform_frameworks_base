@@ -86,6 +86,8 @@
   <string name="use_provider_for_all_description">This password manager for <xliff:g id="username" example="becket@gmail.com">%1$s</xliff:g> will store your passwords and passkeys to help you easily sign in</string>
   <!-- This is a label for a button that sets this password manager as the default. [CHAR LIMIT=20] -->
   <string name="set_as_default">Set as default</string>
+  <!-- This is a button text to navigate the user to their system settings. [CHAR LIMIT=30] -->
+  <string name="settings">Settings</string>
   <!-- This is a label for a button that makes this password manager be used just in this specific case. [CHAR LIMIT=20] -->
   <string name="use_once">Use once</string>
   <!-- Appears as an option row subtitle to show how many passwords and passkeys are saved in this option when there are passwords and passkeys. [CHAR LIMIT=80] -->

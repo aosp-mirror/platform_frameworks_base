@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.systemui.plugins.log
+package com.android.systemui.biometrics.shared.model
 
-/** Production version of [LogcatEchoTracker] that isn't configurable. */
-class LogcatEchoTrackerProd : LogcatEchoTracker {
-    override val logInBackgroundThread = false
+import android.hardware.biometrics.SensorProperties
 
-    override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean {
-        return level >= LogLevel.WARNING
-    }
-
-    override fun isTagLoggable(tagName: String, level: LogLevel): Boolean {
-        return level >= LogLevel.WARNING
-    }
+/** Fingerprint sensor security strength. Represents [SensorProperties.Strength]. */
+enum class SensorStrength {
+    CONVENIENCE,
+    WEAK,
+    STRONG,
 }

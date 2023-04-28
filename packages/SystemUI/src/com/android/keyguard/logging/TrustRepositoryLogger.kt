@@ -18,9 +18,9 @@ package com.android.keyguard.logging
 
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.TrustModel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.KeyguardUpdateMonitorLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 /** Logging helper for trust repository. */

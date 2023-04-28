@@ -12,7 +12,6 @@ import com.android.systemui.flags.Flags
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.NotificationShelf
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.notification.LegacySourceType
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
@@ -357,39 +356,6 @@ class NotificationShelfTest : SysuiTestCase() {
                 expansionFraction = 0.95f,
                 expectedAlpha = aboutToShowBouncerProgress(0.95f),
         )
-    }
-
-    @Test
-    fun resetOnScrollRoundness_shouldSetOnScrollTo0() {
-        val row: ExpandableNotificationRow = notificationTestHelper.createRowWithRoundness(
-                /* topRoundness = */ 1f,
-                /* bottomRoundness = */ 1f,
-                /* sourceType = */ LegacySourceType.OnScroll)
-
-        NotificationShelf.resetLegacyOnScrollRoundness(row)
-
-        assertEquals(0f, row.topRoundness)
-        assertEquals(0f, row.bottomRoundness)
-    }
-
-    @Test
-    fun resetOnScrollRoundness_shouldNotResetOtherRoundness() {
-        val row1: ExpandableNotificationRow = notificationTestHelper.createRowWithRoundness(
-                /* topRoundness = */ 1f,
-                /* bottomRoundness = */ 1f,
-                /* sourceType = */ LegacySourceType.DefaultValue)
-        val row2: ExpandableNotificationRow = notificationTestHelper.createRowWithRoundness(
-                /* topRoundness = */ 1f,
-                /* bottomRoundness = */ 1f,
-                /* sourceType = */ LegacySourceType.OnDismissAnimation)
-
-        NotificationShelf.resetLegacyOnScrollRoundness(row1)
-        NotificationShelf.resetLegacyOnScrollRoundness(row2)
-
-        assertEquals(1f, row1.topRoundness)
-        assertEquals(1f, row1.bottomRoundness)
-        assertEquals(1f, row2.topRoundness)
-        assertEquals(1f, row2.bottomRoundness)
     }
 
     private fun setFractionToShade(fraction: Float) {

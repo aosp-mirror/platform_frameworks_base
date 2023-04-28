@@ -80,7 +80,7 @@ public class BiometricContextProviderTest {
     @Mock
     private WindowManager mWindowManager;
 
-    private OperationContextExt mOpContext = new OperationContextExt();
+    private OperationContextExt mOpContext = new OperationContextExt(true);
     private IBiometricContextListener mListener;
     private BiometricContextProvider mProvider;
 
@@ -316,25 +316,6 @@ public class BiometricContextProviderTest {
         assertThat(aidlContext.isAod).isEqualTo(false);
         assertThat(aidlContext.isCrypto).isEqualTo(false);
 
-        for (int type : List.of(StatusBarManager.SESSION_BIOMETRIC_PROMPT,
-                StatusBarManager.SESSION_KEYGUARD)) {
-            final int id = 40 + type;
-            final boolean aod = (type & 1) == 0;
-
-            mListener.onDisplayStateChanged(aod ? AuthenticateOptions.DISPLAY_STATE_AOD
-                    : AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN);
-            mSessionListener.onSessionStarted(type, InstanceId.fakeInstanceId(id));
-            context = mProvider.updateContext(mOpContext, false /* crypto */);
-            aidlContext = context.toAidlContext();
-            assertThat(context).isSameInstanceAs(mOpContext);
-            assertThat(aidlContext.id).isEqualTo(id);
-            assertThat(aidlContext.reason).isEqualTo(reason(type));
-            assertThat(aidlContext.isAod).isEqualTo(aod);
-            assertThat(aidlContext.isCrypto).isEqualTo(false);
-
-            mSessionListener.onSessionEnded(type, InstanceId.fakeInstanceId(id));
-        }
-
         context = mProvider.updateContext(mOpContext, false /* crypto */);
         aidlContext = context.toAidlContext();
         assertThat(context).isSameInstanceAs(mOpContext);
@@ -342,6 +323,33 @@ public class BiometricContextProviderTest {
         assertThat(aidlContext.reason).isEqualTo(OperationReason.UNKNOWN);
         assertThat(aidlContext.isAod).isEqualTo(false);
         assertThat(aidlContext.isCrypto).isEqualTo(false);
+    }
+
+    @Test
+    public void testUpdateAllSessionTypes() throws RemoteException {
+        OperationContextExt context = mProvider.updateContext(mOpContext, false /* crypto */);
+        OperationContext aidlContext = context.toAidlContext();
+
+        for (int type : List.of(StatusBarManager.SESSION_BIOMETRIC_PROMPT,
+                StatusBarManager.SESSION_KEYGUARD)) {
+            final int id = 40 + type;
+            final boolean aod = (type & 1) == 0;
+
+            OperationContextExt opContext =
+                    new OperationContextExt(type == StatusBarManager.SESSION_BIOMETRIC_PROMPT);
+            mListener.onDisplayStateChanged(aod ? AuthenticateOptions.DISPLAY_STATE_AOD
+                    : AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN);
+            mSessionListener.onSessionStarted(type, InstanceId.fakeInstanceId(id));
+            context = mProvider.updateContext(opContext, false /* crypto */);
+            aidlContext = context.toAidlContext();
+            assertThat(context).isSameInstanceAs(opContext);
+            assertThat(aidlContext.id).isEqualTo(id);
+            assertThat(aidlContext.reason).isEqualTo(reason(type));
+            assertThat(aidlContext.isAod).isEqualTo(aod);
+            assertThat(aidlContext.isCrypto).isEqualTo(false);
+
+            mSessionListener.onSessionEnded(type, InstanceId.fakeInstanceId(id));
+        }
     }
 
     private static byte reason(int type) {

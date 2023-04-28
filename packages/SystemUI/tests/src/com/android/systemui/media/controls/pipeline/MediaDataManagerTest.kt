@@ -40,6 +40,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.media.utils.MediaConstants
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
+import com.android.internal.statusbar.IStatusBarService
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.InstanceIdSequenceFake
 import com.android.systemui.R
@@ -130,6 +131,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Mock lateinit var activityStarter: ActivityStarter
     @Mock lateinit var smartspaceManager: SmartspaceManager
     @Mock lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
+    @Mock lateinit var statusBarService: IStatusBarService
     lateinit var smartspaceMediaDataProvider: SmartspaceMediaDataProvider
     @Mock lateinit var mediaSmartspaceTarget: SmartspaceTarget
     @Mock private lateinit var mediaRecommendationItem: SmartspaceAction
@@ -192,7 +194,8 @@ class MediaDataManagerTest : SysuiTestCase() {
                 mediaFlags = mediaFlags,
                 logger = logger,
                 smartspaceManager = smartspaceManager,
-                keyguardUpdateMonitor = keyguardUpdateMonitor
+                keyguardUpdateMonitor = keyguardUpdateMonitor,
+                statusBarService = statusBarService,
             )
         verify(tunerService)
             .addTunable(capture(tunableCaptor), eq(Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION))
@@ -517,19 +520,136 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOnNotificationRemoved_emptyTitle_notConverted() {
-        // GIVEN that the manager has a notification with a resume action and empty title.
+    fun testOnNotificationAdded_emptyTitle_notLoaded() {
+        // GIVEN that the manager has a notification with an empty title.
         whenever(controller.metadata)
             .thenReturn(
                 metadataBuilder
                     .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_EMPTY_TITLE)
                     .build()
             )
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(statusBarService)
+            .onNotificationError(
+                eq(PACKAGE_NAME),
+                eq(mediaNotification.tag),
+                eq(mediaNotification.id),
+                eq(mediaNotification.uid),
+                eq(mediaNotification.initialPid),
+                eq(MEDIA_TITLE_ERROR_MESSAGE),
+                eq(mediaNotification.user.identifier)
+            )
+        verify(listener, never())
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
+        verify(logger, never()).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), any())
+    }
+
+    @Test
+    fun testOnNotificationAdded_blankTitle_notLoaded() {
+        // GIVEN that the manager has a notification with a blank title.
+        whenever(controller.metadata)
+            .thenReturn(
+                metadataBuilder
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_BLANK_TITLE)
+                    .build()
+            )
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(statusBarService)
+            .onNotificationError(
+                eq(PACKAGE_NAME),
+                eq(mediaNotification.tag),
+                eq(mediaNotification.id),
+                eq(mediaNotification.uid),
+                eq(mediaNotification.initialPid),
+                eq(MEDIA_TITLE_ERROR_MESSAGE),
+                eq(mediaNotification.user.identifier)
+            )
+        verify(listener, never())
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        verify(logger, never()).logResumeMediaAdded(anyInt(), eq(PACKAGE_NAME), any())
+        verify(logger, never()).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), any())
+    }
+
+    @Test
+    fun testOnNotificationUpdated_invalidTitle_logMediaRemoved() {
+        addNotificationAndLoad()
+        val data = mediaDataCaptor.value
+
+        verify(listener)
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+
+        reset(listener)
+        whenever(controller.metadata)
+            .thenReturn(
+                metadataBuilder
+                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_BLANK_TITLE)
+                    .build()
+            )
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        verify(statusBarService)
+            .onNotificationError(
+                eq(PACKAGE_NAME),
+                eq(mediaNotification.tag),
+                eq(mediaNotification.id),
+                eq(mediaNotification.uid),
+                eq(mediaNotification.initialPid),
+                eq(MEDIA_TITLE_ERROR_MESSAGE),
+                eq(mediaNotification.user.identifier)
+            )
+        verify(listener, never())
+            .onMediaDataLoaded(
+                eq(KEY),
+                eq(null),
+                capture(mediaDataCaptor),
+                eq(true),
+                eq(0),
+                eq(false)
+            )
+        verify(logger).logMediaRemoved(anyInt(), eq(PACKAGE_NAME), eq(data.instanceId))
+    }
+
+    @Test
+    fun testOnNotificationRemoved_emptyTitle_notConverted() {
+        // GIVEN that the manager has a notification with a resume action and empty title.
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
         val instanceId = data.instanceId
         assertThat(data.resumption).isFalse()
-        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
+        mediaDataManager.onMediaDataLoaded(
+            KEY,
+            null,
+            data.copy(song = SESSION_EMPTY_TITLE, resumeAction = Runnable {})
+        )
 
         // WHEN the notification is removed
         reset(listener)
@@ -554,17 +674,15 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testOnNotificationRemoved_blankTitle_notConverted() {
         // GIVEN that the manager has a notification with a resume action and blank title.
-        whenever(controller.metadata)
-            .thenReturn(
-                metadataBuilder
-                    .putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_BLANK_TITLE)
-                    .build()
-            )
         addNotificationAndLoad()
         val data = mediaDataCaptor.value
         val instanceId = data.instanceId
         assertThat(data.resumption).isFalse()
-        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
+        mediaDataManager.onMediaDataLoaded(
+            KEY,
+            null,
+            data.copy(song = SESSION_BLANK_TITLE, resumeAction = Runnable {})
+        )
 
         // WHEN the notification is removed
         reset(listener)

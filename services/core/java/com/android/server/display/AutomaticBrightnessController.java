@@ -366,7 +366,12 @@ public class AutomaticBrightnessController {
         return getAutomaticScreenBrightness(null);
     }
 
-    float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
+    /**
+     * @return The current brightness recommendation calculated from the current conditions.
+     * @param brightnessEvent Event object to populate with details about why the specific
+     *                        brightness was chosen.
+     */
+    public float getAutomaticScreenBrightness(BrightnessEvent brightnessEvent) {
         if (brightnessEvent != null) {
             brightnessEvent.setLux(
                     mAmbientLuxValid ? mAmbientLux : PowerManager.BRIGHTNESS_INVALID_FLOAT);

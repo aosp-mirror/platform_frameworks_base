@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.android.systemui.dagger.qualifiers
 
-package com.android.systemui.plugins.log
+import javax.inject.Qualifier
 
-import com.google.errorprone.annotations.CompileTimeConstant
-
-/**
- * Handy for adding basic logging with CompileTimeConstant strings - so logging with no variables.
- * Most likely you want to delegate it to [ConstantStringsLoggerImpl].
- */
-interface ConstantStringsLogger {
-    fun v(@CompileTimeConstant msg: String)
-
-    fun d(@CompileTimeConstant msg: String)
-
-    fun w(@CompileTimeConstant msg: String)
-
-    fun e(@CompileTimeConstant msg: String)
-}
+@Qualifier @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class SystemUser

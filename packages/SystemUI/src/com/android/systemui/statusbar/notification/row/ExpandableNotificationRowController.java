@@ -261,7 +261,6 @@ public class ExpandableNotificationRowController implements NotifViewController 
                 mStatusBarStateController.removeCallback(mStatusBarStateListener);
             }
         });
-        mView.useRoundnessSourceTypes(true);
     }
 
     private final StatusBarStateController.StateListener mStatusBarStateListener =

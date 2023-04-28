@@ -13401,11 +13401,10 @@ public class DevicePolicyManager {
     /**
      * Called by a device admin or holder of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE} to set the short
-     * support message. This will be displayed to the user
-     * in settings screens where funtionality has been disabled by the admin. The message should be
-     * limited to a short statement such as "This setting is disabled by your administrator. Contact
-     * someone@example.com for support." If the message is longer than 200 characters it may be
-     * truncated.
+     * support message. This will be displayed to the user in settings screens where functionality
+     * has been disabled by the admin. The message should be limited to a short statement such as
+     * "This setting is disabled by your administrator. Contact someone@example.com for support."
+     * If the message is longer than 200 characters it may be truncated.
      * <p>
      * If the short support message needs to be localized, it is the responsibility of the
      * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
@@ -13460,7 +13459,8 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device admin to set the long support message. This will be displayed to the user
-     * in the device administators settings screen.
+     * in the device administrators settings screen. If the message is longer than 20000 characters
+     * it may be truncated.
      * <p>
      * If the long support message needs to be localized, it is the responsibility of the
      * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast

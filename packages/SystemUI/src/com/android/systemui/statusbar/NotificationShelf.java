@@ -44,7 +44,6 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
-import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -128,13 +127,6 @@ public class NotificationShelf extends ActivatableNotificationView implements St
         setClipToPadding(false);
         mShelfIcons.setIsStaticLayout(false);
         requestRoundness(/* top = */ 1f, /* bottom = */ 1f, BASE_VALUE, /* animate = */ false);
-
-        if (!mUseRoundnessSourceTypes) {
-            // Setting this to first in section to get the clipping to the top roundness correct.
-            // This value determines the way we are clipping to the top roundness of the overall
-            // shade
-            setFirstInSection(true);
-        }
         updateResources();
     }
 
@@ -569,17 +561,8 @@ public class NotificationShelf extends ActivatableNotificationView implements St
                 * mAmbientState.getExpansionFraction();
         final float cornerAnimationTop = shelfStart - cornerAnimationDistance;
 
-        final SourceType sourceType;
-        if (mUseRoundnessSourceTypes) {
-            sourceType = SHELF_SCROLL;
-        } else {
-            sourceType = LegacySourceType.OnScroll;
-        }
-
         final float topValue;
-        if (!mUseRoundnessSourceTypes && anv.isFirstInSection()) {
-            topValue = 1f;
-        } else if (viewStart >= cornerAnimationTop) {
+        if (viewStart >= cornerAnimationTop) {
             // Round top corners within animation bounds
             topValue = MathUtils.saturate(
                     (viewStart - cornerAnimationTop) / cornerAnimationDistance);
@@ -588,12 +571,10 @@ public class NotificationShelf extends ActivatableNotificationView implements St
             // Reset top and bottom corners outside of animation bounds.
             topValue = 0f;
         }
-        anv.requestTopRoundness(topValue, sourceType, /* animate = */ false);
+        anv.requestTopRoundness(topValue, SHELF_SCROLL, /* animate = */ false);
 
         final float bottomValue;
-        if (!mUseRoundnessSourceTypes && anv.isLastInSection()) {
-            bottomValue = 1f;
-        } else if (viewEnd >= cornerAnimationTop) {
+        if (viewEnd >= cornerAnimationTop) {
             // Round bottom corners within animation bounds
             bottomValue = MathUtils.saturate(
                     (viewEnd - cornerAnimationTop) / cornerAnimationDistance);
@@ -602,7 +583,7 @@ public class NotificationShelf extends ActivatableNotificationView implements St
             // Reset top and bottom corners outside of animation bounds.
             bottomValue = 0f;
         }
-        anv.requestBottomRoundness(bottomValue, sourceType, /* animate = */ false);
+        anv.requestBottomRoundness(bottomValue, SHELF_SCROLL, /* animate = */ false);
     }
 
     private boolean isViewAffectedBySwipe(ExpandableView expandableView) {
@@ -1098,15 +1079,6 @@ public class NotificationShelf extends ActivatableNotificationView implements St
     public void requestRoundnessResetFor(ExpandableView child) {
         if (!checkRefactorFlagEnabled()) return;
         child.requestRoundnessReset(SHELF_SCROLL);
-    }
-
-    /**
-     * This method resets the OnScroll roundness of a view to 0f
-     * <p>
-     * Note: This should be the only class that handles roundness {@code SourceType.OnScroll}
-     */
-    public static void resetLegacyOnScrollRoundness(ExpandableView expandableView) {
-        expandableView.requestRoundnessReset(LegacySourceType.OnScroll);
     }
 
     @Override

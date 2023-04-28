@@ -16,9 +16,9 @@
 
 package com.android.systemui.dreams
 
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.DreamLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 /** Logs dream-related stuff to a {@link LogBuffer}. */

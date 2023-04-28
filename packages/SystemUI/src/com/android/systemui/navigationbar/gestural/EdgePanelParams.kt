@@ -153,7 +153,7 @@ data class EdgePanelParams(private var resources: Resources) {
                 horizontalTranslation = getDimen(R.dimen.navigation_edge_entry_margin),
                 scale = getDimenFloat(R.dimen.navigation_edge_entry_scale),
                 scalePivotX = getDimen(R.dimen.navigation_edge_pre_threshold_background_width),
-                horizontalTranslationSpring = createSpring(500f, 0.76f),
+                horizontalTranslationSpring = createSpring(800f, 0.76f),
                 verticalTranslationSpring = createSpring(30000f, 1f),
                 scaleSpring = createSpring(120f, 0.8f),
                 arrowDimens = ArrowDimens(
@@ -205,8 +205,8 @@ data class EdgePanelParams(private var resources: Resources) {
         activeIndicator = BackIndicatorDimens(
                 horizontalTranslation = getDimen(R.dimen.navigation_edge_active_margin),
                 scale = getDimenFloat(R.dimen.navigation_edge_active_scale),
-                horizontalTranslationSpring = createSpring(1000f, 0.7f),
-                scaleSpring = createSpring(450f, 0.39f),
+                horizontalTranslationSpring = createSpring(1000f, 0.8f),
+                scaleSpring = createSpring(325f, 0.55f),
                 scalePivotX = getDimen(R.dimen.navigation_edge_active_background_width),
                 arrowDimens = ArrowDimens(
                         length = getDimen(R.dimen.navigation_edge_active_arrow_length),
@@ -253,7 +253,7 @@ data class EdgePanelParams(private var resources: Resources) {
                                 getDimen(R.dimen.navigation_edge_pre_threshold_edge_corners),
                         farCornerRadius =
                                 getDimen(R.dimen.navigation_edge_pre_threshold_far_corners),
-                        widthSpring = createSpring(400f, 0.65f),
+                        widthSpring = createSpring(650f, 1f),
                         heightSpring = createSpring(1500f, 0.45f),
                         farCornerRadiusSpring = createSpring(300f, 1f),
                         edgeCornerRadiusSpring = createSpring(250f, 0.5f),

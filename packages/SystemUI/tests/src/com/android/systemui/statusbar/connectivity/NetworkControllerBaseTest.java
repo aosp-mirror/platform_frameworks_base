@@ -70,7 +70,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.plugins.log.LogBuffer;
+import com.android.systemui.log.LogBuffer;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy;

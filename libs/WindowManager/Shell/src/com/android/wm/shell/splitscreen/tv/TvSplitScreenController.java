@@ -72,7 +72,7 @@ public class TvSplitScreenController extends SplitScreenController {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,

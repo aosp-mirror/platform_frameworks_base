@@ -125,9 +125,10 @@ public class SurfaceControlTests {
     public void testSurfaceChangedOnRotation() {
         final Instrumentation instrumentation = getInstrumentation();
         final Context context = instrumentation.getContext();
-        final Activity activity = instrumentation.startActivitySync(new Intent().setComponent(
+        final Intent intent = new Intent().setComponent(
                 new ComponentName(context, ActivityOptionsTest.MainActivity.class))
-                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        final Activity activity = instrumentation.startActivitySync(intent);
         final SurfaceView sv = new SurfaceView(activity);
         final AtomicInteger surfaceChangedCount = new AtomicInteger();
         instrumentation.runOnMainSync(() -> activity.setContentView(sv));
@@ -157,11 +158,26 @@ public class SurfaceControlTests {
         instrumentation.waitForIdleSync();
         final int newRotation = activity.getResources().getConfiguration()
                 .windowConfiguration.getRotation();
+        if (rotation == newRotation) {
+            // The device might not support requested orientation.
+            activity.finishAndRemoveTask();
+            return;
+        }
         final int count = surfaceChangedCount.get();
+        activity.moveTaskToBack(true /* nonRoot */);
+        instrumentation.getUiAutomation().syncInputTransactions();
+        context.startActivity(intent);
+        instrumentation.getUiAutomation().syncInputTransactions();
+        final int countAfterToFront = count - surfaceChangedCount.get();
         activity.finishAndRemoveTask();
+
         // The first count is triggered from creation, so the target number is 2.
-        if (rotation != newRotation && count > 2) {
+        if (count > 2) {
             fail("More than once surfaceChanged for rotation change: " + count);
+        }
+        if (countAfterToFront > 1) {
+            fail("More than once surfaceChanged for app transition with rotation change: "
+                    + countAfterToFront);
         }
     }
 

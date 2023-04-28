@@ -17,7 +17,6 @@
 package com.android.systemui.complication;
 
 import static com.android.systemui.complication.dagger.RegisteredComplicationsModule.DREAM_SMARTSPACE_LAYOUT_PARAMS;
-import static com.android.systemui.dreams.dagger.DreamModule.DREAM_PRETEXT_MONITOR;
 
 import android.content.Context;
 import android.os.Parcelable;
@@ -26,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import com.android.systemui.CoreStartable;
+import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dreams.smartspace.DreamSmartspaceController;
 import com.android.systemui.flags.FeatureFlags;
@@ -88,7 +88,7 @@ public class SmartSpaceComplication implements Complication {
                 DreamOverlayStateController dreamOverlayStateController,
                 SmartSpaceComplication smartSpaceComplication,
                 DreamSmartspaceController smartSpaceController,
-                @Named(DREAM_PRETEXT_MONITOR) Monitor monitor,
+                @SystemUser Monitor monitor,
                 FeatureFlags featureFlags) {
             super(monitor);
             mDreamOverlayStateController = dreamOverlayStateController;

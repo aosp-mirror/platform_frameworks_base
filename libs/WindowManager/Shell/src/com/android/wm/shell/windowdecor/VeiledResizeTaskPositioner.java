@@ -86,9 +86,10 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback {
     public void onDragPositioningEnd(float x, float y) {
         PointF delta = DragPositioningCallbackUtility.calculateDelta(x, y,
                 mRepositionStartPoint);
-        if (mHasMoved && DragPositioningCallbackUtility.changeBounds(mCtrlType, mHasMoved,
-                mRepositionTaskBounds, mTaskBoundsAtDragStart, mStableBounds, delta,
-                mDisplayController, mDesktopWindowDecoration)) {
+        if (mHasMoved) {
+            DragPositioningCallbackUtility.changeBounds(mCtrlType, mHasMoved,
+                    mRepositionTaskBounds, mTaskBoundsAtDragStart, mStableBounds, delta,
+                    mDisplayController, mDesktopWindowDecoration);
             DragPositioningCallbackUtility.applyTaskBoundsChange(
                     new WindowContainerTransaction(), mDesktopWindowDecoration,
                     mRepositionTaskBounds, mTaskOrganizer);

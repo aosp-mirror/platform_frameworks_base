@@ -33,6 +33,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -347,12 +348,16 @@ public final class WMShell implements
     void initDesktopMode(DesktopMode desktopMode) {
         desktopMode.addVisibleTasksListener(
                 new DesktopModeTaskRepository.VisibleTasksListener() {
-            @Override
-            public void onVisibilityChanged(boolean hasFreeformTasks) {
-                mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE, hasFreeformTasks)
-                        .commitUpdate(mDisplayTracker.getDefaultDisplayId());
-            }
-        }, mSysUiMainExecutor);
+                    @Override
+                    public void onVisibilityChanged(int displayId, boolean hasFreeformTasks) {
+                        if (displayId == Display.DEFAULT_DISPLAY) {
+                            mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
+                                            hasFreeformTasks)
+                                    .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+                        }
+                        // TODO(b/278084491): update sysui state for changes on other displays
+                    }
+                }, mSysUiMainExecutor);
     }
 
     @Override

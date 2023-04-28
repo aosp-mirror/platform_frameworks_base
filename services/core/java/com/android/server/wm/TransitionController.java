@@ -879,6 +879,8 @@ class TransitionController {
             // If it's a legacy sync, then it needs to wait until there is no collecting transition.
             if (queued.mTransition == null) return;
             if (!canStartCollectingNow(queued.mTransition)) return;
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from collecting"
+                    + " to waiting.", mCollectingTransition.getSyncId());
             mWaitingTransitions.add(mCollectingTransition);
             mCollectingTransition = null;
         } else if (mSyncEngine.hasActiveSync()) {
@@ -930,8 +932,35 @@ class TransitionController {
      * in {@link #getIsIndependent} later.
      */
     boolean getCanBeIndependent(Transition collecting, Transition queued) {
+        // For tests
         if (queued.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL
                 && collecting.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL) {
+            return true;
+        }
+        // For recents
+        if (queued.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
+            if (collecting.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
+                // Must serialize with itself.
+                return false;
+            }
+            // allow this if `collecting` only has activities
+            for (int i = 0; i < collecting.mParticipants.size(); ++i) {
+                final WindowContainer wc = collecting.mParticipants.valueAt(i);
+                final ActivityRecord ar = wc.asActivityRecord();
+                if (ar == null && wc.asWindowState() == null && wc.asWindowToken() == null) {
+                    // Is task or above, so can't be independent
+                    return false;
+                }
+                if (ar != null && ar.isActivityTypeHomeOrRecents()) {
+                    // It's a recents or home type, so it conflicts.
+                    return false;
+                }
+            }
+            return true;
+        } else if (collecting.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
+            // We can collect simultaneously with recents if it is populated. This is because
+            // we know that recents will not collect/trampoline any more stuff. If anything in the
+            // queued transition overlaps, it will end up just waiting in sync-queue anyways.
             return true;
         }
         return false;
@@ -942,11 +971,47 @@ class TransitionController {
      * `running` is playing based on its current state.
      */
     static boolean getIsIndependent(Transition running, Transition incoming) {
+        // For tests
         if (running.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL
                 && incoming.mParallelCollectType == Transition.PARALLEL_TYPE_MUTUAL) {
             return true;
         }
-        return false;
+        // For now there's only one mutually-independent pair: an all activity-level transition and
+        // a transient-launch where none of the activities are part of the transient-launch task,
+        // so the following logic is hard-coded specifically for this.
+        // Also, we currently restrict valid transient-launches to just recents.
+        final Transition recents;
+        final Transition other;
+        if (running.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS
+                && running.hasTransientLaunch()) {
+            if (incoming.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS) {
+                // Recents can't be independent from itself.
+                return false;
+            }
+            recents = running;
+            other = incoming;
+        } else if (incoming.mParallelCollectType == Transition.PARALLEL_TYPE_RECENTS
+                && incoming.hasTransientLaunch()) {
+            recents = incoming;
+            other = running;
+        } else {
+            return false;
+        }
+        // Check against *targets* because that is the post-promotion set of containers that are
+        // actually animating.
+        for (int i = 0; i < other.mTargets.size(); ++i) {
+            final WindowContainer wc = other.mTargets.get(i).mContainer;
+            final ActivityRecord ar = wc.asActivityRecord();
+            if (ar == null && wc.asWindowState() == null && wc.asWindowToken() == null) {
+                // Is task or above, so for now don't let them be independent.
+                return false;
+            }
+            if (ar != null && recents.isTransientLaunch(ar)) {
+                // Change overlaps with recents, so serialize.
+                return false;
+            }
+        }
+        return true;
     }
 
     void assignTrack(Transition transition, TransitionInfo info) {
@@ -970,9 +1035,15 @@ class TransitionController {
         if (track < 0) {
             // Didn't overlap with anything, so give it its own track
             track = mTrackCount;
+            if (track > 0) {
+                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Playing #%d in parallel on "
+                        + "track #%d", transition.getSyncId(), track);
+            }
         }
         if (sync) {
             info.setFlags(info.getFlags() | TransitionInfo.FLAG_SYNC);
+            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Marking #%d animation as SYNC.",
+                    transition.getSyncId());
         }
         transition.mAnimationTrack = track;
         info.setTrack(track);
@@ -1145,6 +1216,8 @@ class TransitionController {
                 // Check if we can run in parallel here.
                 if (canStartCollectingNow(transit)) {
                     // start running in parallel.
+                    ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS_MIN, "Moving #%d from"
+                            + " collecting to waiting.", mCollectingTransition.getSyncId());
                     mWaitingTransitions.add(mCollectingTransition);
                     mCollectingTransition = null;
                     moveToCollecting(transit);

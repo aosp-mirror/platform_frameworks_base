@@ -16,9 +16,11 @@
 
 package com.android.systemui.controls.ui
 
+import android.app.Activity
 import android.app.ActivityOptions
 import android.app.ActivityTaskManager
 import android.app.ActivityTaskManager.INVALID_TASK_ID
+import android.app.ComponentOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED
 import android.app.Dialog
 import android.app.PendingIntent
 import android.content.ComponentName
@@ -96,7 +98,9 @@ class DetailDialog(
                 activityContext,
                 0 /* enterResId */,
                 0 /* exitResId */
-            )
+            ).setPendingIntentBackgroundActivityStartMode(MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+            options.isPendingIntentBackgroundActivityLaunchAllowedByPermission = true
+
             taskView.startActivity(
                 pendingIntent,
                 fillInIntent,
@@ -214,6 +218,12 @@ class DetailDialog(
         if (!isShowing()) return
         taskView.release()
 
+        val isActivityFinishing =
+            (activityContext as? Activity)?.let { it.isFinishing || it.isDestroyed }
+        if (isActivityFinishing == true) {
+            // Don't dismiss the dialog if the activity is finishing, it will get removed
+            return
+        }
         super.dismiss()
     }
 }

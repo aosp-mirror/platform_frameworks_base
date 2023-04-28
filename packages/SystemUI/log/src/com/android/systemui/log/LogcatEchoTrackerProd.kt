@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.systemui.plugins.log
+package com.android.systemui.log
 
-/** Keeps track of which [LogBuffer] messages should also appear in logcat. */
-interface LogcatEchoTracker {
-    /** Whether [bufferName] should echo messages of [level] or higher to logcat. */
-    fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean
+/** Production version of [LogcatEchoTracker] that isn't configurable. */
+class LogcatEchoTrackerProd : LogcatEchoTracker {
+    override val logInBackgroundThread = false
 
-    /** Whether [tagName] should echo messages of [level] or higher to logcat. */
-    fun isTagLoggable(tagName: String, level: LogLevel): Boolean
+    override fun isBufferLoggable(bufferName: String, level: LogLevel): Boolean {
+        return level >= LogLevel.WARNING
+    }
 
-    /** Whether to log messages in a background thread. */
-    val logInBackgroundThread: Boolean
+    override fun isTagLoggable(tagName: String, level: LogLevel): Boolean {
+        return level >= LogLevel.WARNING
+    }
 }

@@ -52,8 +52,6 @@ class NotificationSectionsManager @Inject internal constructor(
     @SilentHeader private val silentHeaderController: SectionHeaderController
 ) : SectionProvider {
 
-    private val useRoundnessSourceTypes = true
-
     private val configurationListener = object : ConfigurationController.ConfigurationListener {
         override fun onLocaleListChanged() {
             reinflateViews()
@@ -193,35 +191,33 @@ class NotificationSectionsManager @Inject internal constructor(
             isSectionChanged || changed
         }
 
-        if (useRoundnessSourceTypes) {
-            val newFirstChildren = sections.mapNotNull { it.firstVisibleChild }
-            val newLastChildren = sections.mapNotNull { it.lastVisibleChild }
+        val newFirstChildren = sections.mapNotNull { it.firstVisibleChild }
+        val newLastChildren = sections.mapNotNull { it.lastVisibleChild }
 
-            // Update the roundness of Views that weren't already in the first/last position
-            newFirstChildren.forEach { firstChild ->
-                val wasFirstChild = oldFirstChildren.remove(firstChild)
-                if (!wasFirstChild) {
-                    val notAnimatedChild = !notificationRoundnessManager.isAnimatedChild(firstChild)
-                    val animated = firstChild.isShown && notAnimatedChild
-                    firstChild.requestTopRoundness(1f, SECTION, animated)
-                }
+        // Update the roundness of Views that weren't already in the first/last position
+        newFirstChildren.forEach { firstChild ->
+            val wasFirstChild = oldFirstChildren.remove(firstChild)
+            if (!wasFirstChild) {
+                val notAnimatedChild = !notificationRoundnessManager.isAnimatedChild(firstChild)
+                val animated = firstChild.isShown && notAnimatedChild
+                firstChild.requestTopRoundness(1f, SECTION, animated)
             }
-            newLastChildren.forEach { lastChild ->
-                val wasLastChild = oldLastChildren.remove(lastChild)
-                if (!wasLastChild) {
-                    val notAnimatedChild = !notificationRoundnessManager.isAnimatedChild(lastChild)
-                    val animated = lastChild.isShown && notAnimatedChild
-                    lastChild.requestBottomRoundness(1f, SECTION, animated)
-                }
+        }
+        newLastChildren.forEach { lastChild ->
+            val wasLastChild = oldLastChildren.remove(lastChild)
+            if (!wasLastChild) {
+                val notAnimatedChild = !notificationRoundnessManager.isAnimatedChild(lastChild)
+                val animated = lastChild.isShown && notAnimatedChild
+                lastChild.requestBottomRoundness(1f, SECTION, animated)
             }
+        }
 
-            // The Views left in the set are no longer in the first/last position
-            oldFirstChildren.forEach { noMoreFirstChild ->
-                noMoreFirstChild.requestTopRoundness(0f, SECTION)
-            }
-            oldLastChildren.forEach { noMoreLastChild ->
-                noMoreLastChild.requestBottomRoundness(0f, SECTION)
-            }
+        // The Views left in the set are no longer in the first/last position
+        oldFirstChildren.forEach { noMoreFirstChild ->
+            noMoreFirstChild.requestTopRoundness(0f, SECTION)
+        }
+        oldLastChildren.forEach { noMoreLastChild ->
+            noMoreLastChild.requestBottomRoundness(0f, SECTION)
         }
 
         if (DEBUG) {

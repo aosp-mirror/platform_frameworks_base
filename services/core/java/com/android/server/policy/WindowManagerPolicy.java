@@ -67,10 +67,12 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.companion.virtual.VirtualDevice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.hardware.display.VirtualDisplay;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -762,50 +764,84 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
     void setAllowLockscreenWhenOn(int displayId, boolean allow);
 
     /**
+     * Called when the global wakefulness is becoming awake.
+     *
+     * @param reason One of PowerManager.WAKE_REASON_*, detailing the reason for the change.
+     */
+    void startedWakingUpGlobal(@PowerManager.WakeReason int reason);
+
+    /**
+     * Called when the global wakefulness has finished becoming awake.
+     *
+     * @param reason One of PowerManager.WAKE_REASON_*, detailing the reason for the change.
+     */
+    void finishedWakingUpGlobal(@PowerManager.WakeReason int reason);
+
+    /**
+     * Called when the global wakefulness has started going to sleep.
+     *
+     * @param reason One of PowerManager.WAKE_REASON_*, detailing the reason for the change.
+     */
+    void startedGoingToSleepGlobal(@PowerManager.GoToSleepReason int reason);
+
+    /**
+     * Called when the global wakefulness has finished going to sleep.
+     *
+     * @param reason One of PowerManager.WAKE_REASON_*, detailing the reason for the change.
+     */
+    void finishedGoingToSleepGlobal(@PowerManager.GoToSleepReason int reason);
+
+    /**
      * Called when the device has started waking up.
      *
-     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason we're
-     * waking up, such as WAKE_REASON_POWER_BUTTON or WAKE_REASON_GESTURE.
+     * @param displayGroupId The id of the display group that has started waking up. This will often
+     *                       be {@link Display#DEFAULT_DISPLAY_GROUP}, but it is possible for other
+     *                       display groups to exist, for example when there is a
+     *                       {@link VirtualDevice} with one or more {@link VirtualDisplay}s.
+     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason this
+     *                     display group is waking up, such as WAKE_REASON_POWER_BUTTON or
+     *                     WAKE_REASON_GESTURE.
      */
-    void startedWakingUp(@PowerManager.WakeReason int pmWakeReason);
+    void startedWakingUp(int displayGroupId, @PowerManager.WakeReason int pmWakeReason);
 
     /**
      * Called when the device has finished waking up.
      *
-     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason we're
-     * waking up, such as WAKE_REASON_POWER_BUTTON or WAKE_REASON_GESTURE.
+     * @param displayGroupId The id of the display group that has finished waking. This will often
+     *                       be {@link Display#DEFAULT_DISPLAY_GROUP}, but it is possible for other
+     *                       display groups to exist, for example when there is a
+     *                       {@link VirtualDevice} with one or more {@link VirtualDisplay}s.
+     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason this
+     *                     display group is waking up, such as WAKE_REASON_POWER_BUTTON or
+     *                     WAKE_REASON_GESTURE.
      */
-    void finishedWakingUp(@PowerManager.WakeReason int pmWakeReason);
+    void finishedWakingUp(int displayGroupId, @PowerManager.WakeReason int pmWakeReason);
 
     /**
      * Called when the device has started going to sleep.
      *
+     * @param displayGroupId The id of the display group that has started going to sleep. This
+     *                       will often be {@link Display#DEFAULT_DISPLAY_GROUP}, but it is
+     *                       possible for other display groups to exist, for example when there is a
+     *                       {@link VirtualDevice} with one or more {@link VirtualDisplay}s.
      * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the specific reason
-     * we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
+     *                      this display group is going to sleep, such as
+     *                      GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
      */
-    public void startedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason);
+    void startedGoingToSleep(int displayGroupId, @PowerManager.GoToSleepReason int pmSleepReason);
 
     /**
      * Called when the device has finished going to sleep.
      *
+     * @param displayGroupId The id of the display group that has finished going to sleep. This
+     *                       will often be {@link Display#DEFAULT_DISPLAY_GROUP}, but it is
+     *                       possible for other display groups to exist, for example when there is a
+     *                       {@link VirtualDevice} with one or more {@link VirtualDisplay}s.
      * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the specific reason
-     * we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
+     *                      we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or
+     *                      GO_TO_SLEEP_REASON_TIMEOUT.
      */
-    public void finishedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason);
-
-    /**
-     * Called when a particular PowerGroup has changed wakefulness.
-     *
-     * @param groupId The id of the PowerGroup.
-     * @param wakefulness One of PowerManagerInternal.WAKEFULNESS_* indicating the wake state for
-     * the group
-     * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the reason this
-     * group is going to sleep.
-     * @param globalWakefulness The global wakefulness, which may or may not match that of this
-     * group. One of PowerManagerInternal.WAKEFULNESS_*
-     */
-    void onPowerGroupWakefulnessChanged(int groupId, int wakefulness,
-            @PowerManager.GoToSleepReason int pmSleepReason, int globalWakefulness);
+    void finishedGoingToSleep(int displayGroupId, @PowerManager.GoToSleepReason int pmSleepReason);
 
     /**
      * Called when the display is about to turn on to show content.

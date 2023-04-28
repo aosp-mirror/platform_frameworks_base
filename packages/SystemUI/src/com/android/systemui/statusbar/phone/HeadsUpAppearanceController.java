@@ -76,7 +76,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
     private final DarkIconDispatcher mDarkIconDispatcher;
     private final ShadeViewController mShadeViewController;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
-    private final boolean mUseRoundnessSourceTypes;
     private final Consumer<ExpandableNotificationRow>
             mSetTrackingHeadsUp = this::setTrackingHeadsUp;
     private final BiConsumer<Float, Float> mSetExpandedHeight = this::setAppearFraction;
@@ -124,7 +123,6 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
         super(headsUpStatusBarView);
         mNotificationIconAreaController = notificationIconAreaController;
         mNotificationRoundnessManager = notificationRoundnessManager;
-        mUseRoundnessSourceTypes = true;
         mHeadsUpManager = headsUpManager;
 
         // We may be mid-HUN-expansion when this controller is re-created (for example, if the user
@@ -405,21 +403,19 @@ public class HeadsUpAppearanceController extends ViewController<HeadsUpStatusBar
      * @param entry target notification
      */
     public void updateHeadsUpAndPulsingRoundness(NotificationEntry entry) {
-        if (mUseRoundnessSourceTypes) {
-            ExpandableNotificationRow row = entry.getRow();
-            boolean isTrackedChild = row == mTrackedChild;
-            if (row.isPinned() || row.isHeadsUpAnimatingAway() || isTrackedChild) {
-                float roundness = MathUtils.saturate(1f - mAppearFraction);
-                row.requestRoundness(roundness, roundness, HEADS_UP);
+        ExpandableNotificationRow row = entry.getRow();
+        boolean isTrackedChild = row == mTrackedChild;
+        if (row.isPinned() || row.isHeadsUpAnimatingAway() || isTrackedChild) {
+            float roundness = MathUtils.saturate(1f - mAppearFraction);
+            row.requestRoundness(roundness, roundness, HEADS_UP);
+        } else {
+            row.requestRoundnessReset(HEADS_UP);
+        }
+        if (mNotificationRoundnessManager.shouldRoundNotificationPulsing()) {
+            if (row.showingPulsing()) {
+                row.requestRoundness(/* top = */ 1f, /* bottom = */ 1f, PULSING);
             } else {
-                row.requestRoundnessReset(HEADS_UP);
-            }
-            if (mNotificationRoundnessManager.shouldRoundNotificationPulsing()) {
-                if (row.showingPulsing()) {
-                    row.requestRoundness(/* top = */ 1f, /* bottom = */ 1f, PULSING);
-                } else {
-                    row.requestRoundnessReset(PULSING);
-                }
+                row.requestRoundnessReset(PULSING);
             }
         }
     }

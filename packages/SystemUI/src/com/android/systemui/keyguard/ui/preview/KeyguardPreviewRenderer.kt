@@ -21,6 +21,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.IBinder
@@ -33,6 +34,7 @@ import android.widget.FrameLayout
 import com.android.keyguard.ClockEventController
 import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.R
+import com.android.systemui.biometrics.domain.interactor.UdfpsOverlayInteractor
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
@@ -61,6 +63,7 @@ constructor(
     private val clockRegistry: ClockRegistry,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val lockscreenSmartspaceController: LockscreenSmartspaceController,
+    private val udfpsOverlayInteractor: UdfpsOverlayInteractor,
     @Assisted bundle: Bundle,
 ) {
 
@@ -112,7 +115,9 @@ constructor(
 
             setUpBottomArea(rootView)
 
-            setupSmartspace(rootView)
+            setUpSmartspace(rootView)
+
+            setUpUdfps(rootView)
 
             setUpClock(rootView)
 
@@ -169,49 +174,53 @@ constructor(
     /**
      * This sets up and shows a non-interactive smart space
      *
-     * The top padding is as follows:
-     *    Status bar height + clock top margin + keyguard smart space top offset
+     * The top padding is as follows: Status bar height + clock top margin + keyguard smart space
+     * top offset
      *
-     * The start padding is as follows:
-     *    Clock padding start + Below clock padding start
+     * The start padding is as follows: Clock padding start + Below clock padding start
      *
-     * The end padding is as follows:
-     *    Below clock padding end
+     * The end padding is as follows: Below clock padding end
      */
-    private fun setupSmartspace(parentView: ViewGroup) {
-        if (!lockscreenSmartspaceController.isEnabled() ||
-                !lockscreenSmartspaceController.isDateWeatherDecoupled()) {
+    private fun setUpSmartspace(parentView: ViewGroup) {
+        if (
+            !lockscreenSmartspaceController.isEnabled() ||
+                !lockscreenSmartspaceController.isDateWeatherDecoupled()
+        ) {
             return
         }
 
         smartSpaceView = lockscreenSmartspaceController.buildAndConnectDateView(parentView)
 
-        val topPadding: Int = with(context.resources) {
-            getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard) +
+        val topPadding: Int =
+            with(context.resources) {
+                getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard) +
                     getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset) +
                     getDimensionPixelSize(R.dimen.keyguard_clock_top_margin)
-        }
+            }
 
-        val startPadding: Int = with(context.resources) {
-            getDimensionPixelSize(R.dimen.clock_padding_start) +
+        val startPadding: Int =
+            with(context.resources) {
+                getDimensionPixelSize(R.dimen.clock_padding_start) +
                     getDimensionPixelSize(R.dimen.below_clock_padding_start)
-        }
+            }
 
-        val endPadding: Int = context.resources
-                .getDimensionPixelSize(R.dimen.below_clock_padding_end)
+        val endPadding: Int =
+            context.resources.getDimensionPixelSize(R.dimen.below_clock_padding_end)
 
         smartSpaceView?.let {
             it.setPaddingRelative(startPadding, topPadding, endPadding, 0)
             it.isClickable = false
 
             parentView.addView(
-                    it,
-                    FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT,
-                            FrameLayout.LayoutParams.WRAP_CONTENT,
-                    ),
+                it,
+                FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.MATCH_PARENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                ),
             )
         }
+
+        smartSpaceView?.alpha = if (shouldHighlightSelectedAffordance) DIM_ALPHA else 1.0f
     }
 
     private fun setUpBottomArea(parentView: ViewGroup) {
@@ -232,6 +241,33 @@ constructor(
                 FrameLayout.LayoutParams.MATCH_PARENT,
             ),
         )
+    }
+
+    private fun setUpUdfps(parentView: ViewGroup) {
+        val sensorBounds = udfpsOverlayInteractor.udfpsOverlayParams.value.sensorBounds
+
+        // If sensorBounds are default rect, then there is no UDFPS
+        if (sensorBounds == Rect()) {
+            return
+        }
+
+        // Place the UDFPS view in the proper sensor location
+        val fingerprintLayoutParams =
+            FrameLayout.LayoutParams(sensorBounds.width(), sensorBounds.height())
+        fingerprintLayoutParams.setMarginsRelative(
+            sensorBounds.left,
+            sensorBounds.top,
+            sensorBounds.right,
+            sensorBounds.bottom
+        )
+        val finger =
+            LayoutInflater.from(context)
+                .inflate(
+                    R.layout.udfps_keyguard_view_internal,
+                    parentView,
+                    false,
+                ) as View
+        parentView.addView(finger, fingerprintLayoutParams)
     }
 
     private fun setUpClock(parentView: ViewGroup) {
@@ -266,8 +302,6 @@ constructor(
         disposables.add(DisposableHandle { broadcastDispatcher.unregisterReceiver(receiver) })
 
         onClockChanged(parentView)
-
-        updateSmartspaceWithSetupClock()
     }
 
     private fun onClockChanged(parentView: ViewGroup) {
@@ -281,33 +315,22 @@ constructor(
                 ?.onTargetRegionChanged(KeyguardClockSwitch.getLargeClockRegion(parentView))
 
             clockView?.let { parentView.removeView(it) }
-            clockView = largeClock?.view?.apply {
-                if (shouldHighlightSelectedAffordance) {
-                    alpha = DIM_ALPHA
+            clockView =
+                largeClock?.view?.apply {
+                    if (shouldHighlightSelectedAffordance) {
+                        alpha = DIM_ALPHA
+                    }
+                    parentView.addView(this)
+                    visibility = View.VISIBLE
                 }
-                parentView.addView(this)
-                visibility = View.VISIBLE
-            }
         } else {
             clockView?.visibility = View.GONE
         }
-    }
 
-    /**
-     * Updates smart space after clock is set up. Used to show or hide smartspace with the right
-     * opacity based on the clock after setup.
-     */
-    private fun updateSmartspaceWithSetupClock() {
+        // Hide smart space if the clock has weather display; otherwise show it
         val hasCustomWeatherDataDisplay =
-                clockController
-                        .clock
-                        ?.largeClock
-                        ?.config
-                        ?.hasCustomWeatherDataDisplay == true
-
+            clockController.clock?.largeClock?.config?.hasCustomWeatherDataDisplay == true
         hideSmartspace(hasCustomWeatherDataDisplay)
-
-        smartSpaceView?.alpha = if (shouldHighlightSelectedAffordance) DIM_ALPHA else 1.0f
     }
 
     companion object {

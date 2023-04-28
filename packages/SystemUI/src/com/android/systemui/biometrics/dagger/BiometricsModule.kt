@@ -17,6 +17,8 @@
 package com.android.systemui.biometrics.dagger
 
 import com.android.settingslib.udfps.UdfpsUtils
+import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
+import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepositoryImpl
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.data.repository.PromptRepositoryImpl
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractor
@@ -38,6 +40,11 @@ interface BiometricsModule {
     @Binds
     @SysUISingleton
     fun biometricPromptRepository(impl: PromptRepositoryImpl): PromptRepository
+
+    @Binds
+    @SysUISingleton
+    fun fingerprintRepository(impl: FingerprintPropertyRepositoryImpl):
+            FingerprintPropertyRepository
 
     @Binds
     @SysUISingleton

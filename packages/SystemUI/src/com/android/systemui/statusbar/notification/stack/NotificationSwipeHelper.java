@@ -68,7 +68,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     private boolean mIsExpanded;
     private boolean mPulsing;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
-    private final boolean mUseRoundnessSourceTypes;
 
     NotificationSwipeHelper(
             Resources resources,
@@ -80,7 +79,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
             NotificationRoundnessManager notificationRoundnessManager) {
         super(callback, resources, viewConfiguration, falsingManager, featureFlags);
         mNotificationRoundnessManager = notificationRoundnessManager;
-        mUseRoundnessSourceTypes = true;
         mMenuListener = menuListener;
         mCallback = callback;
         mFalsingCheck = () -> resetExposedMenuView(true /* animate */, true /* force */);
@@ -322,8 +320,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     protected void prepareDismissAnimation(View view, Animator anim) {
         super.prepareDismissAnimation(view, anim);
 
-        if (mUseRoundnessSourceTypes
-                && view instanceof ExpandableNotificationRow
+        if (view instanceof ExpandableNotificationRow
                 && mNotificationRoundnessManager.isClearAllInProgress()) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             anim.addListener(new AnimatorListenerAdapter() {
