@@ -215,15 +215,6 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     }
 
     /**
-     * Pass top margin from ClockPositionAlgorithm in NotificationPanelViewController
-     * Use for clock view in LS to compensate for top margin to align to the screen
-     * Regardless of translation from AOD and unlock gestures
-     */
-    public void setLockscreenClockY(int clockY) {
-        mKeyguardClockSwitchController.setLockscreenClockY(clockY);
-    }
-
-    /**
      * Set whether the view accessibility importance mode.
      */
     public void setStatusAccessibilityImportance(int mode) {
@@ -239,6 +230,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Update position of the view with an optional animation
      */
     public void updatePosition(int x, int y, float scale, boolean animate) {
+        float oldY = mView.getY();
         setProperty(AnimatableProperty.Y, y, animate);
 
         ClockController clock = mKeyguardClockSwitchController.getClock();
@@ -253,6 +245,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                     CLOCK_ANIMATION_PROPERTIES, animate);
             setProperty(AnimatableProperty.SCALE_X, 1f, animate);
             setProperty(AnimatableProperty.SCALE_Y, 1f, animate);
+        }
+
+        if (oldY != y) {
+            mKeyguardClockSwitchController.updateKeyguardStatusViewOffset();
         }
     }
 
