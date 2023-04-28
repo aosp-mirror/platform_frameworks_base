@@ -56,13 +56,21 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
             )
             upgradeAccessMediaLocationPermission(packageState, userId)
         }
-        // Enable isAtLeastT check, when moving subsystem to mainline.
+        // TODO Enable isAtLeastT check, when moving subsystem to mainline.
         if (version <= 12 /*&& SdkLevel.isAtLeastT()*/) {
             Slog.v(
                 LOG_TAG, "Upgrading scoped permissions for package: $packageName" +
                     ", version: $version, user: $userId"
             )
             upgradeAuralVisualMediaPermissions(packageState, userId)
+        }
+        // TODO Enable isAtLeastU check, when moving subsystem to mainline.
+        if (version <= 14 /*&& SdkLevel.isAtLeastU()*/) {
+            Slog.v(
+                LOG_TAG, "Upgrading visual media permission for package: $packageName" +
+                    ", version: $version, user: $userId"
+            )
+            upgradeUserSelectedVisualMediaPermission(packageState, userId)
         }
         // Add a new upgrade step: if (packageVersion <= LATEST_VERSION) { .... }
         // Also increase LATEST_VERSION
@@ -127,6 +135,9 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
         }
     }
 
+    /**
+     * Upgrade permissions based on storage permissions grant
+     */
     private fun MutateStateScope.upgradeAuralVisualMediaPermissions(
         packageState: PackageState,
         userId: Int
@@ -150,6 +161,36 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
                 if (permissionName in requestedPermissionNames) {
                     grantRuntimePermission(packageState, userId, permissionName)
                 }
+            }
+        }
+    }
+
+    /**
+     * Upgrade permission based on the grant in [Manifest.permission_group.READ_MEDIA_VISUAL]
+     */
+    private fun MutateStateScope.upgradeUserSelectedVisualMediaPermission(
+        packageState: PackageState,
+        userId: Int
+    ) {
+        val androidPackage = packageState.androidPackage!!
+        if (androidPackage.targetSdkVersion < Build.VERSION_CODES.TIRAMISU) {
+            return
+        }
+        val requestedPermissionNames = androidPackage.requestedPermissions
+        val isVisualMediaUserGranted = VISUAL_MEDIA_PERMISSIONS.anyIndexed { _, permissionName ->
+            if (permissionName !in requestedPermissionNames) {
+                return@anyIndexed false
+            }
+            val flags = with(policy) {
+                getPermissionFlags(packageState.appId, userId, permissionName)
+            }
+            PermissionFlags.isAppOpGranted(flags) && flags.hasBits(PermissionFlags.USER_SET)
+        }
+        if (isVisualMediaUserGranted) {
+            if (Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED in requestedPermissionNames) {
+                grantRuntimePermission(
+                    packageState, userId, Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                )
             }
         }
     }
@@ -218,7 +259,14 @@ class AppIdPermissionUpgrade(private val policy: AppIdPermissionPolicy) {
             Manifest.permission.READ_MEDIA_AUDIO,
             Manifest.permission.READ_MEDIA_IMAGES,
             Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.ACCESS_MEDIA_LOCATION,
             Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+        )
+        // Visual media permissions in T
+        private val VISUAL_MEDIA_PERMISSIONS = indexedSetOf(
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_VIDEO,
+            Manifest.permission.ACCESS_MEDIA_LOCATION
         )
     }
 }

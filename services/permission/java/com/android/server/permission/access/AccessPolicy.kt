@@ -469,7 +469,7 @@ class AccessPolicy private constructor(
     companion object {
         private val LOG_TAG = AccessPolicy::class.java.simpleName
 
-        internal const val VERSION_LATEST = 14
+        internal const val VERSION_LATEST = 15
 
         private const val TAG_ACCESS = "access"
         private const val TAG_DEFAULT_PERMISSION_GRANT = "default-permission-grant"
