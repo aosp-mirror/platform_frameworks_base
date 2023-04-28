@@ -1611,6 +1611,7 @@ public class HdmiControlService extends SystemService {
         @HdmiCecMessageValidator.ValidationResult
         int validationResult = message.getValidationResult();
         if (validationResult == HdmiCecMessageValidator.ERROR_PARAMETER
+                || validationResult == HdmiCecMessageValidator.ERROR_PARAMETER_LONG
                 || !verifyPhysicalAddresses(message)) {
             return Constants.ABORT_INVALID_OPERAND;
         } else if (validationResult != HdmiCecMessageValidator.OK
