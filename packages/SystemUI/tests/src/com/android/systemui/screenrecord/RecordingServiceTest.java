@@ -18,7 +18,6 @@ package com.android.systemui.screenrecord;
 
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -94,6 +93,7 @@ public class RecordingServiceTest extends SysuiTestCase {
         doReturn(mContext.getUserId()).when(mRecordingService).getUserId();
         doReturn(mContext.getPackageName()).when(mRecordingService).getPackageName();
         doReturn(mContext.getContentResolver()).when(mRecordingService).getContentResolver();
+        doReturn(mContext.getResources()).when(mRecordingService).getResources();
 
         // Mock notifications
         doNothing().when(mRecordingService).createRecordingNotification();
@@ -101,7 +101,7 @@ public class RecordingServiceTest extends SysuiTestCase {
         doReturn(mNotification).when(mRecordingService).createSaveNotification(any());
         doNothing().when(mRecordingService).createErrorNotification();
         doNothing().when(mRecordingService).showErrorToast(anyInt());
-        doNothing().when(mRecordingService).stopForeground(anyBoolean());
+        doNothing().when(mRecordingService).stopForeground(anyInt());
 
         doNothing().when(mRecordingService).startForeground(anyInt(), any());
         doReturn(mScreenMediaRecorder).when(mRecordingService).getRecorder();
