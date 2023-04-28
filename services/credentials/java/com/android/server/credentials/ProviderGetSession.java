@@ -40,7 +40,6 @@ import android.service.credentials.CredentialEntry;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.GetCredentialRequest;
 import android.service.credentials.RemoteEntry;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -413,11 +412,9 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
      */
     private boolean onAuthenticationEntrySelected(
             @Nullable ProviderPendingIntentResponse providerPendingIntentResponse) {
-        Log.i(TAG, "onAuthenticationEntrySelected");
         // Authentication entry is expected to have a BeginGetCredentialResponse instance. If it
         // does not have it, we remove the authentication entry and do not add any more content.
         if (providerPendingIntentResponse == null) {
-            Log.i(TAG, "providerPendingIntentResponse is null");
             // Nothing received. This is equivalent to no content received.
             return false;
         }
