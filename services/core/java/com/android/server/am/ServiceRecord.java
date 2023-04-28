@@ -643,6 +643,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         pw.print(prefix); pw.print("lastUntrustedSetFgsRestrictionAllowedTime=");
         TimeUtils.formatDuration(mLastUntrustedSetFgsRestrictionAllowedTime, now, pw);
+        pw.println();
 
         if (delayed) {
             pw.print(prefix); pw.print("delayed="); pw.println(delayed);
