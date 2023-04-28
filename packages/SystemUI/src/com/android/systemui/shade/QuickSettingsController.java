@@ -1230,10 +1230,13 @@ public class QuickSettingsController {
             mVisible = qsVisible;
             mQs.setQsVisible(qsVisible);
             mQs.setFancyClipping(
+                    mDisplayLeftInset,
                     clipTop,
+                    mDisplayRightInset,
                     clipBottom,
                     radius,
-                    qsVisible && !mSplitShadeEnabled);
+                    qsVisible && !mSplitShadeEnabled,
+                    mIsFullWidth);
 
         }
 
