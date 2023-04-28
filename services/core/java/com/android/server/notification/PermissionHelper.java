@@ -25,6 +25,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -37,7 +38,6 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -53,13 +53,13 @@ public final class PermissionHelper {
 
     private static final String NOTIFICATION_PERMISSION = Manifest.permission.POST_NOTIFICATIONS;
 
-    private final PermissionManagerServiceInternal mPmi;
+    private final Context mContext;
     private final IPackageManager mPackageManager;
     private final IPermissionManager mPermManager;
 
-    public PermissionHelper(PermissionManagerServiceInternal pmi, IPackageManager packageManager,
+    public PermissionHelper(Context context, IPackageManager packageManager,
             IPermissionManager permManager) {
-        mPmi = pmi;
+        mContext = context;
         mPackageManager = packageManager;
         mPermManager = permManager;
     }
@@ -71,7 +71,7 @@ public final class PermissionHelper {
     public boolean hasPermission(int uid) {
         final long callingId = Binder.clearCallingIdentity();
         try {
-            return mPmi.checkUidPermission(uid, NOTIFICATION_PERMISSION) == PERMISSION_GRANTED;
+            return mContext.checkPermission(NOTIFICATION_PERMISSION, -1, uid) == PERMISSION_GRANTED;
         } finally {
             Binder.restoreCallingIdentity(callingId);
         }
@@ -193,8 +193,8 @@ public final class PermissionHelper {
                 return;
             }
 
-            boolean currentlyGranted = mPmi.checkPermission(packageName, NOTIFICATION_PERMISSION,
-                    userId) != PackageManager.PERMISSION_DENIED;
+            int uid = mPackageManager.getPackageUid(packageName, 0, userId);
+            boolean currentlyGranted = hasPermission(uid);
             if (grant && !currentlyGranted) {
                 mPermManager.grantRuntimePermission(packageName, NOTIFICATION_PERMISSION, userId);
             } else if (!grant && currentlyGranted) {
