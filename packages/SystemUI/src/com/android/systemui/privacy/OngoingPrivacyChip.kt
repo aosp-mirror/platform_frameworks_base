@@ -15,6 +15,7 @@
 package com.android.systemui.privacy
 
 import android.content.Context
+import android.content.res.Configuration
 import android.util.AttributeSet
 import android.view.Gravity.CENTER_VERTICAL
 import android.view.Gravity.END
@@ -102,6 +103,11 @@ class OngoingPrivacyChip @JvmOverloads constructor(
                 R.string.ongoing_privacy_chip_content_multiple_apps, typesText)
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        super.onConfigurationChanged(newConfig)
+        updateResources()
+    }
+
     private fun updateResources() {
         iconMargin = context.resources
                 .getDimensionPixelSize(R.dimen.ongoing_appops_chip_icon_margin)
@@ -110,8 +116,11 @@ class OngoingPrivacyChip @JvmOverloads constructor(
         iconColor =
                 Utils.getColorAttrDefaultColor(context, com.android.internal.R.attr.colorPrimary)
 
+        val height = context.resources
+                .getDimensionPixelSize(R.dimen.ongoing_appops_chip_height)
         val padding = context.resources
                 .getDimensionPixelSize(R.dimen.ongoing_appops_chip_side_padding)
+        iconsContainer.layoutParams.height = height
         iconsContainer.setPaddingRelative(padding, 0, padding, 0)
         iconsContainer.background = context.getDrawable(R.drawable.statusbar_privacy_chip_bg)
     }
