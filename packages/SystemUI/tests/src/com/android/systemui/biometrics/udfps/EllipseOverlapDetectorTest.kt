@@ -43,7 +43,7 @@ class EllipseOverlapDetectorTest(val testCase: TestCase) : SysuiTestCase() {
                 minor = testCase.minor,
                 major = testCase.major
             )
-        val actual = underTest.isGoodOverlap(touchData, SENSOR)
+        val actual = underTest.isGoodOverlap(touchData, SENSOR, OVERLAY)
 
         assertThat(actual).isEqualTo(testCase.expected)
     }
@@ -71,8 +71,10 @@ class EllipseOverlapDetectorTest(val testCase: TestCase) : SysuiTestCase() {
                         expected = true
                     ),
                     genNegativeTestCase(
-                        outerXs = listOf(SENSOR.left - 1, SENSOR.right + 1),
-                        outerYs = listOf(SENSOR.top - 1, SENSOR.bottom + 1),
+                        outerXs =
+                            listOf(SENSOR.left - 1, SENSOR.right + 1, OVERLAY.left, OVERLAY.right),
+                        outerYs =
+                            listOf(SENSOR.top - 1, SENSOR.bottom + 1, OVERLAY.top, OVERLAY.bottom),
                         minor = 100f,
                         major = 100f,
                         expected = false
@@ -104,6 +106,7 @@ private val TOUCH_DATA =
     )
 
 private val SENSOR = Rect(100 /* left */, 200 /* top */, 300 /* right */, 400 /* bottom */)
+private val OVERLAY = Rect(0 /* left */, 100 /* top */, 400 /* right */, 600 /* bottom */)
 
 private fun genPositiveTestCases(
     innerXs: List<Int>,

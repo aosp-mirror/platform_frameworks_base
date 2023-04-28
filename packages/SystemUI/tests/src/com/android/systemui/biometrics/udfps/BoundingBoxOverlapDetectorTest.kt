@@ -33,7 +33,7 @@ class BoundingBoxOverlapDetectorTest(val testCase: TestCase) : SysuiTestCase() {
     @Test
     fun isGoodOverlap() {
         val touchData = TOUCH_DATA.copy(x = testCase.x.toFloat(), y = testCase.y.toFloat())
-        val actual = underTest.isGoodOverlap(touchData, SENSOR)
+        val actual = underTest.isGoodOverlap(touchData, SENSOR, OVERLAY)
 
         assertThat(actual).isEqualTo(testCase.expected)
     }
@@ -50,8 +50,10 @@ class BoundingBoxOverlapDetectorTest(val testCase: TestCase) : SysuiTestCase() {
                         validYs = listOf(SENSOR.top, SENSOR.bottom, SENSOR.centerY())
                     ),
                     genNegativeTestCases(
-                        invalidXs = listOf(SENSOR.left - 1, SENSOR.right + 1),
-                        invalidYs = listOf(SENSOR.top - 1, SENSOR.bottom + 1),
+                        invalidXs =
+                            listOf(SENSOR.left - 1, SENSOR.right + 1, OVERLAY.left, OVERLAY.right),
+                        invalidYs =
+                            listOf(SENSOR.top - 1, SENSOR.bottom + 1, OVERLAY.top, OVERLAY.bottom),
                         validXs = listOf(SENSOR.left, SENSOR.right, SENSOR.centerX()),
                         validYs = listOf(SENSOR.top, SENSOR.bottom, SENSOR.centerY())
                     )
@@ -82,6 +84,7 @@ private val TOUCH_DATA =
     )
 
 private val SENSOR = Rect(100 /* left */, 200 /* top */, 300 /* right */, 500 /* bottom */)
+private val OVERLAY = Rect(0 /* left */, 100 /* top */, 400 /* right */, 600 /* bottom */)
 
 private fun genTestCases(
     xs: List<Int>,

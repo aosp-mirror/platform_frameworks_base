@@ -20,5 +20,9 @@ import android.graphics.Rect
 
 /** Determines whether the touch has a sufficient overlap with the sensor. */
 interface OverlapDetector {
-    fun isGoodOverlap(touchData: NormalizedTouchData, nativeSensorBounds: Rect): Boolean
+    fun isGoodOverlap(
+        touchData: NormalizedTouchData,
+        nativeSensorBounds: Rect,
+        nativeOverlayBounds: Rect
+    ): Boolean
 }

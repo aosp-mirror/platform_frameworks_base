@@ -36,6 +36,9 @@ data class UdfpsOverlayParams(
     /** Same as [sensorBounds], but in native resolution. */
     val nativeSensorBounds = Rect(sensorBounds).apply { scale(1f / scaleFactor) }
 
+    /** Same as [overlayBounds], but in native resolution. */
+    val nativeOverlayBounds = Rect(overlayBounds).apply { scale(1f / scaleFactor) }
+
     /** See [android.view.DisplayInfo.logicalWidth] */
     val logicalDisplayWidth =
         if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
