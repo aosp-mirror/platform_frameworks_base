@@ -8217,7 +8217,11 @@ public final class ActiveServices {
                         : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
                 0 /* api_sate */,
                 null /* api_type */,
-                null /* api_timestamp */);
+                null /* api_timestamp */,
+                mAm.getUidStateLocked(r.appInfo.uid),
+                mAm.getUidProcessCapabilityLocked(r.appInfo.uid),
+                mAm.getUidStateLocked(r.mRecentCallingUid),
+                mAm.getUidProcessCapabilityLocked(r.mRecentCallingUid));
 
         int event = 0;
         if (state == FOREGROUND_SERVICE_STATE_CHANGED__STATE__ENTER) {
