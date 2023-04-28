@@ -86,6 +86,11 @@ struct DrawGlInfo {
         // commands are issued.
         kStatusDrew = 0x4
     };
+
+    // The current HDR/SDR ratio that we are rendering to. The transform to SDR will already
+    // be baked into the color_space_ptr, so this is just to indicate the amount of extended
+    // range is available if desired
+    float currentHdrSdrRatio;
 };  // struct DrawGlInfo
 
 }  // namespace uirenderer
