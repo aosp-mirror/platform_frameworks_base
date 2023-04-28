@@ -299,6 +299,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Canvia al perfil personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Canvia al perfil de treball"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contactes"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accedir als contactes"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ubicació"</string>
@@ -504,8 +508,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet que l\'aplicació controli el vibrador."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet que l\'aplicació accedeixi a l\'estat de vibració."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"trucar directament a números de telèfon"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Permet que l\'aplicació truqui a números de telèfon sense la teva intervenció. Això pot comportar càrrecs o trucades inesperats. Tingues en compte que això no permet que l\'aplicació truqui a números d\'emergència. És possible que se\'t cobri si les aplicacions malicioses fan trucades sense confirmació o marquen codis d\'operadors que poden causar que les trucades entrants es desviïn automàticament a un altre número."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accés al servei de trucades IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permet que l\'aplicació utilitzi el servei IMS per fer trucades sense la teva intervenció."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"veure l\'estat i la identitat del telèfon"</string>
@@ -2160,10 +2163,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"No es pot obrir aquest contingut amb aplicacions de treball"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"No es pot compartir aquest contingut amb aplicacions personals"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"No es pot obrir aquest contingut amb aplicacions personals"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Les aplicacions de treball estan en pausa"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reactiva"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Cap aplicació de treball"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Cap aplicació personal"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Obre <xliff:g id="APP">%s</xliff:g> al perfil personal"</string>
