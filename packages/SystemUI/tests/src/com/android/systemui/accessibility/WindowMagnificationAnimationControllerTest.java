@@ -53,7 +53,6 @@ import com.android.systemui.util.settings.SecureSettings;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -66,7 +65,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-@Ignore
 @LargeTest
 @RunWith(AndroidTestingRunner.class)
 public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
