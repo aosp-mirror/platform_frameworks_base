@@ -2385,6 +2385,22 @@ class Task extends TaskFragment {
         return parentTask == null ? null : parentTask.getCreatedByOrganizerTask();
     }
 
+    /** @return the first adjacent task of this task or its parent. */
+    @Nullable
+    Task getAdjacentTask() {
+        final TaskFragment adjacentTaskFragment = getAdjacentTaskFragment();
+        if (adjacentTaskFragment != null && adjacentTaskFragment.asTask() != null) {
+            return adjacentTaskFragment.asTask();
+        }
+
+        final WindowContainer parent = getParent();
+        if (parent == null || parent.asTask() == null) {
+            return null;
+        }
+
+        return parent.asTask().getAdjacentTask();
+    }
+
     // TODO(task-merge): Figure out what's the right thing to do for places that used it.
     boolean isRootTask() {
         return getRootTask() == this;
