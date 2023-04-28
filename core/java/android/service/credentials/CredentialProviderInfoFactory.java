@@ -75,12 +75,13 @@ public final class CredentialProviderInfoFactory {
     /**
      * Constructs an information instance of the credential provider.
      *
-     * @param context the context object
+     * @param context          the context object
      * @param serviceComponent the serviceComponent of the provider service
-     * @param userId the android userId for which the current process is running
+     * @param userId           the android userId for which the current process is running
      * @param isSystemProvider whether this provider is a system provider
      * @throws PackageManager.NameNotFoundException If provider service is not found
-     * @throws SecurityException If provider does not require the relevant permission
+     * @throws SecurityException                    If provider does not require the relevant
+     *                                              permission
      */
     public static CredentialProviderInfo create(
             @NonNull Context context,
@@ -99,13 +100,15 @@ public final class CredentialProviderInfoFactory {
     /**
      * Constructs an information instance of the credential provider.
      *
-     * @param context the context object
-     * @param serviceInfo the service info for the provider app. This must be retrieved from the
-     *     {@code PackageManager}
-     * @param isSystemProvider whether the provider app is a system provider
+     * @param context                              the context object
+     * @param serviceInfo                          the service info for the provider app. This must
+     *                                             be retrieved from the
+     *                                             {@code PackageManager}
+     * @param isSystemProvider                     whether the provider app is a system provider
      * @param disableSystemAppVerificationForTests whether to disable system app permission
-     *     verification so that tests can install system providers
-     * @param isEnabled whether the user enabled this provider
+     *                                             verification so that tests can install system
+     *                                             providers
+     * @param isEnabled                            whether the user enabled this provider
      * @throws SecurityException If provider does not require the relevant permission
      */
     public static CredentialProviderInfo create(
@@ -376,7 +379,6 @@ public final class CredentialProviderInfoFactory {
                 if (appInfo == null || serviceInfo == null) {
                     continue;
                 }
-
                 services.add(serviceInfo);
             } catch (SecurityException | PackageManager.NameNotFoundException e) {
                 Slog.e(TAG, "Error getting info for " + serviceInfo, e);
