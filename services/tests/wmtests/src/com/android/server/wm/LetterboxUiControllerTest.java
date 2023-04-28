@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
+import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
@@ -43,6 +45,7 @@ import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATI
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
@@ -916,6 +919,118 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mController = new LetterboxUiController(mWm, mActivity);
 
         assertFalse(mController.shouldOverrideMinAspectRatio());
+    }
+
+    @Test
+    @EnableCompatChanges({FORCE_RESIZE_APP})
+    public void testshouldOverrideForceResizeApp_overrideEnabled_returnsTrue() {
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertTrue(mController.shouldOverrideForceResizeApp());
+    }
+
+    @Test
+    @EnableCompatChanges({FORCE_RESIZE_APP})
+    public void testshouldOverrideForceResizeApp_propertyTrue_overrideEnabled_returnsTrue()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertTrue(mController.shouldOverrideForceResizeApp());
+    }
+
+    @Test
+    @DisableCompatChanges({FORCE_RESIZE_APP})
+    public void testshouldOverrideForceResizeApp_propertyTrue_overrideDisabled_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideForceResizeApp());
+    }
+
+    @Test
+    @DisableCompatChanges({FORCE_RESIZE_APP})
+    public void testshouldOverrideForceResizeApp_overrideDisabled_returnsFalse() {
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideForceResizeApp());
+    }
+
+    @Test
+    @EnableCompatChanges({FORCE_RESIZE_APP})
+    public void testshouldOverrideForceResizeApp_propertyFalse_overrideEnabled_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideForceResizeApp());
+    }
+
+    @Test
+    @DisableCompatChanges({FORCE_RESIZE_APP})
+    public void testshouldOverrideForceResizeApp_propertyFalse_noOverride_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideForceResizeApp());
+    }
+
+    @Test
+    @EnableCompatChanges({FORCE_NON_RESIZE_APP})
+    public void testshouldOverrideForceNonResizeApp_overrideEnabled_returnsTrue() {
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertTrue(mController.shouldOverrideForceNonResizeApp());
+    }
+
+    @Test
+    @EnableCompatChanges({FORCE_NON_RESIZE_APP})
+    public void testshouldOverrideForceNonResizeApp_propertyTrue_overrideEnabled_returnsTrue()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertTrue(mController.shouldOverrideForceNonResizeApp());
+    }
+
+    @Test
+    @DisableCompatChanges({FORCE_NON_RESIZE_APP})
+    public void testshouldOverrideForceNonResizeApp_propertyTrue_overrideDisabled_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ true);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideForceNonResizeApp());
+    }
+
+    @Test
+    @DisableCompatChanges({FORCE_NON_RESIZE_APP})
+    public void testshouldOverrideForceNonResizeApp_overrideDisabled_returnsFalse() {
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideForceNonResizeApp());
+    }
+
+    @Test
+    @EnableCompatChanges({FORCE_NON_RESIZE_APP})
+    public void testshouldOverrideForceNonResizeApp_propertyFalse_overrideEnabled_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideForceNonResizeApp());
+    }
+
+    @Test
+    @DisableCompatChanges({FORCE_NON_RESIZE_APP})
+    public void testshouldOverrideForceNonResizeApp_propertyFalse_noOverride_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES, /* value */ false);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideForceNonResizeApp());
     }
 
     @Test
