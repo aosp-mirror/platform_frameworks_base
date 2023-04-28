@@ -731,7 +731,7 @@ public class LockPatternUtils {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTO_PIN_CONFIRMATION,
                 FLAG_ENABLE_AUTO_PIN_CONFIRMATION,
-                /* defaultValue= */ false);
+                /* defaultValue= */ true);
     }
 
     /** Returns if the given quality maps to an alphabetic password */
