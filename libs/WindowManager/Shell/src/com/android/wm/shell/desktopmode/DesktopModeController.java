@@ -21,7 +21,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -494,18 +493,17 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
             mController = null;
         }
 
-        // TODO(b/278084491): pass in display id
-        public void showDesktopApps() {
+        @Override
+        public void showDesktopApps(int displayId) {
             executeRemoteCallWithTaskPermission(mController, "showDesktopApps",
-                    controller -> controller.showDesktopApps(DEFAULT_DISPLAY));
+                    controller -> controller.showDesktopApps(displayId));
         }
 
-        // TODO(b/278084491): pass in display id
         @Override
-        public int getVisibleTaskCount() throws RemoteException {
+        public int getVisibleTaskCount(int displayId) throws RemoteException {
             int[] result = new int[1];
             executeRemoteCallWithTaskPermission(mController, "getVisibleTaskCount",
-                    controller -> result[0] = controller.getVisibleTaskCount(DEFAULT_DISPLAY),
+                    controller -> result[0] = controller.getVisibleTaskCount(displayId),
                     true /* blocking */
             );
             return result[0];
