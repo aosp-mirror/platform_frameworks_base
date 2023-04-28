@@ -829,8 +829,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Called when the display has turned off.
+     * @param displayId The display to apply to.
+     * @param isSwappingDisplay Whether the display is swapping to another physical display.
      */
-    public void screenTurnedOff(int displayId);
+    void screenTurnedOff(int displayId, boolean isSwappingDisplay);
 
     public interface ScreenOnListener {
         void onScreenOn();
