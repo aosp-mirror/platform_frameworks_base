@@ -26,6 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"ایپ انسٹال ہو گئی۔"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"کیا آپ یہ ایپ انسٹال کرنا چاہتے ہیں؟"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"کیا آپ یہ ایپ اپ ڈیٹ کرنا چاہتے ہیں؟"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"اس ایپ کو <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> سے اپ ڈیٹ کریں؟\n\n اس ایپ کو عام طور پر <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> سے اپ ڈیٹس موصول ہوتی ہیں۔ کسی مختلف ذریعے سے اپ ڈیٹ کر کے، آپ اپنے فون پر کسی بھی ذریعے سے مستقبل کی اپ ڈیٹس حاصل کر سکتے ہیں۔ ایپ کی فعالیت تبدیل ہو سکتی ہے۔"</string>
     <string name="install_failed" msgid="5777824004474125469">"ایپ انسٹال نہیں ہوئی۔"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"پیکج کو انسٹال ہونے سے مسدود کر دیا گیا تھا۔"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"ایپ انسٹال نہیں ہوئی کیونکہ پیکج ایک موجودہ پیکیج سے متصادم ہے۔"</string>
@@ -41,6 +42,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"یہ صارف نامعلوم ایپس کو انسٹال نہیں کر سکتا"</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"اس صارف کو ایپس انسٹال کرنے کی اجازت نہیں ہے"</string>
     <string name="ok" msgid="7871959885003339302">"ٹھیک ہے"</string>
+    <string name="update_anyway" msgid="8792432341346261969">"بہر حال اپ ڈیٹ کریں"</string>
     <string name="manage_applications" msgid="5400164782453975580">"ایپس منظم کریں"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"جگہ نہیں ہے"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> کو انسٹال نہیں کیا جا سکا۔ کچھ جگہ خالی کریں اور دوبارہ کوشش کریں۔"</string>
@@ -68,7 +70,7 @@
     <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ان انسٹال ہو رہا ہے…"</string>
     <string name="uninstall_done" msgid="439354138387969269">"اَن انسٹال مکمل ہو گیا۔"</string>
     <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> اَن انسٹال ہو گیا"</string>
-    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کا کلون حذف کر دیا گیا ہے"</string>
+    <string name="uninstall_done_clone_app" msgid="5578308154544195413">"‫<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کا کلون حذف کر دیا گیا ہے"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"اَن انسٹال ناکام ہو گیا۔"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کو ان انسٹال کرنا ناکام ہو گیا۔"</string>
     <string name="uninstalling_cloned_app" msgid="1826380164974984870">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> کلون کو حذف کیا جا رہا ہے…"</string>
