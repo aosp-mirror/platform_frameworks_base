@@ -85,6 +85,7 @@ import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.After;
@@ -153,6 +154,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private ShadeLogger mShadeLogger;
     @Mock private DumpManager mDumpManager;
     @Mock private UiEventLogger mUiEventLogger;
+    @Mock private CastController mCastController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
 
@@ -239,7 +241,8 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mMetricsLogger,
                 mFeatureFlags,
                 mInteractionJankMonitor,
-                mShadeLogger
+                mShadeLogger,
+                mCastController
         );
 
         mFragmentListener = mQsController.getQsFragmentListener();
