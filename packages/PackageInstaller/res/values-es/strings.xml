@@ -26,7 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Aplicación instalada."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"¿Quieres instalar esta aplicación?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"¿Quieres actualizar esta aplicación?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"¿Actualizar esta aplicación con <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nEsta aplicación suele recibir actualizaciones de <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Si actualizas a través de otra fuente, puede que recibas futuras actualizaciones de cualquier fuente de tu teléfono. La funcionalidad de la aplicación puede cambiar."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"¿Actualizar esta aplicación a través de <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nEsta aplicación normalmente recibe actualizaciones a través de <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Si la actualizas usando otra fuente, puede que recibas futuras actualizaciones a través de cualquier fuente en tu teléfono. La funcionalidad de la aplicación puede cambiar."</string>
     <string name="install_failed" msgid="5777824004474125469">"No se ha instalado la aplicación."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Se ha bloqueado la instalación del paquete."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"La aplicación no se ha instalado debido a un conflicto con un paquete."</string>
