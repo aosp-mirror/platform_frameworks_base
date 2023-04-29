@@ -142,6 +142,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-тэлефанія"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Выклік праз Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Выкл."</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Выклікаць праз Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Выклікаць праз мабільную сетку"</string>
@@ -209,6 +210,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Вашы асабістыя праграмы будуць заблакіраваны, пакуль вы не ўключыце працоўны профіль"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Асабістыя праграмы будуць заблакіраваны ў <xliff:g id="TIME">%2$s</xliff:g> <xliff:g id="DATE">%1$s</xliff:g>. Ваш ІТ-адміністратар не дазволіў выключаць працоўны профіль больш чым на <xliff:g id="NUMBER">%3$d</xliff:g> сут."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Уключыць"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Выклікі і паведамленні выключаны"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Працоўныя праграмы прыпынены. Вы не будзеце атрымліваць тэлефонныя выклікі і тэкставыя паведамленні."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Уключыць працоўныя праграмы"</string>
     <string name="me" msgid="6207584824693813140">"Я"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Параметры планшэта"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Параметры Android TV"</string>
@@ -296,6 +300,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Сістэма Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Пераключыцца на асабісты профіль"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Пераключыцца на працоўны профіль"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Кантакты"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"атрымліваць доступ да вашых кантактаў"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Месцазнаходжанне"</string>
@@ -340,6 +348,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Можа распазнаваць жэсты на сканеры адбіткаў пальцаў прылады."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Зрабіць здымак экрана"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Можна зрабіць здымак экрана."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Перадпрагляд, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"адключаць ці змяняць радок стану"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Дазваляе прыкладанням адключаць радок стану або дадаваць і выдаляць сістэмныя значкі."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"быць панэллю стану"</string>
@@ -460,10 +469,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Праграма ў час яе выкарыстання будзе мець доступ да даных датчыкаў цела, такіх як пульс, тэмпература і працэнт утрымання ў крыві кіслароду."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Доступ да даных датчыкаў цела, такіх як пульс, у фонавым рэжыме"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Праграма ў час яе працы ў фонавым рэжыме будзе мець доступ да даных датчыкаў цела, такіх як пульс, тэмпература і працэнт утрымання ў крыві кіслароду."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Доступ праграмы ў час яе выкарыстання да даных пра тэмпературу з датчыка цела, які знаходзіцца на запясці."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Праграма ў час яе выкарыстання будзе мець доступ да даных пра тэмпературу з датчыка цела, які знаходзіцца на запясці."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Доступ праграмы ў фонавым рэжыме да даных пра тэмпературу з датчыка цела, які знаходзіцца на запясці."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Праграма ў час яе працы ў фонавым рэжыме будзе мець доступ да даных пра тэмпературу з датчыка цела, які знаходзіцца на запясці."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чытаць падзеі календара і падрабязныя звесткі"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Гэта праграма можа чытаць усе падзеі календара, захаваныя на вашым планшэце, і абагульваць ці захоўваць даныя календара."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Гэта праграма можа счытваць усе падзеі календара, захаваныя на прыладзе Android TV, і абагульваць ці захоўваць яго даныя."</string>
@@ -504,7 +509,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дазваляе прыкладанням кіраваць вібрацыяй."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дазваляе праграме атрымліваць доступ да вібрасігналу."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"непасрэдна набіраць тэлефонныя нумары"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Дазваляе прыкладанням званiць на тэлефонныя нумары без вашага ўмяшання. Гэта можа прывесці да нечаканага спагнання сродкаў або званкоў. Звярніце ўвагу, што прыкладанне не можа рабiць экстраныя выклікi. Шкоднасныя прыкладаннi могуць спаганяць з вас сродкi, робячы званкі без вашага пацверджання."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Дазваляе праграме тэлефанаваць на тэлефонныя нумары без вашага ўдзелу. У выніку вы можаце пабачыць нечаканыя плацяжы і званкі. Аднак праграма не зможа рабіць выклікі на нумары экстранных службаў. Шкодныя праграмы могуць прыносіць выдаткі, робячы выклікі без вашага пацвярджэння, або набіраючы коды аператараў, з якімі ўваходныя выклікі аўтаматычна перанакіроўваюцца на іншы нумар."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"атрымліваць доступ да сэрвісу выклікаў IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Дазваляе праграмам выкарыстоўваць службу IMS, каб рабіць выклікі без вашага ўмяшання."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"чытанне статусу тэлефона і ідэнтыфікацыя"</string>
@@ -710,7 +715,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Распазнаванне твару скасавана."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Распазнаванне твару скасавана карыстальнікам"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Занадта шмат спроб. Паўтарыце спробу пазней."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Занадта шмат спроб. Распазнаванне твару выключана."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Занадта шмат спроб. Распазнаванне твару недаступна."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Занадта шмат спроб. Разблакіруйце экран іншым спосабам."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не ўдалося спраўдзіць твар. Паўтарыце спробу."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Вы не наладзілі распазнаванне твару"</string>
@@ -797,6 +802,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Дазваляе трымальніку запусціць прагляд інфармацыі пра функцыі для праграмы."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"атрымліваць даныя датчыка з высокай частатой дыскрэтызацыі"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Праграма зможа распазнаваць даныя датчыка з частатой звыш 200 Гц"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"абнаўленне праграмы без удзелу карыстальніка"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Раней усталяваная праграма будзе абнаўляцца без удзелу карыстальніка"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Устанавіць правілы паролю"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Кіраваць даўжынёй і сімваламі, дазволенымі пры ўводзе пароляў і PIN-кодаў блакіроўкі экрана."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Сачыць за спробамі разблакіроўкі экрана"</string>
@@ -1360,8 +1367,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Перадача фота (PTP) праз USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Рэжым USB-мадэма"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI праз USB"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Прылада падключана як вэб-камера"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-прылада падключана"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Дакраніцеся, каб убачыць іншыя параметры."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Падключаная прылада зараджаецца. Дакраніцеся, каб убачыць іншыя параметры."</string>
@@ -1392,7 +1398,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Выберыце метад уводу"</string>
     <string name="show_ime" msgid="6406112007347443383">"Захоўваць яе на экране ў той час, калі фізічная клавіятура актыўная"</string>
     <string name="hardware" msgid="1800597768237606953">"Паказаць віртуальную клавіятуру"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Наладжванне фізічнай клавіятуры"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Наладзьце прыладу \"<xliff:g id="DEVICE_NAME">%s</xliff:g>\""</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Наладзьце фізічныя клавіятуры"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Дакраніцеся, каб выбраць мову і раскладку"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" АБВГДЕЁЖЗІЙКЛМНОПРСТУЎФХЦЧШ\'ЫЬЭЮЯ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1710,15 +1717,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Гатова"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Дэактываваць камбінацыю хуткага доступу"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Выкарыстоўваць камбінацыю хуткага доступу"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Інверсія колераў"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Карэкцыя колераў"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Рэжым кіравання адной рукой"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дадатковае памяншэнне яркасці"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Слыхавыя апараты"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Клавішы гучнасці ўтрымліваліся націснутымі. Уключана служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Клавішы гучнасці ўтрымліваліся націснутымі. Служба \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" выключана."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Каб карыстацца сэрвісам \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце і ўтрымлівайце на працягу трох секунд абедзве клавішы гучнасці"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Адпусціце клавішы гучнасці. Каб уключыць сэрвіс \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\", націсніце абедзве клавішы гучнасці яшчэ раз і ўтрымлівайце іх на працягу 3 секунд."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Выберыце функцыю, якую будзеце выкарыстоўваць пры націску кнопкі спецыяльных магчымасцей:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Выберыце функцыю, якую будзеце выкарыстоўваць з жэстам спецыяльных магчымасцей (правесці двума пальцамі па экране знізу ўверх):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Выберыце функцыю, якую будзеце выкарыстоўваць з жэстам спецыяльных магчымасцей (правесці трыма пальцамі па экране знізу ўверх):"</string>
@@ -1870,8 +1876,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Абноўлены вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Выдалены вашым адміністратарам"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"У рэжыме эканоміі зараду ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"У рэжыме эканоміі зараду ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"У рэжыме энергазберажэння ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"У рэжыме энергазберажэння ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"У рэжыме \"Эканомія трафіка\" фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Уключыць"</string>
@@ -1950,11 +1956,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Праграма \"<xliff:g id="APP_NAME_0">%1$s</xliff:g>\" цяпер недаступная. Яна кіруецца праграмай \"<xliff:g id="APP_NAME_1">%2$s</xliff:g>\"."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Даведацца больш"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Скасаваць прыпыненне для праграмы"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Уключыць працоўныя праграмы?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Атрымаць доступ да працоўных праграм і апавяшчэнняў"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Уключыць"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Уключыць працоўныя праграмы?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Уключыць"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Экстранны выпадак"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Запытайце доступ да працоўных праграм і выклікаў"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Праграма недаступная"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" цяпер недаступная."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"Недаступна: <xliff:g id="ACTIVITY">%1$s</xliff:g>"</string>
@@ -2160,12 +2164,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Не ўдалося адкрыць гэта змесціва з дапамогай працоўных праграм"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Не ўдалося абагуліць гэта змесціва з асабістымі праграмамі"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Не ўдалося адкрыць гэта змесціва з дапамогай асабістых праграм"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Працоўны профіль прыпынены"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Націсніце, каб уключыць"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Працоўныя праграмы прыпынены"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Уключыць"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Няма працоўных праграм"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Няма асабістых праграм"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Адкрыць праграму \"<xliff:g id="APP">%s</xliff:g>\" з выкарыстаннем асабістага профілю?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Адкрыць праграму \"<xliff:g id="APP">%s</xliff:g>\" з выкарыстаннем працоўнага профілю?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Адкрыць асабістую праграму <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Адкрыць працоўную праграму <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Скарыстаць асабісты браўзер"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Скарыстаць працоўны браўзер"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код разблакіроўкі сеткі для SIM-карты"</string>
@@ -2322,5 +2326,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Праграма \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" выкарыстоўвае абодва экраны для паказу змесціва"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Прылада моцна нагрэлася"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Функцыя \"Двайны экран\" недаступная, бо тэлефон моцна награваецца"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Функцыя Dual Screen недаступная"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Функцыя Dual Screen недаступная, бо ўключаны рэжым энергазберажэння. Вы можаце выключыць яго ў Наладах."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Перайсці ў Налады."</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Выключыць"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Прылада \"<xliff:g id="DEVICE_NAME">%s</xliff:g>\" наладжана"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Раскладка клавіятуры наладжана для мовы \"<xliff:g id="LAYOUT_1">%s</xliff:g>\". Націсніце, каб змяніць."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Раскладка клавіятуры наладжана для наступных моў: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Націсніце, каб змяніць."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Раскладка клавіятуры наладжана для наступных моў: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Націсніце, каб змяніць."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Раскладка клавіятуры наладжана для наступных моў: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Націсніце, каб змяніць."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Фізічныя клавіятуры наладжаны"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Націсніце, каб праглядзець клавіятуры"</string>
 </resources>

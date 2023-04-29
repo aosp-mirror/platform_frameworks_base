@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-puhelut"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi-puhelu"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Ei päällä"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Soita Wi-Fin kautta"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Soita mobiiliverkon kautta"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Henkilökohtaiset sovelluksesi estetään, kunnes laitat työprofiilisi päälle"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Henkilökohtaiset sovellukset estetään <xliff:g id="DATE">%1$s</xliff:g> klo <xliff:g id="TIME">%2$s</xliff:g>. IT-järjestelmänvalvoja ei salli työprofiilisi pysyä pois päältä yli <xliff:g id="NUMBER">%3$d</xliff:g> päivää."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Laita päälle"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Puhelut ja viestit ovat pois päältä"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Olet keskeyttänyt työsovellukset. Et saa puheluja tai tekstiviestejä."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Laita päälle"</string>
     <string name="me" msgid="6207584824693813140">"Minä"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-laitteen asetukset"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ‑vaihtoehdot"</string>
@@ -294,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-järjestelmä"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Vaihda henkilökohtaiseen profiiliin"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Vaihda työprofiiliin"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Yhteystiedot"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"pääsy yhteystietoihin"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Sijainti"</string>
@@ -338,6 +346,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Voi tallentaa laitteen sormenjälkitunnistimelle tehtyjä eleitä."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ota kuvakaappaus"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Voi ottaa kuvakaappauksen näytöstä."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Esikatselu, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"poista tilapalkki käytöstä tai muokkaa tilapalkkia"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Antaa sovelluksen poistaa tilapalkin käytöstä ja lisätä tai poistaa järjestelmäkuvakkeita."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"sijaita tilapalkissa"</string>
@@ -458,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Myöntää sovellukselle pääsyn kehoanturidataan, esim. sykkeeseen, lämpötilaan ja veren happipitoisuuteen, kun sovellusta käytetään."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Pääsy kehoanturidataan, esim. sykkeeseen, kun käynnissä taustalla"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Myöntää sovellukselle pääsyn kehoanturidataan, esim. sykkeeseen, lämpötilaan ja veren happipitoisuuteen, kun sovellus on käynnissä taustalla."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Pääsy kehoanturin ranteen lämpötiladataan, kun sovellusta käytetään."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Myöntää sovellukselle pääsyn kehoanturin ranteen lämpötiladataan, kun sovellusta käytetään."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Pääsy kehoanturin ranteen lämpötiladataan, kun sovellus on käynnissä taustalla."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Myöntää sovellukselle pääsyn kehoanturin ranteen lämpötiladataan, kun sovellus on käynnissä taustalla."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lue kalenterin tapahtumia ja tietoja"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Tämä sovellus voi lukea kaikkia tabletille tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Tämä sovellus voi lukea kaikkia Android TV ‑laitteeseen tallennettuja kalenteritapahtumia sekä jakaa tai tallentaa kalenteritietoja."</string>
@@ -502,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Antaa sovelluksen hallita värinää."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Sallii sovelluksen käyttää värinätilaa."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"soittaa puhelinnumeroihin suoraan"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Antaa sovelluksen soittaa puhelinnumeroihin kysymättä sinulta. Tämä voi aiheuttaa odottamattomia kuluja tai puheluita. Huomaa, että tämä ei anna sovellukselle lupaa soittaa hätänumeroihin. Haitalliset sovellukset voivat aiheuttaa sinulle kuluja soittamalla puheluita ilman lupaa."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Sallii sovelluksen soittaa puhelinnumeroihin ilman toimintaasi. Tämä voi johtaa odottamattomiin veloituksiin tai puheluihin. Huomaa, että tämä lupa ei anna sovelluksen soittaa hätänumeroihin. Haitalliset sovellukset voivat aiheuttaa rahallisia kuluja soittamalla puheluja ilman vahvistustasi tai käyttämällä operaattorikoodeja, joilla saapuvat puhelut siirretään automaattisesti toiseen numeroon."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"pikaviestipalvelun puhelukäyttöoikeus"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Antaa sovelluksen soittaa puheluita pikaviestipalvelun avulla ilman käyttäjän toimia."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lue puhelimen tila ja identiteetti"</string>
@@ -626,7 +631,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Sormenjälkeä ei voi tunnistaa. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhdista sormenjälkitunnistin ja yritä uudelleen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhdista anturi ja yritä uudelleen"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina anturia voimakkaasti"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina tunnistinta voimakkaasti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Kokeile toista sormenjälkeä"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liian kirkas"</string>
@@ -708,7 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Kasvotoiminto peruutettu"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Käyttäjä perui kasvojentunnistusavauksen"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Liian monta yritystä. Yritä myöhemmin uudelleen."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Liian monta yritystä. Kasvojentunnistusavaus poistettu käytöstä."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Liikaa yrityksiä. Face Unlock ei saatavilla."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Liian monta yritystä. Lisää sen sijaan näytön lukitus."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kasvoja ei voi vahvistaa. Yritä uudelleen."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Et ole ottanut käyttöön kasvojentunnistusavausta"</string>
@@ -795,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Antaa luvanhaltijan aloittaa sovelluksen ominaisuustietojen katselun."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"saada pääsyn anturidataan suuremmalla näytteenottotaajuudella"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Sallii sovelluksen ottaa anturidatasta näytteitä yli 200 Hz:n taajuudella"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"päivittää sovelluksen ilman käyttäjän toimintaa"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Sallii luvan saaneen sovelluksen päivittää aiemmin asentamansa sovelluksen ilman käyttäjän toimintaa"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Asentaa salasanasäännöt"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Hallinnoida ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Tarkkailla näytön avaamisyrityksiä"</string>
@@ -1358,8 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP USB:n kautta on käytössä"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Internetin jakaminen USB:n kautta on käytössä"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI USB:n kautta on käytössä"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Laite yhdistetty webkamerana"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-lisälaite yhdistetty"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Näet lisää vaihtoehtoja napauttamalla."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Ladataan yhdistettyä laitetta. Napauta nähdäksesi lisää vaihtoehtoja."</string>
@@ -1390,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Valitse syöttötapa"</string>
     <string name="show_ime" msgid="6406112007347443383">"Pidä näytöllä, kun fyysinen näppäimistö on aktiivinen"</string>
     <string name="hardware" msgid="1800597768237606953">"Näytä virtuaalinen näppäimistö"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Määritä fyysinen näppäimistö"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Määritä <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Määritä fyysiset näppäimistöt"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Valitse kieli ja asettelu koskettamalla."</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZÅÄÖ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1708,15 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Valmis"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Poista pikanäppäin käytöstä"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Käytä pikanäppäintä"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Käänteiset värit"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Värinkorjaus"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Yhden käden moodi"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Erittäin himmeä"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Kuulolaitteet"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Äänenvoimakkuuspainikkeita painettiin pitkään. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> laitettiin päälle."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Äänenvoimakkuuspainikkeita painettiin pitkään. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> laitettiin pois päältä."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Voit käyttää palvelua <xliff:g id="SERVICE_NAME">%1$s</xliff:g> painamalla molempia äänenvoimakkuuspainikkeita kolmen sekunnin ajan"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Vapauta äänenvoimakkuuspainikkeet. Laita <xliff:g id="SERVICE_NAME">%1$s</xliff:g> päälle painamalla äänenvoimakkuuspainikkeita uudelleen kolmen sekunnin ajan."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Valitse ominaisuus, jonka esteettömyyspainike aktivoi:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Valitse ominaisuus, jota käytetään esteettömyyseleellä (pyyhkäise näytön alalaidasta ylös kahdella sormella):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Valitse ominaisuus, jota käytetään esteettömyyseleellä (pyyhkäise näytön alalaidasta ylös kolmella sormella):"</string>
@@ -1948,11 +1954,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ei ole juuri nyt saatavilla. Tästä vastaa <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Lue lisää"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Peru keskeytys"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Käytetäänkö työsovelluksia?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Palauta työsovellukset ja ilmoitukset käyttöön"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Ota käyttöön"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Laita työsovellukset päälle?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Laita päälle"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Hätätilanne"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Palauta työsovellukset ja puhelut käyttöön"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Sovellus ei ole käytettävissä"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei ole nyt käytettävissä."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> ei käytettävissä"</string>
@@ -2158,12 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tätä sisältöä ei voi avata työsovelluksilla"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tätä sisältöä ei voi jakaa henkilökohtaisilla sovelluksilla"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tätä sisältöä ei voi avata henkilökohtaisilla sovelluksilla"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Työprofiilin käyttö on keskeytetty"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Laita päälle napauttamalla"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Työsovellukset on keskeytetty"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Jatka"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ei työsovelluksia"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ei henkilökohtaisia sovelluksia"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Avataanko <xliff:g id="APP">%s</xliff:g> henkilökohtaisessa profiilissa?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Avataanko <xliff:g id="APP">%s</xliff:g> työprofiilissa?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Avaa henkilökohtainen sovellus (<xliff:g id="APP">%s</xliff:g>)"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Avaa työsovellus (<xliff:g id="APP">%s</xliff:g>)"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Käytä henkilökohtaista selainta"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Käytä työselainta"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM-kortin verkkoversion lukituksen avaamisen PIN-koodi"</string>
@@ -2320,5 +2324,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> käyttää molempia näyttöjä sisällön näyttämiseen"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Laite on liian lämmin"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Kaksoisnäyttö ei ole käytettävissä, koska puhelin on liian lämmin"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Kaksoisnäyttö ei ole saatavilla"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Kaksoisnäyttö ei ole käytettävissä, koska Virransäästö on päällä. Voit estää tämän asetuksista."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Siirry asetuksiin"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Laita pois päältä"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> määritetty"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Näppäimistöasetteluksi valittu <xliff:g id="LAYOUT_1">%s</xliff:g>. Muuta asetuksia napauttamalla."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Näppäimistöasetteluksi valittu <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Muuta asetuksia napauttamalla."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Näppäimistöasetteluksi valittu <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Muuta asetuksia napauttamalla."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Näppäimistöasetteluksi valittu <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Muuta asetuksia napauttamalla."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fyysiset näppäimistöt määritetty"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Katso näppäimistöt napauttamalla"</string>
 </resources>

@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi 通話"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-Fi 通話"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"關閉"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"透過 Wi-Fi 進行通話"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"透過行動網路進行通話"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"系統已封鎖你的個人應用程式；你必須開啟工作資料夾，這些應用程式才會解除封鎖"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"系統將於 <xliff:g id="DATE">%1$s</xliff:g><xliff:g id="TIME">%2$s</xliff:g> 封鎖個人應用程式。IT 管理員不允許工作資料夾關閉超過 <xliff:g id="NUMBER">%3$d</xliff:g> 天。"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"開啟"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"通話與訊息功能已關閉"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"你已暫停工作應用程式，因此將無法接聽電話或接收訊息。"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"取消暫停工作應用程式"</string>
     <string name="me" msgid="6207584824693813140">"我"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"平板電腦選項"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV 選項"</string>
@@ -294,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android 系統"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"切換至個人設定檔"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"切換至工作資料夾"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"聯絡人"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"存取你的聯絡人"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"位置"</string>
@@ -338,6 +346,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"可以擷取使用者對裝置的指紋感應器執行的手勢。"</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"擷取螢幕畫面"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"可以擷取螢幕畫面。"</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"預覽，<xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"停用或變更狀態列"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"允許應用程式停用狀態列，並可新增或移除系統圖示。"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"以狀態列顯示"</string>
@@ -458,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"允許應用程式在使用期間存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"在背景執行時可存取人體感應器資料，例如心跳速率"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"允許應用程式在背景執行時存取人體感應器資料，例如心跳速率、體溫和血氧比例。"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"在應用程式使用期間存取手錶人體感應器上的溫度資料。"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"允許應用程式在使用期間存取手錶人體感應器上的溫度資料。"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"在背景執行應用程式時存取手錶人體感應器上的溫度資料。"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"允許應用程式在背景執行時存取手錶人體感應器上的溫度資料。"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"讀取日曆活動和詳細資訊"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"這個應用程式可讀取所有儲存在平板電腦上的日曆活動資訊，以及共用或儲存日曆資料。"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"這個應用程式可讀取所有儲存在 Android TV 裝置上的日曆活動，以及共用或儲存日曆資料。"</string>
@@ -502,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允許應用程式控制震動。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允許應用程式存取震動功能狀態。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"直接撥打電話號碼"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"允許應用程式自行撥打電話，但可能產生非預期的費用或撥打非預期的電話。注意：這項權限不允許應用程式撥打緊急電話。惡意應用程式可能利用此功能擅自撥打電話，增加你不必要的額外支出。"</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"允許應用程式在你未操作的情況下自行撥打電話號碼，但可能產生非預期的費用或撥打非預期的電話。請注意，這項權限並不允許應用程式撥打緊急電話號碼。惡意應用程式可能利用此功能擅自撥打電話或撥打電信業者的代碼，導致來電自動轉接到其他號碼，增加不必要的額外支出。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"存取 IMS 撥號服務"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"允許應用程式自動使用 IMS 服務撥打電話。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"讀取手機狀態和識別碼"</string>
@@ -708,7 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"臉孔處理作業已取消。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"使用者已取消人臉解鎖作業"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"嘗試次數過多，請稍後再試。"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"嘗試次數過多，因此系統已停用人臉解鎖功能。"</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"嘗試次數過多，人臉解鎖功能無法使用。"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"嘗試次數過多，請改用螢幕鎖定功能驗證身分。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"無法驗證臉孔，請再試一次。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"你尚未設定人臉解鎖功能"</string>
@@ -795,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"允許具有這項權限的應用程式開始查看其他應用程式的功能資訊。"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"以高取樣率存取感應器資料"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"允許應用程式以高於 200 Hz 的頻率對感應器資料進行取樣"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"自動更新應用程式 (使用者不必操作)"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"允許容器更新先前安裝的應用程式，使用者不必操作"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"設定密碼規則"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"管理螢幕鎖定密碼和 PIN 碼支援的字元和長度上限。"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"監控螢幕解鎖嘗試次數"</string>
@@ -1358,8 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"已開啟 USB PTP 模式"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"已開啟 USB 網路共用模式"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"已開啟 USB MIDI 模式"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"接上的裝置已做為網路攝影機使用"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"已連接 USB 配件"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"輕觸即可查看更多選項。"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"正在為連接的裝置充電。輕觸即可查看更多選項。"</string>
@@ -1390,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"選擇輸入法"</string>
     <string name="show_ime" msgid="6406112007347443383">"使用實體鍵盤時仍繼續顯示虛擬鍵盤"</string>
     <string name="hardware" msgid="1800597768237606953">"顯示虛擬鍵盤"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"設定實體鍵盤"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"設定「<xliff:g id="DEVICE_NAME">%s</xliff:g>」"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"設定實體鍵盤"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"輕觸即可選取語言和版面配置"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1682,7 +1689,7 @@
     <string name="csd_entering_RS2_warning" product="default" msgid="3699509945325496807">"目前的媒體播放音量在長時間聆聽下可能會損害聽力。\n\n如果繼續以這個音量播放內容，長時間可能導致聽力受損。"</string>
     <string name="csd_momentary_exposure_warning" product="default" msgid="7861896191081176454">"警告：\n目前的內容播放音量已超過安全聆聽範圍。\n\n繼續聆聽這個音量將導致聽力永久受損。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙捷徑嗎？"</string>
-    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量按鈕 3 秒，就能啟動無障礙功能。"</string>
+    <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量鍵 3 秒，就能啟動無障礙功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="3135860819356676426">"要開啟無障礙功能快速鍵嗎？"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按住音量調高鍵和調低鍵數秒，即可開啟無障礙功能。這麼做可能會改變裝置的運作方式。\n\n目前的功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n你可以在 [設定] &gt; [無障礙設定] 中變更選取的功能。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="2128323171922023762">" • <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
@@ -1693,7 +1700,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要將裝置的完整控制權授予「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，可以將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，建議可將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看及控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容及在其他應用程式上顯示內容。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看及執行動作"</string>
@@ -1708,15 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完成"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"停用捷徑"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用捷徑"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"色彩反轉"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"色彩校正"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"單手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"超暗"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"助聽器"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量鍵。「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」已開啟。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量鍵。「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」已關閉。"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"同時按住調低及調高音量鍵三秒即可使用「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"放開音量鍵。如要開啟 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>，請同時按住音量調高鍵和調低鍵 3 秒。"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"輕觸無障礙工具按鈕後，選擇你想使用的功能："</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"選擇要搭配無障礙手勢 (用兩指從螢幕底部向上滑動) 使用的功能："</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"選擇要搭配無障礙手勢 (用三指從螢幕底部向上滑動) 使用的功能："</string>
@@ -1948,11 +1954,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"目前無法使用「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」。這項設定是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」管理。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"瞭解詳情"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"取消暫停應用程式"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"要開啟工作應用程式存取權嗎？"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"開啟工作應用程式和通知的存取權"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"開啟"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"要取消暫停工作應用程式嗎？"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"取消暫停"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"撥打緊急電話"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"要求存取工作應用程式和通話"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"應用程式無法使用"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」目前無法使用。"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"無法存取「<xliff:g id="ACTIVITY">%1$s</xliff:g>」"</string>
@@ -2158,12 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"無法使用工作應用程式開啟這項內容"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"無法透過個人應用程式分享這項內容"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"無法使用個人應用程式開啟這項內容"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"工作資料夾已暫停使用"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"輕觸即可啟用"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"工作應用程式目前為暫停狀態"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暫停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"沒有適用的工作應用程式"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"沒有適用的個人應用程式"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"要在個人資料夾中開啟「<xliff:g id="APP">%s</xliff:g>」嗎？"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"要在工作資料夾中開啟「<xliff:g id="APP">%s</xliff:g>」嗎？"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"開啟個人用「<xliff:g id="APP">%s</xliff:g>」"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"開啟工作用「<xliff:g id="APP">%s</xliff:g>」"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用個人瀏覽器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作瀏覽器"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 卡網路解鎖 PIN 碼"</string>
@@ -2320,5 +2324,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在使用雙螢幕顯示內容"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"裝置過熱"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"手機過熱，因此無法使用雙螢幕功能"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"無法使用雙螢幕功能"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"省電模式已開啟，因此無法使用雙螢幕功能。你可以前往「設定」頁面關閉這個模式。"</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"前往「設定」"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"停用"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"已設定「<xliff:g id="DEVICE_NAME">%s</xliff:g>」"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"鍵盤配置已設為<xliff:g id="LAYOUT_1">%s</xliff:g>。輕觸即可變更。"</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"鍵盤配置已設為<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>。輕觸即可變更。"</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"鍵盤配置已設為<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>。輕觸即可變更。"</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"鍵盤配置已設為<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>、<xliff:g id="LAYOUT_3">%3$s</xliff:g>…輕觸即可變更。"</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"已設定實體鍵盤"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"輕觸即可查看鍵盤"</string>
 </resources>

@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"ການໂທ Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"ການໂທ Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ປິດ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"ໂທຜ່ານ Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ໂທຜ່ານເຄືອຂ່າຍມືຖື"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ແອັບສ່ວນຕົວຂອງທ່ານຈະຖືກບລັອກໄວ້ຈົນກວ່າທ່ານຈະເປີດໃຊ້​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກຂອງທ່ານ"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"ແອັບສ່ວນຕົວຈະຖືກບລັອກໃນວັນທີ <xliff:g id="DATE">%1$s</xliff:g> ເວລາ <xliff:g id="TIME">%2$s</xliff:g>. ຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ປິດໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານເກີນ <xliff:g id="NUMBER">%3$d</xliff:g> ມື້."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ເປີດໃຊ້"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ປິດການໂທ ແລະ ຂໍ້ຄວາມໄວ້ແລ້ວ"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"ທ່ານໄດ້ຢຸດແອັບບ່ອນເຮັດວຽກໄວ້ຊົ່ວຄາວແລ້ວ. ທ່ານຈະບໍ່ໄດ້ຮັບການໂທທາງໂທລະສັບ ຫຼື ຂໍ້ຄວາມ."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ຍົກເລີກການຢຸດແອັບເຮັດວຽກຊົ່ວຄາວ"</string>
     <string name="me" msgid="6207584824693813140">"ຂ້າພະເຈົ້າ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ໂຕເລືອກແທັບເລັດ"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"ຕົວເລືອກ Android TV"</string>
@@ -258,7 +262,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ໂໝດປິດສຽງ"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ປິດສຽງແລ້ວ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ເປິດສຽງແລ້ວ"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ໂໝດໃນຍົນ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ໂໝດຢູ່ໃນຍົນ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"ເປີດໂໝດຢູ່ໃນຍົນແລ້ວ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"ປິດໂໝດໃນຍົນແລ້ວ"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"​ການ​ຕັ້ງ​ຄ່າ"</string>
@@ -294,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"ລະບົບ Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ສະຫຼັບໄປໂປຣໄຟລ໌ສ່ວນຕົວ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ສະຫຼັບໄປໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ລາຍຊື່ຜູ້ຕິດຕໍ່"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ເຂົ້າ​ຫາ​ລາຍ​ຊື່​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ສະ​ຖານ​ທີ່"</string>
@@ -338,6 +346,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"ສາມາດບັນທຶກທ່າທາງທີ່ເກີດຂຶ້ນໃນອຸປະກອນເຊັນເຊີລາຍນິ້ວມືໄດ້."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"ຖ່າຍຮູບໜ້າຈໍ"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"ຕົວຢ່າງ, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"ປິດການນນຳໃຊ້ ຫຼື ແກ້ໄຂແຖບສະຖານະ"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"ອະນຸຍາດໃຫ້ແອັບຯປິດການເຮັດວຽກຂອງແຖບສະຖານະ ຫຼືເພີ່ມ ແລະລຶບໄອຄອນລະບົບອອກໄດ້."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ເປັນ​ແຖບ​ສະ​ຖາ​ນະ"</string>
@@ -458,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ ແລະ ເປີເຊັນອອກຊິເຈນໃນເລືອດ, ໃນຂະນະທີ່ໃຊ້ແອັບຢູ່."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ໃນຂະນະທີ່ແອັບຢູ່ໃນພື້ນຫຼັງ"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີຮ່າງກາຍ, ເຊັ່ນ: ອັດຕາການເຕັ້ນຫົວໃຈ, ອຸນຫະພູມ ແລະ ເປີເຊັນອອກຊິເຈນໃນເລືອດ, ໃນຂະນະທີ່ແອັບຢູ່ໃນພື້ນຫຼັງ."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"ເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ນຳໃຊ້ແອັບ."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ນຳໃຊ້ແອັບ."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"ເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ແອັບເຮັດວຽກໃນພື້ນຫຼັງ."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງຂໍ້ມູນອຸນຫະພູມຢູ່ຂໍ້ມືຈາກເຊັນເຊີຮ່າງກາຍໃນຂະນະທີ່ແອັບເຮັດວຽກໃນພື້ນຫຼັງ."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Read calendar events and details"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"This app can read all calendar events stored on your tablet and share or save your calendar data."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ແອັບນີ້ສາມາດອ່ານນັດໝາຍປະຕິທິນທັງໝົດທີ່ບັນທຶກໄວ້ຢູ່ອຸປະກອນ Android TV ຂອງທ່ານ ແລະ ແບ່ງປັນ ຫຼື ບັນທຶກຂໍ້ມູນປະຕິທິນຂອງທ່ານ."</string>
@@ -502,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ອະນຸຍາດໃຫ້ແອັບຯຄວບຄຸມໂຕສັ່ນ."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ອະນຸຍາດໃຫ້ແອັບເຂົ້າເຖິງສະຖານະການສັ່ນໄດ້."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ໂທຫາເບີໂທລະສັບໂດຍກົງ"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"ອະນຸຍາດໃຫ້ແອັບຯໂທຫາເບີໂທລະສັບໄດ້ ໂດຍບໍ່ຕ້ອງຖ້າການດຳເນີນການໃດໆຈາກທ່ານ. ຄຸນສົມບັດນີ້ອາດກໍ່ໃຫ້ເກີດຄ່າໃຊ້ຈ່າຍໃນການໂທທີ່ບໍ່ຄາດຄິດໄດ້. ໝາຍເຫດ: ຄຸນສົມບັດນີ້ບໍ່ໄດ້ເປັນການອະນຸຍາດໃຫ້ແອັບຯ ສາມາດໂທຫາເບີສຸກເສີນ. ແອັບຯທີ່ເປັນອັນຕະລາຍອາດເຮັດໃຫ້ທ່ານ ຕ້ອງເສຍຄ່າໂທໂດຍທີ່ບໍ່ໄດ້ຄາດຄິດ."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"ອະນຸຍາດໃຫ້ແອັບໂທເຂົ້າເບີໂທລະສັບໂດຍບໍ່ຕ້ອງໃຫ້ທ່ານຈັດການ. ເຊິ່ງອາດເຮັດໃຫ້ມີການຮຽກເກັບເງິນ ຫຼື ການໂທທີ່ບໍ່ຄາດຄິດ. ກະລຸນາຮັບຊາບວ່າການດຳເນີນການນີ້ບໍ່ໄດ້ອະນຸຍາດໃຫ້ແອັບໂທຫາເບີໂທສຸກເສີນ. ແອັບທີ່ເປັນອັນຕະລາຍອາດເຮັດໃຫ້ທ່ານຕ້ອງເສຍຄ່າໃຊ້ຈ່າຍດ້ວຍການໂທໂດຍບໍ່ຂໍການຢືນຢັນຈາກທ່ານ ຫຼື ກົດລະຫັດຜູ້ໃຫ້ບໍລິການເຊິ່ງເຮັດໃຫ້ສາຍໂທເຂົ້າຖືກສົ່ງຕໍ່ໄປຫາເບີອື່ນໂດຍອັດຕະໂນມັດ."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"ເຂົ້າ​ຫາ​ການ​ບໍ​ລິ​ການ​ໂທ IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ອະ​ນຸ​ຍາດ​ໃຫ້​ແອັບ​ໃຊ້​ການ​ບໍ​ລິ​ການ IMS ເພື່ອ​ໂທ​ໂດຍ​ບໍ່​ມີ​ການ​ຊ່ວຍ​ເຫຼືອ​ຂອງ​ທ່ານ."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ອ່ານສະຖານະ ແລະຂໍ້ມູນລະບຸໂຕຕົນຂອງໂທລະສັບ"</string>
@@ -708,7 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ຍົກເລີກການດຳເນີນການກັບໃບໜ້າແລ້ວ."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ຜູ້ໃຊ້ຍົກເລີກການປົດລັອກດ້ວຍໜ້າແລ້ວ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ມີຄວາມພະຍາຍາມຫຼາຍຄັ້ງເກີນໄປ. ກະລຸນາລອງໃໝ່ໃນພາຍຫຼັງ."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ປິດການນຳໃຊ້ການປົດລັອກດ້ວຍໜ້າແລ້ວ."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ໃຊ້ການປົດລັອກດ້ວຍໜ້າບໍ່ໄດ້."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ພະຍາຍາມຫຼາຍເທື່ອເກີນໄປ. ກະລຸນາເຂົ້າການລັອກໜ້າຈໍແທນ."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ບໍ່ສາມາດຢັ້ງຢືນໃບໜ້າໄດ້. ກະລຸນາລອງໃໝ່."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"ທ່ານຍັງບໍ່ໄດ້ຕັ້ງຄ່າການປົດລັອກດ້ວຍໜ້າເທື່ອ"</string>
@@ -795,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"ອະນຸຍາດໃຫ້ຜູ້ຖືເລີ່ມການເບິ່ງຂໍ້ມູນຄຸນສົມບັດສຳລັບແອັບໃດໜຶ່ງ."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ເຂົ້າເຖິງຂໍ້ມູນເຊັນເຊີໃນອັດຕາຕົວຢ່າງສູງ"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"ອະນຸຍາດໃຫ້ແອັບສຸ່ມຕົວຢ່າງຂໍ້ມູນເຊັນເຊີໃນອັດຕາທີ່ຫຼາຍກວ່າ 200 Hz"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ອັບເດດແອັບໂດຍບໍ່ຕ້ອງມີຄຳສັ່ງຜູ້ໃຊ້"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"ອະນຸຍາດໃຫ້ຜູ້ຖືອັບເດດແອັບທີ່ໄດ້ຕິດຕັ້ງໄວ້ກ່ອນໜ້າໂດຍບໍ່ຕ້ອງມີຄຳສັ່ງຜູ້ໃຊ້"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"ຕັ້ງຄ່າກົດຂອງລະຫັດຜ່ານ"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"ຄວບຄຸມຄວາມຍາວ ແລະຕົວອັກສອນທີ່ອະ​ນຸ​ຍາດ​ໃຫ້​ຢູ່​ໃນລະ​ຫັດລັອກໜ້າຈໍ ແລະ PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ຕິດຕາມການພະຍາຍາມປົດລັອກໜ້າຈໍ"</string>
@@ -1358,8 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"ເປີດໂໝດ PTP ຜ່ານ USB ແລ້ວ"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"ເປີດໂໝດ USB tethering ແລ້ວ"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"ເປີດໃຊ້ MIDI ຜ່ານ USB ແລ້ວ"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ເຊື່ອມຕໍ່ອຸປະກອນເປັນເວັບແຄມ"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"ເຊື່ອມຕໍ່ອຸປະກອນເສີມ USB ແລ້ວ"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"ແຕະເພື່ອເບິ່ງຕົວເລືອກເພີ່ມເຕີມ."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ກຳລັງສາກອຸປະກອນທີ່ເຊື່ອມຕໍ່. ແຕະເພື່ອເບິ່ງຕົວເລືອກເພີ່ມເຕີມ."</string>
@@ -1390,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"ເລືອກຮູບແບບການປ້ອນ"</string>
     <string name="show_ime" msgid="6406112007347443383">"ເປີດໃຊ້ໃຫ້ມັນຢູ່ໃນໜ້າຈໍໃນຂະນະທີ່ໃຊ້ແປ້ນພິມພາຍນອກຢູ່"</string>
     <string name="hardware" msgid="1800597768237606953">"ສະແດງແປ້ນພິມສະເໝືອນ"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"ຕັ້ງຄ່າແປ້ນພິມພາຍນອກ"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"ຕັ້ງຄ່າ <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"ຕັ້ງຄ່າແປ້ນພິມແທ້"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"ແຕະເພື່ອເລືອກພາສາ ແລະ ໂຄງແປ້ນພິມ"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1708,15 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"ແລ້ວໆ"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ປິດປຸ່ມລັດ"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ໃຊ້ປຸ່ມລັດ"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"ການປີ້ນສີ"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ການແກ້ໄຂສີ"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ໂໝດມືດຽວ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ຫຼຸດແສງເປັນພິເສດ"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ອຸປະກອນຊ່ວຍຟັງ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ເປີດໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ແລ້ວ."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ປິດ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ໄວ້ແລ້ວ."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"ກົດປຸ່ມສຽງທັງສອງພ້ອມກັນຄ້າງໄວ້ສາມວິນາທີເພື່ອໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ປ່ອຍປຸ່ມລະດັບສຽງ. ເພື່ອເປີດ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, ໃຫ້ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີ."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ເລືອກຄຸນສົມບັດທີ່ຈະໃຊ້ເມື່ອທ່ານແຕະປຸ່ມການຊ່ວຍເຂົ້າເຖິງ:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບທ່າທາງການຊ່ວຍເຂົ້າເຖິງ (ປັດຂຶ້ນຈາກລຸ່ມສຸດຂອງໜ້າຈໍດ້ວຍສອງນິ້ວ):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ເລືອກຄຸນສົມບັດເພື່ອໃຊ້ກັບທ່າທາງການຊ່ວຍເຂົ້າເຖິງ (ປັດຂຶ້ນຈາກລຸ່ມສຸດຂອງໜ້າຈໍດ້ວຍສາມນິ້ວ):"</string>
@@ -1948,11 +1954,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້. ມັນຖືກຈັດການໂດຍ <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ສຶກສາເພີ່ມເຕີມ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ຍົກເລີກການຢຸດແອັບຊົ່ວຄາວ"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ເປີດໃຊ້ແອັບບ່ອນເຮັດວຽກບໍ?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"ຮັບສິດເຂົ້າເຖິງແອັບບ່ອນເຮັດວຽກ ແລະ ການແຈ້ງເຕືອນຂອງທ່ານ"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ເປີດ​"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ຍົກເລີກການຢຸດຊົ່ວຄາວແອັບບ່ອນເຮັດວຽກບໍ?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ຍົກເລີກການຢຸດຊົ່ວຄາວ"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ສຸກເສີນ"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"ຮັບສິດເຂົ້າເຖິງແອັບບ່ອນເຮັດວຽກ ແລະ ການໂທຂອງທ່ານ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ແອັບບໍ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດໃຊ້ໄດ້ໃນຕອນນີ້."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"ບໍ່ສາມາດໃຊ້ <xliff:g id="ACTIVITY">%1$s</xliff:g> ໄດ້"</string>
@@ -2158,12 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ເນື້ອຫານີ້ບໍ່ສາມາດຖືກເປີດໄດ້ດ້ວຍແອັບບ່ອນເຮັດວຽກ"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ເນື້ອຫານີ້ບໍ່ສາມາດຖືກແບ່ງປັນກັບແອັບສ່ວນຕົວໄດ້"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ເນື້ອຫານີ້ບໍ່ສາມາດຖືກເປີດໄດ້ດ້ວຍແອັບສ່ວນຕົວ"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"ຢຸດໂປຣໄຟລ໌ວຽກໄວ້ຊົ່ວຄາວແລ້ວ"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ແຕະເພື່ອເປີດໃຊ້"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"ຢຸດແອັບບ່ອນເຮັດວຽກໄວ້ຊົ່ວຄາວແລ້ວ"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ຍົກເລີກການຢຸດຊົ່ວຄາວ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ບໍ່ມີແອັບບ່ອນເຮັດວຽກ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ບໍ່ມີແອັບສ່ວນຕົວ"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"ເປີດ <xliff:g id="APP">%s</xliff:g> ໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານບໍ?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"ເປີດ <xliff:g id="APP">%s</xliff:g> ໃນ​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກຂອງທ່ານບໍ?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ເປີດ <xliff:g id="APP">%s</xliff:g> ແບບສ່ວນຕົວ"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"ເປີດ <xliff:g id="APP">%s</xliff:g> ສຳລັບວຽກ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບສ່ວນຕົວ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ໃຊ້ໂປຣແກຣມທ່ອງເວັບບ່ອນເຮັດວຽກ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ປົດລັອກເຄືອຂ່າຍຊິມ"</string>
@@ -2320,5 +2324,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> ກຳລັງໃຊ້ຈໍສະແດງຜົນທັງສອງເພື່ອສະແດງເນື້ອຫາ"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ອຸປະກອນຮ້ອນເກີນໄປ"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ໜ້າຈໍຄູ່ບໍ່ພ້ອມໃຫ້ນຳໃຊ້ເນື່ອງຈາກໂທລະສັບຂອງທ່ານຮ້ອນເກີນໄປ"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ໃຊ້ບໍ່ໄດ້"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen ໃຊ້ບໍ່ໄດ້ເນື່ອງຈາກເປີດຕົວປະຢັດແບັດເຕີຣີຢູ່. ທ່ານສາມາດປິດສິ່ງນີ້ໄດ້ໃນການຕັ້ງຄ່າ."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"ເຂົ້າໄປການຕັ້ງຄ່າ"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"ປິດໄວ້"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"ຕັ້ງຄ່າ <xliff:g id="DEVICE_NAME">%s</xliff:g> ແລ້ວ"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"ຕັ້ງຄ່າໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%s</xliff:g>. ແຕະເພື່ອປ່ຽນ."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"ຕັ້ງໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. ແຕະເພື່ອປ່ຽນ."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"ຕັ້ງໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. ແຕະເພື່ອປ່ຽນ."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"ຕັ້ງໂຄງຮ່າງແປ້ນພິມເປັນ <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… ແຕະເພື່ອປ່ຽນແປງ."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"ຕັ້ງຄ່າແປ້ນພິມແທ້ແລ້ວ"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"ແຕະເພື່ອເບິ່ງແປ້ນພິມ"</string>
 </resources>

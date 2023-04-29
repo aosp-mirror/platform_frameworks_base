@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Κλήση Wi-Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Κλήση μέσω Wi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Ανενεργό"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Κλήση μέσω Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Κλήση μέσω δικτύου κινητής τηλεφωνίας"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Οι προσωπικές σας εφαρμογές αποκλείονται μέχρι να ενεργοποιήσετε το προφίλ εργασίας σας."</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Οι προσωπικές εφαρμογές θα αποκλειστούν στις <xliff:g id="DATE">%1$s</xliff:g> και ώρα <xliff:g id="TIME">%2$s</xliff:g>. Ο διαχειριστής IT δεν επιτρέπει το προφίλ εργασίας να παραμένει απενεργοποιημένο για περισσότερες από <xliff:g id="NUMBER">%3$d</xliff:g> ημέρες."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Ενεργοποίηση"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Οι κλήσεις και τα μηνύμ. είναι ανενεργά"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Θέσατε σε παύση τις εφαρμογές εργασιών. Δεν θα λαμβάνετε τηλεφωνικές κλήσεις ή μηνύματα κειμένου."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Κατ. παύσης εφ."</string>
     <string name="me" msgid="6207584824693813140">"Για εμένα"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Επιλογές tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Επιλογές Android TV"</string>
@@ -294,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Σύστημα Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Εναλλαγή σε προσωπικό προφίλ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Εναλλαγή σε προφίλ εργασίας"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Επαφές"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"πρόσβαση στις επαφές σας"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Τοποθεσία"</string>
@@ -338,6 +346,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Μπορεί να αναγνωρίσει κινήσεις που εκτελούνται στον αισθητήρα δακτυλικού αποτυπώματος της συσκευής."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Λήψη στιγμιότυπου οθόνης"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Μπορεί να τραβήξει στιγμιότυπο της οθόνης."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Προεπισκόπηση, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"απενεργοποιεί ή να τροποποιεί την γραμμή κατάστασης"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Επιτρέπει στην εφαρμογή να απενεργοποιεί τη γραμμή κατάστασης ή να προσθέτει και να αφαιρεί εικονίδια συστήματος."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"ορίζεται ως γραμμή κατάστασης"</string>
@@ -458,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Επιτρέπει στην εφαρμογή να αποκτά πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, θερμοκρασία και ποσοστό οξυγόνου στο αίμα, ενώ η εφαρμογή χρησιμοποιείται."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, στο παρασκήνιο"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Επιτρέπει στην εφαρμογή να αποκτά πρόσβαση σε δεδομένα αισθητήρων σώματος, όπως καρδιακό ρυθμό, θερμοκρασία και ποσοστό οξυγόνου στο αίμα, ενώ η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή είναι σε χρήση."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή είναι σε χρήση."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Επιτρέπει στην εφαρμογή να αποκτήσει πρόσβαση στα δεδομένα θερμοκρασίας καρπού του αισθητήρα σώματος όταν η εφαρμογή βρίσκεται στο παρασκήνιο."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Ανάγνωση συμβάντων ημερολογίου και λεπτομερειών"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στο tablet που χρησιμοποιείτε και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Αυτή η εφαρμογή μπορεί να διαβάσει όλα τα συμβάντα ημερολογίου που είναι αποθηκευμένα στη συσκευή Android TV και να μοιραστεί ή να αποθηκεύσει τα δεδομένα ημερολογίου σας."</string>
@@ -502,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Επιτρέπει στην εφαρμογή τον έλεγχο της δόνησης."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Επιτρέπει στην εφαρμογή να έχει πρόσβαση στην κατάσταση δόνησης."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"πραγματοποιεί απευθείας κλήση τηλεφωνικών αριθμών"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Επιτρέπει στην εφαρμογή την κλήση αριθμών τηλεφώνου χωρίς δική σας παρέμβαση. Αυτό μπορεί να προκαλέσει μη αναμενόμενες χρεώσεις ή κλήσεις. Έχετε υπόψη ότι δεν επιτρέπεται στην εφαρμογή η κλήση αριθμών έκτακτης ανάγκης. Οι κακόβουλες εφαρμογές ενδέχεται να σας κοστίσουν χρήματα, πραγματοποιώντας κλήσεις χωρίς την έγκρισή σας."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Επιτρέπει στην εφαρμογή να καλεί αριθμούς τηλεφώνου χωρίς τη δική σας παρέμβαση. Αυτό μπορεί να οδηγήσει σε απροσδόκητες χρεώσεις ή κλήσεις. Λάβετε υπόψη ότι αυτό δεν επιτρέπει την κλήση αριθμών έκτακτης ανάγκης. Οι κακόβουλες εφαρμογές ενδέχεται να σας επιφέρουν χρεώσεις πραγματοποιώντας κλήσεις χωρίς την επιβεβαίωσή σας ή καλώντας κωδικούς εταιρείας κινητής τηλεφωνίας που προκαλούν την αυτόματη προώθηση των εισερχόμενων κλήσεων σε άλλον αριθμό."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"έχει πρόσβαση στην υπηρεσία κλήσεων της IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Επιτρέπει στην εφαρμογή τη χρήση της υπηρεσίας IMS για την πραγματοποίηση κλήσεων χωρίς τη δική σας παρέμβαση."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"διαβάζει την κατάσταση και ταυτότητα τηλεφώνου"</string>
@@ -632,7 +637,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Υπερβολικά έντονος φωτισμός"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Εντοπίστηκε πάτημα του κουμπιού λειτουργίας"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Δοκιμάστε να το προσαρμόσετε"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Αλλάζετε ελαφρώς τη θέση του δακτύλου σας κάθε φορά."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Αλλάζετε ελαφρώς τη θέση του δακτύλου σας κάθε φορά"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Δεν είναι δυνατή η αναγνώριση του δακτυλικού αποτυπώματος"</string>
@@ -683,7 +688,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Μετακινήστε το τηλέφωνο προς τα αριστερά"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Μετακινήστε το τηλέφωνο προς τα δεξιά"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Κοιτάξτε απευθείας τη συσκευή σας."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Δεν εντοπίστηκε το πρόσωπό σας. Κρατήστε το τηλέφωνο στο ύψος των ματιών."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Κρατήστε το τηλέφωνο στο ύψος των ματιών σας."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Πάρα πολλή κίνηση. Κρατήστε σταθερό το τηλέφωνο."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Καταχωρίστε ξανά το πρόσωπό σας."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Το πρόσωπο δεν αναγνωρίζεται. Δοκιμάστε ξανά."</string>
@@ -708,7 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Η ενέργεια προσώπου ακυρώθηκε."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Το Ξεκλείδωμα με το πρόσωπο ακυρώθηκε από τον χρήστη"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Πάρα πολλές προσπάθειες. Δοκιμάστε ξανά αργότερα."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Πάρα πολλές προσπάθειες. Το Ξεκλείδωμα με το πρόσωπο απενεργοποιήθηκε."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Πάρα πολλές προσπάθειες. Το Ξεκλείδωμα με το πρόσωπο δεν είναι διαθέσιμο"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Πάρα πολλές προσπάθειες. Χρησιμοποιήστε εναλλακτικά το κλείδωμα οθόνης."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Αδύνατη επαλήθευση του προσώπου. Επανάληψη."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Δεν έχετε ρυθμίσει το Ξεκλείδωμα με το πρόσωπο"</string>
@@ -795,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Επιτρέπει στον κάτοχο να ξεκινήσει την προβολή των πληροφοριών για τις λειτουργίες μιας εφαρμογής."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"πρόσβαση σε δεδομένα αισθητήρα με υψηλό ρυθμό δειγματοληψίας"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Επιτρέπει στην εφαρμογή τη δειγματοληψία των δεδομένων αισθητήρα με ρυθμό μεγαλύτερο από 200 Hz."</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ενημέρωση εφαρμογής χωρίς ενέργεια από τον χρήστη"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Επιτρέπει στον κάτοχο να ενημερώσει την εφαρμογή που εγκατέστησε προηγουμένως χωρίς κάποια ενέργεια από τον χρήστη"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Ορισμός κανόνων κωδικού πρόσβασης"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Ελέγξτε την έκταση και τους επιτρεπόμενους χαρακτήρες σε κωδικούς πρόσβασης κλειδώματος οθόνης και PIN."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Παρακολούθηση προσπαθειών ξεκλειδώματος οθόνης"</string>
@@ -1358,8 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Η λειτουργία PTP μέσω USB ενεργοποιήθηκε"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Η σύνδεση μέσω USB ενεργοποιήθηκε"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Η λειτουργία MIDI μέσω USB ενεργοποιήθηκε"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Η συσκευή συνδέθηκε ως webcam"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Συνδέθηκε αξεσουάρ USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Πατήστε για περισσότερες επιλογές."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Φόρτιση συνδεδεμένης συσκευής. Πατήστε για περισσότερες επιλογές."</string>
@@ -1390,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Επιλογή μεθόδου εισόδου"</string>
     <string name="show_ime" msgid="6406112007347443383">"Να παραμένει στην οθόνη όταν είναι ενεργό το κανονικό πληκτρολόγιο"</string>
     <string name="hardware" msgid="1800597768237606953">"Εμφάνιση εικονικού πληκτρολ."</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Διαμόρφωση φυσικού πληκτρολογίου"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Διαμόρφωση <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Διαμόρφωση φυσικών πληκτρολογίων"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Πατήστε για να επιλέξετε γλώσσα και διάταξη"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1708,15 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Τέλος"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Απενεργοποίηση συντόμευσης"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Χρήση συντόμευσης"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Αντιστροφή χρωμάτων"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Διόρθωση χρωμάτων"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Λειτουργία ενός χεριού"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Επιπλέον μείωση φωτεινότητας"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Συσκευές ακοής"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Τα πλήκτρα έντασης είναι πατημένα. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ενεργοποιήθηκε."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Τα πλήκτρα έντασης είναι πατημένα. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>: απενεργοποιημένο"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Πατήστε παρατεταμένα και τα δύο κουμπιά έντασης ήχου για τρία δευτερόλεπτα, ώστε να χρησιμοποιήσετε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Αφήστε τα κουμπιά έντασης ήχου. Για να ενεργοποιήσετε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, πατήστε ξανά παρατεταμένα και τα δύο κουμπιά έντασης ήχου για τρία δευτερόλεπτα."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Επιλέξτε μια λειτουργία που θα χρησιμοποιείται κατά το πάτημα του κουμπιού προσβασιμότητας:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Επιλέξτε μια λειτουργία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με δύο δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Επιλέξτε μια λειτουργία που θα χρησιμοποιείται με την κίνηση προσβασιμότητας (σύρετε με τρία δάχτυλα προς τα επάνω από το κάτω μέρος της οθόνης):"</string>
@@ -1948,11 +1954,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Η εφαρμογή <xliff:g id="APP_NAME_0">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή. Η διαχείριση πραγματοποιείται από την εφαρμογή <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Μάθετε περισσότερα"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Κατάργηση παύσης εφαρμογής"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Ενεργοπ. εφαρμογών εργασιών;"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Αποκτήστε πρόσβαση στις εφαρμογές εργασιών και τις ειδοποιήσεις"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Ενεργοποίηση"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Αναίρ. παύσης εφαρμ. εργασιών;"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Αναίρεση παύσης"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Έκτακτη ανάγκη"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Αποκτήστε πρόσβαση στις εφαρμογές εργασιών και τις κλήσεις"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Η εφαρμογή δεν είναι διαθέσιμη"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> δεν είναι διαθέσιμη αυτήν τη στιγμή."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> δεν διατίθεται"</string>
@@ -2158,12 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Δεν είναι δυνατό το άνοιγμα αυτού του περιεχομένου με εφαρμογές εργασιών"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Δεν είναι δυνατή η κοινοποίηση αυτού του περιεχομένου με προσωπικές εφαρμογές"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Δεν είναι δυνατό το άνοιγμα αυτού του περιεχομένου με προσωπικές εφαρμογές"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Το προφίλ εργασίας σας έχει τεθεί σε παύση."</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Πατήστε για ενεργοποίηση"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Οι εφαρμογές εργασιών τέθηκαν σε παύση"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Αναίρεση παύσης"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Δεν υπάρχουν εφαρμογές εργασιών"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Δεν υπάρχουν προσωπικές εφαρμογές"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Θέλετε να ανοίξετε την εφαρμογή <xliff:g id="APP">%s</xliff:g> στο προσωπικό σας προφίλ;"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Θέλετε να ανοίξετε την εφαρμογή <xliff:g id="APP">%s</xliff:g> στο προφίλ σας εργασίας;"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Άνοιγμα προσωπικού <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Άνοιγμα <xliff:g id="APP">%s</xliff:g> εργασίας"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Χρήση προσωπικού προγράμματος περιήγησης"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Χρήση προγράμματος περιήγησης εργασίας"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ξεκλειδώματος δικτύου κάρτας SIM"</string>
@@ -2320,5 +2324,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> χρησιμοποιεί και τις δύο οθόνες για να εμφανίζει περιεχόμενο"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Η θερμοκρασία της συσκευής είναι πολύ υψηλή"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Η λειτουργία διπλής οθόνης δεν είναι διαθέσιμη επειδή η θερμοκρασία του τηλεφώνου αυξάνεται υπερβολικά"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Το Dual Screen δεν είναι διαθέσιμο"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Το Dual Screen δεν είναι διαθέσιμο επειδή η Εξοικονόμηση μπαταρίας είναι ενεργοποιημένη. Μπορείτε να απενεργοποιήσετε αυτήν τη λειτουργία στις Ρυθμίσεις."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Μεταβείτε στις Ρυθμίσεις"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Απενεργοποίηση"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Η συσκευή <xliff:g id="DEVICE_NAME">%s</xliff:g> διαμορφώθηκε"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Η διάταξη πληκτρολογίου ορίστηκε σε <xliff:g id="LAYOUT_1">%s</xliff:g>. Πατήστε για αλλαγή."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Η διάταξη πληκτρολογίου ορίστηκε σε <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Πατήστε για αλλαγή."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Η διάταξη πληκτρολογίου ορίστηκε σε <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Πατήστε για αλλαγή."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Η διάταξη πληκτρολογίου ορίστηκε σε <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Πατήστε για αλλαγή."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Τα φυσικά πληκτρολόγια διαμορφώθηκαν"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Πατήστε για να δείτε πληκτρολόγια"</string>
 </resources>

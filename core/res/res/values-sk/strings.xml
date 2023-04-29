@@ -142,6 +142,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Volanie cez Wi‑Fi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Hovor cez Wi‑Fi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Vypnuté"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Volanie cez Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Volanie cez mobilnú sieť"</string>
@@ -209,6 +210,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vaše osobné aplikácie sú zablokované, dokým nezapnete svoj pracovný profil"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Osobné aplikácie budú <xliff:g id="DATE">%1$s</xliff:g> o <xliff:g id="TIME">%2$s</xliff:g> zablokované. Váš správca IT nepovoľuje, aby váš pracovný profil bol vypnutý viac ako <xliff:g id="NUMBER">%3$d</xliff:g> d."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Zapnúť"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Hovory a správy sú vypnuté"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Pozastavili ste pracovné aplikácie. Nebudete môcť prijímať telefonické hovory ani textové správy."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Zrušiť pozastavenie pracovných aplikácií"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Možnosti tabletu"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Možnosti zariadenia Android TV"</string>
@@ -296,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Systém Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Prepnúť na osobný profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Prepnúť na pracovný profil"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Prepnúť na osobnú verziu aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Prepnúť na pracovnú verziu aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"prístup ku kontaktom"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Poloha"</string>
@@ -314,7 +320,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"nahrávanie zvuku"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Fyzická aktivita"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"prístup k vašej fyzickej aktivite"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Kamera"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Fotoaparát"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"fotenie a natáčanie videí"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Zariadenia v okolí"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"objavovať a pripájať zariadenia v okolí"</string>
@@ -340,6 +346,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Dokáže zaznamenať gestá na senzore odtlačkov prstov zariadenia."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Vytvoriť snímku obrazovky"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Je možné vytvoriť snímku obrazovky."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Ukážka, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"zakázanie alebo zmeny stavového riadka"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Umožňuje aplikácii vypnúť stavový riadok alebo pridať a odstrániť systémové ikony."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"vydávanie sa za stavový riadok"</string>
@@ -460,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Poskytne aplikácii prístup k dátam telových senzorov, ako sú pulz, teplota a saturácia krvi kyslíkom počas používania aplikácie."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Prístup k dátam telových senzorov (napríklad pulzu) počas spustenia na pozadí"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Poskytne aplikácii prístup k dátam telových senzorov, ako sú pulz, teplota a saturácia krvi kyslíkom počas spustenia aplikácie na pozadí."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Prístup k údajom o teplote zápästia z telového senzora počas používania aplikácie."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Umožňuje aplikácii prístup k údajom o teplote zápästia z telového senzora počas používania aplikácie."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Prístup k údajom o teplote zápästia z telového senzora, keď je aplikácia na pozadí."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Umožňuje aplikácii prístup k údajom o teplote zápästia z telového senzora, keď je aplikácia na pozadí."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Čítanie udalostí kalendára a podrobností"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Táto aplikácia môže čítať všetky udalosti kalendára uložené vo vašom tablete a zdieľať alebo ukladať dáta kalendára."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Táto aplikácia môže čítať všetky udalosti kalendára uložené vo vašom zariadení Android TV a zdieľať alebo ukladať údaje kalendára."</string>
@@ -504,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikácii ovládať vibrácie."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Povoľuje aplikácii prístup k stavu vibrátora."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"priamo volať na telefónne čísla"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Umožňuje aplikácii volať telefónne čísla bez vášho zásahu. V dôsledku toho sa môžu účtovať neočakávané poplatky alebo sa môžu uskutočniť neočakávané hovory. Toto povolenie neumožňuje aplikácii volať na tiesňovú linku."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Umožňuje aplikácii volať na telefónne čísla bez vášho zásahu. Môže to viesť k neočakávaným poplatkom alebo hovorov. Upozorňujeme, že aplikácia nemôže volať na tiesňové linky. Škodlivé aplikácie vám môžu spôsobiť poplatky, pretože volajú bez vášho vedomia alebo vytáčajú kódy operátorov, ktoré automaticky presmerovávajú prichádzajúce hovory na iné číslo."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"prístup k službe volania IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Umožňuje aplikácii používať službu okamžitých správ (IMS) na volanie bez intervencie používateľa."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"čítať stav a identitu telefónu"</string>
@@ -624,11 +627,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Chyba overenia"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použiť zámku obrazovky"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadaním zámky obrazovky"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevne pridržte senzor"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevne pritlačte prst na senzor"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Odtlačok prsta sa nedá rozpoznať. Skúste to znova."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistite senzor odtlačkov prstov a skúste to znova"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistite senzor a skúste to znova"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevne pridržte senzor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevne pritlačte prst na senzor"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Vyskúšajte iný odtlačok prsta"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Príliš jasno"</string>
@@ -710,7 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operácia týkajúca sa tváre bola zrušená"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Odomknutie tvárou zrušil používateľ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Príliš veľa pokusov. Skúste to neskôr."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Príliš veľa pokusov. Odomknutie tvárou bolo zakázané."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Priveľa pokusov. Odomknutie tvárou nie je k dispozícii."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Príliš veľa pokusov. Zadajte namiesto toho zámku obrazovky."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nedá sa overiť tvár. Skúste to znova."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nenastavili ste odomknutie tvárou"</string>
@@ -797,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Umožňuje držiteľovi zobraziť informácie o funkciách aplikácie."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"prístup k dátam senzorom s vysokou vzorkovacou frekvenciou"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Umožňuje aplikácii vzorkovať dáta senzorov s frekvenciou vyššou ako 200 Hz"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"aktualizovať aplikáciu bez akcie používateľa"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Povolí vlastníkovi aktualizovať aplikáciu, ktorá bola nainštalovaná bez akcie používateľa"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Nastaviť pravidlá pre heslo"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Nastavte dĺžku hesiel na odomknutie obrazovky aj kódov PIN a v nich používané znaky."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Sledovanie pokusov o odomknutie obrazovky"</string>
@@ -1360,14 +1365,13 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Bol zapnutý režim PTP cez USB"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Bol zapnutý tethering cez USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Bol zapnutý režim MIDI cez USB"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Zariadenie pripojené ako webkamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Bolo pripojené príslušenstvo USB"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte ďalšie možnosti."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pripojené zariadenie sa nabíja. Ďalšie možností získate klepnutím."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bolo zistené analógové zvukové príslušenstvo"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Pripojené zariadenie nie je kompatibilné s týmto telefónom. Ďalšie informácie zobrazíte klepnutím."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Ladenie cez USB pripojené"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Ladenie cez USB je pripojené"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Klepnutím vypnite ladenie cez USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Vyberte, ak chcete zakázať ladenie cez USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Bezdrôtové ladenie je pripojené"</string>
@@ -1392,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Zvoliť metódu vstupu"</string>
     <string name="show_ime" msgid="6406112007347443383">"Ponechať na obrazovke, keď je aktívna fyzická klávesnica"</string>
     <string name="hardware" msgid="1800597768237606953">"Zobraziť virtuálnu klávesnicu"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfigurácia fyzickej klávesnice"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Nakonfigurujte <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Nakonfigurujte fyzické klávesnice"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Klepnutím vyberte jazyk a rozloženie"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" AÁÄBCČDĎDZDŽEÉFGHCHIÍJKLĽMNŇOÓÔPRŔSŠTŤUÚVWXYÝZŽ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1710,15 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Hotovo"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Vypnúť skratku"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Použiť skratku"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Inverzia farieb"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Úprava farieb"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Režim jednej ruky"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mimoriadne stmavenie"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Načúvacie zariadenia"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je zapnutá."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vypnutá."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Ak chcete používať službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, pridržte tri sekundy oba klávesy hlasitosti"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Uvoľnite tlačidlá hlasitosti. Ak chcete zapnúť službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, znova pridržte tri sekundy obe tlačidlá hlasitosti."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Klepnutím na tlačidlo dostupnosti vyberte požadovanú funkciu:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Vyberte funkciu, ktorú chcete používať s daným gestom dostupnosti (potiahnutím dvoma prstami z dolnej časti obrazovky nahor):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Vyberte funkciu aktivovanú daným gestom dostupnosti (potiahnutím troma prstami z dolnej časti obrazovky nahor):"</string>
@@ -1950,11 +1954,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikácia <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie je momentálne k dispozícii. Spravuje to aplikácia <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Ďalšie informácie"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Znova spustiť aplikáciu"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Zapnúť pracovné aplikácie?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Získajte prístup k svojim pracovným aplikáciám a upozorneniam"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Zapnúť"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Zrušiť pozastavenie aplikácií?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Zrušiť pozastavenie"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Zavolať na tiesňovú linku"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Získajte prístup k svojim pracovným aplikáciám a hovorom"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikácia nie je dostupná"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"Aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g> nie je teraz dostupná."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nie je k dispozícii"</string>
@@ -2132,7 +2134,7 @@
     <string name="accessibility_system_action_notifications_label" msgid="6083767351772162010">"Upozornenia"</string>
     <string name="accessibility_system_action_quick_settings_label" msgid="4583900123506773783">"Rýchle nastavenia"</string>
     <string name="accessibility_system_action_power_dialog_label" msgid="8095341821683910781">"Dialógové okno napájania"</string>
-    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Uzamknúť obrazovku"</string>
+    <string name="accessibility_system_action_lock_screen_label" msgid="5484190691945563838">"Zamknúť obrazovku"</string>
     <string name="accessibility_system_action_screenshot_label" msgid="3581566515062741676">"Snímka obrazovky"</string>
     <string name="accessibility_system_action_headset_hook_label" msgid="8524691721287425468">"Hák na slúchadlá s mikrofónom"</string>
     <string name="accessibility_system_action_on_screen_a11y_shortcut_label" msgid="8488701469459210309">"Skratka dostupnosti na obrazovke"</string>
@@ -2160,12 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tento obsah sa nedá otvoriť pomocou pracovných aplikácií"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tento obsah sa nedá zdieľať pomocou osobných aplikácií"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tento obsah sa nedá otvoriť pomocou osobných aplikácií"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Pracovný profil je pozastavený"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Zapnúť klepnutím"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Pracovné aplikácie sú pozastavené"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Zrušiť pozastavenie"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Žiadne pracovné aplikácie"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Žiadne osobné aplikácie"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Chcete otvoriť <xliff:g id="APP">%s</xliff:g> v osobnom profile?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Chcete otvoriť <xliff:g id="APP">%s</xliff:g> v pracovnom profile?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Otvorte osobnú aplikáciu <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Otvorte pracovnú aplikáciu <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Použiť osobný prehliadač"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Použiť pracovný prehliadač"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN na odomknutie siete pre SIM kartu"</string>
@@ -2317,10 +2319,20 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Umožňuje sprievodnej aplikácii spúšťať služby na popredí z pozadia."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofón je k dispozícii"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofón je blokovaný"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dvojitá obrazovka"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dvojitá obrazovka je zapnutá"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Je zapnutá funkcia Dual Screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> zobrazuje obsah na oboch obrazovkách"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Zariadenie je príliš horúce"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dvojitá obrazovka nie je k dispozícii, pretože telefón sa prehrieva"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen nie je k dispozícii"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen nie je k dispozícii, pretože je zapnutý šetrič batérie. Môžete to vypnúť v Nastaveniach."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Prejsť do Nastavení"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Vypnúť"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Klávesnica <xliff:g id="DEVICE_NAME">%s</xliff:g> je nakonfigurovaná"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Rozloženie klávesnice je nastavené na jazyk <xliff:g id="LAYOUT_1">%s</xliff:g>. Môžete to zmeniť klepnutím."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Rozloženie klávesnice je nastavené na jazyky <xliff:g id="LAYOUT_1">%1$s</xliff:g> a <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Môžete to zmeniť klepnutím."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Rozloženie klávesnice je nastavené na jazyky <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> a <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Môžete to zmeniť klepnutím."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Rozloženie klávesnice je nastavené na jazyky <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> a <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Môžete to zmeniť klepnutím."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fyzické klávesnice sú nakonfigurované"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Klávesnice si zobrazíte klepnutím"</string>
 </resources>

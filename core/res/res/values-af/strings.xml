@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi-oproepe"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Wi-fi-oproep"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Af"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Bel oor Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Bel oor mobiele netwerk"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Jou persoonlike programme word geblokkeer totdat jy jou werkprofiel aanskakel"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Persoonlike programme sal op <xliff:g id="DATE">%1$s</xliff:g> om <xliff:g id="TIME">%2$s</xliff:g> geblokkeer word. Jou IT-admin laat nie toe dat jou werkprofiel langer as <xliff:g id="NUMBER">%3$d</xliff:g> dae af bly nie."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Skakel aan"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Oproepe en boodskappe is af"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Jy het werkapps onderbreek. Jy sal nie foonoproepe of SMS’e ontvang nie."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Hervat werkapps"</string>
     <string name="me" msgid="6207584824693813140">"Ek"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-opsies"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV-opsies"</string>
@@ -294,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-stelsel"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Skakel oor na persoonlike profiel"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Skakel oor na werkprofiel"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Skakel oor na persoonlike <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Skakel oor na werk-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"in te gaan by jou kontakte"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ligging"</string>
@@ -338,6 +344,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan gebare vasvang wat op die toestel se vingerafdruksensor uitgevoer word."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Neem skermkiekie"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan \'n skermkiekie neem."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Voorskou, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"deaktiveer of verander statusbalk"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Laat die program toe om die statusbalk te deaktiveer en stelselikone by te voeg of te verwyder."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"wees die statusbalk"</string>
@@ -458,10 +465,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Gee die program toegang tot liggaamsensordata, soos polsslag, temperatuur en bloedsuurstofpersentasie, terwyl die program gebruik word."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Kry toegang tot liggaamsensordata, soos polsslag, terwyl program op agtergrond is"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Gee die program toegang tot liggaamsensordata, soos polsslag, temperatuur en bloedsuurstofpersentasie, terwyl dit op die agtergrond is."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Het toegang tot liggaamsensordata oor polstermperatuur terwyl die app gebruik word."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Gee die app toegang tot liggaamsensordata oor polstermperatuur terwyl die app gebruik word."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Het toegang tot liggaamsensordata oor polstermperatuur terwyl die app op die agtergrond is."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Gee die app toegang tot liggaamsensordata oor polstermperatuur terwyl die app op die agtergrond is."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lees kalendergebeurtenisse en -besonderhede"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Hierdie program kan alle kalendergebeurtenisse lees wat op jou tablet geberg is of jou kalenderdata stoor."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Hierdie program kan alle kalendergeleenthede wat op jou Android TV-toestel geberg is, lees of jou kalenderdata stoor."</string>
@@ -502,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Stel die program in staat om toegang tot die vibreerderstand te kry."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"skakel foonnommers direk"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Laat die program toe om telefoonnommers sonder jou tussentrede te bel. Dit kan tot onverwagte heffings of oproepe lei. Let daarop dat dit nie die program toelaat om noodnommers te bel nie. Kwaadwillige programme kan jou geld kos deur oproepe sonder jou bevestiging te maak."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Laat die app toe om foonnommers sonder jou insae te bel. Dit kan onvoorsiene heffings of oproepe tot gevolg hê. Neem kennis dat dit nie die app toelaat om noodnommers te bel nie. Kwaadwillige apps kan jou geld kos deur oproepe te maak sonder jou bevestiging of diensverskafferkodes te bel wat veroorsaak dat inkomende oproepe outomaties na ’n ander nommer aangestuur word."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"toegang tot kitsboodskapoproepdiens"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Laat die program toe om die kitsboodskapdiens te gebruik om oproepe sonder jou ingryping te maak."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lees foonstatus en identiteit"</string>
@@ -708,7 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Gesighandeling is gekanselleer."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Gebruiker het Gesigslot gekanselleer"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Te veel pogings. Probeer later weer."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Te veel pogings. Gesigslot is gedeaktiveer."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Te veel pogings. Gesigslot is onbeskikbaar."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Te veel pogings. Gebruik eerder skermslot."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan nie gesig verifieer nie. Probeer weer."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Jy het nie Gesigslot opgestel nie"</string>
@@ -795,6 +798,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Laat die houer toe om die kenmerke-inligting vir \'n program te begin bekyk."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"kry toegang tot sensordata teen \'n hoë monsternemingkoers"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Laat die program toe om monsters van sensordata teen \'n hoër koers as 200 Hz te neem"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"dateer app sonder gebruikerhandeling op"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Laat die houer toe om die app wat dit voorheen sonder gebruikhandeling geïnstalleer het, op te dateer"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Stel wagwoordreëls"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Beheer die lengte en die karakters wat in skermslotwagwoorde en -PIN\'e toegelaat word."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitor pogings om skerm te ontsluit"</string>
@@ -1358,8 +1363,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB is aangeskakel"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-verbinding is aangeskakel"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB is aangeskakel"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Toestel is as webkamera gekoppel"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-bykomstigheid is gekoppel"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Tik vir meer opsies."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Laai tans gekoppelde toestel. Tik vir meer opsies."</string>
@@ -1390,7 +1394,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Kies invoermetode"</string>
     <string name="show_ime" msgid="6406112007347443383">"Hou dit op die skerm terwyl fisieke sleutelbord aktief is"</string>
     <string name="hardware" msgid="1800597768237606953">"Wys virtuele sleutelbord"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Stel fisieke sleutelbord op"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Stel <xliff:g id="DEVICE_NAME">%s</xliff:g> op"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Stel fisieke sleutelborde op"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Tik om taal en uitleg te kies"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1693,11 +1698,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AAN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"AF"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Gee <xliff:g id="SERVICE">%1$s</xliff:g> volle beheer oor jou toestel?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volle beheer is gepas vir programme wat jou help met toeganklikheidsbehoeftes, maar nie vir die meeste programme nie."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volle beheer is gepas vir apps wat jou help met toeganklikheidsbehoeftes, maar nie vir die meeste apps nie."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Bekyk en beheer skerm"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Dit kan alle inhoud op die skerm lees en inhoud bo-oor ander programme vertoon."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Dit kan alle inhoud op die skerm lees en inhoud bo-oor ander apps vertoon."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Bekyk en voer handelinge uit"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Dit kan jou interaksies met \'n program of \'n hardewaresensor naspoor en namens jou met programme interaksie hê."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Dit kan jou interaksies met \'n app of \'n hardewaresensor naspoor en namens jou met apps interaksie hê."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Laat toe"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Weier"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tik op \'n kenmerk om dit te begin gebruik:"</string>
@@ -1708,15 +1713,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Klaar"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Skakel kortpad af"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gebruik kortpad"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Kleuromkering"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Kleurregstelling"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Eenhandmodus"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ekstra donker"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Gehoortoestelle"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Het volumesleutels ingehou. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aangeskakel."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Het volumesleutels ingehou. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> is afgeskakel"</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Druk en hou albei volumesleutels drie sekondes lank om <xliff:g id="SERVICE_NAME">%1$s</xliff:g> te gebruik"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Los die volumesleutels. Druk en hou albei volumesleutels weer 3 sekondes lank in om <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aan te skakel."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Kies \'n kenmerk om te gebruik wanneer jy op die toeganklikheidknoppie tik:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Kies \'n kenmerk om te gebruik saam met die toeganklikheidgebaar (swiep met twee vingers op van die onderkant van die skerm af):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Kies \'n kenmerk om te gebruik saam met die toeganklikheidgebaar (swiep met drie vingers op van die onderkant van die skerm af):"</string>
@@ -1948,11 +1952,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> is nie nou onmiddellik beskikbaar nie. Dit word bestuur deur <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Kom meer te wete"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Hervat program"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Skakel werkprogramme aan?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Kry toegang tot jou werkprogramme en -kennisgewings"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Skakel aan"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Hervat werkapps?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Hervat"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Noodgeval"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Kry toegang tot jou werkapps en -oproepe"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Program is nie beskikbaar nie"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is nie op die oomblik beskikbaar nie."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> is nie beskikbaar nie"</string>
@@ -2158,12 +2160,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Hierdie inhoud kan nie met werkprogramme oopgemaak word nie"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Hierdie inhoud kan nie met persoonlike programme gedeel word nie"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Hierdie inhoud kan nie met persoonlike programme oopgemaak word nie"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Werkprofiel is onderbreek"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tik om aan te skakel"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Werkapps is onderbreek"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Hervat"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Geen werkprogramme nie"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Geen persoonlike programme nie"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Maak <xliff:g id="APP">%s</xliff:g> in jou persoonlike profiel oop?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Maak <xliff:g id="APP">%s</xliff:g> in jou werkprofiel oop?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Maak persoonlike <xliff:g id="APP">%s</xliff:g> oop"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Maak werk-<xliff:g id="APP">%s</xliff:g> oop"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gebruik persoonlike blaaier"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gebruik werkblaaier"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM se netwerkontsluiting-PIN"</string>
@@ -2320,5 +2322,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> gebruik tans albei skerms om inhoud te wys"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Toestel is te warm"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dubbelskerm is nie beskikbaar nie omdat jou foon tans te warm word"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen is nie beskikbaar nie"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen is nie beskikbaar nie omdat Batterybespaarder aan is. Jy kan dit in Instellings afskakel."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Gaan na Instellings"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Skakel af"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> is opgestel"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Sleutelborduitleg is gestel op <xliff:g id="LAYOUT_1">%s</xliff:g>. Tik om te verander."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Sleutelborduitleg is gestel op <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Tik om te verander."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Sleutelborduitleg is gestel op <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Tik om te verander."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Sleutelborduitleg is gestel op <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> … Tik om dit te verander."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Fisieke sleutelborde is opgestel"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Tik om sleutelborde te bekyk"</string>
 </resources>

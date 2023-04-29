@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Telefonatë me WiFi"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"Telefonatë me WiFi"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Çaktivizuar"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Telefono nëpërmjet Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Telefono nëpërmjet rrjetit celular"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikacionet e tua personale janë bllokuar derisa të aktivizosh profilin tënd të punës"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Aplikacionet personale do të bllokohen më <xliff:g id="DATE">%1$s</xliff:g> në <xliff:g id="TIME">%2$s</xliff:g>. Administratori yt i teknologjisë së informacionit nuk lejon që profili yt i punës të qëndrojë joaktiv për më shumë se <xliff:g id="NUMBER">%3$d</xliff:g> ditë."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktivizo"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Telefonatat dhe mesazhet janë joaktive"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"I ke vendosur në pauzë aplikacionet e punës. Nuk do të marrësh telefonata ose mesazhe me tekst."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Hiq nga pauza apl. e punës"</string>
     <string name="me" msgid="6207584824693813140">"Unë"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opsionet e tabletit"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opsionet e Android TV"</string>
@@ -294,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistemi Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Kalo te profili personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Kalo te profili i punës"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktet"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"qasu te kontaktet e tua"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Vendndodhja"</string>
@@ -338,6 +346,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Mund të regjistrojë gjestet e kryera në sensorin e gjurmës së gishtit të pajisjes."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Nxirr një pamje të ekranit"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Mund të nxjerrë një pamje e ekranit."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"Versioni paraprak, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"çaktivizo ose modifiko shiritin e statusit"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Lejon aplikacionin të çaktivizojë shiritin e statusit dhe të heqë ikonat e sistemit."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"të bëhet shiriti i statusit"</string>
@@ -458,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Lejon aplikacionin që të ketë qasje te të dhënat e sensorit të trupit, si p.sh. rrahjet e zemrës, temperatura dhe përqindja e oksigjenit në gjak ndërkohë që aplikacioni është në përdorim."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Qasje te të dhënat e sensorit të trupit, si rrahjet e zemrës kur është në sfond"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Lejon aplikacionin që të ketë qasje te të dhënat e sensorit të trupit, si p.sh. rrahjet e zemrës, temperatura dhe përqindja e oksigjenit në gjak ndërkohë që aplikacioni është në sfond."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Qasu te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit ndërsa aplikacioni është në përdorim."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Lejon aplikacionin të ketë qasje te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit, ndërsa aplikacioni është në përdorim."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Qasu te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit ndërsa aplikacioni është në sfond."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Lejon aplikacionin të ketë qasje te të dhënat e temperaturës së kyçit të dorës nga sensori i trupit, ndërsa aplikacioni është në sfond."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lexo ngjarjet e kalendarit dhe detajet"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në tabletin tënd dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Ky aplikacion mund të lexojë të gjitha ngjarjet e kalendarit të ruajtura në pajisjen tënde Android TV dhe të ndajë ose të ruajë të dhënat e kalendarit."</string>
@@ -502,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lejon aplikacionin të kontrollojë dridhësin."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Lejon që aplikacioni të ketë qasje te gjendja e dridhësit."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefono drejtpërdrejt numrat e telefonit"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Lejon aplikacionin të telefonojë numra pa ndërhyrjen tënde. Kjo mund të rezultojë në tarifa ose telefonata të papritura. Ki parasysh se kjo nuk e lejon aplikacionin të telefonojë numra urgjence. Aplikacione keqdashëse mund të të kushtojnë para duke kryer telefonata pa konfirmimin tënd."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Lejon që aplikacioni të telefonojë numrat e telefonit pa ndërhyrjen tënde. Kjo mund të sjellë telefonata ose tarifa të papritura. Ki parasysh se kjo nuk e lejon aplikacionin të telefonojë numrat e urgjencës. Aplikacionet keqdashëse mund të të shkaktojnë kosto duke kryer telefonata pa konfirmimin tënd ose të formojnë kode të operatorit celular që bëjnë që telefonatat hyrëse të transferohen automatikisht te një numër tjetër."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"qasje në shërbimin e telefonatave IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Lejon aplikacionin të përdorë shërbimin IMS për të kryer telefonata pa ndërhyrjen tënde."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lexo statusin e telefonit dhe identitetin"</string>
@@ -683,7 +688,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Lëvize telefonin në të majtën tënde"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Lëvize telefonin në të djathtën tënde"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Shiko më drejt në pajisjen tënde."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Fytyra jote nuk mund të shihet. Mbaje telefonin në nivelin e syve."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Fytyra s\'mund të shihet. Mbaje telefonin në nivelin e syve."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Ka shumë lëvizje. Mbaje telefonin të palëvizur."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Regjistroje përsëri fytyrën tënde."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Fytyra nuk mund të njihet. Provo sërish."</string>
@@ -708,7 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Veprimi me fytyrën u anulua."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"\"Shkyçja me fytyrë\" u anulua nga përdoruesi"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Shumë përpjekje. Provo sërish më vonë."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Shumë përpjekje. \"Shkyçja me fytyrë\" u çaktivizua."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Shumë përpjekje. Shkyçja me fytyrë nuk ofrohet."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Shumë përpjekje. Fut më mirë kyçjen e ekranit."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Fytyra nuk mund të verifikohet. Provo përsëri."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nuk e ke konfiguruar \"Shkyçjen me fytyrë\""</string>
@@ -795,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Lejon që zotëruesi të fillojë të shikojë informacionin e veçorive për një aplikacion."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"qasu te të dhënat e sensorit me një shpejtësi kampionimi më të lartë"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Lejon aplikacionin të mbledhë shembujt e të dhënave të sensorit me shpejtësi më të lartë se 200 Hz"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"përditëso aplikacionin pa veprimin e përdoruesit"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Lejon zotëruesin të përditësojë aplikacionin që e ka instaluar më parë pa veprimin e përdoruesit"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Cakto rregullat e fjalëkalimit"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Kontrollo gjatësinë dhe karakteret e lejuara në fjalëkalimet dhe kodet PIN të kyçjes së ekranit."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Monitoro tentativat e shkyçjes së ekranit"</string>
@@ -1358,8 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP nëpërmjet USB-së u aktivizua"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Ndarja e internetit përmes USB-së u aktivizua"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI nëpërmjet USB-së u aktivizua"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Pajisja u lidh si uebkamerë"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Aksesori i USB-së u lidh"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"Trokit për më shumë opsione."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pajisja e lidhur po karikohet. Trokit për opsione të tjera."</string>
@@ -1390,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"Zgjidh metodën e hyrjes"</string>
     <string name="show_ime" msgid="6406112007347443383">"Mbaje në ekran ndërsa tastiera fizike është aktive"</string>
     <string name="hardware" msgid="1800597768237606953">"Shfaq tastierën virtuale"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Konfiguro tastierën fizike"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Konfiguro <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Konfiguro tastierat fizike"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Trokit për të zgjedhur gjuhën dhe strukturën"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1708,15 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"U krye"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Çaktivizo shkurtoren"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Përdor shkurtoren"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Anasjellja e ngjyrës"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Korrigjimi i ngjyrës"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modaliteti i përdorimit me një dorë"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Shumë më i zbehtë"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Pajisjet e dëgjimit"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Shtyp dhe mbaj shtypur të dy butonat e volumit për tre sekonda për të përdorur <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Lësho tastet e volumit. Për të aktivizuar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, shtyp dhe mbaj shtypur të dy tastet e volumit sërish për 3 sekonda."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Zgjidh një funksion për ta përdorur kur troket butonin e qasshmërisë:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Zgjidh një veçori për ta përdorur me gjestin e qasshmërisë (rrëshqit shpejt lart nga fundi i ekranit me dy gishta):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Zgjidh një veçori për ta përdorur me gjestin e qasshmërisë (rrëshqit shpejt lart nga fundi i ekranit me tre gishta):"</string>
@@ -1948,11 +1954,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> nuk ofrohet në këtë moment. Kjo menaxhohet nga <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Mëso më shumë"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Anulo pauzën për aplikacionin"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Të aktivizohen aplikacionet e punës?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Merr qasje tek aplikacionet e punës dhe njoftimet e tua"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Aktivizo"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Hiq nga pauza apl. e punës?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Hiq nga pauza"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgjenca"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Merr qasje tek aplikacionet e punës dhe telefonatat e tua"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Aplikacioni nuk ofrohet"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk ofrohet për momentin."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> nuk ofrohet"</string>
@@ -2158,12 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Kjo përmbajtje nuk mund të hapet me aplikacione pune"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Kjo përmbajtje nuk mund të shpërndahet me aplikacione personale"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Kjo përmbajtje nuk mund të hapet me aplikacione personale"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Profili i punës është në pauzë"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Trokit për ta aktivizuar"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Aplikacionet e punës janë vendosur në pauzë"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Hiq nga pauza"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nuk ka aplikacione pune"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nuk ka aplikacione personale"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Të hapet <xliff:g id="APP">%s</xliff:g> në profilin tënd personal?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Të hapet <xliff:g id="APP">%s</xliff:g> në profilin tënd të punës?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Hap <xliff:g id="APP">%s</xliff:g> personal"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Hap <xliff:g id="APP">%s</xliff:g> të punës"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Përdor shfletuesin personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Përdor shfletuesin e punës"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kodi PIN i shkyçjes së rrjetit të kartës SIM"</string>
@@ -2320,5 +2324,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> po i përdor të dyja ekranet për të shfaqur përmbajtje"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Pajisja është shumë e nxehtë"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"\"Ekrani i dyfishtë\" nuk ofrohet sepse telefoni yt po nxehet shumë"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"\"Ekrani i dyfishtë\" nuk ofrohet"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"\"Ekrani i dyfishtë\" nuk ofrohet sepse \"Kursyesi i baterisë\" është aktiv. Mund ta çaktivizosh këtë te \"Cilësimet\"."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"Shko te \"Cilësimet\""</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Çaktivizoje"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> u konfigurua"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Struktura e tastierës u caktua në: <xliff:g id="LAYOUT_1">%s</xliff:g>. Trokit për ta ndryshuar."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Struktura e tastierës u caktua në: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Trokit për ta ndryshuar."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"Struktura e tastierës u caktua në: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>. Trokit për ta ndryshuar."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Struktura e tastierës u caktua në: <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Trokit për ta ndryshuar."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Tastierat fizike u konfiguruan"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Trokit për të parë tastierat"</string>
 </resources>

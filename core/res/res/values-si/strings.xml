@@ -140,6 +140,7 @@
     <string name="wfcSpnFormat_wifi" msgid="1376356951297043426">"Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen" msgid="7178561009225028264">"Wi-Fi ඇමතීම"</string>
     <string name="wfcSpnFormat_vowifi" msgid="8371335230890725606">"VoWifi"</string>
+    <string name="wfcSpnFormat_wifi_call" msgid="434016592539090004">"WiFi ඇමතුම"</string>
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"ක්‍රියාවිරහිතයි"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Wi-Fi ඔස්සේ ඇමතුම"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"ජංගම ජාලය ඔස්සේ ඇමතුම"</string>
@@ -207,6 +208,9 @@
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ඔබ ඔබගේ කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන තෙක් ඔබගේ පෞද්ගලික යෙදුම් අවහිර කර ඇත"</string>
     <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"පෞද්ගලික යෙදුම් <xliff:g id="DATE">%1$s</xliff:g> දින <xliff:g id="TIME">%2$s</xliff:g>ට අවහිර වනු ඇත. ඔබේ IT පරිපාලක ඔබේ කාර්යාල පැතිකඩ දින <xliff:g id="NUMBER">%3$d</xliff:g>කට වඩා ඉවත් කර තැබීමට ඉඩ නොදේ."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ක්‍රියාත්මක කරන්න"</string>
+    <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"ඇමතුම් සහ පණිවිඩ ක්‍රියා විරහිතයි"</string>
+    <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"ඔබ කාර්යාල යෙදුම් විරාම කර ඇත. ඔබට දුරකථන ඇමතුම් හෝ පෙළ පණිවිඩ නොලැබෙනු ඇත."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"කාර්යාල යෙදුම් විරාමය නොකරන්න"</string>
     <string name="me" msgid="6207584824693813140">"මම"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ටැබ්ලට විකල්ප"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV විකල්ප"</string>
@@ -294,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android පද්ධතිය"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"පුද්ගලික පැතිකඩ වෙත මාරුවන්න"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"කාර්යාල පැතිකඩ වෙත මාරු වන්න"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"සම්බන්ධතා"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ඔබේ සම්බන්ධතාවලට පිවිසෙන්න"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ස්ථානය"</string>
@@ -338,6 +346,7 @@
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"උපාංගයෙහි ඇඟිලි සලකුණු සංවේදකය මත සිදු කරන ඉංගිත ග්‍රහණය කළ හැකිය."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"තිර රුව ගන්න"</string>
     <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"සංදර්ශකයේ තිර රුවක් ගැනීමට හැකිය."</string>
+    <string name="dream_preview_title" msgid="5570751491996100804">"පෙරදසුන, <xliff:g id="DREAM_NAME">%1$s</xliff:g>"</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"තත්ව තීරුව අබල කරන්න හෝ වෙනස් කරන්න"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"තත්ව තීරුව අක්‍රිය කිරීමට හෝ පද්ධති නිරූපක එකතු හෝ ඉවත් කිරීමට යෙදුමට අවසර දේ."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"තත්ත්ව තීරුව බවට පත්වීම"</string>
@@ -458,10 +467,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"යෙදුම භාවිතයේ පවතින අතරතුර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"පසුබිමේ ඇති අතරතුර හෘද ස්පන්දන වේගය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වන්න"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"යෙදුම පසුබිමේ ඇති අතර හෘද ස්පන්දන වේගය, උෂ්ණත්වය සහ රුධිර ඔක්සිජන් ප්‍රතිශතය වැනි ශරීර සංවේදක දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට අවසර දෙයි."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"යෙදුම භාවිතයේ පවතින අතරේ ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වන්න."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"යෙදුම භාවිතයේ ඇති අතරේ, ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට ඉඩ දෙයි."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"යෙදුම පසුබිමේ ඇති අතරේ ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වන්න."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"යෙදුම පසුබිමේ ඇති අතරේ, ශරීර සංවේදක මැණික් කටුවේ උෂ්ණත්ව දත්ත වෙත ප්‍රවේශ වීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"දින දර්ශන සිදුවීම් හා විස්තර කියවන්න"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"මෙම යෙදුමට ඔබගේ ටැබ්ලට් පරිගණකය මත ගබඩා වී ඇති සියලු දින දර්ශන කියවීමට සහ සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට සහ සුරැකීමට හැකිය."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"මෙම යෙදුමට ඔබගේ Android TV මත ගබඩා කර ඇති සියලු දින දර්ශන සිදුවීම් කියවීමට සහ ඔබගේ දින දර්ශන දත්ත බෙදා ගැනීමට හෝ සුරැකීමට හැකිය."</string>
@@ -502,7 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"කම්පකය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"යෙදුමට කම්පන තත්ත්වයට ප්‍රවේශ වීමට ඉඩ දෙන්න."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"ඔබගේ මැදිහත් වීමක් නොමැතිව දුරකථන අංක ඇමතීමට යෙදුමට අවසර දෙන්න. මෙහි ප්‍රතිඑලය වන්නේ අනපේක්ෂිත අයකිරීම් හෝ ඇමතුම් ඇතිවීමයි. මෙයන් හදිසි අංක වලට ඇමතුම් ගැනීමට යෙදුමට අවසර නොදෙන බවට සටහන් කරගන්න. ඔබගේ අනුදැනුමක් නොමැතිව ඇමතුම් ගැනීමෙන් අනිෂ්ට යෙදුම් ඔබගේ මුදල් නිකරුණේ වැය කරයි."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"ඔබේ මැදිහත්වීමකින් තොරව දුරකථන අංක ඇමතීමට යෙදුමට ඉඩ දෙයි. මෙය අනපේක්ෂිත ගාස්තු හෝ ඇමතුම්වලට හේතු විය හැක. මෙය යෙදුමට හදිසි ඇමතුම් අංක ඇමතීමට ඉඩ නොදෙන බව සලකන්න. ඔබේ තහවුරු කිරීමකින් තොරව ඇමතුම් ලබා දීමෙන්, හෝ ලැබෙන ඇමතුම් ස්වයංක්‍රීයව වෙනත් අංකයකට යොමු කිරීමට හේතු වන වාහක කේත ඇමතීමෙන් අනිෂ්ට යෙදුම් ඔබේ මුදල් වැය කළ හැක."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ඇමතුම් සේවාවට පිවිසෙන්න"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ඔබේ මැදිහත්වීමකින් තොරව ඇමතුම් සිදු කිරීමට  IMS සේවාව භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"දුරකථනයේ තත්වය සහ අනන්‍යතාවය කියවීම"</string>
@@ -708,7 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"මුහුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"පරිශීලකයා විසින් මුහුණෙන් අගුළු හැරීම අවලංගු කරන ලදි"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"උත්සාහයන් ඉතා වැඩි ගණනකි. පසුව නැවත උත්සාහ කරන්න."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"උත්සාහයන් ඉතා වැඩි ගණනකි. මුහුණෙන් අගුළු හැරීම අබලයි."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"උත්සාහ ගණන ඉතා වැඩියි. මුහුණෙන් අගුළු ඇරීම නැත."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"උත්සාහයන් ඉතා වැඩි ගණනකි. ඒ වෙනුවට තිර අගුල ඇතුළු කරන්න."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"මුහුණ සත්‍යාපන කළ නොහැක. නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"ඔබ මුහුණෙන් අගුළු හැරීම පිහිටුවා නැත"</string>
@@ -795,6 +800,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"යෙදුමක් සඳහා විශේෂාංග තොරතුරු බැලීම ආරම්භ කිරීමට දරන්නාට ඉඩ දෙන්න."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"ඉහළ නියැදි කිරීමේ වේගයකින් සංවේදක දත්ත වෙත පිවිසෙන්න"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"200 Hz ට වඩා වැඩි වේගයකින් සංවේදක දත්ත නියැදි කිරීමට යෙදුමට ඉඩ දෙයි"</string>
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"යෙදුම පරිශීලක ක්‍රියාවෙන් තොරව යාවත්කාලීන කරන්න"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"පරිශීලක ක්‍රියාවෙන් තොරව කලින් ස්ථාපිත යෙදුම යාවත්කාලීන කිරීමට දරන්නාට ඉඩ දෙයි"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"මුරපද නීති සකස් කිරීම"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"තිර අගුලු මුරපද සහ PIN තුළ ඉඩ දෙන දිග සහ අනුලකුණු පාලනය කිරීම."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"තිරය අගුළු ඇරීමේ උත්සාහයන් නිරීක්ෂණය කරන්න"</string>
@@ -1358,8 +1365,7 @@
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"USB හරහා PTP ක්‍රියාත්මකයි"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB ටෙදරින් ක්‍රියාත්මකයි"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB හරහා MIDI ක්‍රියාත්මකයි"</string>
-    <!-- no translation found for usb_uvc_notification_title (2030032862673400008) -->
-    <skip />
+    <string name="usb_uvc_notification_title" msgid="2030032862673400008">"උපාංගය වෙබ් කැමරාව ලෙස සම්බන්ධ කර ඇත"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB උපාංගය සම්බන්ධ කර ඇත"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"තවත් විකල්ප සඳහා තට්ටු කරන්න."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"සම්බන්ධිත උපාංගය ආරෝපණය කරමින්. තවත් විකල්ප සඳහා තට්ටු කරන්න."</string>
@@ -1390,7 +1396,8 @@
     <string name="select_input_method" msgid="3971267998568587025">"ආදාන ක්‍රමයක් තෝරන්න"</string>
     <string name="show_ime" msgid="6406112007347443383">"භෞතික යතුරු පුවරුව සක්‍රිය අතරතුර එය තිරය මත තබා ගන්න"</string>
     <string name="hardware" msgid="1800597768237606953">"අතථ්‍ය යතුරු පුවරුව පෙන්වන්න"</string>
-    <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"භෞතික යතුරු පුවරුව වින්‍යාස කරන්න"</string>
+    <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"<xliff:g id="DEVICE_NAME">%s</xliff:g> වින්‍යාස කරන්න"</string>
+    <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"භෞතික යතුරුපුවරුව වින්‍යාස කරන්න"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"භාෂාව හා පිරිසැලසුම තේරීමට තට්ටු කරන්න"</string>
     <string name="fast_scroll_alphabet" msgid="8854435958703888376">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="2529539945421557329">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
@@ -1708,15 +1715,14 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"නිමයි"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"කෙටිමඟ ක්‍රියාවිරහිත කරන්න"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"කෙටිමඟ භාවිතා කරන්න"</string>
-    <!-- no translation found for color_inversion_feature_name (2672824491933264951) -->
-    <skip />
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"වර්ණ අපවර්තනය"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"වර්ණ නිවැරදි කිරීම"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"තනි අත් ප්‍රකාරය"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"තවත් අඳුරු"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ශ්‍රවණ උපාංග"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මකයි."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිතයි."</string>
-    <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> භාවිත කිරීමට හඬ පරිමා යතුරු දෙකම තත්පර තුනකට ඔබාගෙන සිටින්න"</string>
+    <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"හඬ පරිමා යතුරු මුදා හරින්න. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> සක්‍රීය කිරීමට, හඬ පරිමා යතුරු දෙකම නැවත තත්පර 3ක් ඔබා අල්ලා සිටින්න."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"ඔබ ප්‍රවේශ්‍යතා බොත්තම තට්ටු කරන විට භාවිත කිරීමට විශේෂාංගයක් තෝරා ගන්න:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"ප්‍රවේශ්‍යතා ඉංගිතය සමඟ භාවිතයට විශේෂාංගයක් තෝරා ගන්න (ඇඟිලි දෙකකින් තිරයේ පහළ සිට ඉහළට ස්වයිප් කරන්න):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"ප්‍රවේශ්‍යතා ඉංගිතය සමඟ භාවිතයට විශේෂාංගයක් තෝරා ගන්න (ඇඟිලි තුනකින් තිරයේ පහළ සිට ඉහළට ස්වයිප් කරන්න):"</string>
@@ -1948,11 +1954,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> මේ අවස්ථාවේදී ලබා ගත නොහැකිය. මෙය <xliff:g id="APP_NAME_1">%2$s</xliff:g> මගින් කළමනාකරණය කෙරේ."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"තව දැන ගන්න"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"යෙදුම විරාම කිරීම ඉවත් කරන්න"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"කාර්යාල යෙදු. ක්‍රියා. කරන්නද?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"ඔබගේ කාර්යාල යෙදුම් සහ දැනුම්දීම් වෙත ප්‍රවේශය ලබා ගන්න"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ක්‍රියාත්මක කරන්න"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"කාර්ය යෙදුම් විරාම නොකරන්න ද?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"විරාම නොකරන්න"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"හදිසි අවස්ථාව"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"ඔබේ කාර්යාල යෙදුම් සහ ඇමතුම් වෙත ප්‍රවේශය ලබා ගන්න"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"යෙදුම ලබා ගත නොහැකිය"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> මේ දැන් ලබා ගත නොහැකිය."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> නොතිබේ"</string>
@@ -2158,12 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"මෙම අන්තර්ගතය කාර්යාල යෙදුම් සමඟ විවෘත කළ නොහැකිය"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"මෙම අන්තර්ගතය පුද්ගලික යෙදුම් සමඟ බෙදා ගත නොහැකිය"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"මෙම අන්තර්ගතය පුද්ගලික යෙදුම් සමඟ විවෘත කළ නොහැකිය"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"කාර්යාල පැතිකඩ විරාම කර ඇත"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"ක්‍රියාත්මක කිරීමට තට්ටු කරන්න"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"කාර්යාල යෙදුම් විරාම කර ඇත"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"විරාම නොකරන්න"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"කාර්යාල යෙදුම් නැත"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"පුද්ගලික යෙදුම් නැත"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"<xliff:g id="APP">%s</xliff:g> ඔබගේ පුද්ගලික පැතිකඩ තුළ විවෘත කරන්නද?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"<xliff:g id="APP">%s</xliff:g> ඔබගේ කාර්යාල පැතිකඩ තුළ විවෘත කරන්නද?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"පුද්ගලික <xliff:g id="APP">%s</xliff:g> විවෘත කරන්න"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"කාර්යාල <xliff:g id="APP">%s</xliff:g> විවෘත කරන්න"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"පුද්ගලික බ්‍රව්සරය භාවිත කරන්න"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"කාර්යාල බ්‍රව්සරය භාවිත කරන්න"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ජාල අගුලු හැරීමේ PIN"</string>
@@ -2320,5 +2324,15 @@
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"අන්තර්ගතය පෙන්වීමට <xliff:g id="APP_NAME">%1$s</xliff:g> සංදර්ශන දෙකම භාවිත කරයි"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"උපාංගය ඉතා උණුසුම් වේ"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ඔබේ දුරකථනය ඉතා උණුසුම් නිසා ද්විත්ව තිරය ලබා ගත නොහැක"</string>
+    <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen නොමැත"</string>
+    <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"බැටරි සුරැකුම ක්‍රියාත්මක නිසා Dual Screen නොමැත. ඔබට මෙය සැකසීම් තුළ ක්‍රියාවිරහිත කළ හැක."</string>
+    <string name="device_state_notification_settings_button" msgid="691937505741872749">"සැකසීම් වෙත යන්න"</string>
     <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"අක්‍රිය කරන්න"</string>
+    <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> වින්‍යාස කෙරිණි"</string>
+    <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"යතුරු පුවරු පිරිසැලසුම <xliff:g id="LAYOUT_1">%s</xliff:g> ලෙස සැකසිණි. වෙනස් කිරීමට තට්ටු කරන්න."</string>
+    <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"යතුරු පුවරු පිරිසැලසුම <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g> ලෙස සැකසිණි. වෙනස් කිරීමට තට්ටු කරන්න."</string>
+    <string name="keyboard_layout_notification_three_selected_message" msgid="280734264593115419">"යතුරු පුවරුව <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> ලෙස සැකසිණි. වෙනස් කිරීමට තට්ටු කරන්න."</string>
+    <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"යතුරු පුවරුව <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> ලෙස සකසා ඇත… වෙනස් කිරීමට තට්ටු කරන්න."</string>
+    <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"භෞතික යතුරු පුවරුව වින්‍යාස කෙරිණි"</string>
+    <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"යතුරු පුවරු බැලීමට තට්ටු කරන්න"</string>
 </resources>
