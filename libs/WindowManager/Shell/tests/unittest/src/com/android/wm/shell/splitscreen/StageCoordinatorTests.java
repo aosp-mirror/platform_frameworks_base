@@ -152,10 +152,15 @@ public class StageCoordinatorTests extends ShellTestCase {
         when(mStageCoordinator.isSplitActive()).thenReturn(true);
 
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        final WindowContainerTransaction wct = spy(new WindowContainerTransaction());
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
-        verify(mSideStage).addTask(eq(task), eq(wct));
+        verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+        verify(mMainStage).reparentTopTask(eq(wct));
+        verify(mMainStage).evictAllChildren(eq(wct));
+        verify(mSideStage).evictAllChildren(eq(wct));
+        verify(mSplitLayout).resetDividerPosition();
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
     }
@@ -171,14 +176,11 @@ public class StageCoordinatorTests extends ShellTestCase {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
 
         mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
-        verify(mMainStage).addTask(eq(task), eq(wct));
+        verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+        verify(mMainStage).evictAllChildren(eq(wct));
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
         assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getSideStagePosition());
-
-        mStageCoordinator.moveToStage(task, SPLIT_POSITION_TOP_OR_LEFT, wct);
-        verify(mSideStage).addTask(eq(task), eq(wct));
-        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getSideStagePosition());
-        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
     }
 
     @Test
