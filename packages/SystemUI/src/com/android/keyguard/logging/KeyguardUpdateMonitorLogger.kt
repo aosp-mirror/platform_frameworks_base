@@ -67,8 +67,10 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
             "ActiveUnlock",
             DEBUG,
             { int1 = wakeReason },
-            { "Skip requesting active unlock from wake reason that doesn't trigger face auth" +
-                    " reason=${PowerManager.wakeReasonToString(int1)}" }
+            {
+                "Skip requesting active unlock from wake reason that doesn't trigger face auth" +
+                    " reason=${PowerManager.wakeReasonToString(int1)}"
+            }
         )
     }
 
@@ -207,17 +209,27 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
     }
 
     fun logFaceDetected(userId: Int, isStrongBiometric: Boolean) {
-        logBuffer.log(TAG, DEBUG, {
-            int1 = userId
-            bool1 = isStrongBiometric
-        }, {"Face detected: userId: $int1, isStrongBiometric: $bool1"})
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = userId
+                bool1 = isStrongBiometric
+            },
+            { "Face detected: userId: $int1, isStrongBiometric: $bool1" }
+        )
     }
 
     fun logFingerprintDetected(userId: Int, isStrongBiometric: Boolean) {
-        logBuffer.log(TAG, DEBUG, {
-            int1 = userId
-            bool1 = isStrongBiometric
-        }, {"Fingerprint detected: userId: $int1, isStrongBiometric: $bool1"})
+        logBuffer.log(
+            TAG,
+            DEBUG,
+            {
+                int1 = userId
+                bool1 = isStrongBiometric
+            },
+            { "Fingerprint detected: userId: $int1, isStrongBiometric: $bool1" }
+        )
     }
 
     fun logFingerprintError(msgId: Int, originalErrMsg: String) {
@@ -669,13 +681,10 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
     }
 
     fun logHandleBatteryUpdate(isInteresting: Boolean) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            {
-                bool1 = isInteresting
-            },
-            { "handleBatteryUpdate: $bool1" }
-        )
+        logBuffer.log(TAG, DEBUG, { bool1 = isInteresting }, { "handleBatteryUpdate: $bool1" })
+    }
+
+    fun scheduleWatchdog(@CompileTimeConstant watchdogType: String) {
+        logBuffer.log(TAG, DEBUG, "Scheduling biometric watchdog for $watchdogType")
     }
 }
