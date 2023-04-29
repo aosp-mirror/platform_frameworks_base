@@ -913,8 +913,10 @@ final class HotwordDetectionConnection {
         }
         // Handle case where all hotword detector sessions are destroyed with only the visual
         // detector session left
-        if (mDetectorSessions.size() == 1
-                && mDetectorSessions.get(0) instanceof VisualQueryDetectorSession) {
+        boolean allHotwordDetectionServiceSessionsRemoved = mDetectorSessions.size() == 0
+                || (mDetectorSessions.size() == 1 && mDetectorSessions.get(0)
+                instanceof VisualQueryDetectorSession);
+        if (allHotwordDetectionServiceSessionsRemoved) {
             unbindHotwordDetectionService();
         }
     }

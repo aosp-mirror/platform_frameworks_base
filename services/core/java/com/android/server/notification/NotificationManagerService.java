@@ -316,7 +316,6 @@ import com.android.server.notification.toast.TextToastRecord;
 import com.android.server.notification.toast.ToastRecord;
 import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.powerstats.StatsPullAtomCallbackImpl;
 import com.android.server.statusbar.StatusBarManagerInternal;
@@ -2559,8 +2558,8 @@ public class NotificationManagerService extends SystemService {
                         Context.STATS_MANAGER),
                 getContext().getSystemService(TelephonyManager.class),
                 LocalServices.getService(ActivityManagerInternal.class),
-                createToastRateLimiter(), new PermissionHelper(LocalServices.getService(
-                        PermissionManagerServiceInternal.class), AppGlobals.getPackageManager(),
+                createToastRateLimiter(), new PermissionHelper(getContext(),
+                        AppGlobals.getPackageManager(),
                         AppGlobals.getPermissionManager()),
                 LocalServices.getService(UsageStatsManagerInternal.class),
                 getContext().getSystemService(TelecomManager.class),
@@ -11599,6 +11598,8 @@ public class NotificationManagerService extends SystemService {
             StatusBarNotificationHolder sbnHolder = new StatusBarNotificationHolder(sbn);
             try {
                 listener.onNotificationPosted(sbnHolder, rankingUpdate);
+            } catch (android.os.DeadObjectException ex) {
+                Slog.wtf(TAG, "unable to notify listener (posted): " + info, ex);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "unable to notify listener (posted): " + info, ex);
             }
@@ -11620,6 +11621,8 @@ public class NotificationManagerService extends SystemService {
                     reason = REASON_LISTENER_CANCEL;
                 }
                 listener.onNotificationRemoved(sbnHolder, rankingUpdate, stats, reason);
+            } catch (android.os.DeadObjectException ex) {
+                Slog.wtf(TAG, "unable to notify listener (removed): " + info, ex);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "unable to notify listener (removed): " + info, ex);
             }
@@ -11630,6 +11633,8 @@ public class NotificationManagerService extends SystemService {
             final INotificationListener listener = (INotificationListener) info.service;
             try {
                 listener.onNotificationRankingUpdate(rankingUpdate);
+            } catch (android.os.DeadObjectException ex) {
+                Slog.wtf(TAG, "unable to notify listener (ranking update): " + info, ex);
             } catch (RemoteException ex) {
                 Slog.e(TAG, "unable to notify listener (ranking update): " + info, ex);
             }

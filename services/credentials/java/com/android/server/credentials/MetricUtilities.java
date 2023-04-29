@@ -35,6 +35,7 @@ import java.util.Map;
 /**
  * For all future metric additions, this will contain their names for local usage after importing
  * from {@link com.android.internal.util.FrameworkStatsLog}.
+ * TODO(b/271135048) - Emit all atoms, including all V4 atoms (specifically the rest of track 1).
  */
 public class MetricUtilities {
     private static final boolean LOG_FLAG = true;

@@ -98,7 +98,9 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                             mRequestId, mClientRequest,
                             mClientAppInfo.getPackageName(),
                             PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
-                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
+                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS),
+                            // TODO(b/279480457): populate
+                            /*defaultProviderId=*/new ArrayList<>()),
                     providerDataList);
             mClientCallback.onPendingIntent(mPendingIntent);
         } catch (RemoteException e) {

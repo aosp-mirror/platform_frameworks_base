@@ -231,6 +231,11 @@ object Flags {
     val REVAMPED_BOUNCER_MESSAGES =
         unreleasedFlag(234, "revamped_bouncer_messages")
 
+    /** Whether to delay showing bouncer UI when face auth or active unlock are enrolled. */
+    // TODO(b/279794160): Tracking bug.
+    @JvmField
+    val DELAY_BOUNCER = unreleasedFlag(235, "delay_bouncer")
+
     // 300 - power menu
     // TODO(b/254512600): Tracking Bug
     @JvmField val POWER_MENU_LITE = releasedFlag(300, "power_menu_lite")
@@ -595,6 +600,8 @@ object Flags {
 
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
+    // TODO(b/278714186) Tracking Bug
+    @JvmField val CLIPBOARD_IMAGE_TIMEOUT = unreleasedFlag(1702, "clipboard_image_timeout")
 
     // 1800 - shade container
     // TODO(b/265944639): Tracking Bug
@@ -618,7 +625,7 @@ object Flags {
     // TODO(b/269132640): Tracking Bug
     @JvmField
     val APP_PANELS_REMOVE_APPS_ALLOWED =
-        unreleasedFlag(2003, "app_panels_remove_apps_allowed", teamfood = true)
+        releasedFlag(2003, "app_panels_remove_apps_allowed")
 
     // 2200 - biometrics (udfps, sfps, BiometricPrompt, etc.)
     // TODO(b/259264861): Tracking Bug

@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package com.android.server.companion.datatransfer.contextsync;
+package com.android.systemui.log
 
-/** Callback for call metadata syncing. */
-public abstract class CallMetadataSyncCallback {
+import android.os.Build
+import android.util.Log
 
-    abstract void processCallControlAction(int crossDeviceCallId, int callControlAction);
+/** An empty logger for release builds. */
+object DebugLogger {
 
-    abstract void requestCrossDeviceSync(int userId);
-
-    abstract void updateStatus(int userId, boolean shouldSyncCallMetadata);
+    @JvmName("logcatMessage")
+    inline fun Any.debugLog(
+        enabled: Boolean = Build.IS_DEBUGGABLE,
+        priority: Int = Log.DEBUG,
+        tag: String = this::class.simpleName.orEmpty(),
+        error: Throwable? = null,
+        message: () -> String,
+    ) {
+        // no-op.
+    }
 }

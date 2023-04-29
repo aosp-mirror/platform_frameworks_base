@@ -133,6 +133,13 @@ class TransitionController {
     final ArrayList<Runnable> mStateValidators = new ArrayList<>();
 
     /**
+     * List of activity-records whose visibility changed outside the main/tracked part of a
+     * transition (eg. in the finish-transaction). These will be checked when idle to recover from
+     * degenerate states.
+     */
+    final ArrayList<ActivityRecord> mValidateCommitVis = new ArrayList<>();
+
+    /**
      * Currently playing transitions (in the order they were started). When finished, records are
      * removed from this list.
      */
@@ -848,6 +855,15 @@ class TransitionController {
             }
         }
         mStateValidators.clear();
+        for (int i = 0; i < mValidateCommitVis.size(); ++i) {
+            final ActivityRecord ar = mValidateCommitVis.get(i);
+            if (!ar.isVisibleRequested() && ar.isVisible()) {
+                Slog.e(TAG, "Uncommitted visibility change: " + ar);
+                ar.commitVisibility(ar.isVisibleRequested(), false /* layout */,
+                        false /* fromTransition */);
+            }
+        }
+        mValidateCommitVis.clear();
     }
 
     /**

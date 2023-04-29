@@ -17,7 +17,6 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
@@ -26,6 +25,7 @@ import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
@@ -34,9 +34,7 @@ import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisibleByDrag
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
-import com.android.wm.shell.flicker.splitScreenEntered
-import org.junit.Assume
-import org.junit.Before
+import com.android.wm.shell.flicker.splitscreen.benchmark.EnterSplitScreenByDragFromTaskbarBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,40 +51,15 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSplitScreenByDragFromTaskbar(flicker: FlickerTest) : SplitScreenBase(flicker) {
-
-    @Before
-    fun before() {
-        Assume.assumeTrue(tapl.isTablet)
-    }
-
+class EnterSplitScreenByDragFromTaskbar(override val flicker: FlickerTest) :
+    EnterSplitScreenByDragFromTaskbarBenchmark(flicker), ICommonAssertions {
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-            setup {
-                tapl.goHome()
-                SplitScreenUtils.createShortcutOnHotseatIfNotExist(tapl, secondaryApp.appName)
-                primaryApp.launchViaIntent(wmHelper)
-            }
-            transitions {
-                tapl.launchedAppState.taskbar
-                    .getAppIcon(secondaryApp.appName)
-                    .dragToSplitscreen(secondaryApp.`package`, primaryApp.`package`)
-                SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
-            }
+            defaultSetup(this)
+            defaultTeardown(this)
+            thisTransition(this)
         }
-
-    @IwTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    fun cujCompleted() =
-        flicker.splitScreenEntered(
-            primaryApp,
-            secondaryApp,
-            fromOtherApp = false,
-            appExistAtStart = false
-        )
 
     @FlakyTest(bugId = 245472831)
     @Test

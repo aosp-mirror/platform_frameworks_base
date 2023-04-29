@@ -30,7 +30,6 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.os.IBinder
 import android.os.SystemProperties
-import android.view.Display.DEFAULT_DISPLAY
 import android.view.SurfaceControl
 import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
@@ -561,21 +560,19 @@ class DesktopTasksController(
             controller = null
         }
 
-        // TODO(b/278084491): pass in display id
-        override fun showDesktopApps() {
+        override fun showDesktopApps(displayId: Int) {
             ExecutorUtils.executeRemoteCallWithTaskPermission(
                 controller,
                 "showDesktopApps"
-            ) { c -> c.showDesktopApps(DEFAULT_DISPLAY) }
+            ) { c -> c.showDesktopApps(displayId) }
         }
 
-        // TODO(b/278084491): pass in display id
-        override fun getVisibleTaskCount(): Int {
+        override fun getVisibleTaskCount(displayId: Int): Int {
             val result = IntArray(1)
             ExecutorUtils.executeRemoteCallWithTaskPermission(
                 controller,
                 "getVisibleTaskCount",
-                { controller -> result[0] = controller.getVisibleTaskCount(DEFAULT_DISPLAY) },
+                { controller -> result[0] = controller.getVisibleTaskCount(displayId) },
                 true /* blocking */
             )
             return result[0]
