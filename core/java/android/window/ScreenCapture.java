@@ -198,17 +198,21 @@ public class ScreenCapture {
          * Create ScreenshotHardwareBuffer from an existing HardwareBuffer object.
          *
          * @param hardwareBuffer       The existing HardwareBuffer object
-         * @param namedColorSpace      Integer value of a named color space {@link ColorSpace.Named}
+         * @param dataspace            Dataspace describing the content.
+         *                             {@see android.hardware.DataSpace}
          * @param containsSecureLayers Indicates whether this graphic buffer contains captured
          *                             contents of secure layers, in which case the screenshot
          *                             should not be persisted.
          * @param containsHdrLayers    Indicates whether this graphic buffer contains HDR content.
          */
         private static ScreenshotHardwareBuffer createFromNative(HardwareBuffer hardwareBuffer,
-                int namedColorSpace, boolean containsSecureLayers, boolean containsHdrLayers) {
-            ColorSpace colorSpace = ColorSpace.get(ColorSpace.Named.values()[namedColorSpace]);
+                int dataspace, boolean containsSecureLayers, boolean containsHdrLayers) {
+            ColorSpace colorSpace = ColorSpace.getFromDataSpace(dataspace);
             return new ScreenshotHardwareBuffer(
-                    hardwareBuffer, colorSpace, containsSecureLayers, containsHdrLayers);
+                    hardwareBuffer,
+                    colorSpace != null ? colorSpace : ColorSpace.get(ColorSpace.Named.SRGB),
+                    containsSecureLayers,
+                    containsHdrLayers);
         }
 
         public ColorSpace getColorSpace() {
@@ -271,8 +275,8 @@ public class ScreenCapture {
         public final boolean mAllowProtected;
         public final long mUid;
         public final boolean mGrayscale;
-
         final SurfaceControl[] mExcludeLayers;
+        public final boolean mHintForSeamlessTransition;
 
         private CaptureArgs(CaptureArgs.Builder<? extends CaptureArgs.Builder<?>> builder) {
             mPixelFormat = builder.mPixelFormat;
@@ -284,6 +288,7 @@ public class ScreenCapture {
             mUid = builder.mUid;
             mGrayscale = builder.mGrayscale;
             mExcludeLayers = builder.mExcludeLayers;
+            mHintForSeamlessTransition = builder.mHintForSeamlessTransition;
         }
 
         private CaptureArgs(Parcel in) {
@@ -305,6 +310,7 @@ public class ScreenCapture {
             } else {
                 mExcludeLayers = null;
             }
+            mHintForSeamlessTransition = in.readBoolean();
         }
 
         /** Release any layers if set using {@link Builder#setExcludeLayers(SurfaceControl[])}. */
@@ -352,6 +358,7 @@ public class ScreenCapture {
             private long mUid = -1;
             private boolean mGrayscale;
             private SurfaceControl[] mExcludeLayers;
+            private boolean mHintForSeamlessTransition;
 
             /**
              * Construct a new {@link CaptureArgs} with the set parameters. The builder remains
@@ -449,6 +456,21 @@ public class ScreenCapture {
             }
 
             /**
+             * Set whether the screenshot will be used in a system animation.
+             * This hint is used for picking the "best" colorspace for the screenshot, in particular
+             * for mixing HDR and SDR content.
+             * E.g., hintForSeamlessTransition is false, then a colorspace suitable for file
+             * encoding, such as BT2100, may be chosen. Otherwise, then the display's color space
+             * would be chosen, with the possibility of having an extended brightness range. This
+             * is important for screenshots that are directly re-routed to a SurfaceControl in
+             * order to preserve accurate colors.
+             */
+            public T setHintForSeamlessTransition(boolean hintForSeamlessTransition) {
+                mHintForSeamlessTransition = hintForSeamlessTransition;
+                return getThis();
+            }
+
+            /**
              * Each sub class should return itself to allow the builder to chain properly
              */
             T getThis() {
@@ -471,7 +493,6 @@ public class ScreenCapture {
             dest.writeBoolean(mAllowProtected);
             dest.writeLong(mUid);
             dest.writeBoolean(mGrayscale);
-
             if (mExcludeLayers != null) {
                 dest.writeInt(mExcludeLayers.length);
                 for (SurfaceControl excludeLayer : mExcludeLayers) {
@@ -480,6 +501,7 @@ public class ScreenCapture {
             } else {
                 dest.writeInt(0);
             }
+            dest.writeBoolean(mHintForSeamlessTransition);
         }
 
         public static final Parcelable.Creator<CaptureArgs> CREATOR =
@@ -627,6 +649,7 @@ public class ScreenCapture {
                 setUid(args.mUid);
                 setGrayscale(args.mGrayscale);
                 setExcludeLayers(args.mExcludeLayers);
+                setHintForSeamlessTransition(args.mHintForSeamlessTransition);
             }
 
             public Builder(SurfaceControl layer) {

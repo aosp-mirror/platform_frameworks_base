@@ -2100,9 +2100,12 @@ public final class CachedAppOptimizer {
             final boolean frozen;
             final ProcessCachedOptimizerRecord opt = proc.mOptRecord;
 
-            opt.setPendingFreeze(false);
-
             synchronized (mProcLock) {
+                // someone has canceled this freeze
+                if (!opt.isPendingFreeze()) {
+                    return;
+                }
+                opt.setPendingFreeze(false);
                 pid = proc.getPid();
 
                 if (mFreezerOverride) {
@@ -2148,7 +2151,6 @@ public final class CachedAppOptimizer {
                 try {
                     traceAppFreeze(proc.processName, pid, -1);
                     Process.setProcessFrozen(pid, proc.uid, true);
-
                     opt.setFreezeUnfreezeTime(SystemClock.uptimeMillis());
                     opt.setFrozen(true);
                     opt.setHasCollectedFrozenPSS(false);

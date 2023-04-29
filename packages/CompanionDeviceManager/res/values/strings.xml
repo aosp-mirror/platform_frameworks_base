@@ -113,17 +113,11 @@
     <!-- Back button for the helper consent dialog [CHAR LIMIT=30] -->
     <string name="consent_back">Back</string>
 
-    <!-- Action when permission list view is expanded CHAR LIMIT=30] -->
-    <string name="permission_expanded">Expanded</string>
+    <!-- Expand permission in the list CHAR LIMIT=30] -->
+    <string name="permission_expand">Expand <xliff:g id="permission_type" example="Notification">%1$s</xliff:g></string>
 
-    <!-- Expand action permission list CHAR LIMIT=30] -->
-    <string name="permission_expand">Expand</string>
-
-    <!-- Action when permission list view is collapsed CHAR LIMIT=30] -->
-    <string name="permission_collapsed">Collapsed</string>
-
-    <!-- Collapse action permission list CHAR LIMIT=30] -->
-    <string name="permission_collapse">Collapse</string>
+    <!-- Collapse permission int the list CHAR LIMIT=30] -->
+    <string name="permission_collapse">Collapse <xliff:g id="permission_type" example="Notification">%1$s</xliff:g></string>
 
     <!-- ================== System data transfer ==================== -->
     <!-- Title of the permission sync confirmation dialog. [CHAR LIMIT=NONE] -->

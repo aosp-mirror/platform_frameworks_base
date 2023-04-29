@@ -16,12 +16,12 @@
 
 package com.android.systemui.biometrics
 
-import com.android.systemui.log.LogBuffer
-import com.android.systemui.log.LogLevel
-import com.android.systemui.log.LogLevel.ERROR
-import com.android.systemui.log.LogLevel.VERBOSE
-import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.dagger.UdfpsLog
+import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.plugins.log.LogLevel.ERROR
+import com.android.systemui.plugins.log.LogLevel.VERBOSE
+import com.android.systemui.plugins.log.LogLevel.WARNING
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 

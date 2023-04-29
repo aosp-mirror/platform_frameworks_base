@@ -20,9 +20,9 @@ package android.companion;
 
 option java_multiple_files = true;
 
-// Next index: 2
+// Next index: 4
 message Telecom {
-  // Next index: 5
+  // Next index: 6
   message Call {
     // UUID representing this call
     int64 id = 1;
@@ -34,6 +34,8 @@ message Telecom {
       // Human-readable name of the app processing this call
       string app_name = 2;
       bytes app_icon = 3;
+      // Unique identifier for this app, such as a package name.
+      string app_identifier = 4;
     }
     Origin origin = 2;
 
@@ -59,9 +61,11 @@ message Telecom {
       REJECT_AND_BLOCK = 9;
       IGNORE = 10;
     }
-    repeated Control controls_available = 4;
+    repeated Control controls = 4;
   }
 
   // The list of active calls.
   repeated Call calls = 1;
+  // The list of requested calls or call changes.
+  repeated Call requests = 2;
 }

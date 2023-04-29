@@ -73,7 +73,8 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
         if (mHandlerIds.containsKey(handler)) {
             handlerId = mHandlerIds.get(handler);
         } else {
-            handlerId = mHandlerIds.size();
+            // + 1 to avoid 0 ids which can be confused with missing value when dumped to proto
+            handlerId = mHandlerIds.size() + 1;
             mHandlerIds.put(handler, handlerId);
         }
 

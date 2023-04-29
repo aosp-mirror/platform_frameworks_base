@@ -55,6 +55,9 @@ import com.android.systemui.R
 import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
+import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
@@ -66,7 +69,9 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.TestScope
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -90,6 +95,8 @@ import org.mockito.junit.MockitoJUnit
 private const val DISPLAY_ID = 2
 private const val SENSOR_ID = 1
 
+private const val REAR_DISPLAY_MODE_DEVICE_STATE = 3
+
 @SmallTest
 @RoboPilotTest
 @RunWith(AndroidJUnit4::class)
@@ -112,7 +119,12 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     private lateinit var keyguardBouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
+    private lateinit var displayStateInteractor: DisplayStateInteractor
+
     private val executor = FakeExecutor(FakeSystemClock())
+    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+    private val testScope = TestScope(StandardTestDispatcher())
+
     private lateinit var overlayController: ISidefpsController
     private lateinit var sideFpsController: SideFpsController
 
@@ -142,6 +154,13 @@ class SideFpsControllerTest : SysuiTestCase() {
                 FakeDeviceEntryFingerprintAuthRepository(),
                 FakeSystemClock(),
             )
+        displayStateInteractor =
+            DisplayStateInteractorImpl(
+                testScope.backgroundScope,
+                context,
+                executor,
+                rearDisplayStateRepository
+            )
 
         context.addMockSystemService(DisplayManager::class.java, displayManager)
         context.addMockSystemService(WindowManager::class.java, windowManager)
@@ -168,6 +187,7 @@ class SideFpsControllerTest : SysuiTestCase() {
         isReverseDefaultRotation: Boolean = false,
         initInfo: DisplayInfo.() -> Unit = {},
         windowInsets: WindowInsets = insetsForSmallNavbar(),
+        inRearDisplayMode: Boolean = false,
         block: () -> Unit
     ) {
         this.deviceConfig = deviceConfig
@@ -228,6 +248,13 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation
         )
 
+        val rearDisplayDeviceStates =
+            if (inRearDisplayMode) intArrayOf(REAR_DISPLAY_MODE_DEVICE_STATE) else intArrayOf()
+        sideFpsControllerContext.orCreateTestableResources.addOverride(
+            com.android.internal.R.array.config_rearDisplayDeviceStates,
+            rearDisplayDeviceStates
+        )
+
         sideFpsController =
             SideFpsController(
                 sideFpsControllerContext,
@@ -237,12 +264,14 @@ class SideFpsControllerTest : SysuiTestCase() {
                 activityTaskManager,
                 overviewProxyService,
                 displayManager,
+                displayStateInteractor,
                 executor,
                 handler,
                 alternateBouncerInteractor,
                 TestCoroutineScope(),
-                dumpManager,
+                dumpManager
             )
+        rearDisplayStateRepository.setIsInRearDisplayMode(inRearDisplayMode)
 
         overlayController =
             ArgumentCaptor.forClass(ISidefpsController::class.java)
@@ -584,8 +613,60 @@ class SideFpsControllerTest : SysuiTestCase() {
             verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible = true)
         }
 
+    @Test
+    fun verifiesSfpsIndicatorNotAddedInRearDisplayMode_0() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_0 },
+            inRearDisplayMode = true,
+        ) {
+            verifySfpsIndicator_notAdded_InRearDisplayMode()
+        }
+
+    @Test
+    fun verifiesSfpsIndicatorNotAddedInRearDisplayMode_90() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_90 },
+            inRearDisplayMode = true,
+        ) {
+            verifySfpsIndicator_notAdded_InRearDisplayMode()
+        }
+
+    @Test
+    fun verifiesSfpsIndicatorNotAddedInRearDisplayMode_180() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_180 },
+            inRearDisplayMode = true,
+        ) {
+            verifySfpsIndicator_notAdded_InRearDisplayMode()
+        }
+
+    @Test
+    fun verifiesSfpsIndicatorNotAddedInRearDisplayMode_270() =
+        testWithDisplay(
+            deviceConfig = DeviceConfig.Y_ALIGNED,
+            isReverseDefaultRotation = false,
+            { rotation = Surface.ROTATION_270 },
+            inRearDisplayMode = true,
+        ) {
+            verifySfpsIndicator_notAdded_InRearDisplayMode()
+        }
+
     private fun verifySfpsIndicatorVisibilityOnTaskbarUpdate(sfpsViewVisible: Boolean) {
         sideFpsController.overlayOffsets = sensorLocation
+    }
+
+    private fun verifySfpsIndicator_notAdded_InRearDisplayMode() {
+        sideFpsController.overlayOffsets = sensorLocation
+        overlayController.show(SENSOR_ID, REASON_UNKNOWN)
+        executor.runAllReady()
+
+        verify(windowManager, never()).addView(any(), any())
     }
 
     fun alternateBouncerVisibility_showAndHideSideFpsUI() = testWithDisplay {
@@ -624,7 +705,7 @@ class SideFpsControllerTest : SysuiTestCase() {
      * in other rotations have been omitted.
      */
     @Test
-    fun verifiesIndicatorPlacementForXAlignedSensor_0() {
+    fun verifiesIndicatorPlacementForXAlignedSensor_0() =
         testWithDisplay(
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = false,
@@ -641,7 +722,6 @@ class SideFpsControllerTest : SysuiTestCase() {
             assertThat(overlayViewParamsCaptor.value.x).isEqualTo(sensorLocation.sensorLocationX)
             assertThat(overlayViewParamsCaptor.value.y).isEqualTo(0)
         }
-    }
 
     /**
      * {@link SideFpsController#updateOverlayParams} calculates indicator placement for ROTATION_270
@@ -650,7 +730,7 @@ class SideFpsControllerTest : SysuiTestCase() {
      * correctly, tests for indicator placement in other rotations have been omitted.
      */
     @Test
-    fun verifiesIndicatorPlacementForXAlignedSensor_InReverseDefaultRotation_270() {
+    fun verifiesIndicatorPlacementForXAlignedSensor_InReverseDefaultRotation_270() =
         testWithDisplay(
             deviceConfig = DeviceConfig.X_ALIGNED,
             isReverseDefaultRotation = true,
@@ -667,7 +747,6 @@ class SideFpsControllerTest : SysuiTestCase() {
             assertThat(overlayViewParamsCaptor.value.x).isEqualTo(sensorLocation.sensorLocationX)
             assertThat(overlayViewParamsCaptor.value.y).isEqualTo(0)
         }
-    }
 
     /**
      * {@link SideFpsController#updateOverlayParams} calculates indicator placement for ROTATION_0,

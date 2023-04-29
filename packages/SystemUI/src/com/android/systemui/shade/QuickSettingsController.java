@@ -887,7 +887,9 @@ public class QuickSettingsController {
     }
 
     void setOverScrollAmount(int overExpansion) {
-        mQs.setOverScrollAmount(overExpansion);
+        if (mQs != null) {
+            mQs.setOverScrollAmount(overExpansion);
+        }
     }
 
     private void setOverScrolling(boolean overscrolling) {
@@ -1230,10 +1232,13 @@ public class QuickSettingsController {
             mVisible = qsVisible;
             mQs.setQsVisible(qsVisible);
             mQs.setFancyClipping(
+                    mDisplayLeftInset,
                     clipTop,
+                    mDisplayRightInset,
                     clipBottom,
                     radius,
-                    qsVisible && !mSplitShadeEnabled);
+                    qsVisible && !mSplitShadeEnabled,
+                    mIsFullWidth);
 
         }
 

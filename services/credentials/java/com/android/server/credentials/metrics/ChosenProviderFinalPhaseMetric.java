@@ -29,11 +29,8 @@ import java.util.List;
  * Some types are redundant across these metric collectors, but that has debug use-cases as
  * these data-types are available at different moments of the flow (and typically, one can feed
  * into the next).
- * TODO(b/270403549) - iterate on this in V3+
  */
 public class ChosenProviderFinalPhaseMetric {
-
-    // TODO(b/270403549) - applies elsewhere, likely removed or replaced w/ some hashed/count index
     private static final String TAG = "ChosenFinalPhaseMetric";
     // The session id associated with this API call, used to unite split emits
     private int mSessionId = -1;
