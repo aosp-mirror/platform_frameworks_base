@@ -25,6 +25,7 @@ import android.Manifest;
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.Notification;
 import android.app.compat.CompatChanges;
@@ -476,7 +477,8 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getJob().getMinLatencyMillis(),
                     job.getEstimatedNetworkDownloadBytes(),
                     job.getEstimatedNetworkUploadBytes(),
-                    job.getWorkCount());
+                    job.getWorkCount(),
+                    ActivityManager.processStateAmToProto(mService.getUidProcState(job.getUid())));
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
                 final String componentPackage = job.getServiceComponent().getPackageName();
@@ -1447,7 +1449,9 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getJob().getMinLatencyMillis(),
                 completedJob.getEstimatedNetworkDownloadBytes(),
                 completedJob.getEstimatedNetworkUploadBytes(),
-                completedJob.getWorkCount());
+                completedJob.getWorkCount(),
+                ActivityManager
+                        .processStateAmToProto(mService.getUidProcState(completedJob.getUid())));
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());
