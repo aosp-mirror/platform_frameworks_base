@@ -479,7 +479,7 @@
     <string name="power_charging_limited" msgid="7956120998372505295">"<xliff:g id="LEVEL">%1$s</xliff:g> – Зарядтау уақытша шектелген"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгісіз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарядталуда"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядталуда"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядтау"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Баяу зарядталуда"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Сымсыз зарядталуда"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Зарядталу орындалып жатқан жоқ"</string>
