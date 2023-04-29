@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android സിസ്റ്റം"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"വ്യക്തിഗത പ്രൊഫൈലിലേക്ക് മാറുക"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് മാറുക"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"വ്യക്തിഗത <xliff:g id="APP_NAME">%1$s</xliff:g> ആപ്പിലേക്ക് മാറുക"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"ഔദ്യോഗിക <xliff:g id="APP_NAME">%1$s</xliff:g> ആപ്പിലേക്ക് മാറുക"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"കോൺടാക്റ്റുകൾ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ലൊക്കേഷൻ"</string>

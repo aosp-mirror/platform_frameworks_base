@@ -298,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Hệ thống Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Chuyển sang hồ sơ cá nhân"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Chuyển sang hồ sơ công việc"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Danh bạ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"truy cập vào danh bạ của bạn"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Vị trí"</string>
@@ -503,8 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Cho phép ứng dụng kiểm soát bộ rung."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Cho phép ứng dụng truy cập vào trạng thái bộ rung."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"gọi trực tiếp số điện thoại"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Cho phép ứng dụng gọi cho các số điện thoại mà không cần bạn phải can thiệp. Việc này có thể làm phát sinh các khoản phí hoặc cuộc gọi không mong muốn. Xin lưu ý rằng quyền này không cho phép ứng dụng gọi cho các số khẩn cấp. Các ứng dụng độc hại có thể khiến bạn bị mất tiền thông qua việc thực hiện cuộc gọi khi chưa có sự xác nhận của bạn, hoặc có thể quay số theo mã của nhà mạng, khiến các cuộc gọi đến bị tự động chuyển tiếp đến một số khác."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"truy cập dịch vụ gọi điện qua IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Cho phép ứng dụng sử dụng dịch vụ IMS để thực hiện cuộc gọi mà không có sự can thiệp của bạn."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"đọc trạng thái và nhận dạng của điện thoại"</string>
@@ -710,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Đã hủy thao tác dùng khuôn mặt."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Người dùng đã hủy thao tác Mở khóa bằng khuôn mặt"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Bạn đã thử quá nhiều lần. Hãy thử lại sau."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Bạn đã thử quá nhiều lần. Không dùng được tính năng Mở khoá bằng khuôn mặt."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Bạn đã thử quá nhiều lần. Hãy nhập phương thức khóa màn hình."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Không thể xác minh khuôn mặt. Hãy thử lại."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Bạn chưa thiết lập tính năng Mở khóa bằng khuôn mặt"</string>
@@ -2160,16 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bạn không thể mở nội dung này bằng ứng dụng công việc"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bạn không thể chia sẻ nội dung này bằng ứng dụng cá nhân"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bạn không thể mở nội dung này bằng ứng dụng cá nhân"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Các ứng dụng công việc đã bị tạm dừng"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Bỏ tạm dừng"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Không có ứng dụng công việc"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Không có ứng dụng cá nhân"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Mở <xliff:g id="APP">%s</xliff:g> cá nhân"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Mở <xliff:g id="APP">%s</xliff:g> công việc"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Dùng trình duyệt cá nhân"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Dùng trình duyệt công việc"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Mã PIN mở khóa mạng SIM"</string>
@@ -2321,8 +2319,8 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Cho phép một ứng dụng đồng hành bắt đầu các dịch vụ trên nền trước từ nền."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Micrô đang hoạt động"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Micrô đang bị chặn"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Màn hình đôi"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Chế độ Màn hình đôi đang bật"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Chế độ Dual screen bật"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang dùng cả hai màn hình để thể hiện nội dung"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Thiết bị quá nóng"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Không bật được chế độ Màn hình đôi vì điện thoại của bạn quá nóng"</string>

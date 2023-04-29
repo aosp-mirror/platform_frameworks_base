@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android စနစ်"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ကိုယ်ရေးကိုယ်တာသုံး ပရိုဖိုင်သို့ ပြောင်းရန်"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"အလုပ်ပရိုဖိုင်သို့ ပြောင်းရန်"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ကိုယ်ပိုင် <xliff:g id="APP_NAME">%1$s</xliff:g> သို့ပြောင်းရန်"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"အလုပ်သုံး <xliff:g id="APP_NAME">%1$s</xliff:g> သို့ပြောင်းရန်"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"အဆက်အသွယ်များ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"သင့် အဆက်အသွယ်များအား ဝင်ရောက်သုံးရန်"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"တည်နေရာ"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"အက်ပ်အား တုန်ခါစက်ကို ထိန်းချုပ်ခွင့် ပြုသည်။"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"အက်ပ်ကို တုန်ခါမှုအခြေအနေအား သုံးခွင့်ပေးပါ။"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ဖုန်းနံပါတ်များကိုတိုက်ရိုက်ခေါ်ဆိုခြင်း"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"သင့်ဆောင်ရွက်မှုမပါဘဲ အက်ပ်ကို ဖုန်းနံပါတ်များ ခေါ်ခွင့်ပြုသည်။ ထို့ကြောင့် မမျှော်လင့်သော ကျသင့်ငွေ သို့မဟုတ် ခေါ်ဆိုမှုများ ရှိနိုင်သည်။ ၎င်းသည် အက်ပ်ကို အရေးပေါ် နံပါတ်များ ခေါ်ဆိုခွင့်ပြုခြင်း မဟုတ်ပါ။ မသမာသော အက်ပ်များက သင့်အတည်ပြုချက်မပါဘဲ ဖုန်းခေါ်ခြင်းဖြင့် သင့်အား ငွေကြေးကုန်ကျစေနိုင်သည် (သို့) ၎င်းတို့က အဝင်ခေါ်ဆိုမှုများအား အခြားဖုန်းနံပါတ်သို့ အလိုအလျောက်ထပ်ဆင့်ပို့သည့် မိုဘိုင်းဖုန်းကုမ္ပဏီကုဒ်များကို ခေါ်ဆိုနိုင်သည်။"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ဖုန်းခေါ်ဆိုမှု ဝန်ဆောင်ဌာန ဝင်ကြည့်ပါ"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"သင့်ရဲ့ဝင်ရောက်စွက်ဖက်မှုမပါဘဲ IMS ဝန်ဆောင်မှုကိုအသုံးပြုပြီး ဖုန်းခေါ်ဆိုနိုင်ရန် အပ်ဖ်ကို ခွင့်ပြုထားပါ။"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ဖုန်းရဲ့ အခြေအနေ နှင့် အမှတ်သညာအား ဖတ်ခြင်း"</string>
@@ -634,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"အလွန် လင်းသည်"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"ဖွင့်ပိတ်ခလုတ် နှိပ်လိုက်သည်"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"ပြင်ဆင်ကြည့်ပါ"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"အကြိမ်တိုင်း သင့်လက်ချောင်း၏ အနေအထားကို အနည်းငယ်ပြောင်းပါ"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"အကြိမ်တိုင်း လက်ချောင်းအနေအထားကို အနည်းငယ်ပြောင်းပါ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"လက်ဗွေကို မသိရှိပါ"</string>
@@ -1191,7 +1192,7 @@
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ဖွင့်ခွင့်ပေးရန်"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"...နှင့် တည်းဖြတ်ရန်"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s နှင့် တည်းဖြတ်ရန်"</string>
-    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"တည်းဖြတ်ပါ"</string>
+    <string name="whichEditApplicationLabel" msgid="1463288652070140285">"တည်းဖြတ်ရန်"</string>
     <string name="whichSendApplication" msgid="4143847974460792029">"မျှဝေပါ"</string>
     <string name="whichSendApplicationNamed" msgid="4470386782693183461">"%1$sနှင့် မျှဝေရန်"</string>
     <string name="whichSendApplicationLabel" msgid="7467813004769188515">"မျှဝေပါ"</string>
@@ -1728,7 +1729,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ဝန်ဆောင်မှုများအကြား ပြောင်းရန် လက်သုံးချောင်းဖြင့် အပေါ်သို့ ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ချဲ့ခြင်း"</string>
     <string name="user_switched" msgid="7249833311585228097">"လက်ရှိအသုံးပြုနေသူ <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေသည်…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ကို ထွက်ပစ်ပါတော့မည်..."</string>
     <string name="owner_name" msgid="8713560351570795743">"ပိုင်ရှင်"</string>
     <string name="guest_name" msgid="8502103277839834324">"ဧည့်သည်"</string>
@@ -1952,7 +1953,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"ပိုမိုလေ့လာရန်"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"အက်ပ်ကို ခဏမရပ်တော့ရန်"</string>
     <string name="work_mode_off_title" msgid="6367463960165135829">"အလုပ်သုံးအက်ပ် ပြန်ဖွင့်မလား။"</string>
-    <string name="work_mode_turn_on" msgid="5316648862401307800">"ပြန်ဖွင့်ရန်"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"ပြန်စရန်"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"အရေးပေါ်"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"အက်ပ်ကို မရနိုင်ပါ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ကို ယခု မရနိုင်ပါ။"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ဤအကြောင်းအရာကို အလုပ်သုံးအက်ပ်များဖြင့် မဖွင့်နိုင်ပါ"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ဤအကြောင်းအရာကို ကိုယ်ပိုင်အက်ပ်များဖြင့် မမျှဝေနိုင်ပါ"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ဤအကြောင်းအရာကို ကိုယ်ပိုင်အက်ပ်များဖြင့် မဖွင့်နိုင်ပါ"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"အလုပ်သုံးအက်ပ်များကို ခေတ္တရပ်ထားသည်"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ပြန်ဖွင့်ရန်"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"အလုပ်သုံးအက်ပ်များ မရှိပါ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ကိုယ်ပိုင်အက်ပ်များ မရှိပါ"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ကိုယ်ရေးကိုယ်တာသုံး <xliff:g id="APP">%s</xliff:g> ဖွင့်ခြင်း"</string>
@@ -2318,11 +2317,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"နောက်ခံမှနေ၍ မျက်နှာစာဝန်ဆောင်မှုများ စတင်ရန် တွဲဖက် အက်ပ်ကို ခွင့်ပြုသည်။"</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"မိုက်ခရိုဖုန်း သုံးနိုင်သည်"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"မိုက်ခရိုဖုန်း ပိတ်ထားသည်"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"စခရင်နှစ်ခု"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"‘စခရင်နှစ်ခု’ ဖွင့်ထားသည်"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် အကြောင်းအရာကို ဖန်သားပြင်နှစ်ခုစလုံးတွင် ပြနေသည်"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen ဖွင့်ထားသည်"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> သည် အကြောင်းအရာကို ပြရန် ဖန်သားပြင်နှစ်ခုစလုံးကို သုံးနေသည်"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"စက်ပစ္စည်း အလွန်ပူနေသည်"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"သင့်ဖုန်း အလွန်ပူနေသဖြင့် ‘စခရင်နှစ်ခု’ သုံး၍မရပါ"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"သင့်ဖုန်း အလွန်ပူနေသဖြင့် Dual screen သုံး၍မရပါ"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen သုံး၍မရပါ"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"‘ဘက်ထရီ အားထိန်း’ ဖွင့်ထားသဖြင့် Dual Screen သုံး၍မရပါ။ ၎င်းကို ဆက်တင်များတွင် ပိတ်နိုင်သည်။"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"ဆက်တင်များသို့ သွားရန်"</string>
