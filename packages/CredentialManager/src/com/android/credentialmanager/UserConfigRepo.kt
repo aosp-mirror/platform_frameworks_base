@@ -23,15 +23,6 @@ class UserConfigRepo(context: Context) {
     val sharedPreferences: SharedPreferences = context.getSharedPreferences(
         context.packageName, Context.MODE_PRIVATE)
 
-    fun setDefaultProvider(
-        providerId: String
-    ) {
-        sharedPreferences.edit().apply {
-            putString(DEFAULT_PROVIDER, providerId)
-            apply()
-        }
-    }
-
     fun setIsPasskeyFirstUse(
         isFirstUse: Boolean
     ) {
@@ -41,16 +32,11 @@ class UserConfigRepo(context: Context) {
         }
     }
 
-    fun getDefaultProviderId(): String? {
-        return sharedPreferences.getString(DEFAULT_PROVIDER, null)
-    }
-
     fun getIsPasskeyFirstUse(): Boolean {
         return sharedPreferences.getBoolean(IS_PASSKEY_FIRST_USE, true)
     }
 
     companion object {
-        const val DEFAULT_PROVIDER = "default_provider"
         // This first use value only applies to passkeys, not related with if generally
         // credential manager is first use or not
         const val IS_PASSKEY_FIRST_USE = "is_passkey_first_use"

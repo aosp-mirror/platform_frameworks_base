@@ -1560,7 +1560,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     jobStatus.getJob().getMinLatencyMillis(),
                     jobStatus.getEstimatedNetworkDownloadBytes(),
                     jobStatus.getEstimatedNetworkUploadBytes(),
-                    jobStatus.getWorkCount());
+                    jobStatus.getWorkCount(),
+                    ActivityManager.processStateAmToProto(mUidProcStates.get(jobStatus.getUid())));
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -1935,6 +1936,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * {@code incomingJob} is non-null, it replaces {@code cancelled} in the store of
      * currently scheduled jobs.
      */
+    @GuardedBy("mLock")
     private void cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob,
             @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
@@ -1986,7 +1988,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.getJob().getMinLatencyMillis(),
                     cancelled.getEstimatedNetworkDownloadBytes(),
                     cancelled.getEstimatedNetworkUploadBytes(),
-                    cancelled.getWorkCount());
+                    cancelled.getWorkCount(),
+                    ActivityManager.processStateAmToProto(mUidProcStates.get(cancelled.getUid())));
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {

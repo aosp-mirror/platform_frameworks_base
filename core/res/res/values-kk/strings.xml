@@ -298,6 +298,10 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android жүйесі"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Жеке профильге ауысу"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Жұмыс профиліне ауысу"</string>
+    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
+    <skip />
+    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
+    <skip />
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контактілер"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"контактілерге кіру"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Локация"</string>
@@ -503,8 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Қолданбаға вибраторды басқаруға рұқсат береді."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Қолданбаға діріл күйін пайдалануға мүмкіндік береді."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"нөмірлерге тікелей телефон шалу"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Қолданбаға сіз қатыспай-ақ телефон нөміріне қоңырау шалу рұқсаты беріледі. Нәтижесінде болжанбаған ақы төлеуіңіз немесе күтпеген қоңырау алуыңыз мүмкін. Қолданбаға құтқару қызметінің нөміріне қоңырау шалуға рұқсат берілмейтінін ескеріңіз. Зиянды қолданбалар келісіміңізді алмай қоңырау шалып, шығынға батыруы мүмкін немесе оператор кодын теріп, кіріс қоңырауларды басқа нөмірге автоматты түрде бағыттауы мүмкін."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS қоңырау қызметін пайдалану"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Сіздің қатысуыңызсыз қоңыраулар соғу үшін қолданбаға IMS қызметін пайдалануға рұқсат етеді."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"телефон күйін оқу немесе анықтау"</string>
@@ -2159,10 +2162,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Бұл контентті жұмыс қолданбаларымен ашу мүмкін емес."</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Бұл контентті жеке қолданбалармен бөлісу мүмкін емес."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Бұл контентті жеке қолданбалармен ашу мүмкін емес."</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Жұмыс қолданбалары кідіртілді."</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Қайта қосу"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Жұмыс қолданбалары жоқ."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Жеке қолданбалар жоқ."</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Жеке <xliff:g id="APP">%s</xliff:g> қолданбасын ашу"</string>
@@ -2285,10 +2286,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Енді экранның бір бөлігін ұлғайтуға болады."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Параметрлер бөлімінен қосу"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Қабылдамау"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонының бөгеуін алыңыз"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасының бөгеуін алыңыз"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонын блоктан шығарыңыз"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасын блоктан шығарыңыз"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; және барлық қолданбалар мен қызметтерге арналған."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Бөгеуді алу"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Блоктан шығару"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Датчикке қатысты құпиялық"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Қолданба белгішесі"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Қолданба брендін ілгері жылжыту кескіні"</string>
