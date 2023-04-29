@@ -261,4 +261,8 @@ constructor(
             { "Attempting face auth again because of HW error: retry attempt $int1" }
         )
     }
+
+    fun watchdogScheduled() {
+        logBuffer.log(TAG, DEBUG, "FaceManager Biometric watchdog scheduled.")
+    }
 }
