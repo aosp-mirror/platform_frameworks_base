@@ -53,12 +53,12 @@ public class OperationContextExtTest {
 
     @Test
     public void hasAidlContext() {
-        OperationContextExt context = new OperationContextExt();
+        OperationContextExt context = new OperationContextExt(false);
         assertThat(context.toAidlContext()).isNotNull();
 
         final OperationContext aidlContext = newAidlContext();
 
-        context = new OperationContextExt(aidlContext);
+        context = new OperationContextExt(aidlContext, false);
         assertThat(context.toAidlContext()).isSameInstanceAs(aidlContext);
 
         final int id = 5;
@@ -79,7 +79,7 @@ public class OperationContextExtTest {
 
     @Test
     public void hasNoOrderWithoutSession() {
-        OperationContextExt context = new OperationContextExt();
+        OperationContextExt context = new OperationContextExt(false);
         assertThat(context.getOrderAndIncrement()).isEqualTo(-1);
         assertThat(context.getOrderAndIncrement()).isEqualTo(-1);
     }
@@ -96,7 +96,7 @@ public class OperationContextExtTest {
         );
 
         for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-            final OperationContextExt context = new OperationContextExt(newAidlContext());
+            final OperationContextExt context = new OperationContextExt(newAidlContext(), true);
             when(mBiometricContext.getDisplayState()).thenReturn(entry.getKey());
             assertThat(context.update(mBiometricContext).getDisplayState())
                     .isEqualTo(entry.getValue());
@@ -136,7 +136,8 @@ public class OperationContextExtTest {
         when(mBiometricContext.isDisplayOn()).thenReturn(true);
         when(mBiometricContext.getDisplayState()).thenReturn(displayState);
 
-        final OperationContextExt context = new OperationContextExt(newAidlContext());
+        final OperationContextExt context = new OperationContextExt(newAidlContext(),
+                sessionType == OperationReason.BIOMETRIC_PROMPT);
 
         assertThat(context.update(mBiometricContext)).isSameInstanceAs(context);
 

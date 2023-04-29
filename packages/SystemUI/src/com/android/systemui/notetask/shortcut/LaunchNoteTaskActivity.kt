@@ -18,12 +18,11 @@ package com.android.systemui.notetask.shortcut
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.UserHandle
 import android.os.UserManager
-import android.util.Log
 import androidx.activity.ComponentActivity
+import com.android.systemui.log.DebugLogger.debugLog
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
 import com.android.systemui.settings.UserTracker
@@ -68,7 +67,7 @@ constructor(
         val mainUser: UserHandle? = userManager.mainUser
         if (userManager.isManagedProfile) {
             if (mainUser == null) {
-                logDebug { "Can't find the main user. Skipping the notes app launch." }
+                debugLog { "Can't find the main user. Skipping the notes app launch." }
             } else {
                 controller.startNoteTaskProxyActivityForUser(mainUser)
             }
@@ -88,9 +87,4 @@ constructor(
             }
         }
     }
-}
-
-/** [Log.println] a [Log.DEBUG] message, only when [Build.IS_DEBUGGABLE]. */
-private inline fun Any.logDebug(message: () -> String) {
-    if (Build.IS_DEBUGGABLE) Log.d(this::class.java.simpleName.orEmpty(), message())
 }

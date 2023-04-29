@@ -161,7 +161,13 @@ public class TrustAgentWrapper {
                     mDisplayTrustGrantedMessage = (flags & FLAG_GRANT_TRUST_DISPLAY_MESSAGE) != 0;
                     if ((flags & FLAG_GRANT_TRUST_TEMPORARY_AND_RENEWABLE) != 0) {
                         mWaitingForTrustableDowngrade = true;
-                        setSecurityWindowTimer();
+                        resultCallback.thenAccept(result -> {
+                            if (result.getStatus() == GrantTrustResult.STATUS_UNLOCKED_BY_GRANT) {
+                                // if we are not unlocked by grantTrust, then we don't need to
+                                // have the timer for the security window
+                                setSecurityWindowTimer();
+                            }
+                        });
                     } else {
                         mWaitingForTrustableDowngrade = false;
                     }
@@ -562,6 +568,7 @@ public class TrustAgentWrapper {
      * @see android.service.trust.TrustAgentService#onDeviceLocked()
      */
     public void onDeviceLocked() {
+        mWithinSecurityLockdownWindow = false;
         try {
             if (mTrustAgentService != null) mTrustAgentService.onDeviceLocked();
         } catch (RemoteException e) {

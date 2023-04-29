@@ -151,6 +151,7 @@ import com.android.systemui.statusbar.phone.KeyguardBottomAreaViewController;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarViewController;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.phone.ScrimController;
@@ -158,6 +159,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.phone.TapAgainViewController;
 import com.android.systemui.statusbar.phone.UnlockedScreenOffAnimationController;
+import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardQsUserSwitchController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -239,6 +241,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected KeyguardStatusBarViewComponent mKeyguardStatusBarViewComponent;
     @Mock protected KeyguardClockSwitchController mKeyguardClockSwitchController;
     @Mock protected KeyguardStatusBarViewController mKeyguardStatusBarViewController;
+    @Mock protected LightBarController mLightBarController;
     @Mock protected NotificationStackScrollLayoutController
             mNotificationStackScrollLayoutController;
     @Mock protected NotificationShadeDepthController mNotificationShadeDepthController;
@@ -306,6 +309,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
     @Mock protected ActivityStarter mActivityStarter;
     @Mock protected KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
     @Mock protected ShadeRepository mShadeRepository;
+    @Mock private CastController mCastController;
 
     protected final int mMaxUdfpsBurnInOffsetY = 5;
     protected KeyguardBottomAreaInteractor mKeyguardBottomAreaInteractor;
@@ -653,6 +657,7 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mNotificationRemoteInputManager,
                 mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
+                mLightBarController,
                 mNotificationStackScrollLayoutController,
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
@@ -675,7 +680,8 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mInteractionJankMonitor,
                 mShadeLog,
                 mKeyguardFaceAuthInteractor,
-                mShadeRepository
+                mShadeRepository,
+                mCastController
         );
     }
 

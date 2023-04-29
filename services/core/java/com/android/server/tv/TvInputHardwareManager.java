@@ -459,9 +459,11 @@ class TvInputHardwareManager implements TvInputHal.Callback {
 
     private int findDeviceIdForInputIdLocked(String inputId) {
         for (int i = 0; i < mConnections.size(); ++i) {
-            Connection connection = mConnections.get(i);
-            if (connection.getInfoLocked().getId().equals(inputId)) {
-                return i;
+            int key = mConnections.keyAt(i);
+            Connection connection = mConnections.get(key);
+            if (connection != null && connection.getInfoLocked() != null
+                    && connection.getInfoLocked().getId().equals(inputId)) {
+                return key;
             }
         }
         return -1;
@@ -487,6 +489,27 @@ class TvInputHardwareManager implements TvInputHal.Callback {
             }
         }
         return configsList;
+    }
+
+    public boolean setTvMessageEnabled(String inputId, int type,
+            boolean enabled) {
+        synchronized (mLock) {
+            int deviceId = findDeviceIdForInputIdLocked(inputId);
+            if (deviceId < 0) {
+                Slog.e(TAG, "Invalid inputId : " + inputId);
+                return false;
+            }
+
+            Connection connection = mConnections.get(deviceId);
+            boolean success = true;
+            for (TvStreamConfig config : connection.getConfigsLocked()) {
+                success = success
+                        && mHal.setTvMessageEnabled(deviceId, config, type, enabled)
+                        == TvInputHal.SUCCESS;
+            }
+
+            return success;
+        }
     }
 
     /**
@@ -764,6 +787,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                     + " mHardwareInfo: " + mHardwareInfo
                     + ", mInfo: " + mInfo
                     + ", mCallback: " + mCallback
+                    + ", mHardware: " + mHardware
                     + ", mConfigs: " + Arrays.toString(mConfigs)
                     + ", mCallingUid: " + mCallingUid
                     + ", mResolvedUserId: " + mResolvedUserId

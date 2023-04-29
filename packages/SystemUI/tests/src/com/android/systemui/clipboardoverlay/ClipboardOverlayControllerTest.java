@@ -25,6 +25,7 @@ import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBO
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHOWN_EXPANDED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SHOWN_MINIMIZED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_SWIPE_DISMISSED;
+import static com.android.systemui.flags.Flags.CLIPBOARD_IMAGE_TIMEOUT;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -90,6 +91,8 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     @Mock
     private ClipboardOverlayUtils mClipboardUtils;
     @Mock
+    private ClipboardImageLoader mClipboardImageLoader;
+    @Mock
     private UiEventLogger mUiEventLogger;
     private FakeDisplayTracker mDisplayTracker = new FakeDisplayTracker(mContext);
     private FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
@@ -120,6 +123,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
         mSampleClipData = new ClipData("Test", new String[]{"text/plain"},
                 new ClipData.Item("Test Item"));
 
+        mFeatureFlags.set(CLIPBOARD_IMAGE_TIMEOUT, true); // turned off for legacy tests
 
         mOverlayController = new ClipboardOverlayController(
                 mContext,
@@ -131,6 +135,7 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
                 mFeatureFlags,
                 mClipboardUtils,
                 mExecutor,
+                mClipboardImageLoader,
                 mUiEventLogger);
         verify(mClipboardOverlayView).setCallbacks(mOverlayCallbacksCaptor.capture());
         mCallbacks = mOverlayCallbacksCaptor.getValue();
@@ -139,6 +144,69 @@ public class ClipboardOverlayControllerTest extends SysuiTestCase {
     @After
     public void tearDown() {
         mOverlayController.hideImmediate();
+    }
+
+    @Test
+    public void test_setClipData_invalidImageData_legacy() {
+        ClipData clipData = new ClipData("", new String[]{"image/png"},
+                new ClipData.Item(Uri.parse("")));
+        mFeatureFlags.set(CLIPBOARD_IMAGE_TIMEOUT, false);
+
+        mOverlayController.setClipData(clipData, "");
+
+        verify(mClipboardOverlayView, times(1)).showDefaultTextPreview();
+        verify(mClipboardOverlayView, times(1)).showShareChip();
+        verify(mClipboardOverlayView, times(1)).getEnterAnimation();
+    }
+
+    @Test
+    public void test_setClipData_nonImageUri_legacy() {
+        ClipData clipData = new ClipData("", new String[]{"resource/png"},
+                new ClipData.Item(Uri.parse("")));
+        mFeatureFlags.set(CLIPBOARD_IMAGE_TIMEOUT, false);
+
+        mOverlayController.setClipData(clipData, "");
+
+        verify(mClipboardOverlayView, times(1)).showDefaultTextPreview();
+        verify(mClipboardOverlayView, times(1)).showShareChip();
+        verify(mClipboardOverlayView, times(1)).getEnterAnimation();
+    }
+
+    @Test
+    public void test_setClipData_textData_legacy() {
+        mFeatureFlags.set(CLIPBOARD_IMAGE_TIMEOUT, false);
+        mOverlayController.setClipData(mSampleClipData, "abc");
+
+        verify(mClipboardOverlayView, times(1)).showTextPreview("Test Item", false);
+        verify(mUiEventLogger, times(1)).log(CLIPBOARD_OVERLAY_SHOWN_EXPANDED, 0, "abc");
+        verify(mClipboardOverlayView, times(1)).showShareChip();
+        verify(mClipboardOverlayView, times(1)).getEnterAnimation();
+    }
+
+    @Test
+    public void test_setClipData_sensitiveTextData_legacy() {
+        mFeatureFlags.set(CLIPBOARD_IMAGE_TIMEOUT, false);
+        ClipDescription description = mSampleClipData.getDescription();
+        PersistableBundle b = new PersistableBundle();
+        b.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
+        description.setExtras(b);
+        ClipData data = new ClipData(description, mSampleClipData.getItemAt(0));
+        mOverlayController.setClipData(data, "");
+
+        verify(mClipboardOverlayView, times(1)).showTextPreview("••••••", true);
+        verify(mClipboardOverlayView, times(1)).showShareChip();
+        verify(mClipboardOverlayView, times(1)).getEnterAnimation();
+    }
+
+    @Test
+    public void test_setClipData_repeatedCalls_legacy() {
+        when(mAnimator.isRunning()).thenReturn(true);
+        mFeatureFlags.set(CLIPBOARD_IMAGE_TIMEOUT, false);
+
+        mOverlayController.setClipData(mSampleClipData, "");
+        mOverlayController.setClipData(mSampleClipData, "");
+
+        verify(mClipboardOverlayView, times(1)).getEnterAnimation();
     }
 
     @Test

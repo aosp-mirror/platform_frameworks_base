@@ -151,7 +151,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.MockitoSession;
 import org.mockito.internal.util.reflection.FieldSetter;
@@ -2735,6 +2737,36 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mKeyguardUpdateMonitor.setAlternateBouncerShowing(true);
 
         verifyFingerprintAuthenticateCall();
+    }
+
+    @Test
+    public void onTrustChangedCallbacksCalledBeforeOnTrustGrantedForCurrentUserCallback() {
+        // GIVEN device is interactive
+        deviceIsInteractive();
+
+        // GIVEN callback is registered
+        KeyguardUpdateMonitorCallback callback = mock(KeyguardUpdateMonitorCallback.class);
+        mKeyguardUpdateMonitor.registerCallback(callback);
+
+        // WHEN onTrustChanged enabled=true
+        mKeyguardUpdateMonitor.onTrustChanged(
+                true /* enabled */,
+                true /* newlyUnlocked */,
+                getCurrentUser() /* userId */,
+                TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD /* flags */,
+                null /* trustGrantedMessages */);
+
+        // THEN onTrustChanged is called FIRST
+        final InOrder inOrder = Mockito.inOrder(callback);
+        inOrder.verify(callback).onTrustChanged(eq(getCurrentUser()));
+
+        // AND THEN onTrustGrantedForCurrentUser callback called
+        inOrder.verify(callback).onTrustGrantedForCurrentUser(
+                eq(true) /* dismissKeyguard */,
+                eq(true) /* newlyUnlocked */,
+                eq(new TrustGrantFlags(TrustAgentService.FLAG_GRANT_TRUST_DISMISS_KEYGUARD)),
+                eq(null) /* message */
+        );
     }
 
     private void verifyFingerprintAuthenticateNeverCalled() {

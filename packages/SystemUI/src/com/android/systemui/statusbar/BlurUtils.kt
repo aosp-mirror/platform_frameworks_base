@@ -20,6 +20,7 @@ import android.app.ActivityManager
 import android.content.res.Resources
 import android.os.SystemProperties
 import android.os.Trace
+import android.os.Trace.TRACE_TAG_APP
 import android.util.IndentingPrintWriter
 import android.util.MathUtils
 import android.view.CrossWindowBlurListeners
@@ -43,8 +44,8 @@ open class BlurUtils @Inject constructor(
 ) : Dumpable {
     val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
     val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
-    private val traceCookie = System.identityHashCode(this)
     private var lastAppliedBlur = 0
+    private var earlyWakeupEnabled = false
 
     init {
         dumpManager.registerDumpable(javaClass.name, this)
@@ -72,6 +73,26 @@ open class BlurUtils @Inject constructor(
     }
 
     /**
+     * This method should be called before [applyBlur] so that, if needed, we can set the
+     * early-wakeup flag in SurfaceFlinger.
+     */
+    fun prepareBlur(viewRootImpl: ViewRootImpl?, radius: Int) {
+        if (viewRootImpl == null || !viewRootImpl.surfaceControl.isValid ||
+            !supportsBlursOnWindows() || earlyWakeupEnabled
+        ) {
+            return
+        }
+        if (lastAppliedBlur == 0 && radius != 0) {
+            Trace.asyncTraceForTrackBegin(TRACE_TAG_APP, TRACK_NAME, EARLY_WAKEUP_SLICE_NAME, 0)
+            earlyWakeupEnabled = true
+            createTransaction().use {
+                it.setEarlyWakeupStart()
+                it.apply()
+            }
+        }
+    }
+
+    /**
      * Applies background blurs to a {@link ViewRootImpl}.
      *
      * @param viewRootImpl The window root.
@@ -85,14 +106,20 @@ open class BlurUtils @Inject constructor(
         createTransaction().use {
             if (supportsBlursOnWindows()) {
                 it.setBackgroundBlurRadius(viewRootImpl.surfaceControl, radius)
-                if (lastAppliedBlur == 0 && radius != 0) {
-                    Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_APP, TRACK_NAME,
-                            EARLY_WAKEUP_SLICE_NAME, traceCookie)
+                if (!earlyWakeupEnabled && lastAppliedBlur == 0 && radius != 0) {
+                    Trace.asyncTraceForTrackBegin(
+                        TRACE_TAG_APP,
+                        TRACK_NAME,
+                        EARLY_WAKEUP_SLICE_NAME,
+                        0
+                    )
                     it.setEarlyWakeupStart()
+                    earlyWakeupEnabled = true
                 }
-                if (lastAppliedBlur != 0 && radius == 0) {
+                if (earlyWakeupEnabled && lastAppliedBlur != 0 && radius == 0) {
                     it.setEarlyWakeupEnd()
-                    Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_APP, TRACK_NAME, traceCookie)
+                    Trace.asyncTraceForTrackEnd(TRACE_TAG_APP, TRACK_NAME, 0)
+                    earlyWakeupEnabled = false
                 }
                 lastAppliedBlur = radius
             }

@@ -35,6 +35,7 @@ public class BubbleInfo implements Parcelable {
 
     private String mKey; // Same key as the Notification
     private int mFlags;  // Flags from BubbleMetadata
+    @Nullable
     private String mShortcutId;
     private int mUserId;
     private String mPackageName;
@@ -46,7 +47,7 @@ public class BubbleInfo implements Parcelable {
     @Nullable
     private Icon mIcon;
 
-    public BubbleInfo(String key, int flags, String shortcutId, @Nullable Icon icon,
+    public BubbleInfo(String key, int flags, @Nullable String shortcutId, @Nullable Icon icon,
             int userId, String packageName) {
         mKey = key;
         mFlags = flags;
@@ -69,10 +70,12 @@ public class BubbleInfo implements Parcelable {
         return mKey;
     }
 
+    @Nullable
     public String getShortcutId() {
         return mShortcutId;
     }
 
+    @Nullable
     public Icon getIcon() {
         return mIcon;
     }

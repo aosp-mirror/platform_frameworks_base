@@ -205,4 +205,19 @@ public class LogicalDisplayTest {
         assertNotEquals(info3, info2);
         assertTrue(refreshRanges.contentEquals(info3.thermalRefreshRateThrottling));
     }
+
+    @Test
+    public void testSetThermalBrightnessThrottlingDataId() {
+        String brightnessThrottlingDataId = "throttling_data_id";
+        DisplayInfo info1 = mLogicalDisplay.getDisplayInfoLocked();
+        mLogicalDisplay.setThermalBrightnessThrottlingDataIdLocked(brightnessThrottlingDataId);
+        DisplayInfo info2 = mLogicalDisplay.getDisplayInfoLocked();
+        // Display info should only be updated when updateLocked is called
+        assertEquals(info2, info1);
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        DisplayInfo info3 = mLogicalDisplay.getDisplayInfoLocked();
+        assertNotEquals(info3, info2);
+        assertEquals(brightnessThrottlingDataId, info3.thermalBrightnessThrottlingDataId);
+    }
 }

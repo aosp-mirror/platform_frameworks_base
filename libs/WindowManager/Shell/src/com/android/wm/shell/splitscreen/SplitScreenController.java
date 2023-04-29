@@ -165,7 +165,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
     private final DisplayController mDisplayController;
     private final DisplayImeController mDisplayImeController;
     private final DisplayInsetsController mDisplayInsetsController;
-    private final DragAndDropController mDragAndDropController;
+    private final Optional<DragAndDropController> mDragAndDropController;
     private final Transitions mTransitions;
     private final TransactionPool mTransactionPool;
     private final IconProvider mIconProvider;
@@ -191,7 +191,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
@@ -253,7 +253,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         mDisplayController = displayController;
         mDisplayImeController = displayImeController;
         mDisplayInsetsController = displayInsetsController;
-        mDragAndDropController = dragAndDropController;
+        mDragAndDropController = Optional.of(dragAndDropController);
         mTransitions = transitions;
         mTransactionPool = transactionPool;
         mIconProvider = iconProvider;
@@ -289,7 +289,7 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
             // TODO: Multi-display
             mStageCoordinator = createStageCoordinator();
         }
-        mDragAndDropController.setSplitScreenController(this);
+        mDragAndDropController.ifPresent(controller -> controller.setSplitScreenController(this));
     }
 
     protected StageCoordinator createStageCoordinator() {

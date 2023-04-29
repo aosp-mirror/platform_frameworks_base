@@ -37,7 +37,7 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
     protected final Supplier<T> mLazyDaemon;
 
     @NonNull
-    private final OperationContextExt mOperationContext = new OperationContextExt();
+    private final OperationContextExt mOperationContext;
 
     /**
      * @param context    system_server context
@@ -58,6 +58,7 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
         super(context, token, listener, userId, owner, cookie, sensorId,
                 biometricLogger, biometricContext);
         mLazyDaemon = lazyDaemon;
+        mOperationContext = new OperationContextExt(isBiometricPrompt());
     }
 
     @Nullable
@@ -83,6 +84,10 @@ public abstract class HalClientMonitor<T> extends BaseClientMonitor {
 
         // subclasses should do this earlier in most cases, but ensure it happens now
         unsubscribeBiometricContext();
+    }
+
+    public boolean isBiometricPrompt() {
+        return getCookie() != 0;
     }
 
     protected OperationContextExt getOperationContext() {

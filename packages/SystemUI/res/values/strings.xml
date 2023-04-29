@@ -1257,7 +1257,10 @@
     <string name="monitoring_description_managed_profile_network_logging">Your admin has turned on network logging, which monitors traffic in your work profile but not in your personal profile.</string>
 
     <!-- Monitoring dialog: Description of an active VPN. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_named_vpn">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin.</string>
+    <string name="monitoring_description_named_vpn">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to the VPN provider.</string>
+
+    <!-- Monitoring dialog: Description of an active VPN on a managed device. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_managed_device_named_vpn">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin.</string>
 
     <!-- Monitoring dialog: Description of two active VPNs. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_two_named_vpns">This device is connected to the internet through <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g> and <xliff:g id="vpn_app" example="Bar VPN App">%2$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin.</string>
@@ -3034,6 +3037,19 @@
     shortcut button on the lock screen. [CHAR LIMIT=NONE].
     -->
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2">&#8226; At least one device is available</string>
+
+    <!---
+    Requirement for the notes app to be available for the user to use. This is shown as part of a
+    bulleted list of requirements. When all requirements are met, the app can be accessed through a
+    shortcut button on the lock screen. [CHAR LIMIT=NONE] -->
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction">Select a default notes app to use the notetaking shortcut</string>
+
+    <!---
+    The action to make the lock screen shortcut for the notes app to be available for the user to
+    use. This is shown as the action button in the dialog listing the requirements. When all
+    requirements are met, the app can be accessed through a shortcut button on the lock screen.
+    [CHAR LIMIT=NONE] -->
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action">Select app</string>
 
     <!--
     Error message shown when a shortcut must be pressed and held to activate it, usually shown when

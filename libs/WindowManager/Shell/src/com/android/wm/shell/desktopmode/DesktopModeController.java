@@ -264,10 +264,10 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     /**
      * Show apps on desktop
      */
-    void showDesktopApps() {
+    void showDesktopApps(int displayId) {
         // Bring apps to front, ignoring their visibility status to always ensure they are on top.
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        bringDesktopAppsToFront(wct);
+        bringDesktopAppsToFront(displayId, wct);
 
         if (!wct.isEmpty()) {
             if (Transitions.ENABLE_SHELL_TRANSITIONS) {
@@ -280,12 +280,12 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     }
 
     /** Get number of tasks that are marked as visible */
-    int getVisibleTaskCount() {
-        return mDesktopModeTaskRepository.getVisibleTaskCount();
+    int getVisibleTaskCount(int displayId) {
+        return mDesktopModeTaskRepository.getVisibleTaskCount(displayId);
     }
 
-    private void bringDesktopAppsToFront(WindowContainerTransaction wct) {
-        final ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks();
+    private void bringDesktopAppsToFront(int displayId, WindowContainerTransaction wct) {
+        final ArraySet<Integer> activeTasks = mDesktopModeTaskRepository.getActiveTasks(displayId);
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "bringDesktopAppsToFront: tasks=%s", activeTasks.size());
 
         final List<RunningTaskInfo> taskInfos = new ArrayList<>();
@@ -386,6 +386,7 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
+        RunningTaskInfo triggerTask = request.getTriggerTask();
         // Only do anything if we are in desktop mode and opening/moving-to-front a task/app in
         // freeform
         if (!DesktopModeStatus.isActive(mContext)) {
@@ -399,16 +400,15 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
                     WindowManager.transitTypeToString(request.getType()));
             return null;
         }
-        if (request.getTriggerTask() == null
-                || request.getTriggerTask().getWindowingMode() != WINDOWING_MODE_FREEFORM) {
+        if (triggerTask == null || triggerTask.getWindowingMode() != WINDOWING_MODE_FREEFORM) {
             ProtoLog.d(WM_SHELL_DESKTOP_MODE, "skip shell transition request: not freeform task");
             return null;
         }
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "handle shell transition request: %s", request);
 
         WindowContainerTransaction wct = new WindowContainerTransaction();
-        bringDesktopAppsToFront(wct);
-        wct.reorder(request.getTriggerTask().token, true /* onTop */);
+        bringDesktopAppsToFront(triggerTask.displayId, wct);
+        wct.reorder(triggerTask.token, true /* onTop */);
 
         return wct;
     }
@@ -493,16 +493,17 @@ public class DesktopModeController implements RemoteCallable<DesktopModeControll
             mController = null;
         }
 
-        public void showDesktopApps() {
+        @Override
+        public void showDesktopApps(int displayId) {
             executeRemoteCallWithTaskPermission(mController, "showDesktopApps",
-                    DesktopModeController::showDesktopApps);
+                    controller -> controller.showDesktopApps(displayId));
         }
 
         @Override
-        public int getVisibleTaskCount() throws RemoteException {
+        public int getVisibleTaskCount(int displayId) throws RemoteException {
             int[] result = new int[1];
             executeRemoteCallWithTaskPermission(mController, "getVisibleTaskCount",
-                    controller -> result[0] = controller.getVisibleTaskCount(),
+                    controller -> result[0] = controller.getVisibleTaskCount(displayId),
                     true /* blocking */
             );
             return result[0];

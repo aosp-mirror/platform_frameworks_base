@@ -4677,16 +4677,22 @@ public final class Settings {
                 "display_color_mode_vendor_hint";
 
         /**
-         * Whether or not the peak refresh rate should be forced. 0=no, 1=yes
+         * The user selected min refresh rate in frames per second.
+         *
+         * If this isn't set, 0 will be used.
          * @hide
          */
-        public static final String FORCE_PEAK_REFRESH_RATE = "force_peak_refresh_rate";
+        @Readable
+        public static final String MIN_REFRESH_RATE = "min_refresh_rate";
 
         /**
-         * Whether or not the peak refresh rate should be used for some content. 0=no, 1=yes
+         * The user selected peak refresh rate in frames per second.
+         *
+         * If this isn't set, the system falls back to a device specific default.
          * @hide
          */
-        public static final String SMOOTH_DISPLAY = "smooth_display";
+        @Readable
+        public static final String PEAK_REFRESH_RATE = "peak_refresh_rate";
 
         /**
          * The amount of time in milliseconds before the device goes to sleep or begins
@@ -11496,6 +11502,8 @@ public final class Settings {
         public static final int DEVICE_STATE_ROTATION_KEY_HALF_FOLDED = 1;
         /** @hide */
         public static final int DEVICE_STATE_ROTATION_KEY_UNFOLDED = 2;
+        /** @hide */
+        public static final int DEVICE_STATE_ROTATION_KEY_REAR_DISPLAY = 3;
 
         /**
          * The different postures that can be used as keys with
@@ -11507,6 +11515,7 @@ public final class Settings {
                 DEVICE_STATE_ROTATION_KEY_FOLDED,
                 DEVICE_STATE_ROTATION_KEY_HALF_FOLDED,
                 DEVICE_STATE_ROTATION_KEY_UNFOLDED,
+                DEVICE_STATE_ROTATION_KEY_REAR_DISPLAY,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface DeviceStateRotationLockKey {

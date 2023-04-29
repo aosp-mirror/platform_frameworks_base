@@ -83,10 +83,12 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import dagger.Lazy;
@@ -132,6 +134,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
     @Mock private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock private LightBarController mLightBarController;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
@@ -155,6 +158,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private ShadeLogger mShadeLogger;
     @Mock private DumpManager mDumpManager;
     @Mock private UiEventLogger mUiEventLogger;
+    @Mock private CastController mCastController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
 
@@ -221,6 +225,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mNotificationRemoteInputManager,
                 mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
+                mLightBarController,
                 mNotificationStackScrollLayoutController,
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
@@ -243,7 +248,8 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mInteractionJankMonitor,
                 mShadeLogger,
                 mock(KeyguardFaceAuthInteractor.class),
-                mock(ShadeRepository.class)
+                mock(ShadeRepository.class),
+                mCastController
         );
 
         mFragmentListener = mQsController.getQsFragmentListener();

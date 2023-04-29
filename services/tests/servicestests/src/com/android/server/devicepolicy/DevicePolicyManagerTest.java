@@ -130,6 +130,7 @@ import android.os.Build;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.IpcDataCache;
+import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -1511,7 +1512,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
      * Validates that when the device owner is removed, the reset password token is cleared
      */
     @Test
-    @Ignore("b/277916462")
     public void testClearDeviceOwner_clearResetPasswordToken() throws Exception {
         mContext.callerPermissions.add(android.Manifest.permission.MANAGE_DEVICE_ADMINS);
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
@@ -2602,7 +2602,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testSetApplicationHiddenWithDO() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -2628,7 +2627,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testSetApplicationHiddenWithPOOfOrganizationOwnedDevice() throws Exception {
         final int MANAGED_PROFILE_USER_ID = CALLER_USER_HANDLE;
         final int MANAGED_PROFILE_ADMIN_UID =
@@ -4375,7 +4373,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testSetAutoTimeZoneEnabledModifiesSetting() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -4387,7 +4384,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testSetAutoTimeZoneEnabledWithPOOnUser0() throws Exception {
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setupProfileOwnerOnUser0();
@@ -4399,7 +4395,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testSetAutoTimeZoneEnabledFailWithPONotOnUser0() throws Exception {
         setupProfileOwner();
         assertExpectException(SecurityException.class, null,
@@ -4409,7 +4404,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testSetAutoTimeZoneEnabledWithPOOfOrganizationOwnedDevice() throws Exception {
         setupProfileOwner();
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
@@ -5383,7 +5377,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testResetPasswordWithToken() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -5418,7 +5411,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void resetPasswordWithToken_NumericPin() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -5439,7 +5431,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void resetPasswordWithToken_EmptyPassword() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
@@ -7260,7 +7251,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testCanProfileOwnerResetPasswordWhenLocked() throws Exception {
         setDeviceEncryptionPerUser();
         setupProfileOwner();
@@ -7324,7 +7314,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testSetAccountTypesWithManagementDisabledOnManagedProfile() throws Exception {
         setupProfileOwner();
 
@@ -7344,7 +7333,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
-    @Ignore("b/277916462")
     public void testSetAccountTypesWithManagementDisabledOnOrgOwnedManagedProfile()
             throws Exception {
         mContext.callerPermissions.add(permission.INTERACT_ACROSS_USERS);
@@ -8537,6 +8525,46 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         verify(getServices().locationManager, never()).getCurrentLocation(
                 eq(FUSED_PROVIDER), any(), eq(getServices().executor), any());
+    }
+
+    /**
+     * Verifies that bundles with tons of moderately long strings are persisted correctly.
+     *
+     * Policy is serialized into binary XML and there is a limit on the max string length: 65535.
+     * This test ensures that as long as each string in the trust agent configuration is below this
+     * limit, the policy can be serialized and deserialized correctly, even when the total length
+     * of the configuration is above that limit. This should be the case because PersistableBundle
+     * contents are stored as XML subtrees rather than as strings.
+     */
+    @Test
+    public void testSetTrustAgentConfiguration_largeBundlePersisted() {
+        setAsProfileOwner(admin1);
+
+        ComponentName agent = new ComponentName("some.trust.agent", "some.trust.agent.Agent");
+        PersistableBundle configIn = new PersistableBundle();
+        String kilobyteString = new String(new char[1024]).replace('\0', 'A');
+        for (int i = 0; i < 1024; i++) {
+            configIn.putString("key-" + i, kilobyteString);
+        }
+
+        runAsCaller(mAdmin1Context, dpms, dpm -> {
+            dpm.setTrustAgentConfiguration(admin1, agent, configIn);
+        });
+
+        // Re-read policies to see if they were serialized/deserialized correctly.
+        initializeDpms();
+
+        List<PersistableBundle> configsOut = new ArrayList<>();
+        runAsCaller(mAdmin1Context, dpms, dpm -> {
+            configsOut.addAll(dpm.getTrustAgentConfiguration(admin1, agent));
+        });
+
+        assertThat(configsOut.size()).isEqualTo(1);
+        PersistableBundle configOut = configsOut.get(0);
+        assertThat(configOut.size()).isEqualTo(1024);
+        for (int i = 0; i < 1024; i++) {
+            assertThat(configOut.getString("key-" + i, null)).isEqualTo(kilobyteString);
+        }
     }
 
     private void setupVpnAuthorization(String userVpnPackage, int userVpnUid) {

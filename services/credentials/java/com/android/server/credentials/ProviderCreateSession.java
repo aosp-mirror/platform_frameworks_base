@@ -75,7 +75,8 @@ public final class ProviderCreateSession extends ProviderSession<
         CreateCredentialRequest providerCreateRequest =
                 createProviderRequest(providerInfo.getCapabilities(),
                         createRequestSession.mClientRequest,
-                        createRequestSession.mClientAppInfo);
+                        createRequestSession.mClientAppInfo,
+                        providerInfo.isSystemProvider());
         if (providerCreateRequest != null) {
             return new ProviderCreateSession(
                     context,
@@ -114,9 +115,16 @@ public final class ProviderCreateSession extends ProviderSession<
     }
 
     @Nullable
-    private static CreateCredentialRequest createProviderRequest(List<String> providerCapabilities,
+    private static CreateCredentialRequest createProviderRequest(
+            List<String> providerCapabilities,
             android.credentials.CreateCredentialRequest clientRequest,
-            CallingAppInfo callingAppInfo) {
+            CallingAppInfo callingAppInfo,
+            boolean isSystemProvider) {
+        if (clientRequest.isSystemProviderRequired() && !isSystemProvider) {
+            // Request requires system provider but this session does not correspond to a
+            // system service
+            return null;
+        }
         String capability = clientRequest.getType();
         if (providerCapabilities.contains(capability)) {
             return new CreateCredentialRequest(callingAppInfo, capability,

@@ -1183,6 +1183,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "-1005167552": {
+      "message": "Playing #%d in parallel on track #%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "-1003678883": {
       "message": "Cleaning splash screen token=%s",
       "level": "VERBOSE",
@@ -1447,6 +1453,12 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
     },
+    "-774908272": {
+      "message": "Marking #%d animation as SYNC.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "-771177730": {
       "message": "Removing focused app token:%s displayId=%d",
       "level": "VERBOSE",
@@ -1494,12 +1506,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-741766551": {
-      "message": "Content Recording: Ignoring session on invalid virtual display",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_CONTENT_RECORDING",
-      "at": "com\/android\/server\/wm\/ContentRecordingController.java"
     },
     "-732715767": {
       "message": "Unable to retrieve window container to start recording for display %d",
@@ -2017,6 +2023,12 @@
       "group": "WM_DEBUG_WALLPAPER",
       "at": "com\/android\/server\/wm\/WallpaperController.java"
     },
+    "-266707683": {
+      "message": "Moving #%d from collecting to waiting.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "-262984451": {
       "message": "Relaunch failed %s",
       "level": "INFO",
@@ -2088,6 +2100,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_MOVEMENT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-186693085": {
+      "message": "Starting a Recents transition which can be parallel.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-182877285": {
       "message": "Wallpaper layer changed: assigning layers + relayout",

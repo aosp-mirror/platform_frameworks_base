@@ -1168,10 +1168,26 @@ public final class TunerSessionTest extends ExtendedRadioMockitoTestCase {
         doReturn(USER_ID_2).when(() -> RadioServiceUserController.getCurrentUser());
 
         mHalTunerCallback.onCurrentProgramInfoChanged(AidlTestUtils.makeHalProgramInfo(
-                AidlTestUtils.makeHalFmSelector(/* freq= */ 97300), SIGNAL_QUALITY));
+                AidlTestUtils.makeHalFmSelector(AM_FM_FREQUENCY_LIST[1]), SIGNAL_QUALITY));
 
         verify(mAidlTunerCallbackMocks[0], CALLBACK_TIMEOUT.times(0))
                 .onCurrentProgramInfoChanged(any());
+    }
+
+    @Test
+    public void onTuneFailed_forTunerCallback() throws Exception {
+        int numSessions = 3;
+        openAidlClients(numSessions);
+        android.hardware.broadcastradio.ProgramSelector halSel = AidlTestUtils.makeHalFmSelector(
+                AM_FM_FREQUENCY_LIST[1]);
+        ProgramSelector sel = AidlTestUtils.makeFmSelector(AM_FM_FREQUENCY_LIST[1]);
+
+        mHalTunerCallback.onTuneFailed(Result.CANCELED, halSel);
+
+        for (int index = 0; index < numSessions; index++) {
+            verify(mAidlTunerCallbackMocks[index], CALLBACK_TIMEOUT)
+                    .onTuneFailed(RadioTuner.TUNER_RESULT_CANCELED, sel);
+        }
     }
 
     @Test
