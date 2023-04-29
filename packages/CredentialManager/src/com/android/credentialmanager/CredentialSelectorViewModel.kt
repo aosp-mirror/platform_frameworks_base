@@ -255,7 +255,8 @@ class CredentialSelectorViewModel(
             disabledProviders = prevUiState.disabledProviders,
             defaultProviderIdPreferredByApp =
             prevUiState.requestDisplayInfo.appPreferredDefaultProviderId,
-            defaultProviderIdSetByUser = userConfigRepo.getDefaultProviderId(),
+            defaultProviderIdsSetByUser =
+            prevUiState.requestDisplayInfo.userSetDefaultProviderIds,
             requestDisplayInfo = prevUiState.requestDisplayInfo,
             isOnPasskeyIntroStateAlready = true,
             isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
@@ -269,28 +270,10 @@ class CredentialSelectorViewModel(
         userConfigRepo.setIsPasskeyFirstUse(false)
     }
 
-    fun createFlowOnMoreOptionsSelectedOnProviderSelection() {
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
-                isFromProviderSelection = true
-            )
-        )
-    }
-
     fun createFlowOnMoreOptionsSelectedOnCreationSelection() {
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
-                isFromProviderSelection = false
-            )
-        )
-    }
-
-    fun createFlowOnBackProviderSelectionButtonSelected() {
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.PROVIDER_SELECTION,
             )
         )
     }
@@ -315,7 +298,10 @@ class CredentialSelectorViewModel(
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState =
-                if (activeEntry.activeProvider.id == userConfigRepo.getDefaultProviderId() ||
+                if (uiState.createCredentialUiState?.requestDisplayInfo?.userSetDefaultProviderIds
+                        ?.contains(activeEntry.activeProvider.id) ?: true ||
+                    !(uiState.createCredentialUiState?.foundCandidateFromUserDefaultProvider
+                    ?: false) ||
                     !TextUtils.isEmpty(uiState.createCredentialUiState?.requestDisplayInfo
                         ?.appPreferredDefaultProviderId))
                     CreateScreenState.CREATION_OPTION_SELECTION
@@ -325,18 +311,7 @@ class CredentialSelectorViewModel(
         )
     }
 
-    fun createFlowOnEntrySelectedFromFirstUseScreen(activeEntry: ActiveEntry) {
-        val providerId = activeEntry.activeProvider.id
-        createFlowOnDefaultChanged(providerId)
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-                activeEntry = activeEntry
-            )
-        )
-    }
-
-    fun createFlowOnDisabledProvidersSelected() {
+    fun createFlowOnLaunchSettings() {
         credManRepo.onSettingLaunchCancel()
         uiState = uiState.copy(dialogState = DialogState.CANCELED_FOR_SETTINGS)
     }
@@ -349,33 +324,12 @@ class CredentialSelectorViewModel(
         )
     }
 
-    fun createFlowOnChangeDefaultSelected() {
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-            )
-        )
-        val providerId = uiState.createCredentialUiState?.activeEntry?.activeProvider?.id
-        createFlowOnDefaultChanged(providerId)
-    }
-
     fun createFlowOnUseOnceSelected() {
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
             )
         )
-    }
-
-    fun createFlowOnDefaultChanged(providerId: String?) {
-        if (providerId != null) {
-            Log.d(
-                Constants.LOG_TAG, "Default provider changed to: " +
-                " {provider=$providerId")
-            userConfigRepo.setDefaultProvider(providerId)
-        } else {
-            Log.w(Constants.LOG_TAG, "Null provider is being changed")
-        }
     }
 
     fun createFlowOnEntrySelected(selectedEntry: BaseEntry) {
