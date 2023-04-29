@@ -54,6 +54,7 @@ import com.android.systemui.keyguard.shared.model.ErrorAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.HelpAuthenticationStatus
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.SuccessAuthenticationStatus
+import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
@@ -234,6 +235,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             faceDetectBuffer,
             faceAuthBuffer,
             keyguardTransitionInteractor,
+            featureFlags,
             dumpManager,
         )
     }
@@ -612,6 +614,7 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
             authStatus()
             detectStatus()
             authRunning()
+            bypassEnabled()
             lockedOut()
             canFaceAuthRun()
             authenticated()
@@ -847,7 +850,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun schedulesFaceManagerWatchdogWhenKeyguardIsGoneFromDozing() =
         testScope.runTest {
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.DOZING, to = KeyguardState.GONE)
+                TransitionStep(
+                    from = KeyguardState.DOZING,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.FINISHED
+                )
             )
 
             runCurrent()
@@ -858,7 +865,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun schedulesFaceManagerWatchdogWhenKeyguardIsGoneFromAod() =
         testScope.runTest {
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.AOD, to = KeyguardState.GONE)
+                TransitionStep(
+                    from = KeyguardState.AOD,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.FINISHED
+                )
             )
 
             runCurrent()
@@ -869,7 +880,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun schedulesFaceManagerWatchdogWhenKeyguardIsGoneFromLockscreen() =
         testScope.runTest {
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.LOCKSCREEN, to = KeyguardState.GONE)
+                TransitionStep(
+                    from = KeyguardState.LOCKSCREEN,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.FINISHED
+                )
             )
 
             runCurrent()
@@ -880,7 +895,11 @@ class DeviceEntryFaceAuthRepositoryTest : SysuiTestCase() {
     fun schedulesFaceManagerWatchdogWhenKeyguardIsGoneFromBouncer() =
         testScope.runTest {
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(from = KeyguardState.PRIMARY_BOUNCER, to = KeyguardState.GONE)
+                TransitionStep(
+                    from = KeyguardState.PRIMARY_BOUNCER,
+                    to = KeyguardState.GONE,
+                    transitionState = TransitionState.FINISHED
+                )
             )
 
             runCurrent()
