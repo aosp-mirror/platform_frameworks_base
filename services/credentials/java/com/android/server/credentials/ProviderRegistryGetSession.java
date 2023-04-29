@@ -266,7 +266,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
                 .collect(Collectors.toList());
         updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
                 /*source=*/ CredentialsSource.REGISTRY);
-        // TODO(use metric later)
+        // TODO(b/273353677) : metric should be emitted similarly to sibling classes
     }
 
     @Nullable

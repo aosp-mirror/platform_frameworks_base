@@ -18,7 +18,6 @@ package com.android.systemui.biometrics
 
 import android.annotation.DrawableRes
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.drawable.Animatable2
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.Drawable
@@ -93,8 +92,6 @@ abstract class AuthIconController(
 
     /** Called during [onAnimationEnd] if the controller is not [deactivated]. */
     open fun handleAnimationEnd(drawable: Drawable) {}
-
-    open fun onConfigurationChanged(newConfig: Configuration) {}
 
     // TODO(b/251476085): Migrate this to an extension at the appropriate level?
     /** Load the given [rawResources] immediately so they are cached for use in the [context]. */

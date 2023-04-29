@@ -19,6 +19,7 @@ package com.android.systemui.log.table
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
+import com.android.systemui.log.table.TableChange.Companion.MAX_STRING_LENGTH
 import com.android.systemui.plugins.log.LogLevel
 import com.android.systemui.plugins.log.LogcatEchoTracker
 import com.android.systemui.util.mockito.any
@@ -573,6 +574,112 @@ class TableLogBufferTest : SysuiTestCase() {
         assertThat(dumpedString).contains(expected4)
         assertThat(dumpedString).contains(expected5)
         assertThat(dumpedString).contains(expected6)
+    }
+
+    @Test
+    fun dumpChanges_tooLongColumnPrefix_viaLogChange_truncated() {
+        underTest.logChange(
+            prefix = "P".repeat(MAX_STRING_LENGTH + 10),
+            columnName = "name",
+            value = true,
+        )
+
+        val dumpedString = dumpChanges()
+
+        assertThat(dumpedString).contains("P".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("P".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongColumnPrefix_viaLogDiffs_truncated() {
+        val prevDiffable = object : TestDiffable() {}
+        val nextDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    row.logChange("status", "value")
+                }
+            }
+
+        // WHEN the column prefix is too large
+        underTest.logDiffs(
+            columnPrefix = "P".repeat(MAX_STRING_LENGTH + 10),
+            prevDiffable,
+            nextDiffable,
+        )
+
+        val dumpedString = dumpChanges()
+
+        // THEN it's truncated to the max length
+        assertThat(dumpedString).contains("P".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("P".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongColumnName_viaLogChange_truncated() {
+        underTest.logChange(
+            prefix = "prefix",
+            columnName = "N".repeat(MAX_STRING_LENGTH + 10),
+            value = 10,
+        )
+
+        val dumpedString = dumpChanges()
+
+        assertThat(dumpedString).contains("N".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("N".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongColumnName_viaLogDiffs_truncated() {
+        val prevDiffable = object : TestDiffable() {}
+        val nextDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    // WHEN the column name is too large
+                    row.logChange(columnName = "N".repeat(MAX_STRING_LENGTH + 10), "value")
+                }
+            }
+
+        underTest.logDiffs(columnPrefix = "prefix", prevDiffable, nextDiffable)
+
+        val dumpedString = dumpChanges()
+
+        // THEN it's truncated to the max length
+        assertThat(dumpedString).contains("N".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("N".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongValue_viaLogChange_truncated() {
+        underTest.logChange(
+            prefix = "prefix",
+            columnName = "name",
+            value = "V".repeat(MAX_STRING_LENGTH + 10),
+        )
+
+        val dumpedString = dumpChanges()
+
+        assertThat(dumpedString).contains("V".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("V".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongValue_viaLogDiffs_truncated() {
+        val prevDiffable = object : TestDiffable() {}
+        val nextDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    // WHEN the value is too large
+                    row.logChange("columnName", value = "V".repeat(MAX_STRING_LENGTH + 10))
+                }
+            }
+
+        underTest.logDiffs(columnPrefix = "prefix", prevDiffable, nextDiffable)
+
+        val dumpedString = dumpChanges()
+
+        // THEN it's truncated to the max length
+        assertThat(dumpedString).contains("V".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("V".repeat(MAX_STRING_LENGTH + 1))
     }
 
     @Test

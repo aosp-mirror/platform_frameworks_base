@@ -124,6 +124,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     protected final int mTextColorHint;
 
     private AuthPanelController mPanelController;
+
     private PromptInfo mPromptInfo;
     private boolean mRequireConfirmation;
     private int mUserId;
@@ -266,11 +267,9 @@ public abstract class AuthBiometricView extends LinearLayout {
     /** Create the controller for managing the icons transitions during the prompt.*/
     @NonNull
     protected abstract AuthIconController createIconController();
-
     void setPanelController(AuthPanelController panelController) {
         mPanelController = panelController;
     }
-
     void setPromptInfo(PromptInfo promptInfo) {
         mPromptInfo = promptInfo;
     }
@@ -463,9 +462,16 @@ public abstract class AuthBiometricView extends LinearLayout {
         return false;
     }
 
+    /**
+     * Updates mIconView animation on updates to fold state, device rotation, or rear display mode
+     * @param animation new asset to use for iconw
+     */
+    public void updateIconViewAnimation(int animation) {
+        mIconView.setAnimation(animation);
+    }
+
     public void updateState(@BiometricState int newState) {
         Log.v(TAG, "newState: " + newState);
-
         mIconController.updateState(mState, newState);
 
         switch (newState) {
@@ -625,7 +631,6 @@ public abstract class AuthBiometricView extends LinearLayout {
     public void restoreState(@Nullable Bundle savedState) {
         mSavedState = savedState;
     }
-
     private void setTextOrHide(TextView view, CharSequence charSequence) {
         if (TextUtils.isEmpty(charSequence)) {
             view.setVisibility(View.GONE);
@@ -658,7 +663,6 @@ public abstract class AuthBiometricView extends LinearLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mIconController.onConfigurationChanged(newConfig);
         if (mSavedState != null) {
             updateState(mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_STATE));
         }

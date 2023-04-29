@@ -113,11 +113,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private boolean mDragToDesktopAnimationStarted;
     private float mCaptionDragStartX;
 
-    // These values keep track of any transitions to freeform to stop relayout from running on
-    // changing task so that shellTransitions has a chance to animate the transition
-    private int mPauseRelayoutForTask = -1;
-    private IBinder mTransitionPausingRelayout;
-
     public DesktopModeWindowDecorViewModel(
             Context context,
             Handler mainHandler,
@@ -195,22 +190,25 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             @NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change) {
         if (change.getMode() == WindowManager.TRANSIT_CHANGE
-                && info.getType() == Transitions.TRANSIT_ENTER_DESKTOP_MODE) {
-            mTransitionPausingRelayout = transition;
+                && (info.getType() == Transitions.TRANSIT_ENTER_DESKTOP_MODE)) {
+            mWindowDecorByTaskId.get(change.getTaskInfo().taskId)
+                    .addTransitionPausingRelayout(transition);
         }
     }
 
     @Override
     public void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing) {
-        if (merged.equals(mTransitionPausingRelayout)) {
-            mTransitionPausingRelayout = playing;
+        for (int i = 0; i < mWindowDecorByTaskId.size(); i++) {
+            final DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
+            decor.mergeTransitionPausingRelayout(merged, playing);
         }
     }
 
     @Override
     public void onTransitionFinished(@NonNull IBinder transition) {
-        if (transition.equals(mTransitionPausingRelayout)) {
-            mPauseRelayoutForTask = -1;
+        for (int i = 0; i < mWindowDecorByTaskId.size(); i++) {
+            final DesktopModeWindowDecoration decor = mWindowDecorByTaskId.valueAt(i);
+            decor.removeTransitionPausingRelayout(transition);
         }
     }
 
@@ -225,12 +223,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             incrementEventReceiverTasks(taskInfo.displayId);
         }
 
-        // TaskListener callbacks and shell transitions aren't synchronized, so starting a shell
-        // transition can trigger an onTaskInfoChanged call that updates the task's SurfaceControl
-        // and interferes with the transition animation that is playing at the same time.
-        if (taskInfo.taskId != mPauseRelayoutForTask) {
-            decoration.relayout(taskInfo);
-        }
+        decoration.relayout(taskInfo);
     }
 
     @Override
@@ -555,8 +548,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                             relevantDecor.mTaskInfo.displayId);
                     if (ev.getY() > 2 * statusBarHeight) {
                         if (DesktopModeStatus.isProto2Enabled()) {
-                            mPauseRelayoutForTask = relevantDecor.mTaskInfo.taskId;
-                            centerAndMoveToDesktopWithAnimation(relevantDecor, ev);
+                            animateToDesktop(relevantDecor, ev);
                         } else if (DesktopModeStatus.isProto1Enabled()) {
                             mDesktopModeController.ifPresent(c -> c.setDesktopModeActive(true));
                         }
@@ -632,6 +624,15 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     }
 
     /**
+     * Blocks relayout until transition is finished and transitions to Desktop
+     */
+    private void animateToDesktop(DesktopModeWindowDecoration relevantDecor,
+            MotionEvent ev) {
+        relevantDecor.incrementRelayoutBlock();
+        centerAndMoveToDesktopWithAnimation(relevantDecor, ev);
+    }
+
+    /**
      * Animates a window to the center, grows to freeform size, and transitions to Desktop Mode.
      * @param relevantDecor the window decor of the task to be animated
      * @param ev the motion event that triggers the animation
@@ -658,10 +659,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
         animator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
-                mDesktopTasksController.ifPresent(
-                        c -> c.onDragPositioningEndThroughStatusBar(
-                                relevantDecor.mTaskInfo,
-                                calculateFreeformBounds(FINAL_FREEFORM_SCALE)));
+                mDesktopTasksController.ifPresent(c ->
+                        c.onDragPositioningEndThroughStatusBar(relevantDecor.mTaskInfo,
+                            calculateFreeformBounds(FINAL_FREEFORM_SCALE)));
             }
         });
         animator.start();

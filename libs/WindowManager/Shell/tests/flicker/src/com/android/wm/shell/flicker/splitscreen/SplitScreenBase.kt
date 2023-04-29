@@ -20,25 +20,33 @@ import android.content.Context
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import com.android.server.wm.flicker.helpers.setRotation
-import com.android.wm.shell.flicker.BaseTest
+import com.android.wm.shell.flicker.BaseBenchmarkTest
 
-abstract class SplitScreenBase(flicker: FlickerTest) : BaseTest(flicker) {
+abstract class SplitScreenBase(flicker: FlickerTest) : BaseBenchmarkTest(flicker) {
     protected val context: Context = instrumentation.context
     protected val primaryApp = SplitScreenUtils.getPrimary(instrumentation)
     protected val secondaryApp = SplitScreenUtils.getSecondary(instrumentation)
 
-    /** {@inheritDoc} */
-    override val transition: FlickerBuilder.() -> Unit
-        get() = {
-            setup {
-                tapl.setEnableRotation(true)
-                setRotation(flicker.scenario.startRotation)
-                tapl.setExpectedRotation(flicker.scenario.startRotation.value)
-                tapl.workspace.switchToOverview().dismissAllTasks()
-            }
-            teardown {
-                primaryApp.exit(wmHelper)
-                secondaryApp.exit(wmHelper)
-            }
+    protected open val defaultSetup: FlickerBuilder.() -> Unit = {
+        setup {
+            tapl.setEnableRotation(true)
+            setRotation(flicker.scenario.startRotation)
+            tapl.setExpectedRotation(flicker.scenario.startRotation.value)
+            tapl.workspace.switchToOverview().dismissAllTasks()
         }
+    }
+
+    protected open val defaultTeardown: FlickerBuilder.() -> Unit = {
+        teardown {
+            primaryApp.exit(wmHelper)
+            secondaryApp.exit(wmHelper)
+        }
+    }
+
+    protected open val withoutTracing: FlickerBuilder.() -> Unit = {
+        withoutLayerTracing()
+        withoutWindowManagerTracing()
+        withoutTransitionTracing()
+        withoutTransactionsTracing()
+    }
 }

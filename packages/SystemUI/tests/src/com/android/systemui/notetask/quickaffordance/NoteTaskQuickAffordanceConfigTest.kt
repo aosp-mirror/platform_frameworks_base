@@ -18,7 +18,12 @@
 
 package com.android.systemui.notetask.quickaffordance
 
+import android.app.role.RoleManager
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.hardware.input.InputSettings
+import android.os.UserHandle
 import android.os.UserManager
 import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
@@ -31,11 +36,18 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceConfig.LockScreenState
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
+import com.android.systemui.notetask.LaunchNotesRoleSettingsTrampolineActivity.Companion.ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE
 import com.android.systemui.notetask.NoteTaskController
 import com.android.systemui.notetask.NoteTaskEntryPoint
+import com.android.systemui.notetask.NoteTaskInfoResolver
+import com.android.systemui.shared.customization.data.content.CustomizationProviderContract.LockScreenQuickAffordances.AffordanceTable.COMPONENT_NAME_SEPARATOR
 import com.android.systemui.stylus.StylusManager
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,6 +57,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.verify
 import org.mockito.MockitoSession
 import org.mockito.quality.Strictness
@@ -58,6 +71,8 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
     @Mock lateinit var stylusManager: StylusManager
     @Mock lateinit var repository: KeyguardQuickAffordanceRepository
     @Mock lateinit var userManager: UserManager
+    @Mock lateinit var roleManager: RoleManager
+    @Mock lateinit var packageManager: PackageManager
 
     private lateinit var mockitoSession: MockitoSession
 
@@ -69,6 +84,23 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
                 .mockStatic(InputSettings::class.java)
                 .strictness(Strictness.LENIENT)
                 .startMocking()
+
+        whenever(
+                packageManager.getApplicationInfoAsUser(
+                    anyString(),
+                    any(ApplicationInfoFlags::class.java),
+                    any(UserHandle::class.java)
+                )
+            )
+            .thenReturn(ApplicationInfo())
+        whenever(controller.getUserForHandlingNotesTaking(any())).thenReturn(UserHandle.SYSTEM)
+        whenever(
+                roleManager.getRoleHoldersAsUser(
+                    eq(RoleManager.ROLE_NOTES),
+                    any(UserHandle::class.java)
+                )
+            )
+            .thenReturn(listOf("com.google.test.notes"))
     }
 
     @After
@@ -85,6 +117,9 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
             keyguardMonitor = mock(),
             lazyRepository = { repository },
             isEnabled = isEnabled,
+            backgroundExecutor = FakeExecutor(FakeSystemClock()),
+            roleManager = roleManager,
+            noteTaskInfoResolver = NoteTaskInfoResolver(roleManager, packageManager)
         )
 
     private fun createLockScreenStateVisible(): LockScreenState =
@@ -110,6 +145,27 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
 
         assertThat(actual).isEqualTo(createLockScreenStateVisible())
     }
+
+    @Test
+    fun lockScreenState_stylusUsed_userUnlocked_isSelected_noDefaultNotesAppSet_shouldEmitHidden() =
+        runTest {
+            TestConfig()
+                .setStylusEverUsed(true)
+                .setUserUnlocked(true)
+                .setConfigSelections(mock<NoteTaskQuickAffordanceConfig>())
+            whenever(
+                    roleManager.getRoleHoldersAsUser(
+                        eq(RoleManager.ROLE_NOTES),
+                        any(UserHandle::class.java)
+                    )
+                )
+                .thenReturn(emptyList())
+
+            val underTest = createUnderTest()
+            val actual by collectLastValue(underTest.lockScreenState)
+
+            assertThat(actual).isEqualTo(LockScreenState.Hidden)
+        }
 
     @Test
     fun lockScreenState_stylusUnused_userUnlocked_isSelected_shouldEmitHidden() = runTest {
@@ -216,6 +272,39 @@ internal class NoteTaskQuickAffordanceConfigTest : SysuiTestCase() {
 
         verify(controller).showNoteTask(entryPoint = NoteTaskEntryPoint.QUICK_AFFORDANCE)
     }
+
+    // region getPickerScreenState
+    @Test
+    fun getPickerScreenState_defaultNoteAppSet_shouldReturnDefault() = runTest {
+        val underTest = createUnderTest(isEnabled = true)
+
+        assertThat(underTest.getPickerScreenState())
+            .isEqualTo(KeyguardQuickAffordanceConfig.PickerScreenState.Default())
+    }
+
+    @Test
+    fun getPickerScreenState_nodefaultNoteAppSet_shouldReturnDisable() = runTest {
+        val underTest = createUnderTest(isEnabled = true)
+        whenever(
+                roleManager.getRoleHoldersAsUser(
+                    eq(RoleManager.ROLE_NOTES),
+                    any(UserHandle::class.java)
+                )
+            )
+            .thenReturn(emptyList())
+
+        assertThat(underTest.getPickerScreenState())
+            .isEqualTo(
+                KeyguardQuickAffordanceConfig.PickerScreenState.Disabled(
+                    listOf("Select a default notes app to use the notetaking shortcut"),
+                    actionText = "Select app",
+                    actionComponentName =
+                        "${context.packageName}$COMPONENT_NAME_SEPARATOR" +
+                            "$ACTION_MANAGE_NOTES_ROLE_FROM_QUICK_AFFORDANCE"
+                )
+            )
+    }
+    // endregion
 
     private inner class TestConfig {
 
