@@ -421,6 +421,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         final String childPrefix = innerPrefix + "  ";
-        pw.println(prefix + this);
+        if (mChildrenTaskInfo.size() > 0) {
+            pw.println(prefix + "Children list:");
+            for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+                final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
+                pw.println(childPrefix + "Task#" + i + " taskID=" + taskInfo.taskId
+                        + " baseActivity=" + taskInfo.baseActivity);
+            }
+        }
     }
 }
