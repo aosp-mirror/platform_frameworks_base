@@ -52,6 +52,7 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVI
 import static android.os.PowerExemptionManager.REASON_ACTIVE_DEVICE_ADMIN;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_STARTER;
 import static android.os.PowerExemptionManager.REASON_ACTIVITY_VISIBILITY_GRACE_PERIOD;
+import static android.os.PowerExemptionManager.REASON_ALARM_MANAGER_ALARM_CLOCK;
 import static android.os.PowerExemptionManager.REASON_ALLOWLISTED_PACKAGE;
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_ACTIVITY_PERMISSION;
 import static android.os.PowerExemptionManager.REASON_BACKGROUND_FGS_PERMISSION;
@@ -458,11 +459,12 @@ public final class ActiveServices {
         public void updateBackgroundRestrictedForUidPackage(int uid, String packageName,
                 boolean restricted) {
             synchronized (mAm) {
-                if (!isForegroundServiceAllowedInBackgroundRestricted(uid, packageName)) {
-                    stopAllForegroundServicesLocked(uid, packageName);
-                }
                 mAm.mProcessList.updateBackgroundRestrictedForUidPackageLocked(
                         uid, packageName, restricted);
+                if (!isForegroundServiceAllowedInBackgroundRestricted(uid, packageName)
+                        && !isTempAllowedByAlarmClock(uid)) {
+                    stopAllForegroundServicesLocked(uid, packageName);
+                }
             }
         }
     }
@@ -475,7 +477,11 @@ public final class ActiveServices {
             final ServiceRecord r = smap.mServicesByInstanceName.valueAt(i);
             if (uid == r.serviceInfo.applicationInfo.uid
                     || packageName.equals(r.serviceInfo.packageName)) {
-                if (r.isForeground) {
+                // If the FGS is started by temp allowlist of alarm-clock
+                // (REASON_ALARM_MANAGER_ALARM_CLOCK), allow it to continue and do not stop it,
+                // even the app is background-restricted.
+                if (r.isForeground
+                        && r.mAllowStartForegroundAtEntering != REASON_ALARM_MANAGER_ALARM_CLOCK) {
                     toStop.add(r);
                 }
             }
@@ -872,7 +878,9 @@ public final class ActiveServices {
         // start analogously to the legacy-app forced-restrictions case, regardless
         // of its target SDK version.
         boolean forcedStandby = false;
-        if (bgLaunch && appRestrictedAnyInBackground(appUid, appPackageName)) {
+        if (bgLaunch
+                && appRestrictedAnyInBackground(appUid, appPackageName)
+                && !isTempAllowedByAlarmClock(appUid)) {
             if (DEBUG_FOREGROUND_SERVICE) {
                 Slog.d(TAG, "Forcing bg-only service start only for " + r.shortInstanceName
                         + " : bgLaunch=" + bgLaunch + " callerFg=" + callerFg);
@@ -1931,6 +1939,20 @@ public final class ActiveServices {
                 && isForegroundServiceAllowedInBackgroundRestricted(app);
     }
 
+    /*
+     * If the FGS start is temp allowlisted by alarm-clock(REASON_ALARM_MANAGER_ALARM_CLOCK), it is
+     * allowed even the app is background-restricted.
+     */
+    private boolean isTempAllowedByAlarmClock(int uid) {
+        final ActivityManagerService.FgsTempAllowListItem item =
+                mAm.isAllowlistedForFgsStartLOSP(uid);
+        if (item != null) {
+            return item.mReasonCode == REASON_ALARM_MANAGER_ALARM_CLOCK;
+        } else {
+            return false;
+        }
+    }
+
     void logFgsApiBeginLocked(int uid, int pid, int apiType) {
         synchronized (mFGSLogger) {
             mFGSLogger.logForegroundServiceApiEventBegin(uid, pid, apiType, "");
@@ -2064,7 +2086,8 @@ public final class ActiveServices {
                 // Apps that are TOP or effectively similar may call startForeground() on
                 // their services even if they are restricted from doing that while in bg.
                 if (!ignoreForeground
-                        && !isForegroundServiceAllowedInBackgroundRestricted(r.app)) {
+                        && !isForegroundServiceAllowedInBackgroundRestricted(r.app)
+                        && !isTempAllowedByAlarmClock(r.app.uid)) {
                     Slog.w(TAG,
                             "Service.startForeground() not allowed due to bg restriction: service "
                                     + r.shortInstanceName);
