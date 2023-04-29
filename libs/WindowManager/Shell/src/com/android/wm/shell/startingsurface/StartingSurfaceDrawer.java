@@ -18,6 +18,8 @@ package com.android.wm.shell.startingsurface;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NORMAL;
+import static android.window.StartingWindowRemovalInfo.DEFER_MODE_ROTATION;
 
 import android.annotation.CallSuper;
 import android.app.TaskInfo;
@@ -216,7 +218,17 @@ public class StartingSurfaceDrawer {
     }
     abstract static class StartingWindowRecord {
         protected int mBGColor;
-        abstract void removeIfPossible(StartingWindowRemovalInfo info, boolean immediately);
+
+        /**
+         * Remove the starting window with the given {@link StartingWindowRemovalInfo} if possible.
+         * @param info The removal info sent from the task organizer controller in the WM core.
+         * @param immediately {@code true} means removing the starting window immediately,
+         *                    {@code false} otherwise.
+         * @return {@code true} means {@link StartingWindowRecordManager} can safely remove the
+         *         record itself. {@code false} means {@link StartingWindowRecordManager} requires
+         *         to manage the record reference and remove it later.
+         */
+        abstract boolean removeIfPossible(StartingWindowRemovalInfo info, boolean immediately);
         int getBGColor() {
             return mBGColor;
         }
@@ -231,6 +243,15 @@ public class StartingSurfaceDrawer {
          * {@link StartingSurfaceDrawer#onImeDrawnOnTask(int)}.
          */
         private static final long MAX_DELAY_REMOVAL_TIME_IME_VISIBLE = 600;
+
+        /**
+         * The max delay time in milliseconds for removing the task snapshot window with IME
+         * visible after the fixed rotation finished.
+         * Ideally the delay time will be shorter when receiving
+         * {@link StartingSurfaceDrawer#onImeDrawnOnTask(int)}.
+         */
+        private static final long MAX_DELAY_REMOVAL_TIME_FIXED_ROTATION = 3000;
+
         private final Runnable mScheduledRunnable = this::removeImmediately;
 
         @WindowConfiguration.ActivityType protected final int mActivityType;
@@ -242,24 +263,34 @@ public class StartingSurfaceDrawer {
         }
 
         @Override
-        public final void removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
+        public final boolean removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
             if (immediately) {
                 removeImmediately();
             } else {
-                scheduleRemove(info.deferRemoveForIme);
+                scheduleRemove(info.deferRemoveForImeMode);
+                return false;
             }
+            return true;
         }
 
-        void scheduleRemove(boolean deferRemoveForIme) {
+        void scheduleRemove(@StartingWindowRemovalInfo.DeferMode int deferRemoveForImeMode) {
             // Show the latest content as soon as possible for unlocking to home.
             if (mActivityType == ACTIVITY_TYPE_HOME) {
                 removeImmediately();
                 return;
             }
             mRemoveExecutor.removeCallbacks(mScheduledRunnable);
-            final long delayRemovalTime = hasImeSurface() && deferRemoveForIme
-                    ? MAX_DELAY_REMOVAL_TIME_IME_VISIBLE
-                    : DELAY_REMOVAL_TIME_GENERAL;
+            final long delayRemovalTime;
+            switch (deferRemoveForImeMode) {
+                case DEFER_MODE_ROTATION:
+                    delayRemovalTime = MAX_DELAY_REMOVAL_TIME_FIXED_ROTATION;
+                    break;
+                case DEFER_MODE_NORMAL:
+                    delayRemovalTime = MAX_DELAY_REMOVAL_TIME_IME_VISIBLE;
+                    break;
+                default:
+                    delayRemovalTime = DELAY_REMOVAL_TIME_GENERAL;
+            }
             mRemoveExecutor.executeDelayed(mScheduledRunnable, delayRemovalTime);
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                     "Defer removing snapshot surface in %d", delayRemovalTime);
@@ -297,8 +328,10 @@ public class StartingSurfaceDrawer {
             final int taskId = removeInfo.taskId;
             final StartingWindowRecord record = mStartingWindowRecords.get(taskId);
             if (record != null) {
-                record.removeIfPossible(removeInfo, immediately);
-                mStartingWindowRecords.remove(taskId);
+                final boolean canRemoveRecord = record.removeIfPossible(removeInfo, immediately);
+                if (canRemoveRecord) {
+                    mStartingWindowRecords.remove(taskId);
+                }
             }
         }
 

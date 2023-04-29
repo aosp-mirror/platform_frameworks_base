@@ -265,17 +265,17 @@ public class StartingSurfaceDrawerTests extends ShellTestCase {
         mStartingSurfaceDrawer.mWindowRecords.addRecord(taskId,
                 new StartingSurfaceDrawer.StartingWindowRecord() {
                     @Override
-                    public void removeIfPossible(StartingWindowRemovalInfo info,
+                    public boolean removeIfPossible(StartingWindowRemovalInfo info,
                             boolean immediately) {
-
+                        return true;
                     }
                 });
         mStartingSurfaceDrawer.mWindowlessRecords.addRecord(taskId,
                 new StartingSurfaceDrawer.StartingWindowRecord() {
                     @Override
-                    public void removeIfPossible(StartingWindowRemovalInfo info,
+                    public boolean removeIfPossible(StartingWindowRemovalInfo info,
                             boolean immediately) {
-
+                        return true;
                     }
                 });
         mStartingSurfaceDrawer.clearAllWindows();
