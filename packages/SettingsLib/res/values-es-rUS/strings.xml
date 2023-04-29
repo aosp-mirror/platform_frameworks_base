@@ -607,9 +607,9 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Quitar"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Restableciendo invitado…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"¿Quieres restablecer la sesión de invitado?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Esta acción comenzará una nueva sesión de invitado y borrará todas las apps y los datos de la sesión actual"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Esta acción comenzará una nueva sesión de invitado y borrará todas las apps y los datos de la sesión actual."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"¿Salir del modo de invitado?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Esta acción borrará todas las apps y los datos de la sesión de invitado actual"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Esta acción borrará todas las apps y los datos de la sesión de invitado actual."</string>
     <string name="grant_admin" msgid="4323199171790522574">"Sí, convertir en administrador"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"No, no convertir en administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Salir"</string>
