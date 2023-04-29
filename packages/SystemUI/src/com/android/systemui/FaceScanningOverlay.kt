@@ -110,6 +110,10 @@ class FaceScanningOverlay(
         if (showScanningAnimNow == showScanningAnim) {
             return
         }
+        logger.cameraProtectionShownOrHidden(keyguardUpdateMonitor.isFaceDetectionRunning,
+                authController.isShowing,
+                show,
+                showScanningAnim)
         showScanningAnim = showScanningAnimNow
         updateProtectionBoundingPath()
         // Delay the relayout until the end of the animation when hiding,
@@ -352,6 +356,7 @@ class FaceScanningOverlay(
             if (biometricSourceType == BiometricSourceType.FACE) {
                 post {
                     faceAuthSucceeded = true
+                    logger.biometricEvent("biometricAuthenticated")
                     enableShowProtection(true)
                 }
             }
@@ -372,6 +377,7 @@ class FaceScanningOverlay(
             if (biometricSourceType == BiometricSourceType.FACE) {
                 post {
                     faceAuthSucceeded = false
+                    logger.biometricEvent("biometricFailed")
                     enableShowProtection(false)
                 }
             }
@@ -385,6 +391,7 @@ class FaceScanningOverlay(
             if (biometricSourceType == BiometricSourceType.FACE) {
                 post {
                     faceAuthSucceeded = false
+                    logger.biometricEvent("biometricError")
                     enableShowProtection(false)
                 }
             }
