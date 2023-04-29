@@ -268,7 +268,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"برنامه موقعیت مکانی ساختگی: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"شبکه"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"گواهینامه نمایش بی‌سیم"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری طولانی Wi‑Fi"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"‏فعال کردن گزارش‌گیری مفصل Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"‏محدود کردن اسکن کردن Wi‑Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"‏تصادفی‌سازی MAC غیرپایای Wi-Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"داده تلفن همراه همیشه فعال باشد"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"نمایش مرزها، حاشیه‌ها و ویژگی‌های دیگر کلیپ."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"اجباری کردن چیدمان راست‌چین"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"اجباری کردن چیدمان راست‌چین صفحه برای همه زبان‌ها"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"نوار پیمایش شفاف"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"رنگ پس‌زمینه نوار پیمایش را به‌طور پیش‌فرض شفاف می‌کند"</string>
     <string name="window_blurs" msgid="6831008984828425106">"محو کردن در سطح پنجره"</string>
     <string name="force_msaa" msgid="4081288296137775550">"‏اجبار 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"‏فعال کردن 4X MSAA در برنامه‌های OpenGL ES 2.0"</string>
@@ -378,7 +380,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"‏پرداز زدن HWUI نمایه"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏فعال کردن لایه‌های اشکال‌زدایی GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏مجاز کردن بارگیری لایه‌های اشکال‌زدایی GPU برای برنامه‌های اشکا‌ل‌زدایی"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش طولانی فروشنده"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"فعال کردن گزارش‌گیری مفصل فروشنده"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"شامل گزارشات اشکال تکمیلی ورود به سیستم فروشنده ویژه دستگاه می‌شود که ممکن است دربرگیرنده اطلاعات خصوصی، استفاده بیشتر از باتری، و/یا استفاده بیشتر از فضای ذخیره‌سازی باشد."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"مقیاس پویانمایی پنجره"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"مقیاس پویانمایی انتقالی"</string>
@@ -507,7 +509,7 @@
     <string name="use_system_language_to_select_input_method_subtypes" msgid="4865195835541387040">"استفاده از زبان‌های سیستم"</string>
     <string name="failed_to_open_app_settings_toast" msgid="764897252657692092">"تنظیمات <xliff:g id="SPELL_APPLICATION_NAME">%1$s</xliff:g> بازنشد"</string>
     <string name="ime_security_warning" msgid="6547562217880551450">"این روش ورودی ممکن است بتواند تمام متنی را که تایپ می‌کنید جمع‌آوری کند، از جمله اطلاعات شخصی مانند گذرواژه‌ها و شماره‌های کارت اعتباری. این روش توسط برنامه <xliff:g id="IME_APPLICATION_NAME">%1$s</xliff:g> ارائه می‌شود. از این روش ورودی استفاده می‌کنید؟"</string>
-    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"توجه: بعد از راه‌اندازی تا زمانی‌که قفل تلفنتان را باز نکنید، این برنامه نمی‌تواند شروع شود"</string>
+    <string name="direct_boot_unaware_dialog_message" msgid="7845398276735021548">"توجه: بعداز بازراه‌اندازی تا زمانی‌که قفل تلفنتان را باز نکنید، این برنامه نمی‌تواند شروع شود"</string>
     <string name="ims_reg_title" msgid="8197592958123671062">"‏وضعیت ثبت IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"ثبت‌شده"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"ثبت نشده است"</string>
@@ -517,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"زمان بیشتر."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"زمان کمتر."</string>
     <string name="cancel" msgid="5665114069455378395">"لغو"</string>
+    <string name="next" msgid="2699398661093607009">"بعدی"</string>
+    <string name="back" msgid="5554327870352703710">"برگشتن"</string>
+    <string name="save" msgid="3745809743277153149">"ذخیره"</string>
     <string name="okay" msgid="949938843324579502">"تأیید"</string>
     <string name="done" msgid="381184316122520313">"تمام"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"زنگ‌های هشدار و یادآوری‌ها"</string>
@@ -571,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"کاربر جدیدی اضافه می‌کنید؟"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"‏با ایجاد کاربران بیشتر، می‌توانید این دستگاه را با دیگران به‌اشتراک بگذارید. هر کاربر فضای مخصوص به خودش را دارد که می‌تواند آن را با برنامه‌ها، کاغذدیواری و موارد دیگر سفارشی کند. همچنین کاربران می‌توانند تنظیماتی در دستگاه ایجاد کنند، مانند تنظیمات Wi-Fi، که بر تنظیمات بقیه اثر دارد.\n\nوقتی کاربر جدیدی اضافه می‌کنید، آن شخص باید فضای خودش را تنظیم کند.\n\nهر کاربر می‌تواند برنامه‌ها را برای سایر کاربران به‌روزرسانی کند. دسترس‌پذیری، تنظیمات، و سرویس‌ها قابل‌انتقال به کاربر جدید نیستند."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"وقتی کاربر جدیدی اضافه می‌کنید آن فرد باید فضای خودش را تنظیم کند.\n\nهر کاربری می‌تواند برنامه‌ها را برای همه کاربران دیگر به‌روزرسانی کند."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"امتیازهای سرپرست به این کاربر اعطا شود؟"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"به‌عنوان سرپرست، این فرد می‌تواند کاربران دیگر را مدیریت کند، تنظیمات دستگاه را تغییر دهد، و دستگاه را بازنشانی کارخانه‌ای کند."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"این کاربر سرپرست شود؟"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"سرپرستان امتیازهای ویژه‌ای دارند که کاربران دیگر ندارند. سرپرست می‌تواند همه کاربران را مدیریت کند، این دستگاه را به‌روز یا بازنشانی کند، تنظیمات را تغییر دهد، همه برنامه‌های نصب‌شده را ببیند، و امتیازهای سرپرست را به دیگران اعطا کند یا از آن‌ها بگیرد."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"انتخاب به‌عنوان سرپرست"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"هم اکنون کاربر تنظیم شود؟"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"مطمئن شوید شخص در دسترس است تا دستگاه را بگیرد و فضایش را تنظیم کند"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"اکنون نمایه را تنظیم می‌کنید؟"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"با این کار، جلسه مهمان جدیدی شروع خواهد شد و همه برنامه‌ها و داده‌ها از جلسه کنونی حذف خواهند شد"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"از حالت مهمان خارج می‌شوید؟"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"با این کار، برنامه‌ها و داده‌ها از جلسه مهمان کنونی حذف خواهند شد."</string>
-    <string name="grant_admin" msgid="4273077214151417783">"امتیازهای سرپرست به این کاربر اعطا شود"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"امتیازهای سرپرست به کاربر اعطا نشود"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"بله، سرپرست شود"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"نه، سرپرست نشود"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"خروج"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"فعالیت مهمان ذخیره شود؟"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"می‌توانید فعالیت جلسه کنونی را ذخیره کنید یا همه برنامه و داده‌ها را حذف کنید"</string>
@@ -627,7 +633,7 @@
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"پیش‌فرض دستگاه"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیرفعال"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاهتان باید راه‌اندازی مجدد شود. اکنون راه‌اندازی مجدد کنید یا لغو کنید."</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"برای اعمال این تغییر، دستگاه باید بازراه‌اندازی شود. یا اکنون بازراه‌اندازی کنید یا لغو کنید."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"هدفون سیمی"</string>
     <string name="wifi_hotspot_switch_on_text" msgid="9212273118217786155">"روشن"</string>
     <string name="wifi_hotspot_switch_off_text" msgid="7245567251496959764">"خاموش"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"انتقال به‌راست"</item>
     <item msgid="324200556467459329">"انتقال به‌بالا"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>٪"</string>
 </resources>

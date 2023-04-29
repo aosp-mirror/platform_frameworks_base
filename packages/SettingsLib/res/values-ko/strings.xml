@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"클립 경계, 여백 등을 표시"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL 레이아웃 방향 강제 적용"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"모든 언어에 대해 화면 레이아웃 방향을 RTL로 강제 적용"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"탐색 메뉴 투명하게 하기"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"기본적으로 탐색 메뉴의 배경 색상을 투명하게 하기"</string>
     <string name="window_blurs" msgid="6831008984828425106">"창 수준 블러 허용"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA 강제 사용"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 앱에서 4x MSAA 사용"</string>
@@ -517,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"시간 늘리기"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
+    <string name="next" msgid="2699398661093607009">"다음"</string>
+    <string name="back" msgid="5554327870352703710">"뒤로"</string>
+    <string name="save" msgid="3745809743277153149">"저장"</string>
     <string name="okay" msgid="949938843324579502">"확인"</string>
     <string name="done" msgid="381184316122520313">"완료"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"알람 및 리마인더"</string>
@@ -571,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"신규 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"추가 사용자를 만들어 다른 사용자와 기기를 공유할 수 있습니다. 각 사용자는 앱, 배경화면 등으로 맞춤설정할 수 있는 자신만의 공간을 갖게 됩니다. 또한 모든 사용자에게 영향을 미치는 Wi‑Fi와 같은 기기 설정도 조정할 수 있습니다.\n\n추가된 신규 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자가 앱을 업데이트할 수 있으며, 업데이트는 다른 사용자에게도 적용됩니다. 접근성 설정 및 서비스는 신규 사용자에게 이전되지 않을 수도 있습니다."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"이 사용자에게 관리자 권한을 부여하시겠습니까?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"관리자는 다른 사용자를 관리하고 기기 설정을 수정하며 기기를 초기화할 수 있습니다."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"이 사용자에게 관리자 권한을 부여하시겠습니까?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"관리자는 다른 사용자가 가지지 못한 특별한 권한을 보유합니다. 관리자는 모든 사용자를 관리하고, 기기를 업데이트하거나 재설정하고, 설정을 변경하고, 설치된 모든 앱을 확인하고, 다른 사용자에게 관리자 권한을 부여하거나 취소할 수 있습니다."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"관리자 권한 부여"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"지금 사용자를 설정하시겠습니까?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"사용자가 기기를 사용하여 자신의 공간을 설정할 수 있도록 하세요."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"지금 프로필을 설정하시겠습니까?"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"새로운 게스트 세션이 시작되고 기존 세션의 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"게스트 모드를 종료하시겠습니까?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"현재 게스트 세션의 앱과 데이터가 삭제됩니다."</string>
-    <string name="grant_admin" msgid="4273077214151417783">"이 사용자에게 관리자 권한 부여"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"사용자에게 관리자 권한 부여 안 함"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"예, 관리자 권한을 부여합니다."</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"아니요, 관리자 권한을 부여하지 않습니다."</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"종료"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"게스트 활동을 저장하시겠습니까?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"기존 세션의 활동을 저장하거나 모든 앱과 데이터를 삭제할 수 있습니다."</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"오른쪽으로 이동"</item>
     <item msgid="324200556467459329">"위로 이동"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

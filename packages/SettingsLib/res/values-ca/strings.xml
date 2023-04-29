@@ -107,7 +107,7 @@
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Transferència de fitxers"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Dispositiu d\'entrada"</string>
     <string name="bluetooth_profile_pan" msgid="1006235139308318188">"Accés a Internet"</string>
-    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Compartició de contactes i trucades"</string>
+    <string name="bluetooth_profile_pbap" msgid="4262303387989406171">"Compartició de contactes i historial de trucades"</string>
     <string name="bluetooth_profile_pbap_summary" msgid="6466456791354759132">"Utilitza per compartir contactes i l\'historial de trucades"</string>
     <string name="bluetooth_profile_pan_nap" msgid="7871974753822470050">"Compartició de connexió d\'Internet"</string>
     <string name="bluetooth_profile_map" msgid="8907204701162107271">"Missatges de text"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra els límits de clips, els marges, etc."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Força direcció dreta-esquerra"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Força direcció de pantalla dreta-esquerra en totes les llengües"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Barra de navegació transparent"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Fes que el color de fons de la barra de navegació sigui transparent de manera predeterminada"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Permet desenfoc. finestra"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Força MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activa MSAA 4x en aplicacions d\'OpenGL ES 2.0"</string>
@@ -393,9 +395,9 @@
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostra avisos del canal de notificacions"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostra un avís en pantalla quan una aplicació publica una notificació sense un canal vàlid"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Força permetre aplicacions de manera externa"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors del manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Força l\'ajust de la mida de les activitats"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors definits"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors del manifest"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Activa les finestres de forma lliure"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activa la compatibilitat amb finestres de forma lliure experimentals"</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Mode d\'escriptori"</string>
@@ -517,12 +519,15 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Més temps"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Menys temps"</string>
     <string name="cancel" msgid="5665114069455378395">"Cancel·la"</string>
+    <string name="next" msgid="2699398661093607009">"Següent"</string>
+    <string name="back" msgid="5554327870352703710">"Enrere"</string>
+    <string name="save" msgid="3745809743277153149">"Desa"</string>
     <string name="okay" msgid="949938843324579502">"D\'acord"</string>
     <string name="done" msgid="381184316122520313">"Fet"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmes i recordatoris"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Permet la configuració d\'alarmes i recordatoris"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmes i recordatoris"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permet que aquesta aplicació configuri alarmes i programi accions. Això permet a l\'aplicació executar-se en segon pla i, per tant, és possible que consumeixi més bateria.\n\nSi aquest permís està desactivat, les alarmes i els esdeveniments que ja hagi programat l\'aplicació no funcionaran."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Permet que aquesta aplicació configuri alarmes i programi accions a una hora determinada. Això permet a l\'aplicació executar-se en segon pla i, per tant, és possible que consumeixi més bateria.\n\nSi aquest permís està desactivat, les alarmes i els esdeveniments que ja hagi programat l\'aplicació no funcionaran."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programació, alarma, recordatori, rellotge"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activa"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activa el mode No molestis"</string>
@@ -571,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Vols afegir un usuari nou?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Pots compartir aquest dispositiu amb altres persones creant usuaris addicionals. Cada usuari té el seu propi espai, que pot personalitzar amb aplicacions i fons de pantalla, entre d\'altres. Els usuaris també poden ajustar opcions de configuració del dispositiu, com ara la Wi-Fi, que afecten els altres usuaris.\n\nQuan afegeixis un usuari nou, haurà de configurar el seu espai.\n\nTots els usuaris poden actualitzar les aplicacions de la resta. És possible que la configuració i els serveis d\'accessibilitat no es transfereixin a l\'usuari nou."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Quan s\'afegeix un usuari nou, aquesta persona ha de configurar el seu espai.\n\nQualsevol usuari pot actualitzar les aplicacions dels altres usuaris."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Vols donar privilegis d\'admin. a l\'usuari?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Com a administrador podrà gestionar altres usuaris, modificar la configuració del dispositiu i restablir les dades de fàbrica."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Vols convertir aquest usuari en administrador?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Els administradors tenen privilegis especials que altres usuaris no tenen. Un administrador pot gestionar tots els usuaris, actualitzar o restablir aquest dispositiu, modificar la configuració, veure totes les aplicacions instal·lades i concedir o revocar privilegis d\'administrador a altres usuaris."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Converteix en administrador"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Vols configurar l\'usuari ara?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Assegura\'t que la persona estigui disponible per accedir al dispositiu i configurar el seu espai."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Vols configurar el perfil ara?"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Aquesta acció iniciarà una nova sessió de convidat i suprimirà totes les aplicacions i dades de la sessió actual"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Sortir del mode de convidat?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Aquesta acció suprimirà les aplicacions i dades de la sessió de convidat actual"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Dona privilegis d\'administrador a aquest usuari"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"No donis privilegis d\'administrador a l\'usuari"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Sí, converteix en administrador"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"No, no converteixis en administrador"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Surt"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Desar l\'activitat de convidat?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Pots desar l\'activitat de la sessió actual o suprimir totes les apps i dades"</string>
@@ -613,7 +619,7 @@
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Desa"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Surt del mode de convidat"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Restableix la sessió de convidat"</string>
-    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Surt del mode de convidat"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Tanca com a convidat"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Se suprimirà tota l\'activitat en sortir"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Pots desar o suprimir l\'activitat en sortir"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Restableix la sessió per suprimir l\'activitat ara, o desa o suprimeix l\'activitat en sortir."</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"Mou cap a la dreta"</item>
     <item msgid="324200556467459329">"Mou cap amunt"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

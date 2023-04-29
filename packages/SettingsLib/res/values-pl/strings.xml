@@ -140,8 +140,8 @@
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"SPARUJ"</string>
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Anuluj"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Sparowanie powoduje przyznanie dostępu do historii połączeń i Twoich kontaktów w trakcie połączenia."</string>
-    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nie można sparować z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nie można sparować z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ze względu na błędny kod PIN lub klucz."</string>
+    <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Nie udało się sparować z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Nie udało się sparować z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ze względu na błędny kod PIN lub klucz."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Nie można skomunikować się z urządzeniem <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"Powiązanie odrzucone przez urządzenie <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Komputer"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Pokazuj granice przycięcia, marginesy itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Układ od prawej do lewej"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Wymuszaj układ ekranu od prawej do lewej dla wszystkich języków"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Przezroczysty pasek nawigacyjny"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Ustaw domyślnie przezroczyste tło paska nawigacyjnego"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Zezwalaj na rozmycie na poziomie okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Wymuszaj 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Włączaj 4x MSAA w aplikacjach OpenGL ES 2.0"</string>
@@ -517,12 +519,15 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Więcej czasu."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Mniej czasu."</string>
     <string name="cancel" msgid="5665114069455378395">"Anuluj"</string>
+    <string name="next" msgid="2699398661093607009">"Dalej"</string>
+    <string name="back" msgid="5554327870352703710">"Wstecz"</string>
+    <string name="save" msgid="3745809743277153149">"Zapisz"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"Gotowe"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmy i przypomnienia"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Zezwalaj na ustawianie alarmów i przypomnień"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmy i przypomnienia"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Zezwól na ustawianie alarmów i planowanie innych działań, w przypadku których czas jest istotny. Dzięki temu aplikacja będzie mogła działać w tle, co może zwiększyć wykorzystanie baterii.\n\nJeśli nie włączysz tych uprawnień, istniejące alarmy i zaplanowane wydarzenia z tej aplikacji nie będą działać."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Zezwalaj tej aplikacji na ustawianie alarmów i planowanie działań, w przypadku których czas jest istotny. Aplikacja będzie mogła działać w tle, co może zwiększyć wykorzystanie baterii.\n\nJeśli nie włączysz tego uprawnienia, istniejące alarmy i zaplanowane wydarzenia z tej aplikacji nie będą działać."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"harmonogram, alarm, przypomnienie, zegar"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Włącz"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Włącz tryb Nie przeszkadzać"</string>
@@ -571,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Dodać nowego użytkownika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Z tego urządzenia możesz korzystać wraz z innymi osobami, dodając na nim konta użytkowników. Każdy użytkownik ma własne miejsce na swoje aplikacje, tapety i inne dane. Może też zmieniać ustawienia, które wpływają na wszystkich użytkowników urządzenia (np. Wi‑Fi).\n\nGdy dodasz nowego użytkownika, musi on skonfigurować swoje miejsce na dane.\n\nKażdy użytkownik może aktualizować aplikacje w imieniu wszystkich pozostałych użytkowników. Ułatwienia dostępu i usługi mogą nie zostać przeniesione na konto nowego użytkownika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Gdy dodasz nowego użytkownika, musi on skonfigurować swoją przestrzeń.\n\nKażdy użytkownik może aktualizować aplikacje wszystkich innych użytkowników."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Nadać uprawnienia administratora?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Administrator będzie mógł zarządzać innymi użytkownikami, zmieniać ustawienia urządzenia i przywracać urządzenie do ustawień fabrycznych."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Przyznać temu użytkownikowi uprawnienia administratora?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratorzy mają specjalne uprawnienia, którymi nie dysponują pozostali użytkownicy. Administrator może zarządzać wszystkimi użytkownikami, aktualizować i resetować urządzenie, modyfikować ustawienia, wyświetlać wszystkie zainstalowane aplikacje oraz przyznawać uprawnienia administratora innym użytkownikom i je wycofywać."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Przyznaj uprawnienia administratora"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Skonfigurować ustawienia dla użytkownika?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Upewnij się, że ta osoba jest w pobliżu i może skonfigurować swój profil"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Skonfigurować teraz profil?"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Zostanie uruchomiona nowa sesja gościa. Wszystkie aplikacje i dane z obecnej sesji zostaną usunięte."</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Zamknąć tryb gościa?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Wszystkie aplikacje i dane z obecnej sesji gościa zostaną usunięte."</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Nadaj temu użytkownikowi uprawnienia administratora"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Nie nadawaj uprawnień administratora"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Tak, przyznaj uprawnienia administratora"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Nie, nie przyznawaj uprawnień administratora"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Zamknij"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Zapisać aktywność gościa?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Możesz zapisać aktywność z obecnej sesji lub usunąć wszystkie aplikacje i dane"</string>
@@ -614,7 +620,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Zamknij tryb gościa"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Zresetuj sesję gościa"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Zakończ tryb gościa"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Cała aktywność zostanie usunięta po zamknięciu"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Po zamknięciu cała aktywność zostanie usunięta"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Możesz zapisać lub usunąć swoją aktywność podczas zamykania."</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Zresetuj, aby teraz usunąć aktywność z tej sesji. Możesz też ją zapisać lub usunąć podczas zamykania sesji."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Zrób zdjęcie"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"Przenieś w prawo"</item>
     <item msgid="324200556467459329">"Przenieś w górę"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

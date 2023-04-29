@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"Utzi"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"Gailuak parekatzen badituzu, batetik besteko kontaktuak eta deien historia atzitu ahal izango dituzu."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"Ezin izan da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin parekatu."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ezin izan da parekatu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin, PIN edo pasakode okerra idatzi delako."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"Ezin izan da parekatu <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin, PIN edo sarbide-gako okerra idatzi delako."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"Ezin da <xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuarekin komunikatu."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> gailuak bikotetzea ukatu du."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"Ordenagailua"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"Erakutsi kliparen mugak, marjinak, etab."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Eskuinetik ezkerrerako norabidea"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Behartu pantaila-diseinuaren norabidea eskuin-ezker izatera lurraldeko ezarpen guztiekin"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"Nabigazio-barra gardena"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Ezarri nabigazio-barraren atzeko planoko kolorea garden gisa modu lehenetsian"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Gaitu leiho-lausotzeak"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Behartu 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Gaitu 4x MSAA, OpenGL ES 2.0 aplikazioetan"</string>
@@ -467,8 +469,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"<xliff:g id="TIME">%1$s</xliff:g> guztiz kargatu arte"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> guztiz kargatu arte"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Kargatze optimizatua"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Kargatze optimizatua"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - Kargatzeko modu optimizatua"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - Kargatzeko modu optimizatua"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Ezezaguna"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Kargatzen"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Bizkor kargatzen"</string>
@@ -517,12 +519,15 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Denbora gehiago."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Denbora gutxiago."</string>
     <string name="cancel" msgid="5665114069455378395">"Utzi"</string>
+    <string name="next" msgid="2699398661093607009">"Hurrengoa"</string>
+    <string name="back" msgid="5554327870352703710">"Atzera"</string>
+    <string name="save" msgid="3745809743277153149">"Gorde"</string>
     <string name="okay" msgid="949938843324579502">"Ados"</string>
     <string name="done" msgid="381184316122520313">"Eginda"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmak eta abisuak"</string>
     <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Eman alarmak eta abisuak ezartzeko baimena"</string>
     <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmak eta abisuak"</string>
-    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Eman alarmak ezartzeko eta denbora-muga duten ekintzak programatzeko baimena aplikazioari. Hala, aplikazioak atzeko planoan funtzionatuko du, eta litekeena da bateria gehiago kontsumitzea.\n\nEz baduzu ematen baimen hori, ez dute funtzionatuko aplikazio honen bidez programatutako alarmek eta denbora-muga duten ekintzek."</string>
+    <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Eman alarmak ezartzeko eta denbora-muga duten ekintzak programatzeko baimena aplikazioari. Hala, aplikazioak atzeko planoan funtzionatuko du, eta litekeena da bateria gehiago kontsumitzea.\n\nBaimen hori ematen ez baduzu, ez dute funtzionatuko aplikazio honen bidez programatutako alarmek eta denbora-muga duten ekintzek."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programazioa, alarma, abisua, erlojua"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Aktibatu"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Aktibatu ez molestatzeko modua"</string>
@@ -571,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Beste erabiltzaile bat gehitu nahi duzu?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Gailu hau beste pertsona batzuekin partekatzeko, sortu erabiltzaile gehiago. Erabiltzaile bakoitzak bere eremua izango du eta, bertan, aplikazioak, horma-papera eta antzekoak pertsonalizatu ahal izango ditu. Horrez gain, agian erabiltzaile guztiei eragingo dieten ezarpen batzuk ere doi daitezke; adibidez, wifi-konexioarena.\n\nErabiltzaile bat gehitzen duzunean, pertsona horrek berak konfiguratu beharko du bere eremua.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak. Baliteke erabilerraztasun-ezarpenak eta -zerbitzuak ez transferitzea erabiltzaile berriei."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Erabiltzaile bat gehitzen duzunean, erabiltzaile horrek bere eremua konfiguratu beharko du.\n\nEdozein erabiltzailek egunera ditzake beste erabiltzaile guztien aplikazioak."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Administratzaile-baimenak eman nahi dizkiozu erabiltzaileari?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Administratzaile-baimenak ematen badizkiozu, hauek egin ahalko ditu: beste erabiltzaile batzuk kudeatu, gailuaren ezarpenak aldatu eta gailuaren jatorrizko datuak berrezarri."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Administratzaile egin nahi duzu erabiltzaile hau?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Beste erabiltzaileek baino baimen gehiago dauzkate administratzaileek. Administratzaileek erabiltzaile guztiak kudea ditzakete, gailu hau eguneratu edo berrezarri, ezarpenak aldatu, instalatutako aplikazio guztiak ikusi, eta besteei administratzaile-baimenak eman eta kendu."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Egin administratzaile"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Erabiltzailea konfiguratu?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Ziurtatu pertsona horrek gailua hartu eta bere eremua konfigura dezakeela"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Profila konfiguratu?"</string>
@@ -581,7 +587,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Gehitu"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Erabiltzaile berria"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Profil berria"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Erabiltzaile-info."</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Erabiltzaile-informazioa"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profileko informazioa"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Profil murriztua sortu aurretik, aplikazioak eta datu pertsonalak babesteko, pantaila blokeatzeko metodo bat konfiguratu beharko duzu."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Ezarri blokeoa"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Gonbidatuentzako saio berri bat abiaraziko da, eta saio honetako aplikazio eta datu guztiak ezabatuko"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Gonbidatu modutik irten nahi duzu?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Gonbidatuentzako saio honetako aplikazioak eta datuak ezabatuko dira"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Eman administratzaile-baimenak erabiltzaileari"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Ez eman administratzaile-baimenik erabiltzaileari"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Bai, egin administratzaile"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Ez, ez egin administratzaile"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Irten"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Gonbidatuaren jarduerak gorde nahi dituzu?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Saio honetako jarduerak gorde ditzakezu, edo aplikazio eta datu guztiak ezabatu"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"Eraman eskuinera"</item>
     <item msgid="324200556467459329">"Eraman gora"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"%% <xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
 </resources>

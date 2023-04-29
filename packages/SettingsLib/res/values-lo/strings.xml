@@ -141,7 +141,7 @@
     <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ຍົກເລີກ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ການຈັບຄູ່​ຈະ​ອະນຸຍາດ​ໃຫ້ເຂົ້າ​ເຖິງລາຍ​ຊື່ຜູ່ຕິດຕໍ່ ແລະ ປະ​ຫວັດ​ການ​ໂທຂອງ​ທ່ານທຸກໆ​ເທື່ອ​ທີ່​ເຊື່ອມ​ຕໍ່ກັນ."</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"ບໍ່ສາມາດຈັບຄູ່ກັບ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ໄດ້."</string>
-    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ບໍ່ສາມາດຈັບຄູ່ກັບ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ໄດ້ ເພາະ PIN ຫຼື passkey ບໍ່ຖືກຕ້ອງ."</string>
+    <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ບໍ່ສາມາດຈັບຄູ່ກັບ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ໄດ້ເພາະ PIN ຫຼື ກະແຈຜ່ານບໍ່ຖືກຕ້ອງ."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="2554424863101358857">"ບໍ່ສາມາດຕິດຕໍ່ສື່ສານກັບ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ໄດ້."</string>
     <string name="bluetooth_pairing_rejected_error_message" msgid="5943444352777314442">"ການຈັບຄູ່ຖືກປະຕິເສດໂດຍ <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"ຄອມພິວເຕີ"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"ສະແດງໜ້າປົກຄລິບ, ຂອບ ແລະ ອື່ນໆ."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"ບັງ​ຄັບ​ໃຫ້ຮູບຮ່າງຂຽນຈາກຂວາຫາຊ້າຍ"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ບັງຄັບໃຫ້ຮູບຮ່າງໜ້າຈໍ ຂຽນຈາກຂວາໄປຊ້າຍ ສຳລັບທຸກພາສາ"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"ແຖບການນຳທາງແບບໂປ່ງໃສ"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"ເຮັດໃຫ້ສີພື້ນຫຼັງແຖບການນຳທາງມີຄວາມໂປ່ງໃສແບບເລີ່ມຕົ້ນ"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ອະນຸຍາດການມົວໃນລະດັບໜ້າຈໍ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"ບັງຄັບໃຊ້ 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"ເປິດໃຊ້ 4x MSAA ໃນແອັບ OpenGL ES 2.0"</string>
@@ -483,7 +485,7 @@
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"ຄວບຄຸມໂດຍການຕັ້ງຄ່າທີ່ຈຳກັດໄວ້"</string>
     <string name="disabled" msgid="8017887509554714950">"ປິດການນຳໃຊ້"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"ອະນຸຍາດແລ້ວ"</string>
-    <string name="external_source_untrusted" msgid="5037891688911672227">"ບໍ່ອະນຸຍາດແລ້ວ"</string>
+    <string name="external_source_untrusted" msgid="5037891688911672227">"ບໍ່ອະນຸຍາດ"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"ຕິດຕັ້ງແອັບທີ່ບໍ່ຮູ້ຈັກ"</string>
     <string name="home" msgid="973834627243661438">"ໜ້າທຳອິດຂອງການຕັ້ງຄ່າ"</string>
   <string-array name="battery_labels">
@@ -517,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ເພີ່ມເວລາ."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"ຫຼຸດເວລາ."</string>
     <string name="cancel" msgid="5665114069455378395">"ຍົກເລີກ"</string>
+    <string name="next" msgid="2699398661093607009">"ຕໍ່ໄປ"</string>
+    <string name="back" msgid="5554327870352703710">"ກັບຄືນ"</string>
+    <string name="save" msgid="3745809743277153149">"ບັນທຶກ"</string>
     <string name="okay" msgid="949938843324579502">"ຕົກລົງ"</string>
     <string name="done" msgid="381184316122520313">"ແລ້ວໆ"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"ໂມງປຸກ ແລະ ການແຈ້ງເຕືອນ"</string>
@@ -571,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"ເພີ່ມຜູ້ໃຊ້ໃໝ່ບໍ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ທ່ານສາມາດໃຊ້ອຸປະກອນນີ້ຮ່ວມກັບຄົນອື່ນໄດ້ໂດຍການສ້າງຜູ້ໃຊ້ເພີ່ມເຕີມ. ຜູ້ໃຊ້ແຕ່ລະຄົນຈະມີພື້ນທີ່ຂອງຕົວເອງ, ເຊິ່ງເຂົາເຈົ້າສາມາດປັບແຕ່ງແອັບ, ຮູບພື້ນຫຼັງ ແລະ ອື່ນໆໄດ້. ຜູ້ໃຊ້ຕ່າງໆ ສາມາດປັບແຕ່ງການຕັ້ງຄ່າອຸປະກອນໄດ້ ເຊັ່ນ: Wi‑Fi ທີ່ມີຜົນກະທົບທຸກຄົນ.\n\nເມື່ອທ່ານເພີ່ມຜູ້ໃຊ້ໃໝ່, ບຸກຄົນນັ້ນຈະຕ້ອງຕັ້ງຄ່າພື້ນທີ່ຂອງເຂົາເຈົ້າກ່ອນ.\n\nຜູ້ໃຊ້ໃດກໍຕາມສາມາດອັບເດດແອັບສຳລັບຜູ້ໃຊ້ຄົນອື່ນທັງໝົດໄດ້. ການຕັ້ງຄ່າການຊ່ວຍເຂົ້າເຖິງອາດບໍ່ຖືກໂອນຍ້າຍໄປໃຫ້ຜູ້ໃຊ້ໃໝ່."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"ເມື່ອ​ທ່ານ​ເພີ່ມ​ຜູ້​ໃຊ້​ໃໝ່, ຜູ້​ໃຊ້​ນັ້ນ​ຈະ​ຕ້ອງ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ບ່ອນ​ຈັດ​ເກັບ​ຂໍ້​ມູນ​ຂອງ​ລາວ.\n\nຜູ້​ໃຊ້​ທຸກ​ຄົນ​ສາ​ມາດ​ອັບ​ເດດ​ແອັບສຳ​ລັບ​ຜູ້​ໃຊ້​ຄົນ​ອື່ນ​ທັງ​ໝົດ​ໄດ້."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"ໃຫ້ສິດທິຜູ້ເບິ່ງແຍງລະບົບແກ່ຜູ້ໃຊ້ນີ້ບໍ?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"ຜູ້ເບິ່ງແຍງລະບົບຈະສາມາດຈັດການຜູ້ໃຊ້ອື່ນໆ, ແກ້ໄຂການຕັ້ງຄ່າອຸປະກອນ ແລະ ຣີເຊັດອຸປະກອນເປັນຄ່າຈາກໂຮງງານໄດ້."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"ຕັ້ງໃຫ້ຜູ້ໃຊ້ຄົນນີ້ເປັນຜູ້ເບິ່ງແຍງລະບົບບໍ?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"ຜູ້ເບິ່ງແຍງລະບົບຈະມີສິດທິພິເສດທີ່ຜູ້ໃຊ້ຄົນອື່ນບໍ່ມີ. ຜູ້ເບິ່ງແຍງລະບົບສາມາດຈັດການຜູ້ໃຊ້ທັງໝົດ, ການອັບເດດ ຫຼື ການຣີເຊັດອຸປະກອນນີ້, ການແກ້ໄຂການຕັ້ງຄ່າ, ການເບິ່ງແອັບທີ່ຕິດຕັ້ງທັງໝົດ ແລະ ໃຊ້ ຫຼື ຖອດຖອນສິດທິຜູ້ເບິ່ງແຍງລະບົບສຳລັບຄົນອື່ນໆໄດ້."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"ຕັ້ງໃຫ້ເປັນຜູ້ເບິ່ງແຍງລະບົບ"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ຕັ້ງຄ່າຜູ້ໃຊ້ຕອນນີ້ບໍ?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ກວດ​ສອບ​ໃຫ້​ແນ່​ໃຈ​ວ່າ​ບຸກ​ຄົນ​ດັ່ງ​ກ່າວ​ສາ​ມາດ​ຮັບ​ອຸ​ປະ​ກອນ​ ແລະ ​ຕັ້ງ​ຄ່າ​ພື້ນ​ທີ່​ຂອງ​ພວກ​ເຂົາ​ໄດ້"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"ຕັ້ງຄ່າໂປຣໄຟລ໌ດຽວນີ້?"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"ນີ້ຈະເລີ່ມໄລຍະເວລາຂອງແຂກໃໝ່ ແລະ ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດອອກຈາກເຊດຊັນປັດຈຸບັນ"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ອອກຈາກໂໝດແຂກບໍ?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"ນີ້ຈະລຶບແອັບ ແລະ ຂໍ້ມູນອອກຈາກເຊດຊັນແຂກປັດຈຸບັນ"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"ໃຫ້ສິດທິຜູ້ເບິ່ງແຍງລະບົບແກ່ຜູ້ໃຊ້ນີ້"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"ບໍ່ມອບສິດທິຜູ້ເບິ່ງແຍງລະບົບໃຫ້ແກ່ຜູ້ໃຊ້"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"ແມ່ນ, ຕັ້ງໃຫ້ເຂົາເຈົ້າເປັນຜູ້ເບິ່ງແຍງລະບົບ"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"ບໍ່, ບໍ່ຕັ້ງໃຫ້ເຂົາເຈົ້າເປັນຜູ້ເບິ່ງແຍງລະບົບ"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"ອອກ"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ບັນທຶກການເຄື່ອນໄຫວແຂກບໍ?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"ທ່ານສາມາດບັນທຶກການເຄື່ອນໄຫວຈາກເຊດຊັນປັດຈຸບັນ ຫຼື ລຶບແອັບ ແລະ ຂໍ້ມູນທັງໝົດໄດ້"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"ຍ້າຍໄປຂວາ"</item>
     <item msgid="324200556467459329">"ຍ້າຍຂຶ້ນ"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
 </resources>

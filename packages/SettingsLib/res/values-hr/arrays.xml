@@ -64,15 +64,15 @@
     <item msgid="2779123106632690576">"Omogućeno"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_filters_entries">
-    <item msgid="5118179698172834473">"Filtrirana zaglavlja"</item>
-    <item msgid="4818549483446395865">"Filtrirani A2DP medijski paketi"</item>
-    <item msgid="8207123990453243311">"Filtrirani RFCOMM kanal"</item>
+    <item msgid="195768089203590086">"Zadrži samo ACL zaglavlja"</item>
+    <item msgid="2776218217644557831">"Filtriraj A2DP medijske pakete"</item>
+    <item msgid="8163235976612675092">"Filtriraj RFCOMM kanal"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_profile_filter_entries">
-    <item msgid="6348114316510677939">"Onemogućeno"</item>
-    <item msgid="5884245882825346396">"Čarolija"</item>
-    <item msgid="6569400572915342949">"Zaglavlje"</item>
-    <item msgid="1239386221416967664">"Potpuni filtar"</item>
+    <item msgid="3961868665260627524">"Onemogući"</item>
+    <item msgid="2505973306504851132">"Ispunite nizom znakova"</item>
+    <item msgid="5883011000629613855">"Zadržite samo zaglavlje"</item>
+    <item msgid="1051534112762023603">"Uklonite u potpunosti"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
     <item msgid="6603880723315236832">"AVRCP 1.5 (zadano)"</item>
