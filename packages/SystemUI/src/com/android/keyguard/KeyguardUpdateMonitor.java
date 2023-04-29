@@ -4379,9 +4379,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     public void startBiometricWatchdog() {
         if (mFaceManager != null && !isFaceAuthInteractorEnabled()) {
+            mLogger.scheduleWatchdog("face");
             mFaceManager.scheduleWatchdog();
         }
         if (mFpm != null) {
+            mLogger.scheduleWatchdog("fingerprint");
             mFpm.scheduleWatchdog();
         }
     }
