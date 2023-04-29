@@ -107,7 +107,6 @@ class CredentialManagerRepo(
 
         initialUiState = when (requestInfo?.type) {
             RequestInfo.TYPE_CREATE -> {
-                val defaultProviderIdSetByUser = userConfigRepo.getDefaultProviderId()
                 val isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
                 val providerEnableListUiState = getCreateProviderEnableListInitialUiState()
                 val providerDisableListUiState = getCreateProviderDisableListInitialUiState()
@@ -119,7 +118,8 @@ class CredentialManagerRepo(
                         disabledProviders = providerDisableListUiState,
                         defaultProviderIdPreferredByApp =
                         requestDisplayInfoUiState.appPreferredDefaultProviderId,
-                        defaultProviderIdSetByUser = defaultProviderIdSetByUser,
+                        defaultProviderIdsSetByUser =
+                        requestDisplayInfoUiState.userSetDefaultProviderIds,
                         requestDisplayInfo = requestDisplayInfoUiState,
                         isOnPasskeyIntroStateAlready = false,
                         isPasskeyFirstUse = isPasskeyFirstUse,
