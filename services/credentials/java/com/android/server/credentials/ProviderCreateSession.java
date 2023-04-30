@@ -93,7 +93,7 @@ public final class ProviderCreateSession extends ProviderSession<
                     createRequestSession.mHybridService
             );
         }
-        Slog.d(TAG, "Unable to create provider session for: "
+        Slog.i(TAG, "Unable to create provider session for: "
                 + providerInfo.getComponentName());
         return null;
     }
@@ -153,7 +153,7 @@ public final class ProviderCreateSession extends ProviderSession<
     @Override
     public void onProviderResponseSuccess(
             @Nullable BeginCreateCredentialResponse response) {
-        Slog.d(TAG, "Remote provider responded with a valid response: " + mComponentName);
+        Slog.i(TAG, "Remote provider responded with a valid response: " + mComponentName);
         onSetInitialRemoteResponse(response);
     }
 
@@ -208,7 +208,7 @@ public final class ProviderCreateSession extends ProviderSession<
     protected CreateCredentialProviderData prepareUiData()
             throws IllegalArgumentException {
         if (!ProviderSession.isUiInvokingStatus(getStatus())) {
-            Slog.d(TAG, "No data for UI from: " + mComponentName.flattenToString());
+            Slog.i(TAG, "No data for UI from: " + mComponentName.flattenToString());
             return null;
         }
 
@@ -224,7 +224,7 @@ public final class ProviderCreateSession extends ProviderSession<
         switch (entryType) {
             case SAVE_ENTRY_KEY:
                 if (mProviderResponseDataHandler.getCreateEntry(entryKey) == null) {
-                    Slog.w(TAG, "Unexpected save entry key");
+                    Slog.i(TAG, "Unexpected save entry key");
                     invokeCallbackOnInternalInvalidState();
                     return;
                 }
@@ -232,14 +232,14 @@ public final class ProviderCreateSession extends ProviderSession<
                 break;
             case REMOTE_ENTRY_KEY:
                 if (mProviderResponseDataHandler.getRemoteEntry(entryKey) == null) {
-                    Slog.w(TAG, "Unexpected remote entry key");
+                    Slog.i(TAG, "Unexpected remote entry key");
                     invokeCallbackOnInternalInvalidState();
                     return;
                 }
                 onRemoteEntrySelected(providerPendingIntentResponse);
                 break;
             default:
-                Slog.w(TAG, "Unsupported entry type selected");
+                Slog.i(TAG, "Unsupported entry type selected");
                 invokeCallbackOnInternalInvalidState();
         }
     }
@@ -274,7 +274,7 @@ public final class ProviderCreateSession extends ProviderSession<
         if (credentialResponse != null) {
             mCallbacks.onFinalResponseReceived(mComponentName, credentialResponse);
         } else {
-            Slog.w(TAG, "onSaveEntrySelected - no response or error found in pending "
+            Slog.i(TAG, "onSaveEntrySelected - no response or error found in pending "
                     + "intent response");
             invokeCallbackOnInternalInvalidState();
         }
@@ -290,14 +290,14 @@ public final class ProviderCreateSession extends ProviderSession<
     private CreateCredentialException maybeGetPendingIntentException(
             ProviderPendingIntentResponse pendingIntentResponse) {
         if (pendingIntentResponse == null) {
-            Slog.w(TAG, "pendingIntentResponse is null");
+            Slog.i(TAG, "pendingIntentResponse is null");
             return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREATE_OPTIONS);
         }
         if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
             CreateCredentialException exception = PendingIntentResultHandler
                     .extractCreateCredentialException(pendingIntentResponse.getResultData());
             if (exception != null) {
-                Slog.d(TAG, "Pending intent contains provider exception");
+                Slog.i(TAG, "Pending intent contains provider exception");
                 return exception;
             }
         } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {
