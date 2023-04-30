@@ -171,11 +171,11 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
     @Override
     protected ProviderData prepareUiData() {
         if (!ProviderSession.isUiInvokingStatus(getStatus())) {
-            Slog.d(TAG, "No date for UI coming from: " + mComponentName.flattenToString());
+            Slog.i(TAG, "No date for UI coming from: " + mComponentName.flattenToString());
             return null;
         }
         if (mProviderResponse == null) {
-            Slog.w(TAG, "In prepareUiData but response is null. This is strange.");
+            Slog.w(TAG, "response is null when preparing ui data. This is strange.");
             return null;
         }
         return new GetCredentialProviderData.Builder(
@@ -196,13 +196,13 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             case CREDENTIAL_ENTRY_KEY:
                 CredentialEntry credentialEntry = mUiCredentialEntries.get(entryKey);
                 if (credentialEntry == null) {
-                    Slog.w(TAG, "Unexpected credential entry key");
+                    Slog.i(TAG, "Unexpected credential entry key");
                     return;
                 }
                 onCredentialEntrySelected(credentialEntry, providerPendingIntentResponse);
                 break;
             default:
-                Slog.w(TAG, "Unsupported entry type selected");
+                Slog.i(TAG, "Unsupported entry type selected");
         }
     }
 
@@ -279,7 +279,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
             GetCredentialException exception = PendingIntentResultHandler
                     .extractGetCredentialException(pendingIntentResponse.getResultData());
             if (exception != null) {
-                Slog.d(TAG, "Pending intent contains provider exception");
+                Slog.i(TAG, "Pending intent contains provider exception");
                 return exception;
             }
         } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {

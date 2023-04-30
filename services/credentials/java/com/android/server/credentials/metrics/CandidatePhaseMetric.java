@@ -16,7 +16,7 @@
 
 package com.android.server.credentials.metrics;
 
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.server.credentials.MetricUtilities;
 import com.android.server.credentials.metrics.shared.ResponseCollective;
@@ -112,7 +112,7 @@ public class CandidatePhaseMetric {
      */
     public int getTimestampFromReferenceStartMicroseconds(long specificTimestamp) {
         if (specificTimestamp < mServiceBeganTimeNanoseconds) {
-            Log.i(TAG, "The timestamp is before service started, falling back to default int");
+            Slog.i(TAG, "The timestamp is before service started, falling back to default int");
             return MetricUtilities.DEFAULT_INT_32;
         }
         return (int) ((specificTimestamp
