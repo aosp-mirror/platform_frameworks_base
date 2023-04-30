@@ -16,14 +16,12 @@
 
 package com.android.server.credentials.metrics;
 
-import android.util.IntArray;
 import android.util.Log;
 
 import com.android.server.credentials.MetricUtilities;
+import com.android.server.credentials.metrics.shared.ResponseCollective;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 /**
  * The central candidate provider metric object that mimics our defined metric setup.
@@ -55,22 +53,11 @@ public class CandidatePhaseMetric {
     private int mProviderQueryStatus = -1;
     // Indicates if an exception was thrown by this provider, false by default
     private boolean mHasException = false;
-    // Indicates the number of total entries available, defaults to -1
-    private int mNumEntriesTotal = -1;
-    // The count of action entries from this provider, defaults to -1
-    private int mActionEntryCount = -1;
-    // The count of credential entries from this provider, defaults to -1
-    private int mCredentialEntryCount = -1;
-    // The *type-count* of the credential entries, defaults to -1
-    private int mCredentialEntryTypeCount = -1;
-    // The count of remote entries from this provider, defaults to -1
-    private int mRemoteEntryCount = -1;
-    // The count of authentication entries from this provider, defaults to -1
-    private int mAuthenticationEntryCount = -1;
-    // Gathered to pass on to chosen provider when required
-    private final IntArray mAvailableEntries = new IntArray();
-    // The *framework only* exception held by this provider, empty string by default
     private String mFrameworkException = "";
+
+    // Stores the response credential information, as well as the response entry information which
+    // by default, contains empty info
+    private ResponseCollective mResponseCollective = new ResponseCollective(Map.of(), Map.of());
 
     public CandidatePhaseMetric() {
     }
@@ -182,88 +169,13 @@ public class CandidatePhaseMetric {
         return mHasException;
     }
 
-    /* -------------- Number of Entries ---------------- */
-
-    public void setNumEntriesTotal(int numEntriesTotal) {
-        mNumEntriesTotal = numEntriesTotal;
+    /* -------------- The Entries and Responses Gathered ---------------- */
+    public void setResponseCollective(ResponseCollective responseCollective) {
+        mResponseCollective = responseCollective;
     }
 
-    public int getNumEntriesTotal() {
-        return mNumEntriesTotal;
-    }
-
-    /* -------------- Count of Action Entries ---------------- */
-
-    public void setActionEntryCount(int actionEntryCount) {
-        mActionEntryCount = actionEntryCount;
-    }
-
-    public int getActionEntryCount() {
-        return mActionEntryCount;
-    }
-
-    /* -------------- Count of Credential Entries ---------------- */
-
-    public void setCredentialEntryCount(int credentialEntryCount) {
-        mCredentialEntryCount = credentialEntryCount;
-    }
-
-    public int getCredentialEntryCount() {
-        return mCredentialEntryCount;
-    }
-
-    /* -------------- Count of Credential Entry Types ---------------- */
-
-    public void setCredentialEntryTypeCount(int credentialEntryTypeCount) {
-        mCredentialEntryTypeCount = credentialEntryTypeCount;
-    }
-
-    public int getCredentialEntryTypeCount() {
-        return mCredentialEntryTypeCount;
-    }
-
-    /* -------------- Count of Remote Entries ---------------- */
-
-    public void setRemoteEntryCount(int remoteEntryCount) {
-        mRemoteEntryCount = remoteEntryCount;
-    }
-
-    public int getRemoteEntryCount() {
-        return mRemoteEntryCount;
-    }
-
-    /* -------------- Count of Authentication Entries ---------------- */
-
-    public void setAuthenticationEntryCount(int authenticationEntryCount) {
-        mAuthenticationEntryCount = authenticationEntryCount;
-    }
-
-    public int getAuthenticationEntryCount() {
-        return mAuthenticationEntryCount;
-    }
-
-    /* -------------- The Entries Gathered ---------------- */
-
-    /**
-     * Allows adding an entry record to this metric collector, which can then be propagated to
-     * the final phase to retain information on the data available to the candidate.
-     *
-     * @param e the entry enum collected by the candidate provider associated with this metric
-     *          collector
-     */
-    public void addEntry(EntryEnum e) {
-        mAvailableEntries.add(e.getMetricCode());
-    }
-
-    /**
-     * Returns a safely copied list of the entries captured by this metric collector associated
-     * with a particular candidate provider.
-     *
-     * @return the full collection of entries encountered by the candidate provider associated with
-     * this metric
-     */
-    public List<Integer> getAvailableEntries() {
-        return Arrays.stream(mAvailableEntries.toArray()).boxed().collect(Collectors.toList());
+    public ResponseCollective getResponseCollective() {
+        return mResponseCollective;
     }
 
     /* ------ Framework Exception for this Candidate ------ */
