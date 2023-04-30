@@ -79,7 +79,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
                 .createNewSession(mContext, mUserId, providerInfo,
                         this, remoteCredentialService);
         if (providerCreateSession != null) {
-            Slog.d(TAG, "In initiateProviderSession - provider session created and "
+            Slog.i(TAG, "Provider session created and "
                     + "being added for: " + providerInfo.getComponentName());
             mProviders.put(providerCreateSession.getComponentName().flattenToString(),
                     providerCreateSession);
@@ -127,7 +127,7 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     @Override
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable CreateCredentialResponse response) {
-        Slog.d(TAG, "onFinalCredentialReceived from: " + componentName.flattenToString());
+        Slog.i(TAG, "Final credential received from: " + componentName.flattenToString());
         mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
         mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(mProviders.get(
                 componentName.flattenToString()).mProviderSessionMetric
@@ -170,13 +170,13 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
     @Override
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName, ProviderSession.CredentialsSource source) {
-        Slog.d(TAG, "in onStatusChanged with status: " + status + ", and source: " + source);
+        Slog.i(TAG, "Provider status changed: " + status + ", and source: " + source);
         // If all provider responses have been received, we can either need the UI,
         // or we need to respond with error. The only other case is the entry being
         // selected after the UI has been invoked which has a separate code path.
         if (!isAnyProviderPending()) {
             if (isUiInvocationNeeded()) {
-                Slog.d(TAG, "in onProviderStatusChanged - isUiInvocationNeeded");
+                Slog.i(TAG, "Provider status changed - ui invocation is needed");
                 getProviderDataAndInitiateUi();
             } else {
                 respondToClientWithErrorAndFinish(CreateCredentialException.TYPE_NO_CREATE_OPTIONS,

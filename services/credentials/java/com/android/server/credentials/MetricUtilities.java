@@ -169,7 +169,7 @@ public class MetricUtilities {
                     DEFAULT_STRING
             );
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during final provider uid emit: " + e);
         }
     }
 
@@ -269,7 +269,7 @@ public class MetricUtilities {
                     initialPhaseMetric.getUniqueRequestCounts()
             );
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during candidate provider uid metric emit: " + e);
         }
     }
 
@@ -338,7 +338,7 @@ public class MetricUtilities {
                     initialPhaseMetric.isOriginSpecified()
             );
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during initial metric emit: " + e);
         }
     }
 }
