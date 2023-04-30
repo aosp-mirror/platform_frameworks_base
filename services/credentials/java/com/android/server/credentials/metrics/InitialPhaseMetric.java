@@ -16,8 +16,6 @@
 
 package com.android.server.credentials.metrics;
 
-import android.util.Log;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -142,9 +140,6 @@ public class InitialPhaseMetric {
      * @return a string array for deduped classtypes
      */
     public String[] getUniqueRequestStrings() {
-        if (mRequestCounts.isEmpty()) {
-            Log.w(TAG, "There are no unique string request types collected");
-        }
         String[] result = new String[mRequestCounts.keySet().size()];
         mRequestCounts.keySet().toArray(result);
         return result;
@@ -155,9 +150,6 @@ public class InitialPhaseMetric {
      * @return a string array for deduped classtype counts
      */
     public int[] getUniqueRequestCounts() {
-        if (mRequestCounts.isEmpty()) {
-            Log.w(TAG, "There are no unique string request type counts collected");
-        }
         return mRequestCounts.values().stream().mapToInt(Integer::intValue).toArray();
     }
 }
