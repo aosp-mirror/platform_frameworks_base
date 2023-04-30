@@ -572,7 +572,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Колдонмого сүрөт жыйнагыңызды өзгөртүүгө мүмкүнчүлүк берет."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"медиа жыйнагыңыз сакталган жерлерди окуу"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Колдонмого медиа жыйнагыңыз сакталган жерлерди окууга мүмкүнчүлүк берет."</string>
-    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Биометрикалык жөндөөлөрдү колдонуу"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"Биометрикалык параметрлерди колдонуу"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"Биометрикалык жөндөөнү же экрандын кулпусун колдонуу"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"Өзүңүздү ырастаңыз"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"Улантуу үчүн биометрикалык жөндөөнү колдонуу"</string>
@@ -1149,7 +1149,7 @@
     <string name="input_method_ime_switch_button_desc" msgid="2736542240252198501">"Киргизүү ыкмасын өзгөртүү"</string>
     <string name="low_internal_storage_view_title" msgid="9024241779284783414">"Сактагычта орун калбай баратат"</string>
     <string name="low_internal_storage_view_text" msgid="8172166728369697835">"Айрым функциялар иштебеши мүмкүн"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Тутумда сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="7368968163411251788">"Системада сактагыч жетишсиз. 250МБ бош орун бар экенин текшерип туруп, өчүрүп күйгүзүңүз."</string>
     <string name="app_running_notification_title" msgid="8985999749231486569">"<xliff:g id="APP_NAME">%1$s</xliff:g> иштөөдө"</string>
     <string name="app_running_notification_text" msgid="5120815883400228566">"Көбүрөөк маалымат үчүн же колдонмону токтотуш үчүн таптап коюңуз."</string>
     <string name="ok" msgid="2646370155170753815">"Жарайт"</string>
@@ -1389,7 +1389,7 @@
     <string name="alert_windows_notification_channel_group_name" msgid="6063891141815714246">"Башка колдонмолордун үстүнөн көрсөтүү"</string>
     <string name="alert_windows_notification_channel_name" msgid="3437528564303192620">"<xliff:g id="NAME">%s</xliff:g> колдонмосун башка терезелердин үстүнөн көрсөтүү"</string>
     <string name="alert_windows_notification_title" msgid="6331662751095228536">"<xliff:g id="NAME">%s</xliff:g>: башка колдонмолордун үстүнөн"</string>
-    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, жөндөөлөрдү ачып туруп, аны өчүрүп коюңуз."</string>
+    <string name="alert_windows_notification_message" msgid="6538171456970725333">"Эгер <xliff:g id="NAME">%s</xliff:g> колдонмосу бул функцияны пайдаланбасын десеңиз, параметрлерди ачып туруп, аны өчүрүп коюңуз."</string>
     <string name="alert_windows_notification_turn_off_action" msgid="7805857234839123780">"Өчүрүү"</string>
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> текшерилүүдө…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Учурдагы мазмун каралып жатат"</string>

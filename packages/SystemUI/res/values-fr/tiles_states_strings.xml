@@ -43,7 +43,7 @@
   </string-array>
   <string-array name="tile_states_cell">
     <item msgid="1235899788959500719">"Indisponibles"</item>
-    <item msgid="2074416252859094119">"Désactivées"</item>
+    <item msgid="2074416252859094119">"Désactivé"</item>
     <item msgid="287997784730044767">"Activées"</item>
   </string-array>
   <string-array name="tile_states_battery">
@@ -148,7 +148,7 @@
   </string-array>
   <string-array name="tile_states_controls">
     <item msgid="8199009425335668294">"Indisponibles"</item>
-    <item msgid="4544919905196727508">"Désactivées"</item>
+    <item msgid="4544919905196727508">"Désactivé"</item>
     <item msgid="3422023746567004609">"Activées"</item>
   </string-array>
   <string-array name="tile_states_wallet">
