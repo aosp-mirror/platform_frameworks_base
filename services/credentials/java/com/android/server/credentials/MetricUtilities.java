@@ -19,7 +19,7 @@ package com.android.server.credentials;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.credentials.metrics.ApiName;
@@ -27,6 +27,7 @@ import com.android.server.credentials.metrics.ApiStatus;
 import com.android.server.credentials.metrics.CandidateBrowsingPhaseMetric;
 import com.android.server.credentials.metrics.CandidatePhaseMetric;
 import com.android.server.credentials.metrics.ChosenProviderFinalPhaseMetric;
+import com.android.server.credentials.metrics.EntryEnum;
 import com.android.server.credentials.metrics.InitialPhaseMetric;
 
 import java.util.List;
@@ -69,7 +70,7 @@ public class MetricUtilities {
                     componentName.getPackageName(),
                     PackageManager.ApplicationInfoFlags.of(0)).uid;
         } catch (Throwable t) {
-            Log.i(TAG, "Couldn't find required uid");
+            Slog.i(TAG, "Couldn't find required uid");
         }
         return sessUid;
     }
@@ -147,28 +148,28 @@ public class MetricUtilities {
                             .getFinalFinishTimeNanoseconds()),
                     /* chosen_provider_status */ finalPhaseMetric.getChosenProviderStatus(),
                     /* chosen_provider_has_exception */ finalPhaseMetric.isHasException(),
-                    /* chosen_provider_available_entries */ finalPhaseMetric.getAvailableEntries()
-                            .stream().mapToInt(i -> i).toArray(),
-                    /* chosen_provider_action_entry_count */ finalPhaseMetric.getActionEntryCount(),
-                    /* chosen_provider_credential_entry_count */
-                    finalPhaseMetric.getCredentialEntryCount(),
-                    /* chosen_provider_credential_entry_type_count */
-                    finalPhaseMetric.getCredentialEntryTypeCount(),
-                    /* chosen_provider_remote_entry_count */
-                    finalPhaseMetric.getRemoteEntryCount(),
-                    /* chosen_provider_authentication_entry_count */
-                    finalPhaseMetric.getAuthenticationEntryCount(),
+                    /* chosen_provider_available_entries (deprecated) */ DEFAULT_REPEATED_INT_32,
+                    /* chosen_provider_action_entry_count (deprecated) */ DEFAULT_INT_32,
+                    /* chosen_provider_credential_entry_count (deprecated)*/DEFAULT_INT_32,
+                    /* chosen_provider_credential_entry_type_count (deprecated) */ DEFAULT_INT_32,
+                    /* chosen_provider_remote_entry_count (deprecated) */ DEFAULT_INT_32,
+                    /* chosen_provider_authentication_entry_count (deprecated) */ DEFAULT_INT_32,
                     /* clicked_entries */ browsedClickedEntries,
                     /* provider_of_clicked_entry */ browsedProviderUid,
                     /* api_status */ apiStatus,
-                    DEFAULT_REPEATED_INT_32,
-                    DEFAULT_REPEATED_INT_32,
-                    DEFAULT_REPEATED_STR,
-                    DEFAULT_REPEATED_INT_32,
+                    /* unique_entries */
+                    finalPhaseMetric.getResponseCollective().getUniqueEntries(),
+                    /* per_entry_counts */
+                    finalPhaseMetric.getResponseCollective().getUniqueEntryCounts(),
+                    /* unique_response_classtypes */
+                    finalPhaseMetric.getResponseCollective().getUniqueResponseStrings(),
+                    /* per_classtype_counts */
+                    finalPhaseMetric.getResponseCollective().getUniqueResponseCounts(),
+                    /* framework_exception_unique_classtypes */
                     DEFAULT_STRING
             );
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
@@ -223,12 +224,18 @@ public class MetricUtilities {
                                 metric.getQueryFinishTimeNanoseconds());
                 candidateStatusList[index] = metric.getProviderQueryStatus();
                 candidateHasExceptionList[index] = metric.isHasException();
-                candidateTotalEntryCountList[index] = metric.getNumEntriesTotal();
-                candidateCredentialEntryCountList[index] = metric.getCredentialEntryCount();
-                candidateCredentialTypeCountList[index] = metric.getCredentialEntryTypeCount();
-                candidateActionEntryCountList[index] = metric.getActionEntryCount();
-                candidateAuthEntryCountList[index] = metric.getAuthenticationEntryCount();
-                candidateRemoteEntryCountList[index] = metric.getRemoteEntryCount();
+                candidateTotalEntryCountList[index] = metric.getResponseCollective()
+                        .getNumEntriesTotal();
+                candidateCredentialEntryCountList[index] = metric.getResponseCollective()
+                        .getCountForEntry(EntryEnum.CREDENTIAL_ENTRY);
+                candidateCredentialTypeCountList[index] = metric.getResponseCollective()
+                        .getUniqueResponseStrings().length;
+                candidateActionEntryCountList[index] = metric.getResponseCollective()
+                        .getCountForEntry(EntryEnum.ACTION_ENTRY);
+                candidateAuthEntryCountList[index] = metric.getResponseCollective()
+                        .getCountForEntry(EntryEnum.AUTHENTICATION_ENTRY);
+                candidateRemoteEntryCountList[index] = metric.getResponseCollective()
+                        .getCountForEntry(EntryEnum.REMOTE_ENTRY);
                 frameworkExceptionList[index] = metric.getFrameworkException();
                 index++;
             }
@@ -262,7 +269,7 @@ public class MetricUtilities {
                     initialPhaseMetric.getUniqueRequestCounts()
             );
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
@@ -298,7 +305,7 @@ public class MetricUtilities {
                     DEFAULT_INT_32,
                     /* chosen_provider_status */ DEFAULT_INT_32);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
@@ -331,7 +338,7 @@ public class MetricUtilities {
                     initialPhaseMetric.isOriginSpecified()
             );
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 }
