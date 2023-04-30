@@ -17,7 +17,6 @@
 package com.android.server.credentials.metrics.shared;
 
 import android.annotation.NonNull;
-import android.util.Slog;
 
 import com.android.server.credentials.metrics.EntryEnum;
 
@@ -65,9 +64,6 @@ public class ResponseCollective {
      * @return a string array for deduped classtypes
      */
     public String[] getUniqueResponseStrings() {
-        if (mResponseCounts.isEmpty()) {
-            Slog.w(TAG, "There are no unique string response types collected");
-        }
         String[] result = new String[mResponseCounts.keySet().size()];
         mResponseCounts.keySet().toArray(result);
         return result;
@@ -79,9 +75,6 @@ public class ResponseCollective {
      * @return a string array for deduped classtype counts
      */
     public int[] getUniqueResponseCounts() {
-        if (mResponseCounts.isEmpty()) {
-            Slog.w(TAG, "There are no unique string response type counts collected");
-        }
         return mResponseCounts.values().stream().mapToInt(Integer::intValue).toArray();
     }
 
@@ -90,9 +83,6 @@ public class ResponseCollective {
      * @return an int array for deduped entries
      */
     public int[] getUniqueEntries() {
-        if (mEntryCounts.isEmpty()) {
-            Slog.w(TAG, "There are no unique entry response types collected");
-        }
         return mEntryCounts.keySet().stream().mapToInt(Enum::ordinal).toArray();
     }
 
@@ -102,9 +92,6 @@ public class ResponseCollective {
      * @return a string array for deduped classtype counts
      */
     public int[] getUniqueEntryCounts() {
-        if (mEntryCounts.isEmpty()) {
-            Slog.w(TAG, "There are no unique entry response type counts collected");
-        }
         return mEntryCounts.values().stream().mapToInt(Integer::intValue).toArray();
     }
 

@@ -67,7 +67,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
                 .createNewSession(mContext, mUserId, providerInfo,
                         this, remoteCredentialService);
         if (providerClearSession != null) {
-            Slog.d(TAG, "In startProviderSession - provider session created "
+            Slog.i(TAG, "Provider session created "
                     + "and being added for: " + providerInfo.getComponentName());
             mProviders.put(providerClearSession.getComponentName().flattenToString(),
                     providerClearSession);
@@ -78,12 +78,12 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     @Override // from provider session
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName, ProviderSession.CredentialsSource source) {
-        Slog.d(TAG, "in onStatusChanged with status: " + status + ", and source: " + source);
+        Slog.i(TAG, "Provider changed with status: " + status + ", and source: " + source);
         if (ProviderSession.isTerminatingStatus(status)) {
-            Slog.d(TAG, "in onProviderStatusChanged terminating status");
+            Slog.i(TAG, "Provider terminating status");
             onProviderTerminated(componentName);
         } else if (ProviderSession.isCompletionStatus(status)) {
-            Slog.d(TAG, "in onProviderStatusChanged isCompletionStatus status");
+            Slog.i(TAG, "Provider has completion status");
             onProviderResponseComplete(componentName);
         }
     }
