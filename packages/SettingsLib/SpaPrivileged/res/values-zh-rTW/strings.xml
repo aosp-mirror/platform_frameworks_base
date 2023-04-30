@@ -18,7 +18,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="no_applications" msgid="5800789569715871963">"沒有應用程式。"</string>
-    <string name="menu_show_system" msgid="906304605807554788">"顯示系統程序"</string>
+    <string name="menu_show_system" msgid="906304605807554788">"顯示系統設定"</string>
     <string name="menu_hide_system" msgid="374571689914923020">"隱藏系統程序"</string>
     <string name="app_permission_summary_allowed" msgid="6115213465364138103">"允許"</string>
     <string name="app_permission_summary_not_allowed" msgid="58396132188553920">"不允許"</string>
