@@ -48,7 +48,7 @@ public class InitialPhaseMetric {
     // Indicates if the origin was specified when making this API request
     private boolean mOriginSpecified = false;
 
-    // Stores the deduped request information, particularly {"req":5}.
+    // Stores the deduped request information, particularly {"req":5}
     private Map<String, Integer> mRequestCounts = new LinkedHashMap<>();
 
 
@@ -138,7 +138,7 @@ public class InitialPhaseMetric {
     }
 
     /**
-     * Reruns the unique, deduped, request classtypes for logging.
+     * Returns the unique, deduped, request classtypes for logging.
      * @return a string array for deduped classtypes
      */
     public String[] getUniqueRequestStrings() {
@@ -151,7 +151,7 @@ public class InitialPhaseMetric {
     }
 
     /**
-     * Reruns the unique, deduped, request classtype counts for logging.
+     * Returns the unique, deduped, request classtype counts for logging.
      * @return a string array for deduped classtype counts
      */
     public int[] getUniqueRequestCounts() {

@@ -58,7 +58,6 @@ import android.provider.Settings;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.CredentialProviderInfoFactory;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -472,7 +471,7 @@ public final class CredentialManagerService
                             GetCredentialException.TYPE_NO_CREDENTIAL,
                             "No credentials available on this device.");
                 } catch (RemoteException e) {
-                    Log.i(
+                    Slog.i(
                             TAG,
                             "Issue invoking onError on IGetCredentialCallback "
                                     + "callback: "
@@ -528,7 +527,7 @@ public final class CredentialManagerService
                                     false, null,
                                     false, false, null));
                 } catch (RemoteException e) {
-                    Log.i(
+                    Slog.i(
                             TAG,
                             "Issue invoking onError on IGetCredentialCallback "
                                     + "callback: "
@@ -673,7 +672,7 @@ public final class CredentialManagerService
                 MetricUtilities.logApiCalledInitialPhase(initMetric,
                         session.mRequestSessionMetric.returnIncrementSequence());
             } catch (Exception e) {
-                Log.w(TAG, "Unexpected error during metric logging: ", e);
+                Slog.w(TAG, "Unexpected error during metric logging: ", e);
             }
         }
 
@@ -706,7 +705,7 @@ public final class CredentialManagerService
                     Settings.Secure.CREDENTIAL_SERVICE,
                     storedValue,
                     userId)) {
-                Log.e(TAG, "Failed to store setting containing enabled providers");
+                Slog.e(TAG, "Failed to store setting containing enabled providers");
                 try {
                     callback.onError(
                             "failed_setting_store",
@@ -962,7 +961,7 @@ public final class CredentialManagerService
         @Override
         @GuardedBy("mLock")
         public void onFinishRequestSession(@UserIdInt int userId, IBinder token) {
-            Log.i(TAG, "In onFinishRequestSession");
+            Slog.i(TAG, "In onFinishRequestSession");
             if (mRequestSessions.get(userId) != null) {
                 mRequestSessions.get(userId).remove(token);
             }
