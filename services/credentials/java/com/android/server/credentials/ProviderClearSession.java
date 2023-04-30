@@ -80,7 +80,7 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
 
     @Override
     public void onProviderResponseSuccess(@Nullable Void response) {
-        Slog.d(TAG, "Remote provider responded with a valid response: " + mComponentName);
+        Slog.i(TAG, "Remote provider responded with a valid response: " + mComponentName);
         mProviderResponseSet = true;
         updateStatusAndInvokeCallback(Status.COMPLETE,
                 /*source=*/ CredentialsSource.REMOTE_PROVIDER);
