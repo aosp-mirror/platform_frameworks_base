@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"Gestore delle credenziali"</string>
@@ -50,8 +66,10 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"Chiudi"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Chiudi"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Vuoi usare la passkey salvata per <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Vuoi usare l\'accesso salvato per <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Scegli un accesso salvato per <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <!-- no translation found for get_dialog_title_use_sign_in_for (790049858275131785) -->
+    <skip />
+    <!-- no translation found for get_dialog_title_choose_sign_in_for (3048870756117876514) -->
+    <skip />
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Vuoi scegliere un\'opzione per <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Vuoi usare questi dati su <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Accedi in un altro modo"</string>
