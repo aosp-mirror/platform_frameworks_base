@@ -16,15 +16,19 @@
 
 package com.android.server.credentials.metrics;
 
+import static com.android.server.credentials.MetricUtilities.DELTA_CUT;
+import static com.android.server.credentials.MetricUtilities.generateMetricKey;
+
 import android.annotation.NonNull;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.BeginGetCredentialResponse;
-import android.service.credentials.CredentialEntry;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.server.credentials.MetricUtilities;
+import com.android.server.credentials.metrics.shared.ResponseCollective;
 
-import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Provides contextual metric collection for objects generated from
@@ -68,7 +72,7 @@ public class ProviderSessionMetric {
         try {
             mCandidatePhasePerProviderMetric.setFrameworkException(exceptionType);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
@@ -97,7 +101,7 @@ public class ProviderSessionMetric {
                                 .getMetricCode());
             }
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
@@ -118,7 +122,7 @@ public class ProviderSessionMetric {
                     initMetric.getCredentialServiceStartedTimeNanoseconds());
             mCandidatePhasePerProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
@@ -138,59 +142,53 @@ public class ProviderSessionMetric {
                 beginCreateCredentialResponseCollectionCandidateEntryMetrics(
                         (BeginCreateCredentialResponse) response);
             } else {
-                Log.i(TAG, "Your response type is unsupported for metric logging");
+                Slog.i(TAG, "Your response type is unsupported for metric logging");
             }
 
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
     private void beginCreateCredentialResponseCollectionCandidateEntryMetrics(
             BeginCreateCredentialResponse response) {
+        Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
         var createEntries = response.getCreateEntries();
-        int numRemoteEntry = MetricUtilities.ZERO;
-        if (response.getRemoteCreateEntry() != null) {
-            numRemoteEntry = MetricUtilities.UNIT;
-            mCandidatePhasePerProviderMetric.addEntry(EntryEnum.REMOTE_ENTRY);
-        }
-        int numCreateEntries =
-                createEntries == null ? MetricUtilities.ZERO : createEntries.size();
-        if (numCreateEntries > MetricUtilities.ZERO) {
-            createEntries.forEach(c ->
-                    mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
-        }
-        mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCreateEntries + numRemoteEntry);
-        mCandidatePhasePerProviderMetric.setRemoteEntryCount(numRemoteEntry);
-        mCandidatePhasePerProviderMetric.setCredentialEntryCount(numCreateEntries);
-        mCandidatePhasePerProviderMetric.setCredentialEntryTypeCount(MetricUtilities.UNIT);
+        int numRemoteEntry = response.getRemoteCreateEntry() != null ? MetricUtilities.ZERO :
+                MetricUtilities.UNIT;
+        int numCreateEntries = createEntries.size();
+        entryCounts.put(EntryEnum.REMOTE_ENTRY, numRemoteEntry);
+        entryCounts.put(EntryEnum.CREDENTIAL_ENTRY, numCreateEntries);
+
+        Map<String, Integer> responseCounts = new LinkedHashMap<>();
+        responseCounts.put(MetricUtilities.DEFAULT_STRING, numCreateEntries);
+        // We don't store create response because it's directly related to the request
+        // We do still store the count, however
+
+        ResponseCollective responseCollective = new ResponseCollective(responseCounts, entryCounts);
+        mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
     }
 
     private void beginGetCredentialResponseCollectionCandidateEntryMetrics(
             BeginGetCredentialResponse response) {
+        Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
+        Map<String, Integer> responseCounts = new LinkedHashMap<>();
         int numCredEntries = response.getCredentialEntries().size();
         int numActionEntries = response.getActions().size();
         int numAuthEntries = response.getAuthenticationActions().size();
-        int numRemoteEntry = MetricUtilities.ZERO;
-        if (response.getRemoteCredentialEntry() != null) {
-            numRemoteEntry = MetricUtilities.UNIT;
-            mCandidatePhasePerProviderMetric.addEntry(EntryEnum.REMOTE_ENTRY);
-        }
-        response.getCredentialEntries().forEach(c ->
-                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.CREDENTIAL_ENTRY));
-        response.getActions().forEach(c ->
-                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.ACTION_ENTRY));
-        response.getAuthenticationActions().forEach(c ->
-                mCandidatePhasePerProviderMetric.addEntry(EntryEnum.AUTHENTICATION_ENTRY));
-        mCandidatePhasePerProviderMetric.setNumEntriesTotal(numCredEntries + numAuthEntries
-                + numActionEntries + numRemoteEntry);
-        mCandidatePhasePerProviderMetric.setCredentialEntryCount(numCredEntries);
-        int numTypes = (response.getCredentialEntries().stream()
-                .map(CredentialEntry::getType).collect(
-                        Collectors.toSet())).size(); // Dedupe type strings
-        mCandidatePhasePerProviderMetric.setCredentialEntryTypeCount(numTypes);
-        mCandidatePhasePerProviderMetric.setActionEntryCount(numActionEntries);
-        mCandidatePhasePerProviderMetric.setAuthenticationEntryCount(numAuthEntries);
-        mCandidatePhasePerProviderMetric.setRemoteEntryCount(numRemoteEntry);
+        int numRemoteEntry = response.getRemoteCredentialEntry() != null ? MetricUtilities.ZERO :
+                MetricUtilities.UNIT;
+        entryCounts.put(EntryEnum.REMOTE_ENTRY, numRemoteEntry);
+        entryCounts.put(EntryEnum.CREDENTIAL_ENTRY, numCredEntries);
+        entryCounts.put(EntryEnum.ACTION_ENTRY, numActionEntries);
+        entryCounts.put(EntryEnum.AUTHENTICATION_ENTRY, numAuthEntries);
+
+        response.getCredentialEntries().forEach(entry -> {
+            String entryKey = generateMetricKey(entry.getType(), DELTA_CUT);
+            responseCounts.put(entryKey, responseCounts.getOrDefault(entryKey, 0) + 1);
+        });
+
+        ResponseCollective responseCollective = new ResponseCollective(responseCounts, entryCounts);
+        mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
     }
 }
