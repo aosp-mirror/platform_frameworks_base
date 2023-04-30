@@ -468,7 +468,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Құрылғы көп ұзамай өшуі мүмкін (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Толық зарядталғанға дейін <xliff:g id="TIME">%1$s</xliff:g> қалды."</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – толық зарядталғанға дейін <xliff:g id="TIME">%2$s</xliff:g> қалды."</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: толық зарядталуға <xliff:g id="TIME">%2$s</xliff:g> қалды"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау оңтайландырылды"</string>
     <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау оңтайландырылды."</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгісіз"</string>
@@ -575,7 +575,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Шектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңа пайдаланушы қосылсын ба?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша профильдер жасай отырып, бұл құрылғыны басқалармен ортақ пайдалануға болады. Әр пайдаланушы қолданбаларды, тұсқағаздарды орнатып, профилін өз қалауынша реттей алады. Сондай-ақ барлығы ортақ қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы енгізілгенде, ол өз профилін реттеуі керек болады.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға өтпейді."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңа пайдаланушыны қосқанда, сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңадан қосылған пайдаланушы өз профилін реттеуі керек.\n\nКез келген пайдаланушы басқалар үшін қолданбаларды жаңарта алады."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Осы пайдаланушыны әкімші ету керек пе?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Әкімшілер басқа пайдаланушыларда болмайтын арнайы өкілеттерге ие. Әкімші мына әрекеттерді орындай алады: барлық пайдаланушыны басқару, осы құрылғыны жаңарту не бастапқы күйге қайтару, параметрлерді өзгерту, орнатылған құрылғының барлығын көру және әкімші өкілеттерін басқа пайдаланушыларға беру не қайтару."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Әкімші ету"</string>
@@ -593,11 +593,11 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Бекітпе тағайындау"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Пайдаланушыны ауыстыру: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Жаңа пайдаланушы профилі жасалуда…"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Жаңа қонақ профилі жасалуда…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Жаңа қонақ профилі жасалып жатыр…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Жаңа пайдаланушы жасалмады."</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Жаңа қонақ профилі жасалмады."</string>
     <string name="user_nickname" msgid="262624187455825083">"Лақап ат"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Пайдаланушы қосу"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Пайда­ланушы қосу"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Қонақ қосу"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Қонақты жою"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Қонақ сеансын әдепкі күйге қайтару"</string>

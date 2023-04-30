@@ -607,9 +607,9 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Supprimer"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Réinitialisation de la session Invité…"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Réinitialiser la session Invité ?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Cette action lancera une nouvelle session Invité et supprimera toutes les applis et données de la session actuelle"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Une nouvelle session Invité débutera, et toutes les applis et données de la session actuelle seront supprimées"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Quitter le mode Invité ?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Cette action supprimera les applis et données de la session Invité actuelle."</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Les applis et données de la session Invité actuelle seront supprimées"</string>
     <string name="grant_admin" msgid="4323199171790522574">"Oui, le définir comme administrateur"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"Non, ne pas le définir comme administrateur"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Quitter"</string>
@@ -619,7 +619,7 @@
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Enregistrer"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Quitter le mode Invité"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Réinitialiser la session Invité"</string>
-    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Quitter le mode Invité"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Quitter la session Invité"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Toute l\'activité sera supprimée à la fin de la session"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Vous pouvez enregistrer ou supprimer l\'activité en quittant"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Réinitialisez la session pour supprimer immédiatement l\'activité. Vous pourrez aussi l\'enregistrer ou la supprimer en quittant la session."</string>
