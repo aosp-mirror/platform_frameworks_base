@@ -24,7 +24,7 @@ import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPh
 import android.credentials.GetCredentialRequest;
 import android.credentials.ui.UserSelectionDialogResult;
 import android.os.IBinder;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.server.credentials.ProviderSession;
 
@@ -90,7 +90,7 @@ public class RequestSessionMetric {
             mInitialPhaseMetric.setCallerUid(mCallingUid);
             mInitialPhaseMetric.setApiName(metricCode);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error collecting initial metrics: " + e);
         }
     }
 
@@ -103,7 +103,7 @@ public class RequestSessionMetric {
         try {
             mChosenProviderFinalPhaseMetric.setUiReturned(uiReturned);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error collecting ui end time metric: " + e);
         }
     }
 
@@ -116,7 +116,7 @@ public class RequestSessionMetric {
         try {
             mChosenProviderFinalPhaseMetric.setUiCallStartTimeNanoseconds(uiCallStartTime);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error collecting ui start metric: " + e);
         }
     }
 
@@ -132,7 +132,7 @@ public class RequestSessionMetric {
             mChosenProviderFinalPhaseMetric.setUiReturned(uiReturned);
             mChosenProviderFinalPhaseMetric.setUiCallEndTimeNanoseconds(uiEndTimestamp);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error collecting ui response metric: " + e);
         }
     }
 
@@ -146,7 +146,7 @@ public class RequestSessionMetric {
         try {
             mChosenProviderFinalPhaseMetric.setChosenProviderStatus(status);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error setting chosen provider status metric: " + e);
         }
     }
 
@@ -159,7 +159,7 @@ public class RequestSessionMetric {
         try {
             mInitialPhaseMetric.setOriginSpecified(origin);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error collecting create flow metric: " + e);
         }
     }
 
@@ -175,7 +175,7 @@ public class RequestSessionMetric {
                 uniqueRequestCounts.put(optionKey, uniqueRequestCounts.get(optionKey) + 1);
             });
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during get request metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during get request metric logging: " + e);
         }
         return uniqueRequestCounts;
     }
@@ -190,7 +190,7 @@ public class RequestSessionMetric {
             mInitialPhaseMetric.setOriginSpecified(request.getOrigin() != null);
             mInitialPhaseMetric.setRequestCounts(getRequestCountMap(request));
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error collecting get flow metric: " + e);
         }
     }
 
@@ -213,7 +213,7 @@ public class RequestSessionMetric {
             browsingPhaseMetric.setProviderUid(selectedProviderPhaseMetric.getCandidateUid());
             mCandidateBrowsingPhaseMetric.add(browsingPhaseMetric);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error collecting browsing metric: " + e);
         }
     }
 
@@ -226,7 +226,7 @@ public class RequestSessionMetric {
         try {
             mChosenProviderFinalPhaseMetric.setHasException(exceptionBitFinalPhase);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error setting final exception metric: " + e);
         }
     }
 
@@ -244,7 +244,7 @@ public class RequestSessionMetric {
             mChosenProviderFinalPhaseMetric.setChosenProviderStatus(
                     finalStatus.getMetricCode());
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
@@ -276,7 +276,7 @@ public class RequestSessionMetric {
                     candidatePhaseMetric.getResponseCollective());
             mChosenProviderFinalPhaseMetric.setFinalFinishTimeNanoseconds(System.nanoTime());
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during metric candidate to final transfer: " + e);
         }
     }
 
@@ -299,7 +299,7 @@ public class RequestSessionMetric {
                         /* apiStatus */ ApiStatus.FAILURE.getMetricCode());
             }
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during final metric failure emit: " + e);
         }
     }
 
@@ -313,7 +313,7 @@ public class RequestSessionMetric {
         try {
             logApiCalledCandidatePhase(providers, ++mSequenceCounter, mInitialPhaseMetric);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during candidate metric emit: " + e);
         }
     }
 
@@ -328,7 +328,7 @@ public class RequestSessionMetric {
                     apiStatus,
                     ++mSequenceCounter);
         } catch (Exception e) {
-            Log.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during final metric emit: " + e);
         }
     }
 
