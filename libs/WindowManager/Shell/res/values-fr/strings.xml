@@ -89,7 +89,7 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Développez pour obtenir plus d\'informations"</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Redémarrer pour améliorer l\'affichage ?"</string>
-    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Vous pouvez redémarrer l\'appli pour en améliorer son aspect sur votre écran, mais vous risquez de perdre votre progression ou les modifications non enregistrées"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Vous pouvez redémarrer l\'appli pour un meilleur rendu sur votre écran, mais il se peut que vous perdiez votre progression ou les modifications non enregistrées"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Annuler"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Redémarrer"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ne plus afficher"</string>
