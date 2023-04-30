@@ -231,9 +231,17 @@ public final class SoundTriggerInstrumentation {
          */
         public void setModelCallback(@NonNull @CallbackExecutor Executor executor, @NonNull
                 ModelCallback callback) {
+            Objects.requireNonNull(callback);
+            Objects.requireNonNull(executor);
             synchronized (SoundTriggerInstrumentation.this.mLock) {
-                mModelCallback = Objects.requireNonNull(callback);
-                mModelExecutor = Objects.requireNonNull(executor);
+                if (mModelCallback == null) {
+                    for (var droppedConsumer : mDroppedConsumerList) {
+                        executor.execute(() -> droppedConsumer.accept(callback));
+                    }
+                    mDroppedConsumerList.clear();
+                }
+                mModelCallback = callback;
+                mModelExecutor = executor;
             }
         }
 
@@ -267,9 +275,11 @@ public final class SoundTriggerInstrumentation {
 
         private void wrap(Consumer<ModelCallback> consumer) {
             synchronized (SoundTriggerInstrumentation.this.mLock) {
-                if (mModelCallback != null && mModelExecutor != null) {
+                if (mModelCallback != null) {
                     final ModelCallback callback = mModelCallback;
                     mModelExecutor.execute(() -> consumer.accept(callback));
+                } else {
+                    mDroppedConsumerList.add(consumer);
                 }
             }
         }
@@ -282,6 +292,8 @@ public final class SoundTriggerInstrumentation {
         private ModelCallback mModelCallback = null;
         @GuardedBy("SoundTriggerInstrumentation.this.mLock")
         private Executor mModelExecutor = null;
+        @GuardedBy("SoundTriggerInstrumentation.this.mLock")
+        private final List<Consumer<ModelCallback>> mDroppedConsumerList = new ArrayList<>();
     }
 
     /**
@@ -374,9 +386,18 @@ public final class SoundTriggerInstrumentation {
          */
         public void setRecognitionCallback(@NonNull @CallbackExecutor Executor executor,
                 @NonNull RecognitionCallback callback) {
+            Objects.requireNonNull(callback);
+            Objects.requireNonNull(executor);
             synchronized (SoundTriggerInstrumentation.this.mLock) {
+                if (mRecognitionCallback == null) {
+                    for (var droppedConsumer : mDroppedConsumerList) {
+                        executor.execute(() -> droppedConsumer.accept(callback));
+                    }
+                    mDroppedConsumerList.clear();
+                }
                 mRecognitionCallback = callback;
                 mRecognitionExecutor = executor;
+
             }
         }
 
@@ -401,9 +422,11 @@ public final class SoundTriggerInstrumentation {
 
         private void wrap(Consumer<RecognitionCallback> consumer) {
             synchronized (SoundTriggerInstrumentation.this.mLock) {
-                if (mRecognitionCallback != null && mRecognitionExecutor != null) {
+                if (mRecognitionCallback != null) {
                     final RecognitionCallback callback = mRecognitionCallback;
                     mRecognitionExecutor.execute(() -> consumer.accept(callback));
+                } else {
+                    mDroppedConsumerList.add(consumer);
                 }
             }
         }
@@ -416,6 +439,8 @@ public final class SoundTriggerInstrumentation {
         private Executor mRecognitionExecutor = null;
         @GuardedBy("SoundTriggerInstrumentation.this.mLock")
         private RecognitionCallback mRecognitionCallback = null;
+        @GuardedBy("SoundTriggerInstrumentation.this.mLock")
+        private final List<Consumer<RecognitionCallback>> mDroppedConsumerList = new ArrayList<>();
     }
 
     // Implementation of injection interface passed to the HAL.
