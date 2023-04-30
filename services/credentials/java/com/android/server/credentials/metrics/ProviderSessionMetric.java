@@ -72,7 +72,7 @@ public class ProviderSessionMetric {
         try {
             mCandidatePhasePerProviderMetric.setFrameworkException(exceptionType);
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during candidate exception metric logging: " + e);
         }
     }
 
@@ -101,7 +101,7 @@ public class ProviderSessionMetric {
                                 .getMetricCode());
             }
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during candidate update metric logging: " + e);
         }
     }
 
@@ -122,7 +122,7 @@ public class ProviderSessionMetric {
                     initMetric.getCredentialServiceStartedTimeNanoseconds());
             mCandidatePhasePerProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during candidate setup metric logging: " + e);
         }
     }
 
@@ -144,9 +144,8 @@ public class ProviderSessionMetric {
             } else {
                 Slog.i(TAG, "Your response type is unsupported for metric logging");
             }
-
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.i(TAG, "Unexpected error during candidate entry metric logging: " + e);
         }
     }
 

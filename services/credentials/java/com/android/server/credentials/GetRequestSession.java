@@ -72,7 +72,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
                 .createNewSession(mContext, mUserId, providerInfo,
                         this, remoteCredentialService);
         if (providerGetSession != null) {
-            Slog.d(TAG, "In startProviderSession - provider session created and "
+            Slog.i(TAG, "Provider session created and "
                     + "being added for: " + providerInfo.getComponentName());
             mProviders.put(providerGetSession.getComponentName().flattenToString(),
                     providerGetSession);
@@ -114,7 +114,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     @Override
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
-        Slog.d(TAG, "onFinalResponseReceived from: " + componentName.flattenToString());
+        Slog.i(TAG, "onFinalResponseReceived from: " + componentName.flattenToString());
         mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
         mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
                 mProviders.get(componentName.flattenToString())
@@ -158,7 +158,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     @Override
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName, ProviderSession.CredentialsSource source) {
-        Slog.d(TAG, "in onStatusChanged for: " + componentName + ", with status: "
+        Slog.i(TAG, "Status changed for: " + componentName + ", with status: "
                 + status + ", and source: " + source);
 
         // Auth entry was selected, and it did not have any underlying credentials
@@ -172,7 +172,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
             // or we need to respond with error. The only other case is the entry being
             // selected after the UI has been invoked which has a separate code path.
             if (isUiInvocationNeeded()) {
-                Slog.d(TAG, "in onProviderStatusChanged - isUiInvocationNeeded");
+                Slog.i(TAG, "Provider status changed - ui invocation is needed");
                 getProviderDataAndInitiateUi();
             } else {
                 respondToClientWithErrorAndFinish(GetCredentialException.TYPE_NO_CREDENTIAL,
