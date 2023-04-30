@@ -201,7 +201,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
     }
 
     protected void finishSession(boolean propagateCancellation) {
-        Slog.d(TAG, "finishing session with propagateCancellation " + propagateCancellation);
+        Slog.i(TAG, "finishing session with propagateCancellation " + propagateCancellation);
         if (propagateCancellation) {
             mProviders.values().forEach(ProviderSession::cancelProviderRemoteSession);
         }
@@ -265,7 +265,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
 
     @NonNull
     protected ArrayList<ProviderData> getProviderDataForUi() {
-        Slog.d(TAG, "In getProviderDataAndInitiateUi providers size: " + mProviders.size());
+        Slog.i(TAG, "For ui, provider data size: " + mProviders.size());
         ArrayList<ProviderData> providerDataList = new ArrayList<>();
         mRequestSessionMetric.logCandidatePhaseMetrics(mProviders);
 
