@@ -1148,12 +1148,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.userId = userId;
             info.installerPackageName = mInstallSource.mInstallerPackageName;
             info.installerAttributionTag = mInstallSource.mInstallerAttributionTag;
+            info.resolvedBaseCodePath = null;
             if (mContext.checkCallingOrSelfPermission(
                     Manifest.permission.READ_INSTALLED_SESSION_PATHS)
-                            == PackageManager.PERMISSION_GRANTED && mResolvedBaseFile != null) {
-                info.resolvedBaseCodePath = mResolvedBaseFile.getAbsolutePath();
-            } else {
-                info.resolvedBaseCodePath = null;
+                    == PackageManager.PERMISSION_GRANTED) {
+                File file = mResolvedBaseFile;
+                if (file == null) {
+                    // Try to guess mResolvedBaseFile file.
+                    final List<File> addedFiles = getAddedApksLocked();
+                    if (addedFiles.size() > 0) {
+                        file = addedFiles.get(0);
+                    }
+                }
+                if (file != null) {
+                    info.resolvedBaseCodePath = file.getAbsolutePath();
+                }
             }
             info.progress = progress;
             info.sealed = mSealed;
@@ -1355,9 +1364,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private String[] getStageDirContentsLocked() {
+        if (stageDir == null) {
+            return EmptyArray.STRING;
+        }
         String[] result = stageDir.list();
         if (result == null) {
-            result = EmptyArray.STRING;
+            return EmptyArray.STRING;
         }
         return result;
     }

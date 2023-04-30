@@ -3786,6 +3786,7 @@ package android.content.pm {
 
   public class PackageInstaller {
     method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull java.io.File, int) throws android.content.pm.PackageInstaller.PackageParsingException;
+    method @NonNull public android.content.pm.PackageInstaller.InstallInfo readInstallInfo(@NonNull android.os.ParcelFileDescriptor, @Nullable String, int) throws android.content.pm.PackageInstaller.PackageParsingException;
     method @RequiresPermission(android.Manifest.permission.INSTALL_PACKAGES) public void setPermissionsResult(int, boolean);
     field public static final String ACTION_CONFIRM_INSTALL = "android.content.pm.action.CONFIRM_INSTALL";
     field public static final String ACTION_CONFIRM_PRE_APPROVAL = "android.content.pm.action.CONFIRM_PRE_APPROVAL";
@@ -3806,6 +3807,7 @@ package android.content.pm {
 
   public static class PackageInstaller.InstallInfo {
     method public long calculateInstalledSize(@NonNull android.content.pm.PackageInstaller.SessionParams) throws java.io.IOException;
+    method public long calculateInstalledSize(@NonNull android.content.pm.PackageInstaller.SessionParams, @NonNull android.os.ParcelFileDescriptor) throws java.io.IOException;
     method public int getInstallLocation();
     method @NonNull public String getPackageName();
   }
