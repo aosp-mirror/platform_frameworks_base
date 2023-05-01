@@ -4281,6 +4281,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return false;
         }
 
+        if (mInlineSessionController.isImeShowing()) {
+            // IME is showing, fallback to normal suggestions UI
+            // Note: only work when inline suggestions supported
+            return false;
+        }
+
         synchronized (mLock) {
             if (mLastFillDialogTriggerIds == null
                     || !ArrayUtils.contains(mLastFillDialogTriggerIds, filledId)) {

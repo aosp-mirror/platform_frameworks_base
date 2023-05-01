@@ -1744,7 +1744,7 @@ public final class AutofillManager {
                     mForAugmentedAutofillOnly = false;
                 }
 
-                if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0 && view != null) {
+                if ((flags & FLAG_SUPPORTS_FILL_DIALOG) != 0) {
                     flags |= FLAG_RESET_FILL_DIALOG_STATE;
                 }
 
