@@ -48,6 +48,7 @@ import android.window.TransitionRequestInfo;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -97,7 +98,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         mMixers.remove(mixer);
     }
 
-    void startRecentsTransition(PendingIntent intent, Intent fillIn, Bundle options,
+    @VisibleForTesting
+    public IBinder startRecentsTransition(PendingIntent intent, Intent fillIn, Bundle options,
             IApplicationThread appThread, IRecentsAnimationRunner listener) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
                 "RecentsTransitionHandler.startRecentsTransition");
@@ -121,12 +123,13 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler {
         if (mixer != null) {
             mixer.setRecentsTransition(transition);
         }
-        if (transition == null) {
+        if (transition != null) {
+            controller.setTransition(transition);
+            mControllers.add(controller);
+        } else {
             controller.cancel("startRecentsTransition");
-            return;
         }
-        controller.setTransition(transition);
-        mControllers.add(controller);
+        return transition;
     }
 
     @Override
