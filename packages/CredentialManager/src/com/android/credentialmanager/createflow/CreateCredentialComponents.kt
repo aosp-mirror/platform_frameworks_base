@@ -465,7 +465,17 @@ fun ExternalOnlySelectionCard(
     SheetContainerCard {
         item { HeadlineIcon(imageVector = Icons.Outlined.QrCodeScanner) }
         item { Divider(thickness = 16.dp, color = Color.Transparent) }
-        item { HeadlineText(text = stringResource(R.string.create_passkey_in_other_device_title)) }
+        item {
+            HeadlineText(
+                text = stringResource(
+                    when (requestDisplayInfo.type) {
+                        CredentialType.PASSKEY -> R.string.create_passkey_in_other_device_title
+                        CredentialType.PASSWORD -> R.string.save_password_on_other_device_title
+                        else -> R.string.save_sign_in_on_other_device_title
+                    }
+                )
+            )
+        }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
         item {
             CredentialContainerCard {
