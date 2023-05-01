@@ -733,12 +733,16 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         super.dump(pw, args);
         if (DUMP_VERBOSE) {
             DumpUtilsKt.withIncreasedIndent(pw, () -> {
-                pw.println("mBackgroundNormal: " + mBackgroundNormal);
-                if (mBackgroundNormal != null) {
-                    DumpUtilsKt.withIncreasedIndent(pw, () -> {
-                        mBackgroundNormal.dump(pw, args);
-                    });
-                }
+                dumpBackgroundView(pw, args);
+            });
+        }
+    }
+
+    protected void dumpBackgroundView(IndentingPrintWriter pw, String[] args) {
+        pw.println("Background View: " + mBackgroundNormal);
+        if (DUMP_VERBOSE && mBackgroundNormal != null) {
+            DumpUtilsKt.withIncreasedIndent(pw, () -> {
+                mBackgroundNormal.dump(pw, args);
             });
         }
     }
