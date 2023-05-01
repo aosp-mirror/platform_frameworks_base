@@ -364,7 +364,12 @@ class UdfpsControllerOverlay @JvmOverloads constructor(
                 if (accessibilityManager.isTouchExplorationEnabled && isEnrollment) {
                     Rect(overlayParams.sensorBounds)
                 } else {
-                    Rect(overlayParams.overlayBounds)
+                    Rect(
+                        0,
+                        0,
+                        overlayParams.naturalDisplayWidth,
+                        overlayParams.naturalDisplayHeight
+                    )
                 }
             } else {
                 Rect(overlayParams.sensorBounds)
