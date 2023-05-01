@@ -28,11 +28,40 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Class responsible for holding specifications for {@link Mesh} creations. This class
- * generates a {@link MeshSpecification} via the Make method, where multiple parameters to set up
- * the mesh are supplied, including attributes, vertex stride, varyings, and
- * vertex/fragment shaders. There are also additional methods to provide an optional
- * {@link ColorSpace} as well as an alpha type.
+ * Class responsible for holding specifications for {@link Mesh} creations. This class generates a
+ * {@link MeshSpecification} via the
+ * {@link MeshSpecification#make(Attribute[], int, Varying[], String, String)} method,
+ * where multiple parameters to set up the mesh are supplied, including attributes, vertex stride,
+ * {@link Varying}, and vertex/fragment shaders. There are also additional methods to provide an
+ * optional {@link ColorSpace} as well as an alpha type.
+ *
+ * For example a vertex shader that leverages a {@link Varying} may look like the following:
+ *
+ * <pre>
+ *        Varyings main(const Attributes attributes) {
+ *             Varyings varyings;
+ *             varyings.position = attributes.position;
+ *             return varyings;
+ *        }
+ * </pre>
+ *
+ * The corresponding fragment shader that may consume the varying look like the following:
+ *
+ * <pre>
+ *      float2 main(const Varyings varyings, out float4 color) {
+ *             color = vec4(1.0, 0.0, 0.0, 1.0);
+ *             return varyings.position;
+ *      }
+ * </pre>
+ *
+ * The color returned from this fragment shader is blended with the other parameters that are
+ * configured on the Paint object (ex. {@link Paint#setBlendMode(BlendMode)} used to draw the mesh.
+ *
+ * The position returned in the fragment shader can be consumed by any following fragment shaders in
+ * the shader chain.
+ *
+ * See https://developer.android.com/develop/ui/views/graphics/agsl for more information
+ * regarding Android Graphics Shader Language.
  *
  * Note that there are several limitations on various mesh specifications:
  * 1. The max amount of attributes allowed is 8.
@@ -118,7 +147,11 @@ public class MeshSpecification {
     public static final int TYPE_UBYTE4 = 4;
 
     /**
-     * Data class to represent a single attribute in a shader.
+     * Data class to represent a single attribute in a shader. An attribute is a variable that
+     * accompanies a vertex, this can be a color or texture coordinates.
+     *
+     * See https://developer.android.com/develop/ui/views/graphics/agsl for more information
+     * regarding Android Graphics Shader Language.
      *
      * Note that offset is the offset in number of bytes. For example, if we had two attributes
      *
@@ -128,6 +161,10 @@ public class MeshSpecification {
      * </pre>
      *
      * att1 would have an offset of 0, while att2 would have an offset of 12 bytes.
+     *
+     * This is consumed as part of
+     * {@link MeshSpecification#make(Attribute[], int, Varying[], String, String, ColorSpace, int)}
+     * to create a {@link MeshSpecification} instance.
      */
     public static class Attribute {
         @Type
@@ -175,7 +212,15 @@ public class MeshSpecification {
     }
 
     /**
-     * Data class to represent a single varying variable.
+     * Data class to represent a single varying variable. A Varying variable can be altered by the
+     * vertex shader defined on the mesh but not by the fragment shader defined by AGSL.
+     *
+     * See https://developer.android.com/develop/ui/views/graphics/agsl for more information
+     * regarding Android Graphics Shader Language.
+     *
+     * This is consumed as part of
+     * {@link MeshSpecification#make(Attribute[], int, Varying[], String, String, ColorSpace, int)}
+     * to create a {@link MeshSpecification} instance.
      */
     public static class Varying {
         @Type
@@ -220,7 +265,7 @@ public class MeshSpecification {
 
     /**
      * Creates a {@link MeshSpecification} object for use within {@link Mesh}. This uses a default
-     * color space of {@link ColorSpace.Named#SRGB} and {@link AlphaType} of
+     * color space of {@link ColorSpace.Named#SRGB} and alphaType of
      * {@link #ALPHA_TYPE_PREMULTIPLIED}.
      *
      * @param attributes     list of attributes represented by {@link Attribute}. Can hold a max of
@@ -233,7 +278,11 @@ public class MeshSpecification {
      *                       the 6 varyings allowed.
      * @param vertexShader   vertex shader to be supplied to the mesh. Ensure that the position
      *                       varying is set within the shader to get proper results.
+     *                       See {@link MeshSpecification} for an example vertex shader
+     *                       implementation
      * @param fragmentShader fragment shader to be supplied to the mesh.
+     *                       See {@link MeshSpecification} for an example fragment shader
+     *                       implementation
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
     @NonNull
@@ -253,7 +302,7 @@ public class MeshSpecification {
     }
 
     /**
-     * Creates a {@link MeshSpecification} object.  This uses a default {@link AlphaType} of
+     * Creates a {@link MeshSpecification} object.  This uses a default alphaType of
      * {@link #ALPHA_TYPE_PREMULTIPLIED}.
      *
      * @param attributes     list of attributes represented by {@link Attribute}. Can hold a max of
@@ -266,7 +315,11 @@ public class MeshSpecification {
      *                       the 6 varyings allowed.
      * @param vertexShader   vertex shader to be supplied to the mesh. Ensure that the position
      *                       varying is set within the shader to get proper results.
+     *                       See {@link MeshSpecification} for an example vertex shader
+     *                       implementation
      * @param fragmentShader fragment shader to be supplied to the mesh.
+     *                       See {@link MeshSpecification} for an example fragment shader
+     *                       implementation
      * @param colorSpace     {@link ColorSpace} to tell what color space to work in.
      * @return {@link MeshSpecification} object for use when creating {@link Mesh}
      */
@@ -301,7 +354,11 @@ public class MeshSpecification {
      *                       the 6 varyings allowed.
      * @param vertexShader   vertex shader to be supplied to the mesh. Ensure that the position
      *                       varying is set within the shader to get proper results.
+     *                       See {@link MeshSpecification} for an example vertex shader
+     *                       implementation
      * @param fragmentShader fragment shader to be supplied to the mesh.
+     *                       See {@link MeshSpecification} for an example fragment shader
+     *                       implementation
      * @param colorSpace     {@link ColorSpace} to tell what color space to work in.
      * @param alphaType      Describes how to interpret the alpha component for a pixel. Must be
      *                       one of
