@@ -143,6 +143,12 @@ class BroadcastProcessQueue {
     private int mActiveCountSinceIdle;
 
     /**
+     * Count of {@link #mActive} broadcasts with assumed delivery that have been dispatched
+     * since this queue was last idle.
+     */
+    private int mActiveAssumedDeliveryCountSinceIdle;
+
+    /**
      * Flag indicating that the currently active broadcast is being dispatched
      * was scheduled via a cold start.
      */
@@ -499,6 +505,14 @@ class BroadcastProcessQueue {
         return mActiveCountSinceIdle;
     }
 
+    /**
+     * Count of {@link #mActive} broadcasts with assumed delivery that have been dispatched
+     * since this queue was last idle.
+     */
+    public int getActiveAssumedDeliveryCountSinceIdle() {
+        return mActiveAssumedDeliveryCountSinceIdle;
+    }
+
     public void setActiveViaColdStart(boolean activeViaColdStart) {
         mActiveViaColdStart = activeViaColdStart;
     }
@@ -532,6 +546,8 @@ class BroadcastProcessQueue {
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
         mActiveCountSinceIdle++;
+        mActiveAssumedDeliveryCountSinceIdle +=
+                (mActive.isAssumedDelivered(mActiveIndex) ? 1 : 0);
         mActiveViaColdStart = false;
         mActiveWasStopped = false;
         next.recycle();
@@ -545,6 +561,7 @@ class BroadcastProcessQueue {
         mActive = null;
         mActiveIndex = 0;
         mActiveCountSinceIdle = 0;
+        mActiveAssumedDeliveryCountSinceIdle = 0;
         mActiveViaColdStart = false;
         invalidateRunnableAt();
     }
@@ -1309,6 +1326,7 @@ class BroadcastProcessQueue {
         pw.print(" m:"); pw.print(mCountManifest);
 
         pw.print(" csi:"); pw.print(mActiveCountSinceIdle);
+        pw.print(" adcsi:"); pw.print(mActiveAssumedDeliveryCountSinceIdle);
         pw.print(" ccu:"); pw.print(mActiveCountConsecutiveUrgent);
         pw.print(" ccn:"); pw.print(mActiveCountConsecutiveNormal);
         pw.println();
