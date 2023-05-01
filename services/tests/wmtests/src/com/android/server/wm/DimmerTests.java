@@ -36,6 +36,7 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
 import com.android.server.wm.SurfaceAnimator.AnimationType;
+import com.android.server.testutils.StubTransaction;
 
 import org.junit.Before;
 import org.junit.Test;
