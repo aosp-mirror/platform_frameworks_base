@@ -81,7 +81,7 @@ public class CrossDeviceSyncControllerTest {
 
     @Test
     public void processTelecomDataFromSync_createCallUpdateMessage_hasCalls() {
-        when(mMockCrossDeviceCall.getId()).thenReturn(5L);
+        when(mMockCrossDeviceCall.getId()).thenReturn("123abc");
         final String callerId = "Firstname Lastname";
         when(mMockCrossDeviceCall.getReadableCallerId(anyBoolean())).thenReturn(callerId);
         final String appName = "AppName";
@@ -90,9 +90,9 @@ public class CrossDeviceSyncControllerTest {
         when(mMockCrossDeviceCall.getCallingAppIcon()).thenReturn(appIcon.getBytes());
         when(mMockCrossDeviceCall.getStatus()).thenReturn(android.companion.Telecom.Call.RINGING);
         final Set<Integer> controls = Set.of(
-                android.companion.Telecom.Call.ACCEPT,
-                android.companion.Telecom.Call.REJECT,
-                android.companion.Telecom.Call.SILENCE);
+                android.companion.Telecom.ACCEPT,
+                android.companion.Telecom.REJECT,
+                android.companion.Telecom.SILENCE);
         when(mMockCrossDeviceCall.getControls()).thenReturn(controls);
         final byte[] data = mCrossDeviceSyncController.createCallUpdateMessage(
                 new HashSet<>(List.of(mMockCrossDeviceCall)),
@@ -103,35 +103,33 @@ public class CrossDeviceSyncControllerTest {
                 callMetadataSyncData.getCalls()).hasSize(1);
         final CallMetadataSyncData.Call call =
                 callMetadataSyncData.getCalls().stream().findAny().orElseThrow();
-        assertWithMessage("Wrong id").that(call.getId()).isEqualTo(5L);
+        assertWithMessage("Wrong id").that(call.getId()).isEqualTo("123abc");
         assertWithMessage("Wrong app icon").that(new String(call.getAppIcon())).isEqualTo(appIcon);
         assertWithMessage("Wrong app name").that(call.getAppName()).isEqualTo(appName);
         assertWithMessage("Wrong caller id").that(call.getCallerId()).isEqualTo(callerId);
         assertWithMessage("Wrong status").that(call.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.RINGING);
         assertWithMessage("Wrong controls").that(call.getControls()).isEqualTo(controls);
-        assertWithMessage("Unexpectedly has requests").that(
-                callMetadataSyncData.getRequests()).isEmpty();
     }
 
     @Test
     public void processTelecomDataFromMessage_createCallControlMessage_hasCallControlRequest() {
         final byte[] data = CrossDeviceSyncController.createCallControlMessage(
-                /* callId= */ 5L, /* status= */ android.companion.Telecom.Call.ACCEPT);
+                /* callId= */ "123abc", /* status= */ android.companion.Telecom.ACCEPT);
         final CallMetadataSyncData callMetadataSyncData =
                 mCrossDeviceSyncController.processTelecomDataFromSync(data);
         assertWithMessage("Wrong number of requests").that(
                 callMetadataSyncData.getRequests()).hasSize(1);
         final CallMetadataSyncData.Call call =
                 callMetadataSyncData.getRequests().stream().findAny().orElseThrow();
-        assertWithMessage("Wrong id").that(call.getId()).isEqualTo(5L);
+        assertWithMessage("Wrong id").that(call.getId()).isEqualTo("123abc");
         assertWithMessage("Wrong app icon").that(call.getAppIcon()).isNull();
         assertWithMessage("Wrong app name").that(call.getAppName()).isNull();
         assertWithMessage("Wrong caller id").that(call.getCallerId()).isNull();
         assertWithMessage("Wrong status").that(call.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.UNKNOWN_STATUS);
         assertWithMessage("Wrong controls").that(call.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.ACCEPT));
+                .isEqualTo(Set.of(android.companion.Telecom.ACCEPT));
         assertWithMessage("Unexpectedly has active calls").that(
                 callMetadataSyncData.getCalls()).isEmpty();
     }
