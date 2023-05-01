@@ -16,9 +16,11 @@
 
 package com.android.server.credentials.metrics;
 
+import static com.android.server.credentials.MetricUtilities.DEFAULT_INT_32;
 import static com.android.server.credentials.MetricUtilities.DELTA_EXCEPTION_CUT;
 import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
+import static com.android.server.credentials.MetricUtilities.logApiCalledAuthenticationMetric;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidateGetMetric;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPhase;
@@ -100,8 +102,6 @@ public class RequestSessionMetric {
      * @param timestampStarted the timestamp the service begins at
      * @param mCallingUid      the calling process's uid
      * @param metricCode       typically pulled from {@link ApiName}
-     * @param callingAppFlowUniqueInt the unique integer used as the session id for the calling app
-     *                                known flow
      */
     public void collectInitialPhaseMetricInfo(long timestampStarted,
             int mCallingUid, int metricCode) {
@@ -214,7 +214,8 @@ public class RequestSessionMetric {
 
     /**
      * During browsing, where multiple entries can be selected, this collects the browsing phase
-     * metric information.
+     * metric information. This is emitted together with the final phase, and the recursive path
+     * with authentication entries, which may occur in rare circumstances, are captured.
      *
      * @param selection                   contains the selected entry key type
      * @param selectedProviderPhaseMetric contains the utility information of the selected provider
@@ -359,6 +360,26 @@ public class RequestSessionMetric {
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during aggregate candidate logging " + e);
         }
+    }
+
+    /**
+     * This logs the authentication entry when browsed. Combined with the known browsed clicks
+     * in the {@link ChosenProviderFinalPhaseMetric}, this fully captures the authentication entry
+     * logic for multiple loops.
+     *
+     * @param browsedAuthenticationMetric the authentication metric information to emit
+     */
+    public void logAuthEntry(BrowsedAuthenticationMetric browsedAuthenticationMetric) {
+        try {
+            if (browsedAuthenticationMetric.getProviderUid() == DEFAULT_INT_32) {
+                Slog.v(TAG, "An authentication entry was not clicked");
+                return;
+            }
+            logApiCalledAuthenticationMetric(browsedAuthenticationMetric, ++mSequenceCounter);
+        } catch (Exception e) {
+            Slog.i(TAG, "Unexpected error during metric logging: " + e);
+        }
+
     }
 
     /**

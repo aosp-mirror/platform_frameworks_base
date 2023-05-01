@@ -195,10 +195,37 @@ public class MetricUtilities {
      * This emits the authentication entry metrics for track 2, where the provider uid is known.
      *
      * @param authenticationMetric the authentication metric collection to emit with
+     * @param emitSequenceId       an emitted sequence id for the current session
      */
     public static void logApiCalledAuthenticationMetric(
-            BrowsedAuthenticationMetric authenticationMetric) {
-        // TODO(immediately) - Add in this emit
+            BrowsedAuthenticationMetric authenticationMetric,
+            int emitSequenceId) {
+        try {
+            if (!LOG_FLAG) {
+                return;
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_AUTH_CLICK_REPORTED,
+                    /* session_id */ authenticationMetric.getSessionIdProvider(),
+                    /* sequence_num */ emitSequenceId,
+                    /* chosen_provider_uid */ authenticationMetric.getProviderUid(),
+                    /* unique_response_classtypes */
+                    authenticationMetric.getAuthEntryCollective().getUniqueResponseStrings(),
+                    /* per_classtype_counts */
+                    authenticationMetric.getAuthEntryCollective().getUniqueResponseCounts(),
+                    /* unique_entries */
+                    authenticationMetric.getAuthEntryCollective().getUniqueEntries(),
+                    /* auth_per_entry_counts */
+                    authenticationMetric.getAuthEntryCollective().getUniqueEntryCounts(),
+                    /* framework_exception_unique_classtype */
+                    DEFAULT_STRING,
+                    /* exception_specified */ false,
+                    /* auth_provider_status TODO(immediately) change */ DEFAULT_INT_32,
+                    /* query_returned */
+                    false
+            );
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during candidate get metric logging: " + e);
+        }
     }
 
     /**
@@ -214,7 +241,10 @@ public class MetricUtilities {
     public static void logApiCalledCandidateGetMetric(Map<String, ProviderSession> providers,
             int emitSequenceId) {
         try {
-            // TODO(b/future) - Switch to Log format
+            // TODO(b/274954697) : To queue format in future optimizations (metrics POC support)
+            if (!LOG_FLAG) {
+                return;
+            }
             var sessions = providers.values();
             for (var session : sessions) {
                 try {
@@ -411,56 +441,57 @@ public class MetricUtilities {
             int sequenceNum) {
         try {
             if (!LOG_FLAG) {
-                FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_TOTAL_REPORTED,
-                        /*session_id*/ candidateAggregateMetric.getSessionIdProvider(),
-                        /*sequence_num*/ sequenceNum,
-                        /*query_returned*/ candidateAggregateMetric.isQueryReturned(),
-                        /*num_query_providers*/ candidateAggregateMetric.getNumProviders(),
-                        /*min_query_start_timestamp_microseconds*/
-                        DEFAULT_INT_32,
-                        /*max_query_end_timestamp_microseconds*/
-                        DEFAULT_INT_32,
-                        /*query_response_unique_classtypes*/
-                        candidateAggregateMetric.getAggregateCollectiveQuery()
-                                .getUniqueResponseStrings(),
-                        /*query_per_classtype_counts*/
-                        candidateAggregateMetric.getAggregateCollectiveQuery()
-                                .getUniqueResponseCounts(),
-                        /*query_unique_entries*/
-                        candidateAggregateMetric.getAggregateCollectiveQuery()
-                                .getUniqueEntries(),
-                        /*query_per_entry_counts*/
-                        candidateAggregateMetric.getAggregateCollectiveQuery()
-                                .getUniqueEntryCounts(),
-                        /*query_total_candidate_failure*/
-                        DEFAULT_INT_32,
-                        /*query_framework_exception_unique_classtypes*/
-                        DEFAULT_REPEATED_STR,
-                        /*query_per_exception_classtype_counts*/
-                        DEFAULT_REPEATED_INT_32,
-                        /*auth_response_unique_classtypes*/
-                        candidateAggregateMetric.getAggregateCollectiveAuth()
-                                .getUniqueResponseStrings(),
-                        /*auth_per_classtype_counts*/
-                        candidateAggregateMetric.getAggregateCollectiveAuth()
-                                .getUniqueResponseCounts(),
-                        /*auth_unique_entries*/
-                        candidateAggregateMetric.getAggregateCollectiveAuth()
-                                .getUniqueEntries(),
-                        /*auth_per_entry_counts*/
-                        candidateAggregateMetric.getAggregateCollectiveAuth()
-                                .getUniqueEntryCounts(),
-                        /*auth_total_candidate_failure*/
-                        DEFAULT_INT_32,
-                        /*auth_framework_exception_unique_classtypes*/
-                        DEFAULT_REPEATED_STR,
-                        /*auth_per_exception_classtype_counts*/
-                        DEFAULT_REPEATED_INT_32,
-                        /*num_auth_clicks*/
-                        candidateAggregateMetric.getNumAuthEntriesTapped(),
-                        /*auth_returned*/ false
-                );
+                return;
             }
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_TOTAL_REPORTED,
+                    /*session_id*/ candidateAggregateMetric.getSessionIdProvider(),
+                    /*sequence_num*/ sequenceNum,
+                    /*query_returned*/ candidateAggregateMetric.isQueryReturned(),
+                    /*num_query_providers*/ candidateAggregateMetric.getNumProviders(),
+                    /*min_query_start_timestamp_microseconds*/
+                    DEFAULT_INT_32,
+                    /*max_query_end_timestamp_microseconds*/
+                    DEFAULT_INT_32,
+                    /*query_response_unique_classtypes*/
+                    candidateAggregateMetric.getAggregateCollectiveQuery()
+                            .getUniqueResponseStrings(),
+                    /*query_per_classtype_counts*/
+                    candidateAggregateMetric.getAggregateCollectiveQuery()
+                            .getUniqueResponseCounts(),
+                    /*query_unique_entries*/
+                    candidateAggregateMetric.getAggregateCollectiveQuery()
+                            .getUniqueEntries(),
+                    /*query_per_entry_counts*/
+                    candidateAggregateMetric.getAggregateCollectiveQuery()
+                            .getUniqueEntryCounts(),
+                    /*query_total_candidate_failure*/
+                    DEFAULT_INT_32,
+                    /*query_framework_exception_unique_classtypes*/
+                    DEFAULT_REPEATED_STR,
+                    /*query_per_exception_classtype_counts*/
+                    DEFAULT_REPEATED_INT_32,
+                    /*auth_response_unique_classtypes*/
+                    candidateAggregateMetric.getAggregateCollectiveAuth()
+                            .getUniqueResponseStrings(),
+                    /*auth_per_classtype_counts*/
+                    candidateAggregateMetric.getAggregateCollectiveAuth()
+                            .getUniqueResponseCounts(),
+                    /*auth_unique_entries*/
+                    candidateAggregateMetric.getAggregateCollectiveAuth()
+                            .getUniqueEntries(),
+                    /*auth_per_entry_counts*/
+                    candidateAggregateMetric.getAggregateCollectiveAuth()
+                            .getUniqueEntryCounts(),
+                    /*auth_total_candidate_failure*/
+                    DEFAULT_INT_32,
+                    /*auth_framework_exception_unique_classtypes*/
+                    DEFAULT_REPEATED_STR,
+                    /*auth_per_exception_classtype_counts*/
+                    DEFAULT_REPEATED_INT_32,
+                    /*num_auth_clicks*/
+                    candidateAggregateMetric.getNumAuthEntriesTapped(),
+                    /*auth_returned*/ false
+            );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
