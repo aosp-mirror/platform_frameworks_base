@@ -148,10 +148,11 @@ public class InstallStart extends Activity {
                 // [IMPORTANT] This path is deprecated, but should still work. Only necessary
                 // features should be added.
 
-                // Copy file to prevent it from being changed underneath this process
+                // Stage a session with this file to prevent it from being changed underneath
+                // this process.
                 nextActivity.setClass(this, InstallStaging.class);
-            } else if (packageUri != null && packageUri.getScheme().equals(
-                    PackageInstallerActivity.SCHEME_PACKAGE)) {
+            } else if (packageUri != null && PackageInstallerActivity.SCHEME_PACKAGE.equals(
+                    packageUri.getScheme())) {
                 nextActivity.setClass(this, PackageInstallerActivity.class);
             } else {
                 Intent result = new Intent();
