@@ -599,8 +599,8 @@ public final class SystemServer implements Dumpable {
      * Spawn a thread that monitors for fd leaks.
      */
     private static void spawnFdLeakCheckThread() {
-        final int enableThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ENABLE_THRESHOLD, 1024);
-        final int abortThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ABORT_THRESHOLD, 2048);
+        final int enableThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ENABLE_THRESHOLD, 1600);
+        final int abortThreshold = SystemProperties.getInt(SYSPROP_FDTRACK_ABORT_THRESHOLD, 3000);
         final int checkInterval = SystemProperties.getInt(SYSPROP_FDTRACK_INTERVAL, 120);
 
         new Thread(() -> {
