@@ -343,7 +343,7 @@ TEST_F(PointerControllerWindowInfoListenerTest,
         localListenerCopy = registeredListener;
     }
     EXPECT_EQ(nullptr, registeredListener) << "WindowInfosListener was not unregistered";
-    localListenerCopy->onWindowInfosChanged({}, {});
+    localListenerCopy->onWindowInfosChanged({{}, {}, 0, 0});
 }
 
 }  // namespace android
