@@ -22,12 +22,14 @@ import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 import android.annotation.NonNull;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.BeginGetCredentialResponse;
+import android.service.credentials.CredentialEntry;
 import android.util.Slog;
 
 import com.android.server.credentials.MetricUtilities;
 import com.android.server.credentials.metrics.shared.ResponseCollective;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -147,6 +149,33 @@ public class ProviderSessionMetric {
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during candidate entry metric logging: " + e);
         }
+    }
+
+    /**
+     * Once entries are received from the registry, this helps collect their info for metric
+     * purposes.
+     *
+     * @param entries contains matching entries from the Credential Registry.
+     */
+    public void collectCandidateEntryMetrics(List<CredentialEntry> entries) {
+        int numCredEntries = entries.size();
+        int numRemoteEntry = MetricUtilities.ZERO;
+        int numActionEntries = MetricUtilities.ZERO;
+        int numAuthEntries = MetricUtilities.ZERO;
+        Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
+        Map<String, Integer> responseCounts = new LinkedHashMap<>();
+        entryCounts.put(EntryEnum.REMOTE_ENTRY, numRemoteEntry);
+        entryCounts.put(EntryEnum.CREDENTIAL_ENTRY, numCredEntries);
+        entryCounts.put(EntryEnum.ACTION_ENTRY, numActionEntries);
+        entryCounts.put(EntryEnum.AUTHENTICATION_ENTRY, numAuthEntries);
+
+        entries.forEach(entry -> {
+            String entryKey = generateMetricKey(entry.getType(), DELTA_CUT);
+            responseCounts.put(entryKey, responseCounts.getOrDefault(entryKey, 0) + 1);
+        });
+
+        ResponseCollective responseCollective = new ResponseCollective(responseCounts, entryCounts);
+        mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
     }
 
     private void beginCreateCredentialResponseCollectionCandidateEntryMetrics(
