@@ -42,14 +42,14 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel.DEBUG
 import com.android.systemui.log.dagger.KeyguardLargeClockLog
 import com.android.systemui.log.dagger.KeyguardSmallClockLog
 import com.android.systemui.plugins.ClockController
 import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockTickRate
 import com.android.systemui.plugins.WeatherData
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel.DEBUG
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback

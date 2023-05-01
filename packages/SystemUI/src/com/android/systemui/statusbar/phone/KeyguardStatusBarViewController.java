@@ -45,7 +45,7 @@ import com.android.systemui.R;
 import com.android.systemui.animation.InterpolatorsAndroidX;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.plugins.log.LogLevel;
+import com.android.systemui.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.CommandQueue;
