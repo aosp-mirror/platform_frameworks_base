@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.systemui.doze.util
+package com.android.systemui.common.ui.data.repository
 
-import javax.inject.Inject
+import dagger.Binds
+import dagger.Module
 
-/** Injectable wrapper around `BurnInHelper` functions */
-class BurnInHelperWrapper @Inject constructor() {
-
-    fun burnInOffset(amplitude: Int, xAxis: Boolean): Int {
-        return getBurnInOffset(amplitude, xAxis)
-    }
-
-    fun burnInProgressOffset(): Float {
-        return getBurnInProgressOffset()
-    }
+@Module
+interface CommonRepositoryModule {
+    @Binds fun bindRepository(impl: ConfigurationRepositoryImpl): ConfigurationRepository
 }
