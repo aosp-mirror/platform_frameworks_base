@@ -256,6 +256,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
 
     @Override
     protected void invokeSession() {
+        startCandidateMetrics();
         mProviderResponse = mCredentialDescriptionRegistry
                 .getFilteredResultForProvider(mCredentialProviderPackageName,
                         mElementKeys);
@@ -266,7 +267,7 @@ public class ProviderRegistryGetSession extends ProviderSession<CredentialOption
                 .collect(Collectors.toList());
         updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
                 /*source=*/ CredentialsSource.REGISTRY);
-        // TODO(b/273353677) : metric should be emitted similarly to sibling classes
+        mProviderSessionMetric.collectCandidateEntryMetrics(mCredentialEntries);
     }
 
     @Nullable
