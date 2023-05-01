@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.ui.preview
 
+import android.annotation.ColorInt
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -85,6 +86,7 @@ constructor(
 
     private var clockView: View? = null
     private var smartSpaceView: View? = null
+    private var colorOverride: Int? = null
 
     private val disposables = mutableSetOf<DisposableHandle>()
     private var isDestroyed = false
@@ -168,6 +170,14 @@ constructor(
     fun hideSmartspace(hide: Boolean) {
         runBlocking(mainDispatcher) {
             smartSpaceView?.visibility = if (hide) View.INVISIBLE else View.VISIBLE
+        }
+    }
+
+    /** Sets the clock's color to the overridden seed color. */
+    fun onColorOverridden(@ColorInt color: Int?) {
+        runBlocking(mainDispatcher) {
+            colorOverride = color
+            clockController.clock?.run { events.onSeedColorChanged(color) }
         }
     }
 
@@ -288,8 +298,10 @@ constructor(
         val receiver =
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    clockController.clock?.smallClock?.events?.onTimeTick()
-                    clockController.clock?.largeClock?.events?.onTimeTick()
+                    clockController.clock?.run {
+                        smallClock.events.onTimeTick()
+                        largeClock.events.onTimeTick()
+                    }
                 }
             }
         broadcastDispatcher.registerReceiver(
@@ -305,18 +317,18 @@ constructor(
     }
 
     private fun onClockChanged(parentView: ViewGroup) {
-        clockController.clock = clockRegistry.createCurrentClock()
+        val clock = clockRegistry.createCurrentClock()
+        clockController.clock = clock
 
+        colorOverride?.let { clock.events.onSeedColorChanged(it) }
         if (!shouldHideClock) {
-            val largeClock = clockController.clock?.largeClock
-
-            largeClock
-                ?.events
-                ?.onTargetRegionChanged(KeyguardClockSwitch.getLargeClockRegion(parentView))
+            clock.largeClock.events.onTargetRegionChanged(
+                KeyguardClockSwitch.getLargeClockRegion(parentView)
+            )
 
             clockView?.let { parentView.removeView(it) }
             clockView =
-                largeClock?.view?.apply {
+                clock.largeClock.view.apply {
                     if (shouldHighlightSelectedAffordance) {
                         alpha = DIM_ALPHA
                     }
@@ -329,7 +341,7 @@ constructor(
 
         // Hide smart space if the clock has weather display; otherwise show it
         val hasCustomWeatherDataDisplay =
-            clockController.clock?.largeClock?.config?.hasCustomWeatherDataDisplay == true
+            clock.largeClock.config.hasCustomWeatherDataDisplay == true
         hideSmartspace(hasCustomWeatherDataDisplay)
     }
 

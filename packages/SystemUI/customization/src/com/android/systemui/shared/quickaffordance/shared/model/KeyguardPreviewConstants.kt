@@ -20,6 +20,8 @@ package com.android.systemui.shared.quickaffordance.shared.model
 object KeyguardPreviewConstants {
     const val MESSAGE_ID_HIDE_SMART_SPACE = 1111
     const val KEY_HIDE_SMART_SPACE = "hide_smart_space"
+    const val MESSAGE_ID_COLOR_OVERRIDE = 1234
+    const val KEY_COLOR_OVERRIDE = "color_override" // ColorInt Encoded as string
     const val MESSAGE_ID_SLOT_SELECTED = 1337
     const val KEY_SLOT_ID = "slot_id"
     const val KEY_INITIALLY_SELECTED_SLOT_ID = "initially_selected_slot_id"

@@ -115,16 +115,21 @@ constructor(
 
             when (message.what) {
                 KeyguardPreviewConstants.MESSAGE_ID_SLOT_SELECTED -> {
-                    message.data
-                        .getString(
-                            KeyguardPreviewConstants.KEY_SLOT_ID,
-                        )
-                        ?.let { slotId -> renderer.onSlotSelected(slotId = slotId) }
+                    message.data.getString(KeyguardPreviewConstants.KEY_SLOT_ID)?.let { slotId ->
+                        renderer.onSlotSelected(slotId = slotId)
+                    }
                 }
                 KeyguardPreviewConstants.MESSAGE_ID_HIDE_SMART_SPACE -> {
-                    message.data
-                        .getBoolean(KeyguardPreviewConstants.KEY_HIDE_SMART_SPACE)
-                        .let { hide -> renderer.hideSmartspace(hide) }
+                    renderer.hideSmartspace(
+                        message.data.getBoolean(KeyguardPreviewConstants.KEY_HIDE_SMART_SPACE)
+                    )
+                }
+                KeyguardPreviewConstants.MESSAGE_ID_COLOR_OVERRIDE -> {
+                    renderer.onColorOverridden(
+                        message.data
+                            .getString(KeyguardPreviewConstants.KEY_COLOR_OVERRIDE)
+                            ?.toIntOrNull()
+                    )
                 }
                 else -> requestDestruction(this)
             }
