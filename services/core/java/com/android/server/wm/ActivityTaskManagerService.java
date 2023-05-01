@@ -5753,23 +5753,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
                 BackgroundStartPrivileges backgroundStartPrivileges) {
             assertPackageMatchesCallingUid(callingPackage);
-            // A quick path (skip general intent/task resolving) to start recents animation if the
-            // recents (or home) activity is available in background.
-            if (options != null && options.getOriginalOptions() != null
-                    && options.getOriginalOptions().getTransientLaunch() && isCallerRecents(uid)) {
-                try {
-                    synchronized (mGlobalLock) {
-                        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "startExistingRecents");
-                        if (mActivityStartController.startExistingRecentsIfPossible(
-                                intent, options.getOriginalOptions())) {
-                            return ActivityManager.START_TASK_TO_FRONT;
-                        }
-                        // Else follow the standard launch procedure.
-                    }
-                } finally {
-                    Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-                }
-            }
             return getActivityStartController().startActivityInPackage(uid, realCallingPid,
                     realCallingUid, callingPackage, callingFeatureId, intent, resolvedType,
                     resultTo, resultWho, requestCode, startFlags, options, userId, inTask,
