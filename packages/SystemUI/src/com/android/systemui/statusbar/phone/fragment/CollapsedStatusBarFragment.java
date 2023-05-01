@@ -14,11 +14,7 @@
 
 package com.android.systemui.statusbar.phone.fragment;
 
-import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
-import static android.app.StatusBarManager.DISABLE_CLOCK;
-import static android.app.StatusBarManager.DISABLE_NOTIFICATION_ICONS;
-import static android.app.StatusBarManager.DISABLE_ONGOING_CALL_CHIP;
-import static android.app.StatusBarManager.DISABLE_SYSTEM_INFO;
+
 
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.IDLE;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.SHOWING_PERSISTENT_DOT;
@@ -112,8 +108,13 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private View mClockView;
     private View mOngoingCallChip;
     private View mNotificationIconAreaInner;
-    private int mDisabled1;
-    private int mDisabled2;
+    // Visibilities come in from external system callers via disable flags, but we also sometimes
+    // modify the visibilities internally. We need to store both so that we don't accidentally
+    // propagate our internally modified flags for too long.
+    private StatusBarVisibilityModel mLastSystemVisibility =
+            StatusBarVisibilityModel.createDefaultModel();
+    private StatusBarVisibilityModel mLastModifiedVisibility =
+            StatusBarVisibilityModel.createDefaultModel();
     private DarkIconManager mDarkIconManager;
     private final StatusBarFragmentComponent.Factory mStatusBarFragmentComponentFactory;
     private final CommandQueue mCommandQueue;
@@ -141,7 +142,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final OngoingCallListener mOngoingCallListener = new OngoingCallListener() {
         @Override
         public void onOngoingCallStateChanged(boolean animate) {
-            disable(getContext().getDisplayId(), mDisabled1, mDisabled2, animate);
+            updateStatusBarVisibilities(animate);
         }
     };
     private OperatorNameViewController mOperatorNameViewController;
@@ -388,8 +389,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         }
         notificationIconArea.addView(mNotificationIconAreaInner);
 
-        // #disable should have already been called, so use the disable values to set visibility.
-        updateNotificationIconAreaAndCallChip(mDisabled1, false);
+        updateNotificationIconAreaAndCallChip(/* animate= */ false);
     }
 
     /**
@@ -408,49 +408,50 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         if (displayId != getContext().getDisplayId()) {
             return;
         }
+        mCollapsedStatusBarFragmentLogger
+                .logDisableFlagChange(new DisableState(state1, state2));
+        mLastSystemVisibility =
+                StatusBarVisibilityModel.createModelFromFlags(state1, state2);
+        updateStatusBarVisibilities(animate);
+    }
 
-        int state1BeforeAdjustment = state1;
-        state1 = adjustDisableFlags(state1);
+    private void updateStatusBarVisibilities(boolean animate) {
+        StatusBarVisibilityModel previousModel = mLastModifiedVisibility;
+        StatusBarVisibilityModel newModel = calculateInternalModel(mLastSystemVisibility);
+        mCollapsedStatusBarFragmentLogger.logVisibilityModel(newModel);
+        mLastModifiedVisibility = newModel;
 
-        mCollapsedStatusBarFragmentLogger.logDisableFlagChange(
-                /* new= */ new DisableState(state1BeforeAdjustment, state2),
-                /* newAfterLocalModification= */ new DisableState(state1, state2));
-
-        final int old1 = mDisabled1;
-        final int diff1 = state1 ^ old1;
-        final int old2 = mDisabled2;
-        final int diff2 = state2 ^ old2;
-        mDisabled1 = state1;
-        mDisabled2 = state2;
-        if ((diff1 & DISABLE_SYSTEM_INFO) != 0 || ((diff2 & DISABLE2_SYSTEM_ICONS) != 0)) {
-            if ((state1 & DISABLE_SYSTEM_INFO) != 0 || ((state2 & DISABLE2_SYSTEM_ICONS) != 0)) {
-                hideEndSideContent(animate);
-                hideOperatorName(animate);
-            } else {
+        if (newModel.getShowSystemInfo() != previousModel.getShowSystemInfo()) {
+            if (newModel.getShowSystemInfo()) {
                 showEndSideContent(animate);
                 showOperatorName(animate);
+            } else {
+                hideEndSideContent(animate);
+                hideOperatorName(animate);
             }
         }
 
         // The ongoing call chip and notification icon visibilities are intertwined, so update both
         // if either change.
-        if (((diff1 & DISABLE_ONGOING_CALL_CHIP) != 0)
-                || ((diff1 & DISABLE_NOTIFICATION_ICONS) != 0)) {
-            updateNotificationIconAreaAndCallChip(state1, animate);
+        if (newModel.getShowNotificationIcons() != previousModel.getShowNotificationIcons()
+                || newModel.getShowOngoingCallChip() != previousModel.getShowOngoingCallChip()) {
+            updateNotificationIconAreaAndCallChip(animate);
         }
 
         // The clock may have already been hidden, but we might want to shift its
         // visibility to GONE from INVISIBLE or vice versa
-        if ((diff1 & DISABLE_CLOCK) != 0 || mClockView.getVisibility() != clockHiddenMode()) {
-            if ((state1 & DISABLE_CLOCK) != 0) {
-                hideClock(animate);
-            } else {
+        if (newModel.getShowClock() != previousModel.getShowClock()
+                || mClockView.getVisibility() != clockHiddenMode()) {
+            if (newModel.getShowClock()) {
                 showClock(animate);
+            } else {
+                hideClock(animate);
             }
         }
     }
 
-    protected int adjustDisableFlags(int state) {
+    private StatusBarVisibilityModel calculateInternalModel(
+            StatusBarVisibilityModel externalModel) {
         boolean headsUpVisible =
                 mStatusBarFragmentComponent.getHeadsUpAppearanceController().shouldBeVisible();
 
@@ -459,34 +460,31 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 && shouldHideNotificationIcons()
                 && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                         && headsUpVisible)) {
-            state |= DISABLE_NOTIFICATION_ICONS;
-            state |= DISABLE_SYSTEM_INFO;
-            state |= DISABLE_CLOCK;
+            // Hide everything
+            return new StatusBarVisibilityModel(
+                    /* showClock= */ false,
+                    /* showNotificationIcons= */ false,
+                    /* showOngoingCallChip= */ false,
+                    /* showSystemInfo= */ false);
         }
 
-        if (mOngoingCallController.hasOngoingCall()) {
-            state &= ~DISABLE_ONGOING_CALL_CHIP;
-        } else {
-            state |= DISABLE_ONGOING_CALL_CHIP;
-        }
-
-        if (headsUpVisible) {
-            // Disable everything on the left side of the status bar, since the app name for the
-            // heads up notification appears there instead.
-            state |= DISABLE_CLOCK;
-            state |= DISABLE_ONGOING_CALL_CHIP;
-        }
-
-        return state;
+        boolean showClock = externalModel.getShowClock() && !headsUpVisible;
+        boolean showOngoingCallChip = mOngoingCallController.hasOngoingCall() && !headsUpVisible;
+        return new StatusBarVisibilityModel(
+                showClock,
+                externalModel.getShowNotificationIcons(),
+                showOngoingCallChip,
+                externalModel.getShowSystemInfo());
     }
 
     /**
      * Updates the visibility of the notification icon area and ongoing call chip based on disabled1
      * state.
      */
-    private void updateNotificationIconAreaAndCallChip(int state1, boolean animate) {
-        boolean disableNotifications = (state1 & DISABLE_NOTIFICATION_ICONS) != 0;
-        boolean hasOngoingCall = (state1 & DISABLE_ONGOING_CALL_CHIP) == 0;
+    private void updateNotificationIconAreaAndCallChip(boolean animate) {
+        StatusBarVisibilityModel visibilityModel = mLastModifiedVisibility;
+        boolean disableNotifications = !visibilityModel.getShowNotificationIcons();
+        boolean hasOngoingCall = visibilityModel.getShowOngoingCallChip();
 
         // Hide notifications if the disable flag is set or we have an ongoing call.
         if (disableNotifications || hasOngoingCall) {
@@ -683,7 +681,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     @Override
     public void onDozingChanged(boolean isDozing) {
-        disable(getContext().getDisplayId(), mDisabled1, mDisabled2, false /* animate */);
+        updateStatusBarVisibilities(/* animate= */ false);
     }
 
     @Nullable
@@ -696,10 +694,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     @Override
     public Animator onSystemEventAnimationFinish(boolean hasPersistentDot) {
         return mSystemEventAnimator.onSystemEventAnimationFinish(hasPersistentDot);
-    }
-
-    private boolean isSystemIconAreaDisabled() {
-        return (mDisabled1 & DISABLE_SYSTEM_INFO) != 0 || (mDisabled2 & DISABLE2_SYSTEM_ICONS) != 0;
     }
 
     private void updateStatusBarLocation(int left, int right) {
