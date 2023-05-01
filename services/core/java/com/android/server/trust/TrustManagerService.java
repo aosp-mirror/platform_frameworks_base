@@ -1504,7 +1504,7 @@ public class TrustManagerService extends SystemService {
         @Override
         public void reportUserMayRequestUnlock(int userId) throws RemoteException {
             enforceReportPermission();
-            mHandler.obtainMessage(MSG_USER_MAY_REQUEST_UNLOCK, userId).sendToTarget();
+            mHandler.obtainMessage(MSG_USER_MAY_REQUEST_UNLOCK, userId, /*arg2=*/ 0).sendToTarget();
         }
 
         @Override
