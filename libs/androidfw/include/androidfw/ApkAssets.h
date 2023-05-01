@@ -17,12 +17,13 @@
 #ifndef APKASSETS_H_
 #define APKASSETS_H_
 
+#include <utils/RefBase.h>
+
 #include <memory>
 #include <string>
 
 #include "android-base/macros.h"
 #include "android-base/unique_fd.h"
-
 #include "androidfw/Asset.h"
 #include "androidfw/AssetsProvider.h"
 #include "androidfw/Idmap.h"
@@ -31,34 +32,33 @@
 
 namespace android {
 
+class ApkAssets;
+
+using ApkAssetsPtr = sp<ApkAssets>;
+
 // Holds an APK.
-class ApkAssets {
+class ApkAssets : public RefBase {
  public:
   // Creates an ApkAssets from a path on device.
-  static std::unique_ptr<ApkAssets> Load(const std::string& path,
-                                         package_property_t flags = 0U);
+  static ApkAssetsPtr Load(const std::string& path, package_property_t flags = 0U);
 
   // Creates an ApkAssets from an open file descriptor.
-  static std::unique_ptr<ApkAssets> LoadFromFd(base::unique_fd fd,
-                                               const std::string& debug_name,
-                                               package_property_t flags = 0U,
-                                               off64_t offset = 0,
-                                               off64_t len = AssetsProvider::kUnknownLength);
+  static ApkAssetsPtr LoadFromFd(base::unique_fd fd, const std::string& debug_name,
+                                 package_property_t flags = 0U, off64_t offset = 0,
+                                 off64_t len = AssetsProvider::kUnknownLength);
 
   // Creates an ApkAssets from an AssetProvider.
   // The ApkAssets will take care of destroying the AssetsProvider when it is destroyed.
-  static std::unique_ptr<ApkAssets> Load(std::unique_ptr<AssetsProvider> assets,
-                                         package_property_t flags = 0U);
+  static ApkAssetsPtr Load(std::unique_ptr<AssetsProvider> assets, package_property_t flags = 0U);
 
   // Creates an ApkAssets from the given asset file representing a resources.arsc.
-  static std::unique_ptr<ApkAssets> LoadTable(std::unique_ptr<Asset> resources_asset,
-                                              std::unique_ptr<AssetsProvider> assets,
-                                              package_property_t flags = 0U);
+  static ApkAssetsPtr LoadTable(std::unique_ptr<Asset> resources_asset,
+                                std::unique_ptr<AssetsProvider> assets,
+                                package_property_t flags = 0U);
 
   // Creates an ApkAssets from an IDMAP, which contains the original APK path, and the overlay
   // data.
-  static std::unique_ptr<ApkAssets> LoadOverlay(const std::string& idmap_path,
-                                                package_property_t flags = 0U);
+  static ApkAssetsPtr LoadOverlay(const std::string& idmap_path, package_property_t flags = 0U);
 
   // Path to the contents of the ApkAssets on disk. The path could represent an APk, a directory,
   // or some other file type.
@@ -95,22 +95,27 @@ class ApkAssets {
   bool IsUpToDate() const;
 
  private:
-  static std::unique_ptr<ApkAssets> LoadImpl(std::unique_ptr<AssetsProvider> assets,
-                                             package_property_t property_flags,
-                                             std::unique_ptr<Asset> idmap_asset,
-                                             std::unique_ptr<LoadedIdmap> loaded_idmap);
+  static ApkAssetsPtr LoadImpl(std::unique_ptr<AssetsProvider> assets,
+                               package_property_t property_flags,
+                               std::unique_ptr<Asset> idmap_asset,
+                               std::unique_ptr<LoadedIdmap> loaded_idmap);
 
-  static std::unique_ptr<ApkAssets> LoadImpl(std::unique_ptr<Asset> resources_asset,
-                                             std::unique_ptr<AssetsProvider> assets,
-                                             package_property_t property_flags,
-                                             std::unique_ptr<Asset> idmap_asset,
-                                             std::unique_ptr<LoadedIdmap> loaded_idmap);
+  static ApkAssetsPtr LoadImpl(std::unique_ptr<Asset> resources_asset,
+                               std::unique_ptr<AssetsProvider> assets,
+                               package_property_t property_flags,
+                               std::unique_ptr<Asset> idmap_asset,
+                               std::unique_ptr<LoadedIdmap> loaded_idmap);
 
-  ApkAssets(std::unique_ptr<Asset> resources_asset,
-            std::unique_ptr<LoadedArsc> loaded_arsc,
-            std::unique_ptr<AssetsProvider> assets,
-            package_property_t property_flags,
-            std::unique_ptr<Asset> idmap_asset,
+  // Allows us to make it possible to call make_shared from inside the class but still keeps the
+  // ctor 'private' for all means and purposes.
+  struct PrivateConstructorUtil {
+    explicit PrivateConstructorUtil() = default;
+  };
+
+ public:
+  ApkAssets(PrivateConstructorUtil, std::unique_ptr<Asset> resources_asset,
+            std::unique_ptr<LoadedArsc> loaded_arsc, std::unique_ptr<AssetsProvider> assets,
+            package_property_t property_flags, std::unique_ptr<Asset> idmap_asset,
             std::unique_ptr<LoadedIdmap> loaded_idmap);
 
   std::unique_ptr<Asset> resources_asset_;
