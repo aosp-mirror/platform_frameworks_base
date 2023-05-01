@@ -16,8 +16,6 @@
 
 package com.android.server.credentials.metrics;
 
-import android.util.Log;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -48,7 +46,7 @@ public class InitialPhaseMetric {
     // Indicates if the origin was specified when making this API request
     private boolean mOriginSpecified = false;
 
-    // Stores the deduped request information, particularly {"req":5}.
+    // Stores the deduped request information, particularly {"req":5}
     private Map<String, Integer> mRequestCounts = new LinkedHashMap<>();
 
 
@@ -138,26 +136,20 @@ public class InitialPhaseMetric {
     }
 
     /**
-     * Reruns the unique, deduped, request classtypes for logging.
+     * Returns the unique, deduped, request classtypes for logging.
      * @return a string array for deduped classtypes
      */
     public String[] getUniqueRequestStrings() {
-        if (mRequestCounts.isEmpty()) {
-            Log.w(TAG, "There are no unique string request types collected");
-        }
         String[] result = new String[mRequestCounts.keySet().size()];
         mRequestCounts.keySet().toArray(result);
         return result;
     }
 
     /**
-     * Reruns the unique, deduped, request classtype counts for logging.
+     * Returns the unique, deduped, request classtype counts for logging.
      * @return a string array for deduped classtype counts
      */
     public int[] getUniqueRequestCounts() {
-        if (mRequestCounts.isEmpty()) {
-            Log.w(TAG, "There are no unique string request type counts collected");
-        }
         return mRequestCounts.values().stream().mapToInt(Integer::intValue).toArray();
     }
 }

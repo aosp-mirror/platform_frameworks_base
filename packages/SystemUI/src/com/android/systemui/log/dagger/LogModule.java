@@ -209,7 +209,7 @@ public class LogModule {
     @SysUISingleton
     @CollapsedSbFragmentLog
     public static LogBuffer provideCollapsedSbFragmentLogBuffer(LogBufferFactory factory) {
-        return factory.create("CollapsedSbFragmentLog", 20);
+        return factory.create("CollapsedSbFragmentLog", 40);
     }
 
     /**

@@ -28,12 +28,13 @@ import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_USB;
 import static android.os.Process.INVALID_UID;
 
 import android.annotation.IntDef;
+import android.app.ActivityManager;
 import android.app.ActivityManager.ForegroundServiceApiType;
 import android.app.ForegroundServiceDelegationOptions;
 import android.content.ComponentName;
 import android.content.pm.ServiceInfo;
 import android.util.ArrayMap;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -191,13 +192,20 @@ public class ForegroundServiceTypeLoggerModule {
         final ArrayList<Integer> apiTypes = convertFgsTypeToApiTypes(record.foregroundServiceType);
         final UidState uidState = mUids.get(uid);
         if (uidState == null) {
-            Log.e(TAG, "FGS stop call being logged with no start call for UID " + uid);
+            Slog.wtfStack(TAG, "FGS stop call being logged with no start call for UID for UID "
+                    + uid
+                    + " in package " + record.packageName);
             return;
         }
         final ArrayList<Integer> apisFound = new ArrayList<>();
         final ArrayList<Long> timestampsFound = new ArrayList<>();
         for (int i = 0, size = apiTypes.size(); i < size; i++) {
-            int apiType = apiTypes.get(i);
+            final int apiType = apiTypes.get(i);
+            if (!uidState.mOpenWithFgsCount.contains(apiType)) {
+                Slog.wtfStack(TAG, "Logger should be tracking FGS types correctly for UID " + uid
+                        + " in package " + record.packageName);
+                continue;
+            }
             // retrieve the eligible closed call
             // we only want to log if this is the only
             // open in flight call. If there are other calls,
@@ -214,7 +222,8 @@ public class ForegroundServiceTypeLoggerModule {
             final ArrayMap<ComponentName, ServiceRecord> runningFgsOfType =
                     uidState.mRunningFgs.get(apiType);
             if (runningFgsOfType == null) {
-                Log.w(TAG, "Could not find appropriate running FGS for FGS stop");
+                Slog.w(TAG, "Could not find appropriate running FGS for FGS stop for UID " + uid
+                        + " in package " + record.packageName);
                 continue;
             }
 
@@ -321,7 +330,7 @@ public class ForegroundServiceTypeLoggerModule {
         // it's not related to any FGS
         UidState uidState = mUids.get(uid);
         if (uidState == null) {
-            Log.w(TAG, "API event end called before start!");
+            Slog.w(TAG, "API event end called before start!");
             return -1;
         }
         if (uidState.mOpenWithFgsCount.contains(apiType)) {
@@ -466,7 +475,11 @@ public class ForegroundServiceTypeLoggerModule {
                         : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
                 apiState,
                 apiType,
-                timestamp);
+                timestamp,
+                ActivityManager.PROCESS_STATE_UNKNOWN,
+                ActivityManager.PROCESS_CAPABILITY_NONE,
+                ActivityManager.PROCESS_STATE_UNKNOWN,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
     }
 
     /**
@@ -500,7 +513,11 @@ public class ForegroundServiceTypeLoggerModule {
                 0,
                 apiState,
                 apiType,
-                timestamp);
+                timestamp,
+                ActivityManager.PROCESS_STATE_UNKNOWN,
+                ActivityManager.PROCESS_CAPABILITY_NONE,
+                ActivityManager.PROCESS_STATE_UNKNOWN,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
     }
 
     /**
