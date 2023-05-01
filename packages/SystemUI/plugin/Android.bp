@@ -32,6 +32,8 @@ java_library {
         "bcsmartspace/src/**/*.kt",
     ],
 
+    // If you add a static lib here, you may need to also add the package to the ClassLoaderFilter
+    // in PluginInstance. That will ensure that loaded plugins have access to the related classes.
     static_libs: [
         "androidx.annotation_annotation",
         "error_prone_annotations",
