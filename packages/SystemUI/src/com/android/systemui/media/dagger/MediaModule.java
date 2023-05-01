@@ -17,6 +17,7 @@
 package com.android.systemui.media.dagger;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
@@ -30,15 +31,14 @@ import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper;
 import com.android.systemui.media.taptotransfer.MediaTttFlags;
 import com.android.systemui.media.taptotransfer.receiver.MediaTttReceiverLogBuffer;
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderLogBuffer;
-import com.android.systemui.plugins.log.LogBuffer;
-
-import java.util.Optional;
-
-import javax.inject.Named;
 
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.Optional;
+
+import javax.inject.Named;
 
 /** Dagger module for the media package. */
 @Module(subcomponents = {

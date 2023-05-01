@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.plugins.log
+package com.android.systemui.log
 
 /** Recyclable implementation of [LogMessage]. */
 data class LogMessageImpl(

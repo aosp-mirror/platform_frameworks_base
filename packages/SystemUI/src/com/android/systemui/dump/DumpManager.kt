@@ -19,7 +19,7 @@ package com.android.systemui.dump
 import com.android.systemui.Dumpable
 import com.android.systemui.ProtoDumpable
 import com.android.systemui.dump.nano.SystemUIProtoDump
-import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.log.LogBuffer
 import java.io.PrintWriter
 import java.util.TreeMap
 import javax.inject.Inject
