@@ -49,7 +49,7 @@ private val VF_FONT = Font.Builder(File("/system/fonts/Roboto-Regular.ttf")).bui
 private fun Font.toTypeface() =
         Typeface.CustomFallbackBuilder(FontFamily.Builder(this).build()).build()
 
-private val PAINT = TextPaint().apply {
+internal val PAINT = TextPaint().apply {
     typeface = Font.Builder(VF_FONT).setFontVariationSettings("'wght' 400").build().toTypeface()
     textSize = 32f
 }
@@ -79,7 +79,7 @@ class TextInterpolatorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        typefaceCache = TypefaceVariantCacheImpl()
+        typefaceCache = TypefaceVariantCacheImpl(PAINT.typeface)
     }
 
     @Test
