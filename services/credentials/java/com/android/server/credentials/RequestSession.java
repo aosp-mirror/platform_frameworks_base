@@ -138,8 +138,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         mRequestSessionMetric = new RequestSessionMetric(mUniqueSessionInteger,
                 MetricUtilities.getHighlyUniqueInteger());
         mRequestSessionMetric.collectInitialPhaseMetricInfo(timestampStarted,
-                mCallingUid, ApiName.getMetricCodeFromRequestInfo(mRequestType),
-                mUniqueSessionInteger);
+                mCallingUid, ApiName.getMetricCodeFromRequestInfo(mRequestType));
         setCancellationListener();
     }
 

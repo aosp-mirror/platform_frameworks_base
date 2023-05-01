@@ -27,8 +27,8 @@ import java.util.Map;
 public class CandidateAggregateMetric {
 
     private static final String TAG = "CandidateProviderMetric";
-    // The session id of this provider, default set to -1
-    private final int mSessionId;
+    // The session id of this provider metric
+    private final int mSessionIdProvider;
     // Indicates if this provider returned from the query phase, default false
     private boolean mQueryReturned = false;
     // Indicates the total number of providers this aggregate captures information for, default 0
@@ -37,11 +37,11 @@ public class CandidateAggregateMetric {
     private int mNumAuthEntriesTapped = 0;
 
     public CandidateAggregateMetric(int sessionIdTrackOne) {
-        mSessionId = sessionIdTrackOne;
+        mSessionIdProvider = sessionIdTrackOne;
     }
 
-    public int getSessionId() {
-        return mSessionId;
+    public int getSessionIdProvider() {
+        return mSessionIdProvider;
     }
 
     /**

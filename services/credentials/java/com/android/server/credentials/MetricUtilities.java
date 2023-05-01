@@ -141,7 +141,7 @@ public class MetricUtilities {
                 index++;
             }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED,
-                    /* session_id */ finalPhaseMetric.getSessionIdTrackTwo(),
+                    /* session_id */ finalPhaseMetric.getSessionIdProvider(),
                     /* sequence_num */ emitSequenceId,
                     /* ui_returned_final_start */ finalPhaseMetric.isUiReturned(),
                     /* chosen_provider_uid */ finalPhaseMetric.getChosenUid(),
@@ -225,7 +225,7 @@ public class MetricUtilities {
                 CandidatePhaseMetric metric = session.mProviderSessionMetric
                         .getCandidatePhasePerProviderMetric();
                 if (sessionId == -1) {
-                    sessionId = metric.getSessionIdTrackTwo();
+                    sessionId = metric.getSessionIdProvider();
                 }
                 if (!queryReturned) {
                     queryReturned = metric.isQueryReturned();
@@ -329,7 +329,7 @@ public class MetricUtilities {
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_INIT_PHASE_REPORTED,
                     /* api_name */ initialPhaseMetric.getApiName(),
                     /* caller_uid */ initialPhaseMetric.getCallerUid(),
-                    /* session_id */ initialPhaseMetric.getSessionId(),
+                    /* session_id */ initialPhaseMetric.getSessionIdCaller(),
                     /* sequence_num */ sequenceNum,
                     /* initial_timestamp_reference_nanoseconds */
                     initialPhaseMetric.getCredentialServiceStartedTimeNanoseconds(),
@@ -360,7 +360,7 @@ public class MetricUtilities {
         try {
             if (!LOG_FLAG) {
                 FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_TOTAL_REPORTED,
-                        /*session_id*/ candidateAggregateMetric.getSessionId(),
+                        /*session_id*/ candidateAggregateMetric.getSessionIdProvider(),
                         /*sequence_num*/ sequenceNum,
                         /*query_returned*/ candidateAggregateMetric.isQueryReturned(),
                         /*num_providers*/ candidateAggregateMetric.getNumProviders(),
@@ -405,4 +405,70 @@ public class MetricUtilities {
             Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
+
+    /**
+     * A logging utility used primarily for the final phase of the current metric setup for track 1.
+     *
+     * @param finalPhaseMetric     the coalesced data of the chosen provider
+     * @param browsingPhaseMetrics the coalesced data of the browsing phase
+     * @param apiStatus            the final status of this particular api call
+     * @param emitSequenceId       an emitted sequence id for the current session
+     */
+    public static void logApiCalledNoUidFinal(ChosenProviderFinalPhaseMetric finalPhaseMetric,
+            List<CandidateBrowsingPhaseMetric> browsingPhaseMetrics, int apiStatus,
+            int emitSequenceId) {
+        try {
+            if (!LOG_FLAG) {
+                return;
+            }
+            int browsedSize = browsingPhaseMetrics.size();
+            int[] browsedClickedEntries = new int[browsedSize];
+            int[] browsedProviderUid = new int[browsedSize];
+            int index = 0;
+            for (CandidateBrowsingPhaseMetric metric : browsingPhaseMetrics) {
+                browsedClickedEntries[index] = metric.getEntryEnum();
+                browsedProviderUid[index] = metric.getProviderUid();
+                index++;
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINALNOUID_REPORTED,
+                    /* session_id */ finalPhaseMetric.getSessionIdCaller(),
+                    /* sequence_num */ emitSequenceId,
+                    /* ui_returned_final_start */ finalPhaseMetric.isUiReturned(),
+                    /* chosen_provider_query_start_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getQueryStartTimeNanoseconds()),
+                    /* chosen_provider_query_end_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getQueryEndTimeNanoseconds()),
+                    /* chosen_provider_ui_invoked_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getUiCallStartTimeNanoseconds()),
+                    /* chosen_provider_ui_finished_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getUiCallEndTimeNanoseconds()),
+                    /* chosen_provider_finished_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getFinalFinishTimeNanoseconds()),
+                    /* chosen_provider_status */ finalPhaseMetric.getChosenProviderStatus(),
+                    /* chosen_provider_has_exception */ finalPhaseMetric.isHasException(),
+                    /* unique_entries */
+                    finalPhaseMetric.getResponseCollective().getUniqueEntries(),
+                    /* per_entry_counts */
+                    finalPhaseMetric.getResponseCollective().getUniqueEntryCounts(),
+                    /* unique_response_classtypes */
+                    finalPhaseMetric.getResponseCollective().getUniqueResponseStrings(),
+                    /* per_classtype_counts */
+                    finalPhaseMetric.getResponseCollective().getUniqueResponseCounts(),
+                    /* framework_exception_unique_classtype */
+                    finalPhaseMetric.getFrameworkException(),
+                    /* clicked_entries */ browsedClickedEntries,
+                    /* provider_of_clicked_entry */ browsedProviderUid,
+                    /* api_status */ apiStatus,
+                    /* primary_indicated */ false
+            );
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+        }
+    }
+
 }

@@ -21,6 +21,7 @@ import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPhase;
+import static com.android.server.credentials.MetricUtilities.logApiCalledNoUidFinal;
 
 import android.annotation.NonNull;
 import android.credentials.GetCredentialRequest;
@@ -103,7 +104,7 @@ public class RequestSessionMetric {
      *                                known flow
      */
     public void collectInitialPhaseMetricInfo(long timestampStarted,
-            int mCallingUid, int metricCode, int callingAppFlowUniqueInt) {
+            int mCallingUid, int metricCode) {
         try {
             mInitialPhaseMetric.setCredentialServiceStartedTimeNanoseconds(timestampStarted);
             mInitialPhaseMetric.setCallerUid(mCallingUid);
@@ -369,6 +370,9 @@ public class RequestSessionMetric {
     public void logApiCalledAtFinish(int apiStatus) {
         try {
             logApiCalledFinalPhase(mChosenProviderFinalPhaseMetric, mCandidateBrowsingPhaseMetric,
+                    apiStatus,
+                    ++mSequenceCounter);
+            logApiCalledNoUidFinal(mChosenProviderFinalPhaseMetric, mCandidateBrowsingPhaseMetric,
                     apiStatus,
                     ++mSequenceCounter);
         } catch (Exception e) {

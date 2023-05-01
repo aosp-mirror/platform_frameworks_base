@@ -34,10 +34,10 @@ public class ChosenProviderFinalPhaseMetric {
     private static final String TAG = "ChosenFinalPhaseMetric";
     // The session id associated with this API call, used to unite split emits, for the flow
     // where we know the calling app
-    private final int mSessionIdTrackOne;
+    private final int mSessionIdCaller;
     // The session id associated with this API call, used to unite split emits, for the flow
     // where we know the provider apps
-    private final int mSessionIdTrackTwo;
+    private final int mSessionIdProvider;
     // Reveals if the UI was returned, false by default
     private boolean mUiReturned = false;
     private int mChosenUid = -1;
@@ -78,9 +78,9 @@ public class ChosenProviderFinalPhaseMetric {
     private ResponseCollective mResponseCollective = new ResponseCollective(Map.of(), Map.of());
 
 
-    public ChosenProviderFinalPhaseMetric(int sessionIdTrackOne, int sessionIdTrackTwo) {
-        mSessionIdTrackOne = sessionIdTrackOne;
-        mSessionIdTrackTwo = sessionIdTrackTwo;
+    public ChosenProviderFinalPhaseMetric(int sessionIdCaller, int sessionIdProvider) {
+        mSessionIdCaller = sessionIdCaller;
+        mSessionIdProvider = sessionIdProvider;
     }
 
     /* ------------------- UID ------------------- */
@@ -243,8 +243,8 @@ public class ChosenProviderFinalPhaseMetric {
 
     /* ----------- Session ID -------------- */
 
-    public int getSessionIdTrackTwo() {
-        return mSessionIdTrackTwo;
+    public int getSessionIdProvider() {
+        return mSessionIdProvider;
     }
 
     /* ----------- UI Returned Successfully -------------- */
@@ -285,5 +285,11 @@ public class ChosenProviderFinalPhaseMetric {
 
     public String getFrameworkException() {
         return mFrameworkException;
+    }
+
+    /* -------------- Session ID for Track One (Known Calling App) ---------------- */
+
+    public int getSessionIdCaller() {
+        return mSessionIdCaller;
     }
 }

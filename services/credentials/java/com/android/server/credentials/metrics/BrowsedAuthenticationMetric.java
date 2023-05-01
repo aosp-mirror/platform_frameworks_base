@@ -21,15 +21,16 @@ package com.android.server.credentials.metrics;
  * Contains information about what was collected from the authentication entry output.
  */
 public class BrowsedAuthenticationMetric {
-    private final int mSessionIdTrackTwo;
+    // The session id of this provider known flow related metric
+    private final int mSessionIdProvider;
     // TODO(b/271135048) - Match the atom and provide a clean per provider session metric
     // encapsulation.
 
-    public BrowsedAuthenticationMetric(int sessionIdTrackTwo) {
-        mSessionIdTrackTwo = sessionIdTrackTwo;
+    public BrowsedAuthenticationMetric(int sessionIdProvider) {
+        mSessionIdProvider = sessionIdProvider;
     }
 
-    public int getSessionIdTrackTwo() {
-        return mSessionIdTrackTwo;
+    public int getSessionIdProvider() {
+        return mSessionIdProvider;
     }
 }
