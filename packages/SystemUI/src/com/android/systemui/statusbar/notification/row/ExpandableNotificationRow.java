@@ -3593,6 +3593,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         // Skip super call; dump viewState ourselves
         pw.println("Notification: " + mEntry.getKey());
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
+            pw.println(this);
             pw.print("visibility: " + getVisibility());
             pw.print(", alpha: " + getAlpha());
             pw.print(", translation: " + getTranslation());
@@ -3612,6 +3613,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 pw.println("no viewState!!!");
             }
             pw.println(getRoundableState().debugString());
+            dumpBackgroundView(pw, args);
 
             int transientViewCount = mChildrenContainer == null
                     ? 0 : mChildrenContainer.getTransientViewCount();
