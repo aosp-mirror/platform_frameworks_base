@@ -1503,6 +1503,31 @@ public class SatelliteManager {
         }
     }
 
+    /**
+     * Inform whether the device is aligned with the satellite for demo mode.
+     *
+     * @param isAligned {@true} Device is aligned with the satellite for demo mode
+     *                  {@false} Device is not aligned with the satellite for demo mode
+     *
+     * @throws SecurityException if the caller doesn't have required permission.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     */
+    @RequiresPermission(Manifest.permission.SATELLITE_COMMUNICATION)
+
+    public void onDeviceAlignedWithSatellite(boolean isAligned) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.onDeviceAlignedWithSatellite(mSubId, isAligned);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            loge("informDeviceAlignedToSatellite() RemoteException:" + ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
     private static ITelephony getITelephony() {
         ITelephony binder = ITelephony.Stub.asInterface(TelephonyFrameworkInitializer
                 .getTelephonyServiceManager()
