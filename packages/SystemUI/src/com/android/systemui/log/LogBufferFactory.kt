@@ -19,9 +19,6 @@ package com.android.systemui.log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBufferHelper.Companion.adjustMaxSize
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogcatEchoTracker
-
 import javax.inject.Inject
 
 @SysUISingleton
