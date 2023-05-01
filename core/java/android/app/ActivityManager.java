@@ -771,6 +771,7 @@ public class ActivityManager {
 
     /**
      * The set of flags for process capability.
+     * Keep it in sync with ProcessCapability in atoms.proto.
      * @hide
      */
     @IntDef(flag = true, prefix = { "PROCESS_CAPABILITY_" }, value = {
