@@ -675,27 +675,31 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Begins a transaction in DEFERRED mode.
+     * Begins a transaction in DEFERRED mode, with the android-specific constraint that the
+     * transaction is read-only. The database may not be modified inside a read-only transaction.
      * <p>
-     * Transactions can be nested. When the outer transaction is ended all of the work done in
-     * that transaction and all of the nested transactions will be committed or rolled back. The
-     * changes will be rolled back if any transaction is ended without being marked as clean (by
-     * calling setTransactionSuccessful). Otherwise they will be committed.
+     * Read-only transactions may run concurrently with other read-only transactions, and if they
+     * database is in WAL mode, they may also run concurrently with IMMEDIATE or EXCLUSIVE
+     * transactions.
      * <p>
-     * Here is the standard idiom for transactions:
+     * Transactions can be nested.  However, the behavior of the transaction is not altered by
+     * nested transactions.  A nested transaction may be any of the three transaction types but if
+     * the outermost type is read-only then nested transactions remain read-only, regardless of how
+     * they are started.
+     * <p>
+     * Here is the standard idiom for read-only transactions:
      *
      * <pre>
-     *   db.beginTransactionDeferred();
+     *   db.beginTransactionReadOnly();
      *   try {
      *     ...
-     *     db.setTransactionSuccessful();
      *   } finally {
      *     db.endTransaction();
      *   }
      * </pre>
      */
-    public void beginTransactionDeferred() {
-        beginTransactionWithListenerDeferred(null);
+    public void beginTransactionReadOnly() {
+        beginTransactionWithListenerReadOnly(null);
     }
 
     /**
@@ -758,26 +762,26 @@ public final class SQLiteDatabase extends SQLiteClosable {
     }
 
     /**
-     * Begins a transaction in DEFERRED mode.
+     * Begins a transaction in read-only mode with a {@link SQLiteTransactionListener} listener.
+     * The database may not be updated inside a read-only transaction.
      * <p>
-     * Transactions can be nested. When the outer transaction is ended all of the work done in
-     * that transaction and all of the nested transactions will be committed or rolled back. The
-     * changes will be rolled back if any transaction is ended without being marked as clean (by
-     * calling setTransactionSuccessful). Otherwise they will be committed.
+     * Transactions can be nested.  However, the behavior of the transaction is not altered by
+     * nested transactions.  A nested transaction may be any of the three transaction types but if
+     * the outermost type is read-only then nested transactions remain read-only, regardless of how
+     * they are started.
      * <p>
-     * Here is the standard idiom for transactions:
+     * Here is the standard idiom for read-only transactions:
      *
      * <pre>
-     *   db.beginTransactionDeferred();
+     *   db.beginTransactionWightListenerReadOnly(listener);
      *   try {
      *     ...
-     *     db.setTransactionSuccessful();
      *   } finally {
      *     db.endTransaction();
      *   }
      * </pre>
      */
-    public void beginTransactionWithListenerDeferred(
+    public void beginTransactionWithListenerReadOnly(
             @Nullable SQLiteTransactionListener transactionListener) {
         beginTransaction(transactionListener, SQLiteSession.TRANSACTION_MODE_DEFERRED);
     }
@@ -792,15 +796,18 @@ public final class SQLiteDatabase extends SQLiteClosable {
 
     /**
      * Begin a transaction with the specified mode.  Valid modes are
-     * {@link SquLiteSession.TRANSACTION_MODE_DEFERRED},
-     * {@link SquLiteSession.TRANSACTION_MODE_IMMEDIATE}, and
-     * {@link SquLiteSession.TRANSACTION_MODE_EXCLUSIVE}.
+     * {@link SQLiteSession.TRANSACTION_MODE_DEFERRED},
+     * {@link SQLiteSession.TRANSACTION_MODE_IMMEDIATE}, and
+     * {@link SQLiteSession.TRANSACTION_MODE_EXCLUSIVE}.
      */
     private void beginTransaction(@Nullable SQLiteTransactionListener listener, int mode) {
         acquireReference();
         try {
+            // DEFERRED transactions are read-only to allows concurrent read-only transactions.
+            // Others are read/write.
+            boolean readOnly = (mode == SQLiteSession.TRANSACTION_MODE_DEFERRED);
             getThreadSession().beginTransaction(mode, listener,
-                    getThreadDefaultConnectionFlags(false /*readOnly*/), null);
+                    getThreadDefaultConnectionFlags(readOnly), null);
         } finally {
             releaseReference();
         }
