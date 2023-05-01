@@ -41,6 +41,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.keyguard.domain.interactor.BurnInInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -92,6 +93,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthController mAuthController;
     @Mock private DozeHost.Callback mCallback;
+    @Mock private BurnInInteractor mBurnInInteractor;
 
     @Before
     public void setup() {
@@ -102,7 +104,8 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
-                mAuthController, mNotificationIconAreaController);
+                mAuthController, mNotificationIconAreaController,
+                mBurnInInteractor);
 
         mDozeServiceHost.initialize(
                 mCentralSurfaces,
@@ -212,5 +215,13 @@ public class DozeServiceHostTest extends SysuiTestCase {
         // THEN isPendingPulse=false, pulseOutNow is called
         assertFalse(mDozeServiceHost.isPulsePending());
         verify(mDozeScrimController).pulseOutNow();
+    }
+    @Test
+    public void dozeTimeTickSentTBurnInInteractor() {
+        // WHEN dozeTimeTick
+        mDozeServiceHost.dozeTimeTick();
+
+        // THEN burnInInteractor's dozeTimeTick is updated
+        verify(mBurnInInteractor).dozeTimeTick();
     }
 }
