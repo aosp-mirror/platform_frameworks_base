@@ -19,6 +19,7 @@ package com.android.systemui.util
 import android.content.res.TypedArray
 import android.graphics.Color
 import android.view.ContextThemeWrapper
+import androidx.annotation.ColorInt
 
 /** Returns an ARGB color version of [color] at the given [alpha]. */
 fun getColorWithAlpha(color: Int, alpha: Float): Int =
@@ -35,8 +36,11 @@ fun getColorWithAlpha(color: Int, alpha: Float): Int =
  * otherwise, returns the color from the private attribute {@param privAttrId}.
  */
 fun getPrivateAttrColorIfUnset(
-    ctw: ContextThemeWrapper, attrArray: TypedArray,
-    attrIndex: Int, defColor: Int, privAttrId: Int
+    ctw: ContextThemeWrapper,
+    attrArray: TypedArray,
+    attrIndex: Int,
+    defColor: Int,
+    privAttrId: Int
 ): Int {
     // If the index is specified, use that value
     var a = attrArray
@@ -51,3 +55,8 @@ fun getPrivateAttrColorIfUnset(
     a.recycle()
     return color
 }
+
+/** Returns the color as a HTML hex color (or null) */
+fun hexColorString(@ColorInt color: Int?): String = color
+    ?.let { String.format("#%08x", it) }
+    ?: "null"
