@@ -21,6 +21,7 @@ import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_NONE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -624,6 +625,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     options.getTransitionBounds());
         } else if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0 && isOpeningType) {
             // This received a transferred starting window, so don't animate
+            return null;
+        } else if (overrideType == ANIM_SCENE_TRANSITION) {
+            // If there's a scene-transition, then jump-cut.
             return null;
         } else {
             a = loadAttributeAnimation(info, change, wallpaperTransit, mTransitionAnimation);
