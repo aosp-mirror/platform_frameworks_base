@@ -17,8 +17,8 @@
 package com.android.systemui.qs.pipeline.shared.logging
 
 import android.annotation.UserIdInt
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.qs.pipeline.dagger.QSTileListLog
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
