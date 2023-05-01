@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm;
+package com.android.server.testutils;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -29,6 +29,8 @@ import android.os.Parcel;
 import android.view.InputWindowHandle;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
+import com.android.server.testutils.StubTransaction;
 
 import java.util.HashSet;
 import java.util.concurrent.Executor;
