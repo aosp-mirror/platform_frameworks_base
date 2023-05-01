@@ -63,6 +63,12 @@ public class ProviderSessionMetric {
         return mCandidatePhasePerProviderMetric;
     }
 
+    /**
+     * Retrieves the authentication clicked metric information.
+     */
+    public BrowsedAuthenticationMetric getBrowsedAuthenticationMetric() {
+        return mBrowsedAuthenticationMetric;
+    }
 
     /**
      * This collects for ProviderSessions, with respect to the candidate providers, whether
@@ -91,6 +97,19 @@ public class ProviderSessionMetric {
         // TODO(b/271135048) - Mimic typical candidate update, but with authentication metric
         // Collect the final timestamps (and start timestamp), status, exceptions and the provider
         // uid. This occurs typically *after* the collection is complete.
+        mBrowsedAuthenticationMetric.setProviderUid(providerSessionUid);
+        // TODO(immediately) - add timestamps
+        if (isFailureStatus) {
+            mCandidatePhasePerProviderMetric.setQueryReturned(false);
+            mCandidatePhasePerProviderMetric.setProviderQueryStatus(
+                    ProviderStatusForMetrics.QUERY_FAILURE
+                            .getMetricCode());
+        } else if (isCompletionStatus) {
+            mCandidatePhasePerProviderMetric.setQueryReturned(true);
+            mCandidatePhasePerProviderMetric.setProviderQueryStatus(
+                    ProviderStatusForMetrics.QUERY_SUCCESS
+                            .getMetricCode());
+        }
     }
 
     /**
@@ -240,7 +259,7 @@ public class ProviderSessionMetric {
         if (!isAuthEntry) {
             mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
         } else {
-            // TODO(b/immediately) - Add the auth entry get logic
+            mBrowsedAuthenticationMetric.setAuthEntryCollective(responseCollective);
         }
     }
 }

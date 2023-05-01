@@ -24,6 +24,7 @@ import android.util.Slog;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
+import com.android.server.credentials.metrics.BrowsedAuthenticationMetric;
 import com.android.server.credentials.metrics.CandidateAggregateMetric;
 import com.android.server.credentials.metrics.CandidateBrowsingPhaseMetric;
 import com.android.server.credentials.metrics.CandidatePhaseMetric;
@@ -45,6 +46,7 @@ public class MetricUtilities {
 
     private static final String TAG = "MetricUtilities";
     public static final String USER_CANCELED_SUBSTRING = "TYPE_USER_CANCELED";
+    public static final int MIN_EMIT_WAIT_TIME_MS = 10;
 
     public static final int DEFAULT_INT_32 = -1;
     public static final String DEFAULT_STRING = "";
@@ -117,7 +119,8 @@ public class MetricUtilities {
     }
 
     /**
-     * A logging utility used primarily for the final phase of the current metric setup.
+     * A logging utility used primarily for the final phase of the current metric setup, focused on
+     * track 2, where the provider uid is known.
      *
      * @param finalPhaseMetric     the coalesced data of the chosen provider
      * @param browsingPhaseMetrics the coalesced data of the browsing phase
@@ -187,6 +190,56 @@ public class MetricUtilities {
             Slog.w(TAG, "Unexpected error during final provider uid emit: " + e);
         }
     }
+
+    /**
+     * This emits the authentication entry metrics for track 2, where the provider uid is known.
+     *
+     * @param authenticationMetric the authentication metric collection to emit with
+     */
+    public static void logApiCalledAuthenticationMetric(
+            BrowsedAuthenticationMetric authenticationMetric) {
+        // TODO(immediately) - Add in this emit
+    }
+
+    /**
+     * A logging utility used primarily for the candidate phase's get responses in the current
+     * metric setup. This helps avoid nested proto-files. This is primarily focused on track 2,
+     * where the provider uid is known. It ensures to run in a separate thread while emitting
+     * the multiple atoms to work with expected emit limits.
+     *
+     * @param providers      a map with known providers and their held metric objects
+     * @param emitSequenceId an emitted sequence id for the current session, that matches the
+     *                       candidate emit value, as these metrics belong with the candidates
+     */
+    public static void logApiCalledCandidateGetMetric(Map<String, ProviderSession> providers,
+            int emitSequenceId) {
+        try {
+            // TODO(immediately) - Modify to a Static Queue of Ordered Functions and emit from
+            //  queue to adhere to 10 second limit (thread removed given android safe-calling).
+            var sessions = providers.values();
+            for (var session : sessions) {
+                try {
+                    var metric = session.getProviderSessionMetric()
+                            .getCandidatePhasePerProviderMetric();
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.CREDENTIAL_MANAGER_GET_REPORTED,
+                            /* session_id */ metric.getSessionIdProvider(),
+                            /* sequence_num */ emitSequenceId,
+                            /* candidate_provider_uid */ metric.getCandidateUid(),
+                            /* response_unique_classtypes */
+                            metric.getResponseCollective().getUniqueResponseStrings(),
+                            /* per_classtype_counts */
+                            metric.getResponseCollective().getUniqueResponseCounts()
+                    );
+                } catch (Exception e) {
+                    Slog.w(TAG, "Unexpected exception during get metric logging" + e);
+                }
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during candidate get metric logging: " + e);
+        }
+    }
+
 
     /**
      * A logging utility used primarily for the candidate phase of the current metric setup. This
@@ -369,13 +422,17 @@ public class MetricUtilities {
                         /*max_query_end_timestamp_microseconds*/
                         DEFAULT_INT_32,
                         /*query_response_unique_classtypes*/
-                        DEFAULT_REPEATED_STR,
+                        candidateAggregateMetric.getAggregateCollectiveQuery()
+                                .getUniqueResponseStrings(),
                         /*query_per_classtype_counts*/
-                        DEFAULT_REPEATED_INT_32,
+                        candidateAggregateMetric.getAggregateCollectiveQuery()
+                                .getUniqueResponseCounts(),
                         /*query_unique_entries*/
-                        DEFAULT_REPEATED_INT_32,
+                        candidateAggregateMetric.getAggregateCollectiveQuery()
+                                .getUniqueEntries(),
                         /*query_per_entry_counts*/
-                        DEFAULT_REPEATED_INT_32,
+                        candidateAggregateMetric.getAggregateCollectiveQuery()
+                                .getUniqueEntryCounts(),
                         /*query_total_candidate_failure*/
                         DEFAULT_INT_32,
                         /*query_framework_exception_unique_classtypes*/

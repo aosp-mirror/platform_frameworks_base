@@ -16,13 +16,23 @@
 
 package com.android.server.credentials.metrics;
 
+import com.android.server.credentials.metrics.shared.ResponseCollective;
+
+import java.util.Map;
+
 /**
  * Encapsulates an authentication entry click atom, as a part of track 2.
  * Contains information about what was collected from the authentication entry output.
  */
 public class BrowsedAuthenticationMetric {
+    private static final String TAG = "BrowsedAuthenticationMetric";
     // The session id of this provider known flow related metric
     private final int mSessionIdProvider;
+
+    // The provider associated with the press, defaults to -1
+    private int mProviderUid = -1;
+
+    private ResponseCollective mAuthEntryCollective = new ResponseCollective(Map.of(), Map.of());
     // TODO(b/271135048) - Match the atom and provide a clean per provider session metric
     // encapsulation.
 
@@ -32,5 +42,22 @@ public class BrowsedAuthenticationMetric {
 
     public int getSessionIdProvider() {
         return mSessionIdProvider;
+    }
+
+    public void setProviderUid(int providerUid) {
+        mProviderUid = providerUid;
+    }
+
+    public int getProviderUid() {
+        return mProviderUid;
+    }
+
+    public void setAuthEntryCollective(
+            ResponseCollective authEntryCollective) {
+        this.mAuthEntryCollective = authEntryCollective;
+    }
+
+    public ResponseCollective getAuthEntryCollective() {
+        return mAuthEntryCollective;
     }
 }

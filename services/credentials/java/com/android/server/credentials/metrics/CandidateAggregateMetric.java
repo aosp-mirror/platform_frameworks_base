@@ -17,7 +17,9 @@
 package com.android.server.credentials.metrics;
 
 import com.android.server.credentials.ProviderSession;
+import com.android.server.credentials.metrics.shared.ResponseCollective;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -35,6 +37,12 @@ public class CandidateAggregateMetric {
     private int mNumProviders = 0;
     // Indicates the total number of authentication entries that were tapped in aggregate, default 0
     private int mNumAuthEntriesTapped = 0;
+    // The combined aggregate collective across the candidate get/create
+    private ResponseCollective mAggregateCollectiveQuery =
+            new ResponseCollective(Map.of(), Map.of());
+    // The combined aggregate collective across the auth entry info
+    private ResponseCollective mAggregateCollectiveAuth =
+            new ResponseCollective(Map.of(), Map.of());
 
     public CandidateAggregateMetric(int sessionIdTrackOne) {
         mSessionIdProvider = sessionIdTrackOne;
@@ -52,13 +60,44 @@ public class CandidateAggregateMetric {
      */
     public void collectAverages(Map<String, ProviderSession> providers) {
         // TODO(b/271135048) : Complete this method
+        collectQueryAggregates(providers);
+        collectAuthAggregates(providers);
+    }
+
+    private void collectQueryAggregates(Map<String, ProviderSession> providers) {
         mNumProviders = providers.size();
+        Map<String, Integer> responseCountQuery = new LinkedHashMap<>();
+        Map<EntryEnum, Integer> entryCountQuery = new LinkedHashMap<>();
         var providerSessions = providers.values();
         for (var session : providerSessions) {
-            var metric = session.getProviderSessionMetric();
-            mQueryReturned = mQueryReturned || metric
-                    .mCandidatePhasePerProviderMetric.isQueryReturned();
+            var sessionMetric = session.getProviderSessionMetric();
+            var candidateMetric = sessionMetric.getCandidatePhasePerProviderMetric();
+            mQueryReturned = mQueryReturned || candidateMetric.isQueryReturned();
+            ResponseCollective candidateCollective = candidateMetric.getResponseCollective();
+            ResponseCollective.combineTypeCountMaps(responseCountQuery,
+                    candidateCollective.getResponseCountsMap());
+            ResponseCollective.combineTypeCountMaps(entryCountQuery,
+                    candidateCollective.getEntryCountsMap());
         }
+        mAggregateCollectiveQuery = new ResponseCollective(responseCountQuery, entryCountQuery);
+    }
+
+    private void collectAuthAggregates(Map<String, ProviderSession> providers) {
+        mNumProviders = providers.size();
+        Map<String, Integer> responseCountAuth = new LinkedHashMap<>();
+        Map<EntryEnum, Integer> entryCountAuth = new LinkedHashMap<>();
+        var providerSessions = providers.values();
+        for (var session : providerSessions) {
+            var sessionMetric = session.getProviderSessionMetric();
+            var authMetric = sessionMetric.getBrowsedAuthenticationMetric();
+            mQueryReturned = mQueryReturned; // TODO add auth info
+            ResponseCollective authCollective = authMetric.getAuthEntryCollective();
+            ResponseCollective.combineTypeCountMaps(responseCountAuth,
+                    authCollective.getResponseCountsMap());
+            ResponseCollective.combineTypeCountMaps(entryCountAuth,
+                    authCollective.getEntryCountsMap());
+        }
+        mAggregateCollectiveAuth = new ResponseCollective(responseCountAuth, entryCountAuth);
     }
 
     public int getNumProviders() {
@@ -69,7 +108,12 @@ public class CandidateAggregateMetric {
         return mQueryReturned;
     }
 
+
     public int getNumAuthEntriesTapped() {
         return mNumAuthEntriesTapped;
+    }
+
+    public ResponseCollective getAggregateCollectiveQuery() {
+        return mAggregateCollectiveQuery;
     }
 }

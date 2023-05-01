@@ -19,6 +19,7 @@ package com.android.server.credentials.metrics;
 import static com.android.server.credentials.MetricUtilities.DELTA_EXCEPTION_CUT;
 import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
+import static com.android.server.credentials.MetricUtilities.logApiCalledCandidateGetMetric;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledNoUidFinal;
@@ -343,6 +344,7 @@ public class RequestSessionMetric {
     public void logCandidatePhaseMetrics(Map<String, ProviderSession> providers) {
         try {
             logApiCalledCandidatePhase(providers, ++mSequenceCounter, mInitialPhaseMetric);
+            logApiCalledCandidateGetMetric(providers, mSequenceCounter);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during candidate metric emit: " + e);
         }
