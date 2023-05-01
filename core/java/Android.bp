@@ -31,9 +31,14 @@ filegroup {
     srcs: ["android/security/keymaster/IKeyAttestationApplicationIdProvider.aidl"],
 }
 
-filegroup {
-    name: "IDropBoxManagerService.aidl",
-    srcs: ["com/android/internal/os/IDropBoxManagerService.aidl"],
+aidl_library {
+    name: "IDropBoxManagerService_aidl",
+    srcs: [
+        "com/android/internal/os/IDropBoxManagerService.aidl",
+    ],
+    hdrs: [
+        "android/os/DropBoxManager.aidl",
+    ],
 }
 
 filegroup {
@@ -146,7 +151,7 @@ filegroup {
     ],
 }
 
-filegroup {
+aidl_library {
     name: "ILogcatManagerService_aidl",
     srcs: ["android/os/logcat/ILogcatManagerService.aidl"],
 }
