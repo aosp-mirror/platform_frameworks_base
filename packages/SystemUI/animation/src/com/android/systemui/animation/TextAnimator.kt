@@ -23,8 +23,8 @@ import android.animation.ValueAnimator
 import android.graphics.Canvas
 import android.graphics.Typeface
 import android.graphics.fonts.Font
+import android.graphics.fonts.FontVariationAxis
 import android.text.Layout
-import android.text.TextPaint
 import android.util.LruCache
 
 private const val DEFAULT_ANIMATION_DURATION: Long = 300
@@ -33,18 +33,39 @@ private const val TYPEFACE_CACHE_MAX_ENTRIES = 5
 typealias GlyphCallback = (TextAnimator.PositionedGlyph, Float) -> Unit
 
 interface TypefaceVariantCache {
-    fun getTypefaceForVariant(fvar: String, targetPaint: TextPaint): Typeface?
+    fun getTypefaceForVariant(fvar: String?): Typeface?
+
+    companion object {
+        fun createVariantTypeface(baseTypeface: Typeface, fVar: String?): Typeface {
+            if (fVar.isNullOrEmpty()) {
+                return baseTypeface
+            }
+
+            val axes = FontVariationAxis.fromFontVariationSettings(fVar).toMutableList()
+            axes.removeIf { !baseTypeface.isSupportedAxes(it.getOpenTypeTagValue()) }
+            if (axes.isEmpty()) {
+                return baseTypeface
+            }
+            return Typeface.createFromTypefaceWithVariation(baseTypeface, axes)
+        }
+    }
 }
 
-class TypefaceVariantCacheImpl() : TypefaceVariantCache {
+class TypefaceVariantCacheImpl(
+    var baseTypeface: Typeface,
+) : TypefaceVariantCache {
     private val cache = LruCache<String, Typeface>(TYPEFACE_CACHE_MAX_ENTRIES)
-    override fun getTypefaceForVariant(fvar: String, targetPaint: TextPaint): Typeface? {
+    override fun getTypefaceForVariant(fvar: String?): Typeface? {
+        if (fvar == null) {
+            return baseTypeface
+        }
         cache.get(fvar)?.let {
             return it
         }
 
-        targetPaint.fontVariationSettings = fvar
-        return targetPaint.typeface?.also { cache.put(fvar, it) }
+        return TypefaceVariantCache
+            .createVariantTypeface(baseTypeface, fvar)
+            .also { cache.put(fvar, it) }
     }
 }
 
@@ -78,7 +99,7 @@ class TextAnimator(
     layout: Layout,
     private val invalidateCallback: () -> Unit,
 ) {
-    var typefaceCache: TypefaceVariantCache = TypefaceVariantCacheImpl()
+    var typefaceCache: TypefaceVariantCache = TypefaceVariantCacheImpl(layout.paint.typeface)
         get() = field
         set(value) {
             field = value
@@ -244,8 +265,7 @@ class TextAnimator(
         }
 
         if (!fvar.isNullOrBlank()) {
-            textInterpolator.targetPaint.typeface =
-                typefaceCache.getTypefaceForVariant(fvar, textInterpolator.targetPaint)
+            textInterpolator.targetPaint.typeface = typefaceCache.getTypefaceForVariant(fvar)
         }
 
         if (color != null) {
@@ -339,4 +359,3 @@ class TextAnimator(
         )
     }
 }
-
