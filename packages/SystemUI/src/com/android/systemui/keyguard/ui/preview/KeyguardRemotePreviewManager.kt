@@ -114,12 +114,17 @@ constructor(
             }
 
             when (message.what) {
-                KeyguardQuickAffordancePreviewConstants.MESSAGE_ID_SLOT_SELECTED -> {
-                    message.data
-                        .getString(
-                            KeyguardQuickAffordancePreviewConstants.KEY_SLOT_ID,
-                        )
-                        ?.let { slotId -> renderer.onSlotSelected(slotId = slotId) }
+                KeyguardPreviewConstants.MESSAGE_ID_SLOT_SELECTED -> {
+                    message.data.getString(KeyguardPreviewConstants.KEY_SLOT_ID)?.let { slotId ->
+                        renderer.onSlotSelected(slotId = slotId)
+                    }
+                }
+                KeyguardPreviewConstants.MESSAGE_ID_COLOR_OVERRIDE -> {
+                    renderer.onColorOverridden(
+                        message.data
+                            .getString(KeyguardPreviewConstants.KEY_COLOR_OVERRIDE)
+                            ?.toIntOrNull()
+                    )
                 }
                 else -> requestDestruction(this)
             }
