@@ -813,6 +813,10 @@ class TransitionController {
         }
         ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS, "Finish Transition: %s", record);
         mPlayingTransitions.remove(record);
+        if (!inTransition()) {
+            // reset track-count now since shell-side is idle.
+            mTrackCount = 0;
+        }
         updateRunningRemoteAnimation(record, false /* isPlaying */);
         record.finishTransition();
         for (int i = mAnimatingExitWindows.size() - 1; i >= 0; i--) {
@@ -825,10 +829,9 @@ class TransitionController {
             }
         }
         mRunningLock.doNotifyLocked();
-        // Run state-validation checks when no transitions are active anymore.
+        // Run state-validation checks when no transitions are active anymore (Note: sometimes
+        // finish can start a transition, so check afterwards -- eg. pip).
         if (!inTransition()) {
-            // Can reset track-count now that everything is idle.
-            mTrackCount = 0;
             validateStates();
             mAtm.mWindowManager.onAnimationFinished();
         }

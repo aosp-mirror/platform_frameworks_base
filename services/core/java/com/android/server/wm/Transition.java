@@ -954,6 +954,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 // to the transient activity.
                 ar.supportsEnterPipOnTaskSwitch = true;
             }
+            // Make sure this activity can enter pip under the current circumstances.
+            // `enterPictureInPicture` internally checks, but with beforeStopping=false which
+            // is specifically for non-auto-enter.
+            if (!ar.checkEnterPictureInPictureState("enterPictureInPictureMode",
+                    true /* beforeStopping */)) {
+                return false;
+            }
             return mController.mAtm.enterPictureInPictureMode(ar, ar.pictureInPictureArgs,
                     false /* fromClient */);
         }
