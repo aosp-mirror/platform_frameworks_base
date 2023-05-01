@@ -31,6 +31,7 @@ import android.view.WindowManager.TRANSIT_CHANGE
 import android.view.WindowManager.TRANSIT_NONE
 import android.view.WindowManager.TRANSIT_OPEN
 import android.view.WindowManager.TRANSIT_TO_FRONT
+import android.window.DisplayAreaInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER
@@ -340,6 +341,57 @@ class DesktopTasksControllerTest : ShellTestCase() {
         with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
             assertThat(changes.keys).contains(taskDefaultDisplay.token.asBinder())
             assertThat(changes.keys).doesNotContain(taskSecondDisplay.token.asBinder())
+        }
+    }
+
+    @Test
+    fun moveToNextDisplay_noOtherDisplays() {
+        whenever(rootTaskDisplayAreaOrganizer.displayIds).thenReturn(intArrayOf(DEFAULT_DISPLAY))
+        val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        controller.moveToNextDisplay(task.taskId)
+        verifyWCTNotExecuted()
+    }
+
+    @Test
+    fun moveToNextDisplay_moveFromFirstToSecondDisplay() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+                .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: second display
+        val secondDisplayArea = DisplayAreaInfo(MockToken().token(), SECOND_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECOND_DISPLAY))
+                .thenReturn(secondDisplayArea)
+
+        val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+        controller.moveToNextDisplay(task.taskId)
+        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+            assertThat(hierarchyOps).hasSize(1)
+            assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
+            assertThat(hierarchyOps[0].isReparent).isTrue()
+            assertThat(hierarchyOps[0].newParent).isEqualTo(secondDisplayArea.token.asBinder())
+            assertThat(hierarchyOps[0].toTop).isTrue()
+        }
+    }
+
+    @Test
+    fun moveToNextDisplay_moveFromSecondToFirstDisplay() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+            .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: default display
+        val defaultDisplayArea = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY))
+                .thenReturn(defaultDisplayArea)
+
+        val task = setUpFreeformTask(displayId = SECOND_DISPLAY)
+        controller.moveToNextDisplay(task.taskId)
+
+        with(getLatestWct(expectTransition = TRANSIT_CHANGE)) {
+            assertThat(hierarchyOps).hasSize(1)
+            assertThat(hierarchyOps[0].container).isEqualTo(task.token.asBinder())
+            assertThat(hierarchyOps[0].isReparent).isTrue()
+            assertThat(hierarchyOps[0].newParent).isEqualTo(defaultDisplayArea.token.asBinder())
+            assertThat(hierarchyOps[0].toTop).isTrue()
         }
     }
 
