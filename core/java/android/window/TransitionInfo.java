@@ -21,6 +21,7 @@ import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
@@ -1064,6 +1065,11 @@ public final class TransitionInfo implements Parcelable {
 
         public static AnimationOptions makeCrossProfileAnimOptions() {
             AnimationOptions options = new AnimationOptions(ANIM_OPEN_CROSS_PROFILE_APPS);
+            return options;
+        }
+
+        public static AnimationOptions makeSceneTransitionAnimOptions() {
+            AnimationOptions options = new AnimationOptions(ANIM_SCENE_TRANSITION);
             return options;
         }
 
