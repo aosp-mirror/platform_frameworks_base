@@ -933,7 +933,7 @@ public class DisplayPolicy {
             float maxOpacity = mService.mMaximumObscuringOpacityForTouch;
             if (attrs.alpha > maxOpacity
                     && (attrs.flags & FLAG_NOT_TOUCHABLE) != 0
-                    && (attrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) == 0) {
+                    && !win.isTrustedOverlay()) {
                 // The app is posting a SAW with the intent of letting touches pass through, but
                 // they are going to be deemed untrusted and will be blocked. Try to honor the
                 // intent of letting touches pass through at the cost of 0.2 opacity for app
