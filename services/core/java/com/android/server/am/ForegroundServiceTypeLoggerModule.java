@@ -28,6 +28,7 @@ import static android.app.ActivityManager.FOREGROUND_SERVICE_API_TYPE_USB;
 import static android.os.Process.INVALID_UID;
 
 import android.annotation.IntDef;
+import android.app.ActivityManager;
 import android.app.ActivityManager.ForegroundServiceApiType;
 import android.app.ForegroundServiceDelegationOptions;
 import android.content.ComponentName;
@@ -466,7 +467,11 @@ public class ForegroundServiceTypeLoggerModule {
                         : ForegroundServiceDelegationOptions.DELEGATION_SERVICE_DEFAULT,
                 apiState,
                 apiType,
-                timestamp);
+                timestamp,
+                ActivityManager.PROCESS_STATE_UNKNOWN,
+                ActivityManager.PROCESS_CAPABILITY_NONE,
+                ActivityManager.PROCESS_STATE_UNKNOWN,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
     }
 
     /**
@@ -500,7 +505,11 @@ public class ForegroundServiceTypeLoggerModule {
                 0,
                 apiState,
                 apiType,
-                timestamp);
+                timestamp,
+                ActivityManager.PROCESS_STATE_UNKNOWN,
+                ActivityManager.PROCESS_CAPABILITY_NONE,
+                ActivityManager.PROCESS_STATE_UNKNOWN,
+                ActivityManager.PROCESS_CAPABILITY_NONE);
     }
 
     /**
