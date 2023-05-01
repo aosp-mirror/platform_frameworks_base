@@ -235,6 +235,69 @@ class DesktopTasksController(
     }
 
     /**
+     * Move task to the next display.
+     *
+     * Queries all current known display ids and sorts them in ascending order. Then iterates
+     * through the list and looks for the display id that is larger than the display id for
+     * the passed in task. If a display with a higher id is not found, iterates through the list and
+     * finds the first display id that is not the display id for the passed in task.
+     *
+     * If a display matching the above criteria is found, re-parents the task to that display.
+     * No-op if no such display is found.
+     */
+    fun moveToNextDisplay(taskId: Int) {
+        val task = shellTaskOrganizer.getRunningTaskInfo(taskId)
+        if (task == null) {
+            ProtoLog.w(WM_SHELL_DESKTOP_MODE, "moveToNextDisplay: taskId=%d not found", taskId)
+            return
+        }
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveToNextDisplay: taskId=%d taskDisplayId=%d",
+                taskId, task.displayId)
+
+        val displayIds = rootTaskDisplayAreaOrganizer.displayIds.sorted()
+        // Get the first display id that is higher than current task display id
+        var newDisplayId = displayIds.firstOrNull { displayId -> displayId > task.displayId }
+        if (newDisplayId == null) {
+            // No display with a higher id, get the first display id that is not the task display id
+            newDisplayId = displayIds.firstOrNull { displayId -> displayId < task.displayId }
+        }
+        if (newDisplayId == null) {
+            ProtoLog.w(WM_SHELL_DESKTOP_MODE, "moveToNextDisplay: next display not found")
+            return
+        }
+        moveToDisplay(task, newDisplayId)
+    }
+
+    /**
+     * Move [task] to display with [displayId].
+     *
+     * No-op if task is already on that display per [RunningTaskInfo.displayId].
+     */
+    private fun moveToDisplay(task: RunningTaskInfo, displayId: Int) {
+        ProtoLog.v(WM_SHELL_DESKTOP_MODE, "moveToDisplay: taskId=%d displayId=%d",
+                task.taskId, displayId)
+
+        if (task.displayId == displayId) {
+            ProtoLog.d(WM_SHELL_DESKTOP_MODE, "moveToDisplay: task already on display")
+            return
+        }
+
+        val displayAreaInfo = rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(displayId)
+        if (displayAreaInfo == null) {
+            ProtoLog.w(WM_SHELL_DESKTOP_MODE, "moveToDisplay: display not found")
+            return
+        }
+
+        val wct = WindowContainerTransaction()
+        wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+        } else {
+            shellTaskOrganizer.applyTransaction(wct)
+        }
+    }
+
+    /**
      * Get windowing move for a given `taskId`
      *
      * @return [WindowingMode] for the task or [WINDOWING_MODE_UNDEFINED] if task is not found
