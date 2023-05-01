@@ -91,19 +91,19 @@ class AssetManager2Test : public ::testing::Test {
   }
 
  protected:
-  std::unique_ptr<const ApkAssets> basic_assets_;
-  std::unique_ptr<const ApkAssets> basic_de_fr_assets_;
-  std::unique_ptr<const ApkAssets> basic_xhdpi_assets_;
-  std::unique_ptr<const ApkAssets> basic_xxhdpi_assets_;
-  std::unique_ptr<const ApkAssets> style_assets_;
-  std::unique_ptr<const ApkAssets> lib_one_assets_;
-  std::unique_ptr<const ApkAssets> lib_two_assets_;
-  std::unique_ptr<const ApkAssets> libclient_assets_;
-  std::unique_ptr<const ApkAssets> appaslib_assets_;
-  std::unique_ptr<const ApkAssets> system_assets_;
-  std::unique_ptr<const ApkAssets> app_assets_;
-  std::unique_ptr<const ApkAssets> overlay_assets_;
-  std::unique_ptr<const ApkAssets> overlayable_assets_;
+  AssetManager2::ApkAssetsPtr basic_assets_;
+  AssetManager2::ApkAssetsPtr basic_de_fr_assets_;
+  AssetManager2::ApkAssetsPtr basic_xhdpi_assets_;
+  AssetManager2::ApkAssetsPtr basic_xxhdpi_assets_;
+  AssetManager2::ApkAssetsPtr style_assets_;
+  AssetManager2::ApkAssetsPtr lib_one_assets_;
+  AssetManager2::ApkAssetsPtr lib_two_assets_;
+  AssetManager2::ApkAssetsPtr libclient_assets_;
+  AssetManager2::ApkAssetsPtr appaslib_assets_;
+  AssetManager2::ApkAssetsPtr system_assets_;
+  AssetManager2::ApkAssetsPtr app_assets_;
+  AssetManager2::ApkAssetsPtr overlay_assets_;
+  AssetManager2::ApkAssetsPtr overlayable_assets_;
 };
 
 TEST_F(AssetManager2Test, FindsResourceFromSingleApkAssets) {
@@ -114,7 +114,7 @@ TEST_F(AssetManager2Test, FindsResourceFromSingleApkAssets) {
 
   AssetManager2 assetmanager;
   assetmanager.SetConfiguration(desired_config);
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
   ASSERT_TRUE(value.has_value());
@@ -138,7 +138,7 @@ TEST_F(AssetManager2Test, FindsResourceFromMultipleApkAssets) {
 
   AssetManager2 assetmanager;
   assetmanager.SetConfiguration(desired_config);
-  assetmanager.SetApkAssets({basic_assets_.get(), basic_de_fr_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_, basic_de_fr_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
   ASSERT_TRUE(value.has_value());
@@ -159,8 +159,7 @@ TEST_F(AssetManager2Test, FindsResourceFromSharedLibrary) {
 
   // libclient is built with lib_one and then lib_two in order.
   // Reverse the order to test that proper package ID re-assignment is happening.
-  assetmanager.SetApkAssets(
-      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+  assetmanager.SetApkAssets({lib_two_assets_, lib_one_assets_, libclient_assets_});
 
   auto value = assetmanager.GetResource(libclient::R::string::foo_one);
   ASSERT_TRUE(value.has_value());
@@ -195,7 +194,7 @@ TEST_F(AssetManager2Test, FindsResourceFromSharedLibrary) {
 
 TEST_F(AssetManager2Test, FindsResourceFromAppLoadedAsSharedLibrary) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({appaslib_assets_.get()});
+  assetmanager.SetApkAssets({appaslib_assets_});
 
   // The appaslib package will have been assigned the package ID 0x02.
   auto value = assetmanager.GetResource(fix_package_id(appaslib::R::integer::number1, 0x02));
@@ -206,27 +205,26 @@ TEST_F(AssetManager2Test, FindsResourceFromAppLoadedAsSharedLibrary) {
 
 TEST_F(AssetManager2Test, AssignsOverlayPackageIdLast) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets(
-      {overlayable_assets_.get(), overlay_assets_.get(), lib_one_assets_.get()});
+  assetmanager.SetApkAssets({overlayable_assets_, overlay_assets_, lib_one_assets_});
 
   auto apk_assets = assetmanager.GetApkAssets();
   ASSERT_EQ(3, apk_assets.size());
-  ASSERT_EQ(overlayable_assets_.get(), apk_assets[0]);
-  ASSERT_EQ(overlay_assets_.get(), apk_assets[1]);
-  ASSERT_EQ(lib_one_assets_.get(), apk_assets[2]);
+  ASSERT_EQ(overlayable_assets_, apk_assets[0].promote());
+  ASSERT_EQ(overlay_assets_, apk_assets[1].promote());
+  ASSERT_EQ(lib_one_assets_, apk_assets[2].promote());
 
-  auto get_first_package_id = [&assetmanager](const ApkAssets* apkAssets) -> uint8_t {
+  auto get_first_package_id = [&assetmanager](auto apkAssets) -> uint8_t {
     return assetmanager.GetAssignedPackageId(apkAssets->GetLoadedArsc()->GetPackages()[0].get());
   };
 
-  ASSERT_EQ(0x7f, get_first_package_id(overlayable_assets_.get()));
-  ASSERT_EQ(0x03, get_first_package_id(overlay_assets_.get()));
-  ASSERT_EQ(0x02, get_first_package_id(lib_one_assets_.get()));
+  ASSERT_EQ(0x7f, get_first_package_id(overlayable_assets_));
+  ASSERT_EQ(0x03, get_first_package_id(overlay_assets_));
+  ASSERT_EQ(0x02, get_first_package_id(lib_one_assets_));
 }
 
 TEST_F(AssetManager2Test, GetSharedLibraryResourceName) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({lib_one_assets_.get()});
+  assetmanager.SetApkAssets({lib_one_assets_});
 
   auto name = assetmanager.GetResourceName(lib_one::R::string::foo);
   ASSERT_TRUE(name.has_value());
@@ -235,7 +233,7 @@ TEST_F(AssetManager2Test, GetSharedLibraryResourceName) {
 
 TEST_F(AssetManager2Test, GetResourceNameNonMatchingConfig) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_de_fr_assets_.get()});
+  assetmanager.SetApkAssets({basic_de_fr_assets_});
 
   auto value = assetmanager.GetResourceName(basic::R::string::test1);
   ASSERT_TRUE(value.has_value());
@@ -244,7 +242,7 @@ TEST_F(AssetManager2Test, GetResourceNameNonMatchingConfig) {
 
 TEST_F(AssetManager2Test, GetResourceTypeSpecFlags) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_de_fr_assets_.get()});
+  assetmanager.SetApkAssets({basic_de_fr_assets_});
 
   auto value = assetmanager.GetResourceTypeSpecFlags(basic::R::string::test1);
   ASSERT_TRUE(value.has_value());
@@ -253,7 +251,7 @@ TEST_F(AssetManager2Test, GetResourceTypeSpecFlags) {
 
 TEST_F(AssetManager2Test, FindsBagResourceFromSingleApkAssets) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   auto bag = assetmanager.GetBag(basic::R::array::integerArray1);
   ASSERT_TRUE(bag.has_value());
@@ -280,8 +278,7 @@ TEST_F(AssetManager2Test, FindsBagResourceFromSharedLibrary) {
 
   // libclient is built with lib_one and then lib_two in order.
   // Reverse the order to test that proper package ID re-assignment is happening.
-  assetmanager.SetApkAssets(
-      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+  assetmanager.SetApkAssets({lib_two_assets_, lib_one_assets_, libclient_assets_});
 
   auto bag = assetmanager.GetBag(fix_package_id(lib_one::R::style::Theme, 0x03));
   ASSERT_TRUE(bag.has_value());
@@ -300,8 +297,7 @@ TEST_F(AssetManager2Test, FindsBagResourceFromMultipleSharedLibraries) {
 
   // libclient is built with lib_one and then lib_two in order.
   // Reverse the order to test that proper package ID re-assignment is happening.
-  assetmanager.SetApkAssets(
-      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+  assetmanager.SetApkAssets({lib_two_assets_, lib_one_assets_, libclient_assets_});
 
   auto bag = assetmanager.GetBag(libclient::R::style::ThemeMultiLib);
   ASSERT_TRUE(bag.has_value());
@@ -321,8 +317,7 @@ TEST_F(AssetManager2Test, FindsStyleResourceWithParentFromSharedLibrary) {
 
   // libclient is built with lib_one and then lib_two in order.
   // Reverse the order to test that proper package ID re-assignment is happening.
-  assetmanager.SetApkAssets(
-      {lib_two_assets_.get(), lib_one_assets_.get(), libclient_assets_.get()});
+  assetmanager.SetApkAssets({lib_two_assets_, lib_one_assets_, libclient_assets_});
 
   auto bag = assetmanager.GetBag(libclient::R::style::Theme);
   ASSERT_TRUE(bag.has_value());
@@ -337,7 +332,7 @@ TEST_F(AssetManager2Test, FindsStyleResourceWithParentFromSharedLibrary) {
 
 TEST_F(AssetManager2Test, MergesStylesWithParentFromSingleApkAssets) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({style_assets_.get()});
+  assetmanager.SetApkAssets({style_assets_});
 
   auto bag_one = assetmanager.GetBag(app::R::style::StyleOne);
   ASSERT_TRUE(bag_one.has_value());
@@ -401,7 +396,7 @@ TEST_F(AssetManager2Test, MergesStylesWithParentFromSingleApkAssets) {
 
 TEST_F(AssetManager2Test, MergeStylesCircularDependency) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({style_assets_.get()});
+  assetmanager.SetApkAssets({style_assets_});
 
   // GetBag should stop traversing the parents of styles when a circular
   // dependency is detected
@@ -412,7 +407,7 @@ TEST_F(AssetManager2Test, MergeStylesCircularDependency) {
 
 TEST_F(AssetManager2Test, ResolveReferenceToResource) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   auto value = assetmanager.GetResource(basic::R::integer::ref1);
   ASSERT_TRUE(value.has_value());
@@ -428,7 +423,7 @@ TEST_F(AssetManager2Test, ResolveReferenceToResource) {
 
 TEST_F(AssetManager2Test, ResolveReferenceToBag) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   auto value = assetmanager.GetResource(basic::R::integer::number2, true /*may_be_bag*/);
   ASSERT_TRUE(value.has_value());
@@ -444,7 +439,7 @@ TEST_F(AssetManager2Test, ResolveReferenceToBag) {
 
 TEST_F(AssetManager2Test, ResolveDeepIdReference) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   // Set up the resource ids
   auto high_ref = assetmanager.GetResourceId("@id/high_ref", "values", "com.android.basic");
@@ -470,8 +465,7 @@ TEST_F(AssetManager2Test, ResolveDeepIdReference) {
 
 TEST_F(AssetManager2Test, DensityOverride) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_assets_.get(), basic_xhdpi_assets_.get(),
-                             basic_xxhdpi_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_, basic_xhdpi_assets_, basic_xxhdpi_assets_});
   assetmanager.SetConfiguration({
     .density = ResTable_config::DENSITY_XHIGH,
     .sdkVersion = 21,
@@ -493,7 +487,7 @@ TEST_F(AssetManager2Test, DensityOverride) {
 
 TEST_F(AssetManager2Test, KeepLastReferenceIdUnmodifiedIfNoReferenceIsResolved) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   // Create some kind of value that is NOT a reference.
   AssetManager2::SelectedValue value{};
@@ -509,7 +503,7 @@ TEST_F(AssetManager2Test, KeepLastReferenceIdUnmodifiedIfNoReferenceIsResolved) 
 
 TEST_F(AssetManager2Test, ResolveReferenceMissingResourceDoNotCacheFlags) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
   {
     AssetManager2::SelectedValue value{};
     value.data = basic::R::string::test1;
@@ -540,7 +534,7 @@ TEST_F(AssetManager2Test, ResolveReferenceMissingResourceDoNotCacheFlags) {
 
 TEST_F(AssetManager2Test, ResolveReferenceMissingResource) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   const uint32_t kMissingResId = 0x8001ffff;
   AssetManager2::SelectedValue value{};
@@ -558,7 +552,7 @@ TEST_F(AssetManager2Test, ResolveReferenceMissingResource) {
 
 TEST_F(AssetManager2Test, ResolveReferenceMissingResourceLib) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({libclient_assets_.get()});
+  assetmanager.SetApkAssets({libclient_assets_});
 
   AssetManager2::SelectedValue value{};
   value.type = Res_value::TYPE_REFERENCE;
@@ -580,7 +574,7 @@ static bool IsConfigurationPresent(const std::set<ResTable_config>& configuratio
 
 TEST_F(AssetManager2Test, GetResourceConfigurations) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({system_assets_.get(), basic_de_fr_assets_.get()});
+  assetmanager.SetApkAssets({system_assets_, basic_de_fr_assets_});
 
   auto configurations = assetmanager.GetResourceConfigurations();
   ASSERT_TRUE(configurations.has_value());
@@ -625,7 +619,7 @@ TEST_F(AssetManager2Test, GetResourceConfigurations) {
 
 TEST_F(AssetManager2Test, GetResourceLocales) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({system_assets_.get(), basic_de_fr_assets_.get()});
+  assetmanager.SetApkAssets({system_assets_, basic_de_fr_assets_});
 
   std::set<std::string> locales = assetmanager.GetResourceLocales();
 
@@ -644,7 +638,7 @@ TEST_F(AssetManager2Test, GetResourceLocales) {
 
 TEST_F(AssetManager2Test, GetResourceId) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   auto resid = assetmanager.GetResourceId("com.android.basic:layout/main", "", "");
   ASSERT_TRUE(resid.has_value());
@@ -661,7 +655,7 @@ TEST_F(AssetManager2Test, GetResourceId) {
 
 TEST_F(AssetManager2Test, OpensFileFromSingleApkAssets) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({system_assets_.get()});
+  assetmanager.SetApkAssets({system_assets_});
 
   std::unique_ptr<Asset> asset = assetmanager.Open("file.txt", Asset::ACCESS_BUFFER);
   ASSERT_THAT(asset, NotNull());
@@ -673,7 +667,7 @@ TEST_F(AssetManager2Test, OpensFileFromSingleApkAssets) {
 
 TEST_F(AssetManager2Test, OpensFileFromMultipleApkAssets) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({system_assets_.get(), app_assets_.get()});
+  assetmanager.SetApkAssets({system_assets_, app_assets_});
 
   std::unique_ptr<Asset> asset = assetmanager.Open("file.txt", Asset::ACCESS_BUFFER);
   ASSERT_THAT(asset, NotNull());
@@ -685,7 +679,7 @@ TEST_F(AssetManager2Test, OpensFileFromMultipleApkAssets) {
 
 TEST_F(AssetManager2Test, OpenDir) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({system_assets_.get()});
+  assetmanager.SetApkAssets({system_assets_});
 
   std::unique_ptr<AssetDir> asset_dir = assetmanager.OpenDir("");
   ASSERT_THAT(asset_dir, NotNull());
@@ -707,7 +701,7 @@ TEST_F(AssetManager2Test, OpenDir) {
 
 TEST_F(AssetManager2Test, OpenDirFromManyApks) {
   AssetManager2 assetmanager;
-  assetmanager.SetApkAssets({system_assets_.get(), app_assets_.get()});
+  assetmanager.SetApkAssets({system_assets_, app_assets_});
 
   std::unique_ptr<AssetDir> asset_dir = assetmanager.OpenDir("");
   ASSERT_THAT(asset_dir, NotNull());
@@ -728,7 +722,7 @@ TEST_F(AssetManager2Test, GetLastPathWithoutEnablingReturnsEmpty) {
 
   AssetManager2 assetmanager;
   assetmanager.SetConfiguration(desired_config);
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
   assetmanager.SetResourceResolutionLoggingEnabled(false);
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
@@ -743,7 +737,7 @@ TEST_F(AssetManager2Test, GetLastPathWithoutResolutionReturnsEmpty) {
 
   AssetManager2 assetmanager;
   assetmanager.SetConfiguration(desired_config);
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   auto result = assetmanager.GetLastResourceResolution();
   EXPECT_EQ("", result);
@@ -758,17 +752,18 @@ TEST_F(AssetManager2Test, GetLastPathWithSingleApkAssets) {
   AssetManager2 assetmanager;
   assetmanager.SetResourceResolutionLoggingEnabled(true);
   assetmanager.SetConfiguration(desired_config);
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
   ASSERT_TRUE(value.has_value());
 
   auto result = assetmanager.GetLastResourceResolution();
-  EXPECT_EQ("Resolution for 0x7f030000 com.android.basic:string/test1\n"
-            "\tFor config - de\n"
-            "\tFound initial: basic/basic.apk\n"
-            "Best matching is from default configuration of com.android.basic",
-            result);
+  EXPECT_EQ(
+      "Resolution for 0x7f030000 com.android.basic:string/test1\n"
+      "\tFor config - de\n"
+      "\tFound initial: basic/basic.apk #0\n"
+      "Best matching is from default configuration of com.android.basic",
+      result);
 }
 
 TEST_F(AssetManager2Test, GetLastPathWithMultipleApkAssets) {
@@ -780,18 +775,19 @@ TEST_F(AssetManager2Test, GetLastPathWithMultipleApkAssets) {
   AssetManager2 assetmanager;
   assetmanager.SetResourceResolutionLoggingEnabled(true);
   assetmanager.SetConfiguration(desired_config);
-  assetmanager.SetApkAssets({basic_assets_.get(), basic_de_fr_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_, basic_de_fr_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
   ASSERT_TRUE(value.has_value());
 
   auto result = assetmanager.GetLastResourceResolution();
-  EXPECT_EQ("Resolution for 0x7f030000 com.android.basic:string/test1\n"
-            "\tFor config - de\n"
-            "\tFound initial: basic/basic.apk\n"
-            "\tFound better: basic/basic_de_fr.apk - de\n"
-            "Best matching is from de configuration of com.android.basic",
-            result);
+  EXPECT_EQ(
+      "Resolution for 0x7f030000 com.android.basic:string/test1\n"
+      "\tFor config - de\n"
+      "\tFound initial: basic/basic.apk #0\n"
+      "\tFound better: basic/basic_de_fr.apk #1 - de\n"
+      "Best matching is from de configuration of com.android.basic",
+      result);
 }
 
 TEST_F(AssetManager2Test, GetLastPathAfterDisablingReturnsEmpty) {
@@ -801,7 +797,7 @@ TEST_F(AssetManager2Test, GetLastPathAfterDisablingReturnsEmpty) {
   AssetManager2 assetmanager;
   assetmanager.SetResourceResolutionLoggingEnabled(true);
   assetmanager.SetConfiguration(desired_config);
-  assetmanager.SetApkAssets({basic_assets_.get()});
+  assetmanager.SetApkAssets({basic_assets_});
 
   auto value = assetmanager.GetResource(basic::R::string::test1);
   ASSERT_TRUE(value.has_value());
@@ -822,7 +818,7 @@ TEST_F(AssetManager2Test, GetOverlayablesToString) {
   AssetManager2 assetmanager;
   assetmanager.SetResourceResolutionLoggingEnabled(true);
   assetmanager.SetConfiguration(desired_config);
-  assetmanager.SetApkAssets({overlayable_assets_.get()});
+  assetmanager.SetApkAssets({overlayable_assets_});
 
   const auto map = assetmanager.GetOverlayableMapForPackage(0x7f);
   ASSERT_NE(nullptr, map);

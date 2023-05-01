@@ -38,9 +38,9 @@ constexpr const static char* kFrameworkPath = "/system/framework/framework-res.a
 static void BM_AssetManagerLoadAssets(benchmark::State& state) {
   std::string path = GetTestDataPath() + "/basic/basic.apk";
   while (state.KeepRunning()) {
-    std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path);
+    auto apk = ApkAssets::Load(path);
     AssetManager2 assets;
-    assets.SetApkAssets({apk.get()});
+    assets.SetApkAssets({apk});
   }
 }
 BENCHMARK(BM_AssetManagerLoadAssets);
@@ -61,9 +61,9 @@ BENCHMARK(BM_AssetManagerLoadAssetsOld);
 static void BM_AssetManagerLoadFrameworkAssets(benchmark::State& state) {
   std::string path = kFrameworkPath;
   while (state.KeepRunning()) {
-    std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path);
+    auto apk = ApkAssets::Load(path);
     AssetManager2 assets;
-    assets.SetApkAssets({apk.get()});
+    assets.SetApkAssets({apk});
   }
 }
 BENCHMARK(BM_AssetManagerLoadFrameworkAssets);
@@ -129,14 +129,14 @@ static void BM_AssetManagerGetResourceFrameworkLocaleOld(benchmark::State& state
 BENCHMARK(BM_AssetManagerGetResourceFrameworkLocaleOld);
 
 static void BM_AssetManagerGetBag(benchmark::State& state) {
-  std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
+  auto apk = ApkAssets::Load(GetTestDataPath() + "/styles/styles.apk");
   if (apk == nullptr) {
     state.SkipWithError("Failed to load assets");
     return;
   }
 
   AssetManager2 assets;
-  assets.SetApkAssets({apk.get()});
+  assets.SetApkAssets({apk});
 
   while (state.KeepRunning()) {
     auto bag = assets.GetBag(app::R::style::StyleTwo);
@@ -181,14 +181,14 @@ static void BM_AssetManagerGetBagOld(benchmark::State& state) {
 BENCHMARK(BM_AssetManagerGetBagOld);
 
 static void BM_AssetManagerGetResourceLocales(benchmark::State& state) {
-  std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(kFrameworkPath);
+  auto apk = ApkAssets::Load(kFrameworkPath);
   if (apk == nullptr) {
     state.SkipWithError("Failed to load assets");
     return;
   }
 
   AssetManager2 assets;
-  assets.SetApkAssets({apk.get()});
+  assets.SetApkAssets({apk});
 
   while (state.KeepRunning()) {
     std::set<std::string> locales =
@@ -217,14 +217,14 @@ static void BM_AssetManagerGetResourceLocalesOld(benchmark::State& state) {
 BENCHMARK(BM_AssetManagerGetResourceLocalesOld);
 
 static void BM_AssetManagerSetConfigurationFramework(benchmark::State& state) {
-  std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(kFrameworkPath);
+  auto apk = ApkAssets::Load(kFrameworkPath);
   if (apk == nullptr) {
     state.SkipWithError("Failed to load assets");
     return;
   }
 
   AssetManager2 assets;
-  assets.SetApkAssets({apk.get()});
+  assets.SetApkAssets({apk});
 
   ResTable_config config;
   memset(&config, 0, sizeof(config));
