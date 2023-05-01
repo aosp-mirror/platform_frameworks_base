@@ -2585,8 +2585,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     /**
      * Propagates screen turned on event to wallpaper engine(s).
      */
-    @Override
-    public void notifyScreenTurnedOn(int displayId) {
+    private void notifyScreenTurnedOn(int displayId) {
         synchronized (mLock) {
             if (mIsLockscreenLiveWallpaperEnabled) {
                 for (WallpaperData data : getActiveWallpapers()) {
@@ -2621,13 +2620,10 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
-
-
     /**
      * Propagate screen turning on event to wallpaper engine(s).
      */
-    @Override
-    public void notifyScreenTurningOn(int displayId) {
+    private void notifyScreenTurningOn(int displayId) {
         synchronized (mLock) {
             if (mIsLockscreenLiveWallpaperEnabled) {
                 for (WallpaperData data : getActiveWallpapers()) {
