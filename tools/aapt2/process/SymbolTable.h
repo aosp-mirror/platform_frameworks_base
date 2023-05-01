@@ -207,8 +207,8 @@ class AssetManagerSymbolSource : public ISymbolSource {
   }
 
  private:
+  std::vector<android::AssetManager2::ApkAssetsPtr> apk_assets_;
   android::AssetManager2 asset_manager_;
-  std::vector<std::unique_ptr<const android::ApkAssets>> apk_assets_;
 
   DISALLOW_COPY_AND_ASSIGN(AssetManagerSymbolSource);
 };

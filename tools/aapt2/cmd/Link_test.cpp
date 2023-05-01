@@ -575,7 +575,7 @@ TEST_F(LinkTest, StagedAndroidApi) {
   android::AssetManager2 am;
   auto android_asset = android::ApkAssets::Load(android_apk);
   ASSERT_THAT(android_asset, NotNull());
-  ASSERT_TRUE(am.SetApkAssets({android_asset.get()}));
+  ASSERT_TRUE(am.SetApkAssets({android_asset}));
 
   auto result = am.GetResourceId("android:attr/finalized_res");
   ASSERT_TRUE(result.has_value());
@@ -631,7 +631,7 @@ TEST_F(LinkTest, FinalizedAndroidApi) {
   auto app_against_non_final = android::ApkAssets::Load(app_apk);
   ASSERT_THAT(android_asset, NotNull());
   ASSERT_THAT(app_against_non_final, NotNull());
-  ASSERT_TRUE(am.SetApkAssets({android_asset.get(), app_against_non_final.get()}));
+  ASSERT_TRUE(am.SetApkAssets({android_asset, app_against_non_final}));
 
   auto result = am.GetResourceId("android:attr/finalized_res");
   ASSERT_TRUE(result.has_value());
@@ -667,7 +667,7 @@ TEST_F(LinkTest, FinalizedAndroidApi) {
 
   auto app_against_final = android::ApkAssets::Load(app_apk_respin);
   ASSERT_THAT(app_against_final, NotNull());
-  ASSERT_TRUE(am.SetApkAssets({android_asset.get(), app_against_final.get()}));
+  ASSERT_TRUE(am.SetApkAssets({android_asset, app_against_final}));
 
   {
     auto style = am.GetBag(0x7f020000);
