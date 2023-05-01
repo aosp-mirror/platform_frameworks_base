@@ -365,7 +365,9 @@ public class RequestSessionMetric {
     /**
      * This logs the authentication entry when browsed. Combined with the known browsed clicks
      * in the {@link ChosenProviderFinalPhaseMetric}, this fully captures the authentication entry
-     * logic for multiple loops.
+     * logic for multiple loops. An auth entry may have default or missing data, but if a provider
+     * was never assigned to an auth entry, this indicates an auth entry was never clicked.
+     * This case is handled in this emit.
      *
      * @param browsedAuthenticationMetric the authentication metric information to emit
      */

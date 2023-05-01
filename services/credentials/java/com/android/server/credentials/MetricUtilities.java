@@ -217,11 +217,12 @@ public class MetricUtilities {
                     /* auth_per_entry_counts */
                     authenticationMetric.getAuthEntryCollective().getUniqueEntryCounts(),
                     /* framework_exception_unique_classtype */
-                    DEFAULT_STRING,
-                    /* exception_specified */ false,
-                    /* auth_provider_status TODO(immediately) change */ DEFAULT_INT_32,
+                    authenticationMetric.getFrameworkException(),
+                    /* exception_specified */ authenticationMetric.isHasException(),
+                    /* auth_provider_status */
+                    authenticationMetric.getProviderStatus(),
                     /* query_returned */
-                    false
+                    authenticationMetric.isQueryReturned()
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during candidate get metric logging: " + e);

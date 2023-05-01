@@ -31,10 +31,14 @@ public class CandidateAggregateMetric {
     private static final String TAG = "CandidateProviderMetric";
     // The session id of this provider metric
     private final int mSessionIdProvider;
-    // Indicates if this provider returned from the query phase, default false
+    // Indicates if this provider returned from the candidate query phase,
+    // true if at least one provider returns validly, even if empty, default false
     private boolean mQueryReturned = false;
     // Indicates the total number of providers this aggregate captures information for, default 0
     private int mNumProviders = 0;
+    // Indicates if the authentication entry returned, true if at least one entry returns validly,
+    // even if empty, default false
+    private boolean mAuthReturned = false;
     // Indicates the total number of authentication entries that were tapped in aggregate, default 0
     private int mNumAuthEntriesTapped = 0;
     // The combined aggregate collective across the candidate get/create
@@ -89,9 +93,9 @@ public class CandidateAggregateMetric {
         for (var session : providerSessions) {
             var sessionMetric = session.getProviderSessionMetric();
             var authMetrics = sessionMetric.getBrowsedAuthenticationMetric();
-            mQueryReturned = mQueryReturned; // TODO add rest of auth info
             mNumAuthEntriesTapped += authMetrics.size();
             for (var authMetric : authMetrics) {
+                mAuthReturned = mAuthReturned || authMetric.isQueryReturned();
                 ResponseCollective authCollective = authMetric.getAuthEntryCollective();
                 ResponseCollective.combineTypeCountMaps(responseCountAuth,
                         authCollective.getResponseCountsMap());
@@ -121,5 +125,9 @@ public class CandidateAggregateMetric {
 
     public ResponseCollective getAggregateCollectiveAuth() {
         return mAggregateCollectiveAuth;
+    }
+
+    public boolean isAuthReturned() {
+        return mAuthReturned;
     }
 }

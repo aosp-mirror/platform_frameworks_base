@@ -82,7 +82,30 @@ public class ProviderSessionMetric {
      * @param hasException indicates if the candidate provider associated with an exception
      */
     public void collectCandidateExceptionStatus(boolean hasException) {
-        mCandidatePhasePerProviderMetric.setHasException(hasException);
+        try {
+            mCandidatePhasePerProviderMetric.setHasException(hasException);
+        } catch (Exception e) {
+            Slog.i(TAG, "Error while setting candidate metric exception " + e);
+        }
+    }
+
+    /**
+     * This collects for ProviderSessions, with respect to the authentication entry provider,
+     * if an exception occurred in the authentication entry click. It's expected that these
+     * collections always occur after at least 1 authentication metric has been collected
+     * for the provider associated with this metric encapsulation.
+     *
+     * @param hasException indicates if the candidate provider from an authentication entry
+     *                     associated with an exception
+     */
+    public void collectAuthenticationExceptionStatus(boolean hasException) {
+        try {
+            var mostRecentAuthenticationMetric = mBrowsedAuthenticationMetric
+                    .get(mBrowsedAuthenticationMetric.size() - 1);
+            mostRecentAuthenticationMetric.setHasException(hasException);
+        } catch (Exception e) {
+            Slog.i(TAG, "Error while setting authentication metric exception " + e);
+        }
     }
 
     /**
@@ -107,13 +130,13 @@ public class ProviderSessionMetric {
         mostRecentAuthenticationMetric.setProviderUid(providerSessionUid);
         // TODO(immediately) - add timestamps (no longer needed!!) but also update below values!
         if (isFailureStatus) {
-            mCandidatePhasePerProviderMetric.setQueryReturned(false);
-            mCandidatePhasePerProviderMetric.setProviderQueryStatus(
+            mostRecentAuthenticationMetric.setQueryReturned(false);
+            mostRecentAuthenticationMetric.setProviderStatus(
                     ProviderStatusForMetrics.QUERY_FAILURE
                             .getMetricCode());
         } else if (isCompletionStatus) {
-            mCandidatePhasePerProviderMetric.setQueryReturned(true);
-            mCandidatePhasePerProviderMetric.setProviderQueryStatus(
+            mostRecentAuthenticationMetric.setQueryReturned(true);
+            mostRecentAuthenticationMetric.setProviderStatus(
                     ProviderStatusForMetrics.QUERY_SUCCESS
                             .getMetricCode());
         }
@@ -223,6 +246,17 @@ public class ProviderSessionMetric {
         mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
     }
 
+    /**
+     * This sets up an authentication metric collector to the flow. This must be called before
+     * any logical edits are done in a new authentication entry metric collection.
+     */
+    public void createAuthenticationBrowsingMetric() {
+        BrowsedAuthenticationMetric browsedAuthenticationMetric =
+                new BrowsedAuthenticationMetric(mCandidatePhasePerProviderMetric
+                        .getSessionIdProvider());
+        mBrowsedAuthenticationMetric.add(browsedAuthenticationMetric);
+    }
+
     private void beginCreateCredentialResponseCollectionCandidateEntryMetrics(
             BeginCreateCredentialResponse response) {
         Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
@@ -266,12 +300,10 @@ public class ProviderSessionMetric {
         if (!isAuthEntry) {
             mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
         } else {
-            BrowsedAuthenticationMetric browsedAuthenticationMetric =
-                    new BrowsedAuthenticationMetric(mCandidatePhasePerProviderMetric
-                            .getSessionIdProvider());
-            // to receive an auth entry, the candidate phase must have succeeded
+            // The most recent auth entry must be created already
+            var browsedAuthenticationMetric =
+                    mBrowsedAuthenticationMetric.get(mBrowsedAuthenticationMetric.size() - 1);
             browsedAuthenticationMetric.setAuthEntryCollective(responseCollective);
-            mBrowsedAuthenticationMetric.add(browsedAuthenticationMetric);
         }
     }
 }
