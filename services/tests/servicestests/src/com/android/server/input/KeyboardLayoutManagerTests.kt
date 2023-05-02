@@ -85,6 +85,9 @@ class KeyboardLayoutManagerTests {
         const val DEVICE_ID = 1
         const val VENDOR_SPECIFIC_DEVICE_ID = 2
         const val ENGLISH_DVORAK_DEVICE_ID = 3
+        const val ENGLISH_QWERTY_DEVICE_ID = 4
+        const val DEFAULT_VENDOR_ID = 123
+        const val DEFAULT_PRODUCT_ID = 456
         const val USER_ID = 4
         const val IME_ID = "ime_id"
         const val PACKAGE_NAME = "KeyboardLayoutManagerTests"
@@ -122,6 +125,7 @@ class KeyboardLayoutManagerTests {
     private lateinit var keyboardDevice: InputDevice
     private lateinit var vendorSpecificKeyboardDevice: InputDevice
     private lateinit var englishDvorakKeyboardDevice: InputDevice
+    private lateinit var englishQwertyKeyboardDevice: InputDevice
 
     @Before
     fun setup() {
@@ -150,17 +154,26 @@ class KeyboardLayoutManagerTests {
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)
 
-        keyboardDevice = createKeyboard(DEVICE_ID, 0, 0, "", "")
+        keyboardDevice = createKeyboard(DEVICE_ID, DEFAULT_VENDOR_ID, DEFAULT_PRODUCT_ID, "", "")
         vendorSpecificKeyboardDevice = createKeyboard(VENDOR_SPECIFIC_DEVICE_ID, 1, 1, "", "")
-        englishDvorakKeyboardDevice =
-            createKeyboard(ENGLISH_DVORAK_DEVICE_ID, 0, 0, "en", "dvorak")
+        englishDvorakKeyboardDevice = createKeyboard(ENGLISH_DVORAK_DEVICE_ID, DEFAULT_VENDOR_ID,
+                DEFAULT_PRODUCT_ID, "en", "dvorak")
+        englishQwertyKeyboardDevice = createKeyboard(ENGLISH_QWERTY_DEVICE_ID, DEFAULT_VENDOR_ID,
+                DEFAULT_PRODUCT_ID, "en", "qwerty")
         Mockito.`when`(iInputManager.inputDeviceIds)
-            .thenReturn(intArrayOf(DEVICE_ID, VENDOR_SPECIFIC_DEVICE_ID, ENGLISH_DVORAK_DEVICE_ID))
+            .thenReturn(intArrayOf(
+                DEVICE_ID,
+                VENDOR_SPECIFIC_DEVICE_ID,
+                ENGLISH_DVORAK_DEVICE_ID,
+                ENGLISH_QWERTY_DEVICE_ID
+            ))
         Mockito.`when`(iInputManager.getInputDevice(DEVICE_ID)).thenReturn(keyboardDevice)
         Mockito.`when`(iInputManager.getInputDevice(VENDOR_SPECIFIC_DEVICE_ID))
             .thenReturn(vendorSpecificKeyboardDevice)
         Mockito.`when`(iInputManager.getInputDevice(ENGLISH_DVORAK_DEVICE_ID))
             .thenReturn(englishDvorakKeyboardDevice)
+        Mockito.`when`(iInputManager.getInputDevice(ENGLISH_QWERTY_DEVICE_ID))
+                .thenReturn(englishQwertyKeyboardDevice)
     }
 
     private fun setupBroadcastReceiver() {
@@ -778,12 +791,21 @@ class KeyboardLayoutManagerTests {
     @Test
     fun testNewUi_getDefaultKeyboardLayoutForInputDevice_withHwLanguageTagAndLayoutType() {
         NewSettingsApiFlag(true).use {
-            // Should return English dvorak even if IME current layout is qwerty, since HW says the
+            val frenchSubtype = createImeSubtypeForLanguageTagAndLayoutType("fr", "azerty")
+            // Should return English dvorak even if IME current layout is French, since HW says the
             // keyboard is a Dvorak keyboard
             assertCorrectLayout(
                 englishDvorakKeyboardDevice,
-                createImeSubtypeForLanguageTagAndLayoutType("en", "qwerty"),
+                frenchSubtype,
                 createLayoutDescriptor("keyboard_layout_english_us_dvorak")
+            )
+
+            // Back to back changing HW keyboards with same product and vendor ID but different
+            // language and layout type should configure the layouts correctly.
+            assertCorrectLayout(
+                englishQwertyKeyboardDevice,
+                frenchSubtype,
+                createLayoutDescriptor("keyboard_layout_english_us")
             )
 
             // Fallback to IME information if the HW provided layout script is incompatible with the
