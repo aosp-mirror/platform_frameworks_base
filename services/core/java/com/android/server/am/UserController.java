@@ -46,13 +46,24 @@ import static com.android.server.am.UserState.STATE_BOOTING;
 import static com.android.server.am.UserState.STATE_RUNNING_LOCKED;
 import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKED;
 import static com.android.server.am.UserState.STATE_RUNNING_UNLOCKING;
+import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_ABORTED;
+import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_INVALID_SESSION_ID;
+import static com.android.server.pm.UserJourneyLogger.EVENT_STATE_BEGIN;
+import static com.android.server.pm.UserJourneyLogger.EVENT_STATE_FINISH;
+import static com.android.server.pm.UserJourneyLogger.EVENT_STATE_NONE;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_START;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_STOP;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_SWITCH_FG;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_SWITCH_UI;
+import static com.android.server.pm.UserJourneyLogger.USER_LIFECYCLE_EVENT_UNLOCKED_USER;
+import static com.android.server.pm.UserJourneyLogger.USER_LIFECYCLE_EVENT_UNLOCKING_USER;
+import static com.android.server.pm.UserJourneyLogger.USER_LIFECYCLE_EVENT_USER_RUNNING_LOCKED;
 import static com.android.server.pm.UserManagerInternal.USER_ASSIGNMENT_RESULT_FAILURE;
 import static com.android.server.pm.UserManagerInternal.USER_START_MODE_BACKGROUND_VISIBLE;
 import static com.android.server.pm.UserManagerInternal.USER_START_MODE_FOREGROUND;
 import static com.android.server.pm.UserManagerInternal.userAssignmentResultToString;
 import static com.android.server.pm.UserManagerInternal.userStartModeToString;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -123,6 +134,8 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService.UserCompletedEventType;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.UserState.KeyEvictedCallback;
+import com.android.server.pm.UserJourneyLogger;
+import com.android.server.pm.UserJourneyLogger.UserJourneySession;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerInternal.UserLifecycleListener;
 import com.android.server.pm.UserManagerInternal.UserStartMode;
@@ -138,7 +151,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -220,75 +232,6 @@ class UserController implements Handler.Callback {
      */
     // TODO(b/197344658): Increase to 10s or 15s once we have a switch-UX-is-done invocation too.
     private static final int USER_COMPLETED_EVENT_DELAY_MS = 5 * 1000;
-
-    // Used for statsd logging with UserLifecycleJourneyReported + UserLifecycleEventOccurred atoms
-    private static final long INVALID_SESSION_ID = 0;
-
-    // The various user journeys, defined in the UserLifecycleJourneyReported atom for statsd
-    private static final int USER_JOURNEY_UNKNOWN =
-            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__UNKNOWN;
-    private static final int USER_JOURNEY_USER_SWITCH_FG =
-            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_SWITCH_FG;
-    private static final int USER_JOURNEY_USER_SWITCH_UI =
-            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_SWITCH_UI;
-    private static final int USER_JOURNEY_USER_START =
-            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_START;
-    private static final int USER_JOURNEY_USER_CREATE =
-            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_CREATE;
-    private static final int USER_JOURNEY_USER_STOP =
-            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_STOP;
-    @IntDef(prefix = { "USER_JOURNEY" }, value = {
-            USER_JOURNEY_UNKNOWN,
-            USER_JOURNEY_USER_SWITCH_FG,
-            USER_JOURNEY_USER_SWITCH_UI,
-            USER_JOURNEY_USER_START,
-            USER_JOURNEY_USER_CREATE,
-            USER_JOURNEY_USER_STOP
-    })
-    @interface UserJourney {}
-
-    // The various user lifecycle events, defined in the UserLifecycleEventOccurred atom for statsd
-    private static final int USER_LIFECYCLE_EVENT_UNKNOWN =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__UNKNOWN;
-    private static final int USER_LIFECYCLE_EVENT_SWITCH_USER =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__SWITCH_USER;
-    private static final int USER_LIFECYCLE_EVENT_START_USER =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__START_USER;
-    private static final int USER_LIFECYCLE_EVENT_CREATE_USER =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER;
-    private static final int USER_LIFECYCLE_EVENT_USER_RUNNING_LOCKED =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__USER_RUNNING_LOCKED;
-    private static final int USER_LIFECYCLE_EVENT_UNLOCKING_USER =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__UNLOCKING_USER;
-    private static final int USER_LIFECYCLE_EVENT_UNLOCKED_USER =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__UNLOCKED_USER;
-    private static final int USER_LIFECYCLE_EVENT_STOP_USER =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__STOP_USER;
-    @IntDef(prefix = { "USER_LIFECYCLE_EVENT" }, value = {
-            USER_LIFECYCLE_EVENT_UNKNOWN,
-            USER_LIFECYCLE_EVENT_SWITCH_USER,
-            USER_LIFECYCLE_EVENT_START_USER,
-            USER_LIFECYCLE_EVENT_CREATE_USER,
-            USER_LIFECYCLE_EVENT_USER_RUNNING_LOCKED,
-            USER_LIFECYCLE_EVENT_UNLOCKING_USER,
-            USER_LIFECYCLE_EVENT_UNLOCKED_USER,
-            USER_LIFECYCLE_EVENT_STOP_USER
-    })
-    @interface UserLifecycleEvent {}
-
-    // User lifecyle event state, defined in the UserLifecycleEventOccurred atom for statsd
-    private static final int USER_LIFECYCLE_EVENT_STATE_BEGIN =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__BEGIN;
-    private static final int USER_LIFECYCLE_EVENT_STATE_FINISH =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH;
-    private static final int USER_LIFECYCLE_EVENT_STATE_NONE =
-            FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE;
-    @IntDef(prefix = { "USER_LIFECYCLE_EVENT_STATE" }, value = {
-            USER_LIFECYCLE_EVENT_STATE_BEGIN,
-            USER_LIFECYCLE_EVENT_STATE_FINISH,
-            USER_LIFECYCLE_EVENT_STATE_NONE,
-    })
-    @interface UserLifecycleEventState {}
 
     /**
      * Maximum number of users we allow to be running at a time, including system user.
@@ -418,13 +361,6 @@ class UserController implements Handler.Callback {
      */
     @GuardedBy("mLock")
     private final ArrayList<Integer> mLastActiveUsers = new ArrayList<>();
-
-    /**
-     * {@link UserIdInt} to {@link UserJourneySession} mapping used for statsd logging for the
-     * UserLifecycleJourneyReported and UserLifecycleEventOccurred atoms.
-     */
-    @GuardedBy("mUserIdToUserJourneyMap")
-    private final SparseArray<UserJourneySession> mUserIdToUserJourneyMap = new SparseArray<>();
 
     /**
      * Map of userId to {@link UserCompletedEventType} event flags, indicating which as-yet-
@@ -621,8 +557,9 @@ class UserController implements Handler.Callback {
         // but we might immediately step into RUNNING below if the user
         // storage is already unlocked.
         if (uss.setState(STATE_BOOTING, STATE_RUNNING_LOCKED)) {
-            logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_USER_RUNNING_LOCKED,
-                    USER_LIFECYCLE_EVENT_STATE_NONE);
+            mInjector.getUserJourneyLogger()
+                    .logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_USER_RUNNING_LOCKED,
+                    EVENT_STATE_NONE);
             mInjector.getUserManagerInternal().setUserState(userId, uss.state);
             // Do not report secondary users, runtime restarts or first boot/upgrade
             if (userId == UserHandle.USER_SYSTEM
@@ -694,8 +631,9 @@ class UserController implements Handler.Callback {
     private boolean finishUserUnlocking(final UserState uss) {
         final int userId = uss.mHandle.getIdentifier();
         EventLog.writeEvent(EventLogTags.UC_FINISH_USER_UNLOCKING, userId);
-        logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_UNLOCKING_USER,
-                USER_LIFECYCLE_EVENT_STATE_BEGIN);
+        mInjector.getUserJourneyLogger()
+                .logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_UNLOCKING_USER,
+                EVENT_STATE_BEGIN);
         // If the user key hasn't been unlocked yet, we cannot proceed.
         if (!StorageManager.isUserKeyUnlocked(userId)) return false;
         synchronized (mLock) {
@@ -1073,9 +1011,7 @@ class UserController implements Handler.Callback {
             return;
         }
 
-        logUserJourneyInfo(null, getUserInfo(userId), USER_JOURNEY_USER_STOP);
-        logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_STOP_USER,
-                USER_LIFECYCLE_EVENT_STATE_BEGIN);
+        logUserJourneyBegin(userId, USER_JOURNEY_USER_STOP);
 
         if (stopUserCallback != null) {
             uss.mStopCallbacks.add(stopUserCallback);
@@ -1138,9 +1074,16 @@ class UserController implements Handler.Callback {
         synchronized (mLock) {
             if (uss.state != UserState.STATE_STOPPING) {
                 // Whoops, we are being started back up.  Abort, abort!
-                logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_STOP_USER,
-                        USER_LIFECYCLE_EVENT_STATE_NONE);
-                clearSessionId(userId);
+                UserJourneySession session = mInjector.getUserJourneyLogger()
+                        .logUserJourneyFinishWithError(-1, getUserInfo(userId),
+                                USER_JOURNEY_USER_STOP, ERROR_CODE_ABORTED);
+                if (session != null) {
+                    mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG, session);
+                } else {
+                    mInjector.getUserJourneyLogger()
+                            .logUserJourneyFinishWithError(-1, getUserInfo(userId),
+                                    USER_JOURNEY_USER_STOP, ERROR_CODE_INVALID_SESSION_ID);
+                }
                 return;
             }
             uss.setState(UserState.STATE_SHUTDOWN);
@@ -1247,9 +1190,11 @@ class UserController implements Handler.Callback {
                 mInjector.getUserManager().removeUserEvenWhenDisallowed(userId);
             }
 
-            logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_STOP_USER,
-                    USER_LIFECYCLE_EVENT_STATE_FINISH);
-            clearSessionId(userId);
+            UserJourneySession session = mInjector.getUserJourneyLogger()
+                    .logUserJourneyFinish(-1, userInfo, USER_JOURNEY_USER_STOP);
+            if (session != null) {
+                mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG, session);
+            }
 
             if (lockUser) {
                 dispatchUserLocking(userIdToLock, keyEvictedCallbacks);
@@ -1259,9 +1204,11 @@ class UserController implements Handler.Callback {
             // which was paused while the SHUTDOWN flow of the user was in progress.
             resumePendingUserStarts(userId);
         } else {
-            logUserLifecycleEvent(userId, USER_LIFECYCLE_EVENT_STOP_USER,
-                    USER_LIFECYCLE_EVENT_STATE_NONE);
-            clearSessionId(userId);
+            UserJourneySession session = mInjector.getUserJourneyLogger()
+                    .finishAndClearIncompleteUserJourney(userId, USER_JOURNEY_USER_STOP);
+            if (session != null) {
+                mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG, session);
+            }
         }
     }
 
@@ -3135,10 +3082,7 @@ class UserController implements Handler.Callback {
     public boolean handleMessage(Message msg) {
         switch (msg.what) {
             case START_USER_SWITCH_FG_MSG:
-                logUserJourneyInfo(getUserInfo(getCurrentUserId()), getUserInfo(msg.arg1),
-                        USER_JOURNEY_USER_SWITCH_FG);
-                logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_SWITCH_USER,
-                        USER_LIFECYCLE_EVENT_STATE_BEGIN);
+                logUserJourneyBegin(msg.arg1, USER_JOURNEY_USER_SWITCH_FG);
                 startUserInForeground(msg.arg1);
                 break;
             case REPORT_USER_SWITCH_MSG:
@@ -3160,18 +3104,15 @@ class UserController implements Handler.Callback {
                 mInjector.batteryStatsServiceNoteEvent(
                         BatteryStats.HistoryItem.EVENT_USER_RUNNING_START,
                         Integer.toString(msg.arg1), msg.arg1);
-                logUserJourneyInfo(null, getUserInfo(msg.arg1), USER_JOURNEY_USER_START);
-                logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_START_USER,
-                        USER_LIFECYCLE_EVENT_STATE_BEGIN);
+                logUserJourneyBegin(msg.arg1, USER_JOURNEY_USER_START);
 
                 mInjector.onUserStarting(/* userId= */ msg.arg1);
                 scheduleOnUserCompletedEvent(msg.arg1,
                         UserCompletedEventType.EVENT_TYPE_USER_STARTING,
                         USER_COMPLETED_EVENT_DELAY_MS);
 
-                logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_START_USER,
-                        USER_LIFECYCLE_EVENT_STATE_FINISH);
-                clearSessionId(msg.arg1, USER_JOURNEY_USER_START);
+                mInjector.getUserJourneyLogger().logUserJourneyFinish(-1 , getUserInfo(msg.arg1),
+                        USER_JOURNEY_USER_START);
                 break;
             case USER_UNLOCK_MSG:
                 final int userId = msg.arg1;
@@ -3180,10 +3121,11 @@ class UserController implements Handler.Callback {
                 FgThread.getHandler().post(() -> {
                     mInjector.loadUserRecents(userId);
                 });
-                logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_UNLOCKING_USER,
-                        USER_LIFECYCLE_EVENT_STATE_FINISH);
-                logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_UNLOCKED_USER,
-                        USER_LIFECYCLE_EVENT_STATE_BEGIN);
+
+                mInjector.getUserJourneyLogger().logUserLifecycleEvent(msg.arg1,
+                        USER_LIFECYCLE_EVENT_UNLOCKING_USER, EVENT_STATE_FINISH);
+                mInjector.getUserJourneyLogger().logUserLifecycleEvent(msg.arg1,
+                        USER_LIFECYCLE_EVENT_UNLOCKED_USER, EVENT_STATE_BEGIN);
 
                 final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
                 t.traceBegin("finishUserUnlocked-" + userId);
@@ -3199,9 +3141,9 @@ class UserController implements Handler.Callback {
                         // (No need to acquire lock to read mCurrentUserId since it is volatile.)
                         // TODO: Find something to wait for in the case of a profile.
                         mCurrentUserId == msg.arg1 ? USER_COMPLETED_EVENT_DELAY_MS : 1000);
-                logUserLifecycleEvent(msg.arg1, USER_LIFECYCLE_EVENT_UNLOCKED_USER,
-                        USER_LIFECYCLE_EVENT_STATE_FINISH);
-                clearSessionId(msg.arg1);
+                mInjector.getUserJourneyLogger().logUserLifecycleEvent(msg.arg1,
+                        USER_LIFECYCLE_EVENT_UNLOCKED_USER, EVENT_STATE_FINISH);
+                // Unlocking user is not a journey no need to clear sessionId
                 break;
             case USER_CURRENT_MSG:
                 mInjector.batteryStatsServiceNoteEvent(
@@ -3224,22 +3166,24 @@ class UserController implements Handler.Callback {
                 break;
             case REPORT_USER_SWITCH_COMPLETE_MSG:
                 dispatchUserSwitchComplete(msg.arg1, msg.arg2);
-                logUserLifecycleEvent(msg.arg2, USER_LIFECYCLE_EVENT_SWITCH_USER,
-                        USER_LIFECYCLE_EVENT_STATE_FINISH);
+                UserJourneySession session = mInjector.getUserJourneyLogger()
+                        .logUserSwitchJourneyFinish(msg.arg1, getUserInfo(msg.arg2));
+                if (session != null) {
+                    mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG, session);
+                }
                 break;
             case REPORT_LOCKED_BOOT_COMPLETE_MSG:
                 dispatchLockedBootComplete(msg.arg1);
                 break;
             case START_USER_SWITCH_UI_MSG:
                 final Pair<UserInfo, UserInfo> fromToUserPair = (Pair<UserInfo, UserInfo>) msg.obj;
-                logUserJourneyInfo(fromToUserPair.first, fromToUserPair.second,
-                        USER_JOURNEY_USER_SWITCH_UI);
-                logUserLifecycleEvent(fromToUserPair.second.id, USER_LIFECYCLE_EVENT_SWITCH_USER,
-                        USER_LIFECYCLE_EVENT_STATE_BEGIN);
+                logUserJourneyBegin(fromToUserPair.second.id, USER_JOURNEY_USER_SWITCH_UI);
                 showUserSwitchDialog(fromToUserPair);
                 break;
             case CLEAR_USER_JOURNEY_SESSION_MSG:
-                logAndClearSessionId(msg.arg1);
+                mInjector.getUserJourneyLogger()
+                        .finishAndClearIncompleteUserJourney(msg.arg1, msg.arg2);
+                mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG, msg.obj);
                 break;
             case COMPLETE_USER_SWITCH_MSG:
                 completeUserSwitch(msg.arg1, msg.arg2);
@@ -3317,123 +3261,29 @@ class UserController implements Handler.Callback {
      * statsd helper method for logging the start of a user journey via a UserLifecycleEventOccurred
      * atom given the originating and targeting users for the journey.
      */
-    private void logUserJourneyInfo(UserInfo origin, UserInfo target, @UserJourney int journey) {
-        final long newSessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
-        synchronized (mUserIdToUserJourneyMap) {
-            UserJourneySession userJourneySession = mUserIdToUserJourneyMap.get(target.id);
-            if (userJourneySession != null) {
-                // TODO(b/157007231): Move this logic to a separate class/file.
-                if ((userJourneySession.mJourney == USER_JOURNEY_USER_SWITCH_UI
-                        || userJourneySession.mJourney == USER_JOURNEY_USER_SWITCH_FG)
-                        && (journey == USER_JOURNEY_USER_START
-                                || journey == USER_JOURNEY_USER_STOP)) {
-                    /*
-                     * There is already a user switch journey, and a user start or stop journey for
-                     * the same target user received. New journey is most likely a part of user
-                     * switch journey so no need to create a new journey.
-                     */
-                    if (DEBUG_MU) {
-                        Slogf.d(TAG, journey + " not logged as it is expected to be part of "
-                                + userJourneySession.mJourney);
-                    }
-                    return;
-                }
-                /*
-                 * Possible reasons for this condition to be true:
-                 * - A user switch journey is received while another user switch journey is in
-                 *   process for the same user.
-                 * - A user switch journey is received while user start journey is in process for
-                 *   the same user.
-                 * - A user start journey is received while another user start journey is in process
-                 *   for the same user.
-                 * In all cases potentially an incomplete, timed-out session or multiple
-                 * simultaneous requests. It is not possible to keep track of multiple sessions for
-                 * the same user, so previous session is abandoned.
-                 */
-                FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED,
-                        userJourneySession.mSessionId, target.id, USER_LIFECYCLE_EVENT_UNKNOWN,
-                        USER_LIFECYCLE_EVENT_STATE_NONE);
-            }
-
+    private void logUserJourneyBegin(int targetId,
+            @UserJourneyLogger.UserJourney int journey) {
+        UserJourneySession oldSession = mInjector.getUserJourneyLogger()
+                    .finishAndClearIncompleteUserJourney(targetId, journey);
+        if (oldSession != null) {
             if (DEBUG_MU) {
                 Slogf.d(TAG,
-                        "Starting a new journey: " + journey + " with session id: " + newSessionId);
+                        "Starting a new journey: " + journey + " with session id: "
+                                + oldSession);
             }
-
-            userJourneySession = new UserJourneySession(newSessionId, journey);
-            mUserIdToUserJourneyMap.put(target.id, userJourneySession);
             /*
-             * User lifecyle journey would be complete when {@code #clearSessionId} is called after
-             * the last expected lifecycle event for the journey. It may be possible that the last
-             * event is not called, e.g., user not unlocked after user switching. In such cases user
-             * journey is cleared after {@link USER_JOURNEY_TIMEOUT}.
+             * User lifecycle journey would be complete when {@code #clearSessionId} is called
+             * after the last expected lifecycle event for the journey. It may be possible that
+             * the last event is not called, e.g., user not unlocked after user switching. In such
+             * cases user journey is cleared after {@link USER_JOURNEY_TIMEOUT}.
              */
-            mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG);
-            mHandler.sendMessageDelayed(mHandler.obtainMessage(CLEAR_USER_JOURNEY_SESSION_MSG,
-                    target.id, /* arg2= */ 0), USER_JOURNEY_TIMEOUT_MS);
+            mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG, oldSession);
         }
+        UserJourneySession newSession = mInjector.getUserJourneyLogger()
+                .logUserJourneyBegin(targetId, journey);
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(CLEAR_USER_JOURNEY_SESSION_MSG,
+                targetId, /* arg2= */ journey, newSession), USER_JOURNEY_TIMEOUT_MS);
 
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED, newSessionId,
-                journey, origin != null ? origin.id : -1,
-                target.id, UserManager.getUserTypeForStatsd(target.userType), target.flags);
-    }
-
-    /**
-     * statsd helper method for logging the given event for the UserLifecycleEventOccurred statsd
-     * atom.
-     */
-    private void logUserLifecycleEvent(@UserIdInt int userId, @UserLifecycleEvent int event,
-            @UserLifecycleEventState int eventState) {
-        final long sessionId;
-        synchronized (mUserIdToUserJourneyMap) {
-            final UserJourneySession userJourneySession = mUserIdToUserJourneyMap.get(userId);
-            if (userJourneySession == null || userJourneySession.mSessionId == INVALID_SESSION_ID) {
-                Slogf.w(TAG, "UserLifecycleEvent " + event
-                        + " received without an active userJourneySession.");
-                return;
-            }
-            sessionId = userJourneySession.mSessionId;
-        }
-
-        FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
-                event, eventState);
-    }
-
-    /**
-     * Clears the {@link UserJourneySession} for a given {@link UserIdInt} and {@link UserJourney}.
-     */
-    private void clearSessionId(@UserIdInt int userId, @UserJourney int journey) {
-        synchronized (mUserIdToUserJourneyMap) {
-            final UserJourneySession userJourneySession = mUserIdToUserJourneyMap.get(userId);
-            if (userJourneySession != null && userJourneySession.mJourney == journey) {
-                clearSessionId(userId);
-            }
-        }
-    }
-
-    /**
-     * Clears the {@link UserJourneySession} for a given {@link UserIdInt}.
-     */
-    private void clearSessionId(@UserIdInt int userId) {
-        synchronized (mUserIdToUserJourneyMap) {
-            mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG);
-            mUserIdToUserJourneyMap.delete(userId);
-        }
-    }
-
-    /**
-     * Log a final event of the {@link UserJourneySession} and clear it.
-     */
-    private void logAndClearSessionId(@UserIdInt int userId) {
-        synchronized (mUserIdToUserJourneyMap) {
-            final UserJourneySession userJourneySession = mUserIdToUserJourneyMap.get(userId);
-            if (userJourneySession != null) {
-                FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED,
-                        userJourneySession.mSessionId, userId, USER_LIFECYCLE_EVENT_UNKNOWN,
-                        USER_LIFECYCLE_EVENT_STATE_NONE);
-            }
-            clearSessionId(userId);
-        }
     }
 
     private BroadcastOptions getTemporaryAppAllowlistBroadcastOptions(
@@ -3469,23 +3319,6 @@ class UserController implements Handler.Callback {
      */
     public long getLastUserUnlockingUptime() {
         return mLastUserUnlockingUptime;
-    }
-
-    /**
-     * Helper class to store user journey and session id.
-     *
-     * <p> User journey tracks a chain of user lifecycle events occurring during different user
-     * activities such as user start, user switch, and user creation.
-     */
-    // TODO(b/157007231): Move this class and user journey tracking logic to a separate file.
-    private static class UserJourneySession {
-        final long mSessionId;
-        @UserJourney final int mJourney;
-
-        UserJourneySession(long sessionId, @UserJourney int journey) {
-            mJourney = journey;
-            mSessionId = sessionId;
-        }
     }
 
     private static class UserProgressListener extends IProgressListener.Stub {
@@ -3560,6 +3393,10 @@ class UserController implements Handler.Callback {
 
         protected Handler getUiHandler(Handler.Callback callback) {
             return new Handler(mService.mUiHandler.getLooper(), callback);
+        }
+
+        protected UserJourneyLogger getUserJourneyLogger() {
+            return getUserManager().getUserJourneyLogger();
         }
 
         protected Context getContext() {

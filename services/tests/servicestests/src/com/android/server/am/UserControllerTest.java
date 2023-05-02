@@ -100,6 +100,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
 import com.android.server.am.UserState.KeyEvictedCallback;
+import com.android.server.pm.UserJourneyLogger;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.UserManagerService;
 import com.android.server.wm.WindowManagerService;
@@ -1074,6 +1075,8 @@ public class UserControllerTest {
         private final KeyguardManager mKeyguardManagerMock;
         private final LockPatternUtils mLockPatternUtilsMock;
 
+        private final UserJourneyLogger mUserJourneyLoggerMock;
+
         private final Context mCtx;
 
         TestInjector(Context ctx) {
@@ -1090,6 +1093,7 @@ public class UserControllerTest {
             mKeyguardManagerMock = mock(KeyguardManager.class);
             when(mKeyguardManagerMock.isDeviceSecure(anyInt())).thenReturn(true);
             mLockPatternUtilsMock = mock(LockPatternUtils.class);
+            mUserJourneyLoggerMock = mock(UserJourneyLogger.class);
         }
 
         @Override
@@ -1219,6 +1223,11 @@ public class UserControllerTest {
         @Override
         void onSystemUserVisibilityChanged(boolean visible) {
             Log.i(TAG, "onSystemUserVisibilityChanged(" + visible + ")");
+        }
+
+        @Override
+        protected UserJourneyLogger getUserJourneyLogger() {
+            return mUserJourneyLoggerMock;
         }
     }
 
