@@ -3592,15 +3592,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    boolean enterPictureInPictureMode(@NonNull ActivityRecord r,
+            @NonNull PictureInPictureParams params, boolean fromClient) {
+        return enterPictureInPictureMode(r, params, fromClient, false /* isAutoEnter */);
+    }
+
     /**
      * Puts the given activity in picture in picture mode if possible.
      *
      * @param fromClient true if this comes from a client call (eg. Activity.enterPip).
+     * @param isAutoEnter true if this comes from an automatic pip-enter.
      * @return true if the activity is now in picture-in-picture mode, or false if it could not
      * enter picture-in-picture mode.
      */
     boolean enterPictureInPictureMode(@NonNull ActivityRecord r,
-            @NonNull PictureInPictureParams params, boolean fromClient) {
+            @NonNull PictureInPictureParams params, boolean fromClient, boolean isAutoEnter) {
         // If the activity is already in picture in picture mode, then just return early
         if (r.inPinnedWindowingMode()) {
             return true;
@@ -3635,6 +3641,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
                 r.setPictureInPictureParams(params);
+                r.mAutoEnteringPip = isAutoEnter;
                 mRootWindowContainer.moveActivityToPinnedRootTask(r,
                         null /* launchIntoPipHostActivity */, "enterPictureInPictureMode",
                         transition);
@@ -3643,6 +3650,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     r.getTask().schedulePauseActivity(r, false /* userLeaving */,
                             false /* pauseImmediately */, true /* autoEnteringPip */, "auto-pip");
                 }
+                r.mAutoEnteringPip = false;
             }
         };
 
