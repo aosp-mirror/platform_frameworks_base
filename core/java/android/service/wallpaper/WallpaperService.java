@@ -184,6 +184,7 @@ public abstract class WallpaperService extends Service {
 
     private static final long DIMMING_ANIMATION_DURATION_MS = 300L;
 
+    @GuardedBy("itself")
     private final ArrayMap<IBinder, IWallpaperEngineWrapper> mActiveEngines = new ArrayMap<>();
 
     private Handler mBackgroundHandler;
@@ -2514,10 +2515,12 @@ public abstract class WallpaperService extends Service {
             // if they are visible, so we need to toggle the state to get their attention.
             if (!mEngine.mDestroyed) {
                 mEngine.detach();
-                for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
-                    if (engineWrapper.mEngine != null && engineWrapper.mEngine.mVisible) {
-                        engineWrapper.mEngine.doVisibilityChanged(false);
-                        engineWrapper.mEngine.doVisibilityChanged(true);
+                synchronized (mActiveEngines) {
+                    for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+                        if (engineWrapper.mEngine != null && engineWrapper.mEngine.mVisible) {
+                            engineWrapper.mEngine.doVisibilityChanged(false);
+                            engineWrapper.mEngine.doVisibilityChanged(true);
+                        }
                     }
                 }
             }
@@ -2699,7 +2702,9 @@ public abstract class WallpaperService extends Service {
             IWallpaperEngineWrapper engineWrapper =
                     new IWallpaperEngineWrapper(mTarget, conn, windowToken, windowType,
                             isPreview, reqWidth, reqHeight, padding, displayId, which);
-            mActiveEngines.put(windowToken, engineWrapper);
+            synchronized (mActiveEngines) {
+                mActiveEngines.put(windowToken, engineWrapper);
+            }
             if (DEBUG) {
                 Slog.v(TAG, "IWallpaperServiceWrapper Attaching window token " + windowToken);
             }
@@ -2708,7 +2713,10 @@ public abstract class WallpaperService extends Service {
 
         @Override
         public void detach(IBinder windowToken) {
-            IWallpaperEngineWrapper engineWrapper = mActiveEngines.remove(windowToken);
+            IWallpaperEngineWrapper engineWrapper;
+            synchronized (mActiveEngines) {
+                engineWrapper = mActiveEngines.remove(windowToken);
+            }
             if (engineWrapper == null) {
                 Log.w(TAG, "Engine for window token " + windowToken + " already detached");
                 return;
@@ -2734,10 +2742,12 @@ public abstract class WallpaperService extends Service {
     public void onDestroy() {
         Trace.beginSection("WPMS.onDestroy");
         super.onDestroy();
-        for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
-            engineWrapper.destroy();
+        synchronized (mActiveEngines) {
+            for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+                engineWrapper.destroy();
+            }
+            mActiveEngines.clear();
         }
-        mActiveEngines.clear();
         if (mBackgroundThread != null) {
             // onDestroy might be called without a previous onCreate if WallpaperService was
             // instantiated manually. While this is a misuse of the API, some things break
@@ -2768,14 +2778,18 @@ public abstract class WallpaperService extends Service {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter out, String[] args) {
         out.print("State of wallpaper "); out.print(this); out.println(":");
-        for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
-            Engine engine = engineWrapper.mEngine;
-            if (engine == null) {
-                Slog.w(TAG, "Engine for wrapper " + engineWrapper + " not attached");
-                continue;
+        synchronized (mActiveEngines) {
+            for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+                Engine engine = engineWrapper.mEngine;
+                if (engine == null) {
+                    Slog.w(TAG, "Engine for wrapper " + engineWrapper + " not attached");
+                    continue;
+                }
+                out.print("  Engine ");
+                out.print(engine);
+                out.println(":");
+                engine.dump("    ", fd, out, args);
             }
-            out.print("  Engine "); out.print(engine); out.println(":");
-            engine.dump("    ", fd, out, args);
         }
     }
 }
