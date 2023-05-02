@@ -28,6 +28,8 @@ import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
 
+import static com.android.server.am.ProcessList.UNKNOWN_ADJ;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
@@ -81,7 +83,7 @@ public class UidObserverControllerTest {
     public void testEnqueueUidChange() {
         int change = mUidObserverController.enqueueUidChange(null, TEST_UID1,
                 UidRecord.CHANGE_ACTIVE, PROCESS_STATE_FOREGROUND_SERVICE,
-                PROCESS_CAPABILITY_ALL, 0, false);
+                UNKNOWN_ADJ, PROCESS_CAPABILITY_ALL, 0, false);
         assertEquals("expected=ACTIVE,actual=" + changeToStr(change),
                 UidRecord.CHANGE_ACTIVE, change);
         assertPendingChange(TEST_UID1, UidRecord.CHANGE_ACTIVE, PROCESS_STATE_FOREGROUND_SERVICE,
@@ -91,8 +93,8 @@ public class UidObserverControllerTest {
 
         final ChangeRecord record2 = new ChangeRecord();
         change = mUidObserverController.enqueueUidChange(record2, TEST_UID2,
-                UidRecord.CHANGE_CACHED, PROCESS_STATE_CACHED_RECENT, PROCESS_CAPABILITY_NONE,
-                99, true);
+                UidRecord.CHANGE_CACHED, PROCESS_STATE_CACHED_RECENT, UNKNOWN_ADJ,
+                PROCESS_CAPABILITY_NONE, 99, true);
         assertEquals("expected=ACTIVE,actual=" + changeToStr(change),
                 UidRecord.CHANGE_CACHED, change);
         assertPendingChange(TEST_UID1, UidRecord.CHANGE_ACTIVE, PROCESS_STATE_FOREGROUND_SERVICE,
@@ -101,7 +103,8 @@ public class UidObserverControllerTest {
                 PROCESS_CAPABILITY_NONE, 99, true, record2);
 
         change = mUidObserverController.enqueueUidChange(record1, TEST_UID1,
-                UidRecord.CHANGE_UNCACHED, PROCESS_STATE_TOP, PROCESS_CAPABILITY_ALL, 0, false);
+                UidRecord.CHANGE_UNCACHED, PROCESS_STATE_TOP, UNKNOWN_ADJ,
+                PROCESS_CAPABILITY_ALL, 0, false);
         assertEquals("expected=ACTIVE|UNCACHED,actual=" + changeToStr(change),
                 UidRecord.CHANGE_ACTIVE | UidRecord.CHANGE_UNCACHED, change);
         assertPendingChange(TEST_UID1, UidRecord.CHANGE_ACTIVE | UidRecord.CHANGE_UNCACHED,
