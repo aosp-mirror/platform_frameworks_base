@@ -339,6 +339,31 @@ class WallpaperController {
         }
     }
 
+    /**
+     * Change the visibility if wallpaper is home screen only.
+     * This is called during the keyguard unlocking transition
+     * (see {@link KeyguardController#keyguardGoingAway(int, int)}) and thus assumes that if the
+     * system wallpaper is shared with lock, then it needs no animation.
+     */
+    public void showHomeWallpaperInTransition() {
+        updateWallpaperWindowsTarget(mFindResults);
+
+        if (!mFindResults.hasTopShowWhenLockedWallpaper()) {
+            Slog.w(TAG, "There is no wallpaper for the lock screen");
+            return;
+        }
+        WindowState hideWhenLocked = mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper;
+        WindowState showWhenLocked = mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper;
+        if (!mFindResults.hasTopHideWhenLockedWallpaper()) {
+            // Shared wallpaper, ensure its visibility
+            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindows(true);
+        } else {
+            // Separate lock and home wallpapers: show home wallpaper and hide lock
+            hideWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(true);
+            showWhenLocked.mToken.asWallpaperToken().updateWallpaperWindowsInTransition(false);
+        }
+    }
+
     void hideDeferredWallpapersIfNeededLegacy() {
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(i);
@@ -815,7 +840,6 @@ class WallpaperController {
             }
         }
 
-        // Keep both wallpapers visible unless the keyguard is locked (then hide private wp)
         if (!mDisplayContent.isKeyguardGoingAway() || !mIsLockscreenLiveWallpaperEnabled) {
             // When keyguard goes away, KeyguardController handles the visibility
             updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
