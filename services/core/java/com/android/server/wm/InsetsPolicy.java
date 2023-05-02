@@ -311,16 +311,13 @@ class InsetsPolicy {
             state.removeSource(ID_IME);
         } else if (attrs.providedInsets != null) {
             for (InsetsFrameProvider provider : attrs.providedInsets) {
-                final int id = InsetsSource.createId(
-                        provider.getOwner(), provider.getIndex(), provider.getType());
-                final @InsetsType int type = provider.getType();
-                if ((type & WindowInsets.Type.systemBars()) == 0) {
+                if ((provider.getType() & WindowInsets.Type.systemBars()) == 0) {
                     continue;
                 }
                 if (state == originalState) {
                     state = new InsetsState(state);
                 }
-                state.removeSource(id);
+                state.removeSource(provider.getId());
             }
         }
 
