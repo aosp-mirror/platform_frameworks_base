@@ -77,15 +77,18 @@ static void nativeUnparcelAndVerifyWorkSource(JNIEnv* env, jobject /* obj */, jo
     Parcel* parcel = nativeGetParcelData(env, wsParcel);
     int32_t endMarker;
 
-    // read WorkSource and if no error read end marker
-    status_t err = ws.readFromParcel(parcel) ?: parcel->readInt32(&endMarker);
-    int32_t dataAvailable = parcel->dataAvail();
-
+    status_t err = ws.readFromParcel(parcel);
     if (err != OK) {
-        ALOGE("WorkSource readFromParcel failed %d", err);
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                StringPrintf("WorkSource readFromParcel failed: %d", err).c_str());
     }
-
+    err = parcel->readInt32(&endMarker);
+    if (err != OK) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                StringPrintf("Failed to read endMarker: %d", err).c_str());
+    }
     // Now we have a native WorkSource object, verify it.
+    int32_t dataAvailable = parcel->dataAvail();
     if (dataAvailable > 0) { // not all data read from the parcel
         jniThrowException(env, "java/lang/IllegalArgumentException",
                 StringPrintf("WorkSource contains more data than native read (%d)",
