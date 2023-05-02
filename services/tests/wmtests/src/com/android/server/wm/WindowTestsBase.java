@@ -359,9 +359,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
                     new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
             };
-            for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
-                mNavBarWindow.mAttrs.paramsForRotation[rot] =
-                        getNavBarLayoutParamsForRotation(rot, owner);
+            // If the navigation bar cannot move then it is always at the bottom.
+            if (mDisplayContent.getDisplayPolicy().navigationBarCanMove()) {
+                for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+                    mNavBarWindow.mAttrs.paramsForRotation[rot] =
+                            getNavBarLayoutParamsForRotation(rot, owner);
+                }
             }
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_DOCK_DIVIDER)) {
