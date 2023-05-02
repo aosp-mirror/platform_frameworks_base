@@ -3320,7 +3320,9 @@ public class BubbleStackView extends FrameLayout
      * @return the normalized x-axis position of the bubble stack rounded to 4 decimal places.
      */
     public float getNormalizedXPosition() {
-        return new BigDecimal(getStackPosition().x / mPositioner.getAvailableRect().width())
+        int width = mPositioner.getAvailableRect().width();
+        float stackPosition = width > 0 ? getStackPosition().x / width : 0;
+        return new BigDecimal(stackPosition)
                 .setScale(4, RoundingMode.CEILING.HALF_UP)
                 .floatValue();
     }
@@ -3329,7 +3331,9 @@ public class BubbleStackView extends FrameLayout
      * @return the normalized y-axis position of the bubble stack rounded to 4 decimal places.
      */
     public float getNormalizedYPosition() {
-        return new BigDecimal(getStackPosition().y / mPositioner.getAvailableRect().height())
+        int height = mPositioner.getAvailableRect().height();
+        float stackPosition = height > 0 ? getStackPosition().y / height : 0;
+        return new BigDecimal(stackPosition)
                 .setScale(4, RoundingMode.CEILING.HALF_UP)
                 .floatValue();
     }
