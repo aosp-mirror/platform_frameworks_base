@@ -3915,8 +3915,9 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent == null) {
-                throw new IllegalStateException("No touch mode is defined for displayId {"
-                        + displayId + "}");
+                throw new IllegalStateException("Failed to retrieve the touch mode state for"
+                        + "display {" + displayId + "}: display is not registered in "
+                        + "WindowRootContainer");
             }
             return displayContent.isInTouchMode();
         }
