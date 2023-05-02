@@ -128,9 +128,9 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
 
     private static final class CallMetadataSyncConnectionIdentifier {
         private final int mAssociationId;
-        private final long mCallId;
+        private final String mCallId;
 
-        CallMetadataSyncConnectionIdentifier(int associationId, long callId) {
+        CallMetadataSyncConnectionIdentifier(int associationId, String callId) {
             mAssociationId = associationId;
             mCallId = callId;
         }
@@ -139,7 +139,7 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
             return mAssociationId;
         }
 
-        public long getCallId() {
+        public String getCallId() {
             return mCallId;
         }
 
@@ -161,9 +161,7 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
 
     private abstract static class CallMetadataSyncConnectionCallback {
 
-        abstract void sendCallAction(int associationId, long callId, int action);
-
-        abstract void sendStateChange(int associationId, long callId, int newState);
+        abstract void sendCallAction(int associationId, String callId, int action);
     }
 
     private static class CallMetadataSyncConnection extends Connection {
@@ -184,7 +182,7 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
             mCallback = callback;
         }
 
-        public long getCallId() {
+        public String getCallId() {
             return mCall.getId();
         }
 
@@ -205,22 +203,22 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
             }
 
             final Bundle extras = new Bundle();
-            extras.putLong(CrossDeviceCall.EXTRA_CALL_ID, mCall.getId());
+            extras.putString(CrossDeviceCall.EXTRA_CALL_ID, mCall.getId());
             putExtras(extras);
 
             int capabilities = getConnectionCapabilities();
-            if (mCall.hasControl(android.companion.Telecom.Call.PUT_ON_HOLD)) {
+            if (mCall.hasControl(android.companion.Telecom.PUT_ON_HOLD)) {
                 capabilities |= CAPABILITY_HOLD;
             } else {
                 capabilities &= ~CAPABILITY_HOLD;
             }
-            if (mCall.hasControl(android.companion.Telecom.Call.MUTE)) {
+            if (mCall.hasControl(android.companion.Telecom.MUTE)) {
                 capabilities |= CAPABILITY_MUTE;
             } else {
                 capabilities &= ~CAPABILITY_MUTE;
             }
             mAudioManager.setMicrophoneMute(
-                    mCall.hasControl(android.companion.Telecom.Call.UNMUTE));
+                    mCall.hasControl(android.companion.Telecom.UNMUTE));
             if (capabilities != getConnectionCapabilities()) {
                 setConnectionCapabilities(capabilities);
             }
@@ -248,8 +246,8 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
 
             int capabilities = getConnectionCapabilities();
             final boolean hasHoldControl = mCall.hasControl(
-                    android.companion.Telecom.Call.PUT_ON_HOLD)
-                    || mCall.hasControl(android.companion.Telecom.Call.TAKE_OFF_HOLD);
+                    android.companion.Telecom.PUT_ON_HOLD)
+                    || mCall.hasControl(android.companion.Telecom.TAKE_OFF_HOLD);
             if (hasHoldControl != ((getConnectionCapabilities() & CAPABILITY_HOLD)
                     == CAPABILITY_HOLD)) {
                 if (hasHoldControl) {
@@ -258,7 +256,7 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
                     capabilities &= ~CAPABILITY_HOLD;
                 }
             }
-            final boolean hasMuteControl = mCall.hasControl(android.companion.Telecom.Call.MUTE);
+            final boolean hasMuteControl = mCall.hasControl(android.companion.Telecom.MUTE);
             if (hasMuteControl != ((getConnectionCapabilities() & CAPABILITY_MUTE)
                     == CAPABILITY_MUTE)) {
                 if (hasMuteControl) {
@@ -268,7 +266,7 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
                 }
             }
             mAudioManager.setMicrophoneMute(
-                    mCall.hasControl(android.companion.Telecom.Call.UNMUTE));
+                    mCall.hasControl(android.companion.Telecom.UNMUTE));
             if (capabilities != getConnectionCapabilities()) {
                 setConnectionCapabilities(capabilities);
             }
@@ -276,12 +274,12 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
 
         @Override
         public void onAnswer(int videoState) {
-            sendCallAction(android.companion.Telecom.Call.ACCEPT);
+            sendCallAction(android.companion.Telecom.ACCEPT);
         }
 
         @Override
         public void onReject() {
-            sendCallAction(android.companion.Telecom.Call.REJECT);
+            sendCallAction(android.companion.Telecom.REJECT);
         }
 
         @Override
@@ -296,33 +294,28 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
 
         @Override
         public void onSilence() {
-            sendCallAction(android.companion.Telecom.Call.SILENCE);
+            sendCallAction(android.companion.Telecom.SILENCE);
         }
 
         @Override
         public void onHold() {
-            sendCallAction(android.companion.Telecom.Call.PUT_ON_HOLD);
+            sendCallAction(android.companion.Telecom.PUT_ON_HOLD);
         }
 
         @Override
         public void onUnhold() {
-            sendCallAction(android.companion.Telecom.Call.TAKE_OFF_HOLD);
+            sendCallAction(android.companion.Telecom.TAKE_OFF_HOLD);
         }
 
         @Override
         public void onMuteStateChanged(boolean isMuted) {
-            sendCallAction(isMuted ? android.companion.Telecom.Call.MUTE
-                    : android.companion.Telecom.Call.UNMUTE);
+            sendCallAction(isMuted ? android.companion.Telecom.MUTE
+                    : android.companion.Telecom.UNMUTE);
         }
 
         @Override
         public void onDisconnect() {
-            sendCallAction(android.companion.Telecom.Call.END);
-        }
-
-        @Override
-        public void onStateChanged(int state) {
-            mCallback.sendStateChange(mAssociationId, mCall.getId(), state);
+            sendCallAction(android.companion.Telecom.END);
         }
 
         private void sendCallAction(int action) {
