@@ -33,14 +33,14 @@ import java.util.Set;
 /** A read-only snapshot of an {@link ContextSyncMessage}. */
 class CallMetadataSyncData {
 
-    final Map<Long, CallMetadataSyncData.Call> mCalls = new HashMap<>();
+    final Map<String, CallMetadataSyncData.Call> mCalls = new HashMap<>();
     final List<CallMetadataSyncData.Call> mRequests = new ArrayList<>();
 
     public void addCall(CallMetadataSyncData.Call call) {
         mCalls.put(call.getId(), call);
     }
 
-    public boolean hasCall(long id) {
+    public boolean hasCall(String id) {
         return mCalls.containsKey(id);
     }
 
@@ -57,7 +57,7 @@ class CallMetadataSyncData {
     }
 
     public static class Call implements Parcelable {
-        private long mId;
+        private String mId;
         private String mCallerId;
         private byte[] mAppIcon;
         private String mAppName;
@@ -67,7 +67,7 @@ class CallMetadataSyncData {
 
         public static Call fromParcel(Parcel parcel) {
             final Call call = new Call();
-            call.setId(parcel.readLong());
+            call.setId(parcel.readString());
             call.setCallerId(parcel.readString());
             call.setAppIcon(parcel.readBlob());
             call.setAppName(parcel.readString());
@@ -82,7 +82,7 @@ class CallMetadataSyncData {
 
         @Override
         public void writeToParcel(Parcel parcel, int parcelableFlags) {
-            parcel.writeLong(mId);
+            parcel.writeString(mId);
             parcel.writeString(mCallerId);
             parcel.writeBlob(mAppIcon);
             parcel.writeString(mAppName);
@@ -94,7 +94,7 @@ class CallMetadataSyncData {
             }
         }
 
-        void setId(long id) {
+        void setId(String id) {
             mId = id;
         }
 
@@ -122,7 +122,7 @@ class CallMetadataSyncData {
             mControls.add(control);
         }
 
-        long getId() {
+        String getId() {
             return mId;
         }
 
@@ -157,7 +157,7 @@ class CallMetadataSyncData {
         @Override
         public boolean equals(Object other) {
             if (other instanceof CallMetadataSyncData.Call) {
-                return ((Call) other).getId() == getId();
+                return mId != null && mId.equals(((Call) other).getId());
             }
             return false;
         }
