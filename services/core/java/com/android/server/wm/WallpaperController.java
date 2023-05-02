@@ -124,24 +124,19 @@ class WallpaperController {
 
     final boolean mIsLockscreenLiveWallpaperEnabled;
 
-    private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
-        if ((w.mAttrs.type == TYPE_WALLPAPER)) {
-            if (mFindResults.topWallpaper == null || mFindResults.resetTopWallpaper) {
-                WallpaperWindowToken token = w.mToken.asWallpaperToken();
-                if (token == null) {
-                    Slog.w(TAG, "Window " + w + " has wallpaper type but not wallpaper token");
-                    return false;
-                }
-                if (!token.canShowWhenLocked() && mDisplayContent.isKeyguardLocked()) {
-                    return false;
-                }
-                mFindResults.setTopWallpaper(w);
-                mFindResults.resetTopWallpaper = false;
+    private final Consumer<WindowState> mFindWallpapers = w -> {
+        if (w.mAttrs.type == TYPE_WALLPAPER) {
+            WallpaperWindowToken token = w.mToken.asWallpaperToken();
+            if (token.canShowWhenLocked() && !mFindResults.hasTopShowWhenLockedWallpaper()) {
+                mFindResults.setTopShowWhenLockedWallpaper(w);
+            } else if (!token.canShowWhenLocked()
+                    && !mFindResults.hasTopHideWhenLockedWallpaper()) {
+                mFindResults.setTopHideWhenLockedWallpaper(w);
             }
-            return false;
         }
+    };
 
-        mFindResults.resetTopWallpaper = true;
+    private final ToBooleanFunction<WindowState> mFindWallpaperTargetFunction = w -> {
         if (!w.mTransitionController.isShellTransitionsEnabled()) {
             if (w.mActivityRecord != null && !w.mActivityRecord.isVisible()
                     && !w.mActivityRecord.isAnimating(TRANSITION | PARENTS)) {
@@ -668,11 +663,24 @@ class WallpaperController {
             mFindResults.setUseTopWallpaperAsTarget(true);
         }
 
+        mDisplayContent.forAllWindows(mFindWallpapers, true /* traverseTopToBottom */);
         mDisplayContent.forAllWindows(mFindWallpaperTargetFunction, true /* traverseTopToBottom */);
 
         if (mFindResults.wallpaperTarget == null && mFindResults.useTopWallpaperAsTarget) {
-            mFindResults.setWallpaperTarget(mFindResults.topWallpaper);
+            mFindResults.setWallpaperTarget(
+                    mFindResults.getTopWallpaper(mDisplayContent.isKeyguardLocked()));
         }
+    }
+
+    List<WindowState> getAllTopWallpapers() {
+        ArrayList<WindowState> wallpapers = new ArrayList<>(2);
+        if (mFindResults.hasTopShowWhenLockedWallpaper()) {
+            wallpapers.add(mFindResults.mTopWallpaper.mTopShowWhenLockedWallpaper);
+        }
+        if (mFindResults.hasTopHideWhenLockedWallpaper()) {
+            wallpapers.add(mFindResults.mTopWallpaper.mTopHideWhenLockedWallpaper);
+        }
+        return wallpapers;
     }
 
     private boolean isFullscreen(WindowManager.LayoutParams attrs) {
@@ -760,10 +768,16 @@ class WallpaperController {
         result.setWallpaperTarget(wallpaperTarget);
     }
 
+    /**
+     * Change the visibility of the top wallpaper to {@param visibility} and hide all the others.
+     */
     private void updateWallpaperTokens(boolean visibility, boolean locked) {
+        WindowState topWallpaper = mFindResults.getTopWallpaper(locked);
+        WallpaperWindowToken topWallpaperToken =
+                topWallpaper == null ? null : topWallpaper.mToken.asWallpaperToken();
         for (int curTokenNdx = mWallpaperTokens.size() - 1; curTokenNdx >= 0; curTokenNdx--) {
             final WallpaperWindowToken token = mWallpaperTokens.get(curTokenNdx);
-            token.updateWallpaperWindows(visibility && (!locked || token.canShowWhenLocked()));
+            token.updateWallpaperWindows(visibility && (token == topWallpaperToken));
         }
     }
 
@@ -802,7 +816,10 @@ class WallpaperController {
         }
 
         // Keep both wallpapers visible unless the keyguard is locked (then hide private wp)
-        updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
+        if (!mDisplayContent.isKeyguardGoingAway() || !mIsLockscreenLiveWallpaperEnabled) {
+            // When keyguard goes away, KeyguardController handles the visibility
+            updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
+        }
 
         if (DEBUG_WALLPAPER) {
             Slog.v(TAG, "adjustWallpaperWindows: wallpaper visibility " + visible
@@ -1019,14 +1036,52 @@ class WallpaperController {
 
     /** Helper class for storing the results of a wallpaper target find operation. */
     final private static class FindWallpaperTargetResult {
-        WindowState topWallpaper = null;
+
+        static final class TopWallpaper {
+            // A wp that can be visible on home screen only
+            WindowState mTopHideWhenLockedWallpaper = null;
+            // A wallpaper that has permission to be visible on lock screen (lock or shared wp)
+            WindowState mTopShowWhenLockedWallpaper = null;
+
+            void reset() {
+                mTopHideWhenLockedWallpaper = null;
+                mTopShowWhenLockedWallpaper = null;
+            }
+        }
+
+        TopWallpaper mTopWallpaper = new TopWallpaper();
         boolean useTopWallpaperAsTarget = false;
         WindowState wallpaperTarget = null;
-        boolean resetTopWallpaper = false;
         boolean isWallpaperTargetForLetterbox = false;
 
-        void setTopWallpaper(WindowState win) {
-            topWallpaper = win;
+        void setTopHideWhenLockedWallpaper(WindowState win) {
+            if (DEBUG_WALLPAPER) {
+                Slog.v(TAG, "setTopHideWhenLockedWallpaper " + win);
+            }
+            mTopWallpaper.mTopHideWhenLockedWallpaper = win;
+        }
+
+        void setTopShowWhenLockedWallpaper(WindowState win) {
+            if (DEBUG_WALLPAPER) {
+                Slog.v(TAG, "setTopShowWhenLockedWallpaper " + win);
+            }
+            mTopWallpaper.mTopShowWhenLockedWallpaper = win;
+        }
+
+        boolean hasTopHideWhenLockedWallpaper() {
+            return mTopWallpaper.mTopHideWhenLockedWallpaper != null;
+        }
+
+        boolean hasTopShowWhenLockedWallpaper() {
+            return mTopWallpaper.mTopShowWhenLockedWallpaper != null;
+        }
+
+        WindowState getTopWallpaper(boolean isKeyguardLocked) {
+            if (!isKeyguardLocked && hasTopHideWhenLockedWallpaper()) {
+                return mTopWallpaper.mTopHideWhenLockedWallpaper;
+            } else {
+                return mTopWallpaper.mTopShowWhenLockedWallpaper;
+            }
         }
 
         void setWallpaperTarget(WindowState win) {
@@ -1042,10 +1097,9 @@ class WallpaperController {
         }
 
         void reset() {
-            topWallpaper = null;
+            mTopWallpaper.reset();
             wallpaperTarget = null;
             useTopWallpaperAsTarget = false;
-            resetTopWallpaper = false;
             isWallpaperTargetForLetterbox = false;
         }
     }
