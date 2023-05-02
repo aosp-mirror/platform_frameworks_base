@@ -67,6 +67,7 @@ interface IMediaProjectionManager {
      * Returns {@code true} if the given {@link IMediaProjection} corresponds to the current
      * projection, or {@code false} otherwise.
      */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     boolean isCurrentProjection(IMediaProjection projection);
@@ -83,6 +84,7 @@ interface IMediaProjectionManager {
      *
      * <p>Returns immediately but waits to start recording until user has reviewed their consent.
      */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void requestConsentForInvalidProjection(in IMediaProjection projection);
@@ -91,14 +93,17 @@ interface IMediaProjectionManager {
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     MediaProjectionInfo getActiveProjectionInfo();
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void stopActiveProjection();
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyActiveProjectionCapturedContentResized(int width, int height);
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
                 + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyActiveProjectionCapturedContentVisibilityChanged(boolean isVisible);
@@ -123,6 +128,7 @@ interface IMediaProjectionManager {
      * @param projection      the non-null projection the session describes
      * @throws SecurityException If the provided projection is not current.
      */
+  @EnforcePermission("MANAGE_MEDIA_PROJECTION")
   @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     boolean setContentRecordingSession(in ContentRecordingSession incomingSession,

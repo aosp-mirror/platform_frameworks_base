@@ -28,6 +28,7 @@ interface IMediaProjection {
     boolean canProjectVideo();
     boolean canProjectSecureVideo();
 
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     int applyVirtualDisplayFlags(int flags);
@@ -40,6 +41,7 @@ interface IMediaProjection {
      * Returns the {@link android.os.IBinder} identifying the task to record, or {@code null} if
      * there is none.
      */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     IBinder getLaunchCookie();
@@ -48,6 +50,7 @@ interface IMediaProjection {
      * Updates the {@link android.os.IBinder} identifying the task to record, or {@code null} if
      * there is none.
      */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void setLaunchCookie(in IBinder launchCookie);
@@ -62,6 +65,7 @@ interface IMediaProjection {
      * @throws IllegalStateException If the caller's target SDK is at least {@code U} and the
      * projection is not valid.
      */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     boolean isValid();
@@ -70,6 +74,7 @@ interface IMediaProjection {
      * Sets that {@link MediaProjection#createVirtualDisplay} has been invoked with this token (it
      * should only be called once).
      */
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
     void notifyVirtualDisplayCreated(int displayId);
