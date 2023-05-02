@@ -200,6 +200,7 @@ public abstract class WMShellModule {
             ShellTaskOrganizer taskOrganizer,
             DisplayController displayController,
             SyncTransactionQueue syncQueue,
+            Transitions transitions,
             Optional<DesktopModeController> desktopModeController,
             Optional<DesktopTasksController> desktopTasksController,
             Optional<SplitScreenController> splitScreenController) {
@@ -211,6 +212,7 @@ public abstract class WMShellModule {
                     taskOrganizer,
                     displayController,
                     syncQueue,
+                    transitions,
                     desktopModeController,
                     desktopTasksController,
                     splitScreenController);
