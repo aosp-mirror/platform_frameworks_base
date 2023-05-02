@@ -33,6 +33,8 @@ import android.graphics.Shader;
 import android.graphics.drawable.Animatable2;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -53,6 +55,8 @@ import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.UserIcons;
 import com.android.server.wm.WindowManagerService;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Dialog to show during the user switch. This dialog shows target user's name and their profile
  * picture with a circular spinner animation around it if the animations for this dialog are not
@@ -64,8 +68,13 @@ class UserSwitchingDialog extends Dialog {
 
     // User switching doesn't happen that frequently, so it doesn't hurt to have it always on
     protected static final boolean DEBUG = true;
+
     private static final long DIALOG_SHOW_HIDE_ANIMATION_DURATION_MS = 300;
     private final boolean mDisableAnimations;
+
+    // Time to wait for the onAnimationEnd() callbacks before moving on
+    private static final int ANIMATION_TIMEOUT_MS = 1000;
+    private final Handler mHandler = new Handler(Looper.myLooper());
 
     protected final UserInfo mOldUser;
     protected final UserInfo mNewUser;
@@ -180,7 +189,7 @@ class UserSwitchingDialog extends Dialog {
 
     @Override
     public void show() {
-        asyncTraceBegin("", 0);
+        asyncTraceBegin("dialog", 0);
         super.show();
     }
 
@@ -188,7 +197,7 @@ class UserSwitchingDialog extends Dialog {
     public void dismiss() {
         super.dismiss();
         stopFreezingScreen();
-        asyncTraceEnd("", 0);
+        asyncTraceEnd("dialog", 0);
     }
 
     public void show(@NonNull Runnable onShown) {
@@ -217,20 +226,18 @@ class UserSwitchingDialog extends Dialog {
         if (!mNeedToFreezeScreen) {
             return;
         }
-        if (DEBUG) Slog.d(TAG, "startFreezingScreen");
-        Trace.traceBegin(TRACE_TAG, "startFreezingScreen");
+        traceBegin("startFreezingScreen");
         mWindowManager.startFreezingScreen(0, 0);
-        Trace.traceEnd(TRACE_TAG);
+        traceEnd("startFreezingScreen");
     }
 
     private void stopFreezingScreen() {
         if (!mNeedToFreezeScreen) {
             return;
         }
-        if (DEBUG) Slog.d(TAG, "stopFreezingScreen");
-        Trace.traceBegin(TRACE_TAG, "stopFreezingScreen");
+        traceBegin("stopFreezingScreen");
         mWindowManager.stopFreezingScreen();
-        Trace.traceEnd(TRACE_TAG);
+        traceEnd("stopFreezingScreen");
     }
 
     private void startShowAnimation(Runnable onAnimationEnd) {
@@ -238,13 +245,13 @@ class UserSwitchingDialog extends Dialog {
             onAnimationEnd.run();
             return;
         }
-        asyncTraceBegin("-showAnimation", 1);
-        startDialogAnimation(new AlphaAnimation(0, 1), () -> {
-            asyncTraceEnd("-showAnimation", 1);
+        asyncTraceBegin("showAnimation", 1);
+        startDialogAnimation("show", new AlphaAnimation(0, 1), () -> {
+            asyncTraceEnd("showAnimation", 1);
 
-            asyncTraceBegin("-spinnerAnimation", 2);
+            asyncTraceBegin("spinnerAnimation", 2);
             startProgressAnimation(() -> {
-                asyncTraceEnd("-spinnerAnimation", 2);
+                asyncTraceEnd("spinnerAnimation", 2);
 
                 onAnimationEnd.run();
             });
@@ -257,9 +264,9 @@ class UserSwitchingDialog extends Dialog {
             onAnimationEnd.run();
             return;
         }
-        asyncTraceBegin("-dismissAnimation", 3);
-        startDialogAnimation(new AlphaAnimation(1, 0), () -> {
-            asyncTraceEnd("-dismissAnimation", 3);
+        asyncTraceBegin("dismissAnimation", 3);
+        startDialogAnimation("dismiss", new AlphaAnimation(1, 0), () -> {
+            asyncTraceEnd("dismissAnimation", 3);
 
             onAnimationEnd.run();
         });
@@ -271,10 +278,11 @@ class UserSwitchingDialog extends Dialog {
             onAnimationEnd.run();
             return;
         }
+        final Runnable onAnimationEndWithTimeout = animationWithTimeout("spinner", onAnimationEnd);
         avd.registerAnimationCallback(new Animatable2.AnimationCallback() {
             @Override
             public void onAnimationEnd(Drawable drawable) {
-                onAnimationEnd.run();
+                onAnimationEndWithTimeout.run();
             }
         });
         avd.start();
@@ -291,12 +299,13 @@ class UserSwitchingDialog extends Dialog {
         return null;
     }
 
-    private void startDialogAnimation(Animation animation, Runnable onAnimationEnd) {
+    private void startDialogAnimation(String name, Animation animation, Runnable onAnimationEnd) {
         final View view = findViewById(R.id.content);
         if (mDisableAnimations || view == null) {
             onAnimationEnd.run();
             return;
         }
+        final Runnable onAnimationEndWithTimeout = animationWithTimeout(name, onAnimationEnd);
         animation.setDuration(DIALOG_SHOW_HIDE_ANIMATION_DURATION_MS);
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
@@ -306,7 +315,7 @@ class UserSwitchingDialog extends Dialog {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                onAnimationEnd.run();
+                onAnimationEndWithTimeout.run();
             }
 
             @Override
@@ -317,11 +326,39 @@ class UserSwitchingDialog extends Dialog {
         view.startAnimation(animation);
     }
 
+    private Runnable animationWithTimeout(String name, Runnable onAnimationEnd) {
+        final AtomicBoolean isFirst = new AtomicBoolean(true);
+        final Runnable onAnimationEndOrTimeout = () -> {
+            if (isFirst.getAndSet(false)) {
+                mHandler.removeCallbacksAndMessages(null);
+                onAnimationEnd.run();
+            }
+        };
+        mHandler.postDelayed(() -> {
+            Slog.w(TAG, name + " animation not completed in " + ANIMATION_TIMEOUT_MS + " ms");
+            onAnimationEndOrTimeout.run();
+        }, ANIMATION_TIMEOUT_MS);
+
+        return onAnimationEndOrTimeout;
+    }
+
     private void asyncTraceBegin(String subTag, int subCookie) {
+        if (DEBUG) Slog.d(TAG, "asyncTraceBegin-" + subTag);
         Trace.asyncTraceBegin(TRACE_TAG, TAG + subTag, mTraceCookie + subCookie);
     }
 
     private void asyncTraceEnd(String subTag, int subCookie) {
         Trace.asyncTraceEnd(TRACE_TAG, TAG + subTag, mTraceCookie + subCookie);
+        if (DEBUG) Slog.d(TAG, "asyncTraceEnd-" + subTag);
+    }
+
+    private void traceBegin(String msg) {
+        if (DEBUG) Slog.d(TAG, "traceBegin-" + msg);
+        Trace.traceBegin(TRACE_TAG, msg);
+    }
+
+    private void traceEnd(String msg) {
+        Trace.traceEnd(TRACE_TAG);
+        if (DEBUG) Slog.d(TAG, "traceEnd-" + msg);
     }
 }
