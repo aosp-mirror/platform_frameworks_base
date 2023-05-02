@@ -67,11 +67,12 @@ struct ManifestFixerOptions {
   std::optional<std::string> revision_code_default;
 
   // The version of the framework being compiled against to set for 'android:compileSdkVersion' in
-  // the <manifest> tag.
+  // the <manifest> tag. Not used if no_compile_sdk_metadata is set.
   std::optional<std::string> compile_sdk_version;
 
   // The version codename of the framework being compiled against to set for
-  // 'android:compileSdkVersionCodename' in the <manifest> tag.
+  // 'android:compileSdkVersionCodename' in the <manifest> tag. Not used if no_compile_sdk_metadata
+  // is set.
   std::optional<std::string> compile_sdk_version_codename;
 
   // The fingerprint prefixes to be added to the <install-constraints> tag.
@@ -87,6 +88,9 @@ struct ManifestFixerOptions {
 
   // Whether to replace the manifest version with the the command line version
   bool replace_version = false;
+
+  // Whether to suppress `android:compileSdkVersion*` and `platformBuildVersion*` attributes.
+  bool no_compile_sdk_metadata = false;
 };
 
 // Verifies that the manifest is correctly formed and inserts defaults where specified with
