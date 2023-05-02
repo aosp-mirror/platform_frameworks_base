@@ -18,7 +18,6 @@ package com.android.server.credentials;
 
 import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS;
 import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
-import static android.Manifest.permission.LAUNCH_CREDENTIAL_SELECTOR;
 import static android.content.Context.CREDENTIAL_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -46,7 +45,6 @@ import android.credentials.ISetEnabledProvidersCallback;
 import android.credentials.PrepareGetCredentialResponseInternal;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
-import android.credentials.ui.IntentFactory;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.IBinder;
@@ -69,6 +67,7 @@ import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -269,6 +268,18 @@ public final class CredentialManagerService
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
+    }
+
+    private Set<String> getPrimaryProvidersForUserId(int userId) {
+        final int resolvedUserId = ActivityManager.handleIncomingUser(
+                Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, false,
+                "getPrimaryProvidersForUserId", null);
+        SecureSettingsServiceNameResolver resolver = new SecureSettingsServiceNameResolver(
+                mContext, Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                /* isMultipleMode= */ true);
+        String[] serviceNames = resolver.readServiceNameList(resolvedUserId);
+        return new HashSet<String>(Arrays.asList(serviceNames));
     }
 
     @GuardedBy("mLock")
@@ -678,7 +689,8 @@ public final class CredentialManagerService
 
         @Override
         public void setEnabledProviders(
-                List<String> providers, int userId, ISetEnabledProvidersCallback callback) {
+                List<String>  primaryProviders, List<String> providers, int userId,
+                ISetEnabledProvidersCallback callback) {
             if (!hasWriteSecureSettingsPermission()) {
                 try {
                     callback.onError(
@@ -699,17 +711,24 @@ public final class CredentialManagerService
                             "setEnabledProviders",
                             null);
 
-            String storedValue = String.join(":", providers);
-            if (!Settings.Secure.putStringForUser(
-                    getContext().getContentResolver(),
-                    Settings.Secure.CREDENTIAL_SERVICE,
-                    storedValue,
-                    userId)) {
-                Slog.e(TAG, "Failed to store setting containing enabled providers");
+            boolean writeEnabledStatus =
+                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                            Settings.Secure.CREDENTIAL_SERVICE,
+                            String.join(":", providers),
+                            userId);
+
+            boolean writePrimaryStatus =
+                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                            Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                            String.join(":", primaryProviders),
+                            userId);
+
+            if (!writeEnabledStatus || !writePrimaryStatus) {
+                Slog.e(TAG, "Failed to store setting containing enabled or primary providers");
                 try {
                     callback.onError(
                             "failed_setting_store",
-                            "Failed to store setting containing enabled providers");
+                            "Failed to store setting containing enabled or primary providers");
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Issue with invoking error response: ", e);
                     return;
@@ -723,10 +742,6 @@ public final class CredentialManagerService
                 Slog.e(TAG, "Issue with invoking response: ", e);
                 // TODO: Propagate failure
             }
-
-            // Send an intent to the UI that we have new enabled providers.
-            getContext().sendBroadcast(IntentFactory.createProviderUpdateIntent(),
-                    LAUNCH_CREDENTIAL_SELECTOR);
         }
 
         @Override
@@ -775,7 +790,8 @@ public final class CredentialManagerService
             verifyGetProvidersPermission();
 
             return CredentialProviderInfoFactory.getCredentialProviderServices(
-                    mContext, userId, providerFilter, getEnabledProviders());
+                    mContext, userId, providerFilter, getEnabledProviders(),
+                    getPrimaryProvidersForUserId(userId));
         }
 
         @Override
@@ -785,7 +801,8 @@ public final class CredentialManagerService
 
             final int userId = UserHandle.getCallingUserId();
             return CredentialProviderInfoFactory.getCredentialProviderServicesForTesting(
-                    mContext, userId, providerFilter, getEnabledProviders());
+                    mContext, userId, providerFilter, getEnabledProviders(),
+                    getPrimaryProvidersForUserId(userId));
         }
 
         @Override
