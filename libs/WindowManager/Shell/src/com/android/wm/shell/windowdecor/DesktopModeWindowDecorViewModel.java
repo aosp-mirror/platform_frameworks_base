@@ -111,7 +111,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
     private ValueAnimator mDragToDesktopValueAnimator;
     private final Rect mDragToDesktopAnimationStartBounds = new Rect();
     private boolean mDragToDesktopAnimationStarted;
-    private float mCaptionDragStartX;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
@@ -525,7 +524,6 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
             DesktopModeWindowDecoration relevantDecor) {
         switch (ev.getActionMasked()) {
             case MotionEvent.ACTION_DOWN: {
-                mCaptionDragStartX = ev.getX();
                 // Begin drag through status bar if applicable.
                 if (relevantDecor != null) {
                     mDragToDesktopAnimationStartBounds.set(
@@ -580,8 +578,9 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 if (mTransitionDragActive) {
                     mDesktopTasksController.ifPresent(
-                            c -> c.onDragPositioningMoveThroughStatusBar(relevantDecor.mTaskInfo,
-                            relevantDecor.mTaskSurface, ev.getY()));
+                            c -> c.onDragPositioningMoveThroughStatusBar(
+                                    relevantDecor.mTaskInfo,
+                                    relevantDecor.mTaskSurface, ev.getY()));
                     final int statusBarHeight = getStatusBarHeight(
                             relevantDecor.mTaskInfo.displayId);
                     if (ev.getY() > statusBarHeight) {

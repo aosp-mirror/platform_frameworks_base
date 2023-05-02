@@ -162,7 +162,7 @@ public class DesktopModeVisualIndicator {
     /**
      * Release the indicator and its components when it is no longer needed.
      */
-    public void releaseVisualIndicator() {
+    public void releaseVisualIndicator(SurfaceControl.Transaction t) {
         if (mViewHost == null) return;
         if (mViewHost != null) {
             mViewHost.release();
@@ -170,13 +170,8 @@ public class DesktopModeVisualIndicator {
         }
 
         if (mLeash != null) {
-            final SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             t.remove(mLeash);
             mLeash = null;
-            mSyncQueue.runInSync(transaction -> {
-                transaction.merge(t);
-                t.close();
-            });
         }
     }
 
