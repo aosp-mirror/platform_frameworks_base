@@ -562,7 +562,7 @@ final class KeyboardLayoutManager implements InputManager.InputDeviceListener {
                 key.append(",languageTag:").append(inputDevice.getKeyboardLanguageTag());
             }
             if (!TextUtils.isEmpty(inputDevice.getKeyboardLayoutType())) {
-                key.append(",layoutType:").append(inputDevice.getKeyboardLanguageTag());
+                key.append(",layoutType:").append(inputDevice.getKeyboardLayoutType());
             }
         }
         return key.toString();
