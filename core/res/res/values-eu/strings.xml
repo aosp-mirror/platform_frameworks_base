@@ -607,7 +607,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hatz-marken hardwarea ez dago erabilgarri."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Ezin da konfiguratu hatz-marka"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Gainditu egin da hatz-marka konfiguratzeko denbora-muga. Saiatu berriro."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Hatz-marka konfiguratzeko denbora-muga gainditu da. Saiatu berriro."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Hatz-markaren eragiketa bertan behera utzi da."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Erabiltzaileak bertan behera utzi du hatz-marka bidezko eragiketa."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Saiakera gehiegi egin dira. Erabili pantailaren blokeoa."</string>
@@ -630,7 +630,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Aurpegi bidez desblokeatzea"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Arazoak ditugu aurpegi bidez desblokeatzeko eginbidearekin"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Sakatu hau aurpegi-eredua ezabatzeko eta, gero, gehitu aurpegia berriro"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguratu aurpegi bidez desblokeatzeko eginbidea"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguratu Aurpegi bidez desblokeatzea"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonoa desblokeatzeko, begira iezaiozu"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aurpegi bidez desblokeatzeko aukera erabiltzeko, aktibatu "<b>"kamera erabiltzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguratu telefonoa desblokeatzeko modu gehiago"</string>

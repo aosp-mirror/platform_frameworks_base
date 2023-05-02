@@ -250,7 +250,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Informe de errores"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Finalizar sesión"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Captura de pantalla"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Informar error"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Informe de errores"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Se recopilará información sobre el estado actual de tu dispositivo y se enviará por correo electrónico. Pasarán unos minutos desde que empiece a generarse el informe de errores hasta que se envíe."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Informe interactivo"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Usa esta opción en la mayoría de los casos. Te permite realizar un seguimiento del progreso del informe, introducir más información sobre el problema y hacer capturas de pantalla. Es posible que se omitan algunas secciones menos utilizadas y que requieran más tiempo."</string>
@@ -657,7 +657,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mira al teléfono de forma más directa"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mira al teléfono de forma más directa"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mira al teléfono de forma más directa"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retira cualquier objeto que te tape la cara."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retira cualquier objeto que te tape la cara"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpia la parte superior de la pantalla, incluida la barra de color negro"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -781,7 +781,7 @@
     <string name="policydesc_wipeData" product="default" msgid="8036084184768379022">"Borra los datos del teléfono sin avisar restableciendo el estado de fábrica"</string>
     <string name="policylab_wipeData_secondaryUser" product="automotive" msgid="115034358520328373">"Borrar datos del perfil"</string>
     <string name="policylab_wipeData_secondaryUser" product="default" msgid="413813645323433166">"Borrar datos del usuario"</string>
-    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra los datos del usuario en este tablet sin avisar."</string>
+    <string name="policydesc_wipeData_secondaryUser" product="tablet" msgid="2336676480090926470">"Borra los datos del usuario en esta tablet sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="tv" msgid="2293713284515865200">"Eliminar los datos de este usuario del dispositivo Android TV sin previo aviso."</string>
     <string name="policydesc_wipeData_secondaryUser" product="automotive" msgid="4658832487305780879">"Borra los datos del perfil de este sistema de infoentretenimiento sin avisar."</string>
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="2788325512167208654">"Borra los datos del usuario en este teléfono sin avisar."</string>
@@ -1389,7 +1389,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECHAZAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona un método de entrada"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Mientras el teclado físico está activo"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Mantenlo en pantalla mientras el teclado físico está activo"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="4427643867639774118">"Configurar el teclado físico"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"Toca para seleccionar el idioma y el diseño"</string>

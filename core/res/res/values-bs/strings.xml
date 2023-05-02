@@ -246,7 +246,7 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"Isključi"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Napajanje"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Ponovo pokreni"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"Hitno"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"Hitni poziv"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Izvještaj o greškama"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Završi sesiju"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snimak ekrana"</string>
@@ -268,7 +268,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Postavke"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Pomoć"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Glasovna pomoć"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Zaključavanje"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Zaključaj"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Novo obavještenje"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtuelna tastatura"</string>
@@ -608,7 +608,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Lice je provjereno, pritisnite dugme za potvrdu"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hardver za otisak prsta nije dostupan."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nije moguće postaviti otisak prsta"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Vrijeme za postavljanje otiska prsta je isteklo. Pokušajte ponovo."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Postavljanje otiska prsta je isteklo. Pokušajte ponovo."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Radnja s otiskom prsta je otkazana."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Korisnik je otkazao radnju s otiskom prsta."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Previše pokušaja. Umjesto toga koristite zaključavanje ekrana."</string>
@@ -924,7 +924,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Pritisnite dugme Meni kako biste otključali uređaj ili obavili hitni poziv."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Pritisnite dugme Meni za otključavanje uređaja."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Nacrtajte uzorak za otključavanje"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Hitno"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Hitni poziv"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Povratak na poziv"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Ispravno!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Pokušajte ponovo"</string>
@@ -2055,7 +2055,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Dozvoliti aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim zapisnicima uređaja?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Dozvoli jednokratni pristup"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Nemoj dozvoliti"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, zato pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, zato pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju."</string>
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke. Zbog toga pristup svim zapisnicima uređaja dozvolite samo aplikacijama koje smatrate pouzdanima. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje moći pristupiti nekim zapisnicima ili podacima na uređaju.\n\nSaznajte više na g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne prikazuj ponovo"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"Aplikacija <xliff:g id="APP_0">%1$s</xliff:g> želi prikazati isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>"</string>

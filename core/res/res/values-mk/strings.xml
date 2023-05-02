@@ -597,7 +597,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Премногу светло"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Откриено е притискање на копчето за вклучување"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Пробајте да го приспособите прстот"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Менувајте ја положбата на прстот по малку секој пат"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Менувајте ја положбата на прстот секојпат по малку"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Отпечатокот не е препознаен"</string>
@@ -629,7 +629,7 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатоци"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Отклучување со лик"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Проблем со „Отклучување со лик“"</string>
-    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лице, а потоа повторно додајте го лицето"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лик, а потоа повторно додајте го ликот"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Поставете „Отклучување со лик“"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отклучете го телефонот со гледање во него"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
@@ -643,8 +643,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Нема доволно светлина"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Оддалечете го телефонот"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Доближете го телефонот"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Кренете го телефонот погоре"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Спуштете го телефонот подолу"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Поткренете го телефонот"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Снижете го телефонот"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Поместете го телефонот налево"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Поместете го телефонот надесно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Погледнете подиректно во уредот."</string>
@@ -656,7 +656,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Гледајте подиректно во телефонот"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Гледајте подиректно во телефонот"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Гледајте подиректно во телефонот"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат лицето."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат ликот."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Исчистете го врвот на екранот, вклучувајќи ја црната лента"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Не може да создаде модел на лик. Обидете се пак."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Носите темни очила. Лицето мора да ви се гледа целосно."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Лицето е покриено. Лицето мора да ви се гледа целосно."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ликот е покриен. Ликот мора да ви се гледа целосно."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ликот не може да се потврди. Хардвер - недостапен."</string>
@@ -1281,13 +1281,13 @@
     <string name="volume_call" msgid="7625321655265747433">"Јачина на звук на дојдовен повик"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Јачина на звук на дојдовен повик преку Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Јачина на звук за аларм"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Јачина на звук на известување"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Јачина на звук за известување"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Јачина на звук"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Јачина на звук на Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Јачина на звук на мелодија"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Јачина на звук на повик"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Јачина на аудио/видео звук"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Јачина на звук на известување"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Јачина на звук за известување"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Стандардна мелодија"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Стандардна (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Ниедна"</string>
@@ -1551,7 +1551,7 @@
     <string name="date_picker_prev_month_button" msgid="3418694374017868369">"Претходниот месец"</string>
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"Следниот месец"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Копче „Alt“"</string>
-    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Копче „Откажи“"</string>
+    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Откажи"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Копче „Избриши“"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Копче „Готово“"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Копче „Промени режим“"</string>
@@ -1688,12 +1688,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вклучувај"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ВКЛУЧЕНО"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИСКЛУЧЕНО"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Дали дозволувате <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Да се дозволи <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Преглед и контрола на екранот"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини врз другите апликации."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење дејства"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или хардверскиот сензор и да врши интеракција со апликациите во ваше име."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или со хардверските сензори и да врши интеракција со апликациите во ваше име."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Допрете на функција за да почнете да ја користите:"</string>
@@ -1939,7 +1939,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Дознај повеќе"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Прекини ја паузата"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Да се вклучат работни апликации?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Да се вклучат работните апл.?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Добијте пристап до вашите работни апликации и известувања"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Вклучи"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
@@ -2297,5 +2297,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не може да се пристапи до камерата на вашиот телефон од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не може да се пристапи до камерата на вашиот таблет од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"До ова не може да се пристапи при стриминг. Наместо тоа, пробајте на вашиот телефон."</string>
-    <string name="system_locale_title" msgid="711882686834677268">"Стандардно за системот"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Стандарден за системот"</string>
 </resources>

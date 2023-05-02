@@ -164,7 +164,7 @@
     <string name="httpErrorAuth" msgid="469553140922938968">"ప్రామాణీకరించడం సాధ్యపడలేదు."</string>
     <string name="httpErrorProxyAuth" msgid="7229662162030113406">"ప్రాక్సీ సర్వర్ ద్వారా ప్రామాణీకరణ విజయవంతం కాలేదు."</string>
     <string name="httpErrorConnect" msgid="3295081579893205617">"సర్వర్‌కు కనెక్ట్ చేయడం సాధ్యపడలేదు."</string>
-    <string name="httpErrorIO" msgid="3860318696166314490">"సర్వర్‌తో కమ్యూనికేట్ చేయడం సాధ్యపడలేదు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
+    <string name="httpErrorIO" msgid="3860318696166314490">"సర్వర్‌తో కమ్యూనికేట్ చేయడం సాధ్యపడలేదు. తర్వాత మళ్లీ ట్రై చేయండి."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"సర్వర్‌కు కనెక్షన్ సమయం ముగిసింది."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"పేజీ చాలా ఎక్కువ సర్వర్ మళ్లింపులను కలిగి ఉంది."</string>
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"ప్రోటోకాల్‌కి మద్దతు లేదు."</string>
@@ -172,7 +172,7 @@
     <string name="httpErrorBadUrl" msgid="754447723314832538">"URL చెల్లనిది అయినందువలన పేజీని తెరవడం సాధ్యపడలేదు."</string>
     <string name="httpErrorFile" msgid="3400658466057744084">"ఫైల్‌ను యాక్సెస్ చేయడం సాధ్యపడలేదు."</string>
     <string name="httpErrorFileNotFound" msgid="5191433324871147386">"రిక్వెస్ట్ చేసిన ఫైల్‌ను కనుగొనడం సాధ్యపడలేదు."</string>
-    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"చాలా ఎక్కువ రిక్వెస్ట్‌లు ప్రాసెస్ చేయబడుతున్నాయి. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
+    <string name="httpErrorTooManyRequests" msgid="2149677715552037198">"చాలా ఎక్కువ రిక్వెస్ట్‌లు ప్రాసెస్ చేయబడుతున్నాయి. తర్వాత మళ్లీ ట్రై చేయండి."</string>
     <string name="notification_title" msgid="5783748077084481121">"<xliff:g id="ACCOUNT">%1$s</xliff:g>కు సైన్‌ఇన్ ఎర్రర్"</string>
     <string name="contentServiceSync" msgid="2341041749565687871">"సింక్‌"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="5766411446676388623">"సింక్ చేయడం సాధ్యపడదు"</string>
@@ -218,7 +218,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"వైర్‌లెస్‌ను ప్రారంభించండి"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"వైర్‌లెస్‌ను ఆపివేయండి"</string>
     <string name="screen_lock" msgid="2072642720826409809">"స్క్రీన్ లాక్"</string>
-    <string name="power_off" msgid="4111692782492232778">"పవర్ ఆఫ్ చేయండి"</string>
+    <string name="power_off" msgid="4111692782492232778">"పవర్ ఆఫ్"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"రింగర్ ఆఫ్‌లో ఉంది"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"రింగర్ వైబ్రేట్‌లో ఉంది"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"రింగర్ ఆన్‌లో ఉంది"</string>
@@ -242,7 +242,7 @@
     <string name="global_actions" product="tv" msgid="3871763739487450369">"Android TV ఎంపికలు"</string>
     <string name="global_actions" product="default" msgid="6410072189971495460">"ఫోన్ ఎంపికలు"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"స్క్రీన్ లాక్"</string>
-    <string name="global_action_power_off" msgid="4404936470711393203">"పవర్ ఆఫ్ చేయండి"</string>
+    <string name="global_action_power_off" msgid="4404936470711393203">"పవర్ ఆఫ్"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"పవర్"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"రీస్టార్ట్ చేయండి"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"ఎమర్జెన్సీ"</string>
@@ -592,12 +592,12 @@
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"వేలిముద్ర సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"సెన్సార్‌ను క్లీన్ చేసి, మళ్లీ ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"సెన్సార్ మీద గట్టిగా నొక్కండి"</string>
-    <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"వేలిని చాలా నెమ్మదిగా కదిలించారు. దయచేసి మళ్లీ ప్రయత్నించండి."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"వేలిని చాలా నెమ్మదిగా కదిలించారు. దయచేసి మళ్లీ ట్రై చేయండి."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"మరొక వేలిముద్రను ట్రై చేయండి"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"వెలుతురు అధికంగా ఉంది"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"పవర్ బటన్ కనుగొనబడింది"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"సర్దుబాటు చేయడానికి ట్రై చేయండి"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ప్రతిసారీ మీ వేళ్ల స్థానాన్ని కొద్దిగా మార్చండి"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ప్రతిసారి మీ వేలిని కొద్ది కొద్దిగా జరపండి"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"వేలిముద్ర గుర్తించబడలేదు"</string>
@@ -648,7 +648,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ఫోన్‌ను మీ ఎడమ వైపునకు జరపండి"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"ఫోన్‌ను మీ కుడి వైపునకు జరపండి"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"దయచేసి మీ పరికరం వైపు మరింత నేరుగా చూడండి."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"మీ ముఖం కనిపించడం లేదు. మీ ఫోన్‌ను కంటి స్థాయిలో పట్టుకోండి."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"మీ ముఖం కనిపించడం లేదు. మీ ఫోన్‌ను కళ్లకు ఎదురుగా పట్టుకోండి."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"ముఖం గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
@@ -656,7 +656,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేయండి."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి ఏదైనా అడ్డుగా ఉంటే దాన్ని తీసివేయండి."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"నల్లని బార్‌తో సహా మీ స్క్రీన్ పైభాగం అంతటినీ శుభ్రంగా తుడవండి"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -672,10 +672,10 @@
     <string name="face_error_no_space" msgid="5649264057026021723">"కొత్త ముఖం డేటాను స్టోరేజ్‌ చేయడం కాదు. మొదట పాతది తొలిగించండి."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"ముఖ యాక్టివిటీ రద్దయింది."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ఫేస్ అన్‌లాక్‌ను యూజర్ రద్దు చేశారు"</string>
-    <string name="face_error_lockout" msgid="7864408714994529437">"చాలా ఎక్కువ ప్రయత్నాలు చేశారు. తర్వాత మళ్లీ ప్రయత్నించండి."</string>
+    <string name="face_error_lockout" msgid="7864408714994529437">"చాలా ఎక్కువ ప్రయత్నాలు చేశారు. తర్వాత మళ్లీ ట్రై చేయండి."</string>
     <string name="face_error_lockout_permanent" msgid="3277134834042995260">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. ఫేస్ అన్‌లాక్ డిజేబుల్ చేయబడింది."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"చాలా ఎక్కువ సార్లు ప్రయత్నించారు. బదులుగా స్క్రీన్ లాక్‌ను ఎంటర్ చేయండి."</string>
-    <string name="face_error_unable_to_process" msgid="5723292697366130070">"ముఖం ధృవీకరించలేకపోయింది. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="face_error_unable_to_process" msgid="5723292697366130070">"ముఖం ధృవీకరించలేకపోయింది. మళ్లీ ట్రై చేయండి."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"మీరు ఫేస్ అన్‌లాక్‌ను సెటప్ చేయలేదు"</string>
     <string name="face_error_hw_not_present" msgid="7940978724978763011">"ఫేస్ అన్‌లాక్‌ను ఈ పరికరం సపోర్ట్ చేయదు"</string>
     <string name="face_error_security_update_required" msgid="5076017208528750161">"సెన్సార్ తాత్కాలికంగా డిజేబుల్ చేయబడింది."</string>
@@ -926,8 +926,8 @@
     <string name="lockscreen_emergency_call" msgid="7500692654885445299">"అత్యవసరం"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"కాల్‌కు తిరిగి వెళ్లు"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"సరైనది!"</string>
-    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ప్రయత్నించండి"</string>
-    <string name="lockscreen_password_wrong" msgid="8605355913868947490">"మళ్లీ ప్రయత్నించండి"</string>
+    <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"మళ్లీ ట్రై చేయండి"</string>
+    <string name="lockscreen_password_wrong" msgid="8605355913868947490">"మళ్లీ ట్రై చేయండి"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"అన్ని లక్షణాలు మరియు డేటా కోసం అన్‌లాక్ చేయండి"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"ఫేస్ అన్‌లాక్ ప్రయత్నాల గరిష్ఠ పరిమితిని మించిపోయారు"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1248431165144893792">"సిమ్ కార్డు లేదు"</string>
@@ -951,19 +951,19 @@
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"వినియోగదారు గైడ్‌ను చూడండి లేదా కస్టమర్ కేర్‌ను సంప్రదించండి."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"సిమ్ కార్డు లాక్ చేయబడింది."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"సిమ్ కార్డు‌ను అన్‌లాక్ చేస్తోంది…"</string>
-    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ Android TV పరికరాన్ని అన్‌లాక్ చేయాల్సిందిగా మీకు తెలపబడుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="3069635524964070596">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="6399092175942158529">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ Android TV పరికరాన్ని అన్‌లాక్ చేయాల్సిందిగా మీకు తెలపబడుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="5691623136957148335">"మీరు మీ అన్‌లాక్ నమూనాని <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విజయవంతం కాని ప్రయత్నాల తర్వాత, మీరు మీ Google సైన్ఇన్‌ను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయడానికి అడగబడతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="7914445759242151426">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, టాబ్లెట్ ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే మొత్తం యూజర్ డేటాను కోల్పోతారు."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="4275591249631864248">"మీరు మీ Android TV పరికరాన్ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు విఫల ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీ Android TV పరికరం ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే యూజర్ డేటా మొత్తాన్ని కోల్పోతారు."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="default" msgid="1166532464798446579">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఫోన్, ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే మొత్తం యూజర్ డేటాను కోల్పోతారు."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tablet" msgid="8682445539263683414">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. టాబ్లెట్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="tv" msgid="2205435033340091883">"మీరు మీ Android TV పరికరాన్ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు విఫల ప్రయత్నాలు చేశారు. మీ Android TV పరికరం ఇప్పుడు ఫ్యాక్టరీ రీసెట్ చేయబడుతుంది."</string>
     <string name="lockscreen_failed_attempts_now_wiping" product="default" msgid="2203704707679895487">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు తప్పుగా ప్రయత్నించారు. ఫోన్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
-    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="lockscreen_too_many_failed_attempts_countdown" msgid="6807200118164539589">"<xliff:g id="NUMBER">%d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="lockscreen_forgot_pattern_button_text" msgid="8362442730606839031">"నమూనాను మర్చిపోయారా?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="9218940117797602518">"ఖాతా అన్‌లాక్"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="3775904917743034195">"చాలా ఎక్కువ ఆకృతి ప్రయత్నాలు చేశారు"</string>
@@ -1253,7 +1253,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"యాప్‌లను ప్రారంభిస్తోంది."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"బూట్‌ను ముగిస్తోంది."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను సెటప్ చేస్తున్నప్పుడు తేలికగా ట్యాప్ చేయడానికి ట్రై చేయండి."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"సెటప్ ముగించడానికి, స్క్రీన్‌ను ఆఫ్ చేయి"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"సెటప్ ముగించడానికి, స్క్రీన్‌ను ఆఫ్ చేయండి"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ఆఫ్ చేయండి"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"మీ వేలిముద్ర వెరిఫై‌ను కొనసాగించాలా?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను వెరిఫై చేయడానికి తేలికగా ట్యాప్ చేయడం ట్రై చేయండి."</string>
@@ -1436,7 +1436,7 @@
     <string name="ext_media_move_success_title" msgid="4901763082647316767">"కంటెంట్ బదిలీ పూర్తయింది"</string>
     <string name="ext_media_move_success_message" msgid="9159542002276982979">"కంటెంట్ <xliff:g id="NAME">%s</xliff:g>కి తరలించబడింది"</string>
     <string name="ext_media_move_failure_title" msgid="3184577479181333665">"కంటెంట్‌ని తరలించడం సాధ్యం కాలేదు"</string>
-    <string name="ext_media_move_failure_message" msgid="4197306718121869335">"కంటెంట్‌ని తరలించడానికి మళ్లీ ప్రయత్నించండి"</string>
+    <string name="ext_media_move_failure_message" msgid="4197306718121869335">"కంటెంట్‌ని తరలించడానికి మళ్లీ ట్రై చేయండి"</string>
     <string name="ext_media_status_removed" msgid="241223931135751691">"తీసివేయబడింది"</string>
     <string name="ext_media_status_unmounted" msgid="8145812017295835941">"తొలగించబడింది"</string>
     <string name="ext_media_status_checking" msgid="159013362442090347">"చెక్ చేస్తోంది..."</string>
@@ -1662,18 +1662,18 @@
     <string name="kg_login_invalid_input" msgid="8292367491901220210">"చెల్లని వినియోగదారు పేరు లేదా పాస్‌వర్డ్."</string>
     <string name="kg_login_account_recovery_hint" msgid="4892466171043541248">"మీ వినియోగదారు పేరు లేదా పాస్‌వర్డ్‌ను మర్చిపోయారా?\n"<b>"google.com/accounts/recovery"</b>"ని సందర్శించండి."</string>
     <string name="kg_login_checking_password" msgid="4676010303243317253">"ఖాతాను చెక్ చేస్తోంది…"</string>
-    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_too_many_failed_pin_attempts_dialog_message" msgid="23741434207544038">"మీరు మీ పిన్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="kg_too_many_failed_password_attempts_dialog_message" msgid="3328686432962224215">"మీరు మీ పాస్‌వర్డ్‌ను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా టైప్ చేశారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="kg_too_many_failed_pattern_attempts_dialog_message" msgid="7357404233979139075">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. \n\n<xliff:g id="NUMBER_1">%2$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tablet" msgid="3479940221343361587">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, టాబ్లెట్ ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే మొత్తం యూజర్ డేటాను కోల్పోతారు."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="tv" msgid="9064457748587850217">"మీరు మీ Android TV పరికరాన్ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు విఫల ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, మీ Android TV పరికరం ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే యూజర్, డేటా మొత్తాన్ని కోల్పోతారు."</string>
     <string name="kg_failed_attempts_almost_at_wipe" product="default" msgid="5955398963754432548">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER_0">%1$d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఫోన్ ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది, అలాగే మొత్తం యూజర్ డేటాను కోల్పోతారు."</string>
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2299099385175083308">"మీరు టాబ్లెట్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. టాబ్లెట్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="5045460916106267585">"మీరు మీ Android TV పరికరాన్ని అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> సార్లు విఫల ప్రయత్నాలు చేశారు. మీ Android TV పరికరం ఇప్పుడు ఫ్యాక్టరీ రీసెట్ చేయబడుతుంది."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="5043730590446071189">"మీరు ఫోన్‌ను అన్‌లాక్ చేయడానికి <xliff:g id="NUMBER">%d</xliff:g> చెల్లని ప్రయత్నాలు చేశారు. ఫోన్ ఇప్పుడు ఫ్యాక్టరీ ఆటోమేటిక్‌కు రీసెట్ చేయబడుతుంది."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత మీ Android TV పరికరాన్ని ఈమెయిల్‌ ఖాతా ద్వారా అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని కోరడం జరుగుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="7086799295109717623">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ టాబ్లెట్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4670840383567106114">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీశారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత మీ Android TV పరికరాన్ని ఈమెయిల్‌ ఖాతా ద్వారా అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని కోరడం జరుగుతుంది.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఈమెయిల్‌ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ట్రై చేయండి."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"తీసివేయండి"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
@@ -1835,9 +1835,9 @@
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"కొత్త పిన్‌"</string>
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"కొత్త పిన్‌ను నిర్ధారించండి"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"నియంత్రణలను ఎడిట్ చేయడానికి పిన్‌ను రూపొందించండి"</string>
-    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"పిన్‌లు సరిపోలలేదు. మళ్లీ ప్రయత్నించండి."</string>
+    <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"పిన్‌లు సరిపోలలేదు. మళ్లీ ట్రై చేయండి."</string>
     <string name="restr_pin_error_too_short" msgid="1547007808237941065">"పిన్‌ చాలా చిన్నదిగా ఉంది. తప్పనిసరిగా కనీసం 4 అంకెలు ఉండాలి."</string>
-    <string name="restr_pin_try_later" msgid="5897719962541636727">"తర్వాత మళ్లీ ప్రయత్నించండి"</string>
+    <string name="restr_pin_try_later" msgid="5897719962541636727">"తర్వాత మళ్లీ ట్రై చేయండి"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"ఫుల్-స్క్రీన్‌లో వీక్షిస్తున్నారు"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"నిష్క్రమించడానికి, పై నుండి క్రిందికి స్వైప్ చేయండి."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"అర్థమైంది"</string>
@@ -1971,7 +1971,7 @@
     <string name="profile_encrypted_message" msgid="1128512616293157802">"కార్యాలయ ప్రొఫైల్ అన్‌లాక్ చేయుటకు నొక్కండి"</string>
     <string name="usb_mtp_launch_notification_title" msgid="774319638256707227">"<xliff:g id="PRODUCT_NAME">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</string>
     <string name="usb_mtp_launch_notification_description" msgid="6942535713629852684">"ఫైళ్లను చూడటానికి నొక్కండి"</string>
-    <string name="pin_target" msgid="8036028973110156895">"పిన్ చేయి"</string>
+    <string name="pin_target" msgid="8036028973110156895">"పిన్ చేయండి"</string>
     <string name="pin_specific_target" msgid="7824671240625957415">"<xliff:g id="LABEL">%1$s</xliff:g>ను పిన్ చేయండి"</string>
     <string name="unpin_target" msgid="3963318576590204447">"అన్‌‌పిన్‌ ‌చేయి"</string>
     <string name="unpin_specific_target" msgid="3859828252160908146">"<xliff:g id="LABEL">%1$s</xliff:g>ను అన్‌పిన్ చేయి"</string>

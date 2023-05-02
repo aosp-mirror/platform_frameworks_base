@@ -648,7 +648,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smartphone nach links"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Bewege das Smartphone nach rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Bitte sieh direkt auf dein Gerät."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dein Gesicht wurde nicht erkannt. Halte dein Smartphone auf Augenhöhe."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gesicht nicht erkannt. Smartphone auf Augenhöhe halten."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Bitte registriere dein Gesicht noch einmal."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Gesicht nicht erkannt. Versuche es noch einmal."</string>
@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Dein Gesichtsmodell kann nicht erstellt werden. Versuche es noch einmal."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Dunkle Brille erkannt. Dein Gesicht muss vollständig sichtbar sein."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Dein Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
@@ -1842,7 +1842,7 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Zum Beenden von oben nach unten wischen"</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Ok"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Drehen, um die Ansicht zu verbessern"</string>
-    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Modus für geteilten Bildschirm beenden, um die Ansicht zu verbessern"</string>
+    <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Splitscreen-Modus beenden, um die Ansicht zu verbessern"</string>
     <string name="done_label" msgid="7283767013231718521">"Fertig"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Kreisförmiger Schieberegler für Stunden"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Kreisförmiger Schieberegler für Minuten"</string>

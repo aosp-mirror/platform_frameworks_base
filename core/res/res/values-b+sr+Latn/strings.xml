@@ -247,10 +247,10 @@
     <string name="global_action_power_options" msgid="1185286119330160073">"Napajanje"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Restartuj"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hitan poziv"</string>
-    <string name="global_action_bug_report" msgid="5127867163044170003">"Izveštaj o grešci"</string>
+    <string name="global_action_bug_report" msgid="5127867163044170003">"Javi grešku"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Završi sesiju"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snimak ekrana"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Izveštaj o grešci"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Javi grešku"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Ovim će se prikupiti informacije o trenutnom stanju uređaja kako bi bile poslate u poruci e-pošte. Od započinjanja izveštaja o grešci do trenutka za njegovo slanje proći će neko vreme; budite strpljivi."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktiv. izveštaj"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Koristite ovo u većini slučajeva. To vam omogućava da pratite napredak izveštaja, da unosite dodatne detalje o problemu i da snimate snimke ekrana. Verovatno će izostaviti neke manje korišćene odeljke za koje pravljenje izveštaja dugo traje."</string>
@@ -665,7 +665,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Pravljenje modela lica nije uspelo. Probajte ponovo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Otkrivene su tamne naočari. Lice mora da bude potpuno vidljivo."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Otkriveno je prekrivanje lica. Lice mora da bude potpuno vidljivo."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Lice je prekriveno. Mora da bude sasvim vidljivo."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Provera lica nije uspela. Hardver nije dostupan."</string>
@@ -1254,7 +1254,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Pokretanje aplikacija."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Završavanje pokretanja."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnuli ste dugme za uključivanje – time obično isključujete ekran.\n\nProbajte lagano da dodirnete dok podešavate otisak prsta."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Završite podešavanje isključivanjem ekrana"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Isključite ekran i napustite podešavanje"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Isključi"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Nastavljate verifikaciju otiska prsta?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnuli ste dugme za uključivanje – time obično isključujete ekran.\n\nProbajte lagano da dodirnete da biste verifikovali otisak prsta."</string>
@@ -1708,7 +1708,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija boja"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcija boja"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Režim jednom rukom"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Dodatno zatamnjeno"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Dodatno zatamni"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je uključena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je isključena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Pritisnite i zadržite oba tastera za jačinu zvuka tri sekunde da biste koristili <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1837,7 +1837,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Potvrdite novi PIN"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Napravite PIN za izmenu ograničenja"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-ovi se ne podudaraju. Probajte ponovo."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN je prekratak. Mora da sadrži najmanje 4 cifre."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN je prekratak. Mora da ima bar 4 cifre."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Probajte ponovo kasnije"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Prikazuje se ceo ekran"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Da biste izašli, prevucite nadole odozgo."</string>

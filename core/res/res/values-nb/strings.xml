@@ -146,7 +146,7 @@
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Av"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via Wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Ring over mobilnettverk"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare Wifi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare wifi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
     <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g>-reserve for anrop"</string>
@@ -597,7 +597,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"For lyst"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Trykk på av/på-knappen er registrert"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prøv å justere"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Endre posisjonen til fingeren litt hver gang"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Endre fingerens posisjon litt hver gang"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Gjenkjenner ikke fingeravtrykket"</string>
@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan ikke lage ansiktsmodell. Prøv på nytt."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mørke briller er registrert. Ansiktet må være helt synlig."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansiktsdekke er registrert. Ansiktet må være helt synlig."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansiktet er tildekket. Hele ansiktet må vises."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan ikke bekrefte ansikt. Utilgjengelig maskinvare."</string>
@@ -1118,7 +1118,7 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{for # minutt siden}other{For # minutter siden}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{For # time siden}other{For # timer siden}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# time siden}other{# timer siden}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{For # dag siden}other{For # dager siden}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{For # år siden}other{For # år siden}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minutt}other{# minutter}}"</string>
@@ -1361,7 +1361,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-internettdeling er slått på"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB er slått på"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-tilbehør er tilkoblet"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Trykk for å få flere alternativ."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Trykk for flere alternativer."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Den tilkoblede enheten lades. Trykk for å se flere alternativer."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analogt lydtilbehør ble oppdaget"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Den tilkoblede enheten er ikke kompatibel med denne telefonen. Trykk for å finne ut mer."</string>
@@ -2054,8 +2054,8 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vil du gi <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> tilgang til alle enhetslogger?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Gi éngangstilgang"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ikke tillat"</string>
-    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Enhetslogger registrerer det som skjer på enheten din. Apper kan bruke disse loggene til å finne og løse problemer.\n\nNoen logger kan inneholde sensitiv informasjon, så du bør bare gi tilgang til alle enhetslogger til apper du stoler på. \n\nHvis du ikke gir denne appen tilgang til alle enhetslogger, har den fortsatt tilgang til sine egne logger. Enhetsprodusenten kan fortsatt ha tilgang til visse logger eller noe informasjon på enheten din."</string>
-    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Enhetslogger registrerer det som skjer på enheten. Apper kan bruke disse loggene til å finne og løse problemer.\n\nNoen logger kan inneholde sensitiv informasjon, så du bør bare gi tilgang til alle enhetslogger til apper du stoler på. \n\nHvis du ikke gir denne appen tilgang til alle enhetslogger, har den fortsatt tilgang til sine egne logger. Enhetsprodusenten kan fortsatt ha tilgang til visse logger eller noe informasjon på enheten.\n\nFinn ut mer på g.co/android/devicelogs."</string>
+    <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Enhetslogger registrerer det som skjer på enheten din. Apper kan bruke disse loggene til å finne og løse problemer.\n\nNoen logger kan inneholde sensitiv informasjon, så du bør bare gi apper du stoler på, tilgang til alle enhetslogger. \n\nHvis du ikke gir denne appen tilgang til alle enhetslogger, har den fortsatt tilgang til sine egne logger. Enhetsprodusenten kan fortsatt ha tilgang til visse logger eller noe informasjon på enheten din."</string>
+    <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Enhetslogger registrerer det som skjer på enheten. Apper kan bruke disse loggene til å finne og løse problemer.\n\nNoen logger kan inneholde sensitiv informasjon, så du bør bare gi apper du stoler på, tilgang til alle enhetslogger. \n\nHvis du ikke gir denne appen tilgang til alle enhetslogger, har den fortsatt tilgang til sine egne logger. Enhetsprodusenten kan fortsatt ha tilgang til visse logger eller noe informasjon på enheten.\n\nFinn ut mer på g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ikke vis igjen"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vil vise <xliff:g id="APP_2">%2$s</xliff:g>-utsnitt"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Endre"</string>

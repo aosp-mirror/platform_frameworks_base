@@ -607,7 +607,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"اثر انگشت راه‌اندازی نشد"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"مهلت راه‌اندازی اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"مهلت تنظیم اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"تلاش‌ها از حد مجاز بیشتر شده است. به‌جای آن از قفل صفحه استفاده کنید."</string>
@@ -1472,7 +1472,7 @@
     <string name="ime_action_default" msgid="8265027027659800121">"اجرا کردن"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"شماره گیری \nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"ایجاد مخاطب\nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست مجوز کرده‌اند."</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست اجازه کرده‌اند."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"می‌خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"درخواست دسترسی"</string>
     <string name="allow" msgid="6195617008611933762">"ارزیابی‌شده"</string>

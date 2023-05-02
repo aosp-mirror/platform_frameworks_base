@@ -654,7 +654,7 @@
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Reînregistrează-ți chipul."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Chipul nu a fost recunoscut. Reîncearcă."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Schimbă ușor poziția capului"</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Priviți direct spre telefon"</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Privește mai direct spre telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Privește mai direct spre telefon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Privește mai direct spre telefon"</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Îndepărtează orice îți ascunde chipul."</string>
@@ -665,7 +665,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Nu se poate crea modelul facial. Reîncearcă."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"S-au detectat ochelari de culoare închisă. Chipul trebuie să fie vizibil în totalitate."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"S-a detectat un articol care acoperă chipul. Chipul trebuie să fie vizibil în totalitate."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Un articol acoperă chipul. Întreg chipul trebuie să fie vizibil."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nu se poate confirma fața. Hardware-ul nu este disponibil."</string>
@@ -2298,5 +2298,5 @@
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Nu se poate accesa camera foto a telefonului de pe <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Nu se poate accesa camera foto a tabletei de pe <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_secure_window" msgid="161700398158812314">"Nu se poate accesa în timpul streamingului. Încearcă pe telefon."</string>
-    <string name="system_locale_title" msgid="711882686834677268">"Prestabilit de sistem"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Prestabilită de sistem"</string>
 </resources>

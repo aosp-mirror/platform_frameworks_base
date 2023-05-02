@@ -597,7 +597,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"অত্যন্ত উজ্জ্বল"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"পাওয়ার বোতাম প্রেস করার বিষয়টি শনাক্ত করা হয়েছে"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"অ্যাডজাস্ট করার চেষ্টা করুন"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"প্রতিবার আঙ্গুলের ছাপ সেটআপ করার সময় আপনার আঙ্গুলের অবস্থান সামান্য পরিবর্তন করুন"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"প্রতিবার আপনার আঙুলের অবস্থান সামান্য পরিবর্তন করুন"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"আঙ্গুলের ছাপ শনাক্ত করা যায়নি"</string>
@@ -1719,7 +1719,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"একটি ফিচার থেকে অন্যটিতে যেতে, তিনটি আঙ্গুল দিয়ে উপরের দিকে সোয়াইপ করে ধরে থাকুন।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"বড় করে দেখা"</string>
     <string name="user_switched" msgid="7249833311585228097">"বর্তমান ব্যবহারকারী <xliff:g id="NAME">%1$s</xliff:g>৷"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"ব্যবহারকারী পরিবর্তন করে <xliff:g id="NAME">%1$s</xliff:g> করা হচ্ছে…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> প্রোফাইলে পাল্টানো হচ্ছে…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>কে লগ-আউট করা হচ্ছে..."</string>
     <string name="owner_name" msgid="8713560351570795743">"মালিক"</string>
     <string name="guest_name" msgid="8502103277839834324">"অতিথি"</string>

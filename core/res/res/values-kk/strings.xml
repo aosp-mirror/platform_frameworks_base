@@ -587,7 +587,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Аутентификациялауда қате шықты."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Экран құлпын пайдалану"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Жалғастыру үшін экран құлпын енгізіңіз."</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сканерді қатты басыңыз."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сканерді қатты басыңыз"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Саусақ ізін тану мүмкін емес. Қайталап көріңіз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Саусақ ізін оқу сканерін тазалап, әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сканерді тазалап, әрекетті қайталаңыз."</string>
@@ -597,7 +597,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Тым жарық."</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Қуат түймесін басу әрекеті анықталды."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Дұрыстап қойып көріңіз."</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Саусағыңыздың қалпын аздап өзгертіп тұрыңыз."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Саусағыңыздың орнын аздап өзгертіп тұрыңыз"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Саусақ ізі танылмады."</string>
@@ -645,17 +645,17 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонды жақынырақ ұстаңыз."</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонды жоғарырақ ұстаңыз."</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Телефонды төменірек ұстаңыз."</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай ұстаңыз."</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай ұстаңыз."</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай жылжытыңыз."</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай жылжытыңыз."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Құрылғының камерасына тура қараңыз."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Бетіңіз көрінбей тұр. Телефонды көз деңгейінде ұстаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Қозғалыс тым көп. Телефонды қозғалтпаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Қайта тіркеліңіз."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Бет танылмады. Қайталап көріңіз."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Басыңыздың қалпын сәл өзгертіңіз."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға барынша тура қараңыз."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға барынша тура қараңыз."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға барынша тура қараңыз."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға тура қараңыз."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға тура қараңыз."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға тура қараңыз."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Бетіңізді жауып тұрған нәрсені алып тастаңыз."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экранның жоғарғы жағын, сонымен қатар қара жолақты өшіріңіз."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -949,7 +949,7 @@
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Желі бекітілген"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM картасы PUK арқылы бекітілген."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Пайдаланушы нұсқаулығын қараңыз немесе тұтынушыларды қолдау орталығына хабарласыңыз."</string>
-    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM картасы бөгелген."</string>
+    <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM картасы блокталған."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM картаны ашуда…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Құлыпты ашу өрнегін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате салдыңыз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін әрекетті қайталаңыз."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Құпия сөзді <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате тердіңіз. \n\n <xliff:g id="NUMBER_1">%2$d</xliff:g> секундтан кейін қайталаңыз."</string>
@@ -2277,10 +2277,10 @@
     <string name="window_magnification_prompt_content" msgid="8159173903032344891">"Енді экранның бір бөлігін ұлғайтуға болады."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Параметрлер бөлімінен қосу"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Қабылдамау"</string>
-    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонының бөгеуін алыңыз"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасының бөгеуін алыңыз"</string>
+    <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Құрылғы микрофонын блоктан шығарыңыз"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Құрылғы камерасын блоктан шығарыңыз"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; және барлық қолданбалар мен қызметтерге арналған."</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Бөгеуді алу"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Блоктан шығару"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Датчикке қатысты құпиялық"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Қолданба белгішесі"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Қолданба брендін ілгері жылжыту кескіні"</string>

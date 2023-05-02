@@ -945,7 +945,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"შეწყვეტა"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"უკან გადახვევა"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"წინ გადახვევა"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი დახმარების ზარები"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი ზარები"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ქსელი ჩაკეტილია"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM ბარათი არის PUK-ით დაბლოკილი."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"იხილეთ მომხმარებლის სახელმძღვანელო ან დაუკავშირდით კლიენტების მომსახურებას."</string>

@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="byteShort" msgid="202579285008794431">"Б"</string>
+    <string name="byteShort" msgid="202579285008794431">"B"</string>
     <string name="kilobyteShort" msgid="2214285521564195803">"КБ"</string>
     <string name="megabyteShort" msgid="6649361267635823443">"МБ"</string>
     <string name="gigabyteShort" msgid="7515809460261287991">"ГБ"</string>
@@ -648,7 +648,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Преместете телефона наляво"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Преместете телефона надясно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Моля, гледайте точно към устройството си."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Лицето ви не се вижда. Дръжте телефона на нивото на очите си."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Лицето не се вижда. Задръжте на нивото на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Твърде много движение. Дръжте телефона неподвижно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Моля, регистрирайте лицето си отново."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Лицето не е разпознато. Опитайте отново."</string>
@@ -2058,7 +2058,7 @@
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"В регистрационните файлове за устройството се записва какво се извършва на него. Приложенията могат да използват тези регистрационни файлове, за да откриват и отстраняват проблеми.\n\nНякои регистрационни файлове за устройството може да съдържат поверителна информация, затова разрешавайте достъп до всички тях само на приложения, на които имате доверие. \n\nАко не разрешите на това приложение достъп до всички регистрационни файлове за устройството, то пак може да осъществява достъп до собствените си регистрационни файлове. Производителят на устройството може да има достъп до някои регистрационни файлове или информация на устройството ви.\n\nНаучете повече на адрес g.co/android/devicelogs."</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Да не се показва пак"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> иска да показва части от <xliff:g id="APP_2">%2$s</xliff:g>"</string>
-    <string name="screenshot_edit" msgid="7408934887203689207">"Редактиране"</string>
+    <string name="screenshot_edit" msgid="7408934887203689207">"Редакти­ране"</string>
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="2055927873175228519">"При обаждания и известия устройството ще вибрира"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="1011246774949993783">"Обажданията и известията ще бъдат заглушени"</string>
     <string name="notification_channel_system_changes" msgid="2462010596920209678">"Промени в системата"</string>

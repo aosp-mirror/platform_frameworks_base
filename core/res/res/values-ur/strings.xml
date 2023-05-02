@@ -79,18 +79,18 @@
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"سروس فراہم نہیں کی گئی۔"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"‏آپ کالر ID کی ترتیبات تبدیل نہیں کر سکتے ہیں۔"</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"کوئی موبائل ڈیٹا سروس دستیاب نہیں ہے"</string>
-    <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
+    <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"کوئی صوتی سروس نہیں"</string>
-    <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"کوئی صوتی سروس یا ہنگامی کالنگ دستیاب نہیں ہے"</string>
+    <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"کوئی صوتی سروس یا ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"آپ کے کیریئر نے عارضی طور پر آف کر دیا ہے"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"‏SIM <xliff:g id="SIMNUMBER">%d</xliff:g> کے لئے آپ کے کیریئر نے عارضی طور پر آف کر دیا ہے"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"موبائل نیٹ ورک تک رسائی نہیں ہو سکتی"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ترجیحی نیٹ ورک تبدیل کر کے دیکھیں۔ تبدیل کرنے کے لیے تھپتھپائیں۔"</string>
-    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ہنگامی کالنگ دستیاب نہیں ہے"</string>
-    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏Wi‑Fi کے ذریعے ہنگامی کالز نہیں کر سکتے"</string>
+    <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
+    <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"‏Wi‑Fi کے ذریعے ایمرجنسی کالز نہیں کر سکتے"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"الرٹس"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"کال فارورڈنگ"</string>
-    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ہنگامی کال بیک وضع"</string>
+    <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ایمرجنسی کال بیک وضع"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"موبائل ڈیٹا کی صورت حال"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"‏SMS پیغامات"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"صوتی میل پیغامات"</string>
@@ -364,11 +364,11 @@
     <string name="permlab_receiveMms" msgid="4000650116674380275">"‏متنی پیغامات (MMS) حاصل کریں"</string>
     <string name="permdesc_receiveMms" msgid="958102423732219710">"‏ایپ کو MMS پیغامات حاصل اور ان پر کارروائی کرنے کی اجازت دیتا ہے۔ اس کا مطلب ہے کہ ایپ آپ کے آلے پر مرسلہ پیغامات آپ کو دکھائے بغیر ان پر نگاہ رکھ یا انہیں حذف کرسکتی ہے۔"</string>
     <string name="permlab_bindCellBroadcastService" msgid="586746677002040651">"سیل کے نشریاتی پیغامات فارورڈ کریں"</string>
-    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"سیل کی نشریاتی پیغامات کے موصول ہوتے ہی فارورڈ کرنے کے لیے ایپ کو سیل کے نشریاتی ماڈیول میں پابندی لگانے کی اجازت دیں۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل براڈ کاسٹ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں مداخلت کر سکتی ہیں۔"</string>
+    <string name="permdesc_bindCellBroadcastService" msgid="6540910200973641606">"سیل کی نشریاتی پیغامات کے موصول ہوتے ہی فارورڈ کرنے کے لیے ایپ کو سیل کے نشریاتی ماڈیول میں پابندی لگانے کی اجازت دیں۔ سیل کی نشریاتی الرٹس آپ کو ایمرجنسی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ایمرجنسی سیل براڈ کاسٹ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں مداخلت کر سکتی ہیں۔"</string>
     <string name="permlab_manageOngoingCalls" msgid="281244770664231782">"جاری کالز کا نظم کریں"</string>
     <string name="permdesc_manageOngoingCalls" msgid="7003138133829915265">"اس سے ایپ کو آپ کے آلے پر جاری کالز کے بارے میں تفصیلات دیکھنے اور ان کالز کو کنٹرول کرنے کی اجازت ملتی ہے۔"</string>
     <string name="permlab_readCellBroadcasts" msgid="5869884450872137693">"سیل کے نشریاتی پیغامات پڑھیں"</string>
-    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ہنگامی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ہنگامی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
+    <string name="permdesc_readCellBroadcasts" msgid="672513437331980168">"ایپ کو آپ کے آلے کو موصولہ سیل کے نشریاتی پیغامات پڑھنے کی اجازت دیتا ہے۔ سیل کی نشریاتی الرٹس آپ کو ایمرجنسی حالات سے مطلع کرنے کیلئے کچھ مقامات میں مہیا کی جاتی ہیں۔ نقصان دہ ایپس کوئی ایمرجنسی سیل کا نشریہ موصول ہونے پر آپ کے آلے کی کارکردگی یا عمل میں خلل ڈال سکتی ہیں۔"</string>
     <string name="permlab_subscribedFeedsRead" msgid="217624769238425461">"سبسکرائب کردہ فیڈز پڑھیں"</string>
     <string name="permdesc_subscribedFeedsRead" msgid="6911349196661811865">"ایپ کو فی الحال مطابقت پذیر کیے ہوئے فیڈز کے بارے میں تفصیلات حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_sendSms" msgid="7757368721742014252">"‏SMS پیغامات بھیجیں اور دیکھیں"</string>
@@ -469,7 +469,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ایپ کو وائبریٹر کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ایپ کو وائبریٹر اسٹیٹ تک رسائی حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"براہ راست فون نمبرز پر کال کریں"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"ایپ کو آپ کی مداخلت کے بغیر فون نمبروں پر کال کرنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز یا کالیں ہوسکتی ہیں۔ نوٹ کرلیں کہ یہ ایپ کو ہنگامی نمبروں پر کال کرنے کی اجازت نہیں دیتا ہے۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر کالیں کرکے آپ کی رقم صرف کروا سکتے ہیں۔"</string>
+    <string name="permdesc_callPhone" msgid="5439809516131609109">"ایپ کو آپ کی مداخلت کے بغیر فون نمبروں پر کال کرنے کی اجازت دیتا ہے۔ اس کے نتیجے میں غیر متوقع چارجز یا کالیں ہوسکتی ہیں۔ نوٹ کرلیں کہ یہ ایپ کو ایمرجنسی نمبروں پر کال کرنے کی اجازت نہیں دیتا ہے۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر کالیں کرکے آپ کی رقم صرف کروا سکتے ہیں۔"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"‏IMS کال سروس تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏آپ کی مداخلت کے بغیر کالیں کرنے کیلئے ایپ کو IMS سروس استعمال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"فون کے اسٹیٹس اور شناخت کو پڑھیں"</string>
@@ -917,13 +917,13 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="7792964196473964340">"‏غیر مقفل کرنے کیلئے PIN ٹائپ کریں"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"‏غلط PIN کوڈ۔"</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"غیر مقفل کرنے کیلئے، مینیو پھر 0 دبائیں۔"</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"ہنگامی نمبر"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"ایمرجنسی نمبر"</string>
     <string name="lockscreen_carrier_default" msgid="6192313772955399160">"کوئی سروس نہیں ہے"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"اسکرین مقفل ہے۔"</string>
-    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"غیر مقفل کرنے کیلئے مینیو دبائیں یا ہنگامی کال کریں۔"</string>
+    <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"غیر مقفل کرنے کیلئے مینیو دبائیں یا ایمرجنسی کال کریں۔"</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"غیر مقفل کرنے کیلئے مینیو دبائیں۔"</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"غیر مقفل کرنے کیلئے پیٹرن کو ڈرا کریں"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ہنگامی"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ایمرجنسی"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"کال پر واپس جائیں"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"صحیح!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"دوبارہ کوشش کریں"</string>
@@ -945,7 +945,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"روکیں"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ریوائینڈ کریں"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"تیزی سے فارورڈ کریں"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"صرف ہنگامی کالز"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"صرف ایمرجنسی کالز"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"نیٹ ورک مقفل ہو گیا"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"‏SIM کارڈ PUK مقفل ہے۔"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"رہنمائے صارف دیکھیں یا کسٹمر کیئر سے رابطہ کریں۔"</string>

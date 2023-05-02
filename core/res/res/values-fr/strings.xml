@@ -644,7 +644,7 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Lumière insuffisante"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Éloignez le téléphone."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Rapprochez le téléphone"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Déplacez le téléphone vers le haut"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Levez le téléphone"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Déplacez le téléphone vers le bas"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Déplacez le téléphone vers la gauche"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Déplacez le téléphone vers la droite"</string>
@@ -1615,7 +1615,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablette"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Téléviseur"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Téléphone"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Haut-parleurs de la station d\'accueil"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Haut-parleur de la station de recharge"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Écouteurs"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1642,7 +1642,7 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Schéma incorrect."</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Mot de passe incorrect."</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Code PIN incorrect."</string>
-    <string name="kg_pattern_instructions" msgid="8366024510502517748">"Dessinez votre schéma."</string>
+    <string name="kg_pattern_instructions" msgid="8366024510502517748">"Tracez votre schéma"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Saisissez le code PIN de la carte SIM."</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Saisissez le code PIN."</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Saisissez votre mot de passe."</string>
@@ -1878,7 +1878,7 @@
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarme suivante)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Jusqu\'à la désactivation"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Jusqu\'à ce que vous le désactiviez"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Jusqu\'à ce que vous désactiviez la fonctionnalité \"Ne pas déranger\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Réduire"</string>
@@ -2053,7 +2053,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OUVRIR QUAND MÊME"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Application dangereuse détectée"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Autoriser <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> à accéder à tous les journaux de l\'appareil ?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Autoriser un accès unique"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Autoriser un accès ponctuel"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne pas autoriser"</string>
     <string name="log_access_confirmation_body" product="default" msgid="1806692062668620735">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre les problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil."</string>
     <string name="log_access_confirmation_body" product="tv" msgid="7379536536425265262">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre des problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil.\n\nEn savoir plus sur g.co/android/devicelogs"</string>
@@ -2279,7 +2279,7 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activer dans les paramètres"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Fermer"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Débloquer le micro de l\'appareil"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Débloquer l\'appareil photo de l\'appareil"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Débloquer la caméra de l\'appareil"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Pour &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; et tous les services et applis"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Débloquer"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Confidentialité du capteur"</string>

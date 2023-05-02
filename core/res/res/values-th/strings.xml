@@ -1281,13 +1281,13 @@
     <string name="volume_call" msgid="7625321655265747433">"ระดับเสียงขณะโทร"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"ระดับเสียงบลูทูธขณะโทร"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"ระดับเสียงปลุก"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"ระดับเสียงของการแจ้งเตือน"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"ระดับเสียงการแจ้งเตือน"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"ระดับเสียง"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"ระดับบลูทูธ"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"ระดับเสียงเรียกเข้า"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"ระดับเสียงการโทร"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"ระดับเสียงของสื่อ"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"ระดับเสียงของการแจ้งเตือน"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"ระดับเสียงการแจ้งเตือน"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"เสียงเรียกเข้าเริ่มต้น"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"ค่าเริ่มต้น (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"ไม่มี"</string>
@@ -1928,7 +1928,7 @@
     <string name="user_creation_adding" msgid="7305185499667958364">"อนุญาตให้ <xliff:g id="APP">%1$s</xliff:g> สร้างผู้ใช้ใหม่ด้วย <xliff:g id="ACCOUNT">%2$s</xliff:g> ไหม"</string>
     <string name="supervised_user_creation_label" msgid="6884904353827427515">"เพิ่มผู้ใช้ภายใต้การควบคุมดูแล"</string>
     <string name="language_selection_title" msgid="52674936078683285">"เพิ่มภาษา"</string>
-    <string name="country_selection_title" msgid="5221495687299014379">"ค่ากำหนดภูมิภาค"</string>
+    <string name="country_selection_title" msgid="5221495687299014379">"ค่ากำหนดตามพื้นที่"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"พิมพ์ชื่อภาษา"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"แนะนำ"</string>
     <string name="language_picker_regions_section_suggested" msgid="6080131515268225316">"แนะนำ"</string>

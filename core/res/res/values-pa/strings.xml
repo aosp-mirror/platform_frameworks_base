@@ -1614,7 +1614,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ਟੈਬਲੈੱਟ"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ਫ਼ੋਨ ਕਰੋ"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ਡੌਕ ਸਪੀਕਰਸ"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ਡੌਕ ਸਪੀਕਰ"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ਹੈੱਡਫ਼ੋਨ"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1719,7 +1719,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ਨੂੰ ਲਾਗ-ਆਉਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ …"</string>
     <string name="owner_name" msgid="8713560351570795743">"ਮਾਲਕ"</string>
     <string name="guest_name" msgid="8502103277839834324">"ਮਹਿਮਾਨ"</string>
@@ -2086,7 +2086,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"ਠੀਕ ਹੈ"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"ਬੰਦ ਕਰੋ"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"ਹੋਰ ਜਾਣੋ"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਨੇ Android ਅਡੈਪਟਿਵ ਸੂਚਨਾਵਾਂ ਦੀ ਜਗ੍ਹਾ ਲੈ ਲਈ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਕਾਰਵਾਈਆਂ ਅਤੇ ਜਵਾਬਾਂ ਵਾਲੇ ਸੁਝਾਅ ਦਿਖਾਉਂਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰਦੀ ਹੈ।\n\nਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਸੂਚਨਾ ਸਮੱਗਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ, ਜਿਸ ਵਿੱਚ ਸੰਪਰਕ ਦੇ ਨਾਮ ਅਤੇ ਸੁਨੇਹੇ ਵਰਗੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਸੂਚਨਾਵਾਂ ਨੂੰ ਖਾਰਜ ਵੀ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਸੂਚਨਾਵਾਂ ਦਾ ਜਵਾਬ ਵੀ ਦੇ ਸਕਦੀ ਹੈ, ਜਿਵੇਂ ਕਿ ਫ਼ੋਨ ਕਾਲਾਂ ਦਾ ਜਵਾਬ ਦੇਣਾ ਅਤੇ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਕੰਟਰੋਲ ਕਰਨਾ।"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Android 12 ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਨੇ Android ਅਡੈਪਟਿਵ ਸੂਚਨਾਵਾਂ ਦੀ ਜਗ੍ਹਾ ਲੈ ਲਈ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਕਾਰਵਾਈਆਂ ਅਤੇ ਜਵਾਬਾਂ ਵਾਲੇ ਸੁਝਾਅ ਦਿਖਾਉਂਦੀ ਹੈ ਅਤੇ ਤੁਹਾਡੀਆਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਵਿਵਸਥਿਤ ਕਰਦੀ ਹੈ।\n\nਵਿਸਤ੍ਰਿਤ ਸੂਚਨਾਵਾਂ ਸੂਚਨਾ ਸਮੱਗਰੀ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀਆਂ ਹਨ, ਜਿਸ ਵਿੱਚ ਸੰਪਰਕ ਦੇ ਨਾਮ ਅਤੇ ਸੁਨੇਹਿਆਂ ਵਰਗੀ ਨਿੱਜੀ ਜਾਣਕਾਰੀ ਵੀ ਸ਼ਾਮਲ ਹੈ। ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਸੂਚਨਾਵਾਂ ਨੂੰ ਖਾਰਜ ਵੀ ਕਰ ਸਕਦੀ ਹੈ ਜਾਂ ਸੂਚਨਾਵਾਂ ਦਾ ਜਵਾਬ ਵੀ ਦੇ ਸਕਦੀ ਹੈ, ਜਿਵੇਂ ਕਿ ਫ਼ੋਨ ਕਾਲਾਂ ਦਾ ਜਵਾਬ ਦੇਣਾ ਅਤੇ \'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਕੰਟਰੋਲ ਕਰਨਾ।"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ਨਿਯਮਬੱਧ ਮੋਡ ਦੀ ਜਾਣਕਾਰੀ ਵਾਲੀ ਸੂਚਨਾ"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ਬੈਟਰੀ ਚਾਰਜ ਕਰਨ ਦੇ ਮਿੱਥੇ ਸਮੇਂ ਤੋਂ ਪਹਿਲਾਂ ਸ਼ਾਇਦ ਬੈਟਰੀ ਖਤਮ ਹੋ ਜਾਵੇ"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"ਬੈਟਰੀ ਲਾਈਫ਼ ਵਧਾਉਣ ਲਈ ਬੈਟਰੀ ਸੇਵਰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>

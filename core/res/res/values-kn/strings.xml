@@ -414,9 +414,9 @@
     <string name="permdesc_broadcastSticky" product="tv" msgid="2338185920171000650">"ಪ್ರಸಾರವು ಮುಕ್ತಾಯಗೊಂಡ ನಂತರ ಉಳಿದಿರುವ ಜಿಗುಟಾದ ಪ್ರಸಾರಗಳನ್ನು ಕಳುಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದರ ಹೆಚ್ಚಿನ ಬಳಕೆಯು Android TV ಸಾಧನವನ್ನು ನಿಧಾನಗೊಳಿಸುತ್ತದೆ ಅಥವಾ ಅತಿಯಾಗಿ ಮೆಮೊರಿಯನ್ನು ಬಳಸುವಂತೆ ಮಾಡುವ ಮೂಲಕ ಅಸ್ಥಿರಗೊಳಿಸುತ್ತದೆ."</string>
     <string name="permdesc_broadcastSticky" product="default" msgid="134529339678913453">"ಪ್ರಸಾರ ಕೊನೆಗೊಂಡ ನಂತರ ಹಾಗೆಯೇ ಉಳಿಯುವ ಸ್ಟಿಕಿ ಪ್ರಸಾರಗಳನ್ನು ಕಳುಹಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಮಿತಿಮೀರಿದ ಬಳಕೆಯು ಫೋನ್‍ ಅನ್ನು ನಿಧಾನಗೊಳಿಸಬಹುದು ಅಥವಾ ಅತಿಯಾದ ಮೆಮೊರಿ ಬಳಕೆಯು ಅಸ್ಥಿರತೆಯನ್ನು ಉಂಟುಮಾಡಬಹುದು."</string>
     <string name="permlab_readContacts" msgid="8776395111787429099">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಓದಿರಿ"</string>
-    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳ ಕುರಿತಾದ ಡೇಟಾವನ್ನು ರೀಡ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುವು ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಂಪರ್ಕಗಳನ್ನು ರಚಿಸಿದ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿನ ಖಾತೆಗಳಿಗೂ ಸಹ ಆ್ಯಪ್‌ಗಳು ಪ್ರವೇಶ ಹೊಂದಿರುತ್ತವೆ. ಇದರಲ್ಲಿ ನೀವು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಆ್ಯಪ್‌ಗಳು ರಚಿಸಿದ ಖಾತೆಗಳನ್ನು ಒಳಗೊಂಡಿರಬಹುದು. ಈ ಅನುಮತಿಯು ನಿಮ್ಮ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಉಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅನುಮತಿಸುತ್ತದೆ, ಆದರೆ ದುರುದ್ದೇಶಪೂರಿತ ಆ್ಯಪ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಗಮನಕ್ಕೆ ಬಾರದೇ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು."</string>
+    <string name="permdesc_readContacts" product="tablet" msgid="6430093481659992692">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳ ಕುರಿತಾದ ಡೇಟಾವನ್ನು ರೀಡ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುವು ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಂಪರ್ಕಗಳನ್ನು ರಚಿಸಿದ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿನ ಖಾತೆಗಳಿಗೂ ಸಹ ಆ್ಯಪ್‌ಗಳು ಆ್ಯಕ್ಸೆಸ್ ಹೊಂದಿರುತ್ತವೆ. ಇದರಲ್ಲಿ ನೀವು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಆ್ಯಪ್‌ಗಳು ರಚಿಸಿದ ಖಾತೆಗಳನ್ನು ಒಳಗೊಂಡಿರಬಹುದು. ಈ ಅನುಮತಿಯು ನಿಮ್ಮ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಉಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅನುಮತಿಸುತ್ತದೆ, ಆದರೆ ದುರುದ್ದೇಶಪೂರಿತ ಆ್ಯಪ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಗಮನಕ್ಕೆ ಬಾರದೇ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು."</string>
     <string name="permdesc_readContacts" product="tv" msgid="8400138591135554789">"ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಸಂಗ್ರಹಿಸಿರುವ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳ ಕುರಿತಾದ ಡೇಟಾವನ್ನು ರೀಡ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ರಚಿಸಲಾದ ಸಂಪರ್ಕಗಳಿಗೆ ಖಾತೆಗಳಿಗೆ ಆ್ಯಪ್‌ಗಳು ಪ್ರವೇಶವನ್ನು ಹೊಂದಿರುತ್ತವೆ. ಇದರಲ್ಲಿ ನೀವು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಆ್ಯಪ್‌ಗಳು ರಚಿಸಿದ ಖಾತೆಗಳನ್ನು ಒಳಗೊಂಡಿರಬಹುದು. ಈ ಅನುಮತಿಯು ನಿಮ್ಮ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಉಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅನುಮತಿಸುತ್ತದೆ, ಆದರೆ ದುರುದ್ದೇಶಪೂರಿತ ಆ್ಯಪ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಗಮನಕ್ಕೆ ಬಾರದೇ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು."</string>
-    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳ ಕುರಿತಾದ ಡೇಟಾವನ್ನು ರೀಡ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುವು ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಂಪರ್ಕಗಳನ್ನು ರಚಿಸಿದ ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿನ ಖಾತೆಗಳಿಗೂ ಸಹ ಆ್ಯಪ್‌ಗಳು ಪ್ರವೇಶ ಹೊಂದಿರುತ್ತವೆ. ಇದರಲ್ಲಿ ನೀವು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಆ್ಯಪ್‌ಗಳು ರಚಿಸಿದ ಖಾತೆಗಳನ್ನು ಒಳಗೊಂಡಿರಬಹುದು. ಈ ಅನುಮತಿಯು ನಿಮ್ಮ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಉಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅನುಮತಿಸುತ್ತದೆ, ಆದರೆ ದುರುದ್ದೇಶಪೂರಿತ ಆ್ಯಪ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಗಮನಕ್ಕೆ ಬಾರದೇ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು."</string>
+    <string name="permdesc_readContacts" product="default" msgid="4911989776203207644">"ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳ ಕುರಿತಾದ ಡೇಟಾವನ್ನು ರೀಡ್ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುವು ಮಾಡಿಕೊಡುತ್ತದೆ. ಸಂಪರ್ಕಗಳನ್ನು ರಚಿಸಿದ ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿನ ಖಾತೆಗಳಿಗೂ ಸಹ ಆ್ಯಪ್‌ಗಳು ಆ್ಯಕ್ಸೆಸ್ ಹೊಂದಿರುತ್ತವೆ. ಇದರಲ್ಲಿ ನೀವು ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿದ ಆ್ಯಪ್‌ಗಳು ರಚಿಸಿದ ಖಾತೆಗಳನ್ನು ಒಳಗೊಂಡಿರಬಹುದು. ಈ ಅನುಮತಿಯು ನಿಮ್ಮ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಉಳಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅನುಮತಿಸುತ್ತದೆ, ಆದರೆ ದುರುದ್ದೇಶಪೂರಿತ ಆ್ಯಪ್‌ಗಳಿಗೆ ನಿಮ್ಮ ಗಮನಕ್ಕೆ ಬಾರದೇ ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಹಂಚಿಕೊಳ್ಳಬಹುದು."</string>
     <string name="permlab_writeContacts" msgid="8919430536404830430">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಮಾರ್ಪಡಿಸಿ"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="6422419281427826181">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳ ಕುರಿತಾದ ಡೇಟಾವನ್ನು ಮಾರ್ಪಡಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಈ ಅನುಮತಿಯು ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಅಳಿಸಲು ಆ್ಯಪ್‌ಗಳಿಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_writeContacts" product="tv" msgid="6488872735379978935">"ನಿಮ್ಮ Android TV ಸಾಧನದಲ್ಲಿ ಸಂಗ್ರಹಿಸಲಾಗಿರುವ ನಿಮ್ಮ ಸಂಪರ್ಕಗಳ ಕುರಿತಾದ ಡೇಟಾವನ್ನು ಮಾರ್ಪಡಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಈ ಅನುಮತಿಯು ಸಂಪರ್ಕ ಡೇಟಾವನ್ನು ಅಳಿಸಲು ಆ್ಯಪ್‌ಗಳಿಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
@@ -485,7 +485,7 @@
     <string name="permlab_acceptHandover" msgid="2925523073573116523">"ಮತ್ತೊಂದು ಅಪ್ಲಿಕೇಶನ್‌ ಮೂಲಕ ಕರೆಯನ್ನು ಮುಂದುವರಿಸಿ"</string>
     <string name="permdesc_acceptHandovers" msgid="7129026180128626870">"ಮತ್ತೊಂದು ಅಪ್ಲಿಕೇಶನ್‌ನಲ್ಲಿ ಪ್ರಾರಂಭವಾದ ಕರೆಯನ್ನು ಮುಂದುವರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡಿ."</string>
     <string name="permlab_readPhoneNumbers" msgid="5668704794723365628">"ಫೋನ್‌ ಸಂಖ್ಯೆಗಳನ್ನು ಓದಿ"</string>
-    <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ಸಾಧನದ ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ಪ್ರವೇಶ ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ."</string>
+    <string name="permdesc_readPhoneNumbers" msgid="7368652482818338871">"ಸಾಧನದ ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ಆ್ಯಕ್ಸೆಸ್ ಪಡೆಯಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿ ನೀಡುತ್ತದೆ."</string>
     <string name="permlab_wakeLock" product="automotive" msgid="1904736682319375676">"ಕಾರ್ ಸ್ಕ್ರೀನ್ ಅನ್ನು ಆನ್‌ನಲ್ಲೇ ಇರಿಸಿ"</string>
     <string name="permlab_wakeLock" product="tablet" msgid="1527660973931694000">"ಟ್ಯಾಬ್ಲೆಟ್ ನಿದ್ರಾವಸ್ಥೆಯನ್ನು ತಡೆಯಿರಿ"</string>
     <string name="permlab_wakeLock" product="tv" msgid="2856941418123343518">"ನಿಮ್ಮ Android TV ಸಾಧನವು ನಿದ್ರಾವಸ್ಥೆಗೆ ಹೋಗುವುದನ್ನು ತಡೆಯಿರಿ"</string>
@@ -521,7 +521,7 @@
     <string name="permlab_accessWifiState" msgid="5552488500317911052">"ವೈ-ಫೈ ಸಂಪರ್ಕಗಳನ್ನು ವೀಕ್ಷಿಸಿ"</string>
     <string name="permdesc_accessWifiState" msgid="6913641669259483363">"ವೈ-ಫೈ ಸಕ್ರಿಯಗೊಂಡಿದೆಯೇ ಮತ್ತು ಸಂಪರ್ಕಿಸಲಾದ ವೈ-ಫೈ ಸಾಧನಗಳ ಹೆಸರಿನ ಮಾಹಿತಿ ರೀತಿಯ, ವೈ-ಫೈ ನೆಟ್‍‍ವರ್ಕ್ ಕುರಿತು ಮಾಹಿತಿಯನ್ನು ವೀಕ್ಷಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ."</string>
     <string name="permlab_changeWifiState" msgid="7947824109713181554">"ವೈ-ಫೈ ನಿಂದ ಸಂಪರ್ಕಗೊಳಿಸಿ ಮತ್ತು ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಿ"</string>
-    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"ವೈ-ಫೈ ಪ್ರವೇಶ ಕೇಂದ್ರಗಳಿಂದ ಸಂಪರ್ಕ ಹೊಂದಲು ಮತ್ತು ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲು, ಹಾಗೆಯೇ ವೈ-ಫೈ ನೆಟ್‍‍ವರ್ಕ್‌ಗಳಿಗೆ ಸಾಧನದ ಕನ್ಫಿಗರೇಶನ್‍ ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
+    <string name="permdesc_changeWifiState" msgid="7170350070554505384">"ವೈ-ಫೈ ಆ್ಯಕ್ಸೆಸ್ ಕೇಂದ್ರಗಳಿಂದ ಸಂಪರ್ಕ ಹೊಂದಲು ಮತ್ತು ಸಂಪರ್ಕ ಕಡಿತಗೊಳಿಸಲು, ಹಾಗೆಯೇ ವೈ-ಫೈ ನೆಟ್‍‍ವರ್ಕ್‌ಗಳಿಗೆ ಸಾಧನದ ಕನ್ಫಿಗರೇಶನ್‍ ಬದಲಾಯಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ಮಾಡಿಕೊಡುತ್ತದೆ."</string>
     <string name="permlab_changeWifiMulticastState" msgid="285626875870754696">"ವೈ-ಫೈ ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಸ್ವೀಕಾರಕ್ಕೆ ಅನುಮತಿಸಿ"</string>
     <string name="permdesc_changeWifiMulticastState" product="tablet" msgid="191079868596433554">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಮಾತ್ರವಲ್ಲದೇ, ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ವಿಳಾಸಗಳನ್ನು ಬಳಸಿಕೊಂಡು ವೈ-ಫೈ ನೆಟ್‍‍ವರ್ಕ್‌ನಲ್ಲಿ ಎಲ್ಲಾ ಸಾಧನಗಳಿಗೆ ಕಳುಹಿಸಲಾಗಿರುವ ಪ್ಯಾಕೆಟ್‍‍ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‍‍ಗೆ ಅವಕಾಶ ನೀಡುತ್ತದೆ. ಇದು ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಅಲ್ಲದ ಮೋಡ್ ಬಳಸುವ ಶಕ್ತಿಗಿಂತಲೂ ಹೆಚ್ಚಿನ ಶಕ್ತಿಯನ್ನು ಬಳಸುತ್ತದೆ."</string>
     <string name="permdesc_changeWifiMulticastState" product="tv" msgid="1336952358450652595">"ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್‌ನಲ್ಲಿ ನಿಮ್ಮ Android TV ಮಾತ್ರವಲ್ಲದೆ, ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ವಿಳಾಸಗಳನ್ನು ಬಳಸಿಕೊಂಡು ಎಲ್ಲಾ ಸಾಧನಗಳಿಗೆ ಕಳುಹಿಸಲಾದ ಪ್ಯಾಕೆಟ್‌ಗಳನ್ನು ಸ್ವೀಕರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಮಲ್ಟಿಕ್ಯಾಸ್ಟ್ ಅಲ್ಲದ ಮೋಡ್‌ಗಿಂತಲೂ ಹೆಚ್ಚು ಪವರ್ ಬಳಸುತ್ತದೆ."</string>
@@ -587,11 +587,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"ದೃಢೀಕರಿಸುವಾಗ ದೋಷ ಎದುರಾಗಿದೆ"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"ಸ್ಕ್ರೀನ್ ಲಾಕ್ ಬಳಸಿ"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"ಮುಂದುವರಿಯಲು ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಲಾಕ್‌ ಅನ್ನು ನಮೂದಿಸಿ"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ಸೆನ್ಸರ್ ಮೇಲೆ ದೃಢವಾಗಿ ಒತ್ತಿರಿ"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"ಸೆನ್ಸರ್ ಮೇಲೆ ಗಟ್ಟಿಯಾಗಿ ಒತ್ತಿರಿ"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ಫಿಂಗರ್‌ ಪ್ರಿಂಟ್ ಸೆನ್ಸರ್‌‌ ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"ಸೆನ್ಸರ್‌‌ ಸ್ವಚ್ಛಗೊಳಿಸಿ ಹಾಗೂ ಪುನಃ ಪ್ರಯತ್ನಿಸಿ"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ಸೆನ್ಸರ್ ಮೇಲೆ ದೃಢವಾಗಿ ಒತ್ತಿರಿ"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"ಸೆನ್ಸರ್ ಮೇಲೆ ಗಟ್ಟಿಯಾಗಿ ಒತ್ತಿರಿ"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"ಬೆರಳನ್ನು ತುಂಬಾ ನಿಧಾನವಾಗಿ ಸರಿಸಲಾಗಿದೆ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"ಮತ್ತೊಂದು ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"ತುಂಬಾ ಪ್ರಕಾಶಮಾನವಾಗಿದೆ"</string>
@@ -656,7 +656,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ನೋಡಿ"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ನೋಡಿ"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ನೋಡಿ"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರೆಮಾಡುವ ಯಾವುದನ್ನಾದರೂ ತೆಗೆದುಹಾಕಿ."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"ಮುಖವನ್ನು ಮರೆ ಮಾಡುವ ವಸ್ತುಗಳನ್ನು ತೆಗೆದುಹಾಕಿ."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ಬ್ಲ್ಯಾಕ್ ಬಾರ್ ಸೇರಿದಂತೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲ್ಭಾಗವನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ಫೇಸ್ ಮಾಡೆಲ್ ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"ಕಪ್ಪು ಕನ್ನಡಕ ಪತ್ತೆಯಾಗಿದೆ. ನಿಮ್ಮ ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ಮುಖವಾಡ ಪತ್ತೆಯಾಗಿದೆ. ನಿಮ್ಮ ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ಮುಖವಾಡ ಪತ್ತೆಯಾಗಿದೆ. ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ಮುಖ ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಹಾರ್ಡ್‌ವೇರ್ ಲಭ್ಯವಿಲ್ಲ."</string>
@@ -1184,7 +1184,7 @@
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"ಇವುಗಳ ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"<xliff:g id="APPLICATION">%1$s</xliff:g> ಮೂಲಕ ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="APPLICATION">%2$s</xliff:g> ಮೂಲಕ <xliff:g id="HOST">%1$s</xliff:g> ಲಿಂಕ್‌ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
-    <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ಪ್ರವೇಶ ಅನುಮತಿಸಿ"</string>
+    <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"ಆ್ಯಕ್ಸೆಸ್ ಅನುಮತಿಸಿ"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"ಇವರ ಜೊತೆಗೆ ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"%1$s ಜೊತೆಗೆ ಎಡಿಟ್ ಮಾಡಿ"</string>
     <string name="whichEditApplicationLabel" msgid="1463288652070140285">"ಎಡಿಟ್"</string>
@@ -1195,7 +1195,7 @@
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$s ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"ಕಳುಹಿಸು"</string>
     <string name="whichHomeApplication" msgid="8276350727038396616">"ಮುಖಪುಟ‌ ಅಪ್ಲಿಕೇಶನ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"ಮುಖಪುಟ‌ ಎಂಬಂತೆ %1$s ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"%1$s ಅನ್ನು ಹೋಮ್ ಆಗಿ ಬಳಸಿ"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"ಇದರ ಜೊತೆಗೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$s ಜೊತೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
@@ -1253,7 +1253,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ಬೂಟ್ ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ನೀವು ಪವರ್ ಬಟನ್ ಒತ್ತಿದ್ದೀರಿ — ಇದು ಸಾಮಾನ್ಯವಾಗಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.\n\nನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಹೊಂದಿಸುವಾಗ ಲಘುವಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ಸೆಟಪ್ ಪೂರ್ಣಗೊಳಿಸಲು, ಸ್ಕ್ರೀನ್‌ ಆಫ್ ಮಾಡಿ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ಸೆಟಪ್ ಅಂತ್ಯಗೊಳಿಸಲು, ಸ್ಕ್ರೀನ್‌ ಆಫ್ ಮಾಡಿ"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪರಿಶೀಲನೆ ಮುಂದುವರಿಸುವುದೇ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ನೀವು ಪವರ್ ಬಟನ್ ಒತ್ತಿದ್ದೀರಿ — ಇದು ಸಾಮಾನ್ಯವಾಗಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.\n\nನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪರಿಶೀಲಿಸಲು ಲಘುವಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -1270,7 +1270,7 @@
     <string name="dump_heap_ready_notification" msgid="2302452262927390268">"<xliff:g id="PROC">%1$s</xliff:g> ಹೀಪ್ ಡಂಪ್ ಸಿದ್ಧವಾಗಿದೆ"</string>
     <string name="dump_heap_notification_detail" msgid="8431586843001054050">"ಹೀಪ್ ಡಂಪ್ ಅನ್ನು ಸಂಗ್ರಹಿಸಲಾಗಿದೆ; ಹಂಚಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="dump_heap_title" msgid="4367128917229233901">"ಹೀಪ್ ಡಂಪ್ ಹಂಚಿಕೊಳ್ಳುವುದೇ?"</string>
-    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> ಪ್ರಕ್ರಿಯೆಯು ತನ್ನ <xliff:g id="SIZE">%2$s</xliff:g> ಮೆಮೊರಿ ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ಅದರ ಡೆವಲಪರ್ ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಲು ನಿಮಗಾಗಿ ಹೀಪ್ ಡಂಪ್ ಲಭ್ಯವಿದೆ. ಎಚ್ಚರಿಕೆ: ಈ ಹೀಪ್ ಡಂಪ್, ಅಪ್ಲಿಕೇಶನ್ ಪ್ರವೇಶ ಹೊಂದಿರುವ ನಿಮ್ಮ ಯಾವುದೇ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು."</string>
+    <string name="dump_heap_text" msgid="1692649033835719336">"<xliff:g id="PROC">%1$s</xliff:g> ಪ್ರಕ್ರಿಯೆಯು ತನ್ನ <xliff:g id="SIZE">%2$s</xliff:g> ಮೆಮೊರಿ ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ಅದರ ಡೆವಲಪರ್ ಜೊತೆಗೆ ಹಂಚಿಕೊಳ್ಳಲು ನಿಮಗಾಗಿ ಹೀಪ್ ಡಂಪ್ ಲಭ್ಯವಿದೆ. ಎಚ್ಚರಿಕೆ: ಈ ಹೀಪ್ ಡಂಪ್, ಅಪ್ಲಿಕೇಶನ್ ಆ್ಯಕ್ಸೆಸ್ ಹೊಂದಿರುವ ನಿಮ್ಮ ಯಾವುದೇ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಯನ್ನು ಒಳಗೊಂಡಿರಬಹುದು."</string>
     <string name="dump_heap_system_text" msgid="6805155514925350849">"<xliff:g id="PROC">%1$s</xliff:g> ಪ್ರಕ್ರಿಯೆಯು ತನ್ನ <xliff:g id="SIZE">%2$s</xliff:g> ಮೆಮೊರಿ ಮಿತಿಯನ್ನು ಮೀರಿದೆ. ಹಂಚಿಕೊಳ್ಳಲು ನಿಮಗಾಗಿ ಹೀಪ್ ಡಂಪ್ ಲಭ್ಯವಿದೆ. ಎಚ್ಚರಿಕೆ: ಈ ಹೀಪ್ ಡಂಪ್, ಪ್ರಕ್ರಿಯೆಯು ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಗೆ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿರಬಹುದು, ಇದು ನೀವು ಟೈಪ್ ಮಾಡಿದ ವಿಷಯಗಳನ್ನು ಸಹ ಒಳಗೊಂಡಿರಬಹುದು."</string>
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> ನ ಪ್ರಕ್ರಿಯೆಯ ಹೀಪ್ ಡಂಪ್ ನಿಮಗಾಗಿ ಹಂಚಿಕೊಳ್ಳಲು ಲಭ್ಯವಿದೆ. ಎಚ್ಚರಿಕೆ: ಈ ಹೀಪ್ ಡಂಪ್, ಪ್ರಕ್ರಿಯೆಯು ಯಾವುದೇ ಸೂಕ್ಷ್ಮ ವೈಯಕ್ತಿಕ ಮಾಹಿತಿಗೆ ಪ್ರವೇಶವನ್ನು ಹೊಂದಿರಬಹುದು, ಇದು ನೀವು ಟೈಪ್ ಮಾಡಿದ ವಿಷಯಗಳನ್ನು ಸಹ ಒಳಗೊಂಡಿರಬಹುದು."</string>
     <string name="sendText" msgid="493003724401350724">"ಪಠ್ಯಕ್ಕೆ ಕ್ರಿಯೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"</string>
@@ -1307,7 +1307,7 @@
     <string name="network_partial_connectivity" msgid="4791024923851432291">"<xliff:g id="NETWORK_SSID">%1$s</xliff:g> ಸೀಮಿತ ಸಂಪರ್ಕ ಕಲ್ಪಿಸುವಿಕೆಯನ್ನು ಹೊಂದಿದೆ"</string>
     <string name="network_partial_connectivity_detailed" msgid="5741329444564575840">"ಹೇಗಾದರೂ ಸಂಪರ್ಕಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
     <string name="network_switch_metered" msgid="1531869544142283384">"<xliff:g id="NETWORK_TYPE">%1$s</xliff:g> ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
-    <string name="network_switch_metered_detail" msgid="1358296010128405906">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ಇಂಟರ್ನೆಟ್ ಪ್ರವೇಶ ಹೊಂದಿಲ್ಲದಿರುವಾಗ, ಸಾಧನವು <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ಬಳಸುತ್ತದೆ. ಶುಲ್ಕಗಳು ಅನ್ವಯವಾಗಬಹುದು."</string>
+    <string name="network_switch_metered_detail" msgid="1358296010128405906">"<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> ಇಂಟರ್ನೆಟ್ ಆ್ಯಕ್ಸೆಸ್ ಹೊಂದಿಲ್ಲದಿರುವಾಗ, ಸಾಧನವು <xliff:g id="NEW_NETWORK">%1$s</xliff:g> ಬಳಸುತ್ತದೆ. ಶುಲ್ಕಗಳು ಅನ್ವಯವಾಗಬಹುದು."</string>
     <string name="network_switch_metered_toast" msgid="501662047275723743">"<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> ರಿಂದ <xliff:g id="NEW_NETWORK">%2$s</xliff:g> ಗೆ ಬದಲಾಯಿಸಲಾಗಿದೆ"</string>
   <string-array name="network_switch_type_name">
     <item msgid="2255670471736226365">"ಮೊಬೈಲ್ ಡೇಟಾ"</item>
@@ -1939,7 +1939,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ ಸದ್ಯಕ್ಕೆ ಲಭ್ಯವಿಲ್ಲ. ಇದನ್ನು <xliff:g id="APP_NAME_1">%2$s</xliff:g> ನಲ್ಲಿ ನಿರ್ವಹಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ಆ್ಯಪ್ ವಿರಾಮ ನಿಲ್ಲಿಸಿ"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"ಕೆಲಸ ಆ್ಯಪ್‌ಗಳನ್ನು ಆನ್ ಮಾಡಬೇಕೆ?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳನ್ನು ಆನ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"ನಿಮ್ಮ ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳು ಮತ್ತು ಅಧಿಸೂಚನೆಗಳಿಗೆ ಪ್ರವೇಶವನ್ನು ಪಡೆಯಿರಿ"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ಆನ್‌ ಮಾಡಿ"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"ಆ್ಯಪ್ ಲಭ್ಯವಿಲ್ಲ"</string>
@@ -2010,7 +2010,7 @@
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_1">%2$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ನಲ್ಲಿ ಉಳಿಸುವುದೇ?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_2">%3$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ನಲ್ಲಿ ಉಳಿಸುವುದೇ?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡುವುದೇ?"</string>
-    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡುವುದೇ?"</string>
+    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_1">%2$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡುವುದೇ?"</string>
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"ಈ ಮುಂದಿನ ಐಟಂಗಳನ್ನು "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡುವುದೇ: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"ಉಳಿಸಿ"</string>
@@ -2284,7 +2284,7 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ಸೆನ್ಸರ್ ಗೌಪ್ಯತೆ"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ಅಪ್ಲಿಕೇಶನ್‌ ಐಕಾನ್‌"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ಅಪ್ಲಿಕೇಶನ್ ಬ್ರ್ಯಾಂಡಿಂಗ್ ಚಿತ್ರ"</string>
-    <string name="view_and_control_notification_title" msgid="4300765399209912240">"ಪ್ರವೇಶ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"ಆ್ಯಕ್ಸೆಸ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಅನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಮತ್ತು ನಿಯಂತ್ರಿಸಬಹುದು. ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ಅನ್ನು ಅನುವಾದಿಸಲಾಗಿದೆ."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ಭಾಷೆಯಿಂದ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ಭಾಷೆಗೆ ಸಂದೇಶವನ್ನು ಅನುವಾದಿಸಲಾಗಿದೆ."</string>

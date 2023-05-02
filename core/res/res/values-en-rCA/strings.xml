@@ -1534,7 +1534,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Add account"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Increase"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Decrease"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> touch &amp; hold."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> touch and hold."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Slide up to increase and down to decrease."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Increase minute"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Decrease minute"</string>
@@ -1561,7 +1561,7 @@
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Couldn\'t launch <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Share with"</string>
     <string name="shareactionprovider_share_with_application" msgid="4902832247173666973">"Share with <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
-    <string name="content_description_sliding_handle" msgid="982510275422590757">"Sliding handle. Touch &amp; hold."</string>
+    <string name="content_description_sliding_handle" msgid="982510275422590757">"Sliding handle. Touch and hold."</string>
     <string name="description_target_unlock_tablet" msgid="7431571180065859551">"Swipe to unlock."</string>
     <string name="action_bar_home_description" msgid="1501655419158631974">"Navigate home"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Navigate up"</string>
@@ -1714,7 +1714,7 @@
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Choose a feature to use when you tap the accessibility button:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with two fingers):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Choose a feature to use with the accessibility gesture (swipe up from the bottom of the screen with three fingers):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"To switch between features, touch &amp; hold the accessibility button."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"To switch between features, touch and hold the accessibility button."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"To switch between features, swipe up with two fingers and hold."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"To switch between features, swipe up with three fingers and hold."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Magnification"</string>

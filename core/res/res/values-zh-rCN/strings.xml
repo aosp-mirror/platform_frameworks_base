@@ -249,7 +249,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"错误报告"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"结束会话"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"屏幕截图"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"错误报告"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Bug 报告"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"互动式报告"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"在大多数情况下，建议您使用此选项，以便追踪报告的生成进度，输入与相应问题相关的更多详细信息，以及截取屏幕截图。系统可能会省略掉一些不常用的区段，从而缩短生成报告的时间。"</string>
@@ -648,7 +648,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"请将手机向左移动"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"请将手机向右移动"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"请直视您的设备。"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不清您的脸部，请将手机举到与眼睛齐平的位置。"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"看不到人脸，请将手机举到与眼睛齐平的位置。"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"摄像头过于晃动。请将手机拿稳。"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"请重新注册您的面孔。"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"无法识别人脸，请重试。"</string>
@@ -2086,7 +2086,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"确定"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"关闭"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"了解详情"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，增强型通知功能取代了 Android 自适应通知功能。增强型通知功能可以显示建议的操作和回复，并可将通知整理得井井有条。\n\n增强型通知功能可以读取通知内容，包括联系人名称和消息等个人信息。该功能还可以关闭通知或对通知做出回应，例如接听来电以及控制勿扰模式。"</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"在 Android 12 中，增强型通知功能取代了 Android 自适应通知功能。增强型通知功能可以显示建议的操作和回复，并可将通知整理得井井有条。\n\n增强型通知功能可以读取通知内容，包括联系人姓名、消息等个人信息。该功能还可以关闭通知或对通知做出回应，例如接听来电以及控制勿扰模式。"</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"日常安排模式信息通知"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"电池电量可能会在您平时的充电时间之前耗尽"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"已启用省电模式以延长电池续航时间"</string>
