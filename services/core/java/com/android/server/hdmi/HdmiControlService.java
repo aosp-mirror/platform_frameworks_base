@@ -458,6 +458,9 @@ public class HdmiControlService extends SystemService {
     private boolean mEarcTxFeatureFlagEnabled = false;
 
     @ServiceThreadOnly
+    private boolean mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled = false;
+
+    @ServiceThreadOnly
     private boolean mTransitionFromArcToEarcTxEnabled = false;
 
     @ServiceThreadOnly
@@ -682,6 +685,8 @@ public class HdmiControlService extends SystemService {
                 Constants.DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX, false);
         mTransitionFromArcToEarcTxEnabled = mDeviceConfig.getBoolean(
                 Constants.DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX, false);
+        mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled = mDeviceConfig.getBoolean(
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI, false);
 
         synchronized (mLock) {
             mEarcEnabled = (mHdmiCecConfig.getIntValue(
@@ -899,6 +904,17 @@ public class HdmiControlService extends SystemService {
                         mTransitionFromArcToEarcTxEnabled = properties.getBoolean(
                                 Constants.DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX,
                                 false);
+                    }
+                });
+
+        mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
+                new DeviceConfig.OnPropertiesChangedListener() {
+                    @Override
+                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                        mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled = properties.getBoolean(
+                                Constants.DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI,
+                                false);
+                        checkAndUpdateAbsoluteVolumeBehavior();
                     }
                 });
     }
@@ -4337,7 +4353,7 @@ public class HdmiControlService extends SystemService {
             case DeviceFeatures.FEATURE_NOT_SUPPORTED:
                 // TVs may adopt adjust-only absolute volume behavior if condition 4 isn't met.
                 // This allows the device to display numeric volume UI for the System Audio device.
-                if (tv() != null) {
+                if (tv() != null && mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled) {
                     if (currentVolumeBehavior
                             != AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY) {
                         // If we're currently using absolute volume behavior, switch to full volume
