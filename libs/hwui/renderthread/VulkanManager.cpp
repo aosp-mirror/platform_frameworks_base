@@ -107,11 +107,11 @@ GrVkGetProc VulkanManager::sSkiaGetProp = [](const char* proc_name, VkInstance i
 #define GET_INST_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(mInstance, "vk" #F)
 #define GET_DEV_PROC(F) m##F = (PFN_vk##F)vkGetDeviceProcAddr(mDevice, "vk" #F)
 
-sp<VulkanManager> VulkanManager::getInstance() {
-    // cache a weakptr to the context to enable a second thread to share the same vulkan state
-    static wp<VulkanManager> sWeakInstance = nullptr;
-    static std::mutex sLock;
+// cache a weakptr to the context to enable a second thread to share the same vulkan state
+static wp<VulkanManager> sWeakInstance = nullptr;
+static std::mutex sLock;
 
+sp<VulkanManager> VulkanManager::getInstance() {
     std::lock_guard _lock{sLock};
     sp<VulkanManager> vulkanManager = sWeakInstance.promote();
     if (!vulkanManager.get()) {
@@ -120,6 +120,11 @@ sp<VulkanManager> VulkanManager::getInstance() {
     }
 
     return vulkanManager;
+}
+
+sp<VulkanManager> VulkanManager::peekInstance() {
+    std::lock_guard _lock{sLock};
+    return sWeakInstance.promote();
 }
 
 VulkanManager::~VulkanManager() {
@@ -404,9 +409,13 @@ void VulkanManager::initialize() {
     }
 }
 
-sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& options,
-                                                    ContextType contextType) {
+static void onGrContextReleased(void* context) {
+    VulkanManager* manager = (VulkanManager*)context;
+    manager->decStrong((void*)onGrContextReleased);
+}
 
+sk_sp<GrDirectContext> VulkanManager::createContext(GrContextOptions& options,
+                                                    ContextType contextType) {
     GrVkBackendContext backendContext;
     backendContext.fInstance = mInstance;
     backendContext.fPhysicalDevice = mPhysicalDevice;
@@ -417,6 +426,11 @@ sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& opti
     backendContext.fVkExtensions = &mExtensions;
     backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
     backendContext.fGetProc = sSkiaGetProp;
+
+    LOG_ALWAYS_FATAL_IF(options.fContextDeleteProc != nullptr, "Conflicting fContextDeleteProcs!");
+    this->incStrong((void*)onGrContextReleased);
+    options.fContextDeleteContext = this;
+    options.fContextDeleteProc = onGrContextReleased;
 
     return GrDirectContext::MakeVulkan(backendContext, options);
 }
