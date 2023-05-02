@@ -424,6 +424,16 @@ class ProcessRecord implements WindowProcessListener {
      */
     Runnable mSuccessorStartRunnable;
 
+    /**
+     * Whether or not the process group of this process has been created.
+     */
+    volatile boolean mProcessGroupCreated;
+
+    /**
+     * Whether or not we should skip the process group creation.
+     */
+    volatile boolean mSkipProcessGroupCreation;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startUptime, long startElapsedTime) {
         this.mStartUid = startUid;
@@ -1192,8 +1202,26 @@ class ProcessRecord implements WindowProcessListener {
                 EventLog.writeEvent(EventLogTags.AM_KILL,
                         userId, mPid, processName, mState.getSetAdj(), reason);
                 Process.killProcessQuiet(mPid);
-                if (!asyncKPG) Process.sendSignalToProcessGroup(uid, mPid, OsConstants.SIGKILL);
-                ProcessList.killProcessGroup(uid, mPid);
+                final boolean killProcessGroup;
+                if (mHostingRecord != null
+                        && (mHostingRecord.usesWebviewZygote() || mHostingRecord.usesAppZygote())) {
+                    synchronized (ProcessRecord.this) {
+                        killProcessGroup = mProcessGroupCreated;
+                        if (!killProcessGroup) {
+                            // The process group hasn't been created, request to skip it.
+                            mSkipProcessGroupCreation = true;
+                        }
+                    }
+                } else {
+                    killProcessGroup = true;
+                }
+                if (killProcessGroup) {
+                    if (asyncKPG) {
+                        ProcessList.killProcessGroup(uid, mPid);
+                    } else {
+                        Process.sendSignalToProcessGroup(uid, mPid, OsConstants.SIGKILL);
+                    }
+                }
             } else {
                 mPendingStart = false;
             }

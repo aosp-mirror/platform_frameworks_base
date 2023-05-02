@@ -2300,6 +2300,8 @@ public final class ProcessList {
 
             final Process.ProcessStartResult startResult;
             boolean regularZygote = false;
+            app.mProcessGroupCreated = false;
+            app.mSkipProcessGroupCreation = false;
             if (hostingRecord.usesWebviewZygote()) {
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
@@ -2328,18 +2330,28 @@ public final class ProcessList {
                         isTopApp, app.getDisabledCompatChanges(), pkgDataInfoMap,
                         allowlistedAppDataInfoMap, bindMountAppsData, bindMountAppStorageDirs,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
+                // By now the process group should have been created by zygote.
+                app.mProcessGroupCreated = true;
             }
 
             if (!regularZygote) {
                 // webview and app zygote don't have the permission to create the nodes
-                final int res = Process.createProcessGroup(uid, startResult.pid);
-                if (res < 0) {
-                    if (res == -OsConstants.ESRCH) {
-                        Slog.e(ActivityManagerService.TAG, "Unable to create process group for "
-                            + app.processName + " (" + startResult.pid + ")");
-                    } else {
-                        throw new AssertionError("Unable to create process group for "
-                            + app.processName + " (" + startResult.pid + ")");
+                synchronized (app) {
+                    if (!app.mSkipProcessGroupCreation) {
+                        // If we're not told to skip the process group creation, go create it.
+                        final int res = Process.createProcessGroup(uid, startResult.pid);
+                        if (res < 0) {
+                            if (res == -OsConstants.ESRCH) {
+                                Slog.e(ActivityManagerService.TAG,
+                                        "Unable to create process group for "
+                                        + app.processName + " (" + startResult.pid + ")");
+                            } else {
+                                throw new AssertionError("Unable to create process group for "
+                                    + app.processName + " (" + startResult.pid + ")");
+                            }
+                        } else {
+                            app.mProcessGroupCreated = true;
+                        }
                     }
                 }
             }
