@@ -175,6 +175,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mConditionProviders = new ConditionProviders(mContext, new UserProfiles(),
                 AppGlobals.getPackageManager());
         mConditionProviders.addSystemProvider(new CountdownConditionProvider());
+        mConditionProviders.addSystemProvider(new ScheduleConditionProvider());
         mZenModeHelper = new ZenModeHelper(mContext, mTestableLooper.getLooper(),
                 mConditionProviders, mStatsEventBuilderFactory);
 
@@ -813,6 +814,32 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         }
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 mZenModeHelper.TAG);
+    }
+
+    @Test
+    public void testSetConfig_updatesAudioEventually() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelper.mAudioManager = mAudioManager;
+        setupZenConfig();
+
+        // Change the config a little bit, but enough that it would turn zen mode on
+        ZenModeConfig newConfig = mZenModeHelper.mConfig.copy();
+        newConfig.manualRule = new ZenModeConfig.ZenRule();
+        newConfig.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        newConfig.manualRule.enabled = true;
+        mZenModeHelper.setConfig(newConfig, null, "test");
+
+        // audio manager shouldn't do anything until the handler processes its messagse
+        verify(mAudioManager, never()).updateRingerModeAffectedStreamsInternal();
+
+        // now process the looper's messages
+        mTestableLooper.processAllMessages();
+
+        // Expect calls to audio manager
+        verify(mAudioManager, times(1)).updateRingerModeAffectedStreamsInternal();
+
+        // called during applyZenToRingerMode(), which should be true since zen changed
+        verify(mAudioManager, atLeastOnce()).getRingerModeInternal();
     }
 
     @Test
@@ -1827,7 +1854,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Test
     public void testRulesWithSameUri() {
-        Uri sharedUri = ZenModeConfig.toScheduleConditionId(new ScheduleInfo());
+        // needs to be a valid schedule info object for the subscription to happen properly
+        ScheduleInfo scheduleInfo = new ScheduleInfo();
+        scheduleInfo.days = new int[]{1, 2};
+        scheduleInfo.endHour = 1;
+        Uri sharedUri = ZenModeConfig.toScheduleConditionId(scheduleInfo);
         AutomaticZenRule zenRule = new AutomaticZenRule("name",
                 new ComponentName("android", "ScheduleConditionProvider"),
                 sharedUri,
@@ -1874,14 +1905,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // note that caller=null because that's how it comes in from NMS.setZenMode
         mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, null, "");
-        mTestableLooper.processAllMessages();
 
         // confirm that setting zen mode via setManualZenMode changed the zen mode correctly
         assertEquals(ZEN_MODE_IMPORTANT_INTERRUPTIONS, mZenModeHelper.mZenMode);
 
         // and also that it works to turn it back off again
         mZenModeHelper.setManualZenMode(Global.ZEN_MODE_OFF, null, null, "");
-        mTestableLooper.processAllMessages();
         assertEquals(Global.ZEN_MODE_OFF, mZenModeHelper.mZenMode);
     }
 
