@@ -16,21 +16,19 @@
 
 package com.android.systemui.shared.condition;
 
+import kotlinx.coroutines.CoroutineScope;
+
 /**
  * Fake implementation of {@link Condition}, and provides a way for tests to update
  * condition fulfillment.
  */
 public class FakeCondition extends Condition {
-    FakeCondition() {
-        super();
+    FakeCondition(CoroutineScope scope) {
+        super(scope);
     }
 
-    FakeCondition(Boolean initialValue) {
-        super(initialValue, false);
-    }
-
-    FakeCondition(Boolean initialValue, boolean overriding) {
-        super(initialValue, overriding);
+    FakeCondition(CoroutineScope scope, Boolean initialValue, boolean overriding) {
+        super(scope, initialValue, overriding);
     }
 
     @Override
@@ -39,6 +37,11 @@ public class FakeCondition extends Condition {
 
     @Override
     public void stop() {
+    }
+
+    @Override
+    protected int getStartStrategy() {
+        return START_EAGERLY;
     }
 
     public void fakeUpdateCondition(boolean isConditionMet) {
