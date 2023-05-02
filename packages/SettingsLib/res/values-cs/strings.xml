@@ -190,7 +190,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Výška"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Určuje tón syntetizované řeči"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Jazyk"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"Použít jazyk systému"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"Používat jazyk systému"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"Nebyl vybrán jazyk"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"Nastavení jazyka hlasu pro mluvený text"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"Poslechnout příklad"</string>
@@ -309,7 +309,7 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Název hostitele poskytovatele soukromého DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Zadejte hostitele poskytovatele DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Nelze se připojit"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobrazit možnosti certifikace bezdrátového displeje"</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobrazovat možnosti certifikace bezdrátového displeje"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšit úroveň protokolování Wi‑Fi, při výběru Wi‑Fi zobrazovat RSSI pro každý SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Snižuje vyčerpávání baterie a vylepšuje výkon sítě"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Když je tento režim aktivován, adresa MAC tohoto zařízení se může změnit pokaždé, když se zařízení připojí k síti s aktivovanou randomizací adres MAC."</string>
@@ -346,7 +346,7 @@
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kontrola HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Nastavit chování kontroly HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Ladění"</string>
-    <string name="debug_app" msgid="8903350241392391766">"Vybrat aplikaci pro ladění"</string>
+    <string name="debug_app" msgid="8903350241392391766">"Výběr aplikace pro ladění"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"Není nastavena žádná aplikace pro ladění"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Aplikace pro ladění: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Výběr aplikace"</string>
@@ -375,7 +375,7 @@
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Vždy použít GPU ke skládání obrazovky"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"Simulace barevného prostoru"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Povolit trasování OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Směrování zvuku do USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Zakázat směrování zvuku do USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Vypnout automatické směrování zvuku do zvukových periferií USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Zobrazit ohraničení"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"U výstřižku zobrazit ohraničení, okraje atd."</string>
