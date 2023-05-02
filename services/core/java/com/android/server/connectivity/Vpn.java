@@ -456,22 +456,22 @@ public class Vpn {
 
     private static class CarrierConfigInfo {
         public final String mccMnc;
-        public final int keepaliveDelayMs;
+        public final int keepaliveDelaySec;
         public final int encapType;
         public final int ipVersion;
 
-        CarrierConfigInfo(String mccMnc, int keepaliveDelayMs,
+        CarrierConfigInfo(String mccMnc, int keepaliveDelaySec,
                 int encapType,
                 int ipVersion) {
             this.mccMnc = mccMnc;
-            this.keepaliveDelayMs = keepaliveDelayMs;
+            this.keepaliveDelaySec = keepaliveDelaySec;
             this.encapType = encapType;
             this.ipVersion = ipVersion;
         }
 
         @Override
         public String toString() {
-            return "CarrierConfigInfo(" + mccMnc + ") [keepaliveDelayMs=" + keepaliveDelayMs
+            return "CarrierConfigInfo(" + mccMnc + ") [keepaliveDelaySec=" + keepaliveDelaySec
                     + ", encapType=" + encapType + ", ipVersion=" + ipVersion + "]";
         }
     }
@@ -3603,7 +3603,7 @@ public class Vpn {
             }
             final CarrierConfigInfo carrierconfig = getCarrierConfigForUnderlyingNetwork();
             final int nattKeepaliveSec = (carrierconfig != null)
-                    ? carrierconfig.keepaliveDelayMs : AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
+                    ? carrierconfig.keepaliveDelaySec : AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
             if (carrierconfig != null) {
                 Log.d(TAG, "Get customized keepalive (" + nattKeepaliveSec + "s) on SIM (mccmnc="
                         + carrierconfig.mccMnc + ")");
