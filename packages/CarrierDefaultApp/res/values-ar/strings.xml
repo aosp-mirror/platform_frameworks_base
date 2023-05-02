@@ -8,9 +8,7 @@
     <string name="portal_notification_detail" msgid="2295729385924660881">"‏النقر للانتقال إلى موقع %s الإلكتروني"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"‏يُرجى الاتصال بمقدم الخدمة %s"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"لا يوجد اتصال بيانات الجوال"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for no_mobile_data_connection (544980465184147010) -->
-    <skip />
+    <string name="no_mobile_data_connection" msgid="544980465184147010">"‏إضافة بيانات أو خطة تجوال خلال %s"</string>
     <string name="mobile_data_status_notification_channel_name" msgid="833999690121305708">"حالة بيانات الجوّال"</string>
     <string name="action_bar_label" msgid="4290345990334377177">"تسجيل الدخول إلى شبكة الجوّال"</string>
     <string name="ssl_error_warning" msgid="3127935140338254180">"الشبكة التي تحاول الانضمام إليها بها مشاكل أمنية."</string>
