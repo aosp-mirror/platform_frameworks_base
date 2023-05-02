@@ -72,7 +72,7 @@ public final class ProfcollectForwardingService extends SystemService {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction() == INTENT_UPLOAD_PROFILES) {
+            if (INTENT_UPLOAD_PROFILES.equals(intent.getAction())) {
                 Log.d(LOG_TAG, "Received broadcast to pack and upload reports");
                 packAndUploadReport();
             }
@@ -89,7 +89,7 @@ public final class ProfcollectForwardingService extends SystemService {
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(INTENT_UPLOAD_PROFILES);
-        context.registerReceiver(mBroadcastReceiver, filter);
+        context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
     }
 
     /**
