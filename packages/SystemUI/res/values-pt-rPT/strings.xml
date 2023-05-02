@@ -817,7 +817,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover para a posição <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controlos"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Escolha os controlos a que pretende aceder a partir das Definições rápidas"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque sem soltar e arraste para reorganizar os controlos."</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque sem soltar e arraste para reorganizar os controlos"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controlos foram removidos."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Alterações não guardadas."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver outras apps"</string>

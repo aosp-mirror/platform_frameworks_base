@@ -301,9 +301,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Vil du oppheve blokkeringen av enhetsmikrofonen?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Vil du oppheve blokkeringen av enhetskameraet?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Vil du oppheve blokkeringen av enhetskameraet og -mikrofonen?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Dette opphever blokkeringen av tilgang for alle apper og tjenester som har tillatelse til å bruke mikrofonen."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Dette opphever blokkeringen av tilgang for alle apper og tjenester som har tillatelse til å bruke kameraet."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Dette opphever blokkeringen av tilgang for alle apper og tjenester som har tillatelse til å bruke kameraet eller mikrofonen."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Dette gjenoppretter tilgangen for alle apper og tjenester som har tillatelse til å bruke mikrofonen."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Dette gjenoppretter tilgangen for alle apper og tjenester som har tillatelse til å bruke kameraet."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Dette gjenoppretter tilgangen for alle apper og tjenester som har tillatelse til å bruke kameraet eller mikrofonen."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Mikrofonen er blokkert"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Kameraet er blokkert"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Mikrofonen og kameraet er blokkert"</string>
@@ -974,7 +974,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wifi kobles ikke til automatisk inntil videre"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Se alle"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"For å bytte nettverk, koble fra Ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter wifi-nettverk når som helst – også når Wifi er slått av. Du kan endre dette i innstillingene for wifi-skanning. "<annotation id="link">"Endre"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"For å forbedre brukeropplevelsen på enheten kan apper og tjenester søke etter wifi-nettverk når som helst – også når wifi er slått av. Du kan endre dette i innstillingene for wifi-skanning. "<annotation id="link">"Endre"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Slå av flymodus"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> vil legge til denne brikken i Hurtiginnstillinger"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Legg til brikke"</string>

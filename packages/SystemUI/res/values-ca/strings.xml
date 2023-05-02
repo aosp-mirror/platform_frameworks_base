@@ -816,8 +816,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"suprimir dels preferits"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mou a la posició <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Tria els controls a què vols accedir des de la configuració ràpida"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premut i arrossega per reorganitzar els controls"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Tria a quins controls vols accedir des de la configuració ràpida"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premuts els controls i arrossega\'ls per reordenar-los"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"S\'han suprimit tots els controls"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Els canvis no s\'han desat"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Mostra altres aplicacions"</string>
@@ -844,7 +844,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Llisca per veure\'n més"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Carregant les recomanacions"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimèdia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Vols amagar aquest control multimèdia per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Amagar aquest control multimèdia per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"La sessió multimèdia actual no es pot amagar."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Amaga"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reprèn"</string>

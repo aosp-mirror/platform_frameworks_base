@@ -816,7 +816,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"পছন্দসই থেকে সরান"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> অবস্থানে সরান"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্রণ"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"যে কন্ট্রোল অ্যাক্সেস করতে চান তা \'দ্রুত সেটিংস\' থেকে বেছে নিন"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"\'দ্রুত সেটিংস\' থেকে আপনার প্রয়োজনীয় কন্ট্রোল বেছে নিন"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"কন্ট্রোলগুলিকে আবার সাজানোর জন্য ধরে রেখে টেনে আনুন"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"সমস্ত কন্ট্রোল সরানো হয়েছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"পরিবর্তন সেভ করা হয়নি"</string>

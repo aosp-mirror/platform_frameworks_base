@@ -222,7 +222,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"ဖန်သားပြင် အနေအထားက အလျားလိုက်အဖြစ် ပုံသေ လုပ်ထားပါသည်"</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"ဖန်သားပြင် အနေအထားက ဒေါင်လိုက်အဖြစ် ပုံသေ လုပ်ထားပါသည်"</string>
     <string name="dessert_case" msgid="9104973640704357717">"မုန့်ထည့်သော ပုံး"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"စခရင်နားချိန်"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"စခရင်နားချိန်ပုံ"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"အီသာနက်"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"မနှောင့်ယှက်ရ"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ဘလူးတုသ်"</string>
@@ -236,7 +236,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"အော်တို-လည်"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"မျက်နှာပြင်အား အလိုအလျောက်လှည့်ခြင်း"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"တည်နေရာ"</string>
-    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"စကရင်နားချိန်"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"စခရင်နားချိန်ပုံ"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"ကင်မရာသုံးခွင့်"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"မိုက်သုံးခွင့်"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"ရနိုင်သည်"</string>
@@ -294,7 +294,7 @@
     <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="3465000058515424663">"NFC ကို ပိတ်ထားသည်"</string>
     <string name="quick_settings_nfc_on" msgid="1004976611203202230">"NFC ကို ဖွင့်ထားသည်"</string>
-    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"စကရင် ရိုက်ကူးရန်"</string>
+    <string name="quick_settings_screen_record_label" msgid="8650355346742003694">"စခရင် ရိုက်ကူးရန်"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"စတင်ရန်"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ရပ်ရန်"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"လက်တစ်ဖက်သုံးမုဒ်"</string>
@@ -657,7 +657,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"အကွက်ငယ်များ ပြန်စီစဉ်ရန် ဖိပြီးဆွဲပါ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ဖယ်ရှားရန် ဤနေရာသို့ဖိဆွဲပါ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"အနည်းဆုံး <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ကွက် ရှိရမည်"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"တည်းဖြတ်ပါ"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"တည်းဖြတ်ရန်"</string>
     <string name="tuner_time" msgid="2450785840990529997">"အချိန်"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"နာရီ၊ မိနစ်နှင့် စက္ကန့်ကိုပြပါ"</item>
@@ -922,7 +922,7 @@
     <string name="one_week_timestamp" msgid="4925600765473875590">"ပြီးခဲ့သော 1 ပတ်"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"ပြီးခဲ့သော 2 ပတ်"</string>
     <string name="over_one_week_timestamp" msgid="3770560704420807142">"ပြီးခဲ့သော 1 ပတ်ကျော်"</string>
-    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"ပြီးခဲ့သော 2 ပတ်ကျော်"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"ပြီးခဲ့သော ၂ ပတ်ကျော်က"</string>
     <string name="birthday_status" msgid="2596961629465396761">"မွေးနေ့"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> ၏ မွေးနေ့ ဖြစ်ပါသည်"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"မကြာမီလာမည့် မွေးနေ့"</string>

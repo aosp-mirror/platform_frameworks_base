@@ -322,7 +322,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"To zablokuje WSZYSTKIE dźwięki i wibracje – w tym alarmy, muzykę, filmy i gry."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Kliknij ponownie, by otworzyć"</string>
     <string name="tap_again" msgid="1315420114387908655">"Kliknij jeszcze raz"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Przesuń w górę, by otworzyć"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Aby otworzyć, przesuń w górę"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Aby otworzyć, kliknij ikonę odblokowywania"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Odblokowano skanem twarzy. Przesuń w górę, aby otworzyć."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Odblokowano skanem twarzy. Aby otworzyć, kliknij ikonę odblokowywania."</string>
@@ -817,8 +817,8 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Przenieś w położenie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Elementy sterujące"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Wybierz elementy sterujące dostępne w Szybkich ustawieniach"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Przytrzymaj i przeciągnij, aby przestawić elementy sterujące"</string>
-    <string name="controls_favorite_removed" msgid="5276978408529217272">"Usunięto wszystkie elementy sterujące"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Przytrzymaj i przeciągnij elementy sterujące, aby je przestawić"</string>
+    <string name="controls_favorite_removed" msgid="5276978408529217272">"Wszystkie elementy sterujące zostały usunięte"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmiany nie zostały zapisane"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Wyświetl pozostałe aplikacje"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Nie udało się wczytać elementów sterujących. Sprawdź aplikację <xliff:g id="APP">%s</xliff:g>, aby upewnić się, że jej ustawienia się nie zmieniły."</string>
@@ -913,7 +913,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Numer kompilacji"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Numer kompilacji został skopiowany do schowka."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otwarta rozmowa"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"Widżety Rozmowa"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"Widżety rozmów"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Kliknij rozmowę, aby dodać ją do ekranu głównego"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Tutaj będą pojawiać się Twoje ostatnie rozmowy"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Rozmowy priorytetowe"</string>
@@ -937,11 +937,11 @@
     <string name="audio_status" msgid="4237055636967709208">"Słucham"</string>
     <string name="game_status" msgid="1340694320630973259">"Odtwarzam"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Znajomi"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Porozmawiajmy!"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Porozmawiajmy"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Treść wkrótce będzie widoczna"</string>
     <string name="missed_call" msgid="4228016077700161689">"Nieodebrane połączenie"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+ <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Zobacz ostatnie wiadomości, nieodebrane połączenia i stany"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Zobacz ostatnie wiadomości, nieodebrane połączenia i aktualizacje statusów"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Rozmowa"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Wstrzymane przez tryb Nie przeszkadzać"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> wysyła wiadomość: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

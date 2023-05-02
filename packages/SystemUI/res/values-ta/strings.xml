@@ -301,9 +301,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"சாதனத்தின் மைக்ரோஃபோனுக்கான தடுப்பை நீக்கவா?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"சாதனத்தின் கேமராவுக்கான தடுப்பை நீக்கவா?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"சாதனத்தின் கேமராவுக்கும் மைக்ரோஃபோனுக்குமான தடுப்பை நீக்கவா?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"உங்கள் மைக்ரோஃபோனைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"உங்கள் கேமராவையோ மைக்ரோஃபோனையோ பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"உங்கள் மைக்ரோஃபோனைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும் தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும் தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"உங்கள் கேமராவையோ மைக்ரோஃபோனையோ பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும் தடுப்பை இது நீக்கும்."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"மைக்ரோஃபோன் அணுகல் முடக்கப்பட்டுள்ளது"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"கேமரா அணுகல் முடக்கப்பட்டுள்ளது"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"மைக்ரோஃபோன் &amp; கேமரா அணுகல் முடக்கப்பட்டுள்ளது"</string>

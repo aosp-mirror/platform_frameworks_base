@@ -234,7 +234,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Naslouchátka"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Zapínání…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatické otáčení"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otočení obrazovky"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otáčení obrazovky"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Poloha"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Spořič obrazovky"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Přístup k fotoaparátu"</string>
@@ -917,7 +917,7 @@
     <string name="select_conversation_text" msgid="3376048251434956013">"Klepnutím na konverzaci ji přidáte na plochu"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Tady se zobrazí vaše nedávné konverzace"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritní konverzace"</string>
-    <string name="recent_conversations" msgid="8531874684782574622">"Poslední konverzace"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Nedávné konverzace"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"Před <xliff:g id="DURATION">%1$s</xliff:g> dny"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"Před týdnem"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"Před 2 týdny"</string>
@@ -941,7 +941,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah se brzy zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Zobrazit poslední zprávy, zmeškané hovory a aktualizace stavu"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Zobrazte si poslední zprávy, zmeškané hovory a aktualizace stavu"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konverzace"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Pozastaveno funkcí Nerušit"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> posílá zprávu: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

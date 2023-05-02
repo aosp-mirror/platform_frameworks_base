@@ -816,8 +816,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"取消收藏"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移至位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控制"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"选择要从“快捷设置”菜单访问的控制项"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控制器"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"选择要显示在“快捷设置”菜单中的控件"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控件"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制器"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"未保存更改"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"查看其他应用"</string>
@@ -910,8 +910,8 @@
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"无法保存。"</string>
     <string name="media_output_broadcast_code_hint_no_less_than_min" msgid="4663836092607696185">"必须至少 4 个字符"</string>
     <string name="media_output_broadcast_code_hint_no_more_than_max" msgid="9181869364856175638">"必须少于 16 个字符"</string>
-    <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本号"</string>
-    <string name="build_number_copy_toast" msgid="877720921605503046">"已将版本号复制到剪贴板。"</string>
+    <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build 号"</string>
+    <string name="build_number_copy_toast" msgid="877720921605503046">"已将 Build 号复制到剪贴板。"</string>
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"对话微件"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"点按对话即可将其添加到主屏幕"</string>

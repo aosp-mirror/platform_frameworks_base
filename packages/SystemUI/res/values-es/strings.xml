@@ -322,7 +322,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Este modo bloquea TODOS los sonidos y todas las vibraciones, lo que incluye alarmas, música, vídeos y juegos."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Toca de nuevo para abrir"</string>
     <string name="tap_again" msgid="1315420114387908655">"Toca de nuevo"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza hacia arriba para abrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pulsa el icono desbloquear para abrir"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Desbloqueado con la cara. Desliza hacia arriba para abrir."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueado con la cara. Toca el icono de desbloquear para abrir."</string>
@@ -385,7 +385,7 @@
     <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Compartir o grabar una aplicación"</string>
     <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"¿Permitir que esta aplicación que comparta o grabe contenido?"</string>
     <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Cuando compartas, grabes o envíes contenido, esta aplicación podrá acceder a todo lo que se vea en tu pantalla o reproduzcas en tu dispositivo. Debes tener cuidado con contraseñas, detalles de pagos, mensajes o cualquier otra información sensible."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Cuando compartas, grabes o envíes contenido, esta aplicación podrá acceder a todo lo que se muestre o reproduzca en ella. Debes tener cuidado con contraseñas, detalles de pagos, mensajes o cualquier otra información sensible."</string>
+    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Cuando compartas, grabes o envíes una aplicación, esta aplicación podrá acceder a todo lo que se muestre o reproduzca en ella. Debes tener cuidado con contraseñas, detalles de pagos, mensajes o cualquier otra información sensible."</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloqueadas por tu administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Las capturas de pantalla están inhabilitadas debido a la política de dispositivos"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>

@@ -838,7 +838,7 @@
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN मा अक्षर वा चिन्हहरू समाविष्ट हुन्छन्"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> पुष्टि गर्नुहोस्"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN मिलेन"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN हाल्नुहोस्"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"अर्को PIN प्रयोग गरी हेर्नु…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> का हकमा गरिएको परिवर्तन पुष्टि गर्नुहोस्"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>
@@ -860,7 +860,7 @@
     <string name="controls_media_smartspace_rec_description" msgid="4136242327044070732">"<xliff:g id="APP_LABEL">%1$s</xliff:g> खोल्नुहोस्"</string>
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"<xliff:g id="ARTIST_NAME">%2$s</xliff:g> को <xliff:g id="SONG_NAME">%1$s</xliff:g> बोलको गीत <xliff:g id="APP_LABEL">%3$s</xliff:g> मा बजाउनुहोस्"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"<xliff:g id="SONG_NAME">%1$s</xliff:g> बोलको गीत <xliff:g id="APP_LABEL">%2$s</xliff:g> मा बजाउनुहोस्"</string>
-    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"तपाईंको लागि सिफारिस गरिएका"</string>
+    <string name="controls_media_smartspace_rec_header" msgid="5053461390357112834">"तपाईंका लागि सिफारिस गरिएका"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"अन्डू गर्नुहोस्"</string>
     <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"<xliff:g id="DEVICENAME">%1$s</xliff:g> मा प्ले गर्न आफ्नो डिभाइस नजिकै लैजानुहोस्"</string>
     <string name="media_move_closer_to_end_cast" msgid="7302555909119374738">"यो डिभाइसमा प्ले गर्न <xliff:g id="DEVICENAME">%1$s</xliff:g> को अझ नजिक जानुहोस्"</string>

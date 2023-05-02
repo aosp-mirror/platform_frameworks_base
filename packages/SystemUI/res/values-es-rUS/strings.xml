@@ -92,7 +92,7 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Límite izquierdo: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Límite derecho: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Se guardó en <xliff:g id="APP">%1$s</xliff:g> en el perfil de trabajo"</string>
-    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Archivos"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> detectó que tomaste una captura de pantalla."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> y otras apps en ejecución detectaron que tomaste una captura de pantalla."</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Grabadora de pantalla"</string>

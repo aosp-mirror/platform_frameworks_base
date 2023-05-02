@@ -222,7 +222,7 @@
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"Екранот е заклучен во ориентација на пејзаж."</string>
     <string name="accessibility_rotation_lock_on_portrait" msgid="2356633398683813837">"Екранот е заклучен во ориентација на портрет."</string>
     <string name="dessert_case" msgid="9104973640704357717">"Dessert Case"</string>
-    <string name="start_dreams" msgid="9131802557946276718">"Заштитник на екран"</string>
+    <string name="start_dreams" msgid="9131802557946276718">"Штедач на екран"</string>
     <string name="ethernet_label" msgid="2203544727007463351">"Етернет"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Не вознемирувај"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
@@ -236,7 +236,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Автоматско ротирање"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоматско ротирање на екранот"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Локација"</string>
-    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Заштитник на екран"</string>
+    <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Штедач на екран"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Пристап до камерата"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Пристап до микрофонот"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Дозволен"</string>
@@ -322,9 +322,9 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Ова ги блокира СИТЕ звуци и вибрации, вклучувајќи ги и оние од алармите, музиката, видеата и игрите."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Допрете повторно за да се отвори"</string>
     <string name="tap_again" msgid="1315420114387908655">"Допрете повторно"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Повлечете за да отворите"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Повлечете нагоре за да отворите"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Притиснете ја иконата за отклучување за да отворите"</string>
-    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Отклучено со лице. Повлечете за да отворите."</string>
+    <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Отклучено со лик. Повлечете нагоре за да отворите."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Отклучено со лик. Притиснете ја иконата за отклучување за да отворите."</string>
     <string name="keyguard_face_successful_unlock_press_alt_1" msgid="5715461103913071474">"Отклучено со лик. Притиснете за да отворите."</string>
     <string name="keyguard_face_successful_unlock_press_alt_2" msgid="8310787946357120406">"Лицето е препознаено. Притиснете за да отворите."</string>
@@ -526,7 +526,7 @@
     <string name="enable_bluetooth_confirmation_ok" msgid="2866408183324184876">"Вклучи"</string>
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Контроли за известувањата за напојување"</string>
     <string name="rotation_lock_camera_rotation_on" msgid="789434807790534274">"Вклучено - според лице"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Со контролите за известувањата за напојување, може да поставите ниво на важност од 0 до 5 за известувањата на која било апликација. \n\n"<b>"Ниво 5"</b>" \n- Прикажувај на врвот на списокот со известувања \n- Дозволи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 4"</b>" \n- Спречи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 3"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n\n"<b>"Ниво 2"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n\n"<b>"Ниво 1"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n- Сокриј од заклучен екран и статусна лента \n- Прикажувај на дното на списокот со известувања \n\n"<b>"Ниво 0"</b>" \n- Блокирај ги сите известувања од апликацијата"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"Со контролите за известувањата за напојување, може да поставите ниво на важност од 0 до 5 за известувањата на која било апликација. \n\n"<b>"Ниво 5"</b>" \n- Прикажувај на врвот на списокот со известувања \n- Дозволи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 4"</b>" \n- Спречи прекин во цел екран \n- Секогаш користи појавување \n\n"<b>"Ниво 3"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n\n"<b>"Ниво 2"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n\n"<b>"Ниво 1"</b>" \n- Спречи прекин во цел екран \n- Без појавување \n- Без звук и вибрации \n- Скриј од заклучен екран и статусна лента \n- Прикажувај на дното на списокот со известувања \n\n"<b>"Ниво 0"</b>" \n- Блокирај ги сите известувања од апликацијата"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Готово"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Примени"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Исклучи известувања"</string>
@@ -685,7 +685,7 @@
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Отворете ги поставките."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Отворете ги брзите поставки."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Затворете ги брзите поставки."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Најавени сте како <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Најавени сте како: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"изберете корисник"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Нема интернет"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Отворете ги поставките на <xliff:g id="ID_1">%s</xliff:g>."</string>
@@ -844,9 +844,9 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Повлечете за да видите повеќе"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Се вчитуваат препораки"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Аудиовизуелни содржини"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Да се сокријат контролите за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
-    <string name="controls_media_active_session" msgid="3146882316024153337">"Аудиовизуелнава сесија не може да се сокрие."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Сокриј"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Да се скријат контролите за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Аудиовизуелнава сесија не може да се скрие."</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скриј"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Продолжи"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Поставки"</string>
     <string name="controls_media_playing_item_description" msgid="4531853311504359098">"<xliff:g id="SONG_NAME">%1$s</xliff:g> од <xliff:g id="ARTIST_NAME">%2$s</xliff:g> е пуштено на <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
@@ -914,7 +914,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"Бројот на верзијата е копиран во привремената меморија."</string>
     <string name="basic_status" msgid="2315371112182658176">"Започни разговор"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виџети за разговор"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Допрете на разговор за да го додадете на вашиот почетен екран"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Допрете разговор за да го додадете на почетниот екран"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Вашите неодамнешни разговори ќе се прикажуваат тука"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Приоритетни разговори"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Неодамнешни разговори"</string>
@@ -937,7 +937,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Слушам"</string>
     <string name="game_status" msgid="1340694320630973259">"Играње игра"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Пријатели"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Разговарај вечерва!"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Ајде да разговараме!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Содржините ќе се прикажат наскоро"</string>
     <string name="missed_call" msgid="4228016077700161689">"Пропуштен повик"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

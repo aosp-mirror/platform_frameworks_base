@@ -617,7 +617,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"音樂"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"日曆"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"零打擾"</string>
-    <string name="volume_dnd_silent" msgid="4154597281458298093">"音量按鈕快速鍵"</string>
+    <string name="volume_dnd_silent" msgid="4154597281458298093">"音量鍵快速鍵"</string>
     <string name="battery" msgid="769686279459897127">"電池"</string>
     <string name="headset" msgid="4485892374984466437">"耳機"</string>
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"開啟設定"</string>

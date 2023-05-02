@@ -453,15 +453,15 @@
     <string name="sound_settings" msgid="8874581353127418308">"Sound and vibration"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Settings"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"App is pinned"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"This keeps it in view until you unpin. Touch &amp; hold Back and Overview to unpin."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"This keeps it in view until you unpin. Touch &amp; hold Back and Home to unpin."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"This keeps it in view until you unpin. Touch and hold Back and Overview to unpin."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"This keeps it in view until you unpin. Touch and hold Back and Home to unpin."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"This keeps it in view until you unpin. Swipe up &amp; hold to unpin."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"This keeps it in view until you unpin. Touch &amp; hold Overview to unpin."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"This keeps it in view until you unpin. Touch &amp; hold Home to unpin."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"This keeps it in view until you unpin. Touch and hold Overview to unpin."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"This keeps it in view until you unpin. Touch and hold Home to unpin."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Personal data may be accessible (such as contacts and email content)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Pinned app may open other apps."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"To unpin this app, touch &amp; hold Back and Overview buttons"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"To unpin this app, touch &amp; hold Back and Home buttons"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"To unpin this app, touch and hold the Back and Overview buttons"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"To unpin this app, touch and hold the Back and Home buttons"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"To unpin this app, swipe up &amp; hold"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Got it"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"No thanks"</string>
@@ -1027,7 +1027,7 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Install a camera app"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• The app is set up"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• At least one device is available"</string>
-    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Touch &amp; hold shortcut"</string>
+    <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Touch and hold shortcut"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancel"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Switch screens now"</string>
     <string name="rear_display_folded_bottom_sheet_title" msgid="3930008746560711990">"Unfold phone"</string>

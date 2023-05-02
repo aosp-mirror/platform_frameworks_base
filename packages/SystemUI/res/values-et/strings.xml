@@ -201,7 +201,7 @@
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Töö lukustuskuva"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Sulgemine"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"täielik vaikus"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ainult alarmid"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ainult äratused"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Mitte segada."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth on sees."</string>
@@ -802,7 +802,7 @@
     <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"Teisalda serva ja kuva"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Teisalda servast eemale ja kuva"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"lülita"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Seadmete juhikud"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Seadmete juhtimisvidinad"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Valige juhtelementide lisamiseks rakendus"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Lisati # juhtnupp.}other{Lisati # juhtnuppu.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eemaldatud"</string>
@@ -844,7 +844,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pühkige sõrmega, et näha rohkem"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Soovituste laadimine"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Meedia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Kas peita rakenduses <xliff:g id="APP_NAME">%1$s</xliff:g> see meediajuhik?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Kas peita see rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> meediajuhik?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Praegust meediaseanssi ei saa peita."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Peida"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Jätka"</string>

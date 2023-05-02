@@ -298,15 +298,15 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Бастау"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Тоқтату"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Бір қолмен басқару режимі"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Құрылғы микрофонының бөгеуі алынсын ба?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Құрылғы камерасының бөгеуі алынсын ба?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Құрылғы камерасы мен микрофонының бөгеуі алынсын ба?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Құрылғы микрофонын блоктан шығару керек пе?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Құрылғы камерасын блоктан шығару керек пе?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Құрылғы камерасы мен микрофонын блоктан шығару керек пе?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Камераңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Камераңызды немесе микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
-    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон бөгелген"</string>
-    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера бөгелген"</string>
-    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон мен камера бөгелген"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон блокталған"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера блокталған"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон мен камера блокталған"</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын микрофонға жылжытыңыз, оның қалпы микрофонды пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын камераға жылжытыңыз, оның қалпы камераны пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Оның бөгеуін алу үшін құрылғыдағы құпиялық ауыстырғышын ашық қалыпқа жылжытып, пайдалану мүмкіндігін қамтамасыз етіңіз. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
@@ -354,12 +354,12 @@
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Тек\nдабылдар"</string>
     <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Сымсыз зарядталуда • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарядталуда • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Жылдам зарядталуда • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Жылдам зарядтау • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Баяу зарядталуда • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарядталып жатыр. • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Пайдаланушыны ауыстыру"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ашылмалы мәзір"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Осы сеанстағы барлық қолданбалар мен деректер жойылады."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Осы сеанстағы барлық қолданба мен дерек жойылады."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Қош келдіңіз, қонақ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Сеансты жалғастыру керек пе?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Қайта бастау"</string>
@@ -718,7 +718,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Оң жақ"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Mәзір"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> қолданбасы"</string>
-    <string name="notification_channel_alerts" msgid="3385787053375150046">"Ескертулер"</string>
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Хабарландырулар"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Батарея"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Скриншоттар"</string>
     <string name="notification_channel_instant" msgid="7556135423486752680">"Instant Apps"</string>
@@ -1046,8 +1046,8 @@
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Жабу"</string>
     <string name="lock_screen_settings" msgid="9197175446592718435">"Экран құлпының параметрлері"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi қолжетімсіз."</string>
-    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера бөгелген."</string>
-    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера мен микрофон бөгелген."</string>
-    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон бөгелген."</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера блокталған."</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера мен микрофон блокталған."</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон блокталған."</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\"Маңызды\" режимі қосулы."</string>
 </resources>
