@@ -20,6 +20,7 @@ import static com.android.server.credentials.MetricUtilities.DEFAULT_INT_32;
 import static com.android.server.credentials.MetricUtilities.DELTA_EXCEPTION_CUT;
 import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
+import static com.android.server.credentials.MetricUtilities.logApiCalledAggregateCandidate;
 import static com.android.server.credentials.MetricUtilities.logApiCalledAuthenticationMetric;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidateGetMetric;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
@@ -357,6 +358,7 @@ public class RequestSessionMetric {
     public void logCandidateAggregateMetrics(Map<String, ProviderSession> providers) {
         try {
             mCandidateAggregateMetric.collectAverages(providers);
+            logApiCalledAggregateCandidate(mCandidateAggregateMetric, ++mSequenceCounter);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during aggregate candidate logging " + e);
         }

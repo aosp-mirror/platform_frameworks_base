@@ -54,13 +54,13 @@ public class CandidateAggregateMetric {
     // The minimum of all the providers query start time, defaults to -1
     private long mMinProviderTimestampNanoseconds = -1;
     // The maximum of all the providers query finish time, defaults to -1
-    private long mMaxProviderTimestampsNanoseconds = -1;
-    // The total number of failures across all the providers, defaults to -1
-    private int mTotalQueryFailures = -1;
+    private long mMaxProviderTimestampNanoseconds = -1;
+    // The total number of failures across all the providers, defaults to 0
+    private int mTotalQueryFailures = 0;
     // The map of all seen framework exceptions and their counts across all providers, default empty
     private Map<String, Integer> mExceptionCountQuery = new LinkedHashMap<>();
-    // The total number of failures across all auth entries, defaults to -1
-    private int mTotalAuthFailures = -1;
+    // The total number of failures across all auth entries, defaults to 0
+    private int mTotalAuthFailures = 0;
     // The map of all seen framework exceptions and their counts across auth entries, default empty
     private Map<String, Integer> mExceptionCountAuth = new LinkedHashMap<>();
 
@@ -114,7 +114,7 @@ public class CandidateAggregateMetric {
             }
         }
         mMinProviderTimestampNanoseconds = min_query_start;
-        mMaxProviderTimestampsNanoseconds = max_query_end;
+        mMaxProviderTimestampNanoseconds = max_query_end;
         mAggregateCollectiveQuery = new ResponseCollective(responseCountQuery, entryCountQuery);
     }
 
@@ -128,7 +128,7 @@ public class CandidateAggregateMetric {
             var authMetrics = sessionMetric.getBrowsedAuthenticationMetric();
             mNumAuthEntriesTapped += authMetrics.size();
             for (var authMetric : authMetrics) {
-                mAuthReturned = mAuthReturned || authMetric.isQueryReturned();
+                mAuthReturned = mAuthReturned || authMetric.isAuthReturned();
                 ResponseCollective authCollective = authMetric.getAuthEntryCollective();
                 ResponseCollective.combineTypeCountMaps(responseCountAuth,
                         authCollective.getResponseCountsMap());
@@ -170,8 +170,8 @@ public class CandidateAggregateMetric {
         return mAuthReturned;
     }
 
-    public long getMaxProviderTimestampsNanoseconds() {
-        return mMaxProviderTimestampsNanoseconds;
+    public long getMaxProviderTimestampNanoseconds() {
+        return mMaxProviderTimestampNanoseconds;
     }
 
     public long getMinProviderTimestampNanoseconds() {

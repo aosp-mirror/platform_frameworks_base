@@ -304,6 +304,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
      * @param response the response associated with the API call that just completed
      */
     protected void respondToClientWithResponseAndFinish(V response) {
+        mRequestSessionMetric.logCandidateAggregateMetrics(mProviders);
         mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(/*has_exception=*/ false,
                 ProviderStatusForMetrics.FINAL_SUCCESS);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
@@ -337,6 +338,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
      * @param errorMsg  the error message given back in the flow
      */
     protected void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
+        mRequestSessionMetric.logCandidateAggregateMetrics(mProviders);
         mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(
                 /*has_exception=*/ true, ProviderStatusForMetrics.FINAL_FAILURE);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {

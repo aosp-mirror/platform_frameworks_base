@@ -126,12 +126,12 @@ public class ProviderSessionMetric {
                 getUsedAuthenticationMetric();
         mostRecentAuthenticationMetric.setProviderUid(providerSessionUid);
         if (isFailureStatus) {
-            mostRecentAuthenticationMetric.setQueryReturned(false);
+            mostRecentAuthenticationMetric.setAuthReturned(false);
             mostRecentAuthenticationMetric.setProviderStatus(
                     ProviderStatusForMetrics.QUERY_FAILURE
                             .getMetricCode());
         } else if (isCompletionStatus) {
-            mostRecentAuthenticationMetric.setQueryReturned(true);
+            mostRecentAuthenticationMetric.setAuthReturned(true);
             mostRecentAuthenticationMetric.setProviderStatus(
                     ProviderStatusForMetrics.QUERY_SUCCESS
                             .getMetricCode());

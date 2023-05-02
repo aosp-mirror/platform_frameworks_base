@@ -226,7 +226,7 @@ public class MetricUtilities {
                     /* auth_provider_status */
                     authenticationMetric.getProviderStatus(),
                     /* query_returned */
-                    authenticationMetric.isQueryReturned()
+                    authenticationMetric.isAuthReturned()
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during candidate get metric logging: " + e);
@@ -454,9 +454,13 @@ public class MetricUtilities {
                     /*query_returned*/ candidateAggregateMetric.isQueryReturned(),
                     /*num_query_providers*/ candidateAggregateMetric.getNumProviders(),
                     /*min_query_start_timestamp_microseconds*/
-                    DEFAULT_INT_32,
+                    getMetricTimestampDifferenceMicroseconds(
+                            candidateAggregateMetric.getMinProviderTimestampNanoseconds(),
+                            candidateAggregateMetric.getServiceBeganTimeNanoseconds()),
                     /*max_query_end_timestamp_microseconds*/
-                    DEFAULT_INT_32,
+                    getMetricTimestampDifferenceMicroseconds(
+                            candidateAggregateMetric.getMaxProviderTimestampNanoseconds(),
+                            candidateAggregateMetric.getServiceBeganTimeNanoseconds()),
                     /*query_response_unique_classtypes*/
                     candidateAggregateMetric.getAggregateCollectiveQuery()
                             .getUniqueResponseStrings(),
