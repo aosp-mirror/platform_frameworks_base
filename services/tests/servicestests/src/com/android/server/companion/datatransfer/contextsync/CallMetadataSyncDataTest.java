@@ -30,7 +30,7 @@ public class CallMetadataSyncDataTest {
     @Test
     public void call_writeToParcel_fromParcel_reconstructsSuccessfully() {
         final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
-        final long id = 5;
+        final String id = "5";
         final String callerId = "callerId";
         final byte[] appIcon = "appIcon".getBytes();
         final String appName = "appName";

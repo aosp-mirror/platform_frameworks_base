@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 public class CallMetadataSyncInCallService extends InCallService {
 
     private static final String TAG = "CallMetadataIcs";
-    private static final long NOT_VALID = -1L;
 
     private CompanionDeviceManagerServiceInternal mCdmsi;
 
@@ -71,7 +70,7 @@ public class CallMetadataSyncInCallService extends InCallService {
                             callMetadataSyncData.getRequests().iterator();
                     while (iterator.hasNext()) {
                         final CallMetadataSyncData.Call call = iterator.next();
-                        if (call.getId() != 0) {
+                        if (call.getId() != null) {
                             // The call is already assigned an id; treat as control invocations.
                             for (int control : call.getControls()) {
                                 processCallControlAction(call.getId(), control);
@@ -81,41 +80,41 @@ public class CallMetadataSyncInCallService extends InCallService {
                     }
                 }
 
-                private void processCallControlAction(long crossDeviceCallId,
+                private void processCallControlAction(String crossDeviceCallId,
                         int callControlAction) {
                     final CrossDeviceCall crossDeviceCall = getCallForId(crossDeviceCallId,
                             mCurrentCalls.values());
                     switch (callControlAction) {
-                        case android.companion.Telecom.Call.ACCEPT:
+                        case android.companion.Telecom.ACCEPT:
                             if (crossDeviceCall != null) {
                                 crossDeviceCall.doAccept();
                             }
                             break;
-                        case android.companion.Telecom.Call.REJECT:
+                        case android.companion.Telecom.REJECT:
                             if (crossDeviceCall != null) {
                                 crossDeviceCall.doReject();
                             }
                             break;
-                        case android.companion.Telecom.Call.SILENCE:
+                        case android.companion.Telecom.SILENCE:
                             doSilence();
                             break;
-                        case android.companion.Telecom.Call.MUTE:
+                        case android.companion.Telecom.MUTE:
                             doMute();
                             break;
-                        case android.companion.Telecom.Call.UNMUTE:
+                        case android.companion.Telecom.UNMUTE:
                             doUnmute();
                             break;
-                        case android.companion.Telecom.Call.END:
+                        case android.companion.Telecom.END:
                             if (crossDeviceCall != null) {
                                 crossDeviceCall.doEnd();
                             }
                             break;
-                        case android.companion.Telecom.Call.PUT_ON_HOLD:
+                        case android.companion.Telecom.PUT_ON_HOLD:
                             if (crossDeviceCall != null) {
                                 crossDeviceCall.doPutOnHold();
                             }
                             break;
-                        case android.companion.Telecom.Call.TAKE_OFF_HOLD:
+                        case android.companion.Telecom.TAKE_OFF_HOLD:
                             if (crossDeviceCall != null) {
                                 crossDeviceCall.doTakeOffHold();
                             }
@@ -171,12 +170,12 @@ public class CallMetadataSyncInCallService extends InCallService {
 
     @Nullable
     @VisibleForTesting
-    CrossDeviceCall getCallForId(long crossDeviceCallId, Collection<CrossDeviceCall> calls) {
-        if (crossDeviceCallId == NOT_VALID) {
+    CrossDeviceCall getCallForId(String crossDeviceCallId, Collection<CrossDeviceCall> calls) {
+        if (crossDeviceCallId == null) {
             return null;
         }
         for (CrossDeviceCall crossDeviceCall : calls) {
-            if (crossDeviceCall.getId() == crossDeviceCallId) {
+            if (crossDeviceCallId.equals(crossDeviceCall.getId())) {
                 return crossDeviceCall;
             }
         }
