@@ -268,7 +268,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplikacioni për simulimin e vendndodhjes: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Rrjetet"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikimi i ekranit pa tel"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivizo hyrjen Wi-Fi Verbose"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Aktivizo regjistrimin Wi-Fi Verbose"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Përshpejtimi i skanimit të Wi‑Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Renditje e rastësishme jo e përhershme e MAC për Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Të dhënat celulare gjithmonë aktive"</string>
@@ -287,7 +287,7 @@
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Çaktivizimi do të thotë se nuk mbështetet nga telefoni ose kufjet"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bite për shembull Bluetooth Audio"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Bite për shembull"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Regjimi i kanalit Bluetooth Audio"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Modaliteti i kanalit të audios me Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Modaliteti i kanalit"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Kodeku LDAC i audios së Bluetooth-it: Cilësia e luajtjes"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Aktivizo LDAC të audios me Bluetooth\nZgjedhja e kodekut: Cilësia e luajtjes"</string>
