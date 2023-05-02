@@ -100,7 +100,7 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
         doReturn(mToken).when(mTransitions)
                 .startTransition(transitionType, wct, mExitDesktopTaskTransitionHandler);
 
-        mExitDesktopTaskTransitionHandler.startTransition(transitionType, wct);
+        mExitDesktopTaskTransitionHandler.startTransition(transitionType, wct, null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FULLSCREEN);
