@@ -100,8 +100,8 @@ public class ProviderSessionMetric {
      */
     public void collectAuthenticationExceptionStatus(boolean hasException) {
         try {
-            var mostRecentAuthenticationMetric = mBrowsedAuthenticationMetric
-                    .get(mBrowsedAuthenticationMetric.size() - 1);
+            BrowsedAuthenticationMetric mostRecentAuthenticationMetric =
+                    getUsedAuthenticationMetric();
             mostRecentAuthenticationMetric.setHasException(hasException);
         } catch (Exception e) {
             Slog.i(TAG, "Error while setting authentication metric exception " + e);
@@ -122,13 +122,9 @@ public class ProviderSessionMetric {
 
     private void collectAuthEntryUpdate(boolean isFailureStatus,
             boolean isCompletionStatus, int providerSessionUid) {
-        // TODO(b/271135048) - Mimic typical candidate update, but with authentication metric
-        // Collect the final timestamps (and start timestamp), status, exceptions and the provider
-        // uid. This occurs typically *after* the collection is complete.
-        var mostRecentAuthenticationMetric = mBrowsedAuthenticationMetric
-                .get(mBrowsedAuthenticationMetric.size() - 1);
+        BrowsedAuthenticationMetric mostRecentAuthenticationMetric =
+                getUsedAuthenticationMetric();
         mostRecentAuthenticationMetric.setProviderUid(providerSessionUid);
-        // TODO(immediately) - add timestamps (no longer needed!!) but also update below values!
         if (isFailureStatus) {
             mostRecentAuthenticationMetric.setQueryReturned(false);
             mostRecentAuthenticationMetric.setProviderStatus(
@@ -140,6 +136,11 @@ public class ProviderSessionMetric {
                     ProviderStatusForMetrics.QUERY_SUCCESS
                             .getMetricCode());
         }
+    }
+
+    private BrowsedAuthenticationMetric getUsedAuthenticationMetric() {
+        return mBrowsedAuthenticationMetric
+                .get(mBrowsedAuthenticationMetric.size() - 1);
     }
 
     /**

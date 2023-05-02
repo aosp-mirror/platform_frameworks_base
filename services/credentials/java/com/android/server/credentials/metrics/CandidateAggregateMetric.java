@@ -24,7 +24,8 @@ import java.util.Map;
 
 /**
  * This will generate most of its data via using the information of {@link CandidatePhaseMetric}
- * across all the providers. This belongs to the metric flow where the calling app is known.
+ * across all the providers. This belongs to the metric flow where the calling app is known. It
+ * also contains {@link BrowsedAuthenticationMetric} data aggregated within.
  */
 public class CandidateAggregateMetric {
 
@@ -34,6 +35,9 @@ public class CandidateAggregateMetric {
     // Indicates if this provider returned from the candidate query phase,
     // true if at least one provider returns validly, even if empty, default false
     private boolean mQueryReturned = false;
+    // For reference, the initial log timestamp when the service started running the API call,
+    // defaults to -1
+    private long mServiceBeganTimeNanoseconds = -1;
     // Indicates the total number of providers this aggregate captures information for, default 0
     private int mNumProviders = 0;
     // Indicates if the authentication entry returned, true if at least one entry returns validly,
@@ -47,6 +51,18 @@ public class CandidateAggregateMetric {
     // The combined aggregate collective across the auth entry info
     private ResponseCollective mAggregateCollectiveAuth =
             new ResponseCollective(Map.of(), Map.of());
+    // The minimum of all the providers query start time, defaults to -1
+    private long mMinProviderTimestampNanoseconds = -1;
+    // The maximum of all the providers query finish time, defaults to -1
+    private long mMaxProviderTimestampsNanoseconds = -1;
+    // The total number of failures across all the providers, defaults to -1
+    private int mTotalQueryFailures = -1;
+    // The map of all seen framework exceptions and their counts across all providers, default empty
+    private Map<String, Integer> mExceptionCountQuery = new LinkedHashMap<>();
+    // The total number of failures across all auth entries, defaults to -1
+    private int mTotalAuthFailures = -1;
+    // The map of all seen framework exceptions and their counts across auth entries, default empty
+    private Map<String, Integer> mExceptionCountAuth = new LinkedHashMap<>();
 
     public CandidateAggregateMetric(int sessionIdTrackOne) {
         mSessionIdProvider = sessionIdTrackOne;
@@ -72,16 +88,33 @@ public class CandidateAggregateMetric {
         Map<String, Integer> responseCountQuery = new LinkedHashMap<>();
         Map<EntryEnum, Integer> entryCountQuery = new LinkedHashMap<>();
         var providerSessions = providers.values();
+        long min_query_start = Integer.MAX_VALUE;
+        long max_query_end = Integer.MIN_VALUE;
         for (var session : providerSessions) {
             var sessionMetric = session.getProviderSessionMetric();
             var candidateMetric = sessionMetric.getCandidatePhasePerProviderMetric();
+            if (mServiceBeganTimeNanoseconds == -1) {
+                mServiceBeganTimeNanoseconds = candidateMetric.getServiceBeganTimeNanoseconds();
+            }
             mQueryReturned = mQueryReturned || candidateMetric.isQueryReturned();
             ResponseCollective candidateCollective = candidateMetric.getResponseCollective();
             ResponseCollective.combineTypeCountMaps(responseCountQuery,
                     candidateCollective.getResponseCountsMap());
             ResponseCollective.combineTypeCountMaps(entryCountQuery,
                     candidateCollective.getEntryCountsMap());
+            min_query_start = Math.min(min_query_start,
+                    candidateMetric.getStartQueryTimeNanoseconds());
+            max_query_end = Math.max(max_query_end, candidateMetric
+                    .getQueryFinishTimeNanoseconds());
+            mTotalQueryFailures += (candidateMetric.isHasException() ? 1 : 0);
+            if (!candidateMetric.getFrameworkException().isEmpty()) {
+                mExceptionCountQuery.put(candidateMetric.getFrameworkException(),
+                        mExceptionCountQuery.getOrDefault(
+                                candidateMetric.getFrameworkException(), 0) + 1);
+            }
         }
+        mMinProviderTimestampNanoseconds = min_query_start;
+        mMaxProviderTimestampsNanoseconds = max_query_end;
         mAggregateCollectiveQuery = new ResponseCollective(responseCountQuery, entryCountQuery);
     }
 
@@ -101,6 +134,12 @@ public class CandidateAggregateMetric {
                         authCollective.getResponseCountsMap());
                 ResponseCollective.combineTypeCountMaps(entryCountAuth,
                         authCollective.getEntryCountsMap());
+                mTotalQueryFailures += (authMetric.isHasException() ? 1 : 0);
+                if (!authMetric.getFrameworkException().isEmpty()) {
+                    mExceptionCountQuery.put(authMetric.getFrameworkException(),
+                            mExceptionCountQuery.getOrDefault(
+                                    authMetric.getFrameworkException(), 0) + 1);
+                }
             }
         }
         mAggregateCollectiveAuth = new ResponseCollective(responseCountAuth, entryCountAuth);
@@ -129,5 +168,68 @@ public class CandidateAggregateMetric {
 
     public boolean isAuthReturned() {
         return mAuthReturned;
+    }
+
+    public long getMaxProviderTimestampsNanoseconds() {
+        return mMaxProviderTimestampsNanoseconds;
+    }
+
+    public long getMinProviderTimestampNanoseconds() {
+        return mMinProviderTimestampNanoseconds;
+    }
+
+    public int getTotalQueryFailures() {
+        return mTotalQueryFailures;
+    }
+
+    /**
+     * Returns the unique, deduped, exception classtypes for logging associated with this provider.
+     *
+     * @return a string array for deduped exception classtypes
+     */
+    public String[] getUniqueExceptionStringsQuery() {
+        String[] result = new String[mExceptionCountQuery.keySet().size()];
+        mExceptionCountQuery.keySet().toArray(result);
+        return result;
+    }
+
+    /**
+     * Returns the unique, deduped, exception classtype counts for logging associated with this
+     * provider.
+     *
+     * @return a string array for deduped classtype exception counts
+     */
+    public int[] getUniqueExceptionCountsQuery() {
+        return mExceptionCountQuery.values().stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    /**
+     * Returns the unique, deduped, exception classtypes for logging associated with this provider
+     * for auth entries.
+     *
+     * @return a string array for deduped exception classtypes for auth entries
+     */
+    public String[] getUniqueExceptionStringsAuth() {
+        String[] result = new String[mExceptionCountAuth.keySet().size()];
+        mExceptionCountAuth.keySet().toArray(result);
+        return result;
+    }
+
+    /**
+     * Returns the unique, deduped, exception classtype counts for logging associated with this
+     * provider for auth entries.
+     *
+     * @return a string array for deduped classtype exception counts for auth entries
+     */
+    public int[] getUniqueExceptionCountsAuth() {
+        return mExceptionCountAuth.values().stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    public long getServiceBeganTimeNanoseconds() {
+        return mServiceBeganTimeNanoseconds;
+    }
+
+    public int getTotalAuthFailures() {
+        return mTotalAuthFailures;
     }
 }

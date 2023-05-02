@@ -103,6 +103,10 @@ public class MetricUtilities {
         if (t2 - t1 > Integer.MAX_VALUE) {
             throw new ArithmeticException("Input timestamps are too far apart and unsupported");
         }
+        if (t2 < t1) {
+            Slog.i(TAG, "The timestamps aren't in expected order, falling back to default int");
+            return DEFAULT_INT_32;
+        }
         return (int) ((t2 - t1) / 1000);
     }
 
@@ -466,11 +470,11 @@ public class MetricUtilities {
                     candidateAggregateMetric.getAggregateCollectiveQuery()
                             .getUniqueEntryCounts(),
                     /*query_total_candidate_failure*/
-                    DEFAULT_INT_32,
+                    candidateAggregateMetric.getTotalQueryFailures(),
                     /*query_framework_exception_unique_classtypes*/
-                    DEFAULT_REPEATED_STR,
+                    candidateAggregateMetric.getUniqueExceptionStringsQuery(),
                     /*query_per_exception_classtype_counts*/
-                    DEFAULT_REPEATED_INT_32,
+                    candidateAggregateMetric.getUniqueExceptionCountsQuery(),
                     /*auth_response_unique_classtypes*/
                     candidateAggregateMetric.getAggregateCollectiveAuth()
                             .getUniqueResponseStrings(),
@@ -484,14 +488,15 @@ public class MetricUtilities {
                     candidateAggregateMetric.getAggregateCollectiveAuth()
                             .getUniqueEntryCounts(),
                     /*auth_total_candidate_failure*/
-                    DEFAULT_INT_32,
+                    candidateAggregateMetric.getTotalAuthFailures(),
                     /*auth_framework_exception_unique_classtypes*/
-                    DEFAULT_REPEATED_STR,
+                    candidateAggregateMetric.getUniqueExceptionStringsAuth(),
                     /*auth_per_exception_classtype_counts*/
-                    DEFAULT_REPEATED_INT_32,
+                    candidateAggregateMetric.getUniqueExceptionCountsAuth(),
                     /*num_auth_clicks*/
                     candidateAggregateMetric.getNumAuthEntriesTapped(),
-                    /*auth_returned*/ false
+                    /*auth_returned*/
+                    candidateAggregateMetric.isAuthReturned()
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during metric logging: " + e);

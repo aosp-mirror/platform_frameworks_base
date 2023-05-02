@@ -25,10 +25,9 @@ import java.util.Map;
  * Contains information about what was collected from the authentication entry output.
  */
 public class BrowsedAuthenticationMetric {
-    private static final String TAG = "BrowsedAuthenticationMetric";
+    private static final String TAG = "AuthenticationMetric";
     // The session id of this provider known flow related metric
     private final int mSessionIdProvider;
-
     // The provider associated with the press, defaults to -1
     private int mProviderUid = -1;
 
