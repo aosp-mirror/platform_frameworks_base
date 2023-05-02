@@ -1619,7 +1619,14 @@ public class BackupManagerService extends IBackupManager.Stub {
                         /* caller */ "reportDelayedRestoreResult()");
 
         if (userBackupManagerService != null) {
-            userBackupManagerService.reportDelayedRestoreResult(packageName, results);
+            // Clear as the method binds to BackupTransport, which needs to happen from system
+            // process.
+            final long oldId = Binder.clearCallingIdentity();
+            try {
+                userBackupManagerService.reportDelayedRestoreResult(packageName, results);
+            } finally {
+                Binder.restoreCallingIdentity(oldId);
+            }
         }
     }
 
