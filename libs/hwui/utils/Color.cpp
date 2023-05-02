@@ -284,7 +284,9 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
         case HAL_DATASPACE_TRANSFER_GAMMA2_8:
             return SkColorSpace::MakeRGB({2.8f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, gamut);
         case HAL_DATASPACE_TRANSFER_ST2084:
-            return SkColorSpace::MakeRGB(SkNamedTransferFn::kPQ, gamut);
+            return SkColorSpace::MakeRGB({-2.0, -1.555223, 1.860454, 32 / 2523.0, 2413 / 128.0,
+                                          -2392 / 128.0, 8192 / 1305.0},
+                                         gamut);
         case HAL_DATASPACE_TRANSFER_SMPTE_170M:
             return SkColorSpace::MakeRGB(SkNamedTransferFn::kRec2020, gamut);
         case HAL_DATASPACE_TRANSFER_UNSPECIFIED:
@@ -427,10 +429,10 @@ skcms_TransferFunction GetExtendedTransferFunction(float sdrHdrRatio) {
 }
 
 // Skia skcms' default HLG maps encoded [0, 1] to linear [1, 12] in order to follow ARIB
-// but LinearEffect expects a decoded [0, 1] range instead to follow Rec 2100.
+// but LinearEffect expects to map 1.0 == 203 nits
 std::optional<skcms_TransferFunction> GetHLGScaleTransferFunction() {
     skcms_TransferFunction hlgFn;
-    if (skcms_TransferFunction_makeScaledHLGish(&hlgFn, 1.f / 12.f, 2.f, 2.f, 1.f / 0.17883277f,
+    if (skcms_TransferFunction_makeScaledHLGish(&hlgFn, 0.314509843, 2.f, 2.f, 1.f / 0.17883277f,
                                                 0.28466892f, 0.55991073f)) {
         return std::make_optional<skcms_TransferFunction>(hlgFn);
     }

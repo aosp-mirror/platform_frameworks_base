@@ -26,39 +26,57 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RenderNode;
 import android.graphics.Shader;
+import android.graphics.SurfaceTexture;
 import android.hardware.HardwareBuffer;
 import android.media.Image;
 import android.media.ImageWriter;
 import android.os.Bundle;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callback,
-        AdapterView.OnItemSelectedListener {
+        TextureView.SurfaceTextureListener {
 
     private static final int WIDTH = 512;
     private static final int HEIGHT = 512;
 
     private ImageView mImageView;
     private SurfaceView mSurfaceView;
+    private TextureView mTextureView;
     private HardwareBuffer mGradientBuffer;
-    private ImageWriter mImageWriter;
+    private Map<View, ImageWriter> mImageWriters = new HashMap<>();
     private ColorSpace mColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
     private String[] mColorNames = {"sRGB", "BT2020_HLG", "BT2020_PQ"};
-    private String mCurrentColorName = "sRGB";
 
-    private FutureTask<HardwareBuffer> authorGradientBuffer(HardwareBuffer buffer) {
+    private int mGradientEndColor = 0xFFFFFFFF;
+
+    private int[] mGradientEndColors = {0xFFFFFFFF, 0xFFFF0000, 0xFF00FF00, 0xFF0000FF};
+    private String[] mGradientColorNames = {"Grayscale", "Red", "Green", "Blue"};
+
+    private final ExecutorService mBufferFenceExecutor = Executors.newFixedThreadPool(1);
+    private final ExecutorService mBufferExecutor = Executors.newFixedThreadPool(1);
+
+    private FutureTask<HardwareBuffer> authorGradientBuffer(
+            HardwareBuffer buffer, int gradentEndColor) {
         HardwareBufferRenderer renderer = new HardwareBufferRenderer(buffer);
         RenderNode node = new RenderNode("content");
         node.setPosition(0, 0, buffer.getWidth(), buffer.getHeight());
@@ -66,9 +84,10 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
         Canvas canvas = node.beginRecording();
         LinearGradient gradient = new LinearGradient(
                 0, 0, buffer.getWidth(), buffer.getHeight(), 0xFF000000,
-                0xFFFFFFFF, Shader.TileMode.CLAMP);
+                gradentEndColor, Shader.TileMode.CLAMP);
         Paint paint = new Paint();
         paint.setShader(gradient);
+        paint.setDither(true);
         canvas.drawRect(0f, 0f, buffer.getWidth(), buffer.getHeight(), paint);
         node.endRecording();
 
@@ -78,7 +97,7 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
         FutureTask<HardwareBuffer> resolvedBuffer = new FutureTask<>(() -> buffer);
         renderer.obtainRenderRequest()
                 .setColorSpace(colorSpace)
-                .draw(Executors.newSingleThreadExecutor(), result -> {
+                .draw(mBufferFenceExecutor, result -> {
                     result.getFence().await(Duration.ofSeconds(3));
                     resolvedBuffer.run();
                 });
@@ -90,7 +109,7 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
                 WIDTH, HEIGHT, PixelFormat.RGBA_8888, 1,
                 HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
                         | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT);
-        return authorGradientBuffer(buffer);
+        return authorGradientBuffer(buffer, mGradientEndColor);
     }
 
     @Override
@@ -101,29 +120,70 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
 
             mColorSpace = ColorSpace.get(ColorSpace.Named.SRGB);
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+            ArrayAdapter<String> colorSpaceAdapter = new ArrayAdapter<>(
                     this, android.R.layout.simple_spinner_item, mColorNames);
 
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            Spinner spinner = new Spinner(this);
-            spinner.setAdapter(adapter);
-            spinner.setOnItemSelectedListener(this);
+            colorSpaceAdapter
+                    .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            Spinner colorSpaceSpinner = new Spinner(this);
+            colorSpaceSpinner.setAdapter(colorSpaceAdapter);
+            colorSpaceSpinner.setOnItemSelectedListener(new ColorSpaceOnItemSelectedListener());
+
+            ArrayAdapter<String> gradientColorAdapter = new ArrayAdapter<>(
+                    this, android.R.layout.simple_spinner_item, mGradientColorNames);
+
+            gradientColorAdapter
+                    .setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            Spinner gradientColorSpinner = new Spinner(this);
+            gradientColorSpinner.setAdapter(gradientColorAdapter);
+            gradientColorSpinner
+                    .setOnItemSelectedListener(new GradientColorOnItemSelectedListener());
 
             mGradientBuffer = getGradientBuffer().get();
 
             LinearLayout linearLayout = new LinearLayout(this);
             linearLayout.setOrientation(LinearLayout.VERTICAL);
 
+            TextView imageViewText = new TextView(this);
+            imageViewText.setText("ImageView");
             mImageView = new ImageView(this);
 
+            TextView textureViewText = new TextView(this);
+            textureViewText.setText("TextureView");
+            mTextureView = new TextureView(this);
+            mTextureView.setSurfaceTextureListener(this);
+
+            TextView surfaceViewText = new TextView(this);
+            surfaceViewText.setText("SurfaceView");
             mSurfaceView = new SurfaceView(this);
             mSurfaceView.getHolder().addCallback(this);
 
-            linearLayout.addView(spinner, new LinearLayout.LayoutParams(
+            LinearLayout spinnerLayout = new LinearLayout(this);
+            spinnerLayout.setOrientation(LinearLayout.HORIZONTAL);
+
+            spinnerLayout.addView(colorSpaceSpinner, new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT));
 
+            spinnerLayout.addView(gradientColorSpinner, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
+            linearLayout.addView(spinnerLayout, new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+
+            linearLayout.addView(imageViewText,  new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
             linearLayout.addView(mImageView, new LinearLayout.LayoutParams(WIDTH, HEIGHT));
+            linearLayout.addView(textureViewText,  new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
+            linearLayout.addView(mTextureView, new LinearLayout.LayoutParams(WIDTH, HEIGHT));
+            linearLayout.addView(surfaceViewText,  new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT));
             linearLayout.addView(mSurfaceView, new LinearLayout.LayoutParams(WIDTH, HEIGHT));
 
             setContentView(linearLayout);
@@ -145,16 +205,24 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
     }
 
     private void populateBuffers() {
-        Bitmap bitmap = Bitmap.wrapHardwareBuffer(
-                mGradientBuffer, ColorSpace.get(ColorSpace.Named.SRGB));
-        Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
-        copy.setColorSpace(mColorSpace);
-        mImageView.setImageBitmap(copy);
+        try {
+            Bitmap bitmap = Bitmap.wrapHardwareBuffer(
+                    getGradientBuffer().get(), ColorSpace.get(ColorSpace.Named.SRGB));
+            Bitmap copy = bitmap.copy(Bitmap.Config.ARGB_8888, false);
+            copy.setColorSpace(mColorSpace);
+            mImageView.setImageBitmap(copy);
 
-        try (Image image = mImageWriter.dequeueInputImage()) {
-            authorGradientBuffer(image.getHardwareBuffer()).get();
-            image.setDataSpace(mColorSpace.getDataSpace());
-            mImageWriter.queueInputImage(image);
+            for (ImageWriter writer : mImageWriters.values()) {
+                mBufferExecutor.execute(() -> {
+                    try (Image image = writer.dequeueInputImage()) {
+                        authorGradientBuffer(image.getHardwareBuffer(), mGradientEndColor).get();
+                        image.setDataSpace(mColorSpace.getDataSpace());
+                        writer.queueInputImage(image);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -167,30 +235,81 @@ public class ColorBitmapActivity extends Activity implements SurfaceHolder.Callb
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        mImageWriter = new ImageWriter.Builder(holder.getSurface())
+        mImageWriters.put(mSurfaceView, new ImageWriter.Builder(holder.getSurface())
                 .setUsage(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
                         | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT
                         | HardwareBuffer.USAGE_COMPOSER_OVERLAY)
-                .build();
+                .build());
         populateBuffers();
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        mImageWriter.close();
-        mImageWriter = null;
+        if (mImageWriters.containsKey(mSurfaceView)) {
+            mImageWriters.remove(mSurfaceView);
+        }
     }
 
-
     @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        mCurrentColorName = mColorNames[position];
-        mColorSpace = getFromName(mCurrentColorName);
+    public void onSurfaceTextureAvailable(
+            @NonNull SurfaceTexture surface, int width, int height) {
+        mImageWriters.put(mTextureView, new ImageWriter.Builder(new Surface(surface))
+                .setUsage(HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE
+                        | HardwareBuffer.USAGE_GPU_COLOR_OUTPUT)
+                .build());
         populateBuffers();
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> parent) {
+    public void onSurfaceTextureSizeChanged(
+            @NonNull SurfaceTexture surface, int width, int height) {
 
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(@NonNull SurfaceTexture surface) {
+        if (mImageWriters.containsKey(mTextureView)) {
+            mImageWriters.remove(mTextureView);
+        }
+        return false;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(@NonNull SurfaceTexture surface) {
+
+    }
+
+    private final class ColorSpaceOnItemSelectedListener
+            implements AdapterView.OnItemSelectedListener {
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            ColorBitmapActivity.this.mColorSpace =
+                    getFromName(ColorBitmapActivity.this.mColorNames[position]);
+            ColorBitmapActivity.this.getMainExecutor()
+                    .execute(ColorBitmapActivity.this::populateBuffers);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
+    }
+
+    private final class GradientColorOnItemSelectedListener
+            implements AdapterView.OnItemSelectedListener {
+
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            ColorBitmapActivity.this.mGradientEndColor =
+                    ColorBitmapActivity.this.mGradientEndColors[position];
+            ColorBitmapActivity.this.getMainExecutor()
+                    .execute(ColorBitmapActivity.this::populateBuffers);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+
+        }
     }
 }
