@@ -29,9 +29,11 @@
 
 namespace android {
 
+namespace {
 struct NativeFamilyBuilder {
     std::vector<std::shared_ptr<minikin::Font>> fonts;
 };
+}  // namespace
 
 static inline NativeFamilyBuilder* toBuilder(jlong ptr) {
     return reinterpret_cast<NativeFamilyBuilder*>(ptr);
