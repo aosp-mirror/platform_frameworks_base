@@ -10011,10 +10011,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         "clearDeviceOwner can only be called by the device owner");
             }
             enforceUserUnlocked(deviceOwnerUserId);
-            DevicePolicyData policy = getUserData(deviceOwnerUserId);
-            if (policy.mPasswordTokenHandle != 0) {
-                mLockPatternUtils.removeEscrowToken(policy.mPasswordTokenHandle, deviceOwnerUserId);
-            }
 
             final ActiveAdmin admin = getDeviceOwnerAdminLocked();
             mInjector.binderWithCleanCallingIdentity(() -> {
@@ -10069,6 +10065,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         final DevicePolicyData policyData = getUserData(userId);
         policyData.mCurrentInputMethodSet = false;
+        if (policyData.mPasswordTokenHandle != 0) {
+            mLockPatternUtils.removeEscrowToken(policyData.mPasswordTokenHandle, userId);
+            policyData.mPasswordTokenHandle = 0;
+        }
         saveSettingsLocked(userId);
         mPolicyCache.onUserRemoved(userId);
         final DevicePolicyData systemPolicyData = getUserData(UserHandle.USER_SYSTEM);
