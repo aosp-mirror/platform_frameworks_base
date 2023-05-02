@@ -125,34 +125,6 @@ prebuilt_etc {
 
 // End ProtoLog
 
-gensrcs {
-    name: "wm-shell-protos",
-
-    tools: [
-        "aprotoc",
-        "protoc-gen-javastream",
-        "soong_zip",
-    ],
-
-    tool_files: [
-        ":libprotobuf-internal-protos",
-    ],
-
-    cmd: "mkdir -p $(genDir)/$(in) " +
-        "&& $(location aprotoc) " +
-        "  --plugin=$(location protoc-gen-javastream) " +
-        "  --javastream_out=$(genDir)/$(in) " +
-        "  -Iexternal/protobuf/src " +
-        "  -I . " +
-        "  $(in) " +
-        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
-
-    srcs: [
-        "proto/**/*.proto",
-    ],
-    output_extension: "srcjar",
-}
-
 java_library {
     name: "WindowManager-Shell-proto",
 
@@ -170,7 +142,6 @@ android_library {
         // TODO(b/168581922) protologtool do not support kotlin(*.kt)
         ":wm_shell-sources-kt",
         ":wm_shell-aidls",
-        ":wm-shell-protos",
     ],
     resource_dirs: [
         "res",
