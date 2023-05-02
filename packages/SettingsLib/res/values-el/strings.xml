@@ -664,7 +664,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Το Ethernet αποσυνδέθηκε."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Χωρίς κλήσεις."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Επιλογή φωτογραφίας προφίλ"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Επιλογή φωτογραφU+00ADίας προφίλ"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Προεπιλεγμένο εικονίδιο χρήστη"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Φυσικό πληκτρολόγιο"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Επιλέξτε διάταξη πληκτρολογίου"</string>
