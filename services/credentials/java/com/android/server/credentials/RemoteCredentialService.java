@@ -292,13 +292,13 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
             callback.onProviderResponseSuccess(result);
         } else {
             if (error instanceof TimeoutException) {
-                Slog.d(TAG, "Remote provider response timed tuo for: " + mComponentName);
+                Slog.i(TAG, "Remote provider response timed tuo for: " + mComponentName);
                 dispatchCancellationSignal(cancellationSink.get());
                 callback.onProviderResponseFailure(
                         CredentialProviderErrors.ERROR_TIMEOUT,
                         null);
             } else if (error instanceof CancellationException) {
-                Slog.d(TAG, "Cancellation exception for remote provider: " + mComponentName);
+                Slog.i(TAG, "Cancellation exception for remote provider: " + mComponentName);
                 dispatchCancellationSignal(cancellationSink.get());
                 callback.onProviderResponseFailure(
                         CredentialProviderErrors.ERROR_TASK_CANCELED,

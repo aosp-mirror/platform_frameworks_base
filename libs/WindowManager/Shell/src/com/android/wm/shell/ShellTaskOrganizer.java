@@ -421,7 +421,7 @@ public class ShellTaskOrganizer extends TaskOrganizer implements
     /**
      * Removes listener.
      */
-    public void removeLocusIdListener(FocusListener listener) {
+    public void removeFocusListener(FocusListener listener) {
         synchronized (mLock) {
             mFocusListeners.remove(listener);
         }
