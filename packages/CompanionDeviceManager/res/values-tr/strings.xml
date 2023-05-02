@@ -34,7 +34,7 @@
     <string name="permission_notification_summary" msgid="884075314530071011">"Kişiler, mesajlar ve fotoğraflar da dahil olmak üzere tüm bildirimleri okuyabilir"</string>
     <string name="permission_storage" msgid="6831099350839392343">"Fotoğraflar ve medya"</string>
     <string name="permission_storage_summary" msgid="3918240895519506417"></string>
-    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play hizmetleri"</string>
+    <string name="helper_title_computer" msgid="4671071173916176037">"Google Play Hizmetleri"</string>
     <string name="helper_summary_computer" msgid="9050724687678157852">"<xliff:g id="APP_NAME">%1$s</xliff:g>, telefonunuzdaki fotoğraf, medya ve bildirimlere erişmek için <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> cihazınız adına izin istiyor"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"cihaz"</string>
     <string name="summary_generic" msgid="2346762210105903720"></string>
