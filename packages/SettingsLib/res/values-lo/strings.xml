@@ -363,7 +363,7 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"ແກ້ບັນຫາການແຕ້ມທັບຂອງ GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"ປິດການເຮັດວຽກ HW overlays"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"ໃຊ້ GPU ໃນການວາງອົງປະກອບໜ້າຈໍສະເໝີ"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"ຈຳລອງ color space"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"ຈຳລອງຂອບເຂດສີ"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"ເປີດການໃຊ້ຮ່ອງຮອຍໃນ OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"ປິດ​ການ​ນຳ​ໃຊ້​ເສັ້ນ​ທາງ​ສຽງ USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"ປິດ​​ການ​ນຳ​ໃຊ້​ເສັ້ນ​ທາງ​​ອັດ​ຕະ​ໂນ​ມັດ​ໄປ​ຫາອຸ​ປະ​ກອ​ນ​ຕໍ່​ພ່ວງ​ສຽງ​ USB"</string>

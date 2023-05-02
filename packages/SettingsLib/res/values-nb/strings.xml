@@ -226,7 +226,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Feilsøkingsmodus når USB kobles til"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"USB-feilsøking – opphev autorisasjon"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Trådløs feilsøking"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Feilsøkingsmodus når Wifi er tilkoblet"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Feilsøkingsmodus når wifi er tilkoblet"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Feil"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Trådløs feilsøking"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"For å se og bruke tilgjengelige enheter, slå på trådløs feilsøking"</string>
@@ -268,9 +268,9 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"App for fiktiv posisjon: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Nettverk"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Trådløs skjerm-sertifisering"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert Wifi-loggføring"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av Wi‑Fi-skanning"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Ikke-vedvarende tilfeldiggjøring av MAC-adresse for Wi‑Fi"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Slå på detaljert wifi-loggføring"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Begrensning av wifi-skanning"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Ikke-vedvarende tilfeldiggjøring av MAC-adresse for wifi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobildata er alltid aktiv"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Maskinvareakselerasjon for internettdeling"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheter uten navn"</string>
@@ -300,7 +300,7 @@
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Skriv inn DNS-leverandørens vertsnavn"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Kunne ikke koble til"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vis alternativer for sertifisering av trådløs skjerm"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk nivået av Wifi-logging – vis per SSID RSSI i Wifi-velgeren"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Øk nivået av wifi-logging – vis per SSID RSSI i wifi-velgeren"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduserer batteriforbruket og forbedrer nettverksytelsen"</string>
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Når denne modusen er slått på, kan MAC-adressen til denne enheten endres hver gang den kobler seg til et nettverk som har tilfeldiggjøring av MAC-adresse slått på."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datamåling"</string>
@@ -316,7 +316,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"Tillat simulert posisjon"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Tillat bruk av simulerte GPS-koordinater"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Slå på inspeksjon av visningsattributt"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Ha alltid mobildata slått på, selv når Wifi er aktiv (for hurtig nettverksbytting)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Ha alltid mobildata slått på, selv når wifi er aktiv (for hurtig nettverksbytting)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Bruk maskinvareakselerasjon for internettdeling hvis det er tilgjengelig"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Tillate USB-feilsøking?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-feilsøking er bare ment for utviklingsformål. Bruk det til å kopiere data mellom datamaskinen og enheten, installere apper på enheten uten varsel og lese loggdata."</string>
@@ -392,7 +392,7 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"Bakgrunnsprosessgrense"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Vis ANR-feil i bakgrunnen"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Vis Appen svarer ikke-dialog for bakgrunnsapper"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Vis varselskanaladvarsler"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Vis advarsler om varselkanal"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viser advarsler på skjermen når apper publiserer varsler uten en gyldig kanal"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Tillat alltid ekstern lagring av apper"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Dette gjør at alle apper kan lagres på eksterne lagringsmedier – uavhengig av manifestverdier"</string>
@@ -574,7 +574,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Bruker"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Begrenset profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Vil du legge til en ny bruker?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enheten med andre folk ved å opprette flere brukere. Hver bruker har sin egen plass de kan tilpasse med apper, bakgrunner og annet. Brukere kan også justere enhetsinnstillinger, for eksempel Wifi, som påvirker alle.\n\nNår du legger til en ny bruker, må vedkommende angi innstillinger for plassen sin.\n\nAlle brukere kan oppdatere apper for alle andre brukere. Innstillinger og tjenester for tilgjengelighet overføres kanskje ikke til den nye brukeren."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Du kan dele denne enheten med andre folk ved å opprette flere brukere. Hver bruker har sin egen plass de kan tilpasse med apper, bakgrunner og annet. Brukere kan også justere enhetsinnstillinger, for eksempel wifi, som påvirker alle.\n\nNår du legger til en ny bruker, må vedkommende angi innstillinger for plassen sin.\n\nAlle brukere kan oppdatere apper for alle andre brukere. Innstillinger og tjenester for tilgjengelighet overføres kanskje ikke til den nye brukeren."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Når du legger til en ny bruker, må hen konfigurere sitt eget område.\n\nAlle brukere kan oppdatere apper for alle andre brukere."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Vil du gjøre denne brukeren til administrator?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Administratorer har spesielle rettigheter som ikke andre brukere har. Administratorer kan administrere alle brukere, oppdatere og tilbakestille denne enheten, endre innstillinger, se alle installerte apper, gi administratorrettigheter til andre samt oppheve andres administratorrettigheter."</string>
@@ -607,9 +607,9 @@
     <string name="guest_remove_guest_confirm_button" msgid="7858123434954143879">"Fjern"</string>
     <string name="guest_resetting" msgid="7822120170191509566">"Tilbakestiller gjesten …"</string>
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Vil du tilbakestille gjesteøkten?"</string>
-    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dette starter en ny gjesteøkt og sletter alle apper og data fra den gjeldende økten"</string>
+    <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Dette starter en ny gjesteøkt og sletter alle apper og data fra den nåværende økten"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Vil du avslutte gjestemodus?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Dette sletter apper og data fra den gjeldende gjesteøkten"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Da slettes apper og data fra den nåværende gjesteøkten"</string>
     <string name="grant_admin" msgid="4323199171790522574">"Ja, gjør til administrator"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"Nei, ikke gjør til administrator"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Avslutt"</string>

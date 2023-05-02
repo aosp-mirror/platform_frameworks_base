@@ -544,7 +544,7 @@
     <string name="time_unit_just_now" msgid="3006134267292728099">"Μόλις τώρα"</string>
     <string name="media_transfer_this_device_name" product="default" msgid="2357329267148436433">"Αυτό το τηλέφωνο"</string>
     <string name="media_transfer_this_device_name" product="tablet" msgid="3714653244000242800">"Αυτό το tablet"</string>
-    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Αυτό το τηλέφωνο"</string>
+    <string name="media_transfer_this_phone" msgid="7194341457812151531">"Αυτό το τηλέφ."</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Δεν είναι δυνατή η αναπαραγωγή σε αυτήν τη συσκευή"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Αναβαθμίστε τον λογαριασμό για εναλλαγή"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Δεν είναι δυνατή η αναπαραγωγή των λήψεων εδώ"</string>
@@ -664,7 +664,7 @@
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Το Ethernet αποσυνδέθηκε."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Χωρίς κλήσεις."</string>
-    <string name="avatar_picker_title" msgid="8492884172713170652">"Επιλογή φωτογραφίας προφίλ"</string>
+    <string name="avatar_picker_title" msgid="8492884172713170652">"Επιλογή φωτογραφU+00ADίας προφίλ"</string>
     <string name="default_user_icon_description" msgid="6554047177298972638">"Προεπιλεγμένο εικονίδιο χρήστη"</string>
     <string name="physical_keyboard_title" msgid="4811935435315835220">"Φυσικό πληκτρολόγιο"</string>
     <string name="keyboard_layout_dialog_title" msgid="3927180147005616290">"Επιλέξτε διάταξη πληκτρολογίου"</string>
