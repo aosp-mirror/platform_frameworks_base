@@ -1092,21 +1092,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     /*package*/ int setPreferredDevicesForStrategySync(int strategy,
             @NonNull List<AudioDeviceAttributes> devices) {
-        return mDeviceInventory.setPreferredDevicesForStrategySync(strategy, devices);
+        return mDeviceInventory.setPreferredDevicesForStrategyAndSave(strategy, devices);
     }
 
     /*package*/ int removePreferredDevicesForStrategySync(int strategy) {
-        return mDeviceInventory.removePreferredDevicesForStrategySync(strategy);
+        return mDeviceInventory.removePreferredDevicesForStrategyAndSave(strategy);
     }
 
     /*package*/ int setDeviceAsNonDefaultForStrategySync(int strategy,
             @NonNull AudioDeviceAttributes device) {
-        return mDeviceInventory.setDeviceAsNonDefaultForStrategySync(strategy, device);
+        return mDeviceInventory.setDeviceAsNonDefaultForStrategyAndSave(strategy, device);
     }
 
     /*package*/ int removeDeviceAsNonDefaultForStrategySync(int strategy,
             @NonNull AudioDeviceAttributes device) {
-        return mDeviceInventory.removeDeviceAsNonDefaultForStrategySync(strategy, device);
+        return mDeviceInventory.removeDeviceAsNonDefaultForStrategyAndSave(strategy, device);
     }
 
     /*package*/ void registerStrategyPreferredDevicesDispatcher(
@@ -1131,11 +1131,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     /*package*/ int setPreferredDevicesForCapturePresetSync(int capturePreset,
             @NonNull List<AudioDeviceAttributes> devices) {
-        return mDeviceInventory.setPreferredDevicesForCapturePresetSync(capturePreset, devices);
+        return mDeviceInventory.setPreferredDevicesForCapturePresetAndSave(capturePreset, devices);
     }
 
     /*package*/ int clearPreferredDevicesForCapturePresetSync(int capturePreset) {
-        return mDeviceInventory.clearPreferredDevicesForCapturePresetSync(capturePreset);
+        return mDeviceInventory.clearPreferredDevicesForCapturePresetAndSave(capturePreset);
     }
 
     /*package*/ void registerCapturePresetDevicesRoleDispatcher(
@@ -2165,18 +2165,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
         if (preferredCommunicationDevice == null) {
             AudioDeviceAttributes defaultDevice = getDefaultCommunicationDevice();
             if (defaultDevice != null) {
-                setPreferredDevicesForStrategySync(
+                mDeviceInventory.setPreferredDevicesForStrategy(
                         mCommunicationStrategyId, Arrays.asList(defaultDevice));
-                setPreferredDevicesForStrategySync(
+                mDeviceInventory.setPreferredDevicesForStrategy(
                         mAccessibilityStrategyId, Arrays.asList(defaultDevice));
             } else {
-                removePreferredDevicesForStrategySync(mCommunicationStrategyId);
-                removePreferredDevicesForStrategySync(mAccessibilityStrategyId);
+                mDeviceInventory.removePreferredDevicesForStrategy(mCommunicationStrategyId);
+                mDeviceInventory.removePreferredDevicesForStrategy(mAccessibilityStrategyId);
             }
         } else {
-            setPreferredDevicesForStrategySync(
+            mDeviceInventory.setPreferredDevicesForStrategy(
                     mCommunicationStrategyId, Arrays.asList(preferredCommunicationDevice));
-            setPreferredDevicesForStrategySync(
+            mDeviceInventory.setPreferredDevicesForStrategy(
                     mAccessibilityStrategyId, Arrays.asList(preferredCommunicationDevice));
         }
         onUpdatePhoneStrategyDevice(preferredCommunicationDevice);
