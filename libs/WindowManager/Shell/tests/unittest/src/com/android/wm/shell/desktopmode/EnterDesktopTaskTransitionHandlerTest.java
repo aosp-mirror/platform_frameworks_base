@@ -94,7 +94,7 @@ public class EnterDesktopTaskTransitionHandlerTest {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
                 .startTransition(transitionType, wct, mEnterDesktopTaskTransitionHandler);
-        mEnterDesktopTaskTransitionHandler.startTransition(transitionType, wct);
+        mEnterDesktopTaskTransitionHandler.startTransition(transitionType, wct, null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FREEFORM);
@@ -115,7 +115,7 @@ public class EnterDesktopTaskTransitionHandlerTest {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         doReturn(mToken).when(mTransitions)
                 .startTransition(transitionType, wct, mEnterDesktopTaskTransitionHandler);
-        mEnterDesktopTaskTransitionHandler.startTransition(transitionType, wct);
+        mEnterDesktopTaskTransitionHandler.startTransition(transitionType, wct, null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FREEFORM);
