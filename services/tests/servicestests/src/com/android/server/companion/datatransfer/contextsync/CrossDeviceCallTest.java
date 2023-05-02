@@ -62,9 +62,9 @@ public class CrossDeviceCallTest {
         assertWithMessage("Wrong status").that(crossDeviceCall.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.RINGING);
         assertWithMessage("Wrong controls").that(crossDeviceCall.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.ACCEPT,
-                        android.companion.Telecom.Call.REJECT,
-                        android.companion.Telecom.Call.SILENCE));
+                .isEqualTo(Set.of(android.companion.Telecom.ACCEPT,
+                        android.companion.Telecom.REJECT,
+                        android.companion.Telecom.SILENCE));
     }
 
     @Test
@@ -77,9 +77,9 @@ public class CrossDeviceCallTest {
         assertWithMessage("Wrong status").that(crossDeviceCall.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.ONGOING);
         assertWithMessage("Wrong controls").that(crossDeviceCall.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.END,
-                        android.companion.Telecom.Call.MUTE,
-                        android.companion.Telecom.Call.PUT_ON_HOLD));
+                .isEqualTo(Set.of(android.companion.Telecom.END,
+                        android.companion.Telecom.MUTE,
+                        android.companion.Telecom.PUT_ON_HOLD));
     }
 
     @Test
@@ -92,8 +92,8 @@ public class CrossDeviceCallTest {
         assertWithMessage("Wrong status").that(crossDeviceCall.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.ON_HOLD);
         assertWithMessage("Wrong controls").that(crossDeviceCall.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.END,
-                        android.companion.Telecom.Call.TAKE_OFF_HOLD));
+                .isEqualTo(Set.of(android.companion.Telecom.END,
+                        android.companion.Telecom.TAKE_OFF_HOLD));
     }
 
     @Test
@@ -106,8 +106,8 @@ public class CrossDeviceCallTest {
         assertWithMessage("Wrong status").that(crossDeviceCall.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.ONGOING);
         assertWithMessage("Wrong controls").that(crossDeviceCall.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.END,
-                        android.companion.Telecom.Call.MUTE));
+                .isEqualTo(Set.of(android.companion.Telecom.END,
+                        android.companion.Telecom.MUTE));
     }
 
     @Test
@@ -120,8 +120,8 @@ public class CrossDeviceCallTest {
         assertWithMessage("Wrong status").that(crossDeviceCall.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.ONGOING);
         assertWithMessage("Wrong controls").that(crossDeviceCall.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.END,
-                        android.companion.Telecom.Call.PUT_ON_HOLD));
+                .isEqualTo(Set.of(android.companion.Telecom.END,
+                        android.companion.Telecom.PUT_ON_HOLD));
     }
 
     @Test
@@ -134,17 +134,17 @@ public class CrossDeviceCallTest {
         assertWithMessage("Wrong status for ringing state").that(crossDeviceCall.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.RINGING);
         assertWithMessage("Wrong controls for ringing state").that(crossDeviceCall.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.ACCEPT,
-                        android.companion.Telecom.Call.REJECT,
-                        android.companion.Telecom.Call.SILENCE));
+                .isEqualTo(Set.of(android.companion.Telecom.ACCEPT,
+                        android.companion.Telecom.REJECT,
+                        android.companion.Telecom.SILENCE));
         crossDeviceCall.updateCallDetails(createCallDetails(Call.STATE_ACTIVE,
                 Call.Details.CAPABILITY_HOLD | Call.Details.CAPABILITY_MUTE));
         assertWithMessage("Wrong status for active state").that(crossDeviceCall.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.ONGOING);
         assertWithMessage("Wrong controls for active state").that(crossDeviceCall.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.END,
-                        android.companion.Telecom.Call.MUTE,
-                        android.companion.Telecom.Call.PUT_ON_HOLD));
+                .isEqualTo(Set.of(android.companion.Telecom.END,
+                        android.companion.Telecom.MUTE,
+                        android.companion.Telecom.PUT_ON_HOLD));
     }
 
     @Test
@@ -158,8 +158,8 @@ public class CrossDeviceCallTest {
         assertWithMessage("Wrong status").that(crossDeviceCall.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.RINGING_SILENCED);
         assertWithMessage("Wrong controls").that(crossDeviceCall.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.ACCEPT,
-                        android.companion.Telecom.Call.REJECT));
+                .isEqualTo(Set.of(android.companion.Telecom.ACCEPT,
+                        android.companion.Telecom.REJECT));
     }
 
     @Test
@@ -173,9 +173,9 @@ public class CrossDeviceCallTest {
         assertWithMessage("Wrong status").that(crossDeviceCall.getStatus())
                 .isEqualTo(android.companion.Telecom.Call.ONGOING);
         assertWithMessage("Wrong controls").that(crossDeviceCall.getControls())
-                .isEqualTo(Set.of(android.companion.Telecom.Call.END,
-                        android.companion.Telecom.Call.MUTE,
-                        android.companion.Telecom.Call.PUT_ON_HOLD));
+                .isEqualTo(Set.of(android.companion.Telecom.END,
+                        android.companion.Telecom.MUTE,
+                        android.companion.Telecom.PUT_ON_HOLD));
     }
 
     @Test
