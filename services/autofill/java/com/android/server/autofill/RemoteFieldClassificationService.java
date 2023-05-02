@@ -157,6 +157,8 @@ final class RemoteFieldClassificationService
                                         if (sDebug) {
                                             Log.d(TAG, "onSuccess Response: " + response);
                                         }
+                                        fieldClassificationServiceCallbacks
+                                                .onClassificationRequestSuccess(response);
                                     }
 
                                     @Override
@@ -165,6 +167,8 @@ final class RemoteFieldClassificationService
                                         if (sDebug) {
                                             Log.d(TAG, "onFailure");
                                         }
+                                        fieldClassificationServiceCallbacks
+                                                .onClassificationRequestFailure(0, null);
                                     }
 
                                     @Override
