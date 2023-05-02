@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ha detectat aquesta captura de pantalla."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> i altres aplicacions obertes han detectat aquesta captura de pantalla."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Afegeix a una nota"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Gravació de pantalla"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Gravació de pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processant gravació de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Vols iniciar la gravació?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durant la gravació, el sistema Android pot capturar qualsevol informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu. Això inclou contrasenyes, informació de pagament, fotos, missatges i àudio."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Grava la pantalla completa"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Grava una sola aplicació"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Mentre graves contingut, Android pot accedir a tot el que es veu a la pantalla o que es reprodueix al dispositiu. Per això cal que vagis amb compte amb les contrasenyes, les dades de pagament, els missatges o qualsevol altra informació sensible."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Mentre graves una aplicació, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Inicia la gravació"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Vols iniciar una gravació?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Mentre graves, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Mentre graves una aplicació, Android té accés a qualsevol cosa que es mostri o que es reprodueixi en aquella aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Inicia una gravació"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grava l\'àudio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Àudio del dispositiu"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"So del dispositiu, com ara música, trucades i sons de trucada"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micròfon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Àudio del dispositiu i micròfon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Inicia"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Inicia"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"S\'està gravant la pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"S\'estan gravant la pantalla i l\'àudio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostra els tocs a la pantalla"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si tornes a introduir un patró incorrecte, se suprimirà el perfil de treball i les dades que contingui."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Si tornes a introduir un PIN incorrecte, se suprimirà el perfil de treball i les dades que contingui."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Si tornes a introduir una contrasenya incorrecta, se suprimirà el perfil de treball i les dades que contingui."</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Configura"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Ara no"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Aquesta acció és necessària per millorar la seguretat i el rendiment"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Torna a configurar Desbloqueig amb empremta digital"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Desbloqueig amb empremta digital"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Configura Desbloqueig amb empremta digital"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Per tornar a configurar Desbloqueig amb empremta digital, les imatges i els models actuals de la teva empremta digital se suprimiran.\n\nDesprés de suprimir-los, hauràs de tornar a configurar Desbloqueig amb empremta digital per utilitzar la teva empremta digital i desbloquejar el telèfon o verificar la teva identitat."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Per tornar a configurar Desbloqueig amb empremta digital, les imatges i el model actuals de la teva empremta digital se suprimiran.\n\nDesprés de suprimir-los, hauràs de tornar a configurar Desbloqueig amb empremta digital per utilitzar la teva empremta digital i desbloquejar el telèfon o verificar la teva identitat."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"No s\'ha pogut configurar el desbloqueig amb empremta digital. Ves a Configuració per tornar-ho a provar."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Torna a configurar Desbloqueig facial"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Desbloqueig facial"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Configura Desbloqueig facial"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Per tornar a configurar Desbloqueig facial, el model facial actual se suprimirà.\n\nHauràs de tornar configurar aquesta funció per desbloquejar el telèfon utilitzant la cara."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"No s\'ha pogut configurar el desbloqueig facial. Ves a Configuració per tornar-ho a provar."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor d\'empremtes digitals"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"No podem detectar la cara. Usa l\'empremta digital."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Vols suprimir l\'usuari?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Totes les aplicacions i les dades d\'aquest usuari se suprimiran."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Suprimeix"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tindrà accés a tota la informació que es mostri a la pantalla o que es reprodueixi al dispositiu mentre graves o emets contingut. Això inclou contrasenyes, dades de pagament, fotos, missatges i àudio."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servei que ofereix aquesta funció tindrà accés a tota la informació que es mostri a la pantalla o que es reprodueixi al dispositiu mentre graves o emets contingut. Això inclou contrasenyes, dades de pagament, fotos, missatges i àudio."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vols començar a gravar o emetre contingut?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vols començar a gravar o emetre contingut amb <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Vols permetre que <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comparteixi o gravi contingut?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Tota la pantalla"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Una sola aplicació"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Quan estàs compartint, gravant o emetent, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Mentre comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> pot accedir a tot el que es veu a la pantalla o que es reprodueix a l\'aplicació. Per això cal que vagis amb compte amb les contrasenyes, les dades de pagament, els missatges o qualsevol altra informació sensible."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Continua"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Comparteix o grava una aplicació"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Vols permetre que aquesta aplicació comparteixi o gravi contingut?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Quan estàs compartint, gravant o emetent, aquesta aplicació té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Quan estàs compartint, gravant o emetent, aquesta aplicació té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges o altra informació sensible."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tindrà accés a tota la informació que es veu en pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio que reprodueixis."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Vols començar a gravar o emetre contingut?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"El servei que ofereix aquesta funció tindrà accés a tota la informació visible a la teva pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara les contrasenyes, les dades de pagament, les fotos, els missatges i àudio que reprodueixis."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Tota la pantalla"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Una sola aplicació"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Comparteix o grava una aplicació"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Vols començar a gravar o emetre contingut amb <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Quan comparteixes, graves o emets contingut, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Inicia"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Vols iniciar una emissió?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Quan emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Quan emets una aplicació, Android té accés a qualsevol cosa que es mostri o que es reprodueixi en aquella aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Inicia una emissió"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Vols començar a compartir?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Quan comparteixes, graves o emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi al dispositiu. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Quan comparteixes, graves o emets contingut, Android té accés a qualsevol cosa que es vegi a la pantalla o que es reprodueixi a l\'aplicació. Per aquest motiu, ves amb compte amb les contrasenyes, les dades de pagament, els missatges, les fotos i l\'àudio i el vídeo."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Inicia"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloquejat per l\'administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Les captures de pantalla estan desactivades per la política de dispositius"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Esborra-ho tot"</string>
@@ -472,7 +460,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"S\'ha instal·lat una autoritat de certificació en aquest dispositiu. És possible que el trànsit de xarxa segura se supervisi o es modifiqui."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"L\'administrador ha activat el registre de xarxa, que supervisa el trànsit del teu dispositiu."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"L\'administrador ha activat el registre de xarxa, que monitora el trànsit al teu perfil de treball, però no al personal."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
+    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
+    <skip />
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Aquest dispositiu es connecta a Internet a través de <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. El teu administrador de TI pot veure la teva activitat de xarxa, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Les aplicacions de treball es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu administrador de TI i el teu proveïdor de VPN poden veure la teva activitat de xarxa en aplicacions de treball, inclosos els correus electrònics i les dades de navegació."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Les aplicacions personals es connecten a Internet a través de <xliff:g id="VPN_APP">%1$s</xliff:g>. El teu proveïdor de VPN pot veure l\'activitat de la teva xarxa, inclosos els correus electrònics i les dades de navegació."</string>
@@ -889,7 +880,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Toca per obrir funcions d\'accessibilitat. Personalitza o substitueix el botó a Configuració.\n\n"<annotation id="link">"Mostra"</annotation>"."</string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mou el botó a l\'extrem per amagar-lo temporalment"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Desfés"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"S\'ha suprimit la drecera <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"S\'ha suprimit la drecera a <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{S\'ha suprimit # drecera}many{S\'han suprimit # dreceres}other{S\'han suprimit # dreceres}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mou a dalt a l\'esquerra"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mou a dalt a la dreta"</string>
@@ -913,9 +904,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"suprimir dels preferits"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mou a la posició <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premut i arrossega per reorganitzar els controls"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Tria a quins controls del dispositiu vols accedir ràpidament"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premuts els controls i arrossega\'ls per reordenar-los"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"S\'han suprimit tots els controls"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Els canvis no s\'han desat"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Mostra altres aplicacions"</string>
@@ -1134,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Tens una aplicació de càmera."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• L\'aplicació està configurada."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Almenys un dispositiu està disponible."</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantén premuda la drecera"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancel·la"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Canvia de pantalla ara"</string>
