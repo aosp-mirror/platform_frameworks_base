@@ -36,6 +36,7 @@ android_test {
         "-c fa",
     ],
     static_libs: [
+        "collector-device-lib-platform",
         "frameworks-base-testutils",
         "core-test-rules", // for libcore.dalvik.system.CloseGuardSupport
         "core-tests-support",
