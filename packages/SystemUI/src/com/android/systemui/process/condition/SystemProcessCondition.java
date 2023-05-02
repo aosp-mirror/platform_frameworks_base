@@ -16,10 +16,13 @@
 
 package com.android.systemui.process.condition;
 
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.process.ProcessWrapper;
 import com.android.systemui.shared.condition.Condition;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * {@link SystemProcessCondition} checks to make sure the current process is being ran by the
@@ -29,8 +32,9 @@ public class SystemProcessCondition extends Condition {
     private final ProcessWrapper mProcessWrapper;
 
     @Inject
-    public SystemProcessCondition(ProcessWrapper processWrapper) {
-        super();
+    public SystemProcessCondition(@Application CoroutineScope scope,
+            ProcessWrapper processWrapper) {
+        super(scope);
         mProcessWrapper = processWrapper;
     }
 
@@ -41,5 +45,10 @@ public class SystemProcessCondition extends Condition {
 
     @Override
     protected void stop() {
+    }
+
+    @Override
+    protected int getStartStrategy() {
+        return START_EAGERLY;
     }
 }

@@ -607,9 +607,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         recordDisplay(wc.getDisplayContent());
         if (info.mShowWallpaper) {
             // Collect the wallpaper token (for isWallpaper(wc)) so it is part of the sync set.
-            final WindowState wallpaper =
-                    wc.getDisplayContent().mWallpaperController.getTopVisibleWallpaper();
-            if (wallpaper != null) {
+            final List<WindowState> wallpapers =
+                    wc.getDisplayContent().mWallpaperController.getAllTopWallpapers();
+            for (int i = wallpapers.size() - 1; i >= 0; i--) {
+                WindowState wallpaper = wallpapers.get(i);
                 collect(wallpaper.mToken);
             }
         }
@@ -954,8 +955,15 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 // to the transient activity.
                 ar.supportsEnterPipOnTaskSwitch = true;
             }
+            // Make sure this activity can enter pip under the current circumstances.
+            // `enterPictureInPicture` internally checks, but with beforeStopping=false which
+            // is specifically for non-auto-enter.
+            if (!ar.checkEnterPictureInPictureState("enterPictureInPictureMode",
+                    true /* beforeStopping */)) {
+                return false;
+            }
             return mController.mAtm.enterPictureInPictureMode(ar, ar.pictureInPictureArgs,
-                    false /* fromClient */);
+                    false /* fromClient */, true /* isAutoEnter */);
         }
 
         // Legacy pip-entry (not via isAutoEnterEnabled).
@@ -1317,6 +1325,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // ActivityRecord#canShowWindows() may reject to show its window. The visibility also
         // needs to be updated for STATE_ABORT.
         commitVisibleActivities(transaction);
+        commitVisibleWallpapers();
 
         // Fall-back to the default display if there isn't one participating.
         final DisplayContent primaryDisplay = !mTargetDisplays.isEmpty() ? mTargetDisplays.get(0)
@@ -1349,6 +1358,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
         // Resolve the animating targets from the participants.
         mTargets = calculateTargets(mParticipants, mChanges);
+
         // Check whether the participants were animated from back navigation.
         mController.mAtm.mBackNavigationController.onTransactionReady(this, mTargets);
         final TransitionInfo info = calculateTransitionInfo(mType, mFlags, mTargets, transaction);
@@ -1623,6 +1633,30 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
             ar.getTask().setDeferTaskAppear(false);
         }
+    }
+
+    /**
+     * Reset waitingToshow for all wallpapers, and commit the visibility of the visible ones
+     */
+    private void commitVisibleWallpapers() {
+        boolean showWallpaper = shouldWallpaperBeVisible();
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            final WallpaperWindowToken wallpaper = mParticipants.valueAt(i).asWallpaperToken();
+            if (wallpaper != null) {
+                wallpaper.waitingToShow = false;
+                if (!wallpaper.isVisible() && wallpaper.isVisibleRequested()) {
+                    wallpaper.commitVisibility(showWallpaper);
+                }
+            }
+        }
+    }
+
+    private boolean shouldWallpaperBeVisible() {
+        for (int i = mParticipants.size() - 1; i >= 0; --i) {
+            WindowContainer participant = mParticipants.valueAt(i);
+            if (participant.showWallpaper()) return true;
+        }
+        return false;
     }
 
     // TODO(b/188595497): Remove after migrating to shell.

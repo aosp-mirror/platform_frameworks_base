@@ -271,7 +271,7 @@ public class InsetsSource implements Parcelable {
      * @param index An owner may have multiple sources with the same type. For example, the system
      *              server might have multiple display cutout sources. This is used to identify
      *              which one is which. The value must be in a range of [0, 2047].
-     * @param type The {@link WindowInsets.Type.InsetsType type} of the source.
+     * @param type The {@link InsetsType type} of the source.
      * @return a unique integer as the identifier.
      */
     public static int createId(Object owner, @IntRange(from = 0, to = 2047) int index,
@@ -282,9 +282,27 @@ public class InsetsSource implements Parcelable {
         // owner takes top 16 bits;
         // index takes 11 bits since the 6th bit;
         // type takes bottom 5 bits.
-        return (((owner != null ? owner.hashCode() : 1) % (1 << 16)) << 16)
+        return ((System.identityHashCode(owner) % (1 << 16)) << 16)
                 + (index << 5)
                 + WindowInsets.Type.indexOf(type);
+    }
+
+    /**
+     * Gets the index from the ID.
+     *
+     * @see #createId(Object, int, int)
+     */
+    public static int getIndex(int id) {
+        return (id % (1 << 16)) >> 5;
+    }
+
+    /**
+     * Gets the {@link InsetsType} from the ID.
+     *
+     * @see #createId(Object, int, int)
+     */
+    public static int getType(int id) {
+        return 1 << (id % 32);
     }
 
     public static String flagsToString(@Flags int flags) {

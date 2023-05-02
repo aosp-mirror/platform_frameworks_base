@@ -34,15 +34,23 @@ import com.android.systemui.SysuiTestCase;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class ConditionTest extends SysuiTestCase {
+    @Mock
+    CoroutineScope mScope;
+
     private FakeCondition mCondition;
 
     @Before
     public void setup() {
-        mCondition = spy(new FakeCondition());
+        MockitoAnnotations.initMocks(this);
+        mCondition = spy(new FakeCondition(mScope));
     }
 
     @Test
@@ -151,169 +159,5 @@ public class ConditionTest extends SysuiTestCase {
         assertThat(mCondition.isConditionSet()).isTrue();
         mCondition.clearCondition();
         assertThat(mCondition.isConditionSet()).isFalse();
-    }
-
-    @Test
-    public void combineConditionsWithOr_allFalse_reportsNotMet() {
-        mCondition.fakeUpdateCondition(false);
-
-        final Condition combinedCondition = mCondition.or(
-                new FakeCondition(/* initialValue= */ false));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isTrue();
-        assertThat(combinedCondition.isConditionMet()).isFalse();
-        verify(callback, times(1)).onConditionChanged(combinedCondition);
-    }
-
-    @Test
-    public void combineConditionsWithOr_allTrue_reportsMet() {
-        mCondition.fakeUpdateCondition(true);
-
-        final Condition combinedCondition = mCondition.or(
-                new FakeCondition(/* initialValue= */ true));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isTrue();
-        assertThat(combinedCondition.isConditionMet()).isTrue();
-        verify(callback, times(1)).onConditionChanged(combinedCondition);
-    }
-
-    @Test
-    public void combineConditionsWithOr_singleTrue_reportsMet() {
-        mCondition.fakeUpdateCondition(false);
-
-        final Condition combinedCondition = mCondition.or(
-                new FakeCondition(/* initialValue= */ true));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isTrue();
-        assertThat(combinedCondition.isConditionMet()).isTrue();
-        verify(callback, times(1)).onConditionChanged(combinedCondition);
-    }
-
-    @Test
-    public void combineConditionsWithOr_unknownAndTrue_reportsMet() {
-        mCondition.fakeUpdateCondition(true);
-
-        // Combine with an unset condition.
-        final Condition combinedCondition = mCondition.or(
-                new FakeCondition(/* initialValue= */ null));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isTrue();
-        assertThat(combinedCondition.isConditionMet()).isTrue();
-        verify(callback, times(1)).onConditionChanged(combinedCondition);
-    }
-
-    @Test
-    public void combineConditionsWithOr_unknownAndFalse_reportsNotMet() {
-        mCondition.fakeUpdateCondition(false);
-
-        // Combine with an unset condition.
-        final Condition combinedCondition = mCondition.or(
-                new FakeCondition(/* initialValue= */ null));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isFalse();
-        assertThat(combinedCondition.isConditionMet()).isFalse();
-        verify(callback, never()).onConditionChanged(combinedCondition);
-    }
-
-    @Test
-    public void combineConditionsWithAnd_allFalse_reportsNotMet() {
-        mCondition.fakeUpdateCondition(false);
-
-        final Condition combinedCondition = mCondition.and(
-                new FakeCondition(/* initialValue= */ false));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isTrue();
-        assertThat(combinedCondition.isConditionMet()).isFalse();
-        verify(callback, times(1)).onConditionChanged(combinedCondition);
-    }
-
-    @Test
-    public void combineConditionsWithAnd_allTrue_reportsMet() {
-        mCondition.fakeUpdateCondition(true);
-
-        final Condition combinedCondition = mCondition.and(
-                new FakeCondition(/* initialValue= */ true));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isTrue();
-        assertThat(combinedCondition.isConditionMet()).isTrue();
-        verify(callback, times(1)).onConditionChanged(combinedCondition);
-    }
-
-    @Test
-    public void combineConditionsWithAnd_singleTrue_reportsNotMet() {
-        mCondition.fakeUpdateCondition(true);
-
-        final Condition combinedCondition = mCondition.and(
-                new FakeCondition(/* initialValue= */ false));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isTrue();
-        assertThat(combinedCondition.isConditionMet()).isFalse();
-        verify(callback, times(1)).onConditionChanged(combinedCondition);
-    }
-
-    @Test
-    public void combineConditionsWithAnd_unknownAndTrue_reportsNotMet() {
-        mCondition.fakeUpdateCondition(true);
-
-        // Combine with an unset condition.
-        final Condition combinedCondition = mCondition.and(
-                new FakeCondition(/* initialValue= */ null));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isFalse();
-        assertThat(combinedCondition.isConditionMet()).isFalse();
-        verify(callback, never()).onConditionChanged(combinedCondition);
-    }
-
-    @Test
-    public void combineConditionsWithAnd_unknownAndFalse_reportsMet() {
-        mCondition.fakeUpdateCondition(false);
-
-        // Combine with an unset condition.
-        final Condition combinedCondition = mCondition.and(
-                new FakeCondition(/* initialValue= */ null));
-
-        final Condition.Callback callback = mock(
-                Condition.Callback.class);
-        combinedCondition.addCallback(callback);
-
-        assertThat(combinedCondition.isConditionSet()).isTrue();
-        assertThat(combinedCondition.isConditionMet()).isFalse();
-        verify(callback, times(1)).onConditionChanged(combinedCondition);
     }
 }

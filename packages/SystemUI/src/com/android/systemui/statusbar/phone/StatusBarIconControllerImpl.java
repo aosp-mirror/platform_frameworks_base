@@ -109,7 +109,6 @@ public class StatusBarIconControllerImpl implements Tunable,
         }
 
         group.setController(this);
-        group.reloadDimens();
         mIconGroups.add(group);
         List<Slot> allSlots = mStatusBarIconList.getSlots();
         for (int i = 0; i < allSlots.size(); i++) {
