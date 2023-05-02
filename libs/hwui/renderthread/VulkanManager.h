@@ -66,6 +66,7 @@ class RenderThread;
 class VulkanManager final : public RefBase {
 public:
     static sp<VulkanManager> getInstance();
+    static sp<VulkanManager> peekInstance();
 
     // Sets up the vulkan context that is shared amonst all clients of the VulkanManager. This must
     // be call once before use of the VulkanManager. Multiple calls after the first will simiply
@@ -109,7 +110,7 @@ public:
     };
 
     // returns a Skia graphic context used to draw content on the specified thread
-    sk_sp<GrDirectContext> createContext(const GrContextOptions& options,
+    sk_sp<GrDirectContext> createContext(GrContextOptions& options,
                                          ContextType contextType = ContextType::kRenderThread);
 
     uint32_t getDriverVersion() const { return mDriverVersion; }
