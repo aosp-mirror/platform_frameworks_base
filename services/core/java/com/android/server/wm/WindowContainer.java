@@ -435,8 +435,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         if (mLocalInsetsSources == null) {
             mLocalInsetsSources = new SparseArray<>();
         }
-        final int id = InsetsSource.createId(
-                provider.getOwner(), provider.getIndex(), provider.getType());
+        final int id = provider.getId();
         if (mLocalInsetsSources.get(id) != null) {
             if (DEBUG) {
                 Slog.d(TAG, "The local insets source for this " + provider
@@ -457,8 +456,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             return;
         }
 
-        final int id = InsetsSource.createId(
-                provider.getOwner(), provider.getIndex(), provider.getType());
+        final int id = provider.getId();
         if (mLocalInsetsSources.get(id) == null) {
             if (DEBUG) {
                 Slog.d(TAG, "Given " + provider + " doesn't have a local insets source.");
