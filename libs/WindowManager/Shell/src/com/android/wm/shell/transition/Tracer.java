@@ -18,25 +18,29 @@ package com.android.wm.shell.transition;
 
 import static android.os.Build.IS_USER;
 
-import static com.android.wm.shell.WmShellTransitionTraceProto.MAGIC_NUMBER;
-import static com.android.wm.shell.WmShellTransitionTraceProto.MAGIC_NUMBER_H;
-import static com.android.wm.shell.WmShellTransitionTraceProto.MAGIC_NUMBER_L;
+import static com.android.wm.shell.nano.WmShellTransitionTraceProto.MAGIC_NUMBER_H;
+import static com.android.wm.shell.nano.WmShellTransitionTraceProto.MAGIC_NUMBER_L;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.util.Log;
-import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.TraceBuffer;
+import com.android.wm.shell.nano.HandlerMapping;
 import com.android.wm.shell.sysui.ShellCommandHandler;
+
+import com.google.protobuf.nano.MessageNano;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Helper class to collect and dump transition traces.
@@ -54,8 +58,35 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
     private final Object mEnabledLock = new Object();
     private boolean mActiveTracingEnabled = false;
 
-    private final TraceBuffer mTraceBuffer = new TraceBuffer(ALWAYS_ON_TRACING_CAPACITY,
-            (proto) -> handleOnEntryRemovedFromTrace(proto));
+    private final TraceBuffer.ProtoProvider mProtoProvider =
+            new TraceBuffer.ProtoProvider<MessageNano,
+                com.android.wm.shell.nano.WmShellTransitionTraceProto,
+                com.android.wm.shell.nano.Transition>() {
+        @Override
+        public int getItemSize(MessageNano proto) {
+            return proto.getCachedSize();
+        }
+
+        @Override
+        public byte[] getBytes(MessageNano proto) {
+            return MessageNano.toByteArray(proto);
+        }
+
+        @Override
+        public void write(
+                com.android.wm.shell.nano.WmShellTransitionTraceProto encapsulatingProto,
+                Queue<com.android.wm.shell.nano.Transition> buffer, OutputStream os)
+                        throws IOException {
+            encapsulatingProto.transitions = buffer.toArray(
+                    new com.android.wm.shell.nano.Transition[0]);
+            os.write(getBytes(encapsulatingProto));
+        }
+    };
+    private final TraceBuffer<MessageNano,
+            com.android.wm.shell.nano.WmShellTransitionTraceProto,
+            com.android.wm.shell.nano.Transition> mTraceBuffer
+                    = new TraceBuffer(ALWAYS_ON_TRACING_CAPACITY, mProtoProvider,
+                            (proto) -> handleOnEntryRemovedFromTrace(proto));
     private final Map<Object, Runnable> mRemovedFromTraceCallbacks = new HashMap<>();
 
     private final Map<Transitions.TransitionHandler, Integer> mHandlerIds = new HashMap<>();
@@ -78,26 +109,20 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
             mHandlerIds.put(handler, handlerId);
         }
 
-        ProtoOutputStream outputStream = new ProtoOutputStream();
-        final long protoToken =
-                outputStream.start(com.android.wm.shell.WmShellTransitionTraceProto.TRANSITIONS);
-
-        outputStream.write(com.android.wm.shell.Transition.ID, transitionId);
-        outputStream.write(com.android.wm.shell.Transition.DISPATCH_TIME_NS,
-                SystemClock.elapsedRealtimeNanos());
-        outputStream.write(com.android.wm.shell.Transition.HANDLER, handlerId);
-
-        outputStream.end(protoToken);
+        com.android.wm.shell.nano.Transition proto = new com.android.wm.shell.nano.Transition();
+        proto.id = transitionId;
+        proto.dispatchTimeNs = SystemClock.elapsedRealtimeNanos();
+        proto.handler = handlerId;
 
         final int useCountAfterAdd = mHandlerUseCountInTrace.getOrDefault(handler, 0) + 1;
         mHandlerUseCountInTrace.put(handler, useCountAfterAdd);
 
-        mRemovedFromTraceCallbacks.put(outputStream, () -> {
+        mRemovedFromTraceCallbacks.put(proto, () -> {
             final int useCountAfterRemove = mHandlerUseCountInTrace.get(handler) - 1;
             mHandlerUseCountInTrace.put(handler, useCountAfterRemove);
         });
 
-        mTraceBuffer.add(outputStream);
+        mTraceBuffer.add(proto);
     }
 
     /**
@@ -107,18 +132,12 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
      * @param playingTransitionId The id of the transition we was to merge the transition into.
      */
     public void logMergeRequested(int mergeRequestedTransitionId, int playingTransitionId) {
-        ProtoOutputStream outputStream = new ProtoOutputStream();
-        final long protoToken =
-                outputStream.start(com.android.wm.shell.WmShellTransitionTraceProto.TRANSITIONS);
+        com.android.wm.shell.nano.Transition proto = new com.android.wm.shell.nano.Transition();
+        proto.id = mergeRequestedTransitionId;
+        proto.mergeRequestTimeNs = SystemClock.elapsedRealtimeNanos();
+        proto.mergedInto = playingTransitionId;
 
-        outputStream.write(com.android.wm.shell.Transition.ID, mergeRequestedTransitionId);
-        outputStream.write(com.android.wm.shell.Transition.MERGE_REQUEST_TIME_NS,
-                SystemClock.elapsedRealtimeNanos());
-        outputStream.write(com.android.wm.shell.Transition.MERGED_INTO, playingTransitionId);
-
-        outputStream.end(protoToken);
-
-        mTraceBuffer.add(outputStream);
+        mTraceBuffer.add(proto);
     }
 
     /**
@@ -128,18 +147,12 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
      * @param playingTransitionId The id of the transition the transition was merged into.
      */
     public void logMerged(int mergedTransitionId, int playingTransitionId) {
-        ProtoOutputStream outputStream = new ProtoOutputStream();
-        final long protoToken =
-                outputStream.start(com.android.wm.shell.WmShellTransitionTraceProto.TRANSITIONS);
+        com.android.wm.shell.nano.Transition proto = new com.android.wm.shell.nano.Transition();
+        proto.id = mergedTransitionId;
+        proto.mergeTimeNs = SystemClock.elapsedRealtimeNanos();
+        proto.mergedInto = playingTransitionId;
 
-        outputStream.write(com.android.wm.shell.Transition.ID, mergedTransitionId);
-        outputStream.write(
-                com.android.wm.shell.Transition.MERGE_TIME_NS, SystemClock.elapsedRealtimeNanos());
-        outputStream.write(com.android.wm.shell.Transition.MERGED_INTO, playingTransitionId);
-
-        outputStream.end(protoToken);
-
-        mTraceBuffer.add(outputStream);
+        mTraceBuffer.add(proto);
     }
 
     /**
@@ -148,17 +161,11 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
      * @param transitionId The id of the transition that was aborted.
      */
     public void logAborted(int transitionId) {
-        ProtoOutputStream outputStream = new ProtoOutputStream();
-        final long protoToken =
-                outputStream.start(com.android.wm.shell.WmShellTransitionTraceProto.TRANSITIONS);
+        com.android.wm.shell.nano.Transition proto = new com.android.wm.shell.nano.Transition();
+        proto.id = transitionId;
+        proto.abortTimeNs = SystemClock.elapsedRealtimeNanos();
 
-        outputStream.write(com.android.wm.shell.Transition.ID, transitionId);
-        outputStream.write(
-                com.android.wm.shell.Transition.ABORT_TIME_NS, SystemClock.elapsedRealtimeNanos());
-
-        outputStream.end(protoToken);
-
-        mTraceBuffer.add(outputStream);
+        mTraceBuffer.add(proto);
     }
 
     /**
@@ -230,8 +237,9 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
     private void writeTraceToFileLocked(@Nullable PrintWriter pw, File file) {
         Trace.beginSection("TransitionTracer#writeTraceToFileLocked");
         try {
-            ProtoOutputStream proto = new ProtoOutputStream();
-            proto.write(MAGIC_NUMBER, MAGIC_NUMBER_VALUE);
+            com.android.wm.shell.nano.WmShellTransitionTraceProto proto =
+                    new com.android.wm.shell.nano.WmShellTransitionTraceProto();
+            proto.magicNumber = MAGIC_NUMBER_VALUE;
             writeHandlerMappingToProto(proto);
             int pid = android.os.Process.myPid();
             LogAndPrintln.i(pw, "Writing file to " + file.getAbsolutePath()
@@ -243,19 +251,21 @@ public class Tracer implements ShellCommandHandler.ShellCommandActionHandler {
         Trace.endSection();
     }
 
-    private void writeHandlerMappingToProto(ProtoOutputStream outputStream) {
+    private void writeHandlerMappingToProto(
+            com.android.wm.shell.nano.WmShellTransitionTraceProto proto) {
+        ArrayList<com.android.wm.shell.nano.HandlerMapping> handlerMappings = new ArrayList<>();
         for (Transitions.TransitionHandler handler : mHandlerUseCountInTrace.keySet()) {
             final int count = mHandlerUseCountInTrace.get(handler);
             if (count > 0) {
-                final long protoToken = outputStream.start(
-                        com.android.wm.shell.WmShellTransitionTraceProto.HANDLER_MAPPINGS);
-                outputStream.write(com.android.wm.shell.HandlerMapping.ID,
-                        mHandlerIds.get(handler));
-                outputStream.write(com.android.wm.shell.HandlerMapping.NAME,
-                        handler.getClass().getName());
-                outputStream.end(protoToken);
+                com.android.wm.shell.nano.HandlerMapping mapping =
+                        new com.android.wm.shell.nano.HandlerMapping();
+                mapping.id = mHandlerIds.get(handler);
+                mapping.name = handler.getClass().getName();
+                handlerMappings.add(mapping);
             }
         }
+        proto.handlerMappings = handlerMappings.toArray(
+                new com.android.wm.shell.nano.HandlerMapping[0]);
     }
 
     private void handleOnEntryRemovedFromTrace(Object proto) {
