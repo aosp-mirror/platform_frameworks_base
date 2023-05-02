@@ -494,6 +494,8 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
   util::ReadUtf16StringFromDevice(header->name, arraysize(header->name),
                                   &loaded_package->package_name_);
 
+  const bool only_overlayable = (property_flags & PROPERTY_ONLY_OVERLAYABLES) != 0;
+
   // A map of TypeSpec builders, each associated with an type index.
   // We use these to accumulate the set of Types available for a TypeSpec, and later build a single,
   // contiguous block of memory that holds all the Types together with the TypeSpec.
@@ -502,6 +504,9 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
   ChunkIterator iter(chunk.data_ptr(), chunk.data_size());
   while (iter.HasNext()) {
     const Chunk child_chunk = iter.Next();
+    if (only_overlayable && child_chunk.type() != RES_TABLE_OVERLAYABLE_TYPE) {
+      continue;
+    }
     switch (child_chunk.type()) {
       case RES_STRING_POOL_TYPE: {
         const auto pool_address = child_chunk.header<ResChunk_header>();
@@ -655,6 +660,9 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
                      << name_to_actor_it->first << "'.";
           return {};
         }
+        if (only_overlayable) {
+          break;
+        }
 
         // Iterate over the overlayable policy chunks contained within the overlayable chunk data
         ChunkIterator overlayable_iter(child_chunk.data_ptr(), child_chunk.data_size());
@@ -800,14 +808,21 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
     global_string_pool_ = util::make_unique<OverlayStringPool>(loaded_idmap);
   }
 
+  const bool only_overlayable = (property_flags & PROPERTY_ONLY_OVERLAYABLES) != 0;
+
   const size_t package_count = dtohl(header->packageCount);
   size_t packages_seen = 0;
 
-  packages_.reserve(package_count);
+  if (!only_overlayable) {
+    packages_.reserve(package_count);
+  }
 
   ChunkIterator iter(chunk.data_ptr(), chunk.data_size());
   while (iter.HasNext()) {
     const Chunk child_chunk = iter.Next();
+    if (only_overlayable && child_chunk.type() != RES_TABLE_PACKAGE_TYPE) {
+      continue;
+    }
     switch (child_chunk.type()) {
       case RES_STRING_POOL_TYPE:
         // Only use the first string pool. Ignore others.
@@ -837,6 +852,10 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
           return false;
         }
         packages_.push_back(std::move(loaded_package));
+        if (only_overlayable) {
+          // Overlayable is always in the first package, no need to process anything else.
+          return true;
+        }
       } break;
 
       default:

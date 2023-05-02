@@ -96,6 +96,9 @@ enum : package_property_t {
   // The apk assets is owned by the application running in this process and incremental crash
   // protections for this APK must be disabled.
   PROPERTY_DISABLE_INCREMENTAL_HARDENING = 1U << 4U,
+
+  // The apk assets only contain the overlayable declarations information.
+  PROPERTY_ONLY_OVERLAYABLES = 1U << 5U,
 };
 
 struct OverlayableInfo {
