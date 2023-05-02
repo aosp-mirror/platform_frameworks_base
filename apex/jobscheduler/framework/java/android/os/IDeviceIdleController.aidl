@@ -47,5 +47,6 @@ interface IDeviceIdleController {
     long addPowerSaveTempWhitelistAppForMms(String name, int userId, int reasonCode, String reason);
     long addPowerSaveTempWhitelistAppForSms(String name, int userId, int reasonCode, String reason);
     long whitelistAppTemporarily(String name, int userId, int reasonCode, String reason);
+    @EnforcePermission("DEVICE_POWER")
     void exitIdle(String reason);
 }

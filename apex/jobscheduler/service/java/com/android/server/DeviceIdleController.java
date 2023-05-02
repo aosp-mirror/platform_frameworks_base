@@ -23,6 +23,7 @@ import static android.os.PowerExemptionManager.TEMPORARY_ALLOW_LIST_TYPE_NONE;
 import static android.os.Process.INVALID_UID;
 
 import android.Manifest;
+import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -2097,9 +2098,9 @@ public class DeviceIdleController extends SystemService
             return durationMs;
         }
 
+        @EnforcePermission(android.Manifest.permission.DEVICE_POWER)
         @Override public void exitIdle(String reason) {
-            getContext().enforceCallingOrSelfPermission(Manifest.permission.DEVICE_POWER,
-                    null);
+            exitIdle_enforcePermission();
             final long ident = Binder.clearCallingIdentity();
             try {
                 exitIdleInternal(reason);
