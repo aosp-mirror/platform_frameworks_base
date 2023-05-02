@@ -32,7 +32,7 @@ class ConditionExtensionsTest : SysuiTestCase() {
     fun flowInitiallyTrue() =
         testScope.runTest {
             val flow = flowOf(true)
-            val condition = flow.toCondition(this)
+            val condition = flow.toCondition(scope = this, Condition.START_EAGERLY)
 
             runCurrent()
             assertThat(condition.isConditionSet).isFalse()
@@ -47,7 +47,7 @@ class ConditionExtensionsTest : SysuiTestCase() {
     fun flowInitiallyFalse() =
         testScope.runTest {
             val flow = flowOf(false)
-            val condition = flow.toCondition(this)
+            val condition = flow.toCondition(scope = this, Condition.START_EAGERLY)
 
             runCurrent()
             assertThat(condition.isConditionSet).isFalse()
@@ -62,7 +62,7 @@ class ConditionExtensionsTest : SysuiTestCase() {
     fun emptyFlowWithNoInitialValue() =
         testScope.runTest {
             val flow = emptyFlow<Boolean>()
-            val condition = flow.toCondition(this)
+            val condition = flow.toCondition(scope = this, Condition.START_EAGERLY)
             condition.start()
 
             runCurrent()
@@ -74,7 +74,12 @@ class ConditionExtensionsTest : SysuiTestCase() {
     fun emptyFlowWithInitialValueOfTrue() =
         testScope.runTest {
             val flow = emptyFlow<Boolean>()
-            val condition = flow.toCondition(scope = this, initialValue = true)
+            val condition =
+                flow.toCondition(
+                    scope = this,
+                    strategy = Condition.START_EAGERLY,
+                    initialValue = true
+                )
             condition.start()
 
             runCurrent()
@@ -86,7 +91,12 @@ class ConditionExtensionsTest : SysuiTestCase() {
     fun emptyFlowWithInitialValueOfFalse() =
         testScope.runTest {
             val flow = emptyFlow<Boolean>()
-            val condition = flow.toCondition(scope = this, initialValue = false)
+            val condition =
+                flow.toCondition(
+                    scope = this,
+                    strategy = Condition.START_EAGERLY,
+                    initialValue = false
+                )
             condition.start()
 
             runCurrent()
@@ -98,7 +108,7 @@ class ConditionExtensionsTest : SysuiTestCase() {
     fun conditionUpdatesWhenFlowEmitsNewValue() =
         testScope.runTest {
             val flow = MutableStateFlow(false)
-            val condition = flow.toCondition(this)
+            val condition = flow.toCondition(scope = this, strategy = Condition.START_EAGERLY)
             condition.start()
 
             runCurrent()
@@ -120,7 +130,7 @@ class ConditionExtensionsTest : SysuiTestCase() {
     fun stoppingConditionUnsubscribesFromFlow() =
         testScope.runTest {
             val flow = MutableSharedFlow<Boolean>()
-            val condition = flow.toCondition(this)
+            val condition = flow.toCondition(scope = this, strategy = Condition.START_EAGERLY)
             runCurrent()
             assertThat(flow.subscriptionCount.value).isEqualTo(0)
 

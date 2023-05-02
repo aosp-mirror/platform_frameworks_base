@@ -187,6 +187,8 @@ class HandleMenu {
         final View moreActionsPillView = mMoreActionsPill.mWindowViewHost.getView();
         final Button closeBtn = moreActionsPillView.findViewById(R.id.close_button);
         closeBtn.setOnClickListener(mOnClickListener);
+        final Button selectBtn = moreActionsPillView.findViewById(R.id.select_button);
+        selectBtn.setOnClickListener(mOnClickListener);
     }
 
     /**

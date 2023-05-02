@@ -39,10 +39,10 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.LogLevel;
 import com.android.systemui.log.dagger.KeyguardClockLog;
 import com.android.systemui.plugins.ClockController;
-import com.android.systemui.plugins.log.LogBuffer;
-import com.android.systemui.plugins.log.LogLevel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.shared.regionsampling.RegionSampler;
@@ -166,6 +166,16 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
      */
     public void setOnlyClock(boolean onlyClock) {
         mOnlyClock = onlyClock;
+    }
+
+    /**
+     * Used for status view to pass the screen offset from parent view
+     */
+    public void setLockscreenClockY(int clockY) {
+        if (mView.screenOffsetYPadding != clockY) {
+            mView.screenOffsetYPadding = clockY;
+            mView.updateClockTargetRegions();
+        }
     }
 
     /**
@@ -394,13 +404,6 @@ public class KeyguardClockSwitchController extends ViewController<KeyguardClockS
             PropertyAnimator.setProperty(mStatusArea, AnimatableProperty.TRANSLATION_X,
                     x, props, animate);
         }
-
-    }
-
-    void updateKeyguardStatusViewOffset() {
-        // updateClockTargetRegions will call onTargetRegionChanged
-        // which will require the correct translationY property of keyguardStatusView after updating
-        mView.updateClockTargetRegions();
     }
 
     /**

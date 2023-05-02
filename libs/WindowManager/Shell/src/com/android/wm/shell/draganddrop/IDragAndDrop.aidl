@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 The Android Open Source Project
+ * Copyright (C) 2023 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.systemui.plugins.log
-
-import com.google.errorprone.annotations.CompileTimeConstant
+package com.android.wm.shell.draganddrop;
 
 /**
- * Handy for adding basic logging with CompileTimeConstant strings - so logging with no variables.
- * Most likely you want to delegate it to [ConstantStringsLoggerImpl].
+ * Interface that is exposed to remote callers to manipulate drag and drop.
  */
-interface ConstantStringsLogger {
-    fun v(@CompileTimeConstant msg: String)
-
-    fun d(@CompileTimeConstant msg: String)
-
-    fun w(@CompileTimeConstant msg: String)
-
-    fun e(@CompileTimeConstant msg: String)
+interface IDragAndDrop {
+    /**
+     * Returns whether the shell drop target is showing and will handle a drag/drop.
+     */
+    boolean isReadyToHandleDrag() = 1;
 }
+// Last id = 1
