@@ -254,7 +254,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Anslut till ett wifi-nätverk"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev, felsöka, felsökning"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Genväg till felrapport"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Visa en knapp för felrapportering i extramenyn"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Visa en knapp för felrapportering i startmenyn"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Håll aktiverad"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Skärmen vilar aldrig när laddning pågår"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Aktivera HCI snoop-logg för Bluetooth"</string>
@@ -380,7 +380,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"Profilens HWUI-rendering"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Aktivera GPU-felsökningslager"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Tillåt att felsökningsappar läser in GPU-felsökningslager"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivera verbose-loggning"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivera utförlig loggning för leverantörer"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Ta med ytterligare enhetsspecifika leverantörsloggar i felrapporter. Dessa kan innehålla privata uppgifter samt använda mer batteri och/eller mer lagringsutrymme."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala – fönsteranimering"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala – övergångsanimering"</string>
