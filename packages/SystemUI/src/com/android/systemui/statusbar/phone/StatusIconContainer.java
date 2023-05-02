@@ -22,8 +22,6 @@ import static com.android.systemui.statusbar.StatusBarIconView.STATE_ICON;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -74,16 +72,13 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     // Any ignored icon will never be added as a child
     private ArrayList<String> mIgnoredSlots = new ArrayList<>();
 
-    private Configuration mConfiguration;
-
     public StatusIconContainer(Context context) {
         this(context, null);
     }
 
     public StatusIconContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mConfiguration = new Configuration(context.getResources().getConfiguration());
-        reloadDimens();
+        initDimens();
         setWillNotDraw(!DEBUG_OVERFLOW);
     }
 
@@ -100,7 +95,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         return mShouldRestrictIcons;
     }
 
-    private void reloadDimens() {
+    private void initDimens() {
         // This is the same value that StatusBarIconView uses
         mIconDotFrameWidth = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_icon_size);
@@ -214,16 +209,6 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
     public void onViewRemoved(View child) {
         super.onViewRemoved(child);
         child.setTag(R.id.status_bar_view_state_tag, null);
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        final int configDiff = newConfig.diff(mConfiguration);
-        mConfiguration.setTo(newConfig);
-        if ((configDiff & (ActivityInfo.CONFIG_DENSITY | ActivityInfo.CONFIG_FONT_SCALE)) != 0) {
-            reloadDimens();
-        }
     }
 
     /**
@@ -363,17 +348,13 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         int totalVisible = mLayoutStates.size();
         int maxVisible = totalVisible <= MAX_ICONS ? MAX_ICONS : MAX_ICONS - 1;
 
-        // Init mUnderflowStart value with the offset to let the dot be placed next to battery icon.
-        // It to prevent if the underflow happens at rightest(totalVisible - 1) child then break the
-        // for loop with mUnderflowStart staying 0(initial value), causing the dot be placed at the
-        // leftest side.
-        mUnderflowStart = (int) Math.max(contentStart, width - getPaddingEnd() - mUnderflowWidth);
+        mUnderflowStart = 0;
         int visible = 0;
         int firstUnderflowIndex = -1;
         for (int i = totalVisible - 1; i >= 0; i--) {
             StatusIconState state = mLayoutStates.get(i);
             // Allow room for underflow if we found we need it in onMeasure
-            if ((mNeedsUnderflow && (state.getXTranslation() < (contentStart + mUnderflowWidth)))
+            if (mNeedsUnderflow && (state.getXTranslation() < (contentStart + mUnderflowWidth))
                     || (mShouldRestrictIcons && (visible >= maxVisible))) {
                 firstUnderflowIndex = i;
                 break;
