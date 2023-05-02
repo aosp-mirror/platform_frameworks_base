@@ -14247,7 +14247,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new SecurityException(
                         "Intent " + intent.getAction() + " may not be broadcast from an SDK sandbox"
                         + " uid. Given caller package " + callerPackage + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ")");
+                        + ", realCallingUid=" + realCallingUid + ", callingUid= " + callingUid
+                        + ")");
             }
         }
 
