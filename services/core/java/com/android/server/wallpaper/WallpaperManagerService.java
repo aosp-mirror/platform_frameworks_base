@@ -2445,12 +2445,36 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     /**
      * TODO(multi-display) Extends this method with specific display.
-     * Propagate ambient state to wallpaper engine.
+     * Propagate ambient state to wallpaper engine(s).
      *
      * @param inAmbientMode {@code true} when in ambient mode, {@code false} otherwise.
      * @param animationDuration Duration of the animation, or 0 when immediate.
      */
     public void setInAmbientMode(boolean inAmbientMode, long animationDuration) {
+        if (mIsLockscreenLiveWallpaperEnabled) {
+            List<IWallpaperEngine> engines = new ArrayList<>();
+            synchronized (mLock) {
+                mInAmbientMode = inAmbientMode;
+                for (WallpaperData data : getActiveWallpapers()) {
+                    if (data.connection.mInfo == null
+                            || data.connection.mInfo.supportsAmbientMode()) {
+                        // TODO(multi-display) Extends this method with specific display.
+                        IWallpaperEngine engine = data.connection
+                                .getDisplayConnectorOrCreate(DEFAULT_DISPLAY).mEngine;
+                        if (engine != null) engines.add(engine);
+                    }
+                }
+            }
+            for (IWallpaperEngine engine : engines) {
+                try {
+                    engine.setInAmbientMode(inAmbientMode, animationDuration);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to set ambient mode", e);
+                }
+            }
+            return;
+        }
+
         final IWallpaperEngine engine;
         synchronized (mLock) {
             mInAmbientMode = inAmbientMode;
@@ -2475,10 +2499,25 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
-     * Propagate a wake event to the wallpaper engine.
+     * Propagate a wake event to the wallpaper engine(s).
      */
     public void notifyWakingUp(int x, int y, @NonNull Bundle extras) {
         synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    data.connection.forEachDisplayConnector(displayConnector -> {
+                        if (displayConnector.mEngine != null) {
+                            try {
+                                displayConnector.mEngine.dispatchWallpaperCommand(
+                                        WallpaperManager.COMMAND_WAKING_UP, x, y, -1, extras);
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to dispatch COMMAND_WAKING_UP", e);
+                            }
+                        }
+                    });
+                }
+                return;
+            }
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
             if (data != null && data.connection != null) {
                 data.connection.forEachDisplayConnector(
@@ -2497,10 +2536,26 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
-     * Propagate a sleep event to the wallpaper engine.
+     * Propagate a sleep event to the wallpaper engine(s).
      */
     public void notifyGoingToSleep(int x, int y, @NonNull Bundle extras) {
         synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    data.connection.forEachDisplayConnector(displayConnector -> {
+                        if (displayConnector.mEngine != null) {
+                            try {
+                                displayConnector.mEngine.dispatchWallpaperCommand(
+                                        WallpaperManager.COMMAND_GOING_TO_SLEEP, x, y, -1,
+                                        extras);
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to dispatch COMMAND_GOING_TO_SLEEP", e);
+                            }
+                        }
+                    });
+                }
+                return;
+            }
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
             if (data != null && data.connection != null) {
                 data.connection.forEachDisplayConnector(
@@ -2520,11 +2575,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
-     * Propagates screen turned on event to wallpaper engine.
+     * Propagates screen turned on event to wallpaper engine(s).
      */
     @Override
     public void notifyScreenTurnedOn(int displayId) {
         synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    if (data.connection.containsDisplay(displayId)) {
+                        final IWallpaperEngine engine = data.connection
+                                .getDisplayConnectorOrCreate(displayId).mEngine;
+                        if (engine != null) {
+                            try {
+                                engine.onScreenTurnedOn();
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to notify that the screen turned on", e);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
             if (data != null
                     && data.connection != null
@@ -2545,11 +2616,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
 
     /**
-     * Propagate screen turning on event to wallpaper engine.
+     * Propagate screen turning on event to wallpaper engine(s).
      */
     @Override
     public void notifyScreenTurningOn(int displayId) {
         synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    if (data.connection.containsDisplay(displayId)) {
+                        final IWallpaperEngine engine = data.connection
+                                .getDisplayConnectorOrCreate(displayId).mEngine;
+                        if (engine != null) {
+                            try {
+                                engine.onScreenTurningOn();
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to notify that the screen is turning on", e);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
             if (data != null
                     && data.connection != null
@@ -2574,6 +2661,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mKeyguardListener = cb;
         }
         return true;
+    }
+
+    private WallpaperData[] getActiveWallpapers() {
+        WallpaperData systemWallpaper = mWallpaperMap.get(mCurrentUserId);
+        WallpaperData lockWallpaper = mLockWallpaperMap.get(mCurrentUserId);
+        boolean systemValid = systemWallpaper != null && systemWallpaper.connection != null;
+        boolean lockValid = lockWallpaper != null && lockWallpaper.connection != null;
+        return systemValid && lockValid ? new WallpaperData[]{systemWallpaper, lockWallpaper}
+                : systemValid ? new WallpaperData[]{systemWallpaper}
+                : lockValid ? new WallpaperData[]{lockWallpaper}
+                : new WallpaperData[0];
     }
 
     private IWallpaperEngine getEngine(int which, int userId, int displayId) {
