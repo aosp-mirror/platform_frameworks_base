@@ -18,9 +18,6 @@ package com.android.server.biometrics.sensors.face.aidl;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.app.SynchronousUserSwitchObserver;
-import android.app.UserSwitchObserver;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
@@ -93,14 +90,6 @@ public class Sensor {
 
     @NonNull private final Supplier<AidlSession> mLazySession;
     @Nullable private AidlSession mCurrentSession;
-
-    private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
-        @Override
-        public void onUserSwitching(int newUserId) {
-            mProvider.scheduleInternalCleanup(
-                    mSensorProperties.sensorId, newUserId, null /* callback */);
-        }
-    };
 
     @VisibleForTesting
     public static class HalSessionCallback extends ISessionCallback.Stub {
@@ -558,12 +547,6 @@ public class Sensor {
         mLockoutCache = new LockoutCache();
         mAuthenticatorIds = new HashMap<>();
         mLazySession = () -> mCurrentSession != null ? mCurrentSession : null;
-
-        try {
-            ActivityManager.getService().registerUserSwitchObserver(mUserSwitchObserver, mTag);
-        } catch (RemoteException e) {
-            Slog.e(mTag, "Unable to register user switch observer");
-        }
     }
 
     @NonNull Supplier<AidlSession> getLazySession() {

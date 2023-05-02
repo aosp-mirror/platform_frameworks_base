@@ -42,7 +42,7 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
-static std::array<std::string_view, 18> sEnableExtensions{
+static std::array<std::string_view, 19> sEnableExtensions{
         VK_KHR_BIND_MEMORY_2_EXTENSION_NAME,
         VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME,
         VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
@@ -56,6 +56,7 @@ static std::array<std::string_view, 18> sEnableExtensions{
         VK_KHR_SURFACE_EXTENSION_NAME,
         VK_KHR_SWAPCHAIN_EXTENSION_NAME,
         VK_EXT_BLEND_OPERATION_ADVANCED_EXTENSION_NAME,
+        VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME,
         VK_EXT_IMAGE_DRM_FORMAT_MODIFIER_EXTENSION_NAME,
         VK_ANDROID_EXTERNAL_MEMORY_ANDROID_HARDWARE_BUFFER_EXTENSION_NAME,
         VK_EXT_QUEUE_FAMILY_FOREIGN_EXTENSION_NAME,
