@@ -26,7 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Imesakinisha programu."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Ungependa kusakinisha programu hii?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Ungependa kusasisha programu hii?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Ungependa kusasisha hii programu kutoka kwa<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nProgramu hii kwa kawaida hupokea masasisho kutoka kwa <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Kwa kusasisha kutoka chanzo tofauti, huenda ukapokea masasisho ya siku zijazo kutoka chanzo chochote kwenye simu yako. Utendaji wa programu unaweza kubadilika."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Ungependa kusasisha programu hii kutoka kwenye <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>?\n\nProgramu hii kwa kawaida hupokea masasisho kutoka <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>. Kwa kusasisha kutoka chanzo tofauti, huenda ukapokea masasisho ya siku zijazo kutoka chanzo chochote kwenye simu yako. Utendaji wa programu unaweza kubadilika."</string>
     <string name="install_failed" msgid="5777824004474125469">"Imeshindwa kusakinisha programu."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Kifurushi kimezuiwa kisisakinishwe."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Programu haikusakinishwa kwa sababu kifurushi kinakinzana na kifurushi kingine kilichopo."</string>
