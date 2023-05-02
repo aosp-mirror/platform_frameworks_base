@@ -49,6 +49,12 @@ public class DesktopModeStatus {
             "persist.wm.debug.desktop_veiled_resizing", true);
 
     /**
+     * Flag to indicate is moving task to another display is enabled.
+     */
+    public static final boolean IS_DISPLAY_CHANGE_ENABLED = SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_change_display", false);
+
+    /**
      * Return {@code true} if desktop mode support is enabled
      */
     public static boolean isProto1Enabled() {
