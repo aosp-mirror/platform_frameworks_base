@@ -807,7 +807,7 @@ public final class ViewRootImpl implements ViewParent,
     final HighContrastTextManager mHighContrastTextManager;
 
     SendWindowContentChangedAccessibilityEvent mSendWindowContentChangedAccessibilityEvent;
-    boolean mSendingAccessibilityWIndowContentChange = false;
+    boolean mSendingAccessibilityWindowContentChange = false;
 
     HashSet<View> mTempHashSet;
 
@@ -9872,7 +9872,7 @@ public final class ViewRootImpl implements ViewParent,
             postSendWindowContentChangedCallback(source, changeType);
             return;
         }
-        if (mSendingAccessibilityWIndowContentChange) {
+        if (mSendingAccessibilityWindowContentChange) {
             // This allows re-entering this method.
             // Some apps update views during an event dispatch, which triggers another a11y event.
             // In order to avoid an infinite loop, postpone second event dispatch.
@@ -9884,11 +9884,11 @@ public final class ViewRootImpl implements ViewParent,
                 new AccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
         event.setContentChangeTypes(changeType);
         event.setAction(mAccessibilityManager.getPerformingAction());
-        mSendingAccessibilityWIndowContentChange = true;
+        mSendingAccessibilityWindowContentChange = true;
         try {
             source.sendAccessibilityEventUnchecked(event);
         } finally {
-            mSendingAccessibilityWIndowContentChange = false;
+            mSendingAccessibilityWindowContentChange = false;
         }
     }
 
