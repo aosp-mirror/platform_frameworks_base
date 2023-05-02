@@ -639,10 +639,10 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Det är för mörkt. Testa med bättre belysning."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytta telefonen längre bort."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"För mobilen närmare."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Höj mobilen."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Sänk mobilen."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Höj telefonen."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Sänk telefonen."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Flytta mobilen åt vänster."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Flytta mobilen åt höger."</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Flytta telefonen åt höger."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Titta rakt på enheten."</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Ha ansiktet direkt framför telefonen."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"För mycket rörelse. Håll mobilen stilla."</string>
@@ -2267,7 +2267,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Återaktivera enhetens mikrofon"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Återaktivera enhetens kamera"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"För &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; och alla appar och tjänster"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Avblockera"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Återaktivera"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorintegritet"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Appikon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Appens varumärkesbild"</string>

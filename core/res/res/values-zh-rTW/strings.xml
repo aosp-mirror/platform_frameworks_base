@@ -1681,7 +1681,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要將裝置的完整控制權授予「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，可以將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，建議可將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看及控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容及在其他應用程式上顯示內容。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看及執行動作"</string>
