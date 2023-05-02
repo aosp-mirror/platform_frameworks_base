@@ -202,6 +202,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     }
 
     void setTaskViewVisible(TaskViewTaskController taskView, boolean visible) {
+        if (mTaskViews.get(taskView) == null) return;
         if (mTaskViews.get(taskView).mVisible == visible) return;
         if (taskView.getTaskInfo() == null) {
             // Nothing to update, task is not yet available
@@ -220,17 +221,19 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
 
     void updateBoundsState(TaskViewTaskController taskView, Rect boundsOnScreen) {
         TaskViewRequestedState state = mTaskViews.get(taskView);
+        if (state == null) return;
         state.mBounds.set(boundsOnScreen);
     }
 
     void updateVisibilityState(TaskViewTaskController taskView, boolean visible) {
         TaskViewRequestedState state = mTaskViews.get(taskView);
+        if (state == null) return;
         state.mVisible = visible;
     }
 
     void setTaskBounds(TaskViewTaskController taskView, Rect boundsOnScreen) {
         TaskViewRequestedState state = mTaskViews.get(taskView);
-        if (Objects.equals(boundsOnScreen, state.mBounds)) {
+        if (state == null || Objects.equals(boundsOnScreen, state.mBounds)) {
             return;
         }
         state.mBounds.set(boundsOnScreen);
