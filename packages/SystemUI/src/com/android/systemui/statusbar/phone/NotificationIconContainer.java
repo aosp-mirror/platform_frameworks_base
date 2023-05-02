@@ -306,7 +306,7 @@ public class NotificationIconContainer extends ViewGroup {
     public void applyIconStates() {
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
-            IconState childState = mIconStates.get(child);
+            ViewState childState = mIconStates.get(child);
             if (childState != null) {
                 childState.applyToView(child);
             }
@@ -339,7 +339,6 @@ public class NotificationIconContainer extends ViewGroup {
             }
         }
         if (child instanceof StatusBarIconView) {
-            ((StatusBarIconView) child).updateIconDimens();
             ((StatusBarIconView) child).setDozing(mDozing, false, 0);
         }
     }
@@ -448,14 +447,9 @@ public class NotificationIconContainer extends ViewGroup {
     @VisibleForTesting
     boolean isOverflowing(boolean isLastChild, float translationX, float layoutEnd,
             float iconSize) {
-        if (isLastChild) {
-            return translationX + iconSize > layoutEnd;
-        } else {
-            // If the child is not the last child, we need to ensure that we have room for the next
-            // icon and the dot. The dot could be as large as an icon, so verify that we have room
-            // for 2 icons.
-            return translationX + iconSize * 2f > layoutEnd;
-        }
+        // Layout end, as used here, does not include padding end.
+        final float overflowX = isLastChild ? layoutEnd : layoutEnd - iconSize;
+        return translationX >= overflowX;
     }
 
     /**
@@ -495,7 +489,10 @@ public class NotificationIconContainer extends ViewGroup {
             // First icon to overflow.
             if (firstOverflowIndex == -1 && isOverflowing) {
                 firstOverflowIndex = i;
-                mVisualOverflowStart = translationX;
+                mVisualOverflowStart = layoutEnd - mIconSize;
+                if (forceOverflow || mIsStaticLayout) {
+                    mVisualOverflowStart = Math.min(translationX, mVisualOverflowStart);
+                }
             }
             final float drawingScale = mOnLockScreen && view instanceof StatusBarIconView
                     ? ((StatusBarIconView) view).getIconScaleIncreased()
