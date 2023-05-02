@@ -3062,7 +3062,7 @@ class SettingsProtoDumpUtil {
                 Settings.System.APPLY_RAMPING_RINGER,
                 SystemSettingsProto.APPLY_RAMPING_RINGER);
 
-        // Please insert new settings using the same order as in SecureSettingsProto.
+        // Please insert new settings using the same order as in SystemSettingsProto.
 
         // The rest of the settings were moved to Settings.Secure, and are thus excluded here since
         // they're deprecated from Settings.System.
@@ -3100,8 +3100,8 @@ class SettingsProtoDumpUtil {
         // The rest of the settings were moved to Settings.Secure, and are thus excluded here since
         // they're deprecated from Settings.System.
 
-        // Please insert new settings using the same order as in SecureSettingsProto.
+        // Please insert new settings using the same order as in SystemSettingsProto.
         p.end(token);
-        // Please insert new settings using the same order as in SecureSettingsProto.
+        // Please insert new settings using the same order as in SystemSettingsProto.
     }
 }
