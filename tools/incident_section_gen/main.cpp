@@ -383,13 +383,11 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const Destination
     if (allDefaults) return false;
 
     emptyline();
-    int policyCount = 0;
     printf("Privacy* %s[] = {\n", messageName.c_str());
     for (size_t i=0; i<fieldsInOrder.size(); i++) {
         const FieldDescriptor* field = fieldsInOrder[i];
         if (hasDefaultFlags[i]) continue; // NOLINT(clang-analyzer-core.uninitialized.Branch)
         printf("    &%s,\n", getFieldName(field).c_str());
-        policyCount++;
     }
     printf("    NULL };\n");
     emptyline();
