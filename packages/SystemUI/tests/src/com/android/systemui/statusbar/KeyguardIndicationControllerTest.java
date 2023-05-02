@@ -84,6 +84,7 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.app.IBatteryStats;
@@ -383,6 +384,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
                 .isEqualTo(mContext.getColor(R.color.misalignment_text_color));
     }
 
+    @FlakyTest(bugId = 279944472)
     @Test
     public void onAlignmentStateChanged_whileDozing_showsSlowChargingIndication() {
         mInstrumentation.runOnMainSync(() -> {
