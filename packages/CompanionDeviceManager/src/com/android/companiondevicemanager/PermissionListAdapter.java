@@ -123,12 +123,11 @@ class PermissionListAdapter extends RecyclerView.Adapter<PermissionListAdapter.V
             viewHolder.mExpandButton.setTag(R.drawable.btn_expand_more);
         }
 
-        setAccessibility(view, viewType,
-                AccessibilityNodeInfo.ACTION_CLICK, R.string.permission_expand, 0);
-
         // Add expand buttons if the permissions are more than PERMISSION_SIZE in this list also
         // make the summary invisible by default.
         if (mPermissions.size() > PERMISSION_SIZE) {
+            setAccessibility(view, viewType,
+                    AccessibilityNodeInfo.ACTION_CLICK, R.string.permission_expand, 0);
 
             viewHolder.mPermissionSummary.setVisibility(View.GONE);
 
