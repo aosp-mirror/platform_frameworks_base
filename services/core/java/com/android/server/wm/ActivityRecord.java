@@ -582,6 +582,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     boolean mPauseSchedulePendingForPip = false;
 
+    // Gets set to indicate that the activity is currently being auto-pipped.
+    boolean mAutoEnteringPip = false;
+
     private void updateEnterpriseThumbnailDrawable(Context context) {
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
         mEnterpriseThumbnailDrawable = dpm.getResources().getDrawable(
@@ -6094,8 +6097,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), token,
                         PauseActivityItem.obtain(finishing, false /* userLeaving */,
-                                configChangeFlags, false /* dontReport */,
-                                false /* autoEnteringPip */));
+                                configChangeFlags, false /* dontReport */, mAutoEnteringPip));
             } catch (Exception e) {
                 Slog.w(TAG, "Exception thrown sending pause: " + intent.getComponent(), e);
             }
