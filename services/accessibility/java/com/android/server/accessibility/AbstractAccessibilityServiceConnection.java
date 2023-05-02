@@ -478,6 +478,10 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         if (svcConnTracingEnabled()) {
             logTraceSvcConn("setServiceInfo", "info=" + info);
         }
+        if (!info.isWithinParcelableSize()) {
+            throw new IllegalStateException(
+                    "Cannot update service info: size is larger than safe parcelable limits.");
+        }
         final long identity = Binder.clearCallingIdentity();
         try {
             synchronized (mLock) {
