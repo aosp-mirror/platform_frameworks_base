@@ -224,7 +224,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Tự động xoay màn hình"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Vị trí"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Truy cập máy ảnh"</string>
-    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Truy cập micrô"</string>
+    <string name="quick_settings_mic_label" msgid="8392773746295266375">"Quyền truy cập micrô"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Được phép"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bị chặn"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Thiết bị phương tiện"</string>
@@ -289,8 +289,8 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Bỏ chặn micrô của thiết bị?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Bỏ chặn máy ảnh của thiết bị?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Bỏ chặn máy ảnh và micrô của thiết bị?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng micrô của bạn."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh của bạn."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng micrô của bạn."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Sau khi được bỏ chặn, mọi ứng dụng và dịch vụ có quyền sẽ có thể sử dụng máy ảnh của bạn."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Thao tác này sẽ bỏ chặn quyền truy cập cho mọi ứng dụng và dịch vụ được phép sử dụng máy ảnh hoặc micrô của bạn."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Micrô bị chặn"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Máy ảnh bị chặn"</string>
@@ -777,8 +777,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"bỏ yêu thích"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Di chuyển tới vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn các tuỳ chọn điều khiển để truy cập từ trình đơn Cài đặt nhanh"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các tùy chọn điều khiển"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Chọn những tuỳ chọn điều khiển bạn muốn thêm vào trình đơn Cài đặt nhanh"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các tuỳ chọn điều khiển"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Đã xóa tất cả tùy chọn điều khiển"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Chưa lưu các thay đổi"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Xem ứng dụng khác"</string>
@@ -832,7 +832,7 @@
     <string name="controls_open_app" msgid="483650971094300141">"Mở ứng dụng"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Không tải được trạng thái"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Lỗi, hãy thử lại"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Thêm các tùy chọn điều khiển"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Thêm tuỳ chọn điều khiển"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Chỉnh sửa chế độ điều khiển"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Thêm thiết bị đầu ra"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Nhóm"</string>

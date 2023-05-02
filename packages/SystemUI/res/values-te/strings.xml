@@ -75,7 +75,7 @@
     <string name="screenshot_saved_title" msgid="8893267638659083153">"స్క్రీన్‌షాట్ సేవ్ చేయబడింది"</string>
     <string name="screenshot_failed_title" msgid="3259148215671936891">"స్క్రీన్‌షాట్‌ని సేవ్ చేయడం సాధ్యం కాలేదు"</string>
     <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"స్క్రీన్‌షాట్ సేవ్ అవ్వకముందే పరికరం అన్‌లాక్ చేయబడాలి"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"స్క్రీన్‌షాట్ తీయడానికి మళ్లీ ప్రయత్నించండి"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"స్క్రీన్‌షాట్ తీయడానికి మళ్లీ ట్రై చేయండి"</string>
     <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"స్క్రీన్‌షాట్‌ను సేవ్ చేయడం సాధ్యపడలేదు"</string>
     <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"స్క్రీన్‌షాట్‌లు తీయడానికి యాప్ లేదా మీ సంస్థ అనుమతించలేదు"</string>
     <string name="screenshot_blocked_by_admin" msgid="5486757604822795797">"స్క్రీన్‌షాట్‌లు తీయడాన్ని మీ IT అడ్మిన్ బ్లాక్ చేశారు"</string>
@@ -128,8 +128,8 @@
     <string name="voice_assist_label" msgid="3725967093735929020">"వాయిస్ అసిస్టెంట్‌ను తెరువు"</string>
     <string name="camera_label" msgid="8253821920931143699">"కెమెరాను తెరవండి"</string>
     <string name="cancel" msgid="1089011503403416730">"రద్దు చేయండి"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"నిర్ధారించు"</string>
-    <string name="biometric_dialog_try_again" msgid="8575345628117768844">"మళ్లీ ప్రయత్నించు"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"నిర్ధారించండి"</string>
+    <string name="biometric_dialog_try_again" msgid="8575345628117768844">"మళ్లీ ట్రై చేయండి"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"ప్రామాణీకరణను రద్దు చేయడానికి నొక్కండి"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"దయచేసి మళ్ళీ ప్రయత్నించండి"</string>
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"మీ ముఖాన్ని క్యాప్చర్ చేస్తోంది"</string>
@@ -144,8 +144,8 @@
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"పిన్ తప్పు"</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"ఆకృతి తప్పు"</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"పాస్‌వర్డ్ తప్పు"</string>
-    <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు.\n<xliff:g id="NUMBER">%d</xliff:g> సెకన్ల తర్వాత మళ్లీ ప్రయత్నించండి."</string>
-    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"మళ్లీ ప్రయత్నించండి. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>లో <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> ప్రయత్నం చేశారు."</string>
+    <string name="biometric_dialog_credential_too_many_attempts" msgid="3083141271737748716">"చాలా ఎక్కువ తప్పు ప్రయత్నాలు చేశారు.\n<xliff:g id="NUMBER">%d</xliff:g> సెకన్ల తర్వాత మళ్లీ ట్రై చేయండి."</string>
+    <string name="biometric_dialog_credential_attempts_before_wipe" msgid="6751859711975516999">"మళ్లీ ట్రై చేయండి. <xliff:g id="MAX_ATTEMPTS">%2$d</xliff:g>లో <xliff:g id="ATTEMPTS_0">%1$d</xliff:g> ప్రయత్నం చేశారు."</string>
     <string name="biometric_dialog_last_attempt_before_wipe_dialog_title" msgid="2874250099278693477">"మీ డేటా తొలగించబడుతుంది"</string>
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_device" msgid="6562299244825817598">"మీరు ఒకవేళ తర్వాతి ప్రయత్నంలో తప్పు ఆకృతిని ఎంటర్ చేస్తే, ఈ పరికరం యొక్క డేటా తొలగించబడుతుంది."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_device" msgid="9151756675698215723">"మీరు ఒకవేళ తర్వాతి ప్రయత్నంలో తప్పు పిన్‌ను ఎంటర్ చేస్తే, ఈ పరికరం యొక్క డేటా తొలగించబడుతుంది."</string>
@@ -777,7 +777,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ఇష్టమైనదిగా పెట్టిన గుర్తును తీసివేయండి"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> పొజిషన్‌కు తరలించండి"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"నియంత్రణలు"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"త్వరిత సెట్టింగ్‌ల నుండి యాక్సెస్ చేయడానికి కంట్రోల్స్‌ను ఎంచుకోండి"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"క్విక్ సెట్టింగ్‌ల నుండి యాక్సెస్ చేయడానికి కంట్రోల్స్‌ను ఎంచుకోండి"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"కంట్రోల్స్ క్రమం మార్చడానికి దేన్నయినా పట్టుకుని, లాగి వదలండి"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"అన్ని కంట్రోల్స్ తీసివేయబడ్డాయి"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"మార్పులు సేవ్ చేయబడలేదు"</string>
@@ -831,7 +831,7 @@
     <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ను యాక్సెస్ చేయడం సాధ్యపడలేదు. <xliff:g id="APPLICATION">%2$s</xliff:g> యాప్‌ను చెక్ చేసి, కంట్రోల్ ఇప్పటికీ అందుబాటులో ఉందని, యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించుకోండి."</string>
     <string name="controls_open_app" msgid="483650971094300141">"యాప్‌‌ను తెరవండి"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"స్టేటస్ లోడ్ చేయడం సాధ్యపడలేదు"</string>
-    <string name="controls_error_failed" msgid="960228639198558525">"ఎర్రర్, మళ్లీ ప్రయత్నించండి"</string>
+    <string name="controls_error_failed" msgid="960228639198558525">"ఎర్రర్, మళ్లీ ట్రై చేయండి"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"కంట్రోల్స్‌ను జోడించండి"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"కంట్రోల్స్‌ను ఎడిట్ చేయండి"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"అవుట్‌పుట్‌లను జోడించండి"</string>
@@ -861,7 +861,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"బిల్డ్ నంబర్, క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది."</string>
     <string name="basic_status" msgid="2315371112182658176">"సంభాషణను తెరవండి"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"సంభాషణ విడ్జెట్‌లు"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"దీనిని మీ మొదటి స్క్రీన్‌కు జోడించడానికి సంభాషణను ట్యాప్ చేయండి"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"ఏదైనా సంభాషణను మీ మొదటి స్క్రీన్‌కు జోడించడానికి దానిని ట్యాప్ చేయండి"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"మీ ఇటీవలి సంభాషణలు ఇక్కడ కనిపిస్తాయి"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"ప్రాధాన్య సంభాషణలు"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"ఇటీవలి సంభాషణలు"</string>
@@ -869,7 +869,7 @@
     <string name="one_week_timestamp" msgid="4925600765473875590">"1 వారం క్రితం"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"2 వారాల క్రితం"</string>
     <string name="over_one_week_timestamp" msgid="3770560704420807142">"1 వారం క్రితం పైగా"</string>
-    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"2 వారాల క్రితం పైగా"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"2 వారాల కంటే ముందు"</string>
     <string name="birthday_status" msgid="2596961629465396761">"పుట్టినరోజు"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"ఈ రోజు <xliff:g id="NAME">%1$s</xliff:g> పుట్టిన రోజు"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"పుట్టినరోజు వస్తోంది"</string>

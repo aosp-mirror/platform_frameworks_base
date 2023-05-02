@@ -312,7 +312,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"To blokira SVE zvukove i vibracije, uključujući alarme, glazbu, videozapise i igre."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite opet za otvaranje"</string>
     <string name="tap_again" msgid="1315420114387908655">"Dodirnite ponovo"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Prijeđite prstom prema gore da biste otvorili"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Prijeđite prstom prema gore za otvaranje"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pritisnite ikonu otključavanja da biste otvorili"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Otključano pomoću lica. Pritisnite ikonu otključavanja da biste otvorili."</string>
   <string-array name="udfps_accessibility_touch_hints">
@@ -930,7 +930,7 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi dodati sljedeću pločicu u Brze postavke"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj pločicu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nemoj dodati pločicu"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Odabir korisnika"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Odaberite korisnika"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
       <item quantity="one"><xliff:g id="COUNT_1">%s</xliff:g> aplikacija je aktivna</item>
       <item quantity="few"><xliff:g id="COUNT_1">%s</xliff:g> aplikacije su aktivne</item>
