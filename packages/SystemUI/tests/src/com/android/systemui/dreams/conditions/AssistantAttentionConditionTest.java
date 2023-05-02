@@ -42,6 +42,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import kotlinx.coroutines.CoroutineScope;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class AssistantAttentionConditionTest extends SysuiTestCase {
@@ -51,6 +53,8 @@ public class AssistantAttentionConditionTest extends SysuiTestCase {
     AssistUtils mAssistUtils;
     @Mock
     DreamOverlayStateController mDreamOverlayStateController;
+    @Mock
+    CoroutineScope mScope;
 
     private AssistantAttentionCondition mAssistantAttentionCondition;
 
@@ -59,7 +63,7 @@ public class AssistantAttentionConditionTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
 
         mAssistantAttentionCondition =
-                new AssistantAttentionCondition(mDreamOverlayStateController, mAssistUtils);
+                new AssistantAttentionCondition(mScope, mDreamOverlayStateController, mAssistUtils);
         // Adding a callback also starts the condition.
         mAssistantAttentionCondition.addCallback(mCallback);
     }

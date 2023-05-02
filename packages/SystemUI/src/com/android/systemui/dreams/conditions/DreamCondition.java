@@ -19,18 +19,19 @@ import android.app.DreamManager;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.dagger.qualifiers.Application;
 import com.android.systemui.shared.condition.Condition;
 
 import javax.inject.Inject;
+
+import kotlinx.coroutines.CoroutineScope;
 
 /**
  * {@link DreamCondition} provides a signal when a dream begins and ends.
  */
 public class DreamCondition extends Condition {
     private final DreamManager mDreamManager;
-
     private final KeyguardUpdateMonitor mUpdateMonitor;
-
 
     private final KeyguardUpdateMonitorCallback mUpdateCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -41,7 +42,11 @@ public class DreamCondition extends Condition {
             };
 
     @Inject
-    public DreamCondition(DreamManager dreamManager, KeyguardUpdateMonitor monitor) {
+    public DreamCondition(
+            @Application CoroutineScope scope,
+            DreamManager dreamManager,
+            KeyguardUpdateMonitor monitor) {
+        super(scope);
         mDreamManager = dreamManager;
         mUpdateMonitor = monitor;
     }
@@ -55,5 +60,10 @@ public class DreamCondition extends Condition {
     @Override
     protected void stop() {
         mUpdateMonitor.removeCallback(mUpdateCallback);
+    }
+
+    @Override
+    protected int getStartStrategy() {
+        return START_EAGERLY;
     }
 }
