@@ -32,7 +32,7 @@ import java.util.List;
  *
  * <p>This leaves the list unchanged if the device has compose PWLE capability.
  */
-final class RampToStepAdapter implements VibrationEffectAdapters.SegmentsAdapter<VibratorInfo> {
+final class RampToStepAdapter implements VibrationSegmentsAdapter {
 
     private final int mStepDuration;
 
@@ -41,8 +41,8 @@ final class RampToStepAdapter implements VibrationEffectAdapters.SegmentsAdapter
     }
 
     @Override
-    public int apply(List<VibrationEffectSegment> segments, int repeatIndex,
-            VibratorInfo info) {
+    public int adaptToVibrator(VibratorInfo info, List<VibrationEffectSegment> segments,
+            int repeatIndex) {
         if (info.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
             // The vibrator have PWLE capability, so keep the segments unchanged.
             return repeatIndex;
@@ -94,6 +94,9 @@ final class RampToStepAdapter implements VibrationEffectAdapters.SegmentsAdapter
     }
 
     private static float fillEmptyFrequency(VibratorInfo info, float frequencyHz) {
+        if (Float.isNaN(info.getResonantFrequencyHz())) {
+            return 0;
+        }
         return frequencyHz == 0 ? info.getResonantFrequencyHz() : frequencyHz;
     }
 }

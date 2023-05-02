@@ -51,6 +51,9 @@ public class RampToStepAdapterTest {
             new VibratorInfo.FrequencyProfile(
                     /* resonantFrequencyHz= */ 150f, /* minFrequencyHz= */ 50f,
                     /* frequencyResolutionHz= */ 25f, TEST_AMPLITUDE_MAP);
+    private static final VibratorInfo EMPTY_VIBRATOR_INFO = createVibratorInfo();
+    private static final VibratorInfo PWLE_VIBRATOR_INFO = createVibratorInfo(
+            IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
 
     private RampToStepAdapter mAdapter;
 
@@ -68,8 +71,8 @@ public class RampToStepAdapterTest {
                 new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 10)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        assertEquals(-1, mAdapter.apply(segments, -1, createVibratorInfo()));
-        assertEquals(1, mAdapter.apply(segments, 1, createVibratorInfo()));
+        assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
+        assertEquals(1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 1));
 
         assertEquals(originalSegments, segments);
     }
@@ -82,9 +85,8 @@ public class RampToStepAdapterTest {
                         /* startFrequencyHz= */ 100, /* endFrequencyHz= */ 1, /* duration= */ 20)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        assertEquals(-1, mAdapter.apply(segments, -1, vibratorInfo));
-        assertEquals(0, mAdapter.apply(segments, 0, vibratorInfo));
+        assertEquals(-1, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, -1));
+        assertEquals(0, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, 0));
 
         assertEquals(originalSegments, segments);
     }
@@ -116,7 +118,7 @@ public class RampToStepAdapterTest {
                         /* duration= */ 200));
 
         // Repeat index fixed after intermediate steps added
-        assertEquals(4, mAdapter.apply(segments, 3, createVibratorInfo()));
+        assertEquals(4, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 3));
 
         assertEquals(expectedSegments, segments);
     }

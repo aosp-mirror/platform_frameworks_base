@@ -19,7 +19,6 @@ package com.android.server.vibrator;
 import android.os.Trace;
 import android.os.VibrationEffect;
 import android.os.vibrator.RampSegment;
-import android.os.vibrator.StepSegment;
 import android.os.vibrator.VibrationEffectSegment;
 import android.util.Slog;
 
@@ -30,7 +29,7 @@ import java.util.List;
  * Represents a step to turn the vibrator on using a composition of PWLE segments.
  *
  * <p>This step will use the maximum supported number of consecutive segments of type
- * {@link StepSegment} or {@link RampSegment} starting at the current index.
+ * {@link RampSegment}, starting at the current index.
  */
 final class ComposePwleVibratorStep extends AbstractVibratorStep {
     /**

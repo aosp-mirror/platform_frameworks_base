@@ -151,7 +151,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private final VibrationSettings mVibrationSettings;
     private final VibrationScaler mVibrationScaler;
     private final InputDeviceDelegate mInputDeviceDelegate;
-    private final DeviceVibrationEffectAdapter mDeviceVibrationEffectAdapter;
+    private final DeviceAdapter mDeviceAdapter;
 
     private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
@@ -196,7 +196,6 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         mVibrationSettings = new VibrationSettings(mContext, mHandler);
         mVibrationScaler = new VibrationScaler(mContext, mVibrationSettings);
         mInputDeviceDelegate = new InputDeviceDelegate(mContext, mHandler);
-        mDeviceVibrationEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
 
         VibrationCompleteListener listener = new VibrationCompleteListener(this);
         mNativeWrapper = injector.getNativeWrapper();
@@ -233,6 +232,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 mVibrators.put(vibratorId, injector.createVibratorController(vibratorId, listener));
             }
         }
+
+        // Load vibrator adapter, that depends on hardware info.
+        mDeviceAdapter = new DeviceAdapter(mVibrationSettings, mVibrators);
 
         // Reset the hardware to a default state, in case this is a runtime restart instead of a
         // fresh boot.
@@ -671,16 +673,16 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
     private Vibration.EndInfo startVibrationLocked(HalVibration vib) {
         Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "startVibrationLocked");
         try {
-            vib.updateEffects(
-                    effect -> mVibrationScaler.scale(effect, vib.callerInfo.attrs.getUsage()));
+            // Scale effect before dispatching it to the input devices or the vibration thread.
+            vib.scaleEffects(mVibrationScaler::scale);
             boolean inputDevicesAvailable = mInputDeviceDelegate.vibrateIfAvailable(
-                    vib.callerInfo, vib.getEffect());
+                    vib.callerInfo, vib.getEffectToPlay());
             if (inputDevicesAvailable) {
                 return new Vibration.EndInfo(Vibration.Status.FORWARDED_TO_INPUT_DEVICES);
             }
 
             VibrationStepConductor conductor = new VibrationStepConductor(vib, mVibrationSettings,
-                    mDeviceVibrationEffectAdapter, mVibrators, mVibrationThreadCallbacks);
+                    mDeviceAdapter, mVibrationThreadCallbacks);
             if (mCurrentVibration == null) {
                 return startVibrationOnThreadLocked(conductor);
             }
@@ -1506,7 +1508,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
         }
 
         public Vibration.DebugInfo getDebugInfo() {
-            return new Vibration.DebugInfo(mStatus, stats, /* effect= */ null,
+            return new Vibration.DebugInfo(mStatus, stats, /* playedEffect= */ null,
                     /* originalEffect= */ null, scale, callerInfo);
         }
 

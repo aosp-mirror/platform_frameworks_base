@@ -50,6 +50,9 @@ public class StepToRampAdapterTest {
             new VibratorInfo.FrequencyProfile(
                     /* resonantFrequencyHz= */ 150f, /* minFrequencyHz= */ 50f,
                     /* frequencyResolutionHz= */ 25f, TEST_AMPLITUDE_MAP);
+    private static final VibratorInfo EMPTY_VIBRATOR_INFO = createVibratorInfo();
+    private static final VibratorInfo PWLE_VIBRATOR_INFO = createVibratorInfo(
+            IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
 
     private StepToRampAdapter mAdapter;
 
@@ -68,8 +71,8 @@ public class StepToRampAdapterTest {
                 new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 10)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        assertEquals(-1, mAdapter.apply(segments, -1, createVibratorInfo()));
-        assertEquals(1, mAdapter.apply(segments, 1, createVibratorInfo()));
+        assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
+        assertEquals(1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 1));
 
         assertEquals(originalSegments, segments);
     }
@@ -103,7 +106,7 @@ public class StepToRampAdapterTest {
                 .build();
 
         // Update repeat index to skip the ramp splits.
-        assertEquals(4, mAdapter.apply(segments, 2, vibratorInfo));
+        assertEquals(4, mAdapter.adaptToVibrator(vibratorInfo, segments, 2));
         assertEquals(expectedSegments, segments);
     }
 
@@ -115,8 +118,8 @@ public class StepToRampAdapterTest {
                         /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 50, /* duration= */ 20)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        assertEquals(-1, mAdapter.apply(segments, -1, createVibratorInfo()));
-        assertEquals(0, mAdapter.apply(segments, 0, createVibratorInfo()));
+        assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
+        assertEquals(0, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 0));
 
         assertEquals(originalSegments, segments);
     }
@@ -133,9 +136,8 @@ public class StepToRampAdapterTest {
                         /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 1, /* duration= */ 20)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        assertEquals(-1, mAdapter.apply(segments, -1, vibratorInfo));
-        assertEquals(3, mAdapter.apply(segments, 3, vibratorInfo));
+        assertEquals(-1, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, -1));
+        assertEquals(3, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, 3));
 
         assertEquals(originalSegments, segments);
     }
@@ -163,9 +165,8 @@ public class StepToRampAdapterTest {
                 new RampSegment(/* startAmplitude= */ 0.8f, /* endAmplitude= */ 0.8f,
                         /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 10, /* duration= */ 60));
 
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        assertEquals(-1, mAdapter.apply(segments, -1, vibratorInfo));
-        assertEquals(2, mAdapter.apply(segments, 2, vibratorInfo));
+        assertEquals(-1, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, -1));
+        assertEquals(2, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, 2));
 
         assertEquals(expectedSegments, segments);
     }
@@ -181,9 +182,8 @@ public class StepToRampAdapterTest {
                 new RampSegment(/* startAmplitude= */ 0.5f, /* endAmplitude= */ 0.5f,
                         /* startFrequencyHz= */ 150, /* endFrequencyHz= */ 150, /* duration= */ 6));
 
-        VibratorInfo vibratorInfo = createVibratorInfo(IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
-        assertEquals(-1, mAdapter.apply(segments, -1, vibratorInfo));
-        assertEquals(0, mAdapter.apply(segments, 0, vibratorInfo));
+        assertEquals(-1, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, -1));
+        assertEquals(0, mAdapter.adaptToVibrator(PWLE_VIBRATOR_INFO, segments, 0));
 
         assertEquals(expectedSegments, segments);
     }

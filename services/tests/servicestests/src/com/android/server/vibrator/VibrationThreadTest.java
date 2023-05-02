@@ -110,7 +110,6 @@ public class VibrationThreadTest {
 
     private final Map<Integer, FakeVibratorControllerProvider> mVibratorProviders = new HashMap<>();
     private VibrationSettings mVibrationSettings;
-    private DeviceVibrationEffectAdapter mEffectAdapter;
     private TestLooper mTestLooper;
     private TestLooperAutoDispatcher mCustomTestLooperDispatcher;
     private VibrationThread mThread;
@@ -137,7 +136,6 @@ public class VibrationThreadTest {
 
         mockVibrators(VIBRATOR_ID);
 
-        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         PowerManager.WakeLock wakeLock = context.getSystemService(
                 PowerManager.class).newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*vibrator*");
         mThread = new VibrationThread(wakeLock, mManagerHooks);
@@ -1318,7 +1316,6 @@ public class VibrationThreadTest {
     @Test
     public void vibrate_waveformWithRampDown_addsRampDownAfterVibrationCompleted() {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
-        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
         VibrationEffect effect = VibrationEffect.createWaveform(
@@ -1344,7 +1341,6 @@ public class VibrationThreadTest {
     @Test
     public void vibrate_waveformWithRampDown_triggersCallbackWhenOriginalVibrationEnds() {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(10_000);
-        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
         VibrationEffect effect = VibrationEffect.createOneShot(10, 200);
@@ -1379,7 +1375,6 @@ public class VibrationThreadTest {
     public void vibrate_waveformCancelledWithRampDown_addsRampDownAfterVibrationCancelled()
             throws Exception {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
-        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
         VibrationEffect effect = VibrationEffect.createOneShot(10_000, 240);
@@ -1407,7 +1402,6 @@ public class VibrationThreadTest {
     @Test
     public void vibrate_predefinedWithRampDown_doesNotAddRampDown() {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
-        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         mVibratorProviders.get(VIBRATOR_ID).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
 
@@ -1427,7 +1421,6 @@ public class VibrationThreadTest {
     @Test
     public void vibrate_composedWithRampDown_doesNotAddRampDown() {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
-        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL,
                 IVibrator.CAP_COMPOSE_EFFECTS);
         mVibratorProviders.get(VIBRATOR_ID).setSupportedPrimitives(
@@ -1452,7 +1445,6 @@ public class VibrationThreadTest {
     @Test
     public void vibrate_pwleWithRampDown_doesNotAddRampDown() {
         when(mVibrationConfigMock.getRampDownDurationMs()).thenReturn(15);
-        mEffectAdapter = new DeviceVibrationEffectAdapter(mVibrationSettings);
         FakeVibratorControllerProvider fakeVibrator = mVibratorProviders.get(VIBRATOR_ID);
         fakeVibrator.setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL,
                 IVibrator.CAP_COMPOSE_PWLE_EFFECTS);
@@ -1592,8 +1584,9 @@ public class VibrationThreadTest {
 
     private VibrationStepConductor startThreadAndDispatcher(HalVibration vib) {
         mControllers = createVibratorControllers();
-        VibrationStepConductor conductor = new VibrationStepConductor(vib, mVibrationSettings,
-                mEffectAdapter, mControllers, mManagerHooks);
+        DeviceAdapter deviceAdapter = new DeviceAdapter(mVibrationSettings, mControllers);
+        VibrationStepConductor conductor =
+                new VibrationStepConductor(vib, mVibrationSettings, deviceAdapter, mManagerHooks);
         doAnswer(answer -> {
             conductor.notifyVibratorComplete(answer.getArgument(0));
             return null;
