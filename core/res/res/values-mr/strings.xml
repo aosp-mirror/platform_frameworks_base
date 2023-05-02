@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android सिस्‍टीम"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"वैयक्तिक प्रोफाइलवर स्विच करा"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"कार्य प्रोफाइलवर स्विच करा"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> च्या वैयक्तिक प्रोफाइलवर स्विच करा"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> च्या कार्य प्रोफाइलवर स्विच करा"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"संपर्क"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"आपल्या संपर्कांवर प्रवेश"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"स्थान"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"अ‍ॅप ला व्हायब्रेटर नियंत्रित करण्यासाठी अनुमती देते."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"अ‍ॅपला व्हायब्रेटर स्थितीचा अ‍ॅक्सेस करण्याची अनुमती देते."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फोन नंबरवर प्रत्यक्ष कॉल करा"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"अ‍ॅपला तुमच्या हस्तक्षेपाशिवाय फोन नंबरवर कॉल करण्याची अनुमती देते. यामुळे अनपेक्षित शुल्के आकारली जाऊ शकतात किंवा अनपेक्षित कॉल येऊ शकतात. लक्षात ठेवा, की हे अ‍ॅपला आणीबाणी नंबरवर कॉल करण्याची अनुमती देत नाही. दुर्भावनापूर्ण अ‍ॅप्सनी तुमच्या कंफर्मेशनशिवाय कॉल केल्याने किंवा वाहक कोड डायल केल्याने त्यासाठी तुमच्याकडून शुल्क आकारले जाऊ शकते, ज्यामुळे इनकमिंग कॉल आपोआप दुसर्‍या नंबरवर फॉरवर्ड केले जातात."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS कॉल सेवा अ‍ॅक्सेस करा"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"आपल्‍या हस्तक्षेपाशिवाय अ‍ॅपला कॉल करण्‍यासाठी IMS सेवा वापरण्याची अनुमती देते."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"फोन स्थिती आणि ओळख वाचा"</string>
@@ -644,7 +645,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म प्रेस करा"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"फिंगरप्रिंट हार्डवेअर उपलब्‍ध नाही."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"फिंगरप्रिंट सेट करता आली नाही"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिट सेट करण्याची वेळ संपली आहे. पुन्हा प्रयत्न करा."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"फिंगरप्रिंट सेट करण्याची वेळ संपली आहे. पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"फिंगरप्रिंट ऑपरेशन रद्द झाले."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"वापरकर्त्याने फिंगरप्रिंट ऑपरेशन रद्द केले."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"खूप जास्त प्रयत्न. त्याऐवजी स्क्रीन लॉक वापरा."</string>
@@ -1058,10 +1059,10 @@
     <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST कृती फक्त /सिस्टीम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी सपोर्ट आहे."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करा"</string>
-    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पृष्ठ हे म्हणते:"</string>
+    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पेज हे म्हणते:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"नेव्हिगेशनची पुष्टी करा"</string>
-    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पृष्ठ सोडा"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पेज सोडा"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"या पेजवर रहा"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nआपल्‍याला खात्री आहे की तुम्ही या पृष्‍ठावरून नेव्‍हिगेट करू इच्‍छिता?"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> सह ऑटोफील करा"</string>
@@ -1228,7 +1229,7 @@
     <string name="force_close" msgid="9035203496368973803">"ठीक"</string>
     <string name="report" msgid="2149194372340349521">"अहवाल द्या"</string>
     <string name="wait" msgid="7765985809494033348">"प्रतीक्षा करा"</string>
-    <string name="webpage_unresponsive" msgid="7850879412195273433">"पृष्ठ प्रतिसाद न देणारे झाले आहे.\n\nतुम्ही हे बंद करू इच्छिता?"</string>
+    <string name="webpage_unresponsive" msgid="7850879412195273433">"पेज प्रतिसाद न देणारे झाले आहे.\n\nतुम्ही हे बंद करू इच्छिता?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"अ‍ॅप पुनर्निर्देशित केला"</string>
     <string name="launch_warning_replace" msgid="3073392976283203402">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता चालत आहे."</string>
     <string name="launch_warning_original" msgid="3332206576800169626">"<xliff:g id="APP_NAME">%1$s</xliff:g> मूळतः लाँच केले."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"हा आशय कार्य ॲप्स वापरून उघडला जाऊ शकत नाही"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"हा आशय वैयक्तिक ॲप्ससह शेअर केला जाऊ शकत नाही"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"हा आशय वैयक्तिक ॲप्स वापरून उघडला जाऊ शकत नाही"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"कामाशी संबंधित अ‍ॅप्स थांबवली आहेत"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"पुन्हा सुरू करा"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"कोणतीही कार्य ॲप्स सपोर्ट करत नाहीत"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"कोणतीही वैयक्तिक ॲप्स सपोर्ट करत नाहीत"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"वैयक्तिक <xliff:g id="APP">%s</xliff:g> उघडा"</string>

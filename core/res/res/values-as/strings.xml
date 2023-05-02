@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android ছিষ্টেম"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ব্যক্তিগত প্ৰ\'ফাইললৈ সলনি কৰক"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"কৰ্মস্থানৰ প্ৰ’ফাইললৈ সলনি কৰক"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ব্যক্তিগত <xliff:g id="APP_NAME">%1$s</xliff:g>লৈ সলনি কৰক"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"কৰ্মস্থানৰ <xliff:g id="APP_NAME">%1$s</xliff:g>লৈ সলনি কৰক"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"সম্পর্কসূচী"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"আপোনাৰ সম্পৰ্কসূচী চাব পাৰে"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"অৱস্থান"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ভাইব্ৰেটৰ নিয়ন্ত্ৰণ কৰিবলৈ এপ্‌টোক অনুমতি দিয়ে।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"এপ্‌টোক কম্পন স্থিতিটো এক্সেছ কৰিবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"পোনপটীয়াকৈ ফ\'ন নম্বৰলৈ কল কৰক"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"এপ্‌টোক আপোনাৰ হস্তক্ষেপ অবিহনে ফ’ন নম্বৰসমূহলৈ কল কৰিবলৈ অনুমতি দিয়ে। ইয়াৰ ফলত অপ্ৰত্যাশিত মাচুল লোৱা অথবা কল কৰা হ’ব পাৰে। মনত ৰাখিব যে ই এপ্‌টোক জৰুৰীকালীন নম্বৰসমূহত কল কৰিবলৈ অনুমতি নিদিয়ে। ক্ষতিকাৰক এপ্‌সমূহে আপোনাৰ অনুমতি নোলোৱাকৈয়ে কল কৰি আপোনাৰ টকা খৰছ কৰাব পাৰে অথবা এনেকুৱা বাহকৰ ক’ড ডায়েল কৰিব পাৰে যাৰ ফলত অন্তৰ্গামী কলসমূহ স্বয়ংক্ৰিয়ভাৱে অন্য নম্বৰলৈ ফৰৱাৰ্ড হয়।"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"আইএমএছ কল সেৱা ব্যৱহাৰ কৰিব পাৰে"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"আপোনাৰ হস্তক্ষেপৰ অবিহনে আইএমএছ সেৱা ব্যৱহাৰ কৰি কল কৰিবলৈ এপক অনুমতি দিয়ে।"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ফ\'নৰ স্থিতি আৰু পৰিচয় পঢ়ক"</string>
@@ -1715,7 +1716,7 @@
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"ৰং বিপৰীতকৰণ"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"ৰং শুধৰণী"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এখন হাতেৰে ব্যৱহাৰ কৰাৰ ম’ড"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"এক্সট্ৰা ডিম"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিৰিক্তভাৱে পোহৰ কমোৱাৰ সুবিধা"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"শুনাৰ ডিভাইচ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কীসমূহ ধৰি ৰাখক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধৰি ৰাখিছিল। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অফ কৰা হ\'ল।"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"এই সমল কৰ্মস্থানৰ এপৰ জৰিয়তে খুলিব নোৱাৰি"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"এই সমল ব্যক্তিগত এপৰ সৈতে শ্বেয়াৰ কৰিব নোৱাৰি"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"এই সমল ব্যক্তিগত এপৰ জৰিয়তে খুলিব নোৱাৰি"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"কৰ্মস্থানৰ এপ্‌সমূহ পজ কৰা আছে"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"আনপজ কৰক"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"কোনো কৰ্মস্থানৰ এপ্‌ নাই"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"কোনো ব্যক্তিগত এপ্‌ নাই"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ব্যক্তিগত <xliff:g id="APP">%s</xliff:g> খোলক"</string>

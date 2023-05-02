@@ -253,9 +253,9 @@
     <string name="bugreport_title" msgid="8549990811777373050">"バグレポート"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"現在のデバイスの状態に関する情報が収集され、その内容がメールで送信されます。バグレポートが開始してから送信可能な状態となるまでには多少の時間がかかりますのでご了承ください。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"対話型レポート"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"ほとんどの場合はこのオプションを使用します。レポートの進行状況を追跡し、問題についての詳細情報の確認やスクリーンショットの作成が可能です。レポート作成に時間がかかる、あまり使用されない項目は省略されることがあります。"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"ほとんどの場合はこのオプションを使用します。レポートの進行状況を追跡し、問題についての詳細情報の入力やスクリーンショットの作成が可能です。レポート作成に時間がかかる、あまり使用されない項目は省略されることがあります。"</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"完全レポート"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"デバイスの反応がないとき、または動作が遅すぎるときにシステムへの影響を最小限に抑えたい場合は、このオプションを使用します。また、すべてのレポート項目を表示したい場合もこのオプションを使用します。詳細情報は表示されず、追加のスクリーンショットは作成されません。"</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"デバイスの反応がないときや、動作が遅すぎるときにシステムへの影響を最小限に抑えたい場合、またすべてのレポート項目を表示したい場合にこのオプションを使用します。詳細情報の入力はできず、追加のスクリーンショットを撮ることもできません。"</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{# 秒後にバグレポート用のスクリーンショットを撮影します。}other{# 秒後にバグレポート用のスクリーンショットを撮影します。}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"バグレポートのスクリーンショットを取得しました"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"バグレポートのスクリーンショットを取得できませんでした"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android システム"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"個人用プロファイルに切り替える"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"仕事用プロファイルに切り替える"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"個人用の <xliff:g id="APP_NAME">%1$s</xliff:g> に切り替える"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"仕事用の <xliff:g id="APP_NAME">%1$s</xliff:g> に切り替える"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"連絡先"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"連絡先へのアクセス"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"位置情報"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"バイブレーションの制御をアプリに許可します。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"バイブレーションのオン / オフ状態の把握をアプリに許可します。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"電話番号発信"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"電話番号への自動発信をアプリに許可します。許可することで、予期せぬ発信や料金が発生する恐れがあります。この場合、緊急通報への発信はアプリに許可されません。悪意のあるアプリが確認なしで発信して料金が発生したり、携帯通信会社のコードをダイヤルして着信を別の番号に自動転送したりする恐れがあります。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS通話サービスへのアクセス"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"IMSサービスがユーザー操作なしで電話をかけることをアプリに許可します。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"デバイス情報と ID の読み取り"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"このコンテンツを仕事用アプリで開くことはできません"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"このコンテンツを個人用アプリと共有することはできません"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"このコンテンツを個人用アプリで開くことはできません"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"仕事用アプリ一時停止中"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"停止解除"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"仕事用アプリはありません"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"個人用アプリはありません"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"個人用 <xliff:g id="APP">%s</xliff:g> を開く"</string>
@@ -2326,7 +2325,7 @@
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"デュアル スクリーンを使用できません"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"バッテリー セーバーが ON のため、デュアル スクリーンを使用できません。この動作は設定で OFF にできます。"</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"設定に移動"</string>
-    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"オフにする"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"OFF にする"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g>の設定完了"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%s</xliff:g>に設定されています。タップすると変更できます。"</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"キーボードのレイアウトは<xliff:g id="LAYOUT_1">%1$s</xliff:g>、<xliff:g id="LAYOUT_2">%2$s</xliff:g>に設定されています。タップすると変更できます。"</string>

@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistemi Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Kalo te profili personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Kalo te profili i punës"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Kalo te <xliff:g id="APP_NAME">%1$s</xliff:g> personal"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Kalo te <xliff:g id="APP_NAME">%1$s</xliff:g> i punës"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktet"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"qasu te kontaktet e tua"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Vendndodhja"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lejon aplikacionin të kontrollojë dridhësin."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Lejon që aplikacioni të ketë qasje te gjendja e dridhësit."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefono drejtpërdrejt numrat e telefonit"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Lejon që aplikacioni të telefonojë numrat e telefonit pa ndërhyrjen tënde. Kjo mund të sjellë telefonata ose tarifa të papritura. Ki parasysh se kjo nuk e lejon aplikacionin të telefonojë numrat e urgjencës. Aplikacionet keqdashëse mund të të shkaktojnë kosto duke kryer telefonata pa konfirmimin tënd ose të formojnë kode të operatorit celular që bëjnë që telefonatat hyrëse të transferohen automatikisht te një numër tjetër."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"qasje në shërbimin e telefonatave IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Lejon aplikacionin të përdorë shërbimin IMS për të kryer telefonata pa ndërhyrjen tënde."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lexo statusin e telefonit dhe identitetin"</string>
@@ -680,8 +681,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nuk ka dritë të mjaftueshme"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Lëvize telefonin më larg"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Lëvize telefonin më afër"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Lëvize telefonin më lart"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Lëvize telefonin më poshtë"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Ngrije telefonin më lart"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Ule telefonin më poshtë"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Lëvize telefonin në të majtën tënde"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Lëvize telefonin në të djathtën tënde"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Shiko më drejt në pajisjen tënde."</string>
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Modeli i fytyrës nuk krijohet. Provo sërish."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"U zbuluan syze të errëta. Fytyra jote duhet të jetë plotësisht e dukshme."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"U zbulua mbulim i fytyrës. Fytyra jote duhet të jetë plotësisht e dukshme."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Fytyra është e mbuluar. Fytyra duhet të jetë plotësisht e dukshme."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Kjo përmbajtje nuk mund të hapet me aplikacione pune"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Kjo përmbajtje nuk mund të shpërndahet me aplikacione personale"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Kjo përmbajtje nuk mund të hapet me aplikacione personale"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Aplikacionet e punës janë vendosur në pauzë"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Hiq nga pauza"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nuk ka aplikacione pune"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nuk ka aplikacione personale"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Hap <xliff:g id="APP">%s</xliff:g> personal"</string>

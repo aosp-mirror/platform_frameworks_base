@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android ስርዓት"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ወደ የግል መገለጫ ቀይር"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ወደ የስራ መገለጫ ቀይር"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ወደ የግል <xliff:g id="APP_NAME">%1$s</xliff:g> ቀይር"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"ወደ የሥራ <xliff:g id="APP_NAME">%1$s</xliff:g> ቀይር"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ዕውቂያዎች"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"የእርስዎ እውቂያዎች ላይ ይድረሱባቸው"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"መገኛ አካባቢ"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ነዛሪውን ለመቆጣጠር ለመተግበሪያው ይፈቅዳሉ።"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"መተግበሪያው የንዝረት ሁኔታውን እንዲደርስ ያስችለዋል።"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"በቀጥታ ስልክ ቁጥሮች ደውል"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"መተግበሪያው ያለእርስዎ ጣልቃ ገብነት ወደ ስልክ ቁጥሮች እንዲደውል ያስችለዋል። ይህ ያልተጠበቁ ክፍያዎችን ወይም ጥሪዎችን ሊያስከትል ይችላል። ይሄ መተግበሪያው ወደ የአደጋ ጊዜ ቁጥሮች እንዲደውል የማይፈቅድለት መሆኑን ያስታወሱ። ተንኮል-አዘል መተግበሪያዎች ያለእርስዎ ማረጋገጫ ጥሪዎችን በማድረግ ገንዘብ ሊያስወጡዎት ወይም ገቢ ጥሪዎችን ወደ ሌላ ቁጥር በራስ-ሰር እንዲተላለፉ ወደሚያደርጉት የአገልግሎት አቅራቢ ኮዶች ሊደውሉ ይችላሉ።"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"የአይኤምኤስ ጥሪ አገልግሎትን ይደርሳል"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"መተግበሪያው ያለእርስዎ ጣልቃ ገብነት ጥሪዎችን ለማድረግ የአይኤምኤስ አገልግሎቱን እንዲጠቀም ያስችለዋል።"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"የስልክ ሁኔታና ማንነት አንብብ"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ይህ ይዘት በሥራ መተግበሪያዎች መከፈት አይችልም"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ይህ ይዘት በግል መተግበሪያዎች መጋራት አይችልም"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ይህ ይዘት በግል መተግበሪያዎች መከፈት አይችልም"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"የሥራ መተግበሪያዎች ባሉበት ቆመዋል"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ከቆመበት ቀጥል"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ምንም የሥራ መተግበሪያዎች የሉም"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ምንም የግል መተግበሪያዎች የሉም"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"የግል <xliff:g id="APP">%s</xliff:g> ይክፈቱ"</string>

@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android System"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Switch to personal profile"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Switch to work profile"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Switch to personal <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Switch to work <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"access your contacts"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Location"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Allows the app to control the vibrator."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Allows the app to access the vibrator state."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"directly call phone numbers"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Allows the app to call phone numbers without your intervention. This may result in unexpected charges or calls. Note that this doesn\'t allow the app to call emergency numbers. Malicious apps may cost you money by making calls without your confirmation, or dial carrier codes which cause incoming calls to be automatically forwarded to another number."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"access IMS call service"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Allows the app to use the IMS service to make calls without your intervention."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"read phone status and identity"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"This content can’t be opened with work apps"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"This content can’t be shared with personal apps"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"This content can’t be opened with personal apps"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Work apps are paused"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Unpause"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"No work apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"No personal apps"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Open personal <xliff:g id="APP">%s</xliff:g>"</string>

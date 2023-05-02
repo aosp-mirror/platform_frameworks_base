@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Uhlelo lwe-Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Shintshela kuphrofayela yomuntu siqu"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Shintshela kuphrofayela yomsebenzi"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Shintshela ku-<xliff:g id="APP_NAME">%1$s</xliff:g> yomuntu siqu"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Shintshela ku-<xliff:g id="APP_NAME">%1$s</xliff:g> yomsebenzi"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Oxhumana nabo"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"finyelela koxhumana nabo"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Indawo"</string>
@@ -318,7 +320,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"finyelela kumsebenzi wakho womzimba"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Ikhamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"thatha izithombe uphinde urekhode ividiyo"</string>
-    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Amadivayisi aseduze"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"kumadivayisi aseduze"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"thola futhi uxhume kumadivayisi aseduze"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Amarekhodi wamakholi"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"funda futhi ubhale irekhodi lamakholi efoni"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ivumela uhlelo lokusebenza ukulawula isidlidlizi."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ivumela uhlelo lokusebenza ukuthi lufinyelele kusimo sesidlidlizeli."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ngokuqondile shayela izinombolo zocingo"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Ivumela i-app ukushayela izinombolo zefoni ngaphandle kokungenela kwakho. Lokhu kungase kubangele izindleko noma amakholi angalindelekile. Qaphela ukuthi lokhu akuvumeli i-app ukufonela izinombolo zezimo eziphuthumayo. Ama-app angalungile angakubiza imali ngokufona ngaphandle kokuqinisekisa kwakho, noma ukudayela amakhodi enkampani yenethiwekhi abangela ukuthi amakholi angenayo adluliselwe ngokuzenzekelayo kwenye inombolo."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"finyelela kusevisi yekholi ye-IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ivumela uhlelo lokusebenza ukuthi lusebenzise isevisi ye-IMS ukuze yenze amakholi ngaphandle kokungenelela kwakho."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"funda isimo sefoni kanye nesazisi"</string>
@@ -680,8 +681,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Ukukhanya okunganele"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Yisa ifoni kude"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Sondeza ifoni eduze"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Yisa ifoni phezulu"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Yisa ifoni phansi"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Nyusa ifoni"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Yehlisa ifoni"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Yisa ifoni ngakwesokunxele sakho"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Yisa ifoni ngakwesokudla sakho"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Sicela ubheke ngokuqondile kakhulu kudivayisi yakho."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Lokhu okuqukethwe akukwazi ukukopishwa ngama-app womsebenzi"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Lokhu okuqukethwe akukwazi ukwabiwa nama-app womuntu siqu"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Lokhu okuqukethwe akukwazi ukukopishwa ngama-app womuntu siqu"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Ama-app omsebenzi amisiwe"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Qhubekisa"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Awekho ama-app womsebenzi"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Awekho ama-app womuntu siqu"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Vula i-<xliff:g id="APP">%s</xliff:g> yomuntu siqu"</string>
