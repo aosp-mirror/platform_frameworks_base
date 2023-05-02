@@ -57,6 +57,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.DeviceNotAssociatedException;
@@ -237,7 +238,7 @@ public class CompanionDeviceManagerService extends SystemService {
         loadAssociationsFromDisk();
         mAssociationStore.registerListener(mAssociationStoreChangeListener);
 
-        mDevicePresenceMonitor = new CompanionDevicePresenceMonitor(
+        mDevicePresenceMonitor = new CompanionDevicePresenceMonitor(mUserManager,
                 mAssociationStore, mDevicePresenceCallback);
 
         mAssociationRequestsProcessor = new AssociationRequestsProcessor(
@@ -323,6 +324,23 @@ public class CompanionDeviceManagerService extends SystemService {
         BackgroundThread.getHandler().sendMessageDelayed(
                 obtainMessage(CompanionDeviceManagerService::maybeGrantAutoRevokeExemptions, this),
                 MINUTES.toMillis(10));
+    }
+
+    @Override
+    public void onUserUnlocked(@NonNull TargetUser user) {
+        // Notify and bind the app after the phone is unlocked.
+        final int userId = user.getUserIdentifier();
+        final Set<BluetoothDevice> blueToothDevices =
+                mDevicePresenceMonitor.getPendingConnectedDevices().get(userId);
+        if (blueToothDevices != null) {
+            for (BluetoothDevice bluetoothDevice : blueToothDevices) {
+                for (AssociationInfo ai:
+                        mAssociationStore.getAssociationsByAddress(bluetoothDevice.getAddress())) {
+                    Slog.i(TAG, "onUserUnlocked, device id( " + ai.getId() + " ) is connected");
+                    mDevicePresenceMonitor.onBluetoothCompanionDeviceConnected(ai.getId());
+                }
+            }
+        }
     }
 
     @NonNull
