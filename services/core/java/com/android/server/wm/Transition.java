@@ -963,7 +963,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                 return false;
             }
             return mController.mAtm.enterPictureInPictureMode(ar, ar.pictureInPictureArgs,
-                    false /* fromClient */);
+                    false /* fromClient */, true /* isAutoEnter */);
         }
 
         // Legacy pip-entry (not via isAutoEnterEnabled).
