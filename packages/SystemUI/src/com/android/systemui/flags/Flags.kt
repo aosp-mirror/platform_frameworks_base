@@ -607,7 +607,8 @@ object Flags {
     // 1700 - clipboard
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
     // TODO(b/278714186) Tracking Bug
-    @JvmField val CLIPBOARD_IMAGE_TIMEOUT = unreleasedFlag(1702, "clipboard_image_timeout")
+    @JvmField val CLIPBOARD_IMAGE_TIMEOUT =
+            unreleasedFlag(1702, "clipboard_image_timeout", teamfood = true)
     // TODO(b/279405451): Tracking Bug
     @JvmField
     val CLIPBOARD_SHARED_TRANSITIONS = unreleasedFlag(1703, "clipboard_shared_transitions")
