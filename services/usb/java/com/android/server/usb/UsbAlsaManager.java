@@ -300,7 +300,9 @@ public final class UsbAlsaManager {
         AlsaCardsParser.AlsaCardRecord cardRec =
                 mCardsParser.findCardNumFor(deviceAddress);
         if (cardRec == null) {
-            Slog.e(TAG, "usbDeviceAdded(): cannot find sound card for " + deviceAddress);
+            if (parser.hasAudioInterface()) {
+                Slog.e(TAG, "usbDeviceAdded(): cannot find sound card for " + deviceAddress);
+            }
             return;
         }
 
