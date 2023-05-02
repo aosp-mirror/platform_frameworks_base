@@ -371,7 +371,7 @@ class AppIdPermissionPolicy : SchemePolicy() {
             val newPermissionGroup = PackageInfoUtils.generatePermissionGroupInfo(
                 parsedPermissionGroup, PackageManager.GET_META_DATA.toLong()
             )!!
-            // TODO: STOPSHIP: Clear permission state on group take-over?
+            // TODO: Clear permission state on group take-over?
             val permissionGroupName = newPermissionGroup.name
             val oldPermissionGroup = newState.systemState.permissionGroups[permissionGroupName]
             if (oldPermissionGroup != null &&
