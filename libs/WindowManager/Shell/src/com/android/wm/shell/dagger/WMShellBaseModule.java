@@ -189,12 +189,13 @@ public abstract class WMShellBaseModule {
     static Optional<DragAndDropController> provideDragAndDropController(Context context,
             ShellInit shellInit,
             ShellController shellController,
+            ShellCommandHandler shellCommandHandler,
             DisplayController displayController,
             UiEventLogger uiEventLogger,
             IconProvider iconProvider,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(DragAndDropController.create(context, shellInit, shellController,
-                displayController, uiEventLogger, iconProvider, mainExecutor));
+                shellCommandHandler, displayController, uiEventLogger, iconProvider, mainExecutor));
     }
 
     @WMSingleton
