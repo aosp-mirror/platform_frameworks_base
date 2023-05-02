@@ -268,13 +268,13 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"スリープモードにしない"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"充電中に画面をスリープにしない"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI スヌープログ"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth パケットをキャプチャします（この設定を変更した場合は Bluetooth を切り替えてください）。"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth パケットをキャプチャします（設定変更後はBluetoothをオフ/オンしてください）。"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM ロック解除"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"ブートローダーによるロック解除を許可する"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM ロック解除の許可"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"警告: この設定をONにしている場合、このデバイスではデバイス保護機能を利用できません。"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"現在地情報の強制変更アプリを選択"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"現在地情報の強制変更アプリが設定されていません"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"仮の現在地情報アプリを選択"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"仮の現在地情報アプリが設定されていません"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"現在地情報の強制変更アプリ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"ネットワーク"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ワイヤレス ディスプレイ認証"</string>
@@ -347,7 +347,7 @@
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP チェック動作を設定"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"デバッグ"</string>
     <string name="debug_app" msgid="8903350241392391766">"デバッグアプリを選択"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"デバッグアプリケーションが設定されていません"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"デバッグ アプリケーションが設定されていません"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"デバッグアプリケーション: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"アプリを選択"</string>
     <string name="no_application" msgid="9038334538870247690">"なし"</string>
@@ -357,7 +357,7 @@
     <string name="debug_drawing_category" msgid="5066171112313666619">"描画"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ハードウェアアクセラレーテッドレンダリング"</string>
     <string name="media_category" msgid="8122076702526144053">"メディア"</string>
-    <string name="debug_monitoring_category" msgid="1597387133765424994">"監視"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"モニタリング"</string>
     <string name="strict_mode" msgid="889864762140862437">"厳格モードを有効にする"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"メインスレッドの処理が長引く場合は画面を点滅させる"</string>
     <string name="pointer_location" msgid="7516929526199520173">"ポインタの位置"</string>
@@ -393,7 +393,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ウィンドウ アニメ スケール"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"トランジション アニメ スケール"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 再生時間スケール"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"2 次画面シミュレート"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"第2画面のシミュレーション"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"アプリ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"アクティビティを保持しない"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ユーザーが離れたアクティビティを直ちに破棄する"</string>
@@ -572,7 +572,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ユーザー"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"制限付きプロファイル"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"新しいユーザーを追加しますか？"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"追加ユーザーを作成して、このデバイスを他のユーザーと共有できます。各ユーザーは各自のスペースを所有して、アプリや壁紙などのカスタマイズを行うことができます。Wi-Fi など、すべてのユーザーに影響するデバイス設定を変更することもできます。\n\n新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーがアプリを更新でき、その影響は他のユーザーにも及びます。ユーザー補助機能の設定とサービスは新しいユーザーに適用されないことがあります。"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"追加したユーザーとは、このデバイスを共有できます。各ユーザーには独自のスペースが作成され、アプリや壁紙などをカスタマイズできます。Wi-Fi など、すべてのユーザーに影響するデバイス設定を変更することもできます。\n\n新しいユーザーは各自でスペースをセットアップする必要があります。\n\nアプリの更新は、すべてのユーザーが行えます。ユーザー補助機能の設定とサービスは新しいユーザーに引き継がれないことがあります。"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーがアプリを更新でき、その影響は他のユーザーにも及びます。"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ユーザーを今すぐセットアップ"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ユーザーがデバイスを使って各自のスペースをセットアップできるようにします"</string>

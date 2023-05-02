@@ -267,7 +267,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Показывать в меню кнопки питания пункт для отправки отчета об ошибке"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Не выключать экран"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Во время зарядки экран будет всегда включен"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить журнал HCI Bluetooth"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Включить snoop-логи HCI Bluetooth"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Сохранять все пакеты Bluetooth (перезапустите Bluetooth после изменения этой настройки)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Заводская разблокировка"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Разрешить разблокировку загрузчика ОС"</string>
@@ -376,7 +376,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Имитировать аномалию"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Вкл. трассировку OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Откл. передачу аудио (USB)"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Откл. автом. маршрутизацию на внеш. USB-устройства"</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Отключить автоматическую передачу на внешние USB-устройства"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Показывать границы элементов"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Показывать границы обрезки, поля и т. п."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Отразить интерфейс"</string>
@@ -572,7 +572,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Добавить пользователя"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Профиль с огр. доступом"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Добавить пользователя?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Если этим устройством пользуются сразу несколько человек, для каждого из них можно создать отдельный профиль – практически собственное пространство со своими приложениями, обоями и т. д. При этом из профиля можно поменять и настройки устройства, общие для всех, например выбрать сеть Wi-Fi.\n\nКогда вы добавляете нового пользователя, ему нужно настроить свой профиль.\n\nОбновлять общие приложения может любой пользователь, однако специальные возможности настраиваются индивидуально."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Если этим устройством пользуются сразу несколько человек, для каждого из них можно создать профиль – отдельное пространство с выбранными приложениями, обоями и т. д. Новый пользователь настраивает его сам.\n\nИз профиля можно поменять и общие настройки устройства, например сеть Wi-Fi.\n\nОбновлять общие приложения могут все, однако специальные возможности настраиваются индивидуально."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"После создания профиля его потребуется настроить.\n\nЛюбой пользователь устройства может обновлять приложения для всех аккаунтов."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Настроить профиль?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Вам потребуется передать устройство пользователю, чтобы он мог настроить свой профиль."</string>
@@ -613,8 +613,8 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"Выйти из гостевого режима"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Сбросить гостевой сеанс"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Выйти из гостевого режима"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"История будет удалена сразу после выхода."</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"При выходе вы можете сохранить или удалить историю."</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"История будет удалена сразу после выхода"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"При выходе вы можете сохранить или удалить историю"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Можно сбросить историю сеанса прямо сейчас, либо удалить или сохранить ее при выходе."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Сделать снимок"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Выбрать фото"</string>

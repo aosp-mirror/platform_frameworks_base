@@ -205,7 +205,7 @@
     <string name="tts_status_requires_network" msgid="8327617638884678896">"<xliff:g id="LOCALE">%1$s</xliff:g> желеге туташууну талап кылат"</string>
     <string name="tts_status_not_supported" msgid="2702997696245523743">"<xliff:g id="LOCALE">%1$s</xliff:g> колдоого алынган эмес"</string>
     <string name="tts_status_checking" msgid="8026559918948285013">"Текшерилүүдө…"</string>
-    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> жөндөөлөрдү"</string>
+    <string name="tts_engine_settings_title" msgid="7849477533103566291">"<xliff:g id="TTS_ENGINE_NAME">%s</xliff:g> параметрлерди"</string>
     <string name="tts_engine_settings_button" msgid="477155276199968948">"Жарак тууралоолорун ачуу"</string>
     <string name="tts_engine_preference_section_title" msgid="3861562305498624904">"Тандалган жарак"</string>
     <string name="tts_general_section_title" msgid="8919671529502364567">"Жалпы"</string>
@@ -495,7 +495,7 @@
     <string name="external_source_trusted" msgid="1146522036773132905">"Уруксат берилген"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Тыюу салынган"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Белгисиз колдонмолорду орнотуу"</string>
-    <string name="home" msgid="973834627243661438">"Жөндөөлөрдүн башкы бети"</string>
+    <string name="home" msgid="973834627243661438">"Параметрлердин башкы бети"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
     <item msgid="8894873528875953317">"50%"</item>

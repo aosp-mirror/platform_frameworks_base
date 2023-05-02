@@ -234,7 +234,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Postavke za ime pristupne tačke nisu dostupne za ovog korisnika"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Otklanjanje grešaka putem USB-a"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Način rada za otklanjanje grešaka kada je povezan USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Ukinite odobrenja otklanjanja grešaka putem USB-a"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Ukidanje odobrenja otklanjanja grešaka putem USB-a"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Bežično otklanjanje grešaka"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Način rada za otklanjanje grešaka kada je povezan WiFi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Greška"</string>
@@ -280,7 +280,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikacija bežičnog prikaza"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogući detaljni zapisnik za WiFi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje skeniranja WiFi-ja"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Nasumičan odabir MAC adrese prema WiFi mreži s prekidima"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Nasumični odabir MAC adrese prema WiFi mreži s prekidima"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Prijenos podataka na mobilnoj mreži uvijek aktivan"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzavanje dijeljenja internetske veze"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži Bluetooth uređaje bez naziva"</string>
@@ -347,7 +347,7 @@
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Postavke HDCP provjere"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Otklanjanje grešaka"</string>
     <string name="debug_app" msgid="8903350241392391766">"Odabir aplikacije za otklanjanje grešaka"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"Nema postavljenih aplikac. za otklanjanje grešaka"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"Nema postavljenih aplikacija za otklanjanje grešaka"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"Aplikacija za otklanjanje grešaka: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Odaberite aplikaciju"</string>
     <string name="no_application" msgid="9038334538870247690">"Ništa"</string>
@@ -376,7 +376,7 @@
     <string name="simulate_color_space" msgid="1206503300335835151">"Simuliraj prostor boje"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Omogući OpenGL zapise"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Onemogući USB preusmjer. zvuka"</string>
-    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onemoguć. autom. preusmj. na USB audio perif. uređ."</string>
+    <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Onemogućava automatsko preusmjeravanje na USB audio periferne uređaje"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Prikaži granice rasporeda"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Prikaz granica isječka, margina itd."</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Prisilno postavi raspored s desna ulijevo"</string>
@@ -387,13 +387,13 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Otkl. greške na operac. nepravoug. isjecanja"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Profil HWUI iscrtavanja"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Omogući slojeve za otklanjanje grešaka na GPU-u"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Omoguć. učit. sloj. za otkl. greš. na GPU-u za apl. za otkl. greš."</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Omogućite slojeve za otkl. grešaka na GPU-u za apl. za otkl. grešaka"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Omogući opširni zapisnik"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"U izvještaje o greškama uključite dodatne zapisnike dobavljača specifične za uređaj, koji mogu sadržavati lične informacije, povećati potrošnju baterije i/ili koristiti više prostora za pohranu."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Skala animacije prozora"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animacije prijelaza"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Skala trajanja animatora"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuliraj sekundarne ekrane"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulacija sekundarnih ekrana"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacije"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ne čuvaj aktivnosti"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Obustavlja se svaka aktivnost čim je korisnik napusti"</string>
@@ -405,7 +405,7 @@
     <string name="force_allow_on_external" msgid="9187902444231637880">"Nametni aplikacije na vanjskoj pohrani"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Omogućava upisivanje svih aplikacija u vanjsku pohranu, bez obzira na prikazane vrijednosti"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Nametni aktivnostima mijenjanje veličina"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Omogućava mijenjanje veličine svih aktivnosti za prikaz s više prozora, bez obzira na prikazane vrijednosti."</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Omogućava mijenjanje veličine svih aktivnosti za prikaz s više prozora, bez obzira na prikazane vrijednosti"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Omogući prozore nepravilnih oblika"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Omogućava podršku za eksperimentalne prozore nepravilnih oblika."</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Način rada radne površine"</string>
@@ -670,6 +670,6 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emitiraj aplikaciju <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Promijeni izlaz"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animacije predvidljivog pokreta unazad"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogućite animacije sistema za predvidljivi pokret unazad."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Omogućava animacije sistema za predvidljivi pokret unazad."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Ova postavka omogućava animacije sistema za animaciju predvidljivih pokreta. Potrebno je po aplikaciji postaviti vrijednost za enableOnBackInvokedCallback na tačno u fajlu deklaracije."</string>
 </resources>

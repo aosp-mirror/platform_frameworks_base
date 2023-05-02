@@ -263,8 +263,8 @@
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"扫描二维码即可通过 WLAN 配对设备"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"请连接到 WLAN 网络"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, 调试, debug, 开发, dev"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"错误报告快捷方式"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"在电源菜单中显示用于提交错误报告的按钮"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Bug 报告快捷方式"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"在电源菜单中显示用于提交 bug 报告的按钮"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"不锁定屏幕"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"充电时屏幕不会休眠"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"启用蓝牙 HCI 信息收集日志"</string>
@@ -369,7 +369,7 @@
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"显示视图更新"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"绘图时闪烁显示窗口中的视图"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"显示硬件层更新"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Flash 硬件层在更新时会显示为绿色"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"硬件层更新时闪烁绿色"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"调试 GPU 过度绘制"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"停用 HW 叠加层"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"始终使用 GPU 进行屏幕合成"</string>
@@ -389,14 +389,14 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"启用 GPU 调试层"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"允许为调试应用加载 GPU 调试层"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"启用详细供应商日志记录"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"在错误报告中包含其他设备特定的供应商日志，这些日志可能会含有隐私信息、消耗更多电量和/或使用更多存储空间。"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"在 bug 报告中包含其他设备特定的供应商日志，这些日志可能会含有隐私信息、消耗更多电量和/或使用更多存储空间。"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"窗口动画缩放"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"过渡动画缩放"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 时长缩放"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"模拟辅助显示设备"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"应用"</string>
-    <string name="immediately_destroy_activities" msgid="1826287490705167403">"不保留活动"</string>
-    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"用户离开后即销毁每个活动"</string>
+    <string name="immediately_destroy_activities" msgid="1826287490705167403">"不保留 activity"</string>
+    <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"用户离开后即销毁每个 activity"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"后台进程限制"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"显示后台 ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"为后台应用显示“应用无响应”对话框"</string>
@@ -404,8 +404,8 @@
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"当应用未经有效渠道发布通知时，在屏幕上显示警告"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"强制允许将应用写入外部存储设备"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"允许将任何应用写入外部存储设备（无论清单值是什么）"</string>
-    <string name="force_resizable_activities" msgid="7143612144399959606">"强制将 Activity 设为可调整大小"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"将所有 Activity 设为可配合多窗口环境调整大小（忽略清单值）。"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"强制将 activity 设为可调整大小"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"将所有 activity 设为可配合多窗口环境调整大小（无论清单值是什么）。"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"启用可自由调整的窗口"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"启用可自由调整的窗口这一实验性功能。"</string>
     <string name="desktop_mode" msgid="2389067840550544462">"桌面模式"</string>
@@ -613,7 +613,7 @@
     <string name="guest_exit_button" msgid="5774985819191803960">"退出访客模式"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"重置访客会话"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"退出访客模式"</string>
-    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"退出时所有活动记录都将被删除"</string>
+    <string name="guest_notification_ephemeral" msgid="7263252466950923871">"退出时所有活动都将被删除"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"您可以在退出时保存或删除您的活动记录"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"请立即重置以删除会话活动记录；或者，您也可以在退出时保存或删除活动记录"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍摄照片"</string>

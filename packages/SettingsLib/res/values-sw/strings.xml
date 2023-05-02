@@ -401,7 +401,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Onyesha historia ya ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Onyesha kidirisha cha Programu Kutorejesha Majibu kwa programu zinazotumika chinichini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Onyesha arifa za maonyo ya kituo"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Huonyesha onyo kwenye skrini programu inapochapisha arifa bila kituo sahihi."</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Huonyesha onyo kwenye skrini programu inapochapisha arifa bila kituo sahihi"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Lazima uruhusu programu kwenye hifadhi ya nje"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Huruhusu programu yoyote iwekwe kwenye hifadhi ya nje, bila kujali thamani za faili ya maelezo"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Lazimisha shughuli ziweze kubadilishwa ukubwa"</string>
@@ -494,7 +494,7 @@
     <string name="disabled" msgid="8017887509554714950">"Imezimwa"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Imeruhusiwa"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Hairuhusiwi"</string>
-    <string name="install_other_apps" msgid="3232595082023199454">"Kuweka programu zisizojulikana"</string>
+    <string name="install_other_apps" msgid="3232595082023199454">"Kusakinisha programu zisizojulikana"</string>
     <string name="home" msgid="973834627243661438">"Ukurasa wa Kwanza wa Mipangilio"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>

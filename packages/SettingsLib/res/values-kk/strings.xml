@@ -263,18 +263,18 @@
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"QR кодын сканерлеп, құрылғыны Wi‑Fi арқылы жұптау"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi желісіне қосылыңыз."</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, түзету, әзірлеуші"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Қате туралы хабарлау"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Қате туралы есеп жылдам пәрмені"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Қуат мәзірінде қате туралы хабарлауға арналған түймені көрсету"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Ояу тұру"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Зарядтау кезінде экран өшпейді."</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI қадағалау журналын қосу"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI snoop журналын қосу"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth пакеттерін алу (осы параметрді өзгерткен соң, Bluetooth-ты қосыңыз немесе өшіріңіз)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM құлып ашу функциясы"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Операциялық жүйені жүктеу құралының құлпыy ашуға рұқсат ету"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM бекітпесін ашуға рұқсат ету керек пе?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ЕСКЕРТУ: осы параметр қосулы кезде, құрылғыны қорғау мүмкіндіктері жұмыс істемейді."</string>
     <string name="mock_location_app" msgid="6269380172542248304">"Жалған локация қолданбасын таңдау"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ешқандай жалған локация қолданбасы орнатылмаған"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"Ешқандай жалған локация қолданбасы орнатылмаған."</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Жалған локация қолданбасы: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Желі орнату"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Сымсыз дисплей сертификаты"</string>
@@ -336,8 +336,8 @@
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Жетілдіру параметрлеріне рұқсат берілсін бе?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Бұл параметрлер жетілдіру мақсатында ғана қолданылады. Олар құрылғыңыз бен қолданбаларыңыздың бұзылуына немесе әдеттен тыс әрекеттерге себеп болуы мүмкін."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"USB арқылы орнатылған қолданбаларды растау"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT арқылы орнатылған қолданбалардың қауіпсіздігін тексеру."</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth құрылғылары атаусыз (тек MAC мекенжайымен) көрсетіледі"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT арқылы орнатылған қолданбалардың қауіпсіздігі тексеріледі."</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Bluetooth құрылғылары атаусыз (тек MAC мекенжайымен) көрсетіледі."</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Қашықтағы құрылғыларда дыбыстың тым қатты шығуы немесе реттеуге келмеуі сияқты дыбыс деңгейіне қатысты мәселелер туындағанда, Bluetooth абсолютті дыбыс деңгейі функциясын өшіреді."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche функциясы стэгін қосады."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Жетілдірілген байланыс функциясын қосады."</string>
@@ -476,12 +476,12 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Құрылғы көп ұзамай өшуі мүмкін (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Толық зарядталғанға дейін <xliff:g id="TIME">%1$s</xliff:g> қалды."</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – толық зарядталғанға дейін <xliff:g id="TIME">%2$s</xliff:g> қалды."</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g>: толық зарядталуға <xliff:g id="TIME">%2$s</xliff:g> қалды"</string>
     <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау оңтайландырылды"</string>
     <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> – зарядтау оңтайландырылды."</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгісіз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Зарядталуда"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядталуда"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Жылдам зарядтау"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Баяу зарядталуда"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Сымсыз зарядталуда"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Зарядталып жатыр."</string>
@@ -573,7 +573,7 @@
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Шектелген профайл"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Жаңа пайдаланушы қосылсын ба?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Қосымша профильдер жасай отырып, бұл құрылғыны басқалармен ортақ пайдалануға болады. Әр пайдаланушы қолданбаларды, тұсқағаздарды орнатып, профилін өз қалауынша реттей алады. Сондай-ақ барлығы ортақ қолданатын Wi‑Fi сияқты параметрлерді де реттеуге болады.\n\nЖаңа пайдаланушы енгізілгенде, ол өз профилін реттеуі керек болады.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады. Арнайы мүмкіндіктерге қатысты параметрлер мен қызметтер жаңа пайдаланушыға өтпейді."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңа пайдаланушыны қосқанда, сол адам өз кеңістігін реттеуі керек.\n\nКез келген пайдаланушы барлық басқа пайдаланушылар үшін қолданбаларды жаңарта алады."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Жаңадан қосылған пайдаланушы өз профилін реттеуі керек.\n\nКез келген пайдаланушы басқалар үшін қолданбаларды жаңарта алады."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Профиль құру керек пе?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Пайдаланушы құрылғыны алып, өз профилін реттеуі керек."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Профайл қазір жасақталсын ба?"</string>
@@ -588,11 +588,11 @@
     <string name="user_set_lock_button" msgid="1427128184982594856">"Бекітпе тағайындау"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Пайдаланушыны ауыстыру: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Жаңа пайдаланушы профилі жасалуда…"</string>
-    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Жаңа қонақ профилі жасалуда…"</string>
+    <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Жаңа қонақ профилі жасалып жатыр…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Жаңа пайдаланушы жасалмады."</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Жаңа қонақ профилі жасалмады."</string>
     <string name="user_nickname" msgid="262624187455825083">"Лақап ат"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Пайдаланушы қосу"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Пайда­ланушы қосу"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"Қонақ қосу"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Қонақты жою"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Қонақ сеансын әдепкі күйге қайтару"</string>

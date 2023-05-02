@@ -355,7 +355,7 @@
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ਡੀਬੱਗ ਕੀਤੀ ਐਪਲੀਕੇਸ਼ਨ ਚਲਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਅਟੈਚ ਕਰਨ ਲਈ ਡੀਬੱਗਰ ਦੀ ਉਡੀਕ ਕਰਦੀ ਹੈ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"ਇਨਪੁੱਟ"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"ਡਰਾਇੰਗ"</string>
-    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ਹਾਰਡਵੇਅਰ ਐਕਸੇਲਰੇਟਿਡ ਰੈਂਡਰਿੰਗ"</string>
+    <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ਹਾਰਡਵੇਅਰ ਐਕਸੈੱਲਰੇਟਿਡ ਰੈਂਡਰਿੰਗ"</string>
     <string name="media_category" msgid="8122076702526144053">"ਮੀਡੀਆ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"ਨਿਰੀਖਣ ਕਰਨਾ"</string>
     <string name="strict_mode" msgid="889864762140862437">"ਸਟ੍ਰਿਕਟ ਮੋਡ ਚਾਲੂ ਹੈ"</string>
@@ -404,7 +404,7 @@
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ਐਪ ਵੱਲੋਂ ਵੈਧ ਚੈਨਲ ਤੋਂ ਬਿਨਾਂ ਸੂਚਨਾ ਪੋਸਟ ਕਰਨ \'ਤੇ ਸਕ੍ਰੀਨ \'ਤੇ ਚਿਤਾਵਨੀ ਦਿਖਾਉਂਦੀ ਹੈ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ਐਪਾਂ ਨੂੰ ਜ਼ਬਰਦਸਤੀ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਆਗਿਆ ਦਿਓ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਕਿਸੇ ਵੀ ਐਪ ਨੂੰ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ"</string>
-    <string name="force_resizable_activities" msgid="7143612144399959606">"ਵਿੰਡੋ ਮੁਤਾਬਕ ਸਰਗਰਮੀਆਂ ਦਾ ਆਕਾਰ ਬਦਲ ਦਿਓ"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"ਵਿੰਡੋ ਮੁਤਾਬਕ ਸਰਗਰਮੀਆਂ ਦਾ ਆਕਾਰ ਬਦਲਣ ਦਿਓ"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"ਮੈਨੀਫ਼ੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਮਲਟੀ-ਵਿੰਡੋ ਲਈ ਸਾਰੀਆਂ ਸਰਗਰਮੀਆਂ ਨੂੰ ਆਕਾਰ ਬਦਲਣਯੋਗ ਬਣਾਓ।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"ਪ੍ਰਯੋਗਮਈ ਫ੍ਰੀਫਾਰਮ ਵਿੰਡੋਜ਼ ਲਈ ਸਮਰਥਨ ਨੂੰ ਚਾਲੂ ਕਰੋ।"</string>

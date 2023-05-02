@@ -572,7 +572,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Käyttäjä"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Rajoitettu profiili"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Lisätäänkö uusi käyttäjä?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Voit jakaa tämän laitteen muiden kanssa luomalla lisää käyttäjiä. Kullakin käyttäjällä on oma tilansa, jota he voivat muokata esimerkiksi omilla sovelluksilla ja taustakuvilla. Käyttäjät voivat myös muokata laiteasetuksia, kuten Wi‑Fi-asetuksia, jotka vaikuttavat laitteen kaikkiin käyttäjiin.\n\nKun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää muiden käyttäjien sovelluksia. Esteettömyysominaisuuksia tai ‑palveluita ei välttämättä siirretä uudelle käyttäjälle."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Voit jakaa tämän laitteen muiden kanssa luomalla lisää käyttäjiä. Kullakin käyttäjällä on oma tilansa, jota he voivat muokata esimerkiksi omilla sovelluksilla ja taustakuvilla. Käyttäjät voivat myös muokata laiteasetuksia, kuten Wi‑Fi-asetuksia, jotka vaikuttavat laitteen kaikkiin käyttäjiin.\n\nKun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää muiden käyttäjien sovelluksia. Saavutettavuusominaisuuksia tai ‑palveluita ei välttämättä siirretä uudelle käyttäjälle."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää sovelluksia muille käyttäjille."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Lisätäänkö käyttäjä nyt?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Varmista, että käyttäjä voi ottaa laitteen nyt ja määrittää oman tilansa."</string>
@@ -670,6 +670,6 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Lähetä <xliff:g id="SWITCHAPP">%1$s</xliff:g>-sovellusta"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Muuta ulostuloa"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Takaisin siirtymisen ennakoivat animaatiot"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ota käyttöön takaisin siirtymisen ennakoivat järjestelmäanimaatiot."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Ota käyttöön takaisin siirtymisen ennakoivat järjestelmäanimaatiot"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Asetus ottaa järjestelmäanimaatiot käyttöön ennakoiville eleanimaatioille. Se edellyttää, että enableOnBackInvokedCallback-arvo on Tosi sovelluksen manifestitiedostossa."</string>
 </resources>

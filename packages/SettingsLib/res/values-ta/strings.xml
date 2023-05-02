@@ -580,7 +580,7 @@
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"இப்போது அமை"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"இப்போது இல்லை"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"சேர்"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"புதியவர்"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"புதிய பயனர்"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"புதிய சுயவிவரம்"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"பயனர் தகவல்"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"சுயவிவரத் தகவல்"</string>
