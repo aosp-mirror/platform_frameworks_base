@@ -3867,7 +3867,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // configuration update when the window has requested to be hidden. Doing so can lead to
         // the client erroneously accepting a configuration that would have otherwise caused an
         // activity restart. We instead hand back the last reported {@link MergedConfiguration}.
+        // Also note since starting window isn't a window of activity, it won't make activity
+        // restart, so here should allow starting window to set the last reported configuration
+        // during relayout, which could happen before activity request visible.
         if (useLatestConfig || (relayoutVisible && (mActivityRecord == null
+                || mAttrs.type == TYPE_APPLICATION_STARTING
                 || mActivityRecord.isVisibleRequested()))) {
             final Configuration globalConfig = getProcessGlobalConfiguration();
             final Configuration overrideConfig = getMergedOverrideConfiguration();
