@@ -10748,7 +10748,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @VisibleForTesting
     boolean hasDeviceIdAccessUnchecked(String packageName, int uid) {
         final int userId = UserHandle.getUserId(uid);
-        if (isPermissionCheckFlagEnabled()) {
+        // TODO(b/280048070): Introduce a permission to handle device ID access
+        if (isPermissionCheckFlagEnabled()
+                && !(isUidProfileOwnerLocked(uid) || isUidDeviceOwnerLocked(uid))) {
             return hasPermission(MANAGE_DEVICE_POLICY_CERTIFICATES, packageName, userId);
         } else {
             ComponentName deviceOwner = getDeviceOwnerComponent(true);
@@ -22930,6 +22932,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     MANAGE_DEVICE_POLICY_LOCATION,
                     MANAGE_DEVICE_POLICY_LOCK,
                     MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
+                    MANAGE_DEVICE_POLICY_CERTIFICATES,
                     MANAGE_DEVICE_POLICY_NEARBY_COMMUNICATION,
                     MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
                     MANAGE_DEVICE_POLICY_PACKAGE_STATE,
