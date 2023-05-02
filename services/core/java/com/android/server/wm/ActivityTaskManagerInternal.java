@@ -171,6 +171,9 @@ public abstract class ActivityTaskManagerInternal {
     /**
      * Returns the top activity from each of the currently visible root tasks, and the related task
      * id. The first entry will be the focused activity.
+     *
+     * <p>NOTE: If the top activity is in the split screen, the other activities in the same split
+     * screen will also be returned.
      */
     public abstract List<ActivityAssistInfo> getTopVisibleActivities();
 

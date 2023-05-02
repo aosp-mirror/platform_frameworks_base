@@ -1741,9 +1741,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     /**
      * @return a list of pairs, containing activities and their task id which are the top ones in
      * each visible root task. The first entry will be the focused activity.
+     *
+     * <p>NOTE: If the top activity is in the split screen, the other activities in the same split
+     * screen will also be returned.
      */
     List<ActivityAssistInfo> getTopVisibleActivities() {
         final ArrayList<ActivityAssistInfo> topVisibleActivities = new ArrayList<>();
+        final ArrayList<ActivityAssistInfo> activityAssistInfos = new ArrayList<>();
         final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
         // Traverse all displays.
         forAllRootTasks(rootTask -> {
@@ -1751,11 +1755,21 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (rootTask.shouldBeVisible(null /* starting */)) {
                 final ActivityRecord top = rootTask.getTopNonFinishingActivity();
                 if (top != null) {
-                    ActivityAssistInfo visibleActivity = new ActivityAssistInfo(top);
+                    activityAssistInfos.clear();
+                    activityAssistInfos.add(new ActivityAssistInfo(top));
+                    // Check if the activity on the split screen.
+                    final Task adjacentTask = top.getTask().getAdjacentTask();
+                    if (adjacentTask != null) {
+                        final ActivityRecord adjacentActivityRecord =
+                                adjacentTask.getTopNonFinishingActivity();
+                        if (adjacentActivityRecord != null) {
+                            activityAssistInfos.add(new ActivityAssistInfo(adjacentActivityRecord));
+                        }
+                    }
                     if (rootTask == topFocusedRootTask) {
-                        topVisibleActivities.add(0, visibleActivity);
+                        topVisibleActivities.addAll(0, activityAssistInfos);
                     } else {
-                        topVisibleActivities.add(visibleActivity);
+                        topVisibleActivities.addAll(activityAssistInfos);
                     }
                 }
             }
