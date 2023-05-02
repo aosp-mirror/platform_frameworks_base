@@ -342,7 +342,7 @@
     <string name="select_application" msgid="2543228890535466325">"Hautatu aplikazioa"</string>
     <string name="no_application" msgid="9038334538870247690">"Ezer ez"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Itxaron araztaileari"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Araztutako aplikazioa araztailea erantsi arte itxaroten ari da exekutatu aurretik"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Araztutako aplikazioak araztailea erantsi arte itxaroten du exekutatu aurretik"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Sarrera"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Marrazketa"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hardware bidez bizkortutako errendatzea"</string>
