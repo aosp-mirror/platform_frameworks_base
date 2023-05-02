@@ -5258,6 +5258,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         }
 
         @Override
+        public @NonNull List<String> getInitialNonStoppedSystemPackages() {
+            return mInitialNonStoppedSystemPackages != null
+                    ? new ArrayList<>(mInitialNonStoppedSystemPackages) : new ArrayList<>();
+        }
+
+        @Override
         public String[] getUnsuspendablePackagesForUser(String[] packageNames, int userId) {
             Objects.requireNonNull(packageNames, "packageNames cannot be null");
             mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,

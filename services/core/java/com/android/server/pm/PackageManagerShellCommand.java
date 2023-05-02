@@ -782,6 +782,8 @@ class PackageManagerShellCommand extends ShellCommand {
                         getInFileDescriptor(), getOutFileDescriptor(), getErrFileDescriptor(),
                         new String[] { "list" }, getShellCallback(), adoptResultReceiver());
                 return 0;
+            case "initial-non-stopped-system-packages":
+                return runListInitialNonStoppedSystemPackages();
         }
         pw.println("Error: unknown list type '" + type + "'");
         return -1;
@@ -791,6 +793,21 @@ class PackageManagerShellCommand extends ShellCommand {
         Runtime.getRuntime().gc();
         final PrintWriter pw = getOutPrintWriter();
         pw.println("Ok");
+        return 0;
+    }
+
+    private int runListInitialNonStoppedSystemPackages() throws RemoteException {
+        final PrintWriter pw = getOutPrintWriter();
+        final List<String> list = mInterface.getInitialNonStoppedSystemPackages();
+
+        Collections.sort(list);
+
+        for (String pkgName : list) {
+            pw.print("package:");
+            pw.print(pkgName);
+            pw.println();
+        }
+
         return 0;
     }
 
