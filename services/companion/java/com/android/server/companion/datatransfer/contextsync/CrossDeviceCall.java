@@ -23,7 +23,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
 import android.telecom.VideoProfile;
@@ -34,7 +33,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
 
 /** Data holder for a telecom call and additional metadata. */
 public class CrossDeviceCall {
@@ -45,9 +44,7 @@ public class CrossDeviceCall {
             "com.android.companion.datatransfer.contextsync.extra.CALL_ID";
     private static final int APP_ICON_BITMAP_DIMENSION = 256;
 
-    private static final AtomicLong sNextId = new AtomicLong(1);
-
-    private final long mId;
+    private final String mId;
     private Call mCall;
     @VisibleForTesting boolean mIsEnterprise;
     @VisibleForTesting boolean mIsOtt;
@@ -64,14 +61,14 @@ public class CrossDeviceCall {
             CallAudioState callAudioState) {
         this(packageManager, call.getDetails(), callAudioState);
         mCall = call;
-        final Bundle extras = new Bundle();
-        extras.putLong(EXTRA_CALL_ID, mId);
-        call.putExtras(extras);
+        call.putExtra(EXTRA_CALL_ID, mId);
     }
 
     CrossDeviceCall(PackageManager packageManager, Call.Details callDetails,
             CallAudioState callAudioState) {
-        mId = sNextId.getAndIncrement();
+        final String predefinedId = callDetails.getIntentExtras() != null
+                ? callDetails.getIntentExtras().getString(EXTRA_CALL_ID) : null;
+        mId = predefinedId != null ? predefinedId : UUID.randomUUID().toString();
         mCallingAppPackageName =
                 callDetails.getAccountHandle().getComponentName().getPackageName();
         mIsOtt = (callDetails.getCallCapabilities() & Call.Details.PROPERTY_SELF_MANAGED)
@@ -145,7 +142,7 @@ public class CrossDeviceCall {
         if (mStatus == android.companion.Telecom.Call.RINGING) {
             mStatus = android.companion.Telecom.Call.RINGING_SILENCED;
         }
-        mControls.remove(android.companion.Telecom.Call.SILENCE);
+        mControls.remove(android.companion.Telecom.SILENCE);
     }
 
     @VisibleForTesting
@@ -156,26 +153,26 @@ public class CrossDeviceCall {
         mControls.clear();
         if (mStatus == android.companion.Telecom.Call.RINGING
                 || mStatus == android.companion.Telecom.Call.RINGING_SILENCED) {
-            mControls.add(android.companion.Telecom.Call.ACCEPT);
-            mControls.add(android.companion.Telecom.Call.REJECT);
+            mControls.add(android.companion.Telecom.ACCEPT);
+            mControls.add(android.companion.Telecom.REJECT);
             if (mStatus == android.companion.Telecom.Call.RINGING) {
-                mControls.add(android.companion.Telecom.Call.SILENCE);
+                mControls.add(android.companion.Telecom.SILENCE);
             }
         }
         if (mStatus == android.companion.Telecom.Call.ONGOING
                 || mStatus == android.companion.Telecom.Call.ON_HOLD) {
-            mControls.add(android.companion.Telecom.Call.END);
+            mControls.add(android.companion.Telecom.END);
             if (callDetails.can(Call.Details.CAPABILITY_HOLD)) {
                 mControls.add(
                         mStatus == android.companion.Telecom.Call.ON_HOLD
-                                ? android.companion.Telecom.Call.TAKE_OFF_HOLD
-                                : android.companion.Telecom.Call.PUT_ON_HOLD);
+                                ? android.companion.Telecom.TAKE_OFF_HOLD
+                                : android.companion.Telecom.PUT_ON_HOLD);
             }
         }
         if (mStatus == android.companion.Telecom.Call.ONGOING && callDetails.can(
                 Call.Details.CAPABILITY_MUTE)) {
-            mControls.add(mIsMuted ? android.companion.Telecom.Call.UNMUTE
-                    : android.companion.Telecom.Call.MUTE);
+            mControls.add(mIsMuted ? android.companion.Telecom.UNMUTE
+                    : android.companion.Telecom.MUTE);
         }
     }
 
@@ -212,7 +209,7 @@ public class CrossDeviceCall {
         }
     }
 
-    public long getId() {
+    public String getId() {
         return mId;
     }
 
