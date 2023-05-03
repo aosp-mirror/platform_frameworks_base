@@ -7175,6 +7175,13 @@ public final class Settings {
         public static final String CREDENTIAL_SERVICE = "credential_service";
 
         /**
+         * The currently selected primary credential service flattened ComponentName.
+         *
+         * @hide
+         */
+        public static final String CREDENTIAL_SERVICE_PRIMARY = "credential_service_primary";
+
+        /**
          * The currently selected autofill service flattened ComponentName.
          * @hide
          */
