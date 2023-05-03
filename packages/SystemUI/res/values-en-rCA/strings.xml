@@ -1122,6 +1122,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Install a camera app"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• The app is set up"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• At least one device is available"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Select a default notes app to use the notetaking shortcut"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Select app"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Touch and hold shortcut"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancel"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Switch screens now"</string>

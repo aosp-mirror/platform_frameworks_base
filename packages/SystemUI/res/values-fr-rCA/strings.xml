@@ -897,7 +897,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Agrandir une partie de l\'écran"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Ouvrir les paramètres d\'agrandissement"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Faire glisser le coin pour redimensionner"</string>
-    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Autoriser le défilement en diagonale"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Autoriser défilement diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Redimensionner"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Changer le type d\'agrandissement"</string>
     <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Terminer le redimensionnement"</string>
@@ -1163,6 +1163,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• qu\'une application de caméra est installée;"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• que cette application est configurée;"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• qu\'au moins un appareil est utilisable;"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Maintenir le doigt sur raccourci"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuler"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Changer d\'écran maintenant"</string>
