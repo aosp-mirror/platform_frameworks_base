@@ -32,7 +32,6 @@ import android.graphics.Region;
 import android.hardware.input.InputManager;
 import android.os.Looper;
 import android.provider.DeviceConfig;
-import android.util.Log;
 import android.view.BatchedInputEventReceiver;
 import android.view.Choreographer;
 import android.view.InputChannel;
@@ -401,7 +400,6 @@ public class PipResizeGestureHandler {
 
     @VisibleForTesting
     void onPinchResize(MotionEvent ev) {
-        Log.d(TAG, "onPinchResize: " + ev);
         int action = ev.getActionMasked();
 
         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
@@ -444,10 +442,6 @@ public class PipResizeGestureHandler {
             float y1 = ev.getRawY(mSecondIndex);
             mLastPoint.set(x0, y0);
             mLastSecondPoint.set(x1, y1);
-
-            // TODO: remove logging once b/269505548 is resolved
-            Log.d(TAG, "at onPinchResize (" + x0 + ", " + y0 + ")");
-            Log.d(TAG, "at onPinchResize (" + x1 + ", " + y1 + ")");
 
             // Capture inputs
             if (!mThresholdCrossed
