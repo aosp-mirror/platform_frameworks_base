@@ -52,9 +52,9 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
-public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
+public class UdfpsKeyguardViewLegacyControllerBaseTest extends SysuiTestCase {
     // Dependencies
-    protected @Mock UdfpsKeyguardView mView;
+    protected @Mock UdfpsKeyguardViewLegacy mView;
     protected @Mock Context mResourceContext;
     protected @Mock StatusBarStateController mStatusBarStateController;
     protected @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
@@ -75,7 +75,7 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
 
     protected FakeFeatureFlags mFeatureFlags = new FakeFeatureFlags();
 
-    protected UdfpsKeyguardViewController mController;
+    protected UdfpsKeyguardViewControllerLegacy mController;
 
     // Capture listeners so that they can be used to send events
     private @Captor ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerCaptor;
@@ -135,7 +135,7 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
         mKeyguardStateControllerCallback = mKeyguardStateControllerCallbackCaptor.getValue();
     }
 
-    public UdfpsKeyguardViewController createUdfpsKeyguardViewController() {
+    public UdfpsKeyguardViewControllerLegacy createUdfpsKeyguardViewController() {
         return createUdfpsKeyguardViewController(false, false);
     }
 
@@ -145,10 +145,10 @@ public class UdfpsKeyguardViewControllerBaseTest extends SysuiTestCase {
         mKeyguardViewManagerCallback = mKeyguardViewManagerCallbackArgumentCaptor.getValue();
     }
 
-    protected UdfpsKeyguardViewController createUdfpsKeyguardViewController(
+    protected UdfpsKeyguardViewControllerLegacy createUdfpsKeyguardViewController(
             boolean useModernBouncer, boolean useExpandedOverlay) {
         mFeatureFlags.set(Flags.UDFPS_NEW_TOUCH_DETECTION, useExpandedOverlay);
-        UdfpsKeyguardViewController controller = new UdfpsKeyguardViewController(
+        UdfpsKeyguardViewControllerLegacy controller = new UdfpsKeyguardViewControllerLegacy(
                 mView,
                 mStatusBarStateController,
                 mShadeExpansionStateManager,
