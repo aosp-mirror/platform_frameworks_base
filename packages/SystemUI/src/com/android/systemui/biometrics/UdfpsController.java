@@ -553,6 +553,10 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     + mOverlay.getRequestId());
             return false;
         }
+        if (mLockscreenShadeTransitionController.getQSDragProgress() != 0f
+                || mPrimaryBouncerInteractor.isInTransit()) {
+            return false;
+        }
 
         final TouchProcessorResult result = mTouchProcessor.processTouch(event, mActivePointerId,
                 mOverlayParams);
@@ -626,9 +630,8 @@ public class UdfpsController implements DozeReceiver, Dumpable {
             shouldPilfer = true;
         }
 
-        // Execute the pilfer, never pilfer if a vertical swipe is in progress
-        if (shouldPilfer && mLockscreenShadeTransitionController.getQSDragProgress() == 0f
-                && !mPrimaryBouncerInteractor.isInTransit()) {
+        // Execute the pilfer
+        if (shouldPilfer) {
             mInputManager.pilferPointers(
                     mOverlay.getOverlayView().getViewRootImpl().getInputToken());
         }
