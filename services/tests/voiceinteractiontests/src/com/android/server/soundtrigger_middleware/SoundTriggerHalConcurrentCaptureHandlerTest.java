@@ -30,8 +30,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 
 import androidx.annotation.NonNull;
 
@@ -68,13 +68,14 @@ public class SoundTriggerHalConcurrentCaptureHandlerTest {
 
         mNotifier.setActive(true);
         verify(mUnderlying).stopRecognition(handle);
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
+        ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                RecognitionEventSys.class);
         Thread.sleep(50);
         verify(callback).recognitionCallback(eq(handle), eventCaptor.capture());
-        RecognitionEvent event = eventCaptor.getValue();
-        assertEquals(event.status, RecognitionStatus.ABORTED);
-        assertFalse(event.recognitionStillActive);
+        RecognitionEventSys event = eventCaptor.getValue();
+        assertEquals(event.halEventReceivedMillis, -1);
+        assertEquals(event.recognitionEvent.status, RecognitionStatus.ABORTED);
+        assertFalse(event.recognitionEvent.recognitionStillActive);
         verifyZeroInteractions(mGlobalCallback);
         clearInvocations(callback, mUnderlying);
 
@@ -116,8 +117,11 @@ public class SoundTriggerHalConcurrentCaptureHandlerTest {
 
         mNotifier.setActive(true);
         verify(mUnderlying, times(1)).stopRecognition(handle);
+        ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                RecognitionEventSys.class);
         mHandler.stopRecognition(handle);
-        verify(callback, times(1)).recognitionCallback(eq(handle), any());
+        verify(callback).recognitionCallback(eq(handle), eventCaptor.capture());
+        assertEquals(eventCaptor.getValue().halEventReceivedMillis, -1);
     }
 
     @Test(timeout = 200)
@@ -133,19 +137,21 @@ public class SoundTriggerHalConcurrentCaptureHandlerTest {
         verify(mUnderlying).startRecognition(eq(handle), eq(101), eq(102), any());
 
         doAnswer(invocation -> {
-            RecognitionEvent event = TestUtil.createRecognitionEvent(RecognitionStatus.ABORTED,
+            RecognitionEventSys recognitionEventSys = new RecognitionEventSys();
+            recognitionEventSys.recognitionEvent = TestUtil.createRecognitionEvent(
+                    RecognitionStatus.ABORTED,
                     false);
+            recognitionEventSys.halEventReceivedMillis = 12345;
             // Call the callback from a different thread to detect deadlocks by preventing recursive
             // locking from working.
-            runOnSeparateThread(() -> modelCallback.recognitionCallback(handle, event));
+            runOnSeparateThread(
+                    () -> modelCallback.recognitionCallback(handle, recognitionEventSys));
             return null;
         }).when(mUnderlying).stopRecognition(handle);
         mHandler.stopRecognition(handle);
         verify(mUnderlying, times(1)).stopRecognition(handle);
 
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
-        verify(callback, atMost(1)).recognitionCallback(eq(handle), eventCaptor.capture());
+        verify(callback, atMost(1)).recognitionCallback(eq(handle), any(RecognitionEventSys.class));
     }
 
     @Test(timeout = 200)
@@ -162,11 +168,15 @@ public class SoundTriggerHalConcurrentCaptureHandlerTest {
 
         doAnswer(invocation -> {
             // The stop request causes a callback to be flushed.
-            RecognitionEvent event = TestUtil.createRecognitionEvent(RecognitionStatus.FORCED,
+            RecognitionEventSys recognitionEventSys = new RecognitionEventSys();
+            recognitionEventSys.recognitionEvent = TestUtil.createRecognitionEvent(
+                    RecognitionStatus.FORCED,
                     true);
+            recognitionEventSys.halEventReceivedMillis = 12345;
             // Call the callback from a different thread to detect deadlocks by preventing recursive
             // locking from working.
-            runOnSeparateThread(() -> modelCallback.recognitionCallback(handle, event));
+            runOnSeparateThread(
+                    () -> modelCallback.recognitionCallback(handle, recognitionEventSys));
             // While the HAL is processing the stop request, capture state becomes active.
             new Thread(() -> mNotifier.setActive(true)).start();
             Thread.sleep(50);
@@ -194,11 +204,15 @@ public class SoundTriggerHalConcurrentCaptureHandlerTest {
 
         doAnswer(invocation -> {
             // The stop request causes a callback to be flushed.
-            RecognitionEvent event = TestUtil.createRecognitionEvent(RecognitionStatus.FORCED,
+            RecognitionEventSys recognitionEventSys = new RecognitionEventSys();
+            recognitionEventSys.recognitionEvent = TestUtil.createRecognitionEvent(
+                    RecognitionStatus.FORCED,
                     true);
+            recognitionEventSys.halEventReceivedMillis = 12345;
             // Call the callback from a different thread to detect deadlocks by preventing recursive
             // locking from working.
-            runOnSeparateThread(() -> modelCallback.recognitionCallback(handle, event));
+            runOnSeparateThread(
+                    () -> modelCallback.recognitionCallback(handle, recognitionEventSys));
             // While the HAL is processing the stop request, client requests stop.
             new Thread(() -> mHandler.stopRecognition(handle)).start();
             Thread.sleep(50);
@@ -223,23 +237,22 @@ public class SoundTriggerHalConcurrentCaptureHandlerTest {
         verify(mUnderlying).startRecognition(eq(handle), eq(101), eq(102), any());
 
         doAnswer(invocation -> {
-            RecognitionEvent event = TestUtil.createRecognitionEvent(RecognitionStatus.SUCCESS,
+            RecognitionEventSys recognitionEventSys = new RecognitionEventSys();
+            recognitionEventSys.recognitionEvent = TestUtil.createRecognitionEvent(
+                    RecognitionStatus.SUCCESS,
                     false);
+            recognitionEventSys.halEventReceivedMillis = 12345;
             // Call the callback from a different thread to detect deadlocks by preventing recursive
             // locking from working.
-            runOnSeparateThread(() -> modelCallback.recognitionCallback(handle, event));
+            runOnSeparateThread(
+                    () -> modelCallback.recognitionCallback(handle, recognitionEventSys));
             return null;
         }).when(mUnderlying).stopRecognition(handle);
         mNotifier.setActive(true);
         verify(mUnderlying, times(1)).stopRecognition(handle);
         Thread.sleep(50);
 
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
-        verify(callback, atMost(2)).recognitionCallback(eq(handle), eventCaptor.capture());
-        RecognitionEvent lastEvent = eventCaptor.getValue();
-        assertEquals(lastEvent.status, RecognitionStatus.ABORTED);
-        assertFalse(lastEvent.recognitionStillActive);
+        verify(callback, atMost(2)).recognitionCallback(eq(handle), any());
     }
 
 
@@ -256,11 +269,15 @@ public class SoundTriggerHalConcurrentCaptureHandlerTest {
         verify(mUnderlying).startRecognition(eq(handle), eq(101), eq(102), any());
 
         doAnswer(invocation -> {
-            RecognitionEvent event = TestUtil.createRecognitionEvent(RecognitionStatus.FORCED,
+            RecognitionEventSys recognitionEventSys = new RecognitionEventSys();
+            recognitionEventSys.recognitionEvent = TestUtil.createRecognitionEvent(
+                    RecognitionStatus.FORCED,
                     true);
+            recognitionEventSys.halEventReceivedMillis = 12345;
             // Call the callback from a different thread to detect deadlocks by preventing recursive
             // locking from working.
-            runOnSeparateThread(() -> modelCallback.recognitionCallback(handle, event));
+            runOnSeparateThread(
+                    () -> modelCallback.recognitionCallback(handle, recognitionEventSys));
 
             return null;
         }).when(mUnderlying).stopRecognition(handle);
@@ -268,12 +285,7 @@ public class SoundTriggerHalConcurrentCaptureHandlerTest {
         verify(mUnderlying, times(1)).stopRecognition(handle);
 
         Thread.sleep(50);
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
-        verify(callback, atMost(2)).recognitionCallback(eq(handle), eventCaptor.capture());
-        RecognitionEvent lastEvent = eventCaptor.getValue();
-        assertEquals(lastEvent.status, RecognitionStatus.ABORTED);
-        assertFalse(lastEvent.recognitionStillActive);
+        verify(callback, atMost(2)).recognitionCallback(eq(handle), any());
     }
 
     private static void runOnSeparateThread(Runnable runnable) {

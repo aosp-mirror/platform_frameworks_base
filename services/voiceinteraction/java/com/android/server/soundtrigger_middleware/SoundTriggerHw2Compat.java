@@ -25,9 +25,12 @@ import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.IBinder;
 import android.os.IHwBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.system.OsConstants;
 import android.util.Log;
 
@@ -570,16 +573,20 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHal {
         public void recognitionCallback_2_1(
                 android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.RecognitionEvent event,
                 int cookie) {
-            mDelegate.recognitionCallback(event.header.model,
-                    ConversionUtil.hidl2aidlRecognitionEvent(event));
+            RecognitionEventSys eventSys = new RecognitionEventSys();
+            eventSys.recognitionEvent = ConversionUtil.hidl2aidlRecognitionEvent(event);
+            eventSys.halEventReceivedMillis = SystemClock.elapsedRealtime();
+            mDelegate.recognitionCallback(event.header.model, eventSys);
         }
 
         @Override
         public void phraseRecognitionCallback_2_1(
                 android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.PhraseRecognitionEvent event,
                 int cookie) {
-            mDelegate.phraseRecognitionCallback(event.common.header.model,
-                    ConversionUtil.hidl2aidlPhraseRecognitionEvent(event));
+            PhraseRecognitionEventSys eventSys = new PhraseRecognitionEventSys();
+            eventSys.phraseRecognitionEvent = ConversionUtil.hidl2aidlPhraseRecognitionEvent(event);
+            eventSys.halEventReceivedMillis = SystemClock.elapsedRealtime();
+            mDelegate.phraseRecognitionCallback(event.common.header.model, eventSys);
         }
 
         @Override
