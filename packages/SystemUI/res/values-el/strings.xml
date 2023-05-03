@@ -82,7 +82,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Επεξεργασία"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Επεξεργασία στιγμιότυπου οθόνης"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Κοινοποίηση στιγμιότυπου οθόνης"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Λήψη περισσότερων"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Περισσότερα"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Παράβλεψη στιγμιότυπου οθόνης"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Προεπισκόπηση στιγμιότυπου οθόνης"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Επάνω όριο <xliff:g id="PERCENT">%1$d</xliff:g> τοις εκατό"</string>

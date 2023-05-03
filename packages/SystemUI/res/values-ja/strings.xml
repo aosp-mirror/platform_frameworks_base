@@ -919,7 +919,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"Wi-Fi に自動接続しません"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"すべて表示"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"ネットワークを変更するにはイーサネット接続を解除してください"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"デバイスの機能向上のため、アプリやサービスは、Wi-Fi が OFF の場合でも、いつでも Wi-Fi ネットワークをスキャンできます。この設定は Wi-Fi スキャンの設定で変更できます。"<annotation id="link">"変更"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"デバイスの利便性向上のため、アプリやサービスは、Wi-Fi が OFF の場合でもいつでも Wi-Fi ネットワークをスキャンすることができます。この動作は Wi-Fi スキャンの設定で変更できます。"<annotation id="link">"変更"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"機内モードを OFF にする"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> が以下のタイルをクイック設定に追加しようとしています"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"タイルを追加"</string>

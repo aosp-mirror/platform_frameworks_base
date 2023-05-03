@@ -310,7 +310,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Ова ги блокира СИТЕ звуци и вибрации, вклучувајќи ги и оние од алармите, музиката, видеата и игрите."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Допрете повторно за да се отвори"</string>
     <string name="tap_again" msgid="1315420114387908655">"Допрете повторно"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Повлечете за да отворите"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Повлечете нагоре за да отворите"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Притиснете ја иконата за отклучување за да отворите"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Отклучено со лик. Притиснете ја иконата за отклучување за да отворите."</string>
   <string-array name="udfps_accessibility_touch_hints">
@@ -655,7 +655,7 @@
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"Отворете ги поставките."</string>
     <string name="accessibility_quick_settings_expand" msgid="2609275052412521467">"Отворете ги брзите поставки."</string>
     <string name="accessibility_quick_settings_collapse" msgid="4674876336725041982">"Затворете ги брзите поставки."</string>
-    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Најавени сте како <xliff:g id="ID_1">%s</xliff:g>"</string>
+    <string name="accessibility_quick_settings_user" msgid="505821942882668619">"Најавени сте како: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"изберете корисник"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Нема интернет"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Отворете ги поставките на <xliff:g id="ID_1">%s</xliff:g>."</string>
@@ -861,7 +861,7 @@
     <string name="build_number_copy_toast" msgid="877720921605503046">"Бројот на верзијата е копиран во привремената меморија."</string>
     <string name="basic_status" msgid="2315371112182658176">"Започни разговор"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виџети за разговор"</string>
-    <string name="select_conversation_text" msgid="3376048251434956013">"Допрете на разговор за да го додадете на вашиот почетен екран"</string>
+    <string name="select_conversation_text" msgid="3376048251434956013">"Допрете разговор за да го додадете на почетниот екран"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Вашите неодамнешни разговори ќе се прикажуваат тука"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Приоритетни разговори"</string>
     <string name="recent_conversations" msgid="8531874684782574622">"Неодамнешни разговори"</string>
@@ -884,7 +884,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Слушам"</string>
     <string name="game_status" msgid="1340694320630973259">"Играње игра"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Пријатели"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Разговарај вечерва!"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Ајде да разговараме!"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Содржините ќе се прикажат наскоро"</string>
     <string name="missed_call" msgid="4228016077700161689">"Пропуштен повик"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>

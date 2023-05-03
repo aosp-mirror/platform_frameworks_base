@@ -798,7 +798,7 @@
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN मा अक्षर वा चिन्हहरू समाविष्ट हुन्छन्"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g> पुष्टि गर्नुहोस्"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN मिलेन"</string>
-    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="controls_pin_instructions" msgid="6363309783822475238">"PIN हाल्नुहोस्"</string>
     <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"अर्को PIN प्रयोग गरी हेर्नु…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> का हकमा गरिएको परिवर्तन पुष्टि गर्नुहोस्"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>

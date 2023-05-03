@@ -783,8 +783,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"suprimir dels preferits"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mou a la posició <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Tria els controls a què vols accedir des de la configuració ràpida"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premut i arrossega per reorganitzar els controls"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Tria a quins controls vols accedir des de la configuració ràpida"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premuts els controls i arrossega\'ls per reordenar-los"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"S\'han suprimit tots els controls"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Els canvis no s\'han desat"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Mostra altres aplicacions"</string>
