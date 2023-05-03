@@ -5,7 +5,7 @@
     <string name="android_system_label" msgid="2797790869522345065">"Pembawa Mudah Alih"</string>
     <string name="portal_notification_id" msgid="5155057562457079297">"Data mudah alih telah habis"</string>
     <string name="no_data_notification_id" msgid="668400731803969521">"Data mudah alih anda telah dinyahaktifkan"</string>
-    <string name="portal_notification_detail" msgid="2295729385924660881">"Ketik untuk melawat tapak web %s"</string>
+    <string name="portal_notification_detail" msgid="2295729385924660881">"Ketik untuk melawat laman web %s"</string>
     <string name="no_data_notification_detail" msgid="3112125343857014825">"Sila hubungi penyedia perkhidmatan anda, %s"</string>
     <string name="no_mobile_data_connection_title" msgid="7449525772416200578">"Tiada sambungan data mudah alih"</string>
     <string name="no_mobile_data_connection" msgid="544980465184147010">"Tambahkan data atau pelan perayauan melalui %s"</string>
