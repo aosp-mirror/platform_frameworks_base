@@ -28,9 +28,9 @@ import android.text.format.DateFormat
 import android.util.AttributeSet
 import android.util.MathUtils.constrainedMap
 import android.widget.TextView
+import com.android.app.animation.Interpolators
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.animation.GlyphCallback
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.animation.TextAnimator
 import com.android.systemui.customization.R
 import com.android.systemui.log.LogBuffer

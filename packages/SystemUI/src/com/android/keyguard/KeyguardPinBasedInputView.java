@@ -34,9 +34,9 @@ import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.List;
