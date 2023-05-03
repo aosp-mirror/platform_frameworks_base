@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"இந்த ஸ்கிரீன்ஷாட்டை <xliff:g id="APPNAME">%1$s</xliff:g> கண்டறிந்துள்ளது."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"இந்த ஸ்கிரீன்ஷாட்டை <xliff:g id="APPNAME">%1$s</xliff:g> மற்றும் திறந்திருக்கும் பிற ஆப்ஸ் கண்டறிந்துள்ளன."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"குறிப்பில் சேர்"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"ஸ்கிரீன் ரெக்கார்டர்"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"ஸ்கிரீன் ரெக்கார்டர்"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ஸ்க்ரீன் ரெக்கார்டிங் செயலாக்கப்படுகிறது"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"திரை ரெக்கார்டிங் அமர்விற்கான தொடர் அறிவிப்பு"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"ரெக்கார்டிங்கைத் தொடங்கவா?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ரெக்கார்டு செய்யும்போது, உங்கள் திரையில் தோன்றக்கூடிய அல்லது சாதனத்தில் பிளே ஆகக்கூடிய பாதுகாக்கப்பட வேண்டிய தகவலை Android சிஸ்டம் படமெடுக்க முடியும். கடவுச்சொற்கள், பேமெண்ட் தகவல், படங்கள், மெசேஜ்கள், ஆடியோ ஆகியவை இதில் அடங்கும்."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"முழு திரையை ரெக்கார்டு செய்தல்"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"ஓர் ஆப்ஸை ரெக்கார்டு செய்தல்"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"நீங்கள் ரெக்கார்டு செய்யும்போது அந்தச் சாதனத்தில் காட்டப்படும் அல்லது பிளே செய்யப்படும் அனைத்தையும் Android அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், பிற பாதுகாக்கப்பட வேண்டிய தகவல்கள் ஆகியவை குறித்து கவனத்துடன் இருங்கள்."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"ஓர் ஆப்ஸை நீங்கள் ரெக்கார்டு செய்யும்போது அந்த ஆப்ஸில் காட்டப்படும் அல்லது பிளே செய்யப்படும் அனைத்தையும் Android அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், பிற பாதுகாக்கப்பட வேண்டிய தகவல்கள் ஆகியவை குறித்து கவனத்துடன் இருங்கள்."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"ரெக்கார்டிங்கைத் தொடங்கு"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ரெக்கார்டு செய்யத் தொடங்கவா?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"நீங்கள் ரெக்கார்டு செய்யும்போது உங்கள் திரையில் காட்டப்படுகின்ற அல்லது சாதனத்தில் பிளே செய்யப்படுகின்ற அனைத்தையும் Android அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், படங்கள், ஆடியோ, வீடியோ போன்றவை குறித்துக் கவனத்துடன் இருங்கள்."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"ஓர் ஆப்ஸை நீங்கள் ரெக்கார்டு செய்யும்போது அந்த ஆப்ஸில் காட்டப்படுகின்ற அல்லது பிளே செய்யப்படுகின்ற அனைத்தையும் Android அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், படங்கள், ஆடியோ, வீடியோ போன்றவை குறித்துக் கவனத்துடன் இருங்கள்."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ரெக்கார்டு செய்யத் தொடங்கு"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ஆடியோவை ரெக்கார்டு செய்"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"சாதன ஆடியோ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"இசை, அழைப்புகள், ரிங்டோன்கள் போன்ற உங்கள் சாதனத்திலிருந்து வரும் ஒலி"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"மைக்ரோஃபோன்"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"சாதன ஆடியோ மற்றும் மைக்ரோஃபோன்"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"தொடங்கு"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"தொடங்கு"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"ஸ்கிரீன் ரெக்கார்ட் செய்யப்படுகிறது"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"ஸ்கிரீன் மற்றும் ஆடியோ ரெக்கார்ட் செய்யப்படுகிறது"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"திரையில் உள்ள தொடுதல்களைக் காட்டு"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"அடுத்த முறை தவறான பேட்டர்னை வரைந்தால் உங்கள் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"அடுத்த முறை தவறான பின்னை உள்ளிட்டால் உங்கள் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"அடுத்த முறை தவறான கடவுச்சொல்லை உள்ளிட்டால் உங்கள் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்."</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"அமை"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"இப்போது வேண்டாம்"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"பாதுகாப்பையும் செயல்திறனையும் மேம்படுத்த இது தேவை"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"கைரேகை அன்லாக் அம்சத்தை மீண்டும் அமையுங்கள்"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"கைரேகை அன்லாக்"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"கைரேகை அன்லாக் அம்சத்தை அமையுங்கள்"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"\'கைரேகை அன்லாக்\' அம்சத்தை மீண்டும் அமைக்க, உங்களுடைய தற்போதைய கைரேகைப் படங்களும் மாடல்களும் நீக்கப்படும்.\n\nஅவை நீக்கப்பட்ட பிறகு, உங்கள் கைரேகையைப் பயன்படுத்தி மொபைலைத் திறக்கவோ நீங்கள்தான் என்பதை உறுதிப்படுத்தவோ \'கைரேகை அன்லாக்\' அம்சத்தை மீண்டும் அமைக்க வேண்டும்."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"\'கைரேகை அன்லாக்\' அம்சத்தை மீண்டும் அமைக்க, உங்களுடைய தற்போதைய கைரேகைப் படங்களும் மாடலும் நீக்கப்படும்.\n\nஅவை நீக்கப்பட்ட பிறகு, உங்கள் கைரேகையைப் பயன்படுத்தி மொபைலைத் திறக்கவோ நீங்கள்தான் என்பதை உறுதிப்படுத்தவோ \'கைரேகை அன்லாக்\' அம்சத்தை மீண்டும் அமைக்க வேண்டும்."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"\'கைரேகை அன்லாக்\' அம்சத்தை அமைக்க முடியவில்லை. அமைப்புகளுக்குச் சென்று மீண்டும் முயலவும்."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை மீண்டும் அமையுங்கள்"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"முகம் காட்டித் திறத்தல்"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமையுங்கள்"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை மீண்டும் அமைக்க, உங்களுடைய தற்போதைய முகத் தோற்றப் பதிவு நீக்கப்படும்.\n\nஉங்கள் முகத்தைப் பயன்படுத்தி மொபைலைத் திறக்க இந்த அம்சத்தை மீண்டும் அமைக்க வேண்டும்."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"\'முகம் காட்டித் திறத்தல்\' அம்சத்தை அமைக்க முடியவில்லை. அமைப்புகளுக்குச் சென்று மீண்டும் முயலவும்."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"முகத்தை அடையாளம் காண முடியவில்லை. கைரேகையைப் பயன்படுத்தவும்."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -334,9 +317,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"சாதனத்தின் மைக்ரோஃபோனுக்கான தடுப்பை நீக்கவா?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"சாதனத்தின் கேமராவுக்கான தடுப்பை நீக்கவா?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"சாதனத்தின் கேமராவுக்கும் மைக்ரோஃபோனுக்குமான தடுப்பை நீக்கவா?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"உங்கள் மைக்ரோஃபோனைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"உங்கள் கேமராவையோ மைக்ரோஃபோனையோ பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளை அணுகுவதற்கான தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"உங்கள் மைக்ரோஃபோனைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும் தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"உங்கள் கேமராவைப் பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும் தடுப்பை இது நீக்கும்."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"உங்கள் கேமராவையோ மைக்ரோஃபோனையோ பயன்படுத்த அனுமதிக்கப்பட்டுள்ள அனைத்து ஆப்ஸ் மற்றும் சேவைகளுக்கும் தடுப்பை இது நீக்கும்."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"மைக்ரோஃபோன் அணுகல் முடக்கப்பட்டுள்ளது"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"கேமரா அணுகல் முடக்கப்பட்டுள்ளது"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"மைக்ரோஃபோன் &amp; கேமரா அணுகல் முடக்கப்பட்டுள்ளது"</string>
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"பயனரை அகற்றவா?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"இந்தப் பயனரின் எல்லா பயன்பாடுகளும் தரவும் நீக்கப்படும்."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"அகற்று"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> உங்கள் திரையில் தெரியும் தகவல்கள், ரெக்கார்டு செய்யும்போதோ அனுப்பும்போதோ உங்கள் சாதனத்திலிருந்து பிளே ஆகும் அனைத்து தகவல்கள் ஆகியவற்றுக்கான அணுகலைக் கொண்டிருக்கும். கடவுச்சொற்கள், பேமெண்ட் தொடர்பான தகவல்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்ற அனைத்துத் தகவல்களும் இதில் அடங்கும்."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"இந்தச் செயல்பாட்டை வழங்கும் சேவையானது உங்கள் திரையில் தெரியும் தகவல்கள், ரெக்கார்டு செய்யும்போதோ அனுப்பும்போதோ உங்கள் சாதனத்திலிருந்து பிளே ஆகும் அனைத்துத் தகவல்கள் ஆகியவற்றுக்கான அணுகலைக் கொண்டிருக்கும். கடவுச்சொற்கள், பேமெண்ட் தொடர்பான தகவல்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்ற அனைத்துத் தகவல்களும் இதில் அடங்கும்."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ரெக்கார்டிங் செய்யவோ அனுப்புவோ தொடங்கவா?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> மூலம் ரெக்கார்டிங் செய்யவோ அனுப்புவதற்கோ தொடங்கிவீட்டீர்களா?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"பகிர அல்லது ரெக்கார்டு செய்ய <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆப்ஸை அனுமதிக்கலாமா?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"திரை முழுவதும்"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"ஓர் ஆப்ஸ்"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"நீங்கள் பகிரும்போதோ ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ உங்கள் சாதனத்தில் காட்டப்படும் அல்லது பிளே செய்யப்படும் அனைத்தையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆப்ஸால் அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், பிற பாதுகாக்கப்பட வேண்டிய தகவல்கள் ஆகியவை குறித்து கவனத்துடன் இருங்கள்."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"ஓர் ஆப்ஸை நீங்கள் பகிரும்போதோ ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ அந்த ஆப்ஸில் காட்டப்படும் அல்லது பிளே செய்யப்படும் அனைத்தையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆப்ஸால் அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், பிற பாதுகாக்கப்பட வேண்டிய தகவல்கள் ஆகியவை குறித்து கவனத்துடன் இருங்கள்."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"தொடர்க"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"ஆப்ஸைப் பகிர்தல் அல்லது ரெக்கார்டு செய்தல்"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"பகிர்வதற்கோ ரெக்கார்டு செய்வதற்கோ இந்த ஆப்ஸை அனுமதிக்கவா?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"நீங்கள் பகிரும்போதோ ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ திரையில் காட்டப்படும்/சாதனத்தில் பிளே செய்யப்படும் அனைத்தையும் இந்த ஆப்ஸால் அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள் அல்லது பாதுகாக்கப்பட வேண்டிய பிற தகவல்கள் குறித்துக் கவனமாக இருங்கள்."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"ஓர் ஆப்ஸை நீங்கள் பகிரும்போதோ ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ அதில் காட்டப்படும்/பிளே செய்யப்படும் அனைத்தையும் இந்த ஆப்ஸால் அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள் அல்லது பாதுகாக்கப்பட வேண்டிய பிற தகவல்கள் குறித்துக் கவனமாக இருங்கள்."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ உங்கள் திரையில் காட்டப்படுகின்ற அல்லது உங்கள் சாதனத்திலிருந்து பிளே செய்யப்படுகின்ற அனைத்துத் தகவல்களுக்குமான அணுகலை <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆப்ஸ் கொண்டிருக்கும். கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்றவை இதிலடங்கும்."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ரெக்கார்டு செய்ய அல்லது அலைபரப்பத் தொடங்கவா?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ உங்கள் திரையில் காட்டப்படுகின்ற அல்லது சாதனத்திலிருந்து பிளே செய்யப்படுகின்ற அனைத்துத் தகவல்களையும் இந்தச் செயல்பாட்டை வழங்கும் சேவையால் அணுக முடியும். கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், படங்கள், மெசேஜ்கள், நீங்கள் பிளே செய்யும் ஆடியோ போன்றவை இதிலடங்கும்."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"முழுத்திரையையும்"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"ஓர் ஆப்ஸ்"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"ஆப்ஸைப் பகிர்தல் அல்லது ரெக்கார்டு செய்தல்"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆப்ஸ் மூலம் ரெக்கார்டு செய்ய அல்லது அலைபரப்பத் தொடங்கவா?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"நீங்கள் பகிரும்போதோ ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ உங்கள் திரையில் காட்டப்படுகின்ற அல்லது சாதனத்தில் பிளே செய்யப்படுகின்ற அனைத்தையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆப்ஸால் அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், படங்கள், ஆடியோ, வீடியோ போன்றவை குறித்துக் கவனத்துடன் இருங்கள்."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"நீங்கள் ஓர் ஆப்ஸைப் பகிரும்போதோ ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ அந்த ஆப்ஸில் காட்டப்படுகின்ற அல்லது பிளே செய்யப்படுகின்ற அனைத்தையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ஆப்ஸால் அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், படங்கள், ஆடியோ, வீடியோ போன்றவை குறித்துக் கவனத்துடன் இருங்கள்."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"தொடங்கு"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"அலைபரப்பைத் தொடங்கவா?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"நீங்கள் அலைபரப்பும்போது உங்கள் திரையில் காட்டப்படுகின்ற அல்லது சாதனத்தில் பிளே செய்யப்படுகின்ற அனைத்தையும் Android அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், படங்கள், ஆடியோ, வீடியோ போன்றவை குறித்துக் கவனத்துடன் இருங்கள்."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"ஓர் ஆப்ஸை நீங்கள் அலைபரப்பும்போது அந்த ஆப்ஸில் காட்டப்படுகின்ற அல்லது பிளே செய்யப்படுகின்ற அனைத்தையும் Android அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், படங்கள், ஆடியோ, வீடியோ போன்றவை குறித்துக் கவனத்துடன் இருங்கள்."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"அலைபரப்பைத் தொடங்கு"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"பகிர்தலைத் தொடங்கவா?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"நீங்கள் பகிரும்போதோ ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ உங்கள் திரையில் காட்டப்படுகின்ற அல்லது சாதனத்தில் பிளே செய்யப்படுகின்ற அனைத்தையும் Android அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், படங்கள், ஆடியோ, வீடியோ போன்றவை குறித்துக் கவனத்துடன் இருங்கள்."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"நீங்கள் ஓர் ஆப்ஸைப் பகிரும்போதோ ரெக்கார்டு செய்யும்போதோ அலைபரப்பும்போதோ அந்த ஆப்ஸில் காட்டப்படுகின்ற அல்லது பிளே செய்யப்படுகின்ற அனைத்தையும் Android அணுக முடியும். எனவே கடவுச்சொற்கள், பேமெண்ட் விவரங்கள், மெசேஜ்கள், படங்கள், ஆடியோ, வீடியோ போன்றவை குறித்துக் கவனத்துடன் இருங்கள்."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"தொடங்கு"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"உங்கள் IT நிர்வாகி தடுத்துள்ளார்"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"\'திரையைப் படமெடுத்தல்\' சாதனக் கொள்கையின்படி முடக்கப்பட்டுள்ளது"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
@@ -472,7 +460,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"இந்தச் சாதனத்தில் சான்றிதழ் அங்கீகாரம் நிறுவப்பட்டுள்ளது. உங்களின் பாதுகாப்பான நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படலாம் அல்லது மாற்றப்படலாம்."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"உங்கள் நிர்வாகி, நெட்வொர்க் பதிவெடுத்தலை இயக்கியுள்ளார். இது சாதனத்தில் ட்ராஃபிக்கைக் கண்காணிக்கும்."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"உங்கள் நிர்வாகி \'நெட்வொர்க் பதிவெடுத்தலை\' இயக்கியுள்ளார், இது உங்கள் பணிக் கணக்கில் டிராஃபிக்கைக் கண்காணிக்கும். ஆனால் தனிப்பட்ட கணக்கில் கண்காணிக்காது."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"இந்தச் சாதனம் <xliff:g id="VPN_APP">%1$s</xliff:g> மூலம் இணையத்துடன் இணைக்கப்பட்டுள்ளது. உங்களின் நெட்வொர்க் செயல்பாட்டை (மின்னஞ்சல்கள், உலாவிய தரவு உட்பட) உங்கள் IT நிர்வாகியால் பார்க்க முடியும்."</string>
+    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
+    <skip />
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"இந்தச் சாதனம் <xliff:g id="VPN_APP_0">%1$s</xliff:g>, <xliff:g id="VPN_APP_1">%2$s</xliff:g> ஆகியவை மூலம் இணையத்துடன் இணைக்கப்பட்டுள்ளது. உங்களின் நெட்வொர்க் செயல்பாட்டை (மின்னஞ்சல்கள், உலாவிய தரவு உட்பட) உங்கள் IT நிர்வாகியால் பார்க்க முடியும்."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"உங்கள் பணி ஆப்ஸ் <xliff:g id="VPN_APP">%1$s</xliff:g> மூலம் இணையத்துடன் இணைக்கப்பட்டுள்ளது. பணி ஆப்ஸில் உங்களின் நெட்வொர்க் செயல்பாட்டை (மின்னஞ்சல்கள், உலாவிய தரவு உட்பட) உங்கள் IT நிர்வாகியாலும் VPN வழங்குநராலும் பார்க்க முடியும்."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"உங்கள் தனிப்பட்ட ஆப்ஸ் <xliff:g id="VPN_APP">%1$s</xliff:g> மூலம் இணையத்துடன் இணைக்கப்பட்டுள்ளது. உங்களின் நெட்வொர்க் செயல்பாட்டை (மின்னஞ்சல்கள், உலாவிய தரவு உட்பட) உங்கள் VPN வழங்குநரால் பார்க்க முடியும்."</string>
@@ -913,8 +904,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"பிடித்தவற்றிலிருந்து நீக்க இருமுறை தட்டவும்"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>ம் நிலைக்கு நகர்த்து"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"கட்டுப்பாடுகள்"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"விரைவாக அணுக சாதனக் கட்டுப்பாடுகளைத் தேர்ந்தெடுங்கள்"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"கட்டுப்பாடுகளை மறுவரிசைப்படுத்த அவற்றைப் பிடித்து இழுக்கவும்"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"கட்டுப்பாடுகள் அனைத்தும் அகற்றப்பட்டன"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"மாற்றங்கள் சேமிக்கப்படவில்லை"</string>
@@ -1134,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• கேமரா ஆப்ஸ் நிறுவப்பட்டிருக்க வேண்டும்"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• இந்த ஆப்ஸ் அமைக்கப்பட்டிருக்க வேண்டும்"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• குறைந்தபட்சம் ஒரு சாதனமாவது கிடைக்க வேண்டும்"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ஷார்ட்கட்டை தொட்டுப் பிடிக்கவும்"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ரத்துசெய்"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"இப்போது திரைகளை மாற்றவா?"</string>

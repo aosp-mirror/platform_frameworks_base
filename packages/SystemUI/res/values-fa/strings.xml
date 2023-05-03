@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"‫«<xliff:g id="APPNAME">%1$s</xliff:g>» این نماگرفت را تشخیص داد."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> و سایر برنامه‌های باز این نماگرفت را تشخیص دادند."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"افزودن به یادداشت"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"ضبط‌کننده صفحه‌نمایش"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"ضبط‌کن صفحه‌نمایش"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"درحال پردازش ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"اعلان درحال انجام برای جلسه ضبط صفحه‌نمایش"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"ضبط شروع شود؟"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"‏هنگام ضبط، «سیستم Android» می‌تواند هر اطلاعات حساسی را که روی صفحه‌نمایش شما نشان داده می‌شود یا روی دستگاه شما پخش می‌شود ضبط کند. این شامل گذرواژه‌ها، اطلاعات پرداخت، عکس‌ها، پیام‌ها، و صدا می‌شود."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"ضبط کل صفحه"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"ضبط یک برنامه"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"‏درحین ضبط کردن، Android به همه محتوایی که در صفحه‌تان نمایان است یا در دستگاهتان پخش می‌شود دسترسی دارد. بنابراین مراقب گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، یا دیگر اطلاعات حساس باشید."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"‏درحین ضبط برنامه، Android به همه محتوایی که در آن برنامه نمایان است یا پخش می‌شود دسترسی دارد. بنابراین مراقب گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، یا دیگر اطلاعات حساس باشید."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"شروع ضبط"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ضبط شروع شود؟"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"‏درحین ضبط کردن، Android به همه محتوایی که در صفحه‌تان نمایان است یا در دستگاهتان پخش می‌شود دسترسی دارد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"‏درحین ضبط کردن برنامه، Android به همه محتوایی که در آن برنامه نمایان است یا پخش می‌شود دسترسی دارد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"شروع ضبط"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ضبط صدا"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"صدای دریافتی از دستگاه"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"صدای دریافتی از دستگاه، مثل موسیقی، تماس، و آهنگ زنگ"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"میکروفن"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"صدا و میکروفون دستگاه"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"شروع"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"شروع"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"درحال ضبط صفحه‌نمایش"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"درحال ضبط صفحه‌نمایش و صدا"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"نمایش قسمت‌های لمس‌شده روی صفحه‌نمایش"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"اگر در تلاش بعدی الگوی نادرستی وارد کنید، داده‌های نمایه کاری شما و داده‌های آن حذف خواهد شد."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"اگر در تلاش بعدی‌ پین نادرستی وارد کنید، نمایه کاری شما و داده‌های آن حذف خواهند شد."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"اگر در تلاش بعدی‌ گذرواژه نادرستی وارد کنید، نمایه کاری شما و داده‌های آن حذف خواهند شد."</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"راه‌اندازی"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"اکنون نه"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"این کار برای بهبود امنیت و عملکرد لازم است"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"قفل‌گشایی با اثر انگشت"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"راه‌اندازی «قفل‌گشایی با اثر انگشت»"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"برای راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»، تصاویر و مدل‌های فعلی اثر انگشتتان حذف خواهد شد.\n\nبعداز حذف آن‌ها، اگر بخواهید برای قفل‌گشایی تلفن یا تأیید هویت از اثر انگشتتان استفاده کنید، باید «قفل‌گشایی با اثر انگشت» را دوباره راه‌اندازی کنید."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"برای راه‌اندازی مجدد «قفل‌گشایی با اثر انگشت»، تصاویر و مدل‌های فعلی اثر انگشتتان حذف خواهد شد.\n\nبعداز حذف آن‌ها، اگر بخواهید برای قفل‌گشایی تلفن یا تأیید هویت از اثر انگشتتان استفاده کنید، باید «قفل‌گشایی با اثر انگشت» را دوباره راه‌اندازی کنید."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"«قفل‌گشایی با اثر انگشت» راه‌اندازی نشد. برای امتحان مجدد، به «تنظیمات» بروید."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"راه‌اندازی مجدد «قفل‌گشایی با چهره»"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"قفل‌گشایی با چهره"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"راه‌اندازی «قفل‌گشایی با چهره»"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"برای راه‌اندازی مجدد «قفل‌گشایی با چهره»، مدل چهره فعلی‌تان حذف خواهد شد.\n\nاگر بخواهید برای قفل‌گشایی تلفن از چهره‌تان استفاده کنید، باید این ویژگی را دوباره راه‌اندازی کنید."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"«قفل‌گشایی با چهره» راه‌اندازی نشد. برای امتحان مجدد، به «تنظیمات» بروید."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"حسگر اثر انگشت را لمس کنید"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"چهره شناسایی نشد. درعوض از اثر انگشت استفاده کنید."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"کاربر حذف شود؟"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"همه برنامه‌ها و داده‌های این کاربر حذف می‌شود."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"حذف"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> به همه اطلاعاتی که روی صفحه‌نمایش قابل‌مشاهد است و هنگام ضبط کردن یا پخش محتوا از دستگاهتان پخش می‌شود دسترسی خواهد داشت. این شامل اطلاعاتی مانند گذرواژه‌ها، جزئیات پرداخت، عکس‌ها، پیام‌ها، و صداهایی که پخش می‌کنید می‌شود."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"سرویس ارائه‌دهنده این عملکرد به همه اطلاعاتی که روی صفحه‌نمایش قابل‌مشاهد است و هنگام ضبط کردن یا پخش محتوا از دستگاهتان پخش می‌شود دسترسی خواهد داشت. این شامل اطلاعاتی مانند گذرواژه‌ها، جزئیات پرداخت، عکس‌ها، پیام‌ها، و صداهایی که پخش می‌کنید می‌شود."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ضبط یا پخش محتوا شروع شود؟"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"ضبط یا پخش محتوا با <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> شروع شود؟"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"به <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> اجازه هم‌رسانی یا ضبط داده شود؟"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"کل صفحه"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"یک برنامه"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"وقتی درحال هم‌رسانی، ضبط، یا پخش محتوا هستید، <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> به همه محتوایی که در صفحه‌تان نمایان است یا در دستگاهتان پخش می‌شود دسترسی دارد. بنابراین مراقب گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، یا دیگر اطلاعات حساس باشید."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"وقتی درحال هم‌رسانی، ضبط، یا پخش محتوای برنامه‌ای هستید، <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> به همه محتوایی که در آن برنامه نمایان است یا پخش می‌شود دسترسی دارد. بنابراین مراقب گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، یا دیگر اطلاعات حساس باشید."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ادامه"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"هم‌رسانی یا ضبط برنامه"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"به این برنامه اجازه هم‌رسانی یا ضبط می‌دهید؟"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"وقتی درحال هم‌رسانی، ضبط، یا پخش محتوا هستید، این برنامه به همه محتوایی که در صفحه‌تان نمایان است یا در دستگاهتان پخش می‌شود دسترسی دارد. بنابراین مراقب گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، یا دیگر اطلاعات حساس باشید."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"وقتی درحال هم‌رسانی، ضبط، یا پخش محتوای برنامه‌ای هستید، این برنامه به همه محتوایی که در آن برنامه نمایان است یا پخش می‌شود دسترسی دارد. بنابراین مراقب گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، یا دیگر اطلاعات حساس باشید."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> به همه اطلاعاتی که روی صفحه‌نمایش قابل‌مشاهد است و هنگام ضبط کردن یا پخش محتوا از دستگاهتان پخش می‌شود دسترسی خواهد داشت. این شامل اطلاعاتی مانند گذرواژه‌ها، جزئیات پرداخت، عکس‌ها، پیام‌ها، و صداهایی که پخش می‌کنید می‌شود."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ضبط یا پخش محتوا شروع شود؟"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"سرویس ارائه‌دهنده این عملکرد به همه اطلاعاتی که روی صفحه‌نمایش قابل‌مشاهد است و هنگام ضبط کردن یا پخش محتوا از دستگاهتان پخش می‌شود دسترسی خواهد داشت. این شامل اطلاعاتی مانند گذرواژه‌ها، جزئیات پرداخت، عکس‌ها، پیام‌ها، و صداهایی که پخش می‌کنید می‌شود."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"کل صفحه"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"یک برنامه"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"هم‌رسانی یا ضبط برنامه"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"ضبط یا پخش محتوا با <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> شروع شود؟"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"وقتی درحال هم‌رسانی، ضبط، یا پخش محتوا هستید، <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> به همه محتوایی که در صفحه‌تان نمایان است یا در دستگاهتان پخش می‌شود دسترسی دارد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"وقتی درحال هم‌رسانی، ضبط، یا پخش محتوای برنامه‌ای هستید، <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> به همه محتوایی که در آن برنامه نمایان است یا پخش می‌شود دسترسی دارد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"شروع"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"پخش محتوا شروع شود؟"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"‏وقتی محتوا پخش می‌کنید، Android به همه محتوایی که در صفحه‌تان نمایان است یا در دستگاهتان پخش می‌شود دسترسی دارد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"‏وقتی محتوای برنامه‌ای را پخش می‌کنید، Android به همه محتوایی که در آن برنامه نمایان است یا پخش می‌شود دسترسی دارد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"شروع پخش محتوا"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"هم‌رسانی شروع شود؟"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"‏وقتی درحال هم‌رسانی، ضبط، یا پخش محتوا هستید، Android به همه محتوایی که در صفحه‌تان نمایان است یا در دستگاهتان پخش می‌شود دسترسی دارد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"‏وقتی درحال هم‌رسانی، ضبط، یا پخش محتوای برنامه‌ای هستید، Android به همه محتوایی که در آن برنامه نمایان است یا پخش می‌شود دسترسی دارد. درنتیجه مراقب چیزهایی مثل گذرواژه‌ها، جزئیات پرداخت، پیام‌ها، عکس‌ها، و صدا و تصویر باشید."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"شروع"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"سرپرست فناوری اطلاعات آن را مسدود کرده است"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"«ضبط صفحه‌نمایش» به‌دلیل خط‌مشی دستگاه غیرفعال است"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"پاک کردن همه موارد"</string>
@@ -472,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"مرجع گواهینامه‌ای در این دستگاه نصب شده است. ممکن است ترافیک امن شبکه شما پایش یا تغییر داده شود."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"سرپرست سیستم شما گزارش‌گیری از شبکه را (که ترافیک دستگاه شما را پایش می‌کند) روشن کرده است."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"سرپرست شما گزارش‌گیری شبکه را که بر ترافیک نمایه کاری‌تان نظارت می‌کند، اما بر ترافیک نمایه شخصی‌تان نظارت نمی‌کند روشن کرده است."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"این دستگاه ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. سرپرست فناوری اطلاعات شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"‏این دستگاه ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. ارائه‌دهنده VPN می‌تواند فعالیت شبکه شما شامل ایمیل‌ها و داده‌های مرور را ببیند."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"این دستگاه ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. سرپرست فناوری اطلاعات می‌تواند فعالیت شبکه شما شامل ایمیل‌ها و داده‌های مرور را ببیند."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"این دستگاه ازطریق <xliff:g id="VPN_APP_0">%1$s</xliff:g> و <xliff:g id="VPN_APP_1">%2$s</xliff:g> به اینترنت متصل شده است. سرپرست فناوری اطلاعات شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏برنامه‌های کاری‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. ارائه‌دهنده VPN و سرپرست فناوری اطلاعات شما می‌توانند فعالیت شبکه شما در برنامه‌های کاری را (ازجمله ایمیل‌ها و داده‌های مرور) ببینند."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏برنامه‌های شخصی‌تان ازطریق <xliff:g id="VPN_APP">%1$s</xliff:g> به اینترنت متصل شده است. ارائه‌دهنده VPN شما می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها و داده‌های مرور) ببیند."</string>
@@ -868,7 +857,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"درشت‌نمایی بخشی از صفحه"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"باز کردن تنظیمات درشت‌نمایی"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"برای تغییر اندازه، گوشه را بکشید"</string>
-    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"مجاز کردن پیمایش قطری"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"اجازه دادن برای پیمایش قطری"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"تغییر اندازه"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"تغییر نوع درشت‌نمایی"</string>
     <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"پایان تغییر اندازه"</string>
@@ -913,8 +902,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"حذف کردن از موارد دلخواه"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"انتقال به موقعیت <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"کنترل‌ها"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"کنترل‌های دستگاه را برای دسترسی سریع انتخاب کنید"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"برای تغییر دادن ترتیب کنترل‌ها، آن‌ها را نگه دارید و بکشید"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"همه کنترل‌ها برداشته شده‌اند"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"تغییرات ذخیره نشد"</string>
@@ -1134,6 +1122,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• برنامه دوربین نصب شده باشد"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• برنامه راه‌اندازی شده باشد"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• حداقل یک دستگاه دردسترس باشد"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"میان‌بر را لمس کنید و نگه دارید"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"لغو کردن"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"صفحه‌ها اکنون جابه‌جا می‌شود"</string>

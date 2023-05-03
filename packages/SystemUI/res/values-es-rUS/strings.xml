@@ -92,26 +92,23 @@
     <string name="screenshot_left_boundary_pct" msgid="8502323556112287469">"Límite izquierdo: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
     <string name="screenshot_right_boundary_pct" msgid="1201150713021779321">"Límite derecho: <xliff:g id="PERCENT">%1$d</xliff:g> por ciento"</string>
     <string name="screenshot_work_profile_notification" msgid="203041724052970693">"Se guardó en <xliff:g id="APP">%1$s</xliff:g> en el perfil de trabajo"</string>
-    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Files"</string>
+    <string name="screenshot_default_files_app_name" msgid="8721579578575161912">"Archivos"</string>
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> detectó que tomaste una captura de pantalla."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> y otras apps en ejecución detectaron que tomaste una captura de pantalla."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Agregar a la nota"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Grabadora de pantalla"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Grabadora de pantalla"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Procesando grabación pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificación constante para una sesión de grabación de pantalla"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"¿Comenzar a grabar?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Durante la grabación, el sistema Android puede capturar cualquier información sensible que aparezca en la pantalla o que se reproduzca en el dispositivo. Se incluyen contraseñas, información de pago, fotos, mensajes y audio."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Grabar toda la pantalla"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Grabar una sola app"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Mientras grabes, Android podrá acceder a todo el contenido visible en la pantalla o que reproduzcas en el dispositivo. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes y otra información sensible."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Mientras grabes una app, Android podrá acceder a todo el contenido que se muestre o reproduzca en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes y otra información sensible."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Iniciar grabación"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"¿Quieres comenzar a grabar?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Cuando grabes contenido, Android podrá acceder a todo lo que sea visible en la pantalla o que reproduzcas en el dispositivo. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Cuando grabes una app, Android podrá acceder a todo el contenido que se muestre o que reproduzcas en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Iniciar grabación"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grabar audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio del dispositivo"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sonidos del dispositivo, como música, llamadas y tonos"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micrófono"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio del dispositivo y micrófono"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Iniciar"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Iniciar"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Grabando pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Grabando pantalla y audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostrar toques en la pantalla"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si ingresas un patrón incorrecto en el próximo intento, se borrarán tu perfil de trabajo y sus datos."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Si ingresas un PIN incorrecto en el próximo intento, se borrarán tu perfil de trabajo y sus datos."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Si ingresas una contraseña incorrecta en el próximo intento, se borrarán tu perfil de trabajo y sus datos."</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Configurar"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Ahora no"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Se requiere para mejorar la seguridad y el rendimiento"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Vuelve a configurar el Desbloqueo con huellas dactilares"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Desbloqueo con huellas dactilares"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Desbloqueo con huellas dactilares"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Para volver a configurar el Desbloqueo con huellas dactilares, se eliminarán las imágenes y los modelos actuales de tus huellas.\n\nUna vez eliminados, podrás volver a configurar el Desbloqueo con huellas dactilares y usar tus huellas para desbloquear el teléfono o verificar tu identidad."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Para volver a configurar el Desbloqueo con huellas dactilares, se eliminarán las imágenes y los modelos actuales de tus huellas.\n\nUna vez eliminados, podrás volver a configurar el Desbloqueo con huellas dactilares y usar tus huellas para desbloquear el teléfono o verificar tu identidad."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"No se pudo configurar el desbloqueo con huellas dactilares. Ve a Configuración para volver a intentarlo."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Vuelve a configurar Desbloqueo facial"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Desbloqueo facial"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Configura el Desbloqueo facial"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Para volver a configurar el Desbloqueo facial, se eliminará tu modelo de rostro actual.\n\nDeberás volver a configurar esta función si quieres usar tu rostro para desbloquear el teléfono."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"No se pudo configurar el desbloqueo facial. Ve a Configuración para volver a intentarlo."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Toca el sensor de huellas dactilares"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"No se reconoce el rostro. Usa la huella dactilar."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"¿Confirmas que quieres quitar el usuario?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Se borrarán todas las aplicaciones y los datos de este usuario."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Quitar"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en tu dispositivo durante una grabación o transmisión. Se incluyen las contraseñas, los detalles del pago, las fotos, los mensajes y el audio que reproduzcas."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que brinda esta función tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en tu dispositivo durante una grabación o transmisión. Se incluyen contraseñas, detalles de pago, fotos, mensajes y audios que reproduzcas."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"¿Deseas comenzar a grabar o transmitir contenido?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Deseas iniciar una grabación o transmisión con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"¿Quieres permitir que <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> comparta o grabe contenido?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Pantalla completa"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Una sola app"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Cuando compartas, grabes o transmitas contenido, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> podrá acceder a todo aquel que sea visible en la pantalla o que reproduzcas en el dispositivo. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes y otra información sensible."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Cuando compartas, grabes o transmitas una app, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> podrá acceder a todo el contenido que se muestre o reproduzca en ella. Por lo tanto, debes tener cuidado con las contraseñas, los detalles de pagos, los mensajes y otra información sensible."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Continuar"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Compartir o grabar una app"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"¿Quieres permitir que esta app comparta o grabe tu pantalla?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Cuando compartas, grabes o transmitas contenido, esta app podrá acceder a todo lo que sea visible en la pantalla o que reproduzcas en el dispositivo. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes y otra información sensible que pueda estar visible."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Cuando compartas, grabes o transmitas una app, esta app podrá acceder a todo el contenido que se muestre o reproduzca en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes y otra información sensible que pueda estar visible."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en el dispositivo durante una grabación o transmisión. Se incluyen contraseñas, detalles de pagos, fotos, mensajes y el audio que reproduzcas."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"¿Quieres comenzar a grabar o transmitir contenido?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"El servicio que brinda esta función tendrá acceso a toda la información que sea visible en la pantalla o que reproduzcas en el dispositivo durante una grabación o transmisión. Se incluyen contraseñas, detalles de pagos, fotos, mensajes y audio que reproduzcas."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Pantalla completa"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Una sola app"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Comparte o graba una app"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"¿Quieres iniciar una grabación o transmisión con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Cuando compartas, grabes o transmitas contenido, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> podrá acceder a todo lo que sea visible en la pantalla o que reproduzcas en el dispositivo. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Cuando compartas, grabes o transmitas una app, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> podrá acceder a todo el contenido que se muestre o que reproduzcas en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Iniciar"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"¿Quieres comenzar a transmitir contenido?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Cuando transmitas contenido, Android podrá acceder a todo lo que sea visible en la pantalla o que reproduzcas en el dispositivo. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Cuando transmitas una app, Android podrá acceder a todo el contenido que se muestre o que reproduzcas en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Comenzar a transmitir contenido"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"¿Quieres empezar a compartir?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Cuando compartas, grabes o transmitas contenido, Android podrá acceder a todo lo que sea visible en la pantalla o que reproduzcas en el dispositivo. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Cuando compartas, grabes o transmitas una app, Android podrá acceder a todo el contenido que se muestre o que reproduzcas en ella. Por lo tanto, debes tener cuidado con contraseñas, detalles de pagos, mensajes, fotos, audios y videos."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Iniciar"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloqueada por tu administrador de TI"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"La captura de pantalla está inhabilitada debido a la política del dispositivo"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
@@ -472,7 +460,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Hay una autoridad de certificación instalada en este dispositivo. Es posible que se controle o modifique el tráfico de tu red segura."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Tu administrador activó el registro de red, que supervisa el tráfico en tu dispositivo."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"El administrador activó el registro de red, que supervisa el tráfico de tu perfil de trabajo, pero no el de tu perfil personal."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Este dispositivo está conectado a Internet mediante <xliff:g id="VPN_APP">%1$s</xliff:g>. El administrador de TI puede ver tu actividad de red (incluidos tus correos electrónicos y datos de navegación)."</string>
+    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
+    <skip />
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Este dispositivo está conectado a Internet mediante <xliff:g id="VPN_APP_0">%1$s</xliff:g> y <xliff:g id="VPN_APP_1">%2$s</xliff:g>. El administrador de TI puede ver tu actividad de red (incluidos tus correos electrónicos y datos de navegación)."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Tus apps de trabajo están conectadas a Internet mediante <xliff:g id="VPN_APP">%1$s</xliff:g>. El administrador de TI y el proveedor de VPN pueden ver tu actividad de red en las apps de trabajo (incluidos los correos electrónicos y los datos de navegación)."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Tus apps personales están conectadas a Internet mediante <xliff:g id="VPN_APP">%1$s</xliff:g>. El proveedor de VPN puede ver tu actividad (incluidos los correos electrónicos y los datos de navegación)."</string>
@@ -868,7 +859,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Ampliar parte de la pantalla"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Abrir la configuración de ampliación"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Arrastra la esquina para cambiar el tamaño"</string>
-    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Permitir desplazamiento en diagonal"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Desplazamiento en diagonal"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Cambiar tamaño"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Cambiar tipo de ampliación"</string>
     <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Finalizar cambio de tamaño"</string>
@@ -889,7 +880,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Presiona para abrir las funciones de accesibilidad. Personaliza o cambia botón en Config.\n\n"<annotation id="link">"Ver config"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Mueve el botón hacia el borde para ocultarlo temporalmente"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Deshacer"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Se quitó el acceso directo <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Se quitó el acceso directo a <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Se quitó # acceso directo}many{Se quitaron # accesos directos}other{Se quitaron # accesos directos}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Mover arriba a la izquierda"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Mover arriba a la derecha"</string>
@@ -913,8 +904,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"quitar de favoritos"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover a la posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Elige los controles de dispositivos para acceso rápido"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén presionado y arrastra un control para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Se quitaron todos los controles"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se guardaron los cambios"</string>
@@ -1134,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Se instaló la app de Cámara."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Se configuró la app."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Hay al menos un dispositivo disponible."</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Mantener presionado atajo"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Cancelar"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Cambiar de pantalla ahora"</string>
