@@ -1476,6 +1476,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSideStage.removeAllTasks(wct, false /* toTop */);
             mMainStage.deactivate(wct, false /* toTop */);
         }
+        wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                false /* reparentLeafTaskIfRelaunch */);
     }
 
     private void prepareEnterSplitScreen(WindowContainerTransaction wct) {
@@ -2327,6 +2329,15 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     // the remote handler.
                     return null;
                 }
+
+                if ((mMainStage.containsTask(triggerTask.taskId)
+                            && mMainStage.getChildCount() == 1)
+                        || (mSideStage.containsTask(triggerTask.taskId)
+                            && mSideStage.getChildCount() == 1)) {
+                    // A splitting task is opening to fullscreen causes one side of the split empty,
+                    // so appends operations to exit split.
+                    prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, out);
+                }
             }
         } else {
             if (isOpening && getStageOfTask(triggerTask) != null) {
@@ -2409,9 +2420,23 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     if (isOpeningType(change.getMode())) {
                         // Split is opened by someone so set it as visible.
                         setSplitsVisible(true);
+                        // TODO(b/275664132): Find a way to integrate this with finishWct.
+                        //  This is setting the flag to a task and not interfering with the
+                        //  transition.
+                        final WindowContainerTransaction wct = new WindowContainerTransaction();
+                        wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                                false /* reparentLeafTaskIfRelaunch */);
+                        mTaskOrganizer.applyTransaction(wct);
                     } else if (isClosingType(change.getMode())) {
                         // Split is closed by someone so set it as invisible.
                         setSplitsVisible(false);
+                        // TODO(b/275664132): Find a way to integrate this with finishWct.
+                        //  This is setting the flag to a task and not interfering with the
+                        //  transition.
+                        final WindowContainerTransaction wct = new WindowContainerTransaction();
+                        wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                                true /* reparentLeafTaskIfRelaunch */);
+                        mTaskOrganizer.applyTransaction(wct);
                     }
                     continue;
                 }
@@ -2811,16 +2836,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             }
         }
 
-        // TODO(b/275664132): Remove dismissing split screen here to fit in back-to-split support.
-        // Dismiss the split screen if it's not returning to split.
-        prepareExitSplitScreen(STAGE_TYPE_UNDEFINED, finishWct);
-        for (TransitionInfo.Change change : info.getChanges()) {
-            if (change.getTaskInfo() != null && TransitionUtil.isClosingType(change.getMode())) {
-                finishT.setCrop(change.getLeash(), null).hide(change.getLeash());
-            }
-        }
         setSplitsVisible(false);
-        setDividerVisibility(false, finishT);
+        finishWct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
+                true /* reparentLeafTaskIfRelaunch */);
         logExit(EXIT_REASON_UNKNOWN);
     }
 
