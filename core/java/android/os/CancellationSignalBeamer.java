@@ -18,6 +18,7 @@ package android.os;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.system.SystemCleaner;
 import android.util.Pair;
 import android.view.inputmethod.CancellableHandwritingGesture;
@@ -137,7 +138,7 @@ public class CancellationSignalBeamer {
          * MUST be forwarded to {@link Receiver#cancel} with proper ordering. See
          * {@link CancellationSignalBeamer} for details.
          */
-        public abstract void onCancel(IBinder token);
+        public abstract void onCancel(@NonNull IBinder token);
 
         /**
          * A {@link #beam}ed {@link CancellationSignal} was GC'd.
@@ -145,7 +146,7 @@ public class CancellationSignalBeamer {
          * MUST be forwarded to {@link Receiver#forget} with proper ordering. See
          * {@link CancellationSignalBeamer} for details.
          */
-        public abstract void onForget(IBinder token);
+        public abstract void onForget(@NonNull IBinder token);
 
         private static final ThreadLocal<Pair<Sender, ArrayList<CloseableToken>>> sScope =
                 new ThreadLocal<>();
@@ -159,7 +160,8 @@ public class CancellationSignalBeamer {
          *  try-with-resources. {@code null} if {@code cs} was {@code null} or if
          *  {@link HandwritingGesture} isn't {@link CancellableHandwritingGesture cancellable}.
          */
-        public MustClose beamScopeIfNeeded(HandwritingGesture gesture) {
+        @NonNull
+        public MustClose beamScopeIfNeeded(@NonNull HandwritingGesture gesture) {
             if (!(gesture instanceof CancellableHandwritingGesture)) {
                 return null;
             }
@@ -189,7 +191,8 @@ public class CancellationSignalBeamer {
          * @param cs {@link CancellationSignal} for which token should be returned.
          * @return {@link IBinder} token.
          */
-        public static IBinder beamFromScope(CancellationSignal cs) {
+        @NonNull
+        public static IBinder beamFromScope(@NonNull CancellationSignal cs) {
             var state = sScope.get();
             if (state != null) {
                 var token = state.first.beam(cs);
@@ -291,6 +294,7 @@ public class CancellationSignalBeamer {
          * @return a {@link CancellationSignal} linked to the given token.
          */
         @Nullable
+        @SuppressLint("VisiblySynchronized")
         public CancellationSignal unbeam(@Nullable IBinder token) {
             if (token == null) {
                 return null;
@@ -327,6 +331,7 @@ public class CancellationSignalBeamer {
          *
          * @param token the token to forget. No-op if {@code null}.
          */
+        @SuppressLint("VisiblySynchronized")
         public void forget(@Nullable IBinder token) {
             synchronized (this) {
                 if (mTokenMap.remove(token) != null) {
@@ -347,6 +352,7 @@ public class CancellationSignalBeamer {
          *
          * @param token the token to forget. No-op if {@code null}.
          */
+        @SuppressLint("VisiblySynchronized")
         public void cancel(@Nullable IBinder token) {
             CancellationSignal cs;
             synchronized (this) {
