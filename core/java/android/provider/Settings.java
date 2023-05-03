@@ -3036,7 +3036,9 @@ public final class Settings {
 
         public void destroy() {
             try {
-                if (!mArray.isClosed()) {
+                // If this process is the system server process, mArray is the same object as
+                // the memory int array kept inside SettingsProvider, so skipping the close()
+                if (!Settings.isInSystemServer() && !mArray.isClosed()) {
                     mArray.close();
                 }
             } catch (IOException e) {
@@ -3216,9 +3218,8 @@ public final class Settings {
         @UnsupportedAppUsage
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
             final boolean isSelf = (userHandle == UserHandle.myUserId());
-            final boolean useCache = isSelf && !isInSystemServer();
             boolean needsGenerationTracker = false;
-            if (useCache) {
+            if (isSelf) {
                 synchronized (NameValueCache.this) {
                     final GenerationTracker generationTracker = mGenerationTrackers.get(name);
                     if (generationTracker != null) {
@@ -3250,10 +3251,8 @@ public final class Settings {
                 needsGenerationTracker = true;
             } else {
                 if (DEBUG || LOCAL_LOGV) {
-                    Log.v(TAG, "get setting " + name + " for user " + userHandle + " by user "
-                            + UserHandle.myUserId()
-                            + (isInSystemServer() ? " in system_server" : "")
-                            + " so skipping cache");
+                    Log.v(TAG, "get setting for user " + userHandle
+                            + " by user " + UserHandle.myUserId() + " so skipping cache");
                 }
             }
 
@@ -3366,12 +3365,9 @@ public final class Settings {
                                 }
                             }
                         } else {
-                            if (DEBUG || LOCAL_LOGV) {
-                                Log.i(TAG, "call-query of user " + userHandle
-                                        + " by " + UserHandle.myUserId()
-                                        + (isInSystemServer() ? " in system_server" : "")
-                                        + " so not updating cache");
-                            }
+                            if (LOCAL_LOGV) Log.i(TAG, "call-query of user " + userHandle
+                                    + " by " + UserHandle.myUserId()
+                                    + " so not updating cache");
                         }
                         return value;
                     }
@@ -3444,63 +3440,55 @@ public final class Settings {
 
         public ArrayMap<String, String> getStringsForPrefix(ContentResolver cr, String prefix,
                 List<String> names) {
-            final boolean useCache = !isInSystemServer();
             String namespace = prefix.substring(0, prefix.length() - 1);
             Config.enforceReadPermission(namespace);
             ArrayMap<String, String> keyValues = new ArrayMap<>();
             int currentGeneration = -1;
             boolean needsGenerationTracker = false;
 
-            if (useCache) {
-                synchronized (NameValueCache.this) {
-                    final GenerationTracker generationTracker = mGenerationTrackers.get(prefix);
-                    if (generationTracker != null) {
-                        if (generationTracker.isGenerationChanged()) {
-                            if (DEBUG) {
-                                Log.i(TAG, "Generation changed for prefix:" + prefix
-                                        + " type:" + mUri.getPath()
-                                        + " in package:" + cr.getPackageName());
-                            }
-                            for (int i = mValues.size() - 1; i >= 0; i--) {
-                                String key = mValues.keyAt(i);
-                                if (key.startsWith(prefix)) {
-                                    mValues.remove(key);
-                                }
-                            }
-                        } else {
-                            boolean prefixCached = mValues.containsKey(prefix);
-                            if (prefixCached) {
-                                if (DEBUG) {
-                                    Log.i(TAG, "Cache hit for prefix:" + prefix);
-                                }
-                                if (!names.isEmpty()) {
-                                    for (String name : names) {
-                                        if (mValues.containsKey(name)) {
-                                            keyValues.put(name, mValues.get(name));
-                                        }
-                                    }
-                                } else {
-                                    for (int i = 0; i < mValues.size(); ++i) {
-                                        String key = mValues.keyAt(i);
-                                        // Explicitly exclude the prefix as it is only there to
-                                        // signal that the prefix has been cached.
-                                        if (key.startsWith(prefix) && !key.equals(prefix)) {
-                                            keyValues.put(key, mValues.get(key));
-                                        }
-                                    }
-                                }
-                                return keyValues;
+            synchronized (NameValueCache.this) {
+                final GenerationTracker generationTracker = mGenerationTrackers.get(prefix);
+                if (generationTracker != null) {
+                    if (generationTracker.isGenerationChanged()) {
+                        if (DEBUG) {
+                            Log.i(TAG, "Generation changed for prefix:" + prefix
+                                    + " type:" + mUri.getPath()
+                                    + " in package:" + cr.getPackageName());
+                        }
+                        for (int i = mValues.size() - 1; i >= 0; i--) {
+                            String key = mValues.keyAt(i);
+                            if (key.startsWith(prefix)) {
+                                mValues.remove(key);
                             }
                         }
-                        currentGeneration = generationTracker.getCurrentGeneration();
                     } else {
-                        needsGenerationTracker = true;
+                        boolean prefixCached = mValues.containsKey(prefix);
+                        if (prefixCached) {
+                            if (DEBUG) {
+                                Log.i(TAG, "Cache hit for prefix:" + prefix);
+                            }
+                            if (!names.isEmpty()) {
+                                for (String name : names) {
+                                    if (mValues.containsKey(name)) {
+                                        keyValues.put(name, mValues.get(name));
+                                    }
+                                }
+                            } else {
+                                for (int i = 0; i < mValues.size(); ++i) {
+                                    String key = mValues.keyAt(i);
+                                    // Explicitly exclude the prefix as it is only there to
+                                    // signal that the prefix has been cached.
+                                    if (key.startsWith(prefix) && !key.equals(prefix)) {
+                                        keyValues.put(key, mValues.get(key));
+                                    }
+                                }
+                            }
+                            return keyValues;
+                        }
                     }
-                }
-            } else {
-                if (DEBUG || LOCAL_LOGV) {
-                    Log.v(TAG, "getting settings for prefix " + prefix + " in system_server"
-                            + " so skipping cache");
+                    currentGeneration = generationTracker.getCurrentGeneration();
+                } else {
+                    needsGenerationTracker = true;
                 }
             }
 
