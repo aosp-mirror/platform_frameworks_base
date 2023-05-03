@@ -200,6 +200,7 @@ public class UserControllerTest {
             mUserController.setAllowUserUnlocking(true);
             setUpUser(TEST_USER_ID, NO_USERINFO_FLAGS);
             setUpUser(TEST_PRE_CREATED_USER_ID, NO_USERINFO_FLAGS, /* preCreated= */ true, null);
+            mInjector.mRelevantUser = null;
         });
     }
 
@@ -230,6 +231,25 @@ public class UserControllerTest {
         verify(mInjector, never()).clearAllLockedTasks(anyString());
         startBackgroundUserAssertions();
         verifyUserAssignedToDisplay(TEST_USER_ID, Display.DEFAULT_DISPLAY);
+    }
+
+    @Test
+    public void testStartUser_background_duringBootHsum() {
+        mockIsHeadlessSystemUserMode(true);
+        mUserController.setAllowUserUnlocking(false);
+        mInjector.mRelevantUser = TEST_USER_ID;
+        boolean started = mUserController.startUser(TEST_USER_ID, USER_START_MODE_BACKGROUND);
+        assertWithMessage("startUser(%s, foreground=false)", TEST_USER_ID).that(started).isTrue();
+
+        // ACTION_LOCKED_BOOT_COMPLETED not sent yet
+        startUserAssertions(newArrayList(Intent.ACTION_USER_STARTED, Intent.ACTION_USER_STARTING),
+                START_BACKGROUND_USER_MESSAGE_CODES);
+
+        mUserController.onBootComplete(null);
+
+        startUserAssertions(newArrayList(Intent.ACTION_USER_STARTED, Intent.ACTION_USER_STARTING,
+                        Intent.ACTION_LOCKED_BOOT_COMPLETED),
+                START_BACKGROUND_USER_MESSAGE_CODES);
     }
 
     @Test
@@ -1079,6 +1099,8 @@ public class UserControllerTest {
 
         private final Context mCtx;
 
+        private Integer mRelevantUser;
+
         TestInjector(Context ctx) {
             super(null);
             mCtx = ctx;
@@ -1166,7 +1188,9 @@ public class UserControllerTest {
                 boolean sticky, int callingPid, int callingUid, int realCallingUid,
                 int realCallingPid, int userId) {
             Log.i(TAG, "broadcastIntentLocked " + intent);
-            mSentIntents.add(intent);
+            if (mRelevantUser == null || mRelevantUser == userId || userId == UserHandle.USER_ALL) {
+                mSentIntents.add(intent);
+            }
             return 0;
         }
 
