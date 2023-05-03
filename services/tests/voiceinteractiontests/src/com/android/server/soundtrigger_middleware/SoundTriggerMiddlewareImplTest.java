@@ -30,18 +30,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.annotation.ElapsedRealtimeLong;
 import android.media.soundtrigger.ModelParameter;
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.RemoteException;
 import android.util.Pair;
@@ -224,10 +225,12 @@ public class SoundTriggerMiddlewareImplTest {
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
 
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
+        ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                RecognitionEventSys.class);
         verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().status);
+        RecognitionEventSys lastEvent = eventCaptor.getValue();
+        assertEquals(-1, lastEvent.halEventReceivedMillis);
+        assertEquals(RecognitionStatus.ABORTED, lastEvent.recognitionEvent.status);
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
@@ -273,10 +276,12 @@ public class SoundTriggerMiddlewareImplTest {
         // Stop the recognition.
         stopRecognition(module, handle, hwHandle);
 
-        ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                PhraseRecognitionEvent.class);
+        ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                PhraseRecognitionEventSys.class);
         verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().common.status);
+        PhraseRecognitionEventSys lastEvent = eventCaptor.getValue();
+        assertEquals(-1, lastEvent.halEventReceivedMillis);
+        assertEquals(RecognitionStatus.ABORTED, lastEvent.phraseRecognitionEvent.common.status);
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
@@ -299,11 +304,11 @@ public class SoundTriggerMiddlewareImplTest {
 
         {
             // Signal a capture from the driver (with "still active").
-            RecognitionEvent event = hwCallback.sendRecognitionEvent(hwHandle,
-                    RecognitionStatus.SUCCESS, true);
+            RecognitionEventSys event = hwCallback.sendRecognitionEvent(hwHandle,
+                    RecognitionStatus.SUCCESS, true, 12345);
 
-            ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    RecognitionEvent.class);
+            ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    RecognitionEventSys.class);
             verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
             // Validate the event.
@@ -312,11 +317,11 @@ public class SoundTriggerMiddlewareImplTest {
 
         {
             // Signal a capture from the driver (without "still active").
-            RecognitionEvent event = hwCallback.sendRecognitionEvent(hwHandle,
-                    RecognitionStatus.SUCCESS, false);
+            RecognitionEventSys event = hwCallback.sendRecognitionEvent(hwHandle,
+                    RecognitionStatus.SUCCESS, false, 12345);
 
-            ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    RecognitionEvent.class);
+            ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    RecognitionEventSys.class);
             verify(callback, times(2)).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
             // Validate the event.
@@ -343,11 +348,11 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Signal a capture from the driver.
-        PhraseRecognitionEvent event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
-                RecognitionStatus.SUCCESS, false);
+        PhraseRecognitionEventSys event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
+                RecognitionStatus.SUCCESS, false, 12345);
 
-        ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                PhraseRecognitionEvent.class);
+        ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                PhraseRecognitionEventSys.class);
         verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
@@ -377,11 +382,11 @@ public class SoundTriggerMiddlewareImplTest {
         verify(mHalDriver).forceRecognitionEvent(hwHandle);
 
         // Signal a capture from the driver.
-        RecognitionEvent event = hwCallback.sendRecognitionEvent(hwHandle,
-                RecognitionStatus.FORCED, true);
+        RecognitionEventSys event = hwCallback.sendRecognitionEvent(hwHandle,
+                RecognitionStatus.FORCED, true, 12345);
 
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
+        ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                RecognitionEventSys.class);
         verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
@@ -445,11 +450,11 @@ public class SoundTriggerMiddlewareImplTest {
         verify(mHalDriver).forceRecognitionEvent(hwHandle);
 
         // Signal a capture from the driver.
-        PhraseRecognitionEvent event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
-                RecognitionStatus.FORCED, true);
+        PhraseRecognitionEventSys event = hwCallback.sendPhraseRecognitionEvent(hwHandle,
+                RecognitionStatus.FORCED, true, 12345);
 
-        ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                PhraseRecognitionEvent.class);
+        ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                PhraseRecognitionEventSys.class);
         verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
@@ -510,14 +515,16 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        hwCallback.sendRecognitionEvent(hwHandle, RecognitionStatus.ABORTED, false);
+        hwCallback.sendRecognitionEvent(hwHandle, RecognitionStatus.ABORTED, false, 12345);
 
-        ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                RecognitionEvent.class);
+        ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                RecognitionEventSys.class);
         verify(callback).onRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().status);
+        RecognitionEventSys lastEvent = eventCaptor.getValue();
+        assertEquals(12345, lastEvent.halEventReceivedMillis);
+        assertEquals(RecognitionStatus.ABORTED, lastEvent.recognitionEvent.status);
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
@@ -540,14 +547,16 @@ public class SoundTriggerMiddlewareImplTest {
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        hwCallback.sendPhraseRecognitionEvent(hwHandle, RecognitionStatus.ABORTED, false);
+        hwCallback.sendPhraseRecognitionEvent(hwHandle, RecognitionStatus.ABORTED, false, 12345);
 
-        ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                PhraseRecognitionEvent.class);
+        ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                PhraseRecognitionEventSys.class);
         verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture(), eq(101));
 
         // Validate the event.
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().common.status);
+        PhraseRecognitionEventSys lastEvent = eventCaptor.getValue();
+        assertEquals(12345, lastEvent.halEventReceivedMillis);
+        assertEquals(RecognitionStatus.ABORTED, lastEvent.phraseRecognitionEvent.common.status);
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
@@ -630,18 +639,24 @@ public class SoundTriggerMiddlewareImplTest {
             mCallback = callback;
         }
 
-        private RecognitionEvent sendRecognitionEvent(int hwHandle, @RecognitionStatus int status,
-                boolean recognitionStillActive) {
-            RecognitionEvent event = TestUtil.createRecognitionEvent(status,
+        private RecognitionEventSys sendRecognitionEvent(int hwHandle,
+                @RecognitionStatus int status,
+                boolean recognitionStillActive, @ElapsedRealtimeLong long halEventReceivedMillis) {
+            RecognitionEventSys event = new RecognitionEventSys();
+            event.recognitionEvent = TestUtil.createRecognitionEvent(status,
                     recognitionStillActive);
+            event.halEventReceivedMillis = halEventReceivedMillis;
             mCallback.recognitionCallback(hwHandle, event);
             return event;
         }
 
-        private PhraseRecognitionEvent sendPhraseRecognitionEvent(int hwHandle,
-                @RecognitionStatus int status, boolean recognitionStillActive) {
-            PhraseRecognitionEvent event = TestUtil.createPhraseRecognitionEvent(status,
+        private PhraseRecognitionEventSys sendPhraseRecognitionEvent(int hwHandle,
+                @RecognitionStatus int status, boolean recognitionStillActive,
+                @ElapsedRealtimeLong long halEventReceivedMillis) {
+            PhraseRecognitionEventSys event = new PhraseRecognitionEventSys();
+            event.phraseRecognitionEvent = TestUtil.createPhraseRecognitionEvent(status,
                     recognitionStillActive);
+            event.halEventReceivedMillis = halEventReceivedMillis;
             mCallback.phraseRecognitionCallback(hwHandle, event);
             return event;
         }
