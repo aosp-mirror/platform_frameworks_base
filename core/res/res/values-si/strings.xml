@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android පද්ධතිය"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"පුද්ගලික පැතිකඩ වෙත මාරුවන්න"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"කාර්යාල පැතිකඩ වෙත මාරු වන්න"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"පුද්ගලික වෙත මාරු කරන්න <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"කාර්යාලය වෙත මාරු කරන්න <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"සම්බන්ධතා"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ඔබේ සම්බන්ධතාවලට පිවිසෙන්න"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ස්ථානය"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"කම්පකය පාලනයට යෙදුමට අවසර දෙන්න."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"යෙදුමට කම්පන තත්ත්වයට ප්‍රවේශ වීමට ඉඩ දෙන්න."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"දුරකථන අංක වෙත ඍජුවම අමතන්න"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"ඔබේ මැදිහත්වීමකින් තොරව දුරකථන අංක ඇමතීමට යෙදුමට ඉඩ දෙයි. මෙය අනපේක්ෂිත ගාස්තු හෝ ඇමතුම්වලට හේතු විය හැක. මෙය යෙදුමට හදිසි ඇමතුම් අංක ඇමතීමට ඉඩ නොදෙන බව සලකන්න. ඔබේ තහවුරු කිරීමකින් තොරව ඇමතුම් ලබා දීමෙන්, හෝ ලැබෙන ඇමතුම් ස්වයංක්‍රීයව වෙනත් අංකයකට යොමු කිරීමට හේතු වන වාහක කේත ඇමතීමෙන් අනිෂ්ට යෙදුම් ඔබේ මුදල් වැය කළ හැක."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ඇමතුම් සේවාවට පිවිසෙන්න"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ඔබේ මැදිහත්වීමකින් තොරව ඇමතුම් සිදු කිරීමට  IMS සේවාව භාවිතයට යෙදුමට ඉඩ දෙන්න."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"දුරකථනයේ තත්වය සහ අනන්‍යතාවය කියවීම"</string>
@@ -710,8 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"මුහුණු මෙහෙයුම අවලංගු කරන ලදී."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"පරිශීලකයා විසින් මුහුණෙන් අගුළු හැරීම අවලංගු කරන ලදි"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"උත්සාහයන් ඉතා වැඩි ගණනකි. පසුව නැවත උත්සාහ කරන්න."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"උත්සාහ ගණන ඉතා වැඩියි. මුහුණෙන් අගුළු ඇරීම නැත."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"උත්සාහයන් ඉතා වැඩි ගණනකි. ඒ වෙනුවට තිර අගුල ඇතුළු කරන්න."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"මුහුණ සත්‍යාපන කළ නොහැක. නැවත උත්සාහ කරන්න."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"ඔබ මුහුණෙන් අගුළු හැරීම පිහිටුවා නැත"</string>
@@ -2160,16 +2160,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"මෙම අන්තර්ගතය කාර්යාල යෙදුම් සමඟ විවෘත කළ නොහැකිය"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"මෙම අන්තර්ගතය පුද්ගලික යෙදුම් සමඟ බෙදා ගත නොහැකිය"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"මෙම අන්තර්ගතය පුද්ගලික යෙදුම් සමඟ විවෘත කළ නොහැකිය"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"කාර්යාල යෙදුම් විරාම කර ඇත"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"විරාම නොකරන්න"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"කාර්යාල යෙදුම් නැත"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"පුද්ගලික යෙදුම් නැත"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"පුද්ගලික <xliff:g id="APP">%s</xliff:g> විවෘත කරන්න"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"කාර්යාල <xliff:g id="APP">%s</xliff:g> විවෘත කරන්න"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"පුද්ගලික බ්‍රව්සරය භාවිත කරන්න"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"කාර්යාල බ්‍රව්සරය භාවිත කරන්න"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ජාල අගුලු හැරීමේ PIN"</string>

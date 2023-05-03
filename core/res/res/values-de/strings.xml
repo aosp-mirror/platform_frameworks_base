@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-System"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Zum privaten Profil wechseln"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Zum Arbeitsprofil wechseln"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Zum privaten Profil in <xliff:g id="APP_NAME">%1$s</xliff:g> wechseln"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Zum Arbeitsprofil in <xliff:g id="APP_NAME">%1$s</xliff:g> wechseln"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"auf deine Kontakte zugreifen"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Standort"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ermöglicht der App, auf den Vibrationsstatus zuzugreifen."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"Telefonnummern direkt anrufen"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Ermöglicht der App, ohne dein Zutun Telefonnummern zu wählen. Das kann zu unerwarteten Anrufen bzw. Kosten führen. Beachte, dass die App keine Notrufnummer anrufen darf. Es gibt schädliche Apps, die Kosten verursachen können, weil sie eigenmächtig Anrufe starten, oder die bestimmte Anbietercodes wählen, woraufhin eingehende Anrufe automatisch an eine andere Nummer weitergeleitet werden."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"Zugriff auf IMS-Anrufdienst"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ermöglicht der App die Verwendung des IMS-Dienstes zum Tätigen von Anrufen ohne Nutzereingriffe"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Telefonstatus und Identität abrufen"</string>
@@ -685,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Bewege das Smartphone nach links"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Bewege das Smartphone nach rechts"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Bitte sieh direkt auf dein Gerät."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Dein Gesicht wurde nicht erkannt. Halte dein Smartphone auf Augenhöhe."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Gesicht nicht erkannt. Smartphone auf Augenhöhe halten."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Zu viel Unruhe. Halte das Smartphone ruhig."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Bitte registriere dein Gesicht noch einmal."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Gesicht nicht erkannt. Versuche es noch einmal."</string>
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Dein Gesichtsmodell kann nicht erstellt werden. Versuche es noch einmal."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Dunkle Brille erkannt. Dein Gesicht muss vollständig sichtbar sein."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Dein Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesicht ist bedeckt. Es muss vollständig sichtbar sein."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Gesicht nicht erkannt. Hardware nicht verfügbar."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Diese Art von Inhalt kann nicht mit geschäftlichen Apps geöffnet werden"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Diese Art von Inhalt kann nicht über private Apps geteilt werden"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Diese Art von Inhalt kann nicht mit privaten Apps geöffnet werden"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Geschäftliche Apps sind pausiert"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Nicht mehr pausieren"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Keine geschäftlichen Apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Keine privaten Apps"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Private App „<xliff:g id="APP">%s</xliff:g>“ öffnen"</string>

@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android सिस्टम"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"व्यक्तिगत प्रोफाइलमा बदल्नुहोस्"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"कार्य प्रोफाइलमा बदल्नुहोस्"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> को व्यक्तिगत प्रोफाइल प्रयोग गर्नुहोस्"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> को कार्य प्रोफाइल प्रयोग गर्नुहोस्"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"सम्पर्कहरू"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"तपाईँको सम्पर्कमाथि पहुँच गर्नुहोस्"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"लोकेसन"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"एपलाई भाइब्रेटर नियन्त्रण गर्न अनुमति दिन्छ।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"यो एपलाई कम्पनको स्थितिमाथि पहुँच राख्न दिनुहोस्।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"फोन नम्बरहरूमा सीधै कल गर्नुहोस्"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"यो एपले तपाईंको अनुमतिविनै कसैको फोन नम्बरमा कल गर्न सक्छ। यसको परिणामस्वरूप अनपेक्षित शुल्क लाग्न वा तपाईंलाई जानकारी नगराइकन कलहरू गरिन सक्छ। यसले एपलाई आपत्‍कालीन नम्बरहरूमा कल गर्ने अनुमति दिँदैन भन्ने कुरा ख्याल गर्नुहोस्। हानिकारक एपहरूले तपाईंको अनुमतिविनै कलहरू गरेर वा अन्य नम्बरमा आगमन कलहरू स्वतः फर्वार्ड गर्ने सेवा प्रदायकका कोडहरू डायल गरेर तपाईंको पैसा खर्च गराउन सक्छ।"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS कल सेवा पहुँच गर्नुहोस्"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"तपाईँको हस्तक्षेप बिना नै कल गर्न IMS सेवा प्रयोग गर्न एपलाई अनुमति दिन्छ।"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"फोन स्थिति र पहिचान पढ्नुहोस्"</string>
@@ -1368,7 +1369,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"कनेक्ट गरिएको डिभाइस चार्ज गर्दै। थप विकल्पहरूका लागि ट्याप गर्नुहोस्।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"एनालग अडियोको सहायक उपकरण पत्ता लाग्यो"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"संलग्न गरिएको यन्त्र यो फोनसँग कम्प्याटिबल छैन। थप जान्न ट्याप गर्नुहोस्।"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB डिबग गर्न ADB कनेक्ट गरिएको छ"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB डिबगिङ कनेक्ट गरिएको छ कनेक्ट गरिएको छ"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB डिबगिङ अफ गर्न ट्याप गर्नुहोस्‌"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB डिबगिङलाई असक्षम पार्न ट्याप गर्नुहोस्।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"वायरलेस डिबगिङ जोडियो"</string>
@@ -1646,8 +1647,8 @@
     <string name="kg_wrong_password" msgid="2384677900494439426">"गलत पासवर्ड"</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"गलत PIN"</string>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"आफ्नो ढाँचा कोर्नुहोस्"</string>
-    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN प्रविष्टि गर्नुहोस्"</string>
-    <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"SIM PIN हाल्नुहोस्"</string>
+    <string name="kg_pin_instructions" msgid="7355933174673539021">"PIN हाल्नुहोस्"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"पासवर्ड प्रविष्टि गर्नुहोस्"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM कार्ड अहिले असक्षम छ। सुचारु गर्नको लागि PUK कोड प्रविष्टि गर्नुहोस्।  विवरणको लागि वाहकलाई सम्पर्क गर्नुहोस्।"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"इच्छित PIN कोड प्रविष्टि गर्नुहोस्"</string>
@@ -1701,7 +1702,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"स्क्रिन हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"यसले स्क्रिनमा देखिने सबै सामग्री पढ्न सक्छ र अन्य एपहरूमा उक्त सामग्री देखाउन सक्छ।"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"कारबाहीहरू हेर्नुहोस् र तिनमा कार्य गर्नुहोस्"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यसले कुनै एप वा हार्डवेयर सेन्सरसँग तपाईंले गर्ने अन्तर्क्रियाको ट्र्याक गर्न सक्छ र तपाईंका तर्फबाट एपहरूसँग अन्तर्क्रिया गर्न सक्छ।"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"यसले कुनै एप वा हार्डवेयर सेन्सरसँग तपाईंले गर्ने अन्तर्क्रिया ट्र्याक गर्न सक्छ र तपाईंका तर्फबाट एपहरूसँग अन्तर्क्रिया गर्न सक्छ।"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"अनुमति दिनुहोस्"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"नदिनुहोस्"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"कुनै सुविधा प्रयोग गर्न थाल्न उक्त सुविधामा ट्याप गर्नुहोस्:"</string>
@@ -1837,8 +1838,8 @@
     <string name="reason_service_unavailable" msgid="5288405248063804713">"प्रिन्ट सेवा सक्षम गरिएको छैन"</string>
     <string name="print_service_installed_title" msgid="6134880817336942482">"<xliff:g id="NAME">%s</xliff:g> सेवा स्थापित भयो"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"सक्षम पार्न ट्याप गर्नुहोस्"</string>
-    <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"प्रशासकको PIN प्रविष्टि गर्नुहोस्"</string>
-    <string name="restr_pin_enter_pin" msgid="373139384161304555">"PIN प्रविष्टि गर्नुहोस्"</string>
+    <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"प्रशासकको PIN हाल्नुहोस्"</string>
+    <string name="restr_pin_enter_pin" msgid="373139384161304555">"PIN हाल्नुहोस्"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"गलत"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"वर्तमान PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"नयाँ PIN"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"यो सामग्री कामसम्बन्धी एपहरूमार्फत खोल्न मिल्दैन"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"यो सामग्री व्यक्तिगत एपहरूमार्फत सेयर गर्न मिल्दैन"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"यो सामग्री व्यक्तिगत एपहरूमार्फत खोल्न मिल्दैन"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"कामसम्बन्धी एपहरू पज गरिएका छन्"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"अनपज गर्नुहोस्"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"यो सामग्री खोल्न मिल्ने कुनै पनि कामसम्बन्धी एप छैन"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"यो सामग्री खोल्न मिल्ने कुनै पनि व्यक्तिगत एप छैन"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"व्यक्तिगत <xliff:g id="APP">%s</xliff:g> खोल्नुहोस्"</string>
