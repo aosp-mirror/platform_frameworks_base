@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Пробајте со друг отпечаток"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Премногу светло"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Пробајте да го приспособите прстот"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Менувајте ја положбата на прстот по малку секој пат"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Менувајте ја положбата на прстот секојпат по малку"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Отпечатокот не е препознаен"</string>
@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Не вртете ја главата толку многу."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Не навалувајте ја главата толку многу."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Не вртете ја главата толку многу."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат лицето."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Отстранете ги работите што ви го покриваат ликот."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Исчистете го врвот на екранот, вклучувајќи ја црната лента"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1543,7 +1543,7 @@
     <string name="date_picker_prev_month_button" msgid="3418694374017868369">"Претходниот месец"</string>
     <string name="date_picker_next_month_button" msgid="4858207337779144840">"Следниот месец"</string>
     <string name="keyboardview_keycode_alt" msgid="8997420058584292385">"Копче „Alt“"</string>
-    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Копче „Откажи“"</string>
+    <string name="keyboardview_keycode_cancel" msgid="2134624484115716975">"Откажи"</string>
     <string name="keyboardview_keycode_delete" msgid="2661117313730098650">"Копче „Избриши“"</string>
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Копче „Готово“"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Копче „Промени режим“"</string>
@@ -1680,12 +1680,12 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Не вклучувај"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"ВКЛУЧЕНО"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"ИСКЛУЧЕНО"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Дали дозволувате <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Да се дозволи <xliff:g id="SERVICE">%1$s</xliff:g> да има целосна контрола врз вашиот уред?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Целосната контрола е соодветна за апликации што ви помагаат со потребите за пристапност, но не и за повеќето апликации."</string>
-    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Приказ и контрола на екранот"</string>
+    <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Преглед и контрола на екранот"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Може да ги чита сите содржини на екранот и да прикажува содржини врз другите апликации."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Преглед и вршење дејства"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или хардверскиот сензор и да врши интеракција со апликациите во ваше име."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Може да ја следи вашата интеракција со апликациите или со хардверските сензори и да врши интеракција со апликациите во ваше име."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Дозволи"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Одбиј"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Допрете на функција за да почнете да ја користите:"</string>
@@ -1928,7 +1928,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Дознај повеќе"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Прекини ја паузата"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Да се вклучат работни апликации?"</string>
+    <string name="work_mode_off_title" msgid="961171256005852058">"Да се вклучат работните апл.?"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"Добијте пристап до вашите работни апликации и известувања"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Вклучи"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
@@ -2283,5 +2283,5 @@
     <string name="notification_action_check_bg_apps" msgid="4758877443365362532">"Проверете ги активните апликации"</string>
     <string name="vdm_camera_access_denied" product="default" msgid="6102378580971542473">"Не може да се пристапи до камерата на вашиот телефон од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
     <string name="vdm_camera_access_denied" product="tablet" msgid="6895968310395249076">"Не може да се пристапи до камерата на вашиот таблет од <xliff:g id="DEVICE">%1$s</xliff:g>"</string>
-    <string name="system_locale_title" msgid="711882686834677268">"Стандардно за системот"</string>
+    <string name="system_locale_title" msgid="711882686834677268">"Стандарден за системот"</string>
 </resources>

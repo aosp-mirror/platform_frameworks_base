@@ -317,7 +317,7 @@
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"finyelela kumsebenzi wakho womzimba"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Ikhamera"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"thatha izithombe uphinde urekhode ividiyo"</string>
-    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Amadivayisi aseduze"</string>
+    <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"kumadivayisi aseduze"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"thola futhi uxhume kumadivayisi aseduze"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Amarekhodi wamakholi"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"funda futhi ubhale irekhodi lamakholi efoni"</string>
@@ -639,8 +639,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Kumnyama kakhulu Zama ukukhanyisa okukhudlwana."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Hambisa ifoni kude."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Sondeza ifoni eduze."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Hambisa ifoni phezulu."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Hambisa ifoni ngaphansi."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Nyusa ifoni"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Yehlisa ifoni"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Hambisa ifoni ngakwesokunxele."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Hambisa ifoni ngakwesokudla."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Sicela ubheke ngokuqondile kakhulu kudivayisi yakho."</string>

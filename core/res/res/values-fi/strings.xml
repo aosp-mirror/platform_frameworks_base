@@ -589,7 +589,7 @@
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sormenjäljen prosessointi epäonnistui. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Puhdista sormenjälkitunnistin ja yritä uudelleen"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Puhdista anturi ja yritä uudelleen"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina anturia voimakkaasti"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Paina tunnistinta voimakkaasti"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Kokeile toista sormenjälkeä"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Liian kirkas"</string>
@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Käännä päätä vähän vähemmän."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Kallista päätäsi vähän vähemmän."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Käännä päätä vähän vähemmän."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Poista esteet kasvojesi edestä."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Poista esteet kasvojesi edestä"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Puhdista näytön yläreuna, mukaan lukien musta palkki"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
