@@ -40,10 +40,10 @@ import android.widget.LinearLayout;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.animation.Animator;
 
+import com.android.app.animation.Interpolators;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
