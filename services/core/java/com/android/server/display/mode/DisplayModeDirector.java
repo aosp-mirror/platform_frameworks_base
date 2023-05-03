@@ -1977,10 +1977,8 @@ public class DisplayModeDirector {
             }
 
             updateSensorStatus();
-            if (mRefreshRateChangeable) {
-                synchronized (mLock) {
-                    onBrightnessChangedLocked();
-                }
+            synchronized (mLock) {
+                onBrightnessChangedLocked();
             }
         }
 
@@ -2071,6 +2069,9 @@ public class DisplayModeDirector {
         }
 
         private void onBrightnessChangedLocked() {
+            if (!mRefreshRateChangeable) {
+                return;
+            }
             Vote refreshRateVote = null;
             Vote refreshRateSwitchingVote = null;
 
