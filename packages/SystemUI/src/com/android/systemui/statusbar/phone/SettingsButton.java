@@ -29,7 +29,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
-import com.android.systemui.animation.Interpolators;
+import com.android.app.animation.Interpolators;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
 
 public class SettingsButton extends AlphaOptimizedImageView {
