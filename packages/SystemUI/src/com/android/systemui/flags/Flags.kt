@@ -338,6 +338,11 @@ object Flags {
     // TODO(b/265892345): Tracking Bug
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag(265892345, "plug_in_status_bar_chip")
 
+    // TODO(b/280426085): Tracking Bug
+    @JvmField
+    val NEW_BLUETOOTH_REPOSITORY =
+        unreleasedFlag(612, "new_bluetooth_repository", teamfood = true)
+
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
     val ONGOING_CALL_STATUS_BAR_CHIP = releasedFlag(700, "ongoing_call_status_bar_chip")
