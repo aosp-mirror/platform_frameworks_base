@@ -47,6 +47,10 @@ android_app {
         "androidx.leanback_leanback",
         "androidx.annotation_annotation",
     ],
+
+    lint: {
+        error_checks: ["Recycle"],
+    },
 }
 
 android_app {
@@ -67,6 +71,10 @@ android_app {
         "androidx.leanback_leanback",
     ],
     aaptflags: ["--product tablet"],
+
+    lint: {
+        error_checks: ["Recycle"],
+    },
 }
 
 android_app {
@@ -88,4 +96,8 @@ android_app {
         "androidx.annotation_annotation",
     ],
     aaptflags: ["--product tv"],
+
+    lint: {
+        error_checks: ["Recycle"],
+    },
 }
