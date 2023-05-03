@@ -37,6 +37,9 @@ message WmShellTransitionTraceProto {
     required fixed64 magic_number = 1;
     repeated Transition transitions = 2;
     repeated HandlerMapping handlerMappings = 3;
+    /* offset between real-time clock and elapsed time clock in nanoseconds.
+    Calculated as: 1000000 * System.currentTimeMillis() - SystemClock.elapsedRealtimeNanos() */
+    optional fixed64 real_to_elapsed_time_offset_nanos = 4;
 }
 
 message Transition {
