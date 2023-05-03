@@ -57,6 +57,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
     private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
     private Supplier<SurfaceControl.Transaction> mTransactionSupplier;
+    private Point mPosition;
 
     public ExitDesktopTaskTransitionHandler(
             Transitions transitions,
@@ -77,11 +78,13 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
      * Starts Transition of a given type
      * @param type Transition type
      * @param wct WindowContainerTransaction for transition
+     * @param position Position of the task when transition is started
      * @param onAnimationEndCallback to be called after animation
      */
     public void startTransition(@WindowManager.TransitionType int type,
-            @NonNull WindowContainerTransaction wct,
+            @NonNull WindowContainerTransaction wct, Point position,
             Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
+        mPosition = position;
         mOnAnimationFinishedCallback = onAnimationEndCallback;
         final IBinder token = mTransitions.startTransition(type, wct, this);
         mPendingTransitionTokens.add(token);
@@ -143,17 +146,17 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             final ValueAnimator animator = new ValueAnimator();
             animator.setFloatValues(0f, 1f);
             animator.setDuration(FULLSCREEN_ANIMATION_DURATION);
+            // The start bounds contain the correct dimensions of the task but hold the positioning
+            // before being dragged to the status bar to transition into fullscreen
             final Rect startBounds = change.getStartAbsBounds();
             final float scaleX = (float) startBounds.width() / screenWidth;
             final float scaleY = (float) startBounds.height() / screenHeight;
             final SurfaceControl.Transaction t = mTransactionSupplier.get();
-            Point startPos = new Point(startBounds.left,
-                    startBounds.top);
             animator.addUpdateListener(animation -> {
                 float fraction = animation.getAnimatedFraction();
                 float currentScaleX = scaleX + ((1 - scaleX) * fraction);
                 float currentScaleY = scaleY + ((1 - scaleY) * fraction);
-                t.setPosition(sc, startPos.x * (1 - fraction), startPos.y * (1 - fraction))
+                t.setPosition(sc, mPosition.x * (1 - fraction), mPosition.y * (1 - fraction))
                         .setScale(sc, currentScaleX, currentScaleY)
                         .show(sc)
                         .apply();
