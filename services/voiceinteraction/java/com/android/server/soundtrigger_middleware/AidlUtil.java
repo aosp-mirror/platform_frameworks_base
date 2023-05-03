@@ -21,6 +21,8 @@ import android.media.soundtrigger.PhraseRecognitionExtra;
 import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModelType;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 
 /**
  * Utilities for working with sound trigger related AIDL generated types.
@@ -49,23 +51,29 @@ public class AidlUtil {
 
     /**
      * Creates a new generic abort event.
+     *
      * @return The new event.
      */
-    static RecognitionEvent newAbortEvent() {
-        RecognitionEvent event = newEmptyRecognitionEvent();
-        event.type = SoundModelType.GENERIC;
-        event.status = RecognitionStatus.ABORTED;
-        return event;
+    static RecognitionEventSys newAbortEvent() {
+        RecognitionEvent recognitionEvent = newEmptyRecognitionEvent();
+        recognitionEvent.type = SoundModelType.GENERIC;
+        recognitionEvent.status = RecognitionStatus.ABORTED;
+        RecognitionEventSys recognitionEventSys = new RecognitionEventSys();
+        recognitionEventSys.recognitionEvent = recognitionEvent;
+        return recognitionEventSys;
     }
 
     /**
      * Creates a new generic phrase event.
+     *
      * @return The new event.
      */
-    static PhraseRecognitionEvent newAbortPhraseEvent() {
-        PhraseRecognitionEvent event = newEmptyPhraseRecognitionEvent();
-        event.common.type = SoundModelType.KEYPHRASE;
-        event.common.status = RecognitionStatus.ABORTED;
-        return event;
+    static PhraseRecognitionEventSys newAbortPhraseEvent() {
+        PhraseRecognitionEvent recognitionEvent = newEmptyPhraseRecognitionEvent();
+        recognitionEvent.common.type = SoundModelType.KEYPHRASE;
+        recognitionEvent.common.status = RecognitionStatus.ABORTED;
+        PhraseRecognitionEventSys phraseRecognitionEventSys = new PhraseRecognitionEventSys();
+        phraseRecognitionEventSys.phraseRecognitionEvent = recognitionEvent;
+        return phraseRecognitionEventSys;
     }
 }

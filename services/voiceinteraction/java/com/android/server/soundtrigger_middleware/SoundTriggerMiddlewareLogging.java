@@ -16,12 +16,24 @@
 
 package com.android.server.soundtrigger_middleware;
 
-import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.*;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.DETACH;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.FORCE_RECOGNITION;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.GET_MODEL_PARAMETER;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.LOAD_MODEL;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.LOAD_PHRASE_MODEL;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.MODEL_UNLOADED;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.MODULE_DIED;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.QUERY_MODEL_PARAMETER;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.RECOGNITION;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.RESOURCES_AVAILABLE;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.SET_MODEL_PARAMETER;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.START_RECOGNITION;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.STOP_RECOGNITION;
+import static com.android.server.soundtrigger_middleware.SoundTriggerMiddlewareLogging.SessionEvent.Type.UNLOAD_MODEL;
 import static com.android.server.utils.EventLogger.Event.ALOGI;
 import static com.android.server.utils.EventLogger.Event.ALOGW;
 
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
@@ -29,11 +41,12 @@ import android.media.soundtrigger.ModelParameterRange;
 import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.BatteryStatsInternal;
 import android.os.IBinder;
@@ -45,19 +58,18 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.LatencyTracker;
 import com.android.server.LocalServices;
-import com.android.server.utils.EventLogger.Event;
 import com.android.server.utils.EventLogger;
-
+import com.android.server.utils.EventLogger.Event;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-import java.util.Deque;
 
 
 /**
@@ -370,7 +382,7 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         }
 
         @Override
-        public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
+        public void onRecognition(int modelHandle, RecognitionEventSys event, int captureSession)
                 throws RemoteException {
             try {
                 mBatteryStatsInternalSupplier.get().noteWakingSoundTrigger(
@@ -388,13 +400,13 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         }
 
         @Override
-        public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event,
+        public void onPhraseRecognition(int modelHandle, PhraseRecognitionEventSys event,
                 int captureSession)
                 throws RemoteException {
             try {
                 mBatteryStatsInternalSupplier.get().noteWakingSoundTrigger(
                         SystemClock.elapsedRealtime(), mOriginatorIdentity.uid);
-                startKeyphraseEventLatencyTracking(event);
+                startKeyphraseEventLatencyTracking(event.phraseRecognitionEvent);
                 mCallbackDelegate.onPhraseRecognition(modelHandle, event, captureSession);
                 mEventLogger.enqueue(SessionEvent.createForVoid(
                             RECOGNITION, modelHandle, event, captureSession)

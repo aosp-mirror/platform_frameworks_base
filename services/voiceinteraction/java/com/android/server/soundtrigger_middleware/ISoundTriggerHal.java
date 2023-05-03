@@ -20,12 +20,12 @@ import android.hardware.soundtrigger3.ISoundTriggerHw;
 import android.hardware.soundtrigger3.ISoundTriggerHwCallback;
 import android.hardware.soundtrigger3.ISoundTriggerHwGlobalCallback;
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.IBinder;
 
 /**
@@ -173,14 +173,19 @@ interface ISoundTriggerHal {
      */
     interface ModelCallback {
         /**
-         * @see ISoundTriggerHwCallback#recognitionCallback(int, RecognitionEvent)
+         * Decorated callback of
+         * {@link ISoundTriggerHwCallback#recognitionCallback(int, RecognitionEvent)} where
+         * {@link RecognitionEventSys} is decorating the returned {@link RecognitionEvent}
          */
-        void recognitionCallback(int modelHandle, RecognitionEvent event);
+        void recognitionCallback(int modelHandle, RecognitionEventSys event);
 
         /**
-         * @see ISoundTriggerHwCallback#phraseRecognitionCallback(int, PhraseRecognitionEvent)
+         * Decorated callback of
+         * {@link ISoundTriggerHwCallback#phraseRecognitionCallback(int, PhraseRecognitionEvent)}
+         * where {@link PhraseRecognitionEventSys} is decorating the returned
+         * {@link PhraseRecognitionEvent}
          */
-        void phraseRecognitionCallback(int modelHandle, PhraseRecognitionEvent event);
+        void phraseRecognitionCallback(int modelHandle, PhraseRecognitionEventSys event);
 
         /**
          * @see ISoundTriggerHwCallback#modelUnloaded(int)
