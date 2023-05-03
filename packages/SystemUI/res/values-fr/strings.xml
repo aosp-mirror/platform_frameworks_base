@@ -547,7 +547,7 @@
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Les appels et les notifications sonneront (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barre d\'état"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Mode de démonstration de l\'interface du système"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Mode démo de l\'UI du système"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Activer le mode de démonstration"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Afficher le mode de démonstration"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
@@ -1148,6 +1148,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Installer une appli d\'appareil photo"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• L\'appli est configurée"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Au moins un appareil est disponible"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Appuyez de manière prolongée sur raccourci"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuler"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Changer d\'écran maintenant"</string>

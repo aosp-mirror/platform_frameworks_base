@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android सिस्‍टीम"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"वैयक्तिक प्रोफाइलवर स्विच करा"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"कार्य प्रोफाइलवर स्विच करा"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> च्या वैयक्तिक प्रोफाइलवर स्विच करा"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> च्या कार्य प्रोफाइलवर स्विच करा"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"संपर्क"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"आपल्या संपर्कांवर प्रवेश"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"स्थान"</string>
@@ -1061,10 +1059,10 @@
     <string name="factorytest_not_system" msgid="5658160199925519869">"FACTORY_TEST कृती फक्त /सिस्टीम/अ‍ॅप मध्ये इंस्टॉल केलेल्या पॅकेजसाठी सपोर्ट आहे."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"FACTORY_TEST क्रिया प्रदान करणारे कोणतेही पॅकेज आढळले नाही."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"रीबूट करा"</string>
-    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पृष्ठ हे म्हणते:"</string>
+    <string name="js_dialog_title" msgid="7464775045615023241">"\"<xliff:g id="TITLE">%s</xliff:g>\" वरील पेज हे म्हणते:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"नेव्हिगेशनची पुष्टी करा"</string>
-    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पृष्ठ सोडा"</string>
+    <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"हे पेज सोडा"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"या पेजवर रहा"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nआपल्‍याला खात्री आहे की तुम्ही या पृष्‍ठावरून नेव्‍हिगेट करू इच्‍छिता?"</string>
     <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> सह ऑटोफील करा"</string>
@@ -1231,7 +1229,7 @@
     <string name="force_close" msgid="9035203496368973803">"ठीक"</string>
     <string name="report" msgid="2149194372340349521">"अहवाल द्या"</string>
     <string name="wait" msgid="7765985809494033348">"प्रतीक्षा करा"</string>
-    <string name="webpage_unresponsive" msgid="7850879412195273433">"पृष्ठ प्रतिसाद न देणारे झाले आहे.\n\nतुम्ही हे बंद करू इच्छिता?"</string>
+    <string name="webpage_unresponsive" msgid="7850879412195273433">"पेज प्रतिसाद न देणारे झाले आहे.\n\nतुम्ही हे बंद करू इच्छिता?"</string>
     <string name="launch_warning_title" msgid="6725456009564953595">"अ‍ॅप पुनर्निर्देशित केला"</string>
     <string name="launch_warning_replace" msgid="3073392976283203402">"<xliff:g id="APP_NAME">%1$s</xliff:g> आता चालत आहे."</string>
     <string name="launch_warning_original" msgid="3332206576800169626">"<xliff:g id="APP_NAME">%1$s</xliff:g> मूळतः लाँच केले."</string>

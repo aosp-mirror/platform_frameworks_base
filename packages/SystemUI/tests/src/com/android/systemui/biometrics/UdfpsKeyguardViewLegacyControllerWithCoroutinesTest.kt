@@ -21,22 +21,23 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepositoryImpl
+import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.RoboPilotTest
 import com.android.systemui.statusbar.StatusBarState
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.systemui.util.time.SystemClock
@@ -59,7 +60,8 @@ import org.mockito.MockitoAnnotations
 @RoboPilotTest
 @TestableLooper.RunWithLooper
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControllerBaseTest() {
+class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
+    UdfpsKeyguardViewLegacyControllerBaseTest() {
     lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
     @Mock private lateinit var bouncerLogger: TableLogBuffer
 
@@ -81,7 +83,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
         super.setUp()
     }
 
-    override fun createUdfpsKeyguardViewController(): UdfpsKeyguardViewController? {
+    override fun createUdfpsKeyguardViewController(): UdfpsKeyguardViewControllerLegacy? {
         mPrimaryBouncerInteractor =
             PrimaryBouncerInteractor(
                 keyguardBouncerRepository,
@@ -94,7 +96,8 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
                 mock(DismissCallbackRegistry::class.java),
                 context,
                 mKeyguardUpdateMonitor,
-                mock(KeyguardBypassController::class.java),
+                mock(TrustRepository::class.java),
+                FakeFeatureFlags(),
             )
         mAlternateBouncerInteractor =
             AlternateBouncerInteractor(

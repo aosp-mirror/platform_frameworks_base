@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> установи заснемането на тази екранна снимка."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> и други отворени приложения установиха заснемането на тази екранна снимка."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Добавяне към бележката"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"Запис на екрана"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Записът на екрана се обработва"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущо известие за сесия за записване на екрана"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Искате ли да стартирате записване?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Когато записвате, Android има достъп до всичко, което се вижда на екрана ви или се възпроизвежда на устройството ви. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Докато записвате дадено приложение, Android има достъп до всичко, което се показва или възпроизвежда в него. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Стартиране на записването"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Записване на звук"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Аудио от устройството"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Звук от устройството ви, като например музика, обаждания и мелодии"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Микрофон"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Аудио от устройството и микрофона"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Стартиране"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Екранът се записва"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Екранът и аудиото се записват"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Показване на докосванията на екрана"</string>
@@ -276,7 +270,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инвертиране на цветовете"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Корекция на цветове"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Размер на шрифта"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Управление на потребителите"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Управляване"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Затваряне"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Установена е връзка"</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Всички приложения и данни на този потребител ще бъдат изтрити."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Премахване"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Да се стартира ли записване или предаване чрез <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ще има достъп до цялата информация, която е видима на екрана или възпроизвеждана от устройството ви по време на записване или предаване. Това включва различна информация, като например пароли, подробности за начини на плащане, снимки, съобщения и възпроизвеждано аудио."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Искате ли да стартирате записване или предаване?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Услугата, предоставяща тази функция, ще има достъп до цялата информация, която е видима на екрана или възпроизвеждана от устройството ви по време на записване или предаване. Това включва различна информация, като например пароли, подробности за начини на плащане, снимки, съобщения и възпроизвеждано аудио."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Цял екран"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Едно приложение"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Споделяне или записване на приложение"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Искате ли да стартирате записване или предаване чрез <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Когато споделяте, записвате или предавате, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има достъп до всичко, което се вижда на екрана ви или се възпроизвежда на устройството ви. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Когато споделяте, записвате или предавате дадено приложение, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> има достъп до всичко, което се показва или възпроизвежда в него. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Стартиране"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Искате ли да стартирате предаване?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Когато предавате, Android има достъп до всичко, което се вижда на екрана ви или се възпроизвежда на устройството ви. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Когато предавате дадено приложение, Android има достъп до всичко, което се показва или възпроизвежда в него. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Стартиране на предаването"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Искате ли да стартирате споделяне?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Когато споделяте, записвате или предавате, Android има достъп до всичко, което се вижда на екрана ви или се възпроизвежда на устройството ви. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Когато споделяте, записвате или предавате дадено приложение, Android има достъп до всичко, което се показва или възпроизвежда в него. Затова бъдете внимателни с неща като пароли, подробности за начини на плащане, съобщения, снимки, аудио и видео."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Стартиране"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Блокирано от системния ви администратор"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Заснемането на екрана е деактивирано от правило за устройството"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Изчистване на всички"</string>
@@ -904,7 +880,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Докоснете, за да отворите функциите за достъпност. Персон./заменете бутона от настройките.\n\n"<annotation id="link">"Преглед на настройките"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете бутона до края, за да го скриете временно"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Отмяна"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> пряк път бе премахнат"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Прекият път за „<xliff:g id="FEATURE_NAME">%s</xliff:g>“ бе премахнат"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# пряк път бе премахнат}other{# преки пътя бяха премахнати}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Преместване горе вляво"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Преместване горе вдясно"</string>
@@ -1148,6 +1124,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Инсталирано е приложение за камера."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Приложението е настроено."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Налице е поне едно устройство."</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Изберете стандартно приложение за бележки, за да използвате прекия път за водене на бележки"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Избиране на приложение"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Докоснете и задръжте прекия път"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Отказ"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Превключване на екраните сега"</string>

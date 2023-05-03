@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Yuzingiz modeli yaratilmadi. Qayta urining."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Qora koʻzoynak aniqlandi. Yuzingiz toʻliq koʻrinishi kerak."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yuzning bir qismi yopilib qolgan. Yuzingiz toʻliq koʻrinishi kerak."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yuz qismi yopilib qolgan. Yuzingiz toʻliq koʻrinishi kerak."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>

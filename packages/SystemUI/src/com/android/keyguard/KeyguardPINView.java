@@ -16,6 +16,7 @@
 
 package com.android.keyguard;
 
+import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_APPEAR;
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_DISAPPEAR;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_HALF_OPENED;
 import static com.android.systemui.statusbar.policy.DevicePostureController.DEVICE_POSTURE_UNKNOWN;
@@ -32,9 +33,9 @@ import android.view.animation.Interpolator;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.app.animation.Interpolators;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.statusbar.policy.DevicePostureController.DevicePostureInt;
 
 /**
@@ -184,6 +185,7 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         }
         mAppearAnimator.setDuration(ANIMATION_DURATION);
         mAppearAnimator.addUpdateListener(animation -> animate(animation.getAnimatedFraction()));
+        mAppearAnimator.addListener(getAnimationListener(CUJ_LOCKSCREEN_PIN_APPEAR));
         mAppearAnimator.start();
     }
 

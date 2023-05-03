@@ -111,7 +111,7 @@ class MediaProjectionAppSelectorActivity(
         if (featureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
             component.emptyStateProvider
         } else {
-            super.createBlockerEmptyStateProvider()
+            object : EmptyStateProvider {}
         }
 
     override fun createListController(userHandle: UserHandle): ResolverListController =

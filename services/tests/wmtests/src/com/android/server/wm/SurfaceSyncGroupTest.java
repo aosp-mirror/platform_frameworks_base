@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.testutils.StubTransaction;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,6 +51,11 @@ public class SurfaceSyncGroupTest {
     @Before
     public void setup() {
         SurfaceSyncGroup.setTransactionFactory(StubTransaction::new);
+    }
+
+    @After
+    public void tearDown() {
+        SurfaceSyncGroup.setTransactionFactory(SurfaceControl.Transaction::new);
     }
 
     @Test

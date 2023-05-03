@@ -25,6 +25,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.retail.data.repository.FakeRetailModeRepository
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +45,7 @@ import org.mockito.MockitoAnnotations
 class TileSpecSettingsRepositoryTest : SysuiTestCase() {
 
     private lateinit var secureSettings: FakeSettings
+    private lateinit var retailModeRepository: FakeRetailModeRepository
 
     @Mock private lateinit var logger: QSPipelineLogger
 
@@ -57,9 +59,12 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         secureSettings = FakeSettings()
+        retailModeRepository = FakeRetailModeRepository()
+        retailModeRepository.setRetailMode(false)
 
         with(context.orCreateTestableResources) {
             addOverride(R.string.quick_settings_tiles_default, DEFAULT_TILES)
+            addOverride(R.string.quick_settings_tiles_retail_mode, RETAIL_TILES)
         }
 
         underTest =
@@ -67,6 +72,7 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
                 secureSettings,
                 context.resources,
                 logger,
+                retailModeRepository,
                 testDispatcher,
             )
     }
@@ -346,6 +352,26 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
             assertThat(tiles).isEqualTo("b".toTileSpecs())
         }
 
+    @Test
+    fun retailMode_usesRetailTiles() =
+        testScope.runTest {
+            retailModeRepository.setRetailMode(true)
+
+            val tiles by collectLastValue(underTest.tilesSpecs(0))
+
+            assertThat(tiles).isEqualTo(RETAIL_TILES.toTileSpecs())
+        }
+
+    @Test
+    fun retailMode_cannotModifyTiles() =
+        testScope.runTest {
+            retailModeRepository.setRetailMode(true)
+
+            underTest.setTiles(0, DEFAULT_TILES.toTileSpecs())
+
+            assertThat(loadTilesForUser(0)).isNull()
+        }
+
     private fun getDefaultTileSpecs(): List<TileSpec> {
         return QSHost.getDefaultSpecs(context.resources).map(TileSpec::create)
     }
@@ -360,6 +386,7 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
 
     companion object {
         private const val DEFAULT_TILES = "a,b,c"
+        private const val RETAIL_TILES = "d"
         private const val SETTING = Settings.Secure.QS_TILES
 
         private fun String.toTileSpecs(): List<TileSpec> {

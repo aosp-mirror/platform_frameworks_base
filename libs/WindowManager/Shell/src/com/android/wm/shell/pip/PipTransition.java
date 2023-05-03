@@ -508,8 +508,16 @@ public class PipTransition extends PipTransitionController {
         currentBounds.offset(-offset.x, -offset.y);
         startTransaction.setPosition(pipLeash, currentBounds.left, currentBounds.top);
 
+        final WindowContainerToken pipTaskToken = pipChange.getContainer();
+        final boolean toFullscreen = pipChange.getEndAbsBounds().equals(
+                mPipBoundsState.getDisplayBounds());
         mFinishCallback = (wct, wctCB) -> {
             mPipOrganizer.onExitPipFinished(taskInfo);
+            if (!Transitions.SHELL_TRANSITIONS_ROTATION && toFullscreen) {
+                wct = wct != null ? wct : new WindowContainerTransaction();
+                wct.setBounds(pipTaskToken, null);
+                mPipOrganizer.applyWindowingModeChangeOnExit(wct, TRANSITION_DIRECTION_LEAVE_PIP);
+            }
             finishCallback.onTransitionFinished(wct, wctCB);
         };
         mFinishTransaction = finishTransaction;

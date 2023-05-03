@@ -7175,6 +7175,13 @@ public final class Settings {
         public static final String CREDENTIAL_SERVICE = "credential_service";
 
         /**
+         * The currently selected primary credential service flattened ComponentName.
+         *
+         * @hide
+         */
+        public static final String CREDENTIAL_SERVICE_PRIMARY = "credential_service_primary";
+
+        /**
          * The currently selected autofill service flattened ComponentName.
          * @hide
          */
@@ -11819,6 +11826,7 @@ public final class Settings {
          *
          * {@hide}
          */
+        @Readable
         public static final String SATELLITE_MODE_RADIOS = "satellite_mode_radios";
 
         /**
@@ -11832,6 +11840,7 @@ public final class Settings {
          *
          * {@hide}
          */
+        @Readable
         public static final String SATELLITE_MODE_ENABLED = "satellite_mode_enabled";
 
         /**

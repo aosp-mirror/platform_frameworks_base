@@ -16,6 +16,7 @@
 
 package com.android.server.display.color;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.Slog;
 
@@ -28,14 +29,14 @@ abstract class TintController {
      */
     private static final long TRANSITION_DURATION = 3000L;
 
-    private ColorDisplayService.TintValueAnimator mAnimator;
+    private ValueAnimator mAnimator;
     private Boolean mIsActivated;
 
-    public ColorDisplayService.TintValueAnimator getAnimator() {
+    public ValueAnimator getAnimator() {
         return mAnimator;
     }
 
-    public void setAnimator(ColorDisplayService.TintValueAnimator animator) {
+    public void setAnimator(ValueAnimator animator) {
         mAnimator = animator;
     }
 

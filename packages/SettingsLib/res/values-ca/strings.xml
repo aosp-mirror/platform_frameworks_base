@@ -253,11 +253,11 @@
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Vincula el dispositiu per Wi‑Fi escanejant un codi QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Connecta\'t a una xarxa Wi‑Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, depurar, desenvolupador"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Drecera per a informe d\'errors"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Drecera de l\'informe d\'errors"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostra un botó al menú d\'engegada per crear un informe d\'errors"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Pantalla activa"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla no entra mai en mode de repòs si el dispositiu s\'està carregant"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Activa registre de Bluetooth HCI"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Activa el registre de Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Captura els paquets de Bluetooth. Activa el Bluetooth un cop hagis canviat aquesta opció."</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"Desbloqueig d\'OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Permet desbloquejar el bootloader"</string>
@@ -268,7 +268,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"Aplicació d\'ubicació simulada: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Xarxes"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certificació de pantalla sense fil"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Activa el registre Wi‑Fi detallat"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Activa el registre detallat de Wi‑Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Limitació de la cerca de xarxes Wi‑Fi"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Aleatorització de MAC no persistent per a connexions Wi‑Fi"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Dades mòbils sempre actives"</string>
@@ -280,17 +280,17 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Selecciona la versió AVRCP de Bluetooth"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Versió MAP de Bluetooth"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Selecciona la versió MAP de Bluetooth"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Còdec d\'àudio per Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Còdec d\'àudio de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Activa el còdec d\'àudio per Bluetooth\nSelecció"</string>
-    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Freqüència de mostratge d’àudio per Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Freqüència de mostratge d’àudio de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Activa el còdec d\'àudio per Bluetooth\nSelecció: freqüència de mostratge"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Si una opció està ombrejada, vol dir que el telèfon o els auriculars no l\'admeten"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bits per mostra de l\'àudio per Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bits per mostra de l\'àudio de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Activa el còdec d\'àudio per Bluetooth\nSelecció: bits per mostra"</string>
-    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Mode de canal de l\'àudio per Bluetooth"</string>
+    <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Mode de canal de l\'àudio de Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Activa el còdec d\'àudio per Bluetooth\nSelecció: mode de canal"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Còdec LDAC d\'àudio per Bluetooth: qualitat de reproducció"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Activa l\'LDAC d\'àudio per Bluetooth\nSelecció de còdec: qualitat de reproducció"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Còdec LDAC d\'àudio de Bluetooth: qualitat de reproducció"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Activa l\'LDAC d\'àudio de Bluetooth\nSelecció de còdec: qualitat de reproducció"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Reproducció en continu: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS privat"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Selecciona el mode de DNS privat"</string>
@@ -305,7 +305,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quan aquest mode està activat, és possible que l’adreça MAC d\'aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la mem. intermèdia del registrador"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la memòria intermèdia del registrador"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona la mida de la memòria intermèdia del registre"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Vols esborrar l\'emmagatzematge persistent del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Quan deixem de supervisar amb el registrador persistent, hem d\'esborrar les dades del registrador que hi ha al teu dispositiu."</string>
@@ -343,13 +343,13 @@
     <string name="no_application" msgid="9038334538870247690">"Cap"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Espera el depurador"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"L\'aplicació depurada espera que es connecti el depurador abans d\'executar-se"</string>
-    <string name="debug_input_category" msgid="7349460906970849771">"Introducció de text"</string>
+    <string name="debug_input_category" msgid="7349460906970849771">"Entrada"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Dibuix"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Renderització accelerada per maquinari"</string>
     <string name="media_category" msgid="8122076702526144053">"Multimèdia"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Supervisió"</string>
     <string name="strict_mode" msgid="889864762140862437">"Mode estricte activat"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Il·lumina si les aplicacions tarden molt al procés principal"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Il·lumina la pantalla quan les aplicacions facin operacions llargues al fil principal"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Ubicació del punter"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Superposa les dades dels tocs a la pantalla"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostra els tocs"</string>
@@ -369,22 +369,22 @@
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Desactiva l\'encaminament automàtic a perifèrics d\'àudio USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Mostra límits de disposició"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Mostra els límits de clips, els marges, etc."</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Força direcció dreta-esquerra"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Força direcció de pantalla dreta-esquerra en totes les llengües"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Força la direcció dreta-esquerra"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Força la direcció dreta-esquerra de la pantalla en totes les llengües"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"Barra de navegació transparent"</string>
     <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Fes que el color de fons de la barra de navegació sigui transparent de manera predeterminada"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Permet desenfoc. finestra"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Permet desenfocar al nivell de finestra"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Força MSAA 4x"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Activa MSAA 4x en aplicacions d\'OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Depura operacions de retall no rectangulars"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Renderització perfil HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Activa les capes de depuració de GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permet capes de depuració de GPU en apps de depuració"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activa el registre detallat"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Permet carregar capes de depuració de GPU en aplicacions de depuració"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Activa el registre detallat del proveïdor"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Inclou altres registres de proveïdor específics del dispositiu als informes d’errors; és possible que continguin informació privada, consumeixin més bateria o utilitzin més espai d\'emmagatzematge"</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala d\'animació finestra"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala d\'animació transició"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de durada d\'animació"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"Escala d\'animació de la finestra"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala d\'animació de la transició"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de durada de l\'animació"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simula pantalles secundàries"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplicacions"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"No desis les activitats"</string>
@@ -398,8 +398,8 @@
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors del manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Força l\'ajust de la mida de les activitats"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Permet ajustar la mida de totes les activitats per al mode multifinestra, independentment dels valors del manifest"</string>
-    <string name="enable_freeform_support" msgid="7599125687603914253">"Activa les finestres de forma lliure"</string>
-    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activa la compatibilitat amb finestres de forma lliure experimentals"</string>
+    <string name="enable_freeform_support" msgid="7599125687603914253">"Activa les finestres amb format lliure"</string>
+    <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Activa la compatibilitat amb finestres experimentals amb format lliure"</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Mode d\'escriptori"</string>
     <string name="local_backup_password_title" msgid="4631017948933578709">"Contrasenya per a còpies d\'ordinador"</string>
     <string name="local_backup_password_summary_none" msgid="7646898032616361714">"Les còpies de seguretat completes d\'ordinador no estan protegides"</string>
@@ -677,7 +677,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Emet <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Canvia la sortida"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Animacions de retrocés predictiu"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activa animacions del sistema de retrocés predictiu."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Activa animacions del sistema de retrocés predictiu"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Aquesta configuració activa animacions del sistema per a accions gestuals predictives. Requereix definir enableOnBackInvokedCallback com a \"true\" en cada aplicació al fitxer de manifest."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1737722959616802157">"Mou cap a l\'esquerra"</item>
