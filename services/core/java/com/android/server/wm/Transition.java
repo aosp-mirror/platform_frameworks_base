@@ -2267,7 +2267,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         // Display won't be rotated for multi window Task, so the fixed rotation
                         // won't be applied. This can happen when the windowing mode is changed
                         // before the previous fixed rotation is applied.
-                        && !task.inMultiWindowMode()) {
+                        && (!task.inMultiWindowMode() || !topRunningActivity.inMultiWindowMode())) {
                     // If Activity is in fixed rotation, its will be applied with the next rotation,
                     // when the Task is still in the previous rotation.
                     final int taskRotation = task.getWindowConfiguration().getDisplayRotation();
