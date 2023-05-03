@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ने हा स्क्रीनशॉट डिटेक्ट केला."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> आणि उघडलेल्या इतर अ‍ॅप्सनी हा स्क्रीनशॉट डिटेक्ट केला."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"टीप जोडा"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"स्क्रीन रेकॉर्डर"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"स्क्रीन रेकॉर्डर"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"स्क्रीन रेकॉर्डिंग प्रोसेस सुरू"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"स्क्रीन रेकॉर्ड सत्रासाठी सुरू असलेली सूचना"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"रेकॉर्डिंग सुरू करायचे आहे का?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"रेकॉर्डिंग करताना, Android सिस्टीम तुमच्या स्क्रीनवर दिसणारी किंवा तुमच्या डिव्हाइसवर प्ले केलेली कोणतीही संवेदनशील माहिती कॅप्चर करू शकते. यात पासवर्ड, पेमेंट माहिती, फोटो, मेसेज आणि ऑडिओचा समावेश आहे."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"संपूर्ण स्क्रीन रेकॉर्ड करा"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"एकच अ‍ॅप रेकॉर्ड करा"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"तुम्ही रेकॉर्ड करत असताना, Android ला तुमच्या स्क्रीनवर दाखवलेल्या किंवा डिव्हाइसवर प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज किंवा इतर संवेदनशील माहिती काळजीपूर्वक वापरा."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"तुम्ही अ‍ॅप रेकॉर्ड करत असताना, Android ला त्या अ‍ॅपवर दाखवलेल्या किंवा प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज किंवा इतर संवेदनशील माहिती काळजीपूर्वक वापरा."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"रेकॉर्डिंग सुरू करा"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"रेकॉर्डिंग सुरू करायचे आहे का?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"तुम्ही रेकॉर्ड करत असताना, Android ला तुमच्या स्क्रीनवर दाखवलेल्या किंवा डिव्हाइसवर प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज, फोटो आणि ऑडिओ व व्हिडिओ यांसारख्या गोष्टींबाबत सावधगिरी बाळगा."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"तुम्ही एखादे ॲप रेकॉर्ड करत असताना, Android ला त्या ॲपवर दाखवलेल्या किंवा प्ले केलेल्या कोणत्याही गोष्टीचा ॲक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज, फोटो आणि ऑडिओ व व्हिडिओ यांसारख्या गोष्टींबाबत सावधगिरी बाळगा."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"रेकॉर्डिंग सुरू करा"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ऑडिओ रेकॉर्ड करा"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"डिव्हाइस ऑडिओ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"तुमच्या डिव्हाइसवरील आवाज, जसे की संगीत, कॉल आणि रिंगटोन"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"मायक्रोफोन"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"डिव्हाइस ऑडिओ आणि मायक्रोफोन"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"सुरू"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"सुरुवात करा"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"स्क्रीन रेकॉर्ड करत आहे"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"स्क्रीन आणि ऑडिओ रेकॉर्ड करत आहे"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"स्क्रीनवर टच दाखवा"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पॅटर्न एंटर केल्यास, तुमची कार्य प्रोफाइल आणि तिचा डेटा हटवला जाईल."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पिन एंटर केल्यास, तुमची कार्य प्रोफाइल आणि तिचा डेटा हटवला जाईल."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"तुम्‍ही पुढील प्रयत्‍नात चुकीचा पासवर्ड एंटर केल्यास, तुमची कार्य प्रोफाइल आणि तिचा डेटा हटवला जाईल."</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"सेट करा"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"आता नको"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"सुरक्षितता आणि परफॉर्मन्समध्ये सुधारणा करण्यासाठी हे आवश्यक आहे"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"फिंगरप्रिंट अनलॉक पुन्हा सेट करा"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"फिंगरप्रिंट अनलॉक"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"फिंगरप्रिंट अनलॉक सेट करा"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"फिंगरप्रिंट अनलॉक पुन्हा सेट करण्यासाठी, तुमच्या सद्य फिंगरप्रिंट इमेज आणि मॉडेल या गोष्टी हटवल्या जातील.\n\nत्या हटवल्यानंतर, तुमचा फोन अनलॉक करण्यासाठी किंवा ते तुम्ही आहात याची पडताळणी करण्यासाठी तुमचे फिंगरप्रिंट वापरण्याकरिता तुम्हाला पुन्हा फिंगरप्रिंट अनलॉक सेट करणे आवश्यक आहे."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"फिंगरप्रिंट अनलॉक पुन्हा सेट करण्यासाठी, तुमच्या सद्य फिंगरप्रिंट इमेज आणि मॉडेल या गोष्टी हटवल्या जातील.\n\nत्या हटवल्यानंतर, तुमचा फोन अनलॉक करण्यासाठी किंवा ते तुम्ही आहात याची पडताळणी करण्यासाठी तुमचे फिंगरप्रिंट वापरण्याकरिता तुम्हाला पुन्हा फिंगरप्रिंट अनलॉक सेट करणे आवश्यक आहे."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"फिंगरप्रिंट अनलॉक सेट करता आले नाही. सेटिंग्ज वर जा आणि पुन्हा प्रयत्न करा."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"फेस अनलॉक पुन्हा सेट करा"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"फेस अनलॉक"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"फेस अनलॉक सेट करा"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"फेस अनलॉक पुन्हा सेट करण्यासाठी, तुमचे सध्याचे फेस मॉडेल हटवले जाईल.\n\nतुमचा फोन अनलॉक करण्यासाठी तुमचा चेहरा वापरण्याकरिता तुम्हाला हे वैशिष्ट्य पुन्हा सेट करावे लागेल."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"फेस अनलॉक सेट करता आले नाही. सेटिंग्ज वर जा आणि पुन्हा प्रयत्न करा."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"फिंगरप्रिंट सेन्सरला स्पर्श करा"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"चेहरा ओळखू शकत नाही. त्याऐवजी फिंगरप्रिंट वापरा."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"वापरकर्त्यास काढायचे?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"या वापरकर्त्याचे सर्व अ‍ॅप्स आणि डेटा काढून टाकला जाईल."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"काढा"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"तुमच्या स्क्रीनवर दृश्यमान असलेल्या किंवा रेकॉर्ड किंवा कास्ट करताना तुमच्या डिव्हाइसमधून प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले केलेला ऑडिओ यासारख्या माहितीचा समावेश असतो."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"हे कार्य पुरवणाऱ्या सेवेस तुमच्या स्क्रीनवर दृश्यमान असलेल्या किंवा रेकॉर्ड किंवा कास्ट करताना तुमच्या डिव्हाइसमधून प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले केलेला ऑडिओ यासारख्या माहितीचा समावेश असतो."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"रेकॉर्ड करणे किंवा कास्ट करणे सुरू करायचे का ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ने रेकॉर्ड करणे किंवा कास्ट करणे सुरू करायचे का?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला शेअर किंवा रेकॉर्ड करण्याची अनुमती द्यायची आहे का?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"संपूर्ण स्क्रीन"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"एक अ‍ॅप"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"तुम्ही शेअर, रेकॉर्ड किंवा कास्ट करत असताना, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला तुमच्या स्क्रीनवर दाखवलेल्या किंवा डिव्हाइसवर प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज किंवा इतर संवेदनशील माहिती काळजीपूर्वक वापरा."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"तुम्ही अ‍ॅप शेअर, रेकॉर्ड किंवा कास्ट करत असताना, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला त्या अ‍ॅपवर दाखवलेल्या किंवा प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज किंवा इतर संवेदनशील माहिती काळजीपूर्वक वापरा."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"पुढे सुरू ठेवा"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"अ‍ॅप शेअर किंवा रेकॉर्ड करा"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"या अ‍ॅपला शेअर किंवा रेकॉर्ड करण्याची अनुमती द्यायची आहे का?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"तुम्ही शेअर, रेकॉर्ड किंवा कास्ट करत असता, तेव्हा या अ‍ॅपला तुमच्या स्क्रीनवर दाखवलेल्या अथवा डिव्हाइसवर प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज किंवा इतर संवेदनशील माहिती काळजीपूर्वक वापरा."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"तुम्ही अ‍ॅप शेअर, रेकॉर्ड किंवा कास्ट करत असताना, या अ‍ॅपला त्या अ‍ॅपवर दाखवलेल्या किंवा प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज अथवा इतर संवेदनशील माहिती काळजीपूर्वक वापरा."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"रेकॉर्ड किंवा कास्ट करत असताना, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला तुमच्या स्क्रीनवर दाखवलेल्या अथवा तुमच्या डिव्हाइसवर प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले करत असलेला ऑडिओ यासारख्या माहितीचा समावेश आहे."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"रेकॉर्ड किंवा कास्ट करणे सुरू करायचे आहे का ?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"रेकॉर्ड किंवा कास्ट करत असताना, हे कार्य पुरवणाऱ्या सेवेला तुमच्या स्क्रीनवर दाखवलेल्या किंवा डिव्हाइसवर प्ले केलेल्या सर्व माहितीचा अ‍ॅक्सेस असेल. यामध्ये पासवर्ड, पेमेंट तपशील, फोटो, मेसेज आणि तुम्ही प्ले करत असलेला ऑडिओ यासारख्या माहितीचा समावेश आहे."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"संपूर्ण स्क्रीन"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"एक अ‍ॅप"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"अ‍ॅप शेअर किंवा रेकॉर्ड करा"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> वापरून रेकॉर्ड किंवा कास्ट करणे सुरू करायचे आहे का?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"तुम्ही शेअर, रेकॉर्ड किंवा कास्ट करत असताना, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला तुमच्या स्क्रीनवर दाखवलेल्या किंवा डिव्हाइसवर प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज, फोटो आणि ऑडिओ व व्हिडिओ यांसारख्या गोष्टींबाबत सावधगिरी बाळगा."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"तुम्ही एखादे अ‍ॅप शेअर, रेकॉर्ड किंवा कास्ट करत असताना, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ला त्या अ‍ॅपवर दाखवलेल्या किंवा प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज, फोटो आणि ऑडिओ व व्हिडिओ यांसारख्या गोष्टींबाबत सावधगिरी बाळगा."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"सुरुवात करा"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"कास्ट करणे सुरू करायचे आहे का?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"तुम्ही कास्ट करत असताना, Android ला तुमच्या स्क्रीनवर दाखवलेल्या किंवा डिव्हाइसवर प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज, फोटो आणि ऑडिओ व व्हिडिओ यांसारख्या गोष्टींबाबत सावधगिरी बाळगा."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"तुम्ही एखादे अ‍ॅप कास्ट करत असताना, Android ला त्या अ‍ॅपवर दाखवलेल्या किंवा प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज, फोटो आणि ऑडिओ व व्हिडिओ यांसारख्या गोष्टींबाबत सावधगिरी बाळगा."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"कास्ट करणे सुरू करा"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"शेअर करणे सुरू करायचे आहे का?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"तुम्ही शेअर, रेकॉर्ड किंवा कास्ट करत असताना, Android ला तुमच्या स्क्रीनवर दाखवलेल्या किंवा डिव्हाइसवर प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज, फोटो आणि ऑडिओ व व्हिडिओ यांसारख्या गोष्टींबाबत सावधगिरी बाळगा."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"तुम्ही एखादे अ‍ॅप शेअर, रेकॉर्ड किंवा कास्ट करत असताना, Android ला त्या अ‍ॅपवर दाखवलेल्या किंवा प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असतो. त्यामुळे पासवर्ड, पेमेंट तपशील, मेसेज, फोटो आणि ऑडिओ व व्हिडिओ यांसारख्या गोष्टींबाबत सावधगिरी बाळगा."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"सुरुवात करा"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"तुमच्या आयटी ॲडमिनने ब्लॉक केले आहे"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"डिव्हाइस धोरणाने स्‍क्रीन कॅप्‍चर करणे बंद केले आहे"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सर्व साफ करा"</string>
@@ -472,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"या डिव्हाइसवर प्रमाणपत्र अधिकार इंस्टॉल केला आहे. आपल्या सुरक्षित नेटवर्क रहदारीचे परीक्षण केले जाऊ शकते किंवा ती सुधारली जाऊ शकते."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"आपल्या प्रशासकाने नेटवर्क लॉगिंग सुरू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे परीक्षण करते."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"तुमच्या ॲडमिनने नेटवर्क लॉग इन सुरू केले आहे, जे तुमच्या कार्य प्रोफाइलमधील रहदारीचे निरीक्षण करत असले तरी तुमच्या वैयक्तिक प्रोफाइलमधील रहदारीचे निरीक्षण करत नाही."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"हे डिव्हाइस <xliff:g id="VPN_APP">%1$s</xliff:g> द्वारे इंटरनेटशी कनेक्ट केलेले आहे. ईमेल आणि ब्राउझिंग डेटासोबतच, तुमची नेटवर्क अ‍ॅक्टिव्हिटी तुमच्या आयटी ॲडमिनला दृश्यमान आहे."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"हे डिव्हाइस <xliff:g id="VPN_APP">%1$s</xliff:g> द्वारे इंटरनेटशी कनेक्ट केलेले आहे. ईमेल आणि ब्राउझिंग डेटाच्या समावेशासह, तुमची नेटवर्क अ‍ॅक्टिव्हिटी तुमच्या VPN पुरवठादाराला दिसते."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"हे डिव्हाइस <xliff:g id="VPN_APP">%1$s</xliff:g> द्वारे इंटरनेटशी कनेक्ट केलेले आहे. ईमेल आणि ब्राउझिंग डेटाच्या समावेशासह, तुमची नेटवर्क अ‍ॅक्टिव्हिटी तुमच्या आयटी ॲडमिनला दिसते."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"हे डिव्हाइस <xliff:g id="VPN_APP_0">%1$s</xliff:g> आणि <xliff:g id="VPN_APP_1">%2$s</xliff:g> यांद्वारे इंटरनेटशी कनेक्ट केलेले आहे. ईमेल आणि ब्राउझिंग डेटासोबतच, तुमची नेटवर्क अ‍ॅक्टिव्हिटी तुमच्या आयटी ॲडमिनला दृश्यमान आहे."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"तुमची कार्य ॲप्स <xliff:g id="VPN_APP">%1$s</xliff:g> द्वारे इंटरनेटशी कनेक्ट केलेली आहेत. ईमेल आणि ब्राउझिंग डेटासोबतच, तुमच्या कार्य ॲप्समधील नेटवर्क अ‍ॅक्टिव्हिटी तुमच्या आयटी ॲडमिन आणि VPN पुरवठादाराला दृश्यमान आहे."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"तुमची वैयक्तिक ॲप्स <xliff:g id="VPN_APP">%1$s</xliff:g> द्वारे इंटरनेटशी कनेक्ट केलेली आहेत. ईमेल आणि ब्राउझिंग डेटासोबतच, तुमची नेटवर्क अ‍ॅक्टिव्हिटी तुमच्या VPN पुरवठादाराला दृश्यमान आहे."</string>
@@ -765,7 +754,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> सेटिंग्ज उघडा."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"सेटिंग्जचा क्रम संपादित करा."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"पॉवर मेनू"</string>
-    <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"पृष्ठ <xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g>"</string>
+    <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"पेज <xliff:g id="ID_2">%2$d</xliff:g> पैकी <xliff:g id="ID_1">%1$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"लॉक स्‍क्रीन"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"तापल्‍यामुळे फोन बंद झाला"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"तुमचा फोन आता नेहमीप्रमाणे काम करत आहे.\nअधिक माहितीसाठी टॅप करा"</string>
@@ -913,8 +902,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"नावडते"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> स्थानावर हलवा"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियंत्रणे"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"झटपट अ‍ॅक्सेस करण्यासाठी डिव्हाइस नियंत्रणे निवडा"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियंत्रणांची पुनर्रचना करण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सर्व नियंत्रणे काढून टाकली आहेत"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदल सेव्ह केले गेले नाहीत"</string>
@@ -1134,6 +1122,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• कॅमेरा अ‍ॅप इंस्टॉल करणे"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• अ‍ॅप सेट करणे"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• किमान एक डिव्हाइस उपलब्ध करणे"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"स्पर्श करा आणि धरून ठेवा शॉर्टकट"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"रद्द करा"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"आता स्क्रीन स्विच करा"</string>

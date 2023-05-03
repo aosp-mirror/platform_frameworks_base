@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Aplikacija <xliff:g id="APPNAME">%1$s</xliff:g> je otkrila ovaj snimak ekrana."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"Aplikacija <xliff:g id="APPNAME">%1$s</xliff:g> i druge otvorene aplikacije su otkrile ovaj snimak ekrana."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Dodaj u bilješku"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Snimač ekrana"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Snimač ekrana"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađivanje snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obavještenje za sesiju snimanja ekrana je u toku"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Započeti snimanje?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Prilikom snimanja, Android sistem može snimiti sve osjetljive informacije koje su vidljive na vašem ekranu ili koje reproducirate na uređaju. To uključuje lozinke, informacije za plaćanje, fotografije, poruke i zvuk."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Snimaj cijeli ekran"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Snimaj jednu aplikaciju"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Dok snimate, Android ima pristup svemu što se vidi na ekranu ili reproducira na uređaju. Zato budite oprezni s lozinkama, detaljima o plaćanju, porukama i drugim osjetljivim informacijama."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Dok snimate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Zato budite oprezni s lozinkama, detaljima o plaćanju, porukama i drugim osjetljivim informacijama."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Započni snimanje"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Pokrenuti snimanje?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Dok snimate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Dok snimate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Pokreni snimanje"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimi zvučni zapis"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk na uređaju"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, naprimjer muzika, pozivi i melodije zvona"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk na uređaju i mikrofon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Započni"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Pokreni"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Snimanje ekrana"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Snimanje ekrana i zvuka"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Prikaži dodire na ekranu"</string>
@@ -396,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Zaista želite ukloniti korisnika?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Sve aplikacije i podaci ovog korisnika bit će izbrisani."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Ukloni"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> će imati pristup svim informacijama koje se prikazuju na ekranu ili koje se reproduciraju s vašeg uređaja za vrijeme snimanja ili emitiranja. To obuhvata informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Usluga koja pruža ovu funkciju će imati pristup svim informacijama koje se prikazuju na ekranu ili koje se reproduciraju s vašeg uređaja za vrijeme snimanja ili emitiranja. To obuhvata informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Započeti snimanje ili emitiranje?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Započeti snimanje ili emitiranje s aplikacijom <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Dozvoliti aplikaciji <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> da dijeli ili snima?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Cijeli ekran"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Jedna aplikacija"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Kada dijelite, snimate ili emitirate, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što se vidi na ekranu ili što se reproducira na uređaju. Zato budite oprezni s lozinkama, detaljima o plaćanju, porukama i drugim osjetljivim informacijama."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Kada aplikaciju dijelite, snimate ili emitirate, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Zato budite oprezni s lozinkama, detaljima o plaćanju, porukama i drugim osjetljivim informacijama."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Nastavi"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Dijelite ili snimajte aplikaciju"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Dozvoliti aplikaciji da dijeli ili snima?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Kada dijelite, snimate ili emitirate, aplikacija ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Zato budite oprezni s lozinkama, detaljima o plaćanju, porukama i drugim osjetljivim informacijama."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Kada dijelite, snimate ili emitirate aplikaciju, ona ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Zato budite oprezni s lozinkama, detaljima o plaćanju, porukama i drugim osjetljivim informacijama."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> će imati pristup svim informacijama koje su vidljive na ekranu ili koje se reproduciraju s uređaja tokom snimanja ili emitiranja. To uključuje informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Pokrenuti snimanje ili emitiranje?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Usluga koja pruža ovu funkciju će imati pristup svim informacijama koje su vidljive na ekranu ili koje se reproduciraju s uređaja tokom snimanja ili emitiranja. To uključuje informacije kao što su lozinke, detalji o plaćanju, fotografije, poruke i zvuk koji reproducirate."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Cijeli ekran"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Jedna aplikacija"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Dijelite ili snimite aplikaciju"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Pokrenuti snimanje ili emitiranje uz aplikaciju <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kada dijelite, snimate ili emitirate, aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kada dijelite, snimate ili emitirate aplikaciju, aplikacija <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Pokreni"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Pokrenuti emitiranje?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kada emitirate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Kada emitirate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Pokreni emitiranje"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Pokrenuti dijeljenje?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kada dijelite, snimate ili emitirate, Android ima pristup svemu što je vidljivo na ekranu ili što se reproducira na uređaju. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kada dijelite, snimate ili emitirate aplikaciju, Android ima pristup svemu što se prikazuje ili reproducira u toj aplikaciji. Stoga budite oprezni s informacijama kao što su lozinke, podaci o plaćanju, poruke, fotografije, zvukovi i videozapisi."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Pokreni"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokirao je vaš IT administrator"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Snimanje ekrana je onemogućeno pravilima uređaja"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Očisti sve"</string>
@@ -458,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"CA certifikat je instaliran na ovom uređaju. Vaš saobraćaj preko sigurne mreže može se pratiti."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Vaš administrator je uključio zapisivanje na mreži, čime se prati saobraćaj na vašem uređaju."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator je uključio zapisivanje na mreži, čime se nadzire saobraćaj na vašem radnom profilu, ali ne i na ličnom profilu."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Uređaj je povezan s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Uređaj je povezan s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša aktivnost na mreži, uključujući e-poruke i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Uređaj je povezan s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša aktivnost na mreži, uključujući e-poruke i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Uređaj je povezan s internetom putem aplikacija <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem IT administratoru."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše poslovne aplikacije su povezane s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost u poslovnim aplikacijama, uključujući e-poštu i podatke o pregledanju, je vidljiva IT administratoru i pružaocu VPN usluga."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Lične aplikacije su povezane s internetom putem aplikacije <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša mrežna aktivnost, uključujući e-poštu i podatke o pregledanju, je vidljiva vašem pružaocu VPN usluga."</string>
@@ -904,8 +907,8 @@
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve kontrole su uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu sačuvane"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Prikaži druge aplikacije"</string>
-    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Preuređivanje"</string>
-    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Dodaj kontrole"</string>
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Preuredi"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Dodajte kontrole"</string>
     <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Nazad na uređivanje"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Učitavanje kontrola nije uspjelo. Provjerite aplikaciju <xliff:g id="APP">%s</xliff:g> da se uvjerite da postavke aplikacije nisu izmijenjene."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatibilne kontrole nisu dostupne"</string>
@@ -1110,7 +1113,7 @@
     <string name="log_access_confirmation_title" msgid="4843557604739943395">"Dozvoliti aplikaciji <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> da pristupa svim zapisnicima uređaja?"</string>
     <string name="log_access_confirmation_allow" msgid="752147861593202968">"Dozvoli jednokratni pristup"</string>
     <string name="log_access_confirmation_deny" msgid="2389461495803585795">"Nemoj dozvoliti"</string>
-    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, zato pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju."</string>
+    <string name="log_access_confirmation_body" msgid="6883031912003112634">"Zapisnici uređaja bilježe šta se dešava na uređaju. Aplikacije mogu koristiti te zapisnike da pronađu i riješe probleme.\n\nNeki zapisnici mogu sadržavati osjetljive podatke, zato pristup svim zapisnicima uređaja dozvolite samo aplikacijama kojima vjerujete. \n\nAko ne dozvolite ovoj aplikaciji da pristupa svim zapisnicima uređaja, ona i dalje može pristupati svojim zapisnicima. Proizvođač uređaja će možda i dalje biti u stanju pristupiti nekim zapisnicima ili podacima na uređaju."</string>
     <string name="log_access_confirmation_learn_more" msgid="3134565480986328004">"Saznajte više"</string>
     <string name="log_access_confirmation_learn_more_at" msgid="5635666259505215905">"Saznajte više na <xliff:g id="URL">%s</xliff:g>"</string>
     <string name="keyguard_affordance_enablement_dialog_action_template" msgid="8164857863036314664">"Otvori aplikaciju <xliff:g id="APPNAME">%1$s</xliff:g>"</string>
@@ -1119,6 +1122,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Instalirajte aplikaciju kamere"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikacija je postavljena"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Dostupan je najmanje jedan uređaj"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Dodirnite i zadržite prečicu"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Otkaži"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Promijenite ekran sada"</string>

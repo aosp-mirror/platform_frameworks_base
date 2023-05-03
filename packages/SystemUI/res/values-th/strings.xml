@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ตรวจพบภาพหน้าจอนี้"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> และแอปอื่นๆ ที่เปิดอยู่ตรวจพบภาพหน้าจอนี้"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"เพิ่มลงในโน้ต"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"โปรแกรมบันทึกหน้าจอ"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"โปรแกรมบันทึกหน้าจอ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"กำลังประมวลผลการอัดหน้าจอ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"การแจ้งเตือนต่อเนื่องสำหรับเซสชันการบันทึกหน้าจอ"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"เริ่มบันทึกเลยไหม"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ขณะบันทึก ระบบ Android อาจบันทึกข้อมูลที่ละเอียดอ่อนซึ่งปรากฏบนหน้าจอหรือเล่นในอุปกรณ์ได้ ซึ่งรวมถึงรหัสผ่าน ข้อมูลการชำระเงิน รูปภาพ ข้อความ และเสียง"</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"บันทึกทั้งหน้าจอ"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"บันทึกแอปเดียว"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"ขณะกำลังบันทึก Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่ปรากฏบนหน้าจอหรือเล่นอยู่ในอุปกรณ์ ดังนั้นโปรดระวังเกี่ยวกับรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ หรือข้อมูลที่ละเอียดอ่อนอื่นๆ"</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"ขณะกำลังบันทึกแอป Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังเกี่ยวกับรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ หรือข้อมูลที่ละเอียดอ่อนอื่นๆ"</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"เริ่มบันทึก"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"เริ่มบันทึกเลยไหม"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ขณะกำลังบันทึก Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่ปรากฏบนหน้าจอหรือเล่นอยู่ในอุปกรณ์ ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"ขณะกำลังบันทึกแอป Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"เริ่มบันทึก"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"บันทึกเสียง"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"เสียงจากอุปกรณ์"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"เสียงจากอุปกรณ์ เช่น เพลง การโทร และเสียงเรียกเข้า"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"ไมโครโฟน"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"เสียงจากอุปกรณ์และไมโครโฟน"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"เริ่ม"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"เริ่ม"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"กำลังบันทึกหน้าจอ"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"กำลังบันทึกหน้าจอและเสียง"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"แสดงการแตะบนหน้าจอ"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"หากคุณป้อนรูปแบบไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"หากคุณป้อน PIN ไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"หากคุณป้อนรหัสผ่านไม่ถูกต้องในความพยายามครั้งถัดไป ระบบจะลบโปรไฟล์งานและข้อมูลในโปรไฟล์"</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"ตั้งค่า"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"ไว้ทีหลัง"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"จำเป็นต้องดำเนินการนี้เพื่อปรับปรุงความปลอดภัยและประสิทธิภาพ"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"ตั้งค่าการปลดล็อกด้วยลายนิ้วมืออีกครั้ง"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"ปลดล็อกด้วยลายนิ้วมือ"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"ตั้งค่าการปลดล็อกด้วยลายนิ้วมือ"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"ระบบจะลบรูปภาพและรูปแบบลายนิ้วมือปัจจุบันเพื่อตั้งค่าการปลดล็อกด้วยลายนิ้วมืออีกครั้ง\n\nหลังจากลบแล้ว คุณจะต้องตั้งค่าการปลดล็อกด้วยลายนิ้วมือใหม่เพื่อใช้ลายนิ้วมือในการปลดล็อกโทรศัพท์หรือยืนยันตัวตน"</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"ระบบจะลบรูปภาพและรูปแบบลายนิ้วมือปัจจุบันเพื่อตั้งค่าการปลดล็อกด้วยลายนิ้วมืออีกครั้ง\n\nหลังจากลบแล้ว คุณจะต้องตั้งค่าการปลดล็อกด้วยลายนิ้วมือใหม่เพื่อใช้ลายนิ้วมือในการปลดล็อกโทรศัพท์หรือยืนยันตัวตน"</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"ตั้งค่าการปลดล็อกด้วยลายนิ้วมือไม่ได้ ไปที่การตั้งค่าเพื่อลองอีกครั้ง"</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"ตั้งค่าการปลดล็อกด้วยใบหน้าอีกครั้ง"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"ปลดล็อกด้วยใบหน้า"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"ตั้งค่าการปลดล็อกด้วยใบหน้า"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"ระบบจะลบรูปแบบใบหน้าปัจจุบันเพื่อตั้งค่าการปลดล็อกด้วยใบหน้าอีกครั้ง\n\nคุณจะต้องตั้งค่าฟีเจอร์นี้ใหม่เพื่อใช้ใบหน้าในการปลดล็อกโทรศัพท์"</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ตั้งค่าการปลดล็อกด้วยใบหน้าไม่ได้ ไปที่การตั้งค่าเพื่อลองอีกครั้ง"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"แตะเซ็นเซอร์ลายนิ้วมือ"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"ไม่รู้จักใบหน้า ใช้ลายนิ้วมือแทน"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -366,7 +349,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"แตะอีกครั้งเพื่อเปิด"</string>
     <string name="tap_again" msgid="1315420114387908655">"แตะอีกครั้ง"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"เลื่อนขึ้นเพื่อเปิด"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"ปัดขึ้นเพื่อเปิด"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"กดไอคอนปลดล็อกเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"ปลดล็อกด้วยใบหน้าแล้ว ปัดขึ้นเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ปลดล็อกด้วยใบหน้าแล้ว กดไอคอนปลดล็อกเพื่อเปิด"</string>
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"นำผู้ใช้ออกใช่ไหม"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"แอปและข้อมูลทั้งหมดของผู้ใช้นี้จะถูกลบ"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"นำออก"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะมีสิทธิ์เข้าถึงข้อมูลทั้งหมดที่ปรากฏบนหน้าจอหรือเปิดจากอุปกรณ์ของคุณขณะบันทึกหรือแคสต์ ซึ่งรวมถึงข้อมูลอย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน รูปภาพ ข้อความ และเสียงที่คุณเล่น"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"บริการที่มีฟังก์ชันนี้จะมีสิทธิ์เข้าถึงข้อมูลทั้งหมดที่ปรากฏบนหน้าจอหรือเปิดจากอุปกรณ์ของคุณขณะบันทึกหรือแคสต์ ซึ่งรวมถึงข้อมูลอย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน รูปภาพ ข้อความ และเสียงที่คุณเล่น"</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"เริ่มบันทึกหรือแคสต์ใช่ไหม"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"เริ่มบันทึกหรือแคสต์ด้วย <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> เลยไหม"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"อนุญาตให้ \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" แชร์หรือบันทึกไหม"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"ทั้งหน้าจอ"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"แอปเดียว"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"เมื่อกำลังแชร์ บันทึก หรือแคสต์ \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" จะมีสิทธิ์เข้าถึงทุกสิ่งที่ปรากฏบนหน้าจอหรือเล่นอยู่ในอุปกรณ์ ดังนั้นโปรดระวังเกี่ยวกับรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ หรือข้อมูลที่ละเอียดอ่อนอื่นๆ"</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"เมื่อกำลังแชร์ บันทึก หรือแคสต์แอป \"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>\" จะมีสิทธิ์เข้าถึงทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังเกี่ยวกับรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ หรือข้อมูลที่ละเอียดอ่อนอื่นๆ"</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"ต่อไป"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"แชร์หรือบันทึกแอป"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"อนุญาตให้แอปนี้แชร์หรือบันทึกไหม"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"เมื่อกำลังแชร์ บันทึก หรือแคสต์ แอปนี้จะมีสิทธิ์เข้าถึงทุกสิ่งที่ปรากฏบนหน้าจอหรือเล่นอยู่ในอุปกรณ์ ดังนั้นโปรดระวังเกี่ยวกับรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ หรือข้อมูลที่ละเอียดอ่อนอื่นๆ"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"เมื่อกำลังแชร์ บันทึก หรือแคสต์แอป แอปนี้จะมีสิทธิ์เข้าถึงทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังเกี่ยวกับรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ หรือข้อมูลที่ละเอียดอ่อนอื่นๆ"</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะมีสิทธิ์เข้าถึงข้อมูลทั้งหมดที่ปรากฏบนหน้าจอหรือเปิดจากอุปกรณ์ของคุณขณะบันทึกหรือแคสต์ ซึ่งรวมถึงข้อมูลอย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน รูปภาพ ข้อความ และเสียงที่คุณเล่น"</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"เริ่มบันทึกหรือแคสต์เลยไหม"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"บริการที่มีฟังก์ชันนี้จะมีสิทธิ์เข้าถึงข้อมูลทั้งหมดที่ปรากฏบนหน้าจอหรือเปิดจากอุปกรณ์ของคุณขณะบันทึกหรือแคสต์ ซึ่งรวมถึงข้อมูลอย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน รูปภาพ ข้อความ และเสียงที่คุณเล่น"</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"ทั้งหน้าจอ"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"แอปเดียว"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"แชร์หรือบันทึกแอป"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"เริ่มบันทึกหรือแคสต์ด้วย <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> เลยไหม"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"เมื่อกำลังแชร์ บันทึก หรือแคสต์ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะมีสิทธิ์เข้าถึงทุกสิ่งที่ปรากฏบนหน้าจอหรือเล่นอยู่ในอุปกรณ์ ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"เมื่อกำลังแชร์ บันทึก หรือแคสต์แอป <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> จะมีสิทธิ์เข้าถึงทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"เริ่ม"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"เริ่มแคสต์เลยไหม"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"เมื่อกำลังแคสต์ Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่ปรากฏบนหน้าจอหรือเล่นอยู่ในอุปกรณ์ ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"เมื่อกำลังแคสต์แอป Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"เริ่มแคสต์"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"เริ่มแชร์เลยไหม"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"เมื่อกำลังแชร์ บันทึก หรือแคสต์ Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่ปรากฏบนหน้าจอหรือเล่นอยู่ในอุปกรณ์ ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"เมื่อกำลังแชร์ บันทึก หรือแคสต์แอป Android จะมีสิทธิ์เข้าถึงทุกสิ่งที่แสดงหรือเล่นอยู่ในแอปดังกล่าว ดังนั้นโปรดระวังสิ่งต่างๆ อย่างเช่นรหัสผ่าน รายละเอียดการชำระเงิน ข้อความ รูปภาพ รวมถึงเสียงและวิดีโอ"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"เริ่ม"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"ผู้ดูแลระบบไอทีบล็อกไว้"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"การจับภาพหน้าจอปิดใช้โดยนโยบายด้านอุปกรณ์"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ล้างทั้งหมด"</string>
@@ -472,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"มีการติดตั้งผู้ออกใบรับรองในอุปกรณ์นี้ อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในอุปกรณ์ของคุณ"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในโปรไฟล์งานแต่ไม่ตรวจสอบในโปรไฟล์ส่วนตัวของคุณ"</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่ายรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่ายรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน <xliff:g id="VPN_APP_0">%1$s</xliff:g> และ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่าย ซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"แอปงานเชื่อมต่ออินเทอร์เน็ตผ่าน <xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีและผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายในแอปงานได้ ซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บ"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"แอปส่วนตัวเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
@@ -650,8 +639,8 @@
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"สลับรูปแบบแป้นพิมพ์"</string>
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"ล้างข้อความ"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ทางลัด"</string>
-    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ค้นหาทางลัด"</string>
-    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ไม่พบทางลัด"</string>
+    <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ค้นหาแป้นพิมพ์ลัด"</string>
+    <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ไม่พบแป้นพิมพ์ลัด"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"ระบบ"</string>
     <string name="keyboard_shortcut_search_category_input" msgid="5440558509904296233">"อินพุต"</string>
     <string name="keyboard_shortcut_search_category_open_apps" msgid="1450959949739257562">"แอปที่เปิดอยู่"</string>
@@ -913,8 +902,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"นำออกจากรายการโปรด"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"ย้ายไปที่ตำแหน่ง <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"การควบคุม"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"เลือกระบบควบคุมอุปกรณ์ที่ต้องการให้เข้าถึงได้อย่างรวดเร็ว"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"แตะตัวควบคุมค้างไว้แล้วลากเพื่อจัดเรียงใหม่"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"นำตัวควบคุมทั้งหมดออกแล้ว"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ยังไม่ได้บันทึกการเปลี่ยนแปลง"</string>
@@ -1134,6 +1122,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ติดตั้งแอปกล้อง"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• แอปได้รับการตั้งค่าแล้ว"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• มีอุปกรณ์พร้อมใช้งานอย่างน้อย 1 รายการ"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"เลือกแอปโน้ตเริ่มต้นเพื่อใช้ทางลัดการจดบันทึก"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"เลือกแอป"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"แตะแป้นพิมพ์ลัดค้างไว้"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ยกเลิก"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"สลับหน้าจอเลย"</string>
