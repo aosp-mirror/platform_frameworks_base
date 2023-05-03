@@ -28,6 +28,7 @@ import android.util.Slog;
 import com.android.server.credentials.MetricUtilities;
 import com.android.server.credentials.metrics.shared.ResponseCollective;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,13 +48,17 @@ public class ProviderSessionMetric {
     protected final CandidatePhaseMetric mCandidatePhasePerProviderMetric;
 
     // IFF there was an authentication entry clicked, this stores all required information for
-    // that event. This is for the 'get' flow.
+    // that event. This is for the 'get' flow. Notice these flows may be repetitive.
+    // Thus each provider stores a list of authentication metrics. The time between emits
+    // of these metrics should exceed 10 ms (given human reaction time is ~ 100's of ms), so emits
+    // will never collide. However, for aggregation, this will store information accordingly.
     @NonNull
-    protected final BrowsedAuthenticationMetric mBrowsedAuthenticationMetric;
+    protected final List<BrowsedAuthenticationMetric> mBrowsedAuthenticationMetric =
+            new ArrayList<>();
 
     public ProviderSessionMetric(int sessionIdTrackTwo) {
         mCandidatePhasePerProviderMetric = new CandidatePhaseMetric(sessionIdTrackTwo);
-        mBrowsedAuthenticationMetric = new BrowsedAuthenticationMetric(sessionIdTrackTwo);
+        mBrowsedAuthenticationMetric.add(new BrowsedAuthenticationMetric(sessionIdTrackTwo));
     }
 
     /**
@@ -66,7 +71,7 @@ public class ProviderSessionMetric {
     /**
      * Retrieves the authentication clicked metric information.
      */
-    public BrowsedAuthenticationMetric getBrowsedAuthenticationMetric() {
+    public List<BrowsedAuthenticationMetric> getBrowsedAuthenticationMetric() {
         return mBrowsedAuthenticationMetric;
     }
 
@@ -97,8 +102,10 @@ public class ProviderSessionMetric {
         // TODO(b/271135048) - Mimic typical candidate update, but with authentication metric
         // Collect the final timestamps (and start timestamp), status, exceptions and the provider
         // uid. This occurs typically *after* the collection is complete.
-        mBrowsedAuthenticationMetric.setProviderUid(providerSessionUid);
-        // TODO(immediately) - add timestamps
+        var mostRecentAuthenticationMetric = mBrowsedAuthenticationMetric
+                .get(mBrowsedAuthenticationMetric.size() - 1);
+        mostRecentAuthenticationMetric.setProviderUid(providerSessionUid);
+        // TODO(immediately) - add timestamps (no longer needed!!) but also update below values!
         if (isFailureStatus) {
             mCandidatePhasePerProviderMetric.setQueryReturned(false);
             mCandidatePhasePerProviderMetric.setProviderQueryStatus(
@@ -259,7 +266,12 @@ public class ProviderSessionMetric {
         if (!isAuthEntry) {
             mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
         } else {
-            mBrowsedAuthenticationMetric.setAuthEntryCollective(responseCollective);
+            BrowsedAuthenticationMetric browsedAuthenticationMetric =
+                    new BrowsedAuthenticationMetric(mCandidatePhasePerProviderMetric
+                            .getSessionIdProvider());
+            // to receive an auth entry, the candidate phase must have succeeded
+            browsedAuthenticationMetric.setAuthEntryCollective(responseCollective);
+            mBrowsedAuthenticationMetric.add(browsedAuthenticationMetric);
         }
     }
 }

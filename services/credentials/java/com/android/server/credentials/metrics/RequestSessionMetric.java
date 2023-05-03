@@ -53,7 +53,6 @@ public class RequestSessionMetric {
     protected final InitialPhaseMetric mInitialPhaseMetric;
     protected final ChosenProviderFinalPhaseMetric
             mChosenProviderFinalPhaseMetric;
-    // TODO(b/271135048) - Replace this with a new atom per each browsing emit (V4)
     protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric = new ArrayList<>();
     // Specific aggregate candidate provider metric for the provider this session handles
     @NonNull
@@ -216,8 +215,6 @@ public class RequestSessionMetric {
     /**
      * During browsing, where multiple entries can be selected, this collects the browsing phase
      * metric information.
-     * TODO(b/271135048) - modify asap to account for a new metric emit per browse response to
-     * framework.
      *
      * @param selection                   contains the selected entry key type
      * @param selectedProviderPhaseMetric contains the utility information of the selected provider

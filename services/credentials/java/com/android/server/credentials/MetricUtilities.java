@@ -214,8 +214,7 @@ public class MetricUtilities {
     public static void logApiCalledCandidateGetMetric(Map<String, ProviderSession> providers,
             int emitSequenceId) {
         try {
-            // TODO(immediately) - Modify to a Static Queue of Ordered Functions and emit from
-            //  queue to adhere to 10 second limit (thread removed given android safe-calling).
+            // TODO(b/future) - Switch to Log format
             var sessions = providers.values();
             for (var session : sessions) {
                 try {
@@ -416,7 +415,7 @@ public class MetricUtilities {
                         /*session_id*/ candidateAggregateMetric.getSessionIdProvider(),
                         /*sequence_num*/ sequenceNum,
                         /*query_returned*/ candidateAggregateMetric.isQueryReturned(),
-                        /*num_providers*/ candidateAggregateMetric.getNumProviders(),
+                        /*num_query_providers*/ candidateAggregateMetric.getNumProviders(),
                         /*min_query_start_timestamp_microseconds*/
                         DEFAULT_INT_32,
                         /*max_query_end_timestamp_microseconds*/
@@ -440,13 +439,17 @@ public class MetricUtilities {
                         /*query_per_exception_classtype_counts*/
                         DEFAULT_REPEATED_INT_32,
                         /*auth_response_unique_classtypes*/
-                        DEFAULT_REPEATED_STR,
+                        candidateAggregateMetric.getAggregateCollectiveAuth()
+                                .getUniqueResponseStrings(),
                         /*auth_per_classtype_counts*/
-                        DEFAULT_REPEATED_INT_32,
+                        candidateAggregateMetric.getAggregateCollectiveAuth()
+                                .getUniqueResponseCounts(),
                         /*auth_unique_entries*/
-                        DEFAULT_REPEATED_INT_32,
+                        candidateAggregateMetric.getAggregateCollectiveAuth()
+                                .getUniqueEntries(),
                         /*auth_per_entry_counts*/
-                        DEFAULT_REPEATED_INT_32,
+                        candidateAggregateMetric.getAggregateCollectiveAuth()
+                                .getUniqueEntryCounts(),
                         /*auth_total_candidate_failure*/
                         DEFAULT_INT_32,
                         /*auth_framework_exception_unique_classtypes*/
@@ -454,7 +457,7 @@ public class MetricUtilities {
                         /*auth_per_exception_classtype_counts*/
                         DEFAULT_REPEATED_INT_32,
                         /*num_auth_clicks*/
-                        DEFAULT_INT_32,
+                        candidateAggregateMetric.getNumAuthEntriesTapped(),
                         /*auth_returned*/ false
                 );
             }

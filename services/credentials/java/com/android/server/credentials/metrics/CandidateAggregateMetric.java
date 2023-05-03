@@ -59,7 +59,6 @@ public class CandidateAggregateMetric {
      * @param providers the providers associated with the candidate flow
      */
     public void collectAverages(Map<String, ProviderSession> providers) {
-        // TODO(b/271135048) : Complete this method
         collectQueryAggregates(providers);
         collectAuthAggregates(providers);
     }
@@ -89,13 +88,16 @@ public class CandidateAggregateMetric {
         var providerSessions = providers.values();
         for (var session : providerSessions) {
             var sessionMetric = session.getProviderSessionMetric();
-            var authMetric = sessionMetric.getBrowsedAuthenticationMetric();
-            mQueryReturned = mQueryReturned; // TODO add auth info
-            ResponseCollective authCollective = authMetric.getAuthEntryCollective();
-            ResponseCollective.combineTypeCountMaps(responseCountAuth,
-                    authCollective.getResponseCountsMap());
-            ResponseCollective.combineTypeCountMaps(entryCountAuth,
-                    authCollective.getEntryCountsMap());
+            var authMetrics = sessionMetric.getBrowsedAuthenticationMetric();
+            mQueryReturned = mQueryReturned; // TODO add rest of auth info
+            mNumAuthEntriesTapped += authMetrics.size();
+            for (var authMetric : authMetrics) {
+                ResponseCollective authCollective = authMetric.getAuthEntryCollective();
+                ResponseCollective.combineTypeCountMaps(responseCountAuth,
+                        authCollective.getResponseCountsMap());
+                ResponseCollective.combineTypeCountMaps(entryCountAuth,
+                        authCollective.getEntryCountsMap());
+            }
         }
         mAggregateCollectiveAuth = new ResponseCollective(responseCountAuth, entryCountAuth);
     }
@@ -115,5 +117,9 @@ public class CandidateAggregateMetric {
 
     public ResponseCollective getAggregateCollectiveQuery() {
         return mAggregateCollectiveQuery;
+    }
+
+    public ResponseCollective getAggregateCollectiveAuth() {
+        return mAggregateCollectiveAuth;
     }
 }
