@@ -1477,14 +1477,22 @@ public final class AutofillManager {
         // to PCC classification service.
         if (AutofillFeatureFlags.isAutofillPccClassificationEnabled()) {
             synchronized (mLock) {
-                final boolean clientAdded = tryAddServiceClientIfNeededLocked();
-                if (clientAdded){
-                    startSessionLocked(/* id= */ AutofillId.NO_AUTOFILL_ID,
-                        /* bounds= */ null, /* value= */ null, /* flags= */ FLAG_PCC_DETECTION);
-                } else {
-                    if (sVerbose) {
-                        Log.v(TAG, "not starting session: no service client");
+                // If session has already been created, that'd mean we already have issued the
+                // detection request previously. It is possible in cases like autofocus that this
+                // method isn't invoked, so the server should still handle such cases where fill
+                // request comes in but PCC Detection hasn't been triggered. There is no benefit to
+                // trigger PCC Detection separately in those cases.
+                if (!isActiveLocked()) {
+                    final boolean clientAdded = tryAddServiceClientIfNeededLocked();
+                    if (clientAdded) {
+                        startSessionLocked(/* id= */ AutofillId.NO_AUTOFILL_ID, /* bounds= */ null,
+                                /* value= */ null, /* flags= */ FLAG_PCC_DETECTION);
+                    } else {
+                        if (sVerbose) {
+                            Log.v(TAG, "not starting session: no service client");
+                        }
                     }
+
                 }
             }
         }
