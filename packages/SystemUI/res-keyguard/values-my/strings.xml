@@ -37,7 +37,7 @@
     <string name="keyguard_plugged_in_incompatible_charger" msgid="3687961801947819076">"<xliff:g id="PERCENTAGE">%s</xliff:g> • အားသွင်းပစ္စည်းတွင် ပြဿနာရှိသည်"</string>
     <string name="keyguard_instructions_when_pattern_disabled" msgid="8448804180089936954">"မီနူးကို နှိပ်၍ လော့ခ်ဖွင့်ပါ။"</string>
     <string name="keyguard_network_locked_message" msgid="407096292844868608">"ကွန်ရက်ကို လော့ခ်ချထားသည်"</string>
-    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ဆင်းမ်မရှိပါ"</string>
+    <string name="keyguard_missing_sim_message_short" msgid="685029586173458728">"ဆင်းမ်ကတ် မရှိပါ"</string>
     <string name="keyguard_missing_sim_instructions" msgid="7735360104844653246">"ဆင်းမ်ထည့်ပါ။"</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="3451467338947610268">"ဆင်းမ်မရှိပါ (သို့) သုံး၍မရပါ။ ဆင်းမ်ထည့်ပါ။"</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="3955052454216046100">"ဆင်းမ်ကို သုံး၍မရပါ။"</string>
