@@ -88,7 +88,7 @@
     <string name="letterbox_education_reposition_text" msgid="4589957299813220661">"在應用程式外輕按兩下即可調整位置"</string>
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"知道了"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"展開即可查看詳情。"</string>
-    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"要重新啟動改善檢視畫面嗎？"</string>
+    <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"要重新啟動以改善檢視畫面嗎？"</string>
     <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"你可重新啟動應用程式，讓系統更新檢視畫面；但系統可能不會儲存目前進度及你作出的任何變更"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"取消"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"重新啟動"</string>
