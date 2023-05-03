@@ -121,9 +121,10 @@ fun GetCredentialScreen(
                                 providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
                                 onEntrySelected = viewModel::getFlowOnEntrySelected,
                                 onBackButtonClicked =
-                                viewModel::getFlowOnBackToPrimarySelectionScreen,
+                                if (getCredentialUiState.isNoAccount)
+                                    viewModel::getFlowOnBackToHybridSnackBarScreen
+                                else viewModel::getFlowOnBackToPrimarySelectionScreen,
                                 onCancel = viewModel::onUserCancel,
-                                isNoAccount = getCredentialUiState.isNoAccount,
                                 onLog = { viewModel.logUiEvent(it) },
                             )
                             viewModel.uiMetrics.log(GetCredentialEvent
@@ -327,7 +328,6 @@ fun AllSignInOptionCard(
     onEntrySelected: (BaseEntry) -> Unit,
     onBackButtonClicked: () -> Unit,
     onCancel: () -> Unit,
-    isNoAccount: Boolean,
     onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     val sortedUserNameToCredentialEntryList =
@@ -336,7 +336,7 @@ fun AllSignInOptionCard(
     SheetContainerCard(topAppBar = {
         MoreOptionTopAppBar(
             text = stringResource(R.string.get_dialog_title_sign_in_options),
-            onNavigationIconClicked = if (isNoAccount) onCancel else onBackButtonClicked,
+            onNavigationIconClicked = onBackButtonClicked,
             bottomPadding = 0.dp,
         )
     }) {
