@@ -87,11 +87,8 @@ int64_t AKeyEvent_getDownTime(const AInputEvent* key_event) {
 
 const AInputEvent* AKeyEvent_fromJava(JNIEnv* env, jobject keyEvent) {
     std::unique_ptr<KeyEvent> event = std::make_unique<KeyEvent>();
-    android::status_t ret = android::android_view_KeyEvent_toNative(env, keyEvent, event.get());
-    if (ret == android::OK) {
-        return event.release();
-    }
-    return nullptr;
+    *event = android::android_view_KeyEvent_toNative(env, keyEvent);
+    return event.release();
 }
 
 int64_t AKeyEvent_getEventTime(const AInputEvent* key_event) {
