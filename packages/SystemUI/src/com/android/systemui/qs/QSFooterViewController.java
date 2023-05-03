@@ -27,6 +27,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.retail.domain.interactor.RetailModeInteractor;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.ViewController;
 
@@ -45,18 +46,22 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     private final View mEditButton;
     private final FalsingManager mFalsingManager;
     private final ActivityStarter mActivityStarter;
+    private final RetailModeInteractor mRetailModeInteractor;
 
     @Inject
     QSFooterViewController(QSFooterView view,
             UserTracker userTracker,
             FalsingManager falsingManager,
             ActivityStarter activityStarter,
-            QSPanelController qsPanelController) {
+            QSPanelController qsPanelController,
+            RetailModeInteractor retailModeInteractor
+    ) {
         super(view);
         mUserTracker = userTracker;
         mQsPanelController = qsPanelController;
         mFalsingManager = falsingManager;
         mActivityStarter = activityStarter;
+        mRetailModeInteractor = retailModeInteractor;
 
         mBuildText = mView.findViewById(R.id.build);
         mPageIndicator = mView.findViewById(R.id.footer_page_indicator);
@@ -96,6 +101,8 @@ public class QSFooterViewController extends ViewController<QSFooterView> impleme
     @Override
     public void setVisibility(int visibility) {
         mView.setVisibility(visibility);
+        mEditButton
+                .setVisibility(mRetailModeInteractor.isInRetailMode() ? View.GONE : View.VISIBLE);
         mEditButton.setClickable(visibility == View.VISIBLE);
     }
 
