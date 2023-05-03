@@ -299,10 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android sistēma"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Pārslēgties uz personisko profilu"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Pārslēgties uz darba profilu"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Pārslēgties uz personīgo profilu lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Pārslēgties uz darba profilu lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktpersonas"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"piekļūt jūsu kontaktpersonu datiem"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Atrašanās vieta"</string>

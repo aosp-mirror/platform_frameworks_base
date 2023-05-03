@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistemi Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Kalo te profili personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Kalo te profili i punës"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Kalo te <xliff:g id="APP_NAME">%1$s</xliff:g> personal"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Kalo te <xliff:g id="APP_NAME">%1$s</xliff:g> i punës"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktet"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"qasu te kontaktet e tua"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Vendndodhja"</string>
@@ -683,8 +681,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nuk ka dritë të mjaftueshme"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Lëvize telefonin më larg"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Lëvize telefonin më afër"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Lëvize telefonin më lart"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Lëvize telefonin më poshtë"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Ngrije telefonin më lart"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Ule telefonin më poshtë"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Lëvize telefonin në të majtën tënde"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Lëvize telefonin në të djathtën tënde"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Shiko më drejt në pajisjen tënde."</string>
@@ -704,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Modeli i fytyrës nuk krijohet. Provo sërish."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"U zbuluan syze të errëta. Fytyra jote duhet të jetë plotësisht e dukshme."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"U zbulua mbulim i fytyrës. Fytyra jote duhet të jetë plotësisht e dukshme."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Fytyra është e mbuluar. Fytyra duhet të jetë plotësisht e dukshme."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>

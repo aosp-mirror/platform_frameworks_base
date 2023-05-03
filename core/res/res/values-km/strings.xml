@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"ប្រព័ន្ធ​​ Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ប្តូរ​ទៅ​កម្រង​ព័ត៌មាន​ផ្ទាល់ខ្លួន"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ប្តូរ​ទៅ​កម្រង​ព័ត៌មាន​ការងារ"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ប្ដូរទៅ <xliff:g id="APP_NAME">%1$s</xliff:g> ផ្ទាល់ខ្លួន"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"ប្ដូរទៅ <xliff:g id="APP_NAME">%1$s</xliff:g> ការងារ"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ទំនាក់ទំនង"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ចូលប្រើទំនាក់ទំនងរបស់អ្នក"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ទីតាំង"</string>
@@ -683,10 +681,10 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"មិនមាន​ពន្លឺគ្រប់គ្រាន់"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ដាក់​ទូរសព្ទឱ្យឆ្ងាយ​ជាងមុន"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ដាក់​ទូរសព្ទ​ឱ្យជិត​ជាងមុន"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"ដាក់​ទូរសព្ទ​ឱ្យខ្ពស់​ជាងមុន"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"ដាក់​ទូរសព្ទ​ឱ្យទាប​ជាងមុន"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"រំកិល​ទូរសព្ទឡើងលើ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"រំកិល​ទូរសព្ទចុះក្រោម"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ដាក់​ទូរសព្ទ​ទៅខាងឆ្វេងអ្នក"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"ដាក់ទូរសព្ទ​ទៅខាងស្ដាំអ្នក"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"រំកិលទូរសព្ទ​ទៅខាងស្ដាំ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"សូមមើល​ឱ្យចំ​ឧបករណ៍​របស់អ្នក​ជាងមុន។"</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"មើលមិនឃើញ​មុខរបស់អ្នកទេ។ កាន់ទូរសព្ទរបស់អ្នក​ដាក់ត្រឹមភ្នែក។"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"មាន​ចលនា​ខ្លាំងពេក។ សូមកាន់​ទូរសព្ទ​ឱ្យនឹង។"</string>
@@ -704,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"មិនអាចបង្កើតគំរូមុខរបស់អ្នកបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"បានរកឃើញ​វ៉ែនតាខ្មៅ។ មុខរបស់អ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ។"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"បានរកឃើញ​គ្រឿងពាក់លើមុខ។ មុខរបស់អ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ។"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"បានរកឃើញ​របស់បាំងមុខ។ មុខអ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ។"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"មិនអាច​ផ្ទៀងផ្ទាត់​មុខបានទេ។ មិនមាន​ហាតវែរទេ។"</string>

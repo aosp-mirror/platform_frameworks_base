@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android Sistemi"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Kişisel profile geçiş yap"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"İş profiline geç"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> kişisel profiline geç"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> iş profiline geç"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kişiler"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"kişilerinize erişme"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Konum"</string>
@@ -637,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Çok parlak"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Güç düğmesine basma algılandı"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ayarlamayı deneyin"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Her defasında parmağınızın konumunu biraz değiştirin"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Her defasında parmağınızı biraz kaydırın"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Parmak izi tanınmadı"</string>
@@ -683,8 +681,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Yeterli ışık yok"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefonu uzaklaştırın"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Telefonu yaklaştırın"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonu daha yukarı kaldırın"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Telefonu daha aşağı indirin"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonu yukarı kaldırın"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Telefonu aşağı indirin"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Telefonu solunuza kaydırın"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Telefonu sağınıza kaydırın"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lütfen cihazınıza daha doğrudan bakın."</string>
@@ -696,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Telefonunuza daha doğrudan bakın"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Telefonunuza daha doğrudan bakın"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Telefonunuza daha doğrudan bakın"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Yüzünüzün görünmesini engelleyen şeyleri kaldırın."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Yüzünüzü engelleyen şeyleri kaldırın"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Siyah çubuk da dahil olmak üzere ekranınızın üst kısmını temizleyin"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -704,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Yüzünüzün modeli oluşturulamıyor. Tekrar deneyin."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Koyu renk gözlükler algılandı. Yüzünüz tamamen görünür olmalıdır."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yüzünüzü kapattığınız algılandı. Yüzünüz tamamen görünür olmalıdır."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yüzünüz algılanamıyor. Yüzünüz tamamen görünür olmalıdır."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yüz doğrulanamıyor. Donanım kullanılamıyor."</string>

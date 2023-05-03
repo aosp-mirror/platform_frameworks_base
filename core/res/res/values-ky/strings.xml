@@ -255,7 +255,7 @@
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Интерактивдүү кабар"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Ката жөнүндө кабардын абалын жана көйгөй тууралуу кошумча маалыматты көрсөтүү үчүн ушул функцияны колдонууну сунуштайбыз. Ката жөнүндө кабар жөнөтүлүп жатканда көп убакыт талап кылынбашы үчүн негизги бөлүмдөр гана көрүнөт."</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"Толук кабар берүү"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Түзмөгүңүз жооп бербей же өтө жай иштеп жатса, ошондой эле жөндөөлөрдүн бардык кабарлоо бөлүмдөрүн карап чыккыңыз келсе, ушул функцияны колдонуңуз. Баса, ката жөнүндө кошумча маалыматты көрсөтүп же скриншотторду тарта албайсыз."</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"Түзмөгүңүз жооп бербей же өтө жай иштеп жатса, ошондой эле параметрлердин бардык кабарлоо бөлүмдөрүн карап чыккыңыз келсе, ушул функцияны колдонуңуз. Баса, ката жөнүндө кошумча маалыматты көрсөтүп же скриншотторду тарта албайсыз."</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{Мүчүлүштүк тууралуу кабар берүү үчүн # секунддан кийин скриншот тартылат.}other{Мүчүлүштүк тууралуу кабар берүү үчүн # секунддан кийин скриншот тартылат.}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"Мүчүлүштүк тууралуу кабарлоо үчүн скриншот тартылды"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"Мүчүлүштүк тууралуу кабарлоо үчүн скриншот тартылган жок"</string>
@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android системасы"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Жеке профилге которулуу"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Жумуш профилине которулуу"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Жеке <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна которулуу"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Жумушка тиешелүү <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосуна которулуу"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Байланыштар"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"байланыштарыңызды көрүүгө"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Жайгашкан жер"</string>
@@ -683,7 +681,7 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Жарык жетишсиз"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Телефонду алыстатыңыз"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонду жакындатыңыз"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонду жогору жылдырыңыз"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонду өйдө жылдырыңыз"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Телефонду ылдый жылдырыңыз"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонду солго жылдырыңыз"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонду оңго жылдырыңыз"</string>
@@ -1716,7 +1714,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Кыска жолду өчүрүү"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Кыска жолду колдонуу"</string>
     <string name="color_inversion_feature_name" msgid="2672824491933264951">"Түстөрдү инверсиялоо"</string>
-    <string name="color_correction_feature_name" msgid="7975133554160979214">"Түсүн тууралоо"</string>
+    <string name="color_correction_feature_name" msgid="7975133554160979214">"Түстөрдү тууралоо"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Бир кол режими"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дагы караңгы"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Угуу түзмөктөрү"</string>
