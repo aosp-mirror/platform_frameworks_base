@@ -38,6 +38,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.logDiffsForTable
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.dagger.MobileSummaryLog
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.NetworkNameModel
@@ -88,6 +89,7 @@ constructor(
     private val context: Context,
     @Background private val bgDispatcher: CoroutineDispatcher,
     @Application private val scope: CoroutineScope,
+    airplaneModeRepository: AirplaneModeRepository,
     // Some "wifi networks" should be rendered as a mobile connection, which is why the wifi
     // repository is an input to the mobile repository.
     // See [CarrierMergedConnectionRepository] for details.
@@ -106,10 +108,20 @@ constructor(
         context.getString(R.string.status_bar_network_name_separator)
 
     private val carrierMergedSubId: StateFlow<Int?> =
-        wifiRepository.wifiNetwork
-            .mapLatest {
-                if (it is WifiNetworkModel.CarrierMerged) {
-                    it.subscriptionId
+        combine(
+                wifiRepository.wifiNetwork,
+                connectivityRepository.defaultConnections,
+                airplaneModeRepository.isAirplaneMode,
+            ) { wifiNetwork, defaultConnections, isAirplaneMode ->
+                // The carrier merged connection should only be used if it's also the default
+                // connection or mobile connections aren't available because of airplane mode.
+                val defaultConnectionIsNonMobile =
+                    defaultConnections.carrierMerged.isDefault ||
+                        defaultConnections.wifi.isDefault ||
+                        isAirplaneMode
+
+                if (wifiNetwork is WifiNetworkModel.CarrierMerged && defaultConnectionIsNonMobile) {
+                    wifiNetwork.subscriptionId
                 } else {
                     null
                 }
@@ -269,12 +281,8 @@ constructor(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val hasCarrierMergedConnection: StateFlow<Boolean> =
-        combine(
-                connectivityRepository.defaultConnections,
-                carrierMergedSubId,
-            ) { defaultConnections, carrierMergedSubId ->
-                defaultConnections.carrierMerged.isDefault || carrierMergedSubId != null
-            }
+        carrierMergedSubId
+            .map { it != null }
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
