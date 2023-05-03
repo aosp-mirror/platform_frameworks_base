@@ -21,7 +21,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Introduza o PIN."</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Introduza o padrão."</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Introduza o padrão"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Introduza a palavra-passe."</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Cartão inválido."</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Carregada"</string>

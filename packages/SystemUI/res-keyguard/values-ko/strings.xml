@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN을 입력해 주세요."</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN 입력"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"패턴 입력"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"비밀번호 입력"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"유효하지 않은 카드"</string>
