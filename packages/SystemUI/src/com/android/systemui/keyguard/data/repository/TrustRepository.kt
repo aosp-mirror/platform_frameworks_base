@@ -80,6 +80,8 @@ constructor(
                         override fun onTrustError(message: CharSequence?) = Unit
 
                         override fun onTrustManagedChanged(enabled: Boolean, userId: Int) = Unit
+
+                        override fun onEnabledTrustAgentsChanged(userId: Int) = Unit
                     }
                 trustManager.registerTrustListener(callback)
                 logger.trustListenerRegistered()
