@@ -11867,6 +11867,7 @@ public final class Settings {
          *
          * {@hide}
          */
+        @Readable
         public static final String SATELLITE_MODE_RADIOS = "satellite_mode_radios";
 
         /**
@@ -11880,6 +11881,7 @@ public final class Settings {
          *
          * {@hide}
          */
+        @Readable
         public static final String SATELLITE_MODE_ENABLED = "satellite_mode_enabled";
 
         /**
