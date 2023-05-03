@@ -273,6 +273,11 @@ public class SatelliteManager {
      */
     public static final int SATELLITE_NOT_SUPPORTED = 20;
 
+    /**
+     * The current request is already in-progress.
+     */
+    public static final int SATELLITE_REQUEST_IN_PROGRESS = 21;
+
     /** @hide */
     @IntDef(prefix = {"SATELLITE_"}, value = {
             SATELLITE_ERROR_NONE,
@@ -295,7 +300,8 @@ public class SatelliteManager {
             SATELLITE_NETWORK_TIMEOUT,
             SATELLITE_NOT_REACHABLE,
             SATELLITE_NOT_AUTHORIZED,
-            SATELLITE_NOT_SUPPORTED
+            SATELLITE_NOT_SUPPORTED,
+            SATELLITE_REQUEST_IN_PROGRESS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface SatelliteError {}
