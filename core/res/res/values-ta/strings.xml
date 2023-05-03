@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android அமைப்பு"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"தனிப்பட்ட சுயவிவரத்திற்கு மாற்றவும்"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"பணிச் சுயவிவரத்திற்கு மாற்றவும்"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"தனிப்பட்ட கணக்கிற்கு (<xliff:g id="APP_NAME">%1$s</xliff:g>) மாறு"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"பணிக் கணக்கிற்கு (<xliff:g id="APP_NAME">%1$s</xliff:g>) மாறு"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"தொடர்புகள்"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"தொடர்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"இருப்பிடம்"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"அதிர்வைக் கட்டுப்படுத்தப் ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"அதிர்வு நிலையை அணுக ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"தொலைபேசி எண்களை நேரடியாக அழைத்தல்"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"உங்கள் உறுதிப்படுத்தல் இல்லாமல் ஃபோன் எண்களை அழைக்க ஆப்ஸை அனுமதிக்கும். இது எதிர்பாராத கட்டணங்கள்/அழைப்புகளுக்கு வழிவகுக்கக்கூடும். அவசர உதவி எண்களை அழைக்க இது ஆப்ஸை அனுமதிக்காது என்பதை நினைவில் கொள்ளுங்கள். தீங்கிழைக்கும் ஆப்ஸ் உங்கள் உறுதிப்படுத்தல் இல்லாமல் அழைப்புகளை மேற்கொள்வதன் மூலம் உங்களுக்கு அநாவசியச் செலவு ஏற்படக்கூடும் அல்லது அவை கேரியர் குறியீடுகளை டயல் செய்து உங்களுக்கான உள்வரும் அழைப்புகளை வேறு எண்ணுக்குத் தானாகத் திசைதிருப்பக்கூடும்."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS அழைப்புச் சேவையை அணுகுதல்"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"உங்கள் குறுக்கீடின்றி IMS சேவையைப் பயன்படுத்தி அழைப்பதற்கு, ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"மொபைல் நிலை மற்றும் அடையாளத்தைப் படித்தல்"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"பணி ஆப்ஸ் மூலம் இந்த உள்ளடக்கத்தைத் திறக்க முடியாது"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"தனிப்பட்ட ஆப்ஸுடன் இந்த உள்ளடக்கத்தைப் பகிர முடியாது"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"தனிப்பட்ட ஆப்ஸ் மூலம் இந்த உள்ளடக்கத்தைத் திறக்க முடியாது"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"பணி ஆப்ஸ் இடைநிறுத்தப்பட்டுள்ளன"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"மீண்டும் இயக்கு"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"பணி ஆப்ஸ் எதுவுமில்லை"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"தனிப்பட்ட ஆப்ஸ் எதுவுமில்லை"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"தனிப்பட்ட கணக்கில் <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறங்கள்"</string>

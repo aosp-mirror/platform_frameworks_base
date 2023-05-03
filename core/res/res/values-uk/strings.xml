@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Система Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Перейти в особистий профіль"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Перейти в робочий профіль"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Перейти в особистий профіль у додатку <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Перейти в робочий профіль у додатку <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"отримувати доступ до контактів"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Геодані"</string>
@@ -505,8 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволяє програмі контролювати вібросигнал."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Надає додатку доступ до стану вібрації."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"прямо набирати номери тел."</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Дозволяє додатку набирати номери телефонів без вашого відома. Це може спричинити неочікуване стягнення плати чи здійснення викликів. Зверніть увагу, що додаток не зможе набирати екстрені номери. Шкідливі додатки можуть здійснювати дзвінки без вашого підтвердження, за що з вас стягуватимуться кошти, або набирати коди оператора, після чого вхідні виклики переадресовуватимуться на інший номер."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"отримувати доступ до телефонної служби IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Додаток зможе телефонувати за допомогою служби IMS без вашого відома."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"читати статус та ідентифікаційну інформацію телефону"</string>
@@ -703,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Не вдається створити модель обличчя. Повторіть спробу."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Виявлено темні окуляри. Обличчя має бути видно повністю."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Виявлено аксесуар, який закриває обличчя. Обличчя має бути видно повністю."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Обличчя не видно повністю, бо його закриває аксесуар."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Не вдається перевірити обличчя. Апаратне забезпечення недоступне."</string>
@@ -712,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Дію з обличчям скасовано."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Користувач скасував операцію фейсконтролю"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Забагато спроб. Повторіть пізніше."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Забагато спроб. Фейс-контроль недоступний."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Забагато спроб. Розблокуйте екран іншим способом."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не вдається перевірити обличчя. Повторіть спробу."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Ви не налаштували фейсконтроль"</string>
@@ -2162,16 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Цей контент не можна відкривати в робочих додатках"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Цим контентом не можна ділитися в особистих додатках"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Цей контент не можна відкривати в особистих додатках"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Робочі додатки призупинено"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Увімкнути знову"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Немає робочих додатків"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Немає особистих додатків"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Відкрити особистий додаток <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Відкрити робочий додаток <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використати особистий веб-переглядач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використати робочий веб-переглядач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>
@@ -2293,7 +2289,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Розблокуйте мікрофон пристрою"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Розблокуйте камеру пристрою"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Для &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; та всіх додатків і сервісів"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Розблокувати"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Надати"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Конфіденційність датчиків"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Значок додатка"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Зображення фірмової символіки додатка"</string>
@@ -2323,8 +2319,8 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Дозволяє супутньому додатку запускати активні сервіси у фоновому режимі."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Мікрофон доступний"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Мікрофон заблоковано"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Подвійний екран"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Подвійний екран увімкнено"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen увімкнено"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує обидва екрани для показу контенту"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Пристрій сильно нагрівається"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Подвійний екран недоступний, оскільки телефон сильно нагрівається"</string>

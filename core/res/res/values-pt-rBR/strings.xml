@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Mudar para o perfil pessoal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Perfil de trabalho"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Mudar para o app <xliff:g id="APP_NAME">%1$s</xliff:g> do perfil pessoal"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Mudar para o app <xliff:g id="APP_NAME">%1$s</xliff:g> do perfil de trabalho"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acesse seus contatos"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Localização"</string>
@@ -504,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que o app controle a vibração."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que o app acesse o estado da vibração."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ligar diretamente para números de telefone"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Permite que o app faça ligações para números de telefone sem a sua intervenção. Ligações ou cobranças inesperadas podem acontecer. Isso não permite que o app ligue para números de emergência. Você pode receber cobranças indesejadas de ligações feitas por apps maliciosos sem a sua confirmação. Além disso, esses apps podem discar códigos de operadora que automaticamente encaminham ligações recebidas para outro número."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"acessar serviço de mensagens instantâneas para chamadas"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite que o app use o serviço de mensagens instantâneas para fazer chamadas sem sua intervenção."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ler status e identidade do telefone"</string>
@@ -635,7 +636,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Claro demais"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"O botão liga/desliga foi pressionado"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ajuste a posição do dedo"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude a posição do dedo ligeiramente a cada momento"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude ligeiramente a posição do dedo em cada registro"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Impressão digital não reconhecida"</string>
@@ -694,7 +695,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Olhe diretamente para o smartphone"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Olhe diretamente para o smartphone"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Olhe diretamente para o smartphone"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Remova tudo que esteja ocultando seu rosto."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Tire tudo que possa esconder seu rosto."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpe a parte superior da tela, inclusive a barra preta"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -702,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Falha ao criar o modelo de rosto. Tente de novo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Óculos escuros detectados. Seu rosto precisa estar completamente visível."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máscara detectada. Seu rosto precisa estar completamente visível."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máscara detectada. Seu rosto precisa estar visível."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Impossível verificar rosto. Hardware indisponível."</string>
@@ -1729,7 +1730,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Para alternar entre recursos, deslize de baixo para cima na tela com três dedos, sem soltar."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliação"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuário atual <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Alternando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Mudando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Desconectando <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Proprietário"</string>
     <string name="guest_name" msgid="8502103277839834324">"Visitante"</string>
@@ -2160,10 +2161,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Não é possível abrir esse conteúdo com apps de trabalho"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Não é possível compartilhar esse conteúdo com apps pessoais"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Não é possível abrir esse conteúdo com apps pessoais"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Os apps de trabalho foram pausados"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reativar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nenhum app de trabalho"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nenhum app pessoal"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Abrir <xliff:g id="APP">%s</xliff:g> no perfil pessoal"</string>

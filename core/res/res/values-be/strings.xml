@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Сістэма Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Пераключыцца на асабісты профіль"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Пераключыцца на працоўны профіль"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Пераключыцца на асабісты профіль <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Пераключыцца на працоўны профіль <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Кантакты"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"атрымліваць доступ да вашых кантактаў"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Месцазнаходжанне"</string>
@@ -505,8 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дазваляе прыкладанням кіраваць вібрацыяй."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дазваляе праграме атрымліваць доступ да вібрасігналу."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"непасрэдна набіраць тэлефонныя нумары"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Дазваляе праграме тэлефанаваць на тэлефонныя нумары без вашага ўдзелу. У выніку вы можаце пабачыць нечаканыя плацяжы і званкі. Аднак праграма не зможа рабіць выклікі на нумары экстранных службаў. Шкодныя праграмы могуць прыносіць выдаткі, робячы выклікі без вашага пацвярджэння, або набіраючы коды аператараў, з якімі ўваходныя выклікі аўтаматычна перанакіроўваюцца на іншы нумар."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"атрымліваць доступ да сэрвісу выклікаў IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Дазваляе праграмам выкарыстоўваць службу IMS, каб рабіць выклікі без вашага ўмяшання."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"чытанне статусу тэлефона і ідэнтыфікацыя"</string>
@@ -674,7 +675,7 @@
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Каб выкарыстоўваць распазнаванне твару, уключыце "<b>"доступ да камеры"</b>" праз раздзел \"Налады &gt; Прыватнасць\""</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Наладзьце дадатковыя спосабы разблакіроўкі"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Націсніце, каб дадаць адбітак пальца"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Разблакіраванне адбіткам пальца"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Разблакіроўка адбіткам пальца"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не ўдалося скарыстаць сканер адбіткаў пальцаў"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Звярніцеся ў сэрвісны цэнтр."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Не ўдалося стварыць мадэль твару. Паўтарыце."</string>
@@ -712,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Распазнаванне твару скасавана."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Распазнаванне твару скасавана карыстальнікам"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Занадта шмат спроб. Паўтарыце спробу пазней."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Занадта шмат спроб. Распазнаванне твару недаступна."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Занадта шмат спроб. Разблакіруйце экран іншым спосабам."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Не ўдалося спраўдзіць твар. Паўтарыце спробу."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Вы не наладзілі распазнаванне твару"</string>
@@ -1874,8 +1874,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Абноўлены вашым адміністратарам"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Выдалены вашым адміністратарам"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"ОК"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"У рэжыме эканоміі зараду ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
-    <string name="battery_saver_description" msgid="8518809702138617167">"У рэжыме эканоміі зараду ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"У рэжыме энергазберажэння ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
+    <string name="battery_saver_description" msgid="8518809702138617167">"У рэжыме энергазберажэння ўключаецца цёмная тэма і выключаюцца ці абмяжоўваюцца дзеянні ў фонавым рэжыме, некаторыя візуальныя эфекты, пэўныя функцыі і падключэнні да сетак."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"У рэжыме \"Эканомія трафіка\" фонавая перадача для некаторых праграмам адключана. Праграма, якую вы зараз выкарыстоўваеце, можа атрымліваць доступ да даных, але радзей, чым звычайна. Напрыклад, відарысы могуць не загружацца, пакуль вы не націсніце на іх."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Уключыць Эканомію трафіка?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Уключыць"</string>
@@ -2162,16 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Не ўдалося адкрыць гэта змесціва з дапамогай працоўных праграм"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Не ўдалося абагуліць гэта змесціва з асабістымі праграмамі"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Не ўдалося адкрыць гэта змесціва з дапамогай асабістых праграм"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Працоўныя праграмы прыпынены"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Уключыць"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Няма працоўных праграм"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Няма асабістых праграм"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Адкрыць асабістую праграму <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Адкрыць працоўную праграму <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Скарыстаць асабісты браўзер"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Скарыстаць працоўны браўзер"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код разблакіроўкі сеткі для SIM-карты"</string>

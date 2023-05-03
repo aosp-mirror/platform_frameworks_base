@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android kerfið"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Skipta yfir í eigið snið"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Skipta yfir í vinnusnið"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Skipta yfir í eigið snið <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Skipta yfir í vinnusnið <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Tengiliðir"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"fá aðgang að tengiliðunum þínum"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Staðsetning"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Leyfir forriti að stjórna titraranum."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Veitir forritinu aðgang að stöðu titrings."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"hringja beint í símanúmer"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Leyfir forriti að hringja í símanúmer án aðgerðar frá þér. Þetta getur haft í för með sér óvænt gjöld eða símtöl. Athugaðu að þetta heimilar forriti ekki að hringja í neyðarnúmer. Skaðleg forrit gætu kostað þig peninga með því að hringja án staðfestingar frá þér eða hringja í kóða símafyrirtækis sem verður til þess að móttekin símtöl verði framsend sjálfkrafa í annað númer."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"fá aðgang að IMS-símtalsþjónustu"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Leyfir forriti að nota IMS-þjónustu til að hringja án inngrips frá þér."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lesa stöðu símans og auðkenni"</string>
@@ -710,8 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Hætt við andlitsgreiningu."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Notandi hætti við andlitskenni."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Of margar tilraunir. Reyndu aftur síðar."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Of margar tilraunir. Andlitskenni ekki í boði."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Of margar tilraunir. Sláðu inn skjálásinn í staðinn."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ekki tókst að staðfesta andlit. Reyndu aftur."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Þú hefur ekki sett upp andlitskenni."</string>
@@ -1697,7 +1697,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ekki kveikja"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"KVEIKT"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"SLÖKKT"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Viltu leyfa <xliff:g id="SERVICE">%1$s</xliff:g> að hafa fulla stjórn yfir tækinu þínu?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Viltu leyfa „<xliff:g id="SERVICE">%1$s</xliff:g>“ að hafa fulla stjórn yfir tækinu þínu?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Full stjórnun er viðeigandi fyrir forrit sem hjálpa þér ef þú hefur ekki aðgang, en ekki fyrir flest forrit."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skoða og stjórna skjá"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Það getur lesið allt efni á skjánum og birt efni yfir öðrum forritum."</string>
@@ -2160,16 +2160,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Ekki er hægt að opna þetta efni með vinnuforritum"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Ekki er hægt að deila þessu efni með forritum til einkanota"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Ekki er hægt að opna þetta efni með forritum til einkanota"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Hlé gert á vinnuforritum"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Ljúka hléi"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Engin vinnuforrit"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Engin forrit til einkanota"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Opna <xliff:g id="APP">%s</xliff:g> með einkaprófíl"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Opna <xliff:g id="APP">%s</xliff:g> með vinnuprófíl"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Nota einkavafra"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Nota vinnuvafra"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-númer fyrir opnun á SIM-korti netkerfis"</string>

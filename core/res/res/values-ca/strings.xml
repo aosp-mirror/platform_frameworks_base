@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Canvia al perfil personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Canvia al perfil de treball"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Canvia al perfil personal de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Canvia al perfil de treball de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contactes"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accedir als contactes"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ubicació"</string>
@@ -474,8 +476,8 @@
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Aquesta aplicació pot afegir, suprimir i canviar esdeveniments del calendari al telèfon. També pot enviar missatges que sembli que provenen dels propietaris del calendari o canviar esdeveniments sense notificar-los-ho."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"accedir a ordres del proveïdor d\'ubicació addicionals"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permet que l\'aplicació accedeixi a ordres addicionals del proveïdor d\'ubicacions; per tant, és possible que l\'aplicació pugui interferir en el funcionament del GPS o d\'altres fonts d\'ubicacions."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"accedeix a la ubicació exacta només en primer pla"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aquesta aplicació pot obtenir la teva ubicació exacta a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació, i això pot fer que l\'ús de la bateria augmenti."</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"accedeix a la ubicació precisa només en primer pla"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aquesta aplicació pot obtenir la teva ubicació precisa a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació, i això pot fer que l\'ús de la bateria augmenti."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"accedeix a la ubicació aproximada només en primer pla"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aquesta aplicació pot obtenir la teva ubicació aproximada a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"accedir a la ubicació en segon pla"</string>
@@ -504,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet que l\'aplicació controli el vibrador."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet que l\'aplicació accedeixi a l\'estat de vibració."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"trucar directament a números de telèfon"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Permet que l\'aplicació truqui a números de telèfon sense la teva intervenció. Això pot comportar càrrecs o trucades inesperats. Tingues en compte que això no permet que l\'aplicació truqui a números d\'emergència. És possible que se\'t cobri si les aplicacions malicioses fan trucades sense confirmació o marquen codis d\'operadors que poden causar que les trucades entrants es desviïn automàticament a un altre número."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accés al servei de trucades IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permet que l\'aplicació utilitzi el servei IMS per fer trucades sense la teva intervenció."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"veure l\'estat i la identitat del telèfon"</string>
@@ -635,7 +636,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hi ha massa llum"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"S\'ha premut el botó d\'engegada"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prova d\'ajustar l\'empremta digital"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Canvia lleugerament la posició del dit en cada intent"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Canvia lleugerament la posició del dit cada vegada"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"L\'empremta digital no s\'ha reconegut"</string>
@@ -681,8 +682,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"No hi ha prou llum"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Allunya\'t del telèfon"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Apropa el telèfon"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Mou el telèfon més amunt"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Mou el telèfon més avall"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Apuja el telèfon"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Abaixa el telèfon"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Mou el telèfon cap a l\'esquerra"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Mou el telèfon cap a la dreta"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Mira més directament cap al dispositiu."</string>
@@ -694,7 +695,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mira més directament al telèfon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mira més directament al telèfon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mira més directament al telèfon"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Treu qualsevol cosa que amagui la teva cara."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Aparta tot allò que et tapi la cara"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Neteja la part superior de la pantalla, inclosa la barra negra"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -2160,10 +2161,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"No es pot obrir aquest contingut amb aplicacions de treball"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"No es pot compartir aquest contingut amb aplicacions personals"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"No es pot obrir aquest contingut amb aplicacions personals"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Les aplicacions de treball estan en pausa"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reactiva"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Cap aplicació de treball"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Cap aplicació personal"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Obre <xliff:g id="APP">%s</xliff:g> al perfil personal"</string>

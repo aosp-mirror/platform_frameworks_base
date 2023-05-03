@@ -250,7 +250,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"错误报告"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"结束会话"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"屏幕截图"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"错误报告"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Bug 报告"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"这会收集有关当前设备状态的信息，并以电子邮件的形式进行发送。从开始生成错误报告到准备好发送需要一点时间，请耐心等待。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"互动式报告"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"在大多数情况下，建议您使用此选项，以便追踪报告的生成进度，输入与相应问题相关的更多详细信息，以及截取屏幕截图。系统可能会省略掉一些不常用的区段，从而缩短生成报告的时间。"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android 系统"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"切换到个人资料"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"切换到工作资料"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"切换到个人 <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"切换到工作 <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"通讯录"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"访问您的通讯录"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"位置信息"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允许应用控制振动器。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允许该应用访问振动器状态。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"拨打电话"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"允许应用在没有您干预的情况下拨打电话号码。这可能会导致意外扣款和拨打电话。请注意，此权限不允许应用拨打紧急电话号码。恶意应用可能会在未经您确认的情况下拨打电话，给您带来不必要的费用；也可能会拨打运营商代码，导致系统将来电自动转接到另一个号码。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"使用即时通讯通话服务"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"允许应用自行使用即时通讯服务拨打电话。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"读取手机状态和身份"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"无法使用工作应用打开该内容"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"无法使用个人应用分享该内容"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"无法使用个人应用打开该内容"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"工作应用已暂停"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暂停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"没有支持该内容的工作应用"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"没有支持该内容的个人应用"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"打开个人 <xliff:g id="APP">%s</xliff:g>"</string>

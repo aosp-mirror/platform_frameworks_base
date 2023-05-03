@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Система Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Переключиться на личный профиль"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Перейти в рабочий профиль"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Открыть <xliff:g id="APP_NAME">%1$s</xliff:g> в личном профиле"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Открыть <xliff:g id="APP_NAME">%1$s</xliff:g> в рабочем профиле"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакты"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"доступ к контактам"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Местоположение"</string>
@@ -505,8 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Приложение сможет контролировать вибросигналы."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Приложение сможет получать доступ к состоянию виброотклика."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"Осуществление телефонных вызовов"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Разрешает приложению совершать вызовы без вашего участия. Это может привести к непредвиденным расходам или незапланированным звонкам. Обратите внимание, что приложению не предоставляется разрешение на звонки в экстренные службы. Из-за вредоносных приложений, которые совершают платные звонки без вашего подтверждения или используют коды оператора, чтобы входящие вызовы автоматически переадресовывались на другой номер, у вас могут списываться средства."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"совершение звонков с помощью службы IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Позволяет приложению совершать звонки с помощью службы IMS без вашего вмешательства."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Получение данных о статусе телефона"</string>
@@ -2161,10 +2162,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Этот контент нельзя открыть в рабочем приложении."</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Этот контент нельзя открывать через личные приложения."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Этот контент нельзя открыть в личном приложении."</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Рабочие приложения приостановлены."</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Включить"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Не поддерживается рабочими приложениями."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Не поддерживается личными приложениями."</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Откройте приложение \"<xliff:g id="APP">%s</xliff:g>\" в личном профиле"</string>
@@ -2322,7 +2321,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон заблокирован."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Двойной экран"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Двойной экран включен"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> показывает контент на обоих экранах."</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> использует оба экрана."</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Устройство перегрелось"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Двойной экран недоступен из-за перегрева телефона."</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Функция Dual Screen недоступна"</string>

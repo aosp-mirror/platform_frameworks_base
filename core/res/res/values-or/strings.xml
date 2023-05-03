@@ -288,16 +288,18 @@
     <string name="notification_channel_usb" msgid="1528280969406244896">"USB ସଂଯୋଗ"</string>
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ଆପ୍‍ ଚାଲୁଛି"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ଆପ୍‍ଗୁଡ଼ିକ ବ୍ୟାଟେରୀ ଖର୍ଚ୍ଚ କରିଥା\'ନ୍ତି"</string>
-    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ମ୍ୟାଗ୍ନିଫିକେସନ୍"</string>
+    <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ମେଗ୍ନିଫିକେସନ"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ଆକ୍ସେସିବିଲିଟୀ ବ୍ୟବହାର"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରୁଛି"</string>
     <string name="foreground_service_apps_in_background" msgid="7340037176412387863">"<xliff:g id="NUMBER">%1$d</xliff:g>ଟି ଆପ୍‍ ବ୍ୟାଟେରୀ ବ୍ୟବହାର କରୁଛନ୍ତି"</string>
     <string name="foreground_service_tap_for_details" msgid="9078123626015586751">"ବ୍ୟାଟେରୀ ଏବଂ ଡାଟା ବ୍ୟବହାର ଉପରେ ବିବରଣୀ ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="foreground_service_multiple_separator" msgid="5002287361849863168">"<xliff:g id="LEFT_SIDE">%1$s</xliff:g>, <xliff:g id="RIGHT_SIDE">%2$s</xliff:g>"</string>
     <string name="safeMode" msgid="8974401416068943888">"ସୁରକ୍ଷିତ ମୋଡ୍"</string>
-    <string name="android_system_label" msgid="5974767339591067210">"Android ସିଷ୍ଟମ୍‌"</string>
+    <string name="android_system_label" msgid="5974767339591067210">"Android ସିଷ୍ଟମ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ବ୍ୟକ୍ତିଗତ ପ୍ରୋଫାଇଲ୍‌କୁ ଫେରିଆସନ୍ତୁ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"କାର୍ଯ୍ୟ ପ୍ରୋଫାଇଲ୍‌କୁ ଯାଆନ୍ତୁ"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ବ୍ୟକ୍ତିଗତ <xliff:g id="APP_NAME">%1$s</xliff:g>କୁ ସୁଇଚ କରନ୍ତୁ"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"ୱାର୍କ <xliff:g id="APP_NAME">%1$s</xliff:g>କୁ ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"କଣ୍ଟାକ୍ଟ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ଆପଣଙ୍କ ଯୋଗାଯୋଗ ଆକ୍ସେସ୍ କରେ"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ଲୋକେସନ"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ଆପ୍‍କୁ, ଭାଇବ୍ରେଟର୍‍ ନିୟନ୍ତ୍ରଣ କରିବାକୁ ଦେଇଥାଏ।"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ଭାଇବ୍ରେଟର୍ ସ୍ଥିତି ଆକ୍ସେସ୍ କରିବାକୁ ଆପକୁ ଅନୁମତି ଦିଏ।"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ସିଧାସଳଖ ଫୋନ୍ ନମ୍ବରଗୁଡ଼ିକୁ କଲ୍ କରନ୍ତୁ"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"ଆପଣଙ୍କ ହସ୍ତକ୍ଷେପ ବିନା ଫୋନ ନମ୍ଵରକୁ କଲ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ। ଏହା ଫଳରେ ଅପ୍ରତ୍ୟାଶିତ ଚାର୍ଜ ଲାଗୁ ହୋଇପାରେ କିମ୍ବା କଲ ହୋଇପାରେ। ଧ୍ୟାନ ଦିଅନ୍ତୁ ଯେ ଏହା ଜରୁରୀକାଳୀନ ନମ୍ବରଗୁଡ଼ିକୁ କଲ କରିବା ପାଇଁ ଆପକୁ ଅନୁମତି ଦିଏ ନାହିଁ। କ୍ଷତିକାରକ ଆପ୍ସ ଆପଣଙ୍କ ସୁନିଶ୍ଚିତକରଣ ବିନା କଲ କରି ଆପଣଙ୍କ ଟଙ୍କା ଖର୍ଚ୍ଚ କରିପାରେ କିମ୍ବା ଅନ୍ୟ ଏକ ନମ୍ବରକୁ ଇନକମିଂ କଲ ସ୍ୱତଃ ଫରୱାର୍ଡ କରୁଥିବା କେରିଅର କୋଡଗୁଡ଼ିକୁ ଡାଏଲ କରିପାରେ।"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS କଲ୍‍ ସେବା ଆକ୍ସେସ୍‍ କରେ"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ଆପଣଙ୍କ ହସ୍ତକ୍ଷେପ ବିନା କଲ୍‍ କରିପାରିବା ପାଇଁ ଆପ୍‌କୁ IMS ସେବା ବ୍ୟବହାର କରିବାକୁ ଦିଏ।"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ଫୋନ୍‍ ସ୍ଥିତି ଓ ପରିଚୟ ପଢ଼ନ୍ତୁ"</string>
@@ -664,7 +665,7 @@
   </string-array>
     <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"କିଛି ତ୍ରୁଟି ହୋଇଛି। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"ଟିପଚିହ୍ନ ଆଇକନ୍"</string>
-    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ଫେସ୍ ଅନଲକ୍"</string>
+    <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ଫେସ ଅନଲକ"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"ଫେସ୍ ଅନଲକ୍ ସହ ସମସ୍ୟା"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"ଆପଣଙ୍କ ଫେସ୍ ମଡେଲକୁ ଡିଲିଟ୍ କରିବାକୁ ଟାପ୍ କରନ୍ତୁ, ତା\'ପରେ ପୁଣି ଆପଣଙ୍କ ଫେସ୍ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"ଫେସ୍ ଅନଲକ୍ ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
@@ -710,8 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"ଫେସ୍‍ର ଅପରେଶନ୍‍ କ୍ୟାନ୍ସଲ୍‍ ହୋ‍ଇଗଲା"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ଦ୍ୱାରା ଫେସ୍ ଅନଲକ୍ ବାତିଲ୍ କରାଯାଇଛି"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ବାରମ୍ବାର ଚେଷ୍ଟା। ପରେ ପୁଣିଥରେ ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"ଅନେକଗୁଡ଼ିଏ ପ୍ରଚେଷ୍ଟା। ଫେସ ଅନଲକ ଉପଲବ୍ଧ ନାହିଁ।"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ଅନେକଗୁଡ଼ିଏ ପ୍ରଚେଷ୍ଟା। ଏହା ପରିବର୍ତ୍ତେ ସ୍କ୍ରିନ୍ ଲକ୍ ଏଣ୍ଟର୍ କରନ୍ତୁ।"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"ମୁହଁ ଚିହ୍ନଟ କରିପାରିଲା ନାହିଁ। ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"ଆପଣ ଫେସ୍ ଅନଲକ୍ ସେଟ୍ ଅପ୍ କରିନାହାଁନ୍ତି"</string>
@@ -1041,7 +1041,7 @@
     <string name="keyguard_accessibility_expand_lock_area" msgid="4215280881346033434">"ଅନଲକ୍‍ କ୍ଷେତ୍ରକୁ ବଢ଼ାନ୍ତୁ।"</string>
     <string name="keyguard_accessibility_slide_unlock" msgid="2968195219692413046">"ସ୍ଲାଇଡ୍‍ ଅନଲକ୍‍।"</string>
     <string name="keyguard_accessibility_pattern_unlock" msgid="8669128146589233293">"ପାଟର୍ନ ଅନଲକ୍‍।"</string>
-    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ଫେସ୍ ଅନଲକ୍।"</string>
+    <string name="keyguard_accessibility_face_unlock" msgid="4533832120787386728">"ଫେସ ଅନଲକ।"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="4020864007967340068">"PIN ଅନଲକ୍‍।"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="4895939120871890557">"PIN ଦ୍ଵାରା SIMକୁ ଅନଲକ୍ କରନ୍ତୁ।"</string>
     <string name="keyguard_accessibility_sim_puk_unlock" msgid="3459003464041899101">"PUK ଦ୍ଵାରା SIMକୁ ଅନଲକ୍ କରନ୍ତୁ।"</string>
@@ -1431,7 +1431,7 @@
     <string name="ext_media_unmounting_notification_title" msgid="4147986383917892162">"<xliff:g id="NAME">%s</xliff:g>କୁ ଇଜେକ୍ଟ କରାଯାଉଛି"</string>
     <string name="ext_media_unmounting_notification_message" msgid="5717036261538754203">"କାଢ଼ନ୍ତୁ ନାହିଁ"</string>
     <string name="ext_media_init_action" msgid="2312974060585056709">"ସେଟ୍ ଅପ୍ କରନ୍ତୁ"</string>
-    <string name="ext_media_unmount_action" msgid="966992232088442745">"ବାହାର କରନ୍ତୁ"</string>
+    <string name="ext_media_unmount_action" msgid="966992232088442745">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="ext_media_browse_action" msgid="344865351947079139">"ଖୋଜନ୍ତୁ"</string>
     <string name="ext_media_seamless_action" msgid="8837030226009268080">"ଆଉଟ୍‌ପୁଟ୍ ସ୍ୱିଚ୍‌ କରନ୍ତୁ"</string>
     <string name="ext_media_missing_title" msgid="3209472091220515046">"<xliff:g id="NAME">%s</xliff:g> ନାହିଁ"</string>
@@ -1521,7 +1521,7 @@
     <string name="progress_erasing" msgid="6891435992721028004">"ସେୟାର୍‍ ହୋଇଥିବା ଷ୍ଟୋରେଜ୍‍ ଲିଭାଉଛି…"</string>
     <string name="share" msgid="4157615043345227321">"ସେୟାର୍‍"</string>
     <string name="find" msgid="5015737188624767706">"ଖୋଜନ୍ତୁ"</string>
-    <string name="websearch" msgid="5624340204512793290">"ୱେବ୍ ସର୍ଚ୍ଚ"</string>
+    <string name="websearch" msgid="5624340204512793290">"ୱେବ ସର୍ଚ୍ଚ"</string>
     <string name="find_next" msgid="5341217051549648153">"ପରବର୍ତ୍ତୀ ଖୋଜନ୍ତୁ"</string>
     <string name="find_previous" msgid="4405898398141275532">"ପୂର୍ବବର୍ତ୍ତୀ ଖୋଜନ୍ତୁ"</string>
     <string name="gpsNotifTicker" msgid="3207361857637620780">"<xliff:g id="NAME">%s</xliff:g>ଙ୍କଠାରୁ ଲୋକେସନ୍ ଅନୁରୋଧ ଆସିଛି"</string>
@@ -1729,14 +1729,14 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ଫିଚରଗୁଡ଼ିକ ମଧ୍ୟରେ ସ୍ୱିଚ୍ କରିବାକୁ, ତିନୋଟି ଆଙ୍ଗୁଠିରେ ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ମ୍ୟାଗ୍ନିଫିକେସନ୍‍"</string>
     <string name="user_switched" msgid="7249833311585228097">"ବର୍ତ୍ତମାନର ୟୁଜର୍‌ ହେଉଛନ୍ତି <xliff:g id="NAME">%1$s</xliff:g>।"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ରେ ସ୍ୱିଚ୍ କରନ୍ତୁ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ରେ ସ୍ୱିଚ କରନ୍ତୁ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ଙ୍କୁ ଲଗଆଉଟ୍‍ କରାଯାଉଛି…"</string>
     <string name="owner_name" msgid="8713560351570795743">"ମାଲିକ"</string>
     <string name="guest_name" msgid="8502103277839834324">"ଅତିଥି"</string>
     <string name="error_message_title" msgid="4082495589294631966">"ତ୍ରୁଟି"</string>
     <string name="error_message_change_not_allowed" msgid="843159705042381454">"ଏହି ପରିବର୍ତ୍ତନ ପାଇଁ ଆପଣଙ୍କ ଆଡମିନ୍‌ ଅନୁମତି ଦେଇନାହାଁନ୍ତି"</string>
     <string name="app_not_found" msgid="3429506115332341800">"ଏହି କାର୍ଯ୍ୟକୁ ନିୟନ୍ତ୍ରଣ କରିବା ପାଇଁ କୌଣସି ଆପ୍ଲିକେଶନ୍‍ ମିଳିଲା ନାହିଁ"</string>
-    <string name="revoke" msgid="5526857743819590458">"ବାହାର କରନ୍ତୁ"</string>
+    <string name="revoke" msgid="5526857743819590458">"କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="mediasize_iso_a0" msgid="7039061159929977973">"ISO A0"</string>
     <string name="mediasize_iso_a1" msgid="4063589931031977223">"ISO A1"</string>
     <string name="mediasize_iso_a2" msgid="2779860175680233980">"ISO A2"</string>
@@ -2160,16 +2160,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ଏହି ବିଷୟବସ୍ତୁ ୱାର୍କ ଆପଗୁଡ଼ିକରେ ଖୋଲାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ଏହି ବିଷୟବସ୍ତୁ ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକରେ ସେୟାର୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ଏହି ବିଷୟବସ୍ତୁ ବ୍ୟକ୍ତିଗତ ଆପଗୁଡ଼ିକରେ ଖୋଲାଯାଇପାରିବ ନାହିଁ"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"ୱାର୍କ ଆପ୍ସକୁ ବିରତ କରାଯାଇଛି"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"କୌଣସି ୱାର୍କ ଆପ୍ ନାହିଁ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"କୌଣସି ବ୍ୟକ୍ତିଗତ ଆପ୍ ନାହିଁ"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ବ୍ୟକ୍ତିଗତ <xliff:g id="APP">%s</xliff:g> ଖୋଲନ୍ତୁ"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"ୱାର୍କ <xliff:g id="APP">%s</xliff:g> ଖୋଲନ୍ତୁ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ବ୍ୟକ୍ତିଗତ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ୱାର୍କ ବ୍ରାଉଜର୍ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ନେଟୱାର୍କ ଅନଲକ୍ PIN"</string>

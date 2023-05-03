@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android sistēma"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Pārslēgties uz personisko profilu"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Pārslēgties uz darba profilu"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Pārslēgties uz personīgo profilu lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Pārslēgties uz darba profilu lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktpersonas"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"piekļūt jūsu kontaktpersonu datiem"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Atrašanās vieta"</string>
@@ -504,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ļauj lietotnei kontrolēt vibrosignālu."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ļauj lietotnei piekļūt vibrosignāla statusam."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"tieši zvanīt uz tālruņa numuriem"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Ļauj lietotnei zvanīt uz tālruņa numuriem bez jūsu iejaukšanās. Var rasties neparedzētas izmaksas vai zvani. Ņemiet vērā, ka lietotnei tādējādi netiek atļauts zvanīt uz ārkārtas numuriem. Ļaunprātīgas lietotnes var radīt jums izmaksas, veicot zvanus bez jūsu apstiprinājuma, vai sastādīt mobilo sakaru operatoru kodus, kuru dēļ ienākošie zvani tiek automātiski pāradresēti uz citu numuru."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"piekļūt tūlītējās ziņojumapmaiņas pakalpojumam, lai veiktu zvanus"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ļauj lietotnei izmantot tūlītējās ziņojumapmaiņas pakalpojumu, lai veiktu zvanus bez jūsu ziņas."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lasīt tālruņa statusu un identitāti"</string>
@@ -2160,10 +2161,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Šo saturu nevar atvērt darba lietotnēs"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Šo saturu nevar kopīgot ar personīgajām lietotnēm"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Šo saturu nevar atvērt personīgajās lietotnēs"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Darba lietotnes ir apturētas."</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Aktivizēt"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nav darba lietotņu"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nav personīgu lietotņu"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Lietotnes <xliff:g id="APP">%s</xliff:g> atvēršana personīgajā profilā"</string>

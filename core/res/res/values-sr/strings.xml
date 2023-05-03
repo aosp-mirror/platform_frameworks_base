@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android систем"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Пређи на лични профил"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Пређи на пословни профил"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Пређи на лични профил апликације <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Пређи на пословни профил апликације <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"приступи контактима"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Локација"</string>
@@ -504,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозвољава апликацији да контролише вибрацију."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Дозвољава апликацији да приступа стању вибрирања."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно позивање бројева телефона"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Дозвољава апликацији да позива бројеве телефона без ваше интеракције. То може да доведе до неочекиваних наплата или позива. Имајте у виду да се тиме апликацији не дозвољава да позива бројеве за хитне случајеве. Злонамерне апликације могу да изазову трошкове упућивањем позива без ваше потврде или да бирају кодове оператера услед чега се долазни позиви аутоматски прослеђују на други број."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"приступ услузи позива помоћу размене тренутних порука"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Дозвољава апликацији да користи услугу размене тренутних порука да би упућивала позиве без ваше интервенције."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"читање статуса и идентитета телефона"</string>
@@ -702,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Прављење модела лица није успело. Пробајте поново."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Откривене су тамне наочари. Лице мора да буде потпуно видљиво."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Откривено је прекривање лица. Лице мора да буде потпуно видљиво."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Лице је прекривено. Мора да буде сасвим видљиво."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Провера лица није успела. Хардвер није доступан."</string>
@@ -1256,7 +1257,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Покретање апликација."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Завршавање покретања."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Притиснули сте дугме за укључивање – тиме обично искључујете екран.\n\nПробајте лагано да додирнете док подешавате отисак прста."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Завршите подешавање искључивањем екрана"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Искључите екран и напустите подешавање"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Искључи"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Настављате верификацију отиска прста?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Притиснули сте дугме за укључивање – тиме обично искључујете екран.\n\nПробајте лагано да додирнете да бисте верификовали отисак прста."</string>
@@ -1846,7 +1847,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Потврдите нови PIN"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Направите PIN за измену ограничења"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-ови се не подударају. Пробајте поново."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN је прекратак. Мора да садржи најмање 4 цифре."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN је прекратак. Мора да има бар 4 цифре."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Пробајте поново касније"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Приказује се цео екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Да бисте изашли, превуците надоле одозго."</string>
@@ -2160,10 +2161,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овај садржај не може да се отвара помоћу пословних апликација"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овај садржај не може да се дели помоћу личних апликација"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Овај садржај не може да се отвара помоћу личних апликација"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Пословне апликације су паузиране"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Опозови паузу"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Нема пословних апликација"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Нема личних апликација"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Отворите личну апликацију <xliff:g id="APP">%s</xliff:g>"</string>

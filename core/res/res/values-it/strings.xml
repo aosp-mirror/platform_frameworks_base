@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Passa al profilo personale"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Passa al profilo di lavoro"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Passa all\'app <xliff:g id="APP_NAME">%1$s</xliff:g> personale"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Passa all\'app <xliff:g id="APP_NAME">%1$s</xliff:g> di lavoro"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contatti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"Possono accedere ai contatti"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Posizione"</string>
@@ -504,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Consente all\'applicazione di controllare la vibrazione."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Consente all\'app di accedere allo stato di vibrazione."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"chiamata diretta n. telefono"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Consente all\'app di chiamare numeri di telefono senza il tuo intervento. Questo potrebbe comportare chiamate o addebiti imprevisti. Tieni presente che l\'app non può chiamare numeri di emergenza. Le app dannose potrebbero generare dei costi effettuando chiamate senza la tua conferma o componendo codici di operatori a causa dei quali le chiamate in arrivo vengono deviate automaticamente su un altro numero."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accesso al servizio di chiamata IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Consente all\'app di utilizzare il servizio IMS per fare chiamate senza il tuo intervento."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lettura stato e identità telefono"</string>
@@ -702,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossibile creare il modello del volto. Riprova."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Sono stati rilevati occhiali scuri. Il tuo volto deve essere visibile per intero."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"È stata rilevata una mascherina. Il tuo volto deve essere visibile per intero."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Rilevata mascherina. Il volto deve essere visibile per intero."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. verificare volto. Hardware non disponibile."</string>
@@ -2160,10 +2161,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Questi contenuti non possono essere aperti con app di lavoro"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Questi contenuti non possono essere condivisi con app personali"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Questi contenuti non possono essere aperti con app personali"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Le app di lavoro sono in pausa"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Riattiva"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nessuna app di lavoro"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nessuna app personale"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Apri l\'app <xliff:g id="APP">%s</xliff:g> personale"</string>

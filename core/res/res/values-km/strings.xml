@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"ប្រព័ន្ធ​​ Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ប្តូរ​ទៅ​កម្រង​ព័ត៌មាន​ផ្ទាល់ខ្លួន"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ប្តូរ​ទៅ​កម្រង​ព័ត៌មាន​ការងារ"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ប្ដូរទៅ <xliff:g id="APP_NAME">%1$s</xliff:g> ផ្ទាល់ខ្លួន"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"ប្ដូរទៅ <xliff:g id="APP_NAME">%1$s</xliff:g> ការងារ"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ទំនាក់ទំនង"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ចូលប្រើទំនាក់ទំនងរបស់អ្នក"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ទីតាំង"</string>
@@ -324,7 +326,7 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"អាន និងសរសេរ​កំណត់​ហេតុ​ហៅ​ទូរសព្ទ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ទូរសព្ទ"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ឧបករណ៍​ចាប់សញ្ញា​រាងកាយ"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"សេនស័រ​រាងកាយ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"ការ​ជូនដំណឹង"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"បង្ហាញ​ការជូនដំណឹង"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ឲ្យ​កម្មវិធី​គ្រប់គ្រង​កម្មវិធី​ញ័រ។"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"អនុញ្ញាតឱ្យ​កម្មវិធី​ចូលប្រើ​ស្ថានភាពកម្មវិធី​ញ័រ។"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ហៅ​លេខ​ទូរស័ព្ទ​ដោយ​ផ្ទាល់"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"អនុញ្ញាតឱ្យ​កម្មវិធីហៅទៅ​លេខទូរសព្ទ​ដោយគ្មាន​ការអន្តរាគមន៍​របស់អ្នក។ ការធ្វើបែបនេះ​អាចបណ្ដាលឱ្យមាន​ការហៅទូរសព្ទ ឬការគិតថ្លៃ​ដែលមិនបានរំពឹងទុក។ សូមចំណាំថា ការធ្វើបែបនេះ​មិនអនុញ្ញាតឱ្យ​កម្មវិធីហៅទូរសព្ទទៅ​លេខសង្គ្រោះបន្ទាន់ទេ។ កម្មវិធីគ្រោះថ្នាក់​អាចគិតប្រាក់ពីអ្នក​ដោយហៅទូរសព្ទដោយគ្មានការបញ្ជាក់របស់អ្នក ឬហៅទូរសព្ទទៅលេខកូដក្រុមហ៊ុនសេវាទូរសព្ទ ដែលបណ្តាលឱ្យការហៅចូល​ត្រូវបានបញ្ជូនបន្ត​ដោយស្វ័យប្រវត្តិទៅ​លេខផ្សេងទៀត។"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"ចូលដំណើរការសេវាកម្មការហៅតាម IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"អនុញ្ញាតឲ្យកម្មវិធីនេះប្រើសេវាកម្ម IMS ដើម្បីធ្វើការហៅដោយគ្មានការអន្តរាគមន៍ពីអ្នក។"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"អាន​ស្ថានភាព និង​អត្តសញ្ញាណ​ទូរស័ព្ទ"</string>
@@ -680,10 +681,10 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"មិនមាន​ពន្លឺគ្រប់គ្រាន់"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ដាក់​ទូរសព្ទឱ្យឆ្ងាយ​ជាងមុន"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ដាក់​ទូរសព្ទ​ឱ្យជិត​ជាងមុន"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"ដាក់​ទូរសព្ទ​ឱ្យខ្ពស់​ជាងមុន"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"ដាក់​ទូរសព្ទ​ឱ្យទាប​ជាងមុន"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"រំកិល​ទូរសព្ទឡើងលើ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"រំកិល​ទូរសព្ទចុះក្រោម"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ដាក់​ទូរសព្ទ​ទៅខាងឆ្វេងអ្នក"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"ដាក់ទូរសព្ទ​ទៅខាងស្ដាំអ្នក"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"រំកិលទូរសព្ទ​ទៅខាងស្ដាំ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"សូមមើល​ឱ្យចំ​ឧបករណ៍​របស់អ្នក​ជាងមុន។"</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"មើលមិនឃើញ​មុខរបស់អ្នកទេ។ កាន់ទូរសព្ទរបស់អ្នក​ដាក់ត្រឹមភ្នែក។"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"មាន​ចលនា​ខ្លាំងពេក។ សូមកាន់​ទូរសព្ទ​ឱ្យនឹង។"</string>
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"មិនអាចបង្កើតគំរូមុខរបស់អ្នកបានទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"បានរកឃើញ​វ៉ែនតាខ្មៅ។ មុខរបស់អ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ។"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"បានរកឃើញ​គ្រឿងពាក់លើមុខ។ មុខរបស់អ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ។"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"បានរកឃើញ​របស់បាំងមុខ។ មុខអ្នកត្រូវតែ​អាចមើលឃើញ​ពេញលេញ។"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"មិនអាច​ផ្ទៀងផ្ទាត់​មុខបានទេ។ មិនមាន​ហាតវែរទេ។"</string>
@@ -710,8 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"បាន​បោះបង់​ប្រតិបត្តិការចាប់​ផ្ទៃមុខ។"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"អ្នកប្រើប្រាស់​បានបោះបង់​ការដោះសោ​តាមទម្រង់មុខ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"ព្យាយាមចូលច្រើនពេកហើយ។ សូមព្យាយាមម្តងទៀតពេលក្រោយ។"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"ព្យាយាម​ច្រើនដងពេក។ មិនអាចប្រើការដោះសោតាមទម្រង់មុខបានទេ។"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"ព្យាយាម​ដោះសោ​ច្រើនដងពេក។ សូមបញ្ចូល​ការចាក់សោ​អេក្រង់​ជំនួសវិញ​។"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"មិន​អាច​ផ្ទៀងផ្ទាត់​មុខ​បាន​ទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"អ្នក​មិនបាន​រៀបចំ​ការដោះសោតាមទម្រង់មុខ​ទេ"</string>
@@ -2160,16 +2160,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ខ្លឹមសារនេះ​មិនអាចបើក​តាមរយៈ​កម្មវិធី​ការងារ​បានទេ"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ខ្លឹមសារនេះ​មិនអាចចែករំលែក​តាមរយៈ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ខ្លឹមសារនេះ​មិនអាចបើក​តាមរយៈ​កម្មវិធី​ផ្ទាល់ខ្លួន​បានទេ"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"កម្មវិធី​ការងារ​ត្រូវបានផ្អាក"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ឈប់ផ្អាក"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"គ្មាន​កម្មវិធី​ការងារ​ទេ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"គ្មាន​កម្មវិធី​ផ្ទាល់ខ្លួន​ទេ"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"បើក <xliff:g id="APP">%s</xliff:g> ផ្ទាល់ខ្លួន"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"បើក <xliff:g id="APP">%s</xliff:g> សម្រាប់ការងារ"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​ផ្ទាល់ខ្លួន"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​សម្រាប់​ការងារ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"កូដ PIN ដោះ​សោ​បណ្ដាញ​ស៊ីម"</string>

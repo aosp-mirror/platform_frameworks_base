@@ -144,7 +144,7 @@
     <string name="wifi_calling_off_summary" msgid="5626710010766902560">"Av"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"Ring via Wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"Ring over mobilnettverk"</string>
-    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare Wifi"</string>
+    <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Bare wifi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
     <string name="crossSimFormat_spn_cross_sim_calling" msgid="5620807020002879057">"<xliff:g id="SPN">%s</xliff:g>-reserve for anrop"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-system"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Bytt til personlig profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Bytt til jobbprofil"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Bytt til <xliff:g id="APP_NAME">%1$s</xliff:g> for personlig bruk"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Bytt til <xliff:g id="APP_NAME">%1$s</xliff:g> for jobb"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"se kontaktene dine"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Posisjon"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Lar appen kontrollere vibreringsfunksjonen."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Gir appen tilgang til vibreringstilstanden."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ringe telefonnummer direkte"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Dette gir appen tillatelse til å ringe telefonnumre uten at du gjør noe. Dette kan føre til uventede kostnader eller anrop. Vær oppmerksom på at dette ikke fører til at appen kan ringe nødnumre. Skadelige apper kan føre til kostnader ved at de kan ringe uten å få bekreftelse fra deg, eller de kan ringe operatørkoder som fører til at innkommende anrop automatisk viderekobles til andre numre."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"få tilgang til nettprattjenesten for ringing"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Lar appen bruke nettprattjenesten til å ringe uten at du gjør noe."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lese telefonstatus og -identitet"</string>
@@ -634,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"For lyst"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Trykk på av/på-knappen er registrert"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prøv å justere"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Endre posisjonen til fingeren litt hver gang"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Endre fingerens posisjon litt hver gang"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Gjenkjenner ikke fingeravtrykket"</string>
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan ikke lage ansiktsmodell. Prøv på nytt."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mørke briller er registrert. Ansiktet må være helt synlig."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansiktsdekke er registrert. Ansiktet må være helt synlig."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Ansiktet er tildekket. Hele ansiktet må vises."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan ikke bekrefte ansikt. Utilgjengelig maskinvare."</string>
@@ -1121,7 +1122,7 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{for # minutt siden}other{For # minutter siden}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{For # time siden}other{For # timer siden}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# time siden}other{# timer siden}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{For # dag siden}other{For # dager siden}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{For # år siden}other{For # år siden}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minutt}other{# minutter}}"</string>
@@ -1364,7 +1365,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB er slått på"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Enheten er koblet til som webkamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-tilbehør er tilkoblet"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Trykk for å få flere alternativ."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Trykk for flere alternativer."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Den tilkoblede enheten lades. Trykk for å se flere alternativer."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analogt lydtilbehør ble oppdaget"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Den tilkoblede enheten er ikke kompatibel med denne telefonen. Trykk for å finne ut mer."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Dette innholdet kan ikke åpnes med jobbapper"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Dette innholdet kan ikke deles med personlige apper"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Dette innholdet kan ikke åpnes med personlige apper"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Jobbapper er satt på pause"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Slå av pausen"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ingen jobbapper"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ingen personlige apper"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Åpne <xliff:g id="APP">%s</xliff:g> personlig"</string>
