@@ -93,6 +93,7 @@ public class PackageInfo implements Parcelable {
      * tag's {@link android.R.styleable#AndroidManifest_versionName versionName}
      * attribute, or null if there was none.
      */
+    @Nullable
     public String versionName;
 
     /**
@@ -117,20 +118,20 @@ public class PackageInfo implements Parcelable {
      * attribute.
      */
     public String sharedUserId;
-    
+
     /**
      * The shared user ID label of this package, as specified by the &lt;manifest&gt;
      * tag's {@link android.R.styleable#AndroidManifest_sharedUserLabel sharedUserLabel}
      * attribute.
      */
     public int sharedUserLabel;
-    
+
     /**
      * Information collected from the &lt;application&gt; tag, or null if
      * there was none.
      */
     public ApplicationInfo applicationInfo;
-    
+
     /**
      * The time at which the app was first installed.  Units are as
      * per {@link System#currentTimeMillis()}.
