@@ -221,12 +221,7 @@ static jlong nativeSendKeyEvent(JNIEnv* env, jobject clazz, jlong ptr, jobject e
         jboolean predispatch) {
     InputQueue* queue = reinterpret_cast<InputQueue*>(ptr);
     KeyEvent* event = queue->createKeyEvent();
-    status_t status = android_view_KeyEvent_toNative(env, eventObj, event);
-    if (status) {
-        queue->recycleInputEvent(event);
-        jniThrowRuntimeException(env, "Could not read contents of KeyEvent object.");
-        return -1;
-    }
+    *event = android_view_KeyEvent_toNative(env, eventObj);
 
     if (predispatch) {
         event->setFlags(event->getFlags() | AKEY_EVENT_FLAG_PREDISPATCH);
