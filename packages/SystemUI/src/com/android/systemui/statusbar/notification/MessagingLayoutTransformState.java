@@ -23,13 +23,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.widget.IMessagingLayout;
 import com.android.internal.widget.MessagingGroup;
 import com.android.internal.widget.MessagingImageMessage;
 import com.android.internal.widget.MessagingLinearLayout;
 import com.android.internal.widget.MessagingMessage;
 import com.android.internal.widget.MessagingPropertyAnimator;
-import com.android.systemui.animation.Interpolators;
 
 import java.util.ArrayList;
 import java.util.HashMap;
