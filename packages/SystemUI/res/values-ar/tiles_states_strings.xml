@@ -89,7 +89,7 @@
   <string-array name="tile_states_color_correction">
     <item msgid="2840507878437297682">"غير متوفّر"</item>
     <item msgid="1909756493418256167">"غير مفعّل"</item>
-    <item msgid="4531508423703413340">"مفعّل"</item>
+    <item msgid="4531508423703413340">"الميزة مفعّلة"</item>
   </string-array>
   <string-array name="tile_states_inversion">
     <item msgid="3638187931191394628">"الميزة غير متاحة"</item>
