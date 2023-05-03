@@ -17,8 +17,8 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.tools.common.PlatformConsts
 import android.tools.common.traces.component.ComponentNameMatcher
-import android.tools.common.traces.wm.WindowManagerState.Companion.STATE_RESUMED
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.helpers.FIND_TIMEOUT
 import android.tools.device.traces.parsers.WindowManagerStateHelper
@@ -54,8 +54,8 @@ constructor(
         launchButton.click()
         wmHelper
             .StateSyncBuilder()
-            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, STATE_RESUMED)
-            .withActivityState(MAIN_ACTIVITY_COMPONENT, STATE_RESUMED)
+            .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+            .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
             .waitForAndVerify()
     }
 
@@ -73,8 +73,8 @@ constructor(
         launchButton.click()
         wmHelper
             .StateSyncBuilder()
-            .withActivityState(PLACEHOLDER_PRIMARY_COMPONENT, STATE_RESUMED)
-            .withActivityState(PLACEHOLDER_SECONDARY_COMPONENT, STATE_RESUMED)
+            .withActivityState(PLACEHOLDER_PRIMARY_COMPONENT, PlatformConsts.STATE_RESUMED)
+            .withActivityState(PLACEHOLDER_SECONDARY_COMPONENT, PlatformConsts.STATE_RESUMED)
             .waitForAndVerify()
     }
 
