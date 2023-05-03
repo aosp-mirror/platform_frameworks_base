@@ -1775,8 +1775,12 @@
     <!-- Rear Display Education dimens -->
     <dimen name="rear_display_animation_width">273dp</dimen>
     <dimen name="rear_display_animation_height">200dp</dimen>
+    <dimen name="rear_display_animation_width_opened">273dp</dimen>
+    <dimen name="rear_display_animation_height_opened">200dp</dimen>
     <dimen name="rear_display_title_top_padding">24dp</dimen>
     <dimen name="rear_display_title_bottom_padding">16dp</dimen>
+    <dimen name="rear_display_title_top_padding_opened">24dp</dimen>
+    <dimen name="rear_display_title_bottom_padding_opened">16dp</dimen>
 
     <!-- Bouncer user switcher margins -->
     <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>
