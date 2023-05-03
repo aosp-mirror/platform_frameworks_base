@@ -3423,6 +3423,9 @@
   <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureDefault" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayPrimaries" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayNominalWhite" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceDisplayNominalWhiteCct" />
+  <java-symbol type="array" name="config_displayWhiteBalanceDisplayRangeMinimums" />
+  <java-symbol type="array" name="config_displayWhiteBalanceDisplaySteps" />
   <java-symbol type="bool" name="config_displayWhiteBalanceLightModeAllowed" />
   <java-symbol type="integer" name="config_displayWhiteBalanceTransitionTime" />
 
