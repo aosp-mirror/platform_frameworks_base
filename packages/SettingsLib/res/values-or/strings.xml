@@ -573,9 +573,9 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"ନିଜ ଆକାଉଣ୍ଟରୁ ଆପ୍‌ ତଥା କଣ୍ଟେଣ୍ଟକୁ ଆପଣ ଆକ୍ସେସ୍ ରୋକିପାରିବେ"</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ଉପଯୋଗକର୍ତ୍ତା"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ସୀମିତ ସୁବିଧା ଥିବା ପ୍ରୋଫାଇଲ୍‌"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"ନୂତନ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବେ?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"ନୂଆ ୟୁଜରଙ୍କୁ ଯୋଗ କରିବେ?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"ଅତିରିକ୍ତ ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରି ଆପଣ ଏହି ଡିଭାଇସକୁ ଅନ୍ୟ ଲୋକମାନଙ୍କ ସହିତ ସେୟାର କରିପାରିବେ। ପ୍ରତ୍ୟେକ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ନିଜର ସ୍ପେସ୍ ଅଛି ଯାହାକୁ ସେମାନେ ଆପ, ୱାଲପେପର୍ ଓ ଏପରି ଅନେକ କିଛି ସହିତ କଷ୍ଟମାଇଜ କରିପାରିବେ। ଉପଯୋଗକର୍ତ୍ତା ୱାଇ-ଫାଇ ଭଳି ଡିଭାଇସ ସେଟିଂସକୁ ମଧ୍ୟ ଆଡଜଷ୍ଟ କରିପାରିବେ ଯାହା ସମସ୍ତଙ୍କୁ ପ୍ରଭାବିତ କରିଥାଏ। \n\nଯେତେବେଳେ ଆପଣ ଗୋଟିଏ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବେ, ସେତେବେଳେ ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ନିଜର ସ୍ପେସ୍‌କୁ ସେଟ‌ଅପ କରିବାକୁ ପଡ଼ିବ। \n\nଅନ୍ୟ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଆପକୁ ଅପଡେଟ କରିପାରିବେ। ଆକ୍ସେସିବିଲିଟୀ ସେଟିଂସ ଏବଂ ସେବାଗୁଡ଼ିକ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ସ୍ଥାନାନ୍ତର ହୋ‌ଇନପାରେ।"</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"ଆପଣ ଜଣେ ନୂଆ ଉପଯୋଗକର୍ତ୍ତାଙ୍କୁ ଯୋଗ କରିବା ବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ତାଙ୍କ ସ୍ପେସ ସେଟ ଅପ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ଉପଯୋଗକର୍ତ୍ତାଙ୍କ ପାଇଁ, ଆପଗୁଡ଼ିକୁ ଯେ କୌଣସି ଉପଯୋଗକର୍ତ୍ତା ଅପଡେଟ କରିପାରିବେ।"</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"ଆପଣ ଜଣେ ନୂଆ ୟୁଜରଙ୍କୁ ଯୋଗ କରିବା ବେଳେ, ସେହି ବ୍ୟକ୍ତିଙ୍କୁ ତାଙ୍କ ସ୍ପେସ ସେଟ ଅପ କରିବାକୁ ପଡ଼ିବ।\n\nଅନ୍ୟ ସମସ୍ତ ୟୁଜରଙ୍କ ପାଇଁ ଆପ୍ସକୁ ଯେ କୌଣସି ୟୁଜର ଅପଡେଟ କରିପାରିବେ।"</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"ଏହି ୟୁଜରଙ୍କୁ ଜଣେ ଆଡମିନ କରିବେ?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"ଆଡମିନମାନଙ୍କର ବିଶେଷ ଅଧିକାରଗୁଡ଼ିକ ଥାଏ ଯାହା ଅନ୍ୟ ୟୁଜରମାନଙ୍କର ନଥାଏ। ଜଣେ ଆଡମିନ ସମସ୍ତ ୟୁଜରଙ୍କୁ ପରିଚାଳନା କରିପାରିବେ, ଏହି ଡିଭାଇସକୁ ଅପଡେଟ କିମ୍ବା ରିସେଟ କରିପାରିବେ, ସେଟିଂସ ପରିବର୍ତ୍ତନ କରିପାରିବେ, ଇନଷ୍ଟଲ କରାଯାଇଥିବା ସମସ୍ତ ଆପ୍ସ ଦେଖିପାରିବେ ଏବଂ ଅନ୍ୟମାନଙ୍କ ପାଇଁ ଆଡମିନ ବିଶେଷ ଅଧିକାରଗୁଡ଼ିକୁ ଅନୁମତି ଦେଇପାରିବେ କିମ୍ବା ପ୍ରତ୍ୟାହାର କରିପାରିବେ।"</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"ଆଡମିନ କରନ୍ତୁ"</string>
@@ -585,9 +585,9 @@
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"ଏବେ ସେଟଅପ୍ କରନ୍ତୁ"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"ଏବେ ନୁହେଁଁ"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"ଯୋଡନ୍ତୁ"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"ନୂଆ ୟୁଜର"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"ନୂଆ ପ୍ରୋଫାଇଲ୍‌"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"ଉପଯୋଗକର୍ତ୍ତା ସୂଚନା"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"ୟୁଜର ସୂଚନା"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"ପ୍ରୋଫାଇଲ୍ ସୂଚନା"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"ପ୍ରତିବନ୍ଧିତ ପ୍ରୋଫାଇଲ୍‌ ତିଆରି କରିବାବେଳେ, ନିଜ ଆପ୍‌ ଓ ବ୍ୟକ୍ତିଗତ ତଥ୍ୟର ସୁରକ୍ଷା ପାଇଁ ଏକ ସ୍କ୍ରୀନ୍‌ ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ଲକ୍‌ ସେଟ୍‌ କରନ୍ତୁ"</string>
@@ -597,7 +597,7 @@
     <string name="add_user_failed" msgid="4809887794313944872">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରିବାକୁ ବିଫଳ ହେଲା"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"ଜଣେ ନୂଆ ଅତିଥି ତିଆରି କରିବାରେ ବିଫଳ ହୋଇଛି"</string>
     <string name="user_nickname" msgid="262624187455825083">"ଡାକନାମ"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"ଉପଯୋଗକର୍ତ୍ତା ଯୋଗ କରନ୍ତୁ"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"ୟୁଜର ଯୋଗ କରନ୍ତୁ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ଅତିଥି ଯୋଗ କରନ୍ତୁ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ଅତିଥିଙ୍କୁ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"ଅତିଥି ସେସନକୁ ରିସେଟ୍ କରନ୍ତୁ"</string>

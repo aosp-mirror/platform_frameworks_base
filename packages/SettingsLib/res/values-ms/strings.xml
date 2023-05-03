@@ -302,7 +302,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Tunjukkan pilihan untuk pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tingkatkan tahap pengelogan Wi-Fi, tunjuk setiap SSID RSSI dalam Pemilih Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Mengurangkan penyusutan bateri &amp; meningkatkan prestasi rangkaian"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Apabila mod ini didayakan, alamat MAC peranti ini mungkin berubah pada setiap kali peranti menyambung kepada rangkaian yang telah mendayakan perawakan MAC."</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Apabila mod ini didayakan, alamat MAC peranti ini mungkin berubah setiap kali peranti menyambung kepada rangkaian yang telah mendayakan perawakan MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Bermeter"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Tidak bermeter"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Saiz penimbal pengelog"</string>
@@ -328,7 +328,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Sahkan apl melalui USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Semak apl yang dipasang melalui ADB/ADT untuk tingkah laku yang berbahaya."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Peranti Bluetooth tanpa nama (alamat MAC sahaja) akan dipaparkan"</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Lumpuhkan ciri kelantangan mutlak Bluetooth dalam kes isu kelantangan menggunakan peranti kawalan jauh seperti kelantangan yang sangat kuat atau tidak dapat mengawal."</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Lumpuhkan ciri kelantangan mutlak Bluetooth jika ada masalah kelantangan pada peranti kawalan jauh seperti kelantangan yang sangat kuat atau tidak terkawal."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Mendayakan tindanan ciri Gabeldorche Bluetooth."</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Mendayakan ciri Kesambungan Dipertingkat"</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal setempat"</string>
@@ -341,7 +341,7 @@
     <string name="debug_app_set" msgid="6599535090477753651">"Menyahpepijat aplikasi: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Pilih aplikasi"</string>
     <string name="no_application" msgid="9038334538870247690">"Tiada apa-apa"</string>
-    <string name="wait_for_debugger" msgid="7461199843335409809">"Nantikan penyahpepijat"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"Tunggu penyahpepijat"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Menanti penyahpepijat sebelum aplikasi melaksana"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Input"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Lukisan"</string>
@@ -354,9 +354,9 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"Tindihan skrin menunjukkan data sentuh semasa"</string>
     <string name="show_touches" msgid="8437666942161289025">"Tunjukkan ketikan"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"Tunjukkan maklum balas visual untuk ketikan"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"Tunjuk kemas kini permukaan"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"Tunjuk kemaskinian permukaan"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Denyar permukaan tetingkap apabila dikemas kini"</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Papar lihat kemas kini"</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Tunjuk kemaskinian paparan"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Denyar paparan dalam tetingkap apabila dilukis"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"Tunjukkan kemas kini perkakasan"</string>
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Denyar hijau lapisan perkakasan yang dikemas kini"</string>
@@ -378,7 +378,7 @@
     <string name="force_msaa_summary" msgid="9070437493586769500">"Dayakan 4x MSAA dalam apl OpenGL ES 2.0"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Nyahpepijat operasi keratan bukan segi empat tepat"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Pemaparan HWUI profil"</string>
-    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Dayakan lepasan nyahpepijat GPU"</string>
+    <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Dayakan lapisan nyahpepijat GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Benarkan pemuatan lapisan nyahpepijat GPU untuk apl penyahpepijatan"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Dayakan pengelogan vendor berjela"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Sertakan log tambahan vendor khusus peranti dalam laporan pepijat, yang mungkin mengandungi maklumat peribadi, menggunakan lebih banyak kuasa bateri dan/atau menggunakan lebih banyak storan."</string>
@@ -574,8 +574,8 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Pengguna"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Profil terhad"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Tambah pengguna baharu?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Anda boleh berkongsi peranti ini dengan orang lain dengan membuat pengguna tambahan. Setiap pengguna mempunyai ruang mereka sendiri, yang boleh diperibadikan dengan apl, kertas dinding dan sebagainya. Pengguna juga boleh melaraskan tetapan peranti seperti Wi-Fi yang akan memberi kesan kepada semua orang.\n\nApabila anda menambah pengguna baharu, orang itu perlu menyediakan ruang mereka.\n\nMana-mana pengguna boleh mengemas kini apl untuk semua pengguna lain. Tetapan dan perkhidmatan kebolehaksesan tidak boleh dipindahkan kepada pengguna baharu."</string>
-    <string name="user_add_user_message_short" msgid="3295959985795716166">"Apabila anda menambah pengguna baharu, orang itu perlu menyediakan ruang mereka.\n\nMana-mana pengguna boleh mengemas kini apl untuk semua pengguna lain."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Anda boleh berkongsi peranti ini dengan orang lain dengan membuat pengguna tambahan. Setiap pengguna mempunyai ruang mereka sendiri, yang boleh diperibadikan dengan apl, kertas dinding dan sebagainya. Pengguna juga boleh melaraskan tetapan peranti seperti Wi-Fi yang akan memberi kesan kepada semua orang.\n\nApabila anda menambah pengguna baharu, orang itu perlu menyediakan ruang mereka.\n\nMana-mana pengguna boleh mengemaskinikan apl untuk semua pengguna lain. Tetapan dan perkhidmatan kebolehaksesan tidak boleh dipindahkan kepada pengguna baharu."</string>
+    <string name="user_add_user_message_short" msgid="3295959985795716166">"Apabila anda menambah pengguna baharu, orang itu perlu menyediakan ruangnya sendiri.\n\nMana-mana pengguna boleh mengemaskinikan apl untuk semua pengguna lain."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"Jadikan pengguna ini pentadbir?"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"Pentadbir mempunyai keistimewaan khas yang tiada pada pengguna lain. Pentadbir boleh mengurus semua pengguna, mengemaskinikan atau menetapkan semula peranti ini, mengubah suai tetapan, melihat semua apl yang telah dipasang dan memberikan atau membatalkan keistimewaan pentadbir untuk pengguna lain."</string>
     <string name="user_grant_admin_button" msgid="5441486731331725756">"Jadikan pentadbir"</string>
