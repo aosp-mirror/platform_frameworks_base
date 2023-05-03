@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"ລະບົບ Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ສະຫຼັບໄປໂປຣໄຟລ໌ສ່ວນຕົວ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ສະຫຼັບໄປໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ປ່ຽນໄປໃຊ້ໂປຣໄຟລ໌ສ່ວນຕົວໃນ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"ປ່ຽນໄປໃຊ້ໂປຣໄຟລ໌ວຽກໃນ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ລາຍຊື່ຜູ້ຕິດຕໍ່"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ເຂົ້າ​ຫາ​ລາຍ​ຊື່​ຂອງ​ທ່ານ"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ສະ​ຖານ​ທີ່"</string>
