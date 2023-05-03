@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN을 입력해 주세요."</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"PIN 입력"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN 입력"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"패턴 입력"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"패턴 그리기"</string>
