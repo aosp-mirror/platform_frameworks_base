@@ -1111,15 +1111,12 @@ public final class Choreographer {
      */
     public static class FrameData {
         private long mFrameTimeNanos;
-        private final FrameTimeline[] mFrameTimelines =
-                new FrameTimeline[DisplayEventReceiver.VsyncEventData.FRAME_TIMELINES_LENGTH];
+        private FrameTimeline[] mFrameTimelines;
         private int mPreferredFrameTimelineIndex;
         private boolean mInCallback = false;
 
         FrameData() {
-            for (int i = 0; i < mFrameTimelines.length; i++) {
-                mFrameTimelines[i] = new FrameTimeline();
-            }
+            allocateFrameTimelines(DisplayEventReceiver.VsyncEventData.FRAME_TIMELINES_CAPACITY);
         }
 
         /** The time in nanoseconds when the frame started being rendered. */
@@ -1157,21 +1154,29 @@ public final class Choreographer {
             }
         }
 
+        private void allocateFrameTimelines(int length) {
+            mFrameTimelines = new FrameTimeline[length];
+            for (int i = 0; i < mFrameTimelines.length; i++) {
+                mFrameTimelines[i] = new FrameTimeline();
+            }
+        }
+
         /**
          * Update the frame data with a {@code DisplayEventReceiver.VsyncEventData} received from
          * native.
          */
         FrameTimeline update(
                 long frameTimeNanos, DisplayEventReceiver.VsyncEventData vsyncEventData) {
-            if (vsyncEventData.frameTimelines.length != mFrameTimelines.length) {
-                throw new IllegalStateException(
-                        "Length of native frame timelines received does not match Java. Did "
-                                + "FRAME_TIMELINES_LENGTH or kFrameTimelinesLength (native) "
-                                + "change?");
+            if (vsyncEventData.frameTimelinesLength == 0) {
+                throw new IllegalArgumentException(
+                        "Vsync event timelines length must be greater than 0");
+            }
+            if (mFrameTimelines.length != vsyncEventData.frameTimelinesLength) {
+                allocateFrameTimelines(vsyncEventData.frameTimelinesLength);
             }
             mFrameTimeNanos = frameTimeNanos;
             mPreferredFrameTimelineIndex = vsyncEventData.preferredFrameTimelineIndex;
-            for (int i = 0; i < vsyncEventData.frameTimelines.length; i++) {
+            for (int i = 0; i < mFrameTimelines.length; i++) {
                 DisplayEventReceiver.VsyncEventData.FrameTimeline frameTimeline =
                         vsyncEventData.frameTimelines[i];
                 mFrameTimelines[i].update(frameTimeline.vsyncId,
