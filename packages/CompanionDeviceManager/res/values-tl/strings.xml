@@ -43,10 +43,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"Payagan"</string>
     <string name="consent_no" msgid="2640796915611404382">"Huwag payagan"</string>
     <string name="consent_back" msgid="2560683030046918882">"Bumalik"</string>
-    <string name="permission_expanded" msgid="5234121789170200621">"Naka-expand"</string>
-    <string name="permission_expand" msgid="1464954219517793480">"I-expand"</string>
-    <string name="permission_collapsed" msgid="3193316780088731226">"Naka-collapse"</string>
-    <string name="permission_collapse" msgid="6555844383912351944">"I-collapse"</string>
+    <string name="permission_expand" msgid="893185038020887411">"I-expand ang <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"I-collapse ang <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Bigyan ang mga app sa &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; ng mga pahintulot na mayroon din sa &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Posibleng kasama rito ang &lt;strong&gt;access sa Mikropono&lt;/strong&gt;, &lt;strong&gt;Camera&lt;/strong&gt;, at &lt;strong&gt;Lokasyon&lt;/strong&gt;, at iba pang pahintulot sa sensitibong impormasyon sa &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Puwede mong baguhin ang mga pahintulot na ito anumang oras sa iyong Mga Setting sa &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
     <string name="vendor_header_button_description" msgid="7994879208461111473">"Higit Pang Impormasyon"</string>

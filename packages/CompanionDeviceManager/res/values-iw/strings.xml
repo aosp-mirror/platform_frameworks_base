@@ -43,10 +43,8 @@
     <string name="consent_yes" msgid="8344487259618762872">"יש אישור"</string>
     <string name="consent_no" msgid="2640796915611404382">"אין אישור"</string>
     <string name="consent_back" msgid="2560683030046918882">"חזרה"</string>
-    <string name="permission_expanded" msgid="5234121789170200621">"הרשימה מורחבת"</string>
-    <string name="permission_expand" msgid="1464954219517793480">"הרחבה"</string>
-    <string name="permission_collapsed" msgid="3193316780088731226">"הרשימה מכווצת"</string>
-    <string name="permission_collapse" msgid="6555844383912351944">"כיווץ"</string>
+    <string name="permission_expand" msgid="893185038020887411">"הרחבה של <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
+    <string name="permission_collapse" msgid="3320833884220844084">"כיווץ של <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"‏האם לתת לאפליקציות ב-‎&lt;strong&gt;‎‏<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>‏‎&lt;/strong&gt;‎‏ את אותן הרשאות כמו ב-‏‎&lt;strong&gt;‎‏<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>‏‎&lt;/strong&gt;‎‏?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"‏ההרשאות עשויות לכלול גישה ל&lt;strong&gt;מיקרופון&lt;/strong&gt;, ל&lt;strong&gt;מצלמה&lt;/strong&gt;, ול&lt;strong&gt;מיקום&lt;/strong&gt;, וכן גישה למידע רגיש אחר ב-&lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;אפשר לשנות את ההרשאות האלה בכל שלב בהגדרות של &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
     <string name="vendor_header_button_description" msgid="7994879208461111473">"מידע נוסף"</string>
