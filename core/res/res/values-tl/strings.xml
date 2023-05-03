@@ -648,7 +648,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Iusog pakaliwa ang telepono mo"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Iusog pakanan ang telepono mo"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Tumingin nang mas direkta sa iyong device."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Hindi makita ang mukha mo. Hawakan ang telepono mo nang kapantay ng mata."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Hindi makita ang mukha mo. Hawakan ang telepono kapantay ng mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Masyadong magalaw. Hawakang mabuti ang telepono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Paki-enroll muli ang iyong mukha."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Hindi makilala ang mukha. Subukan ulit."</string>
@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Hindi magawa ang iyong face model. Subukan ulit."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"May na-detect na madilim na salamin. Dapat ganap na nakikita ang iyong mukha."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"May na-detect na pantakip sa mukha. Dapat ganap na nakikita ang iyong mukha."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"May na-detect na mask. Dapat ganap na nakikita ang mukha."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Di ma-verify ang mukha. Di available ang hardware."</string>

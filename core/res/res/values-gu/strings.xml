@@ -218,7 +218,7 @@
     <string name="turn_on_radio" msgid="2961717788170634233">"વાયરલેસ ચાલુ કરો"</string>
     <string name="turn_off_radio" msgid="7222573978109933360">"વાયરલેસ બંધ કરો"</string>
     <string name="screen_lock" msgid="2072642720826409809">"સ્ક્રીન લૉક કરો"</string>
-    <string name="power_off" msgid="4111692782492232778">"પાવર બંધ"</string>
+    <string name="power_off" msgid="4111692782492232778">"પાવર બંધ કરો"</string>
     <string name="silent_mode_silent" msgid="5079789070221150912">"રિંગર બંધ"</string>
     <string name="silent_mode_vibrate" msgid="8821830448369552678">"રિંગર વાઇબ્રેટ"</string>
     <string name="silent_mode_ring" msgid="6039011004781526678">"રિંગર ચાલુ"</string>

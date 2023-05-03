@@ -945,7 +945,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"বন্ধ কৰক"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"ৰিৱাইণ্ড কৰক"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ফাষ্ট ফৰৱাৰ্ড"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"জৰুৰীকালীন কল মাত্ৰ"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"কেৱল জৰুৰীকালীন কল"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"নেটৱর্ক অৱৰোধিত"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"PUKৰ দ্বাৰা লক কৰা ছিম কার্ড।"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"ব্যৱহাৰকাৰীৰ নিৰ্দেশনা চাওক বা গ্ৰাহক সেৱা কেন্দ্ৰৰ সৈতে যোগাযোগ কৰক।"</string>
@@ -1355,14 +1355,14 @@
     <string name="perm_costs_money" msgid="749054595022779685">"ইয়াৰ ফলত আপোনাৰ টকা খৰচ হ\'ব পাৰে"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"ঠিক আছে"</string>
     <string name="usb_charging_notification_title" msgid="1674124518282666955">"ইউএছবিৰ জৰিয়তে এই ডিভাইচটো চাৰ্জ কৰি থকা হৈছে"</string>
-    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"ইউএছবিৰ জৰিয়তে সংযুক্ত ডিভাইচটো চ্চাৰ্জ কৰি থকা হৈছে"</string>
+    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"ইউএছবিৰ জৰিয়তে সংযুক্ত ডিভাইচটো চাৰ্জ কৰি থকা হৈছে"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"ইউএছবি জৰিয়তে ফাইল স্থানান্তৰণ অন কৰা হ’ল"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"ইউএছবিৰ জৰিয়তে পিটিপি অন কৰা হ’ল"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"ইউএছবি টেডাৰিং অন কৰা হ’ল"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"ইউএছবিৰ জৰিয়তে এমআইডিআই অন কৰা হ’ল"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"ইউএছবি সহায়ক সামগ্ৰী সংযোগ কৰা হ’ল"</string>
     <string name="usb_notification_message" msgid="4715163067192110676">"অধিক বিকল্পৰ বাবে টিপক।"</string>
-    <string name="usb_power_notification_message" msgid="7284765627437897702">"সংযুক্ত ডিভাইচ চ্চাৰ্জ কৰি থকা হৈছে। অধিক বিকল্পৰ বাবে টিপক।"</string>
+    <string name="usb_power_notification_message" msgid="7284765627437897702">"সংযুক্ত ডিভাইচ চাৰ্জ কৰি থকা হৈছে। অধিক বিকল্পৰ বাবে টিপক।"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"এনাল\'গ অডিঅ\' সহায়ক সামগ্ৰী পোৱা গৈছে"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"সংলগ্ন কৰা ডিভাইচটোৱে এই ফ\'নটোৰ সৈতে কাম কৰিব নোৱাৰে। অধিক জানিবলৈ টিপক।"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"ইউএছবি ডিবাগিং সংযোগ কৰা হ’ল"</string>
@@ -1707,7 +1707,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"ৰং বিপৰীতকৰণ"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"ৰং শুধৰণি"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এখন হাতেৰে ব্যৱহাৰ কৰাৰ ম’ড"</string>
-    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"এক্সট্ৰা ডিম"</string>
+    <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিৰিক্তভাৱে পোহৰ কমোৱাৰ সুবিধা"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কীসমূহ ধৰি ৰাখক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধৰি ৰাখিছিল। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অফ কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ব্যৱহাৰ কৰিবলৈ দুয়োটা ভলিউম বুটাম তিনি ছেকেণ্ডৰ বাবে হেঁচি ৰাখক"</string>

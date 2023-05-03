@@ -1688,7 +1688,7 @@
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ekki kveikja"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"KVEIKT"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"SLÖKKT"</string>
-    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Viltu leyfa <xliff:g id="SERVICE">%1$s</xliff:g> að hafa fulla stjórn yfir tækinu þínu?"</string>
+    <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Viltu leyfa „<xliff:g id="SERVICE">%1$s</xliff:g>“ að hafa fulla stjórn yfir tækinu þínu?"</string>
     <string name="accessibility_service_warning_description" msgid="291674995220940133">"Full stjórnun er viðeigandi fyrir forrit sem hjálpa þér ef þú hefur ekki aðgang, en ekki fyrir flest forrit."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Skoða og stjórna skjá"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Það getur lesið allt efni á skjánum og birt efni yfir öðrum forritum."</string>

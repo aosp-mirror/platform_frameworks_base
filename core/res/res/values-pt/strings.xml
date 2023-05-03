@@ -598,7 +598,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Claro demais"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"O botão liga/desliga foi pressionado"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ajuste a posição do dedo"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude a posição do dedo ligeiramente a cada momento"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude ligeiramente a posição do dedo em cada registro"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Impressão digital não reconhecida"</string>
@@ -657,7 +657,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Olhe diretamente para o smartphone"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Olhe diretamente para o smartphone"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Olhe diretamente para o smartphone"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Remova tudo que esteja ocultando seu rosto."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Tire tudo que possa esconder seu rosto."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpe a parte superior da tela, inclusive a barra preta"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -665,7 +665,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Falha ao criar o modelo de rosto. Tente de novo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Óculos escuros detectados. Seu rosto precisa estar completamente visível."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máscara detectada. Seu rosto precisa estar completamente visível."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Máscara detectada. Seu rosto precisa estar visível."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Impossível verificar rosto. Hardware indisponível."</string>
@@ -1720,7 +1720,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Para alternar entre recursos, deslize de baixo para cima na tela com três dedos, sem soltar."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliação"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuário atual <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Alternando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Mudando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Desconectando <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Proprietário"</string>
     <string name="guest_name" msgid="8502103277839834324">"Visitante"</string>
