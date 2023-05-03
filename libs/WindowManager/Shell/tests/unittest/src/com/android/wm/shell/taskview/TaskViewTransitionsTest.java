@@ -179,4 +179,23 @@ public class TaskViewTransitionsTest extends ShellTestCase {
                 mTaskViewTransitions.findPending(mTaskViewTaskController, TRANSIT_CHANGE);
         assertThat(pendingBounds2).isNull();
     }
+
+    @Test
+    public void testSetTaskVisibility_taskRemoved_noNPE() {
+        mTaskViewTransitions.removeTaskView(mTaskViewTaskController);
+
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskViewTransitions.setTaskViewVisible(mTaskViewTaskController, false);
+    }
+
+    @Test
+    public void testSetTaskBounds_taskRemoved_noNPE() {
+        mTaskViewTransitions.removeTaskView(mTaskViewTaskController);
+
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskViewTransitions.setTaskBounds(mTaskViewTaskController,
+                new Rect(0, 0, 100, 100));
+    }
 }

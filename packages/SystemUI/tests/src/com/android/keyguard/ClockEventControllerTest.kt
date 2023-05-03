@@ -35,7 +35,7 @@ import com.android.systemui.plugins.ClockFaceController
 import com.android.systemui.plugins.ClockFaceConfig
 import com.android.systemui.plugins.ClockFaceEvents
 import com.android.systemui.plugins.ClockTickRate
-import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.ConfigurationController

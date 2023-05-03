@@ -85,6 +85,7 @@ import android.net.NetworkScore;
 import android.net.NetworkSpecifier;
 import android.net.RouteInfo;
 import android.net.TelephonyNetworkSpecifier;
+import android.net.TransportInfo;
 import android.net.UidRangeParcel;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
@@ -107,6 +108,8 @@ import android.net.ipsec.ike.exceptions.IkeNetworkLostException;
 import android.net.ipsec.ike.exceptions.IkeNonProtocolException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.net.ipsec.ike.exceptions.IkeTimeoutException;
+import android.net.vcn.VcnGatewayConnectionConfig;
+import android.net.vcn.VcnTransportInfo;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -453,22 +456,22 @@ public class Vpn {
 
     private static class CarrierConfigInfo {
         public final String mccMnc;
-        public final int keepaliveDelayMs;
+        public final int keepaliveDelaySec;
         public final int encapType;
         public final int ipVersion;
 
-        CarrierConfigInfo(String mccMnc, int keepaliveDelayMs,
+        CarrierConfigInfo(String mccMnc, int keepaliveDelaySec,
                 int encapType,
                 int ipVersion) {
             this.mccMnc = mccMnc;
-            this.keepaliveDelayMs = keepaliveDelayMs;
+            this.keepaliveDelaySec = keepaliveDelaySec;
             this.encapType = encapType;
             this.ipVersion = ipVersion;
         }
 
         @Override
         public String toString() {
-            return "CarrierConfigInfo(" + mccMnc + ") [keepaliveDelayMs=" + keepaliveDelayMs
+            return "CarrierConfigInfo(" + mccMnc + ") [keepaliveDelaySec=" + keepaliveDelaySec
                     + ", encapType=" + encapType + ", ipVersion=" + ipVersion + "]";
         }
     }
@@ -3556,39 +3559,63 @@ public class Vpn {
         }
 
         private int guessEspIpVersionForNetwork() {
-            final CarrierConfigInfo carrierconfig = getCarrierConfig();
+            if (mUnderlyingNetworkCapabilities.getTransportInfo() instanceof VcnTransportInfo) {
+                Log.d(TAG, "Running over VCN, esp IP version is auto");
+                return ESP_IP_VERSION_AUTO;
+            }
+            final CarrierConfigInfo carrierconfig = getCarrierConfigForUnderlyingNetwork();
             final int ipVersion = (carrierconfig != null)
                     ? carrierconfig.ipVersion : ESP_IP_VERSION_AUTO;
             if (carrierconfig != null) {
-                Log.d(TAG, "Get customized IP version(" + ipVersion + ") on SIM("
+                Log.d(TAG, "Get customized IP version (" + ipVersion + ") on SIM (mccmnc="
                         + carrierconfig.mccMnc + ")");
             }
             return ipVersion;
         }
 
         private int guessEspEncapTypeForNetwork() {
-            final CarrierConfigInfo carrierconfig = getCarrierConfig();
+            if (mUnderlyingNetworkCapabilities.getTransportInfo() instanceof VcnTransportInfo) {
+                Log.d(TAG, "Running over VCN, encap type is auto");
+                return ESP_ENCAP_TYPE_AUTO;
+            }
+            final CarrierConfigInfo carrierconfig = getCarrierConfigForUnderlyingNetwork();
             final int encapType = (carrierconfig != null)
                     ? carrierconfig.encapType : ESP_ENCAP_TYPE_AUTO;
             if (carrierconfig != null) {
-                Log.d(TAG, "Get customized encap type(" + encapType + ") on SIM("
+                Log.d(TAG, "Get customized encap type (" + encapType + ") on SIM (mccmnc="
                         + carrierconfig.mccMnc + ")");
             }
             return encapType;
         }
 
+
         private int guessNattKeepaliveTimerForNetwork() {
-            final CarrierConfigInfo carrierconfig = getCarrierConfig();
-            final int natKeepalive = (carrierconfig != null)
-                    ? carrierconfig.keepaliveDelayMs : AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
+            final TransportInfo transportInfo = mUnderlyingNetworkCapabilities.getTransportInfo();
+            if (transportInfo instanceof VcnTransportInfo) {
+                final int nattKeepaliveSec =
+                        ((VcnTransportInfo) transportInfo).getMinUdpPort4500NatTimeoutSeconds();
+                Log.d(TAG, "Running over VCN, keepalive timer : " + nattKeepaliveSec + "s");
+                if (VcnGatewayConnectionConfig.MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET
+                        != nattKeepaliveSec) {
+                    return nattKeepaliveSec;
+                }
+                // else fall back to carrier config, if any
+            }
+            final CarrierConfigInfo carrierconfig = getCarrierConfigForUnderlyingNetwork();
+            final int nattKeepaliveSec = (carrierconfig != null)
+                    ? carrierconfig.keepaliveDelaySec : AUTOMATIC_KEEPALIVE_DELAY_SECONDS;
             if (carrierconfig != null) {
-                Log.d(TAG, "Get customized keepalive(" + natKeepalive + ") on SIM("
+                Log.d(TAG, "Get customized keepalive (" + nattKeepaliveSec + "s) on SIM (mccmnc="
                         + carrierconfig.mccMnc + ")");
             }
-            return natKeepalive;
+            return nattKeepaliveSec;
         }
 
-        private CarrierConfigInfo getCarrierConfig() {
+        /**
+         * Returns the carrier config for the underlying network, or null if not a cell network.
+         */
+        @Nullable
+        private CarrierConfigInfo getCarrierConfigForUnderlyingNetwork() {
             final int subId = getCellSubIdForNetworkCapabilities(mUnderlyingNetworkCapabilities);
             if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
                 Log.d(TAG, "Underlying network is not a cellular network");

@@ -21,8 +21,6 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.StatusBarIconView
-import com.android.systemui.statusbar.StatusBarIconView.STATE_DOT
-import com.android.systemui.statusbar.StatusBarIconView.STATE_HIDDEN
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertFalse
 import junit.framework.Assert.assertTrue
@@ -51,7 +49,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
     fun calculateWidthFor_oneIcon_widthForOneIcon() {
         iconContainer.setActualPaddingStart(10f)
         iconContainer.setActualPaddingEnd(10f)
-        iconContainer.setIconSize(10)
+        iconContainer.setIconSize(10);
 
         assertEquals(/* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 1f),
                 /* actual= */ 30f)
@@ -61,7 +59,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
     fun calculateWidthFor_fourIcons_widthForFourIcons() {
         iconContainer.setActualPaddingStart(10f)
         iconContainer.setActualPaddingEnd(10f)
-        iconContainer.setIconSize(10)
+        iconContainer.setIconSize(10);
 
         assertEquals(/* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 4f),
                 /* actual= */ 60f)
@@ -71,7 +69,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
     fun calculateWidthFor_fiveIcons_widthForFourIcons() {
         iconContainer.setActualPaddingStart(10f)
         iconContainer.setActualPaddingEnd(10f)
-        iconContainer.setIconSize(10)
+        iconContainer.setIconSize(10);
         assertEquals(/* expected= */ iconContainer.calculateWidthFor(/* numIcons= */ 5f),
                 /* actual= */ 60f)
     }
@@ -80,7 +78,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
     fun calculateIconXTranslations_shortShelfOneIcon_atCorrectXWithoutOverflowDot() {
         iconContainer.setActualPaddingStart(10f)
         iconContainer.setActualPaddingEnd(10f)
-        iconContainer.setIconSize(10)
+        iconContainer.setIconSize(10);
 
         val icon = mockStatusBarIcon()
         iconContainer.addView(icon)
@@ -101,7 +99,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
     fun calculateIconXTranslations_shortShelfFourIcons_atCorrectXWithoutOverflowDot() {
         iconContainer.setActualPaddingStart(10f)
         iconContainer.setActualPaddingEnd(10f)
-        iconContainer.setIconSize(10)
+        iconContainer.setIconSize(10);
 
         val iconOne = mockStatusBarIcon()
         val iconTwo = mockStatusBarIcon()
@@ -130,7 +128,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
     fun calculateIconXTranslations_shortShelfFiveIcons_atCorrectXWithOverflowDot() {
         iconContainer.setActualPaddingStart(10f)
         iconContainer.setActualPaddingEnd(10f)
-        iconContainer.setIconSize(10)
+        iconContainer.setIconSize(10);
 
         val iconOne = mockStatusBarIcon()
         val iconTwo = mockStatusBarIcon()
@@ -156,55 +154,6 @@ class NotificationIconContainerTest : SysuiTestCase() {
     }
 
     @Test
-    fun calculateIconXTranslations_givenWidthEnoughForThreeIcons_atCorrectXWithoutOverflowDot() {
-        iconContainer.setActualPaddingStart(0f)
-        iconContainer.setActualPaddingEnd(0f)
-        iconContainer.setActualLayoutWidth(30)
-        iconContainer.setIconSize(10)
-
-        val iconOne = mockStatusBarIcon()
-        val iconTwo = mockStatusBarIcon()
-        val iconThree = mockStatusBarIcon()
-
-        iconContainer.addView(iconOne)
-        iconContainer.addView(iconTwo)
-        iconContainer.addView(iconThree)
-        assertEquals(3, iconContainer.childCount)
-
-        iconContainer.calculateIconXTranslations()
-        assertEquals(0f, iconContainer.getIconState(iconOne).xTranslation)
-        assertEquals(10f, iconContainer.getIconState(iconTwo).xTranslation)
-        assertEquals(20f, iconContainer.getIconState(iconThree).xTranslation)
-        assertFalse(iconContainer.areIconsOverflowing())
-    }
-
-    @Test
-    fun calculateIconXTranslations_givenWidthNotEnoughForFourIcons_atCorrectXWithOverflowDot() {
-        iconContainer.setActualPaddingStart(0f)
-        iconContainer.setActualPaddingEnd(0f)
-        iconContainer.setActualLayoutWidth(35)
-        iconContainer.setIconSize(10)
-
-        val iconOne = mockStatusBarIcon()
-        val iconTwo = mockStatusBarIcon()
-        val iconThree = mockStatusBarIcon()
-        val iconFour = mockStatusBarIcon()
-
-        iconContainer.addView(iconOne)
-        iconContainer.addView(iconTwo)
-        iconContainer.addView(iconThree)
-        iconContainer.addView(iconFour)
-        assertEquals(4, iconContainer.childCount)
-
-        iconContainer.calculateIconXTranslations()
-        assertEquals(0f, iconContainer.getIconState(iconOne).xTranslation)
-        assertEquals(10f, iconContainer.getIconState(iconTwo).xTranslation)
-        assertEquals(STATE_DOT, iconContainer.getIconState(iconThree).visibleState)
-        assertEquals(STATE_HIDDEN, iconContainer.getIconState(iconFour).visibleState)
-        assertTrue(iconContainer.areIconsOverflowing())
-    }
-
-    @Test
     fun shouldForceOverflow_appearingAboveSpeedBump_true() {
         val forceOverflow = iconContainer.shouldForceOverflow(
                 /* i= */ 1,
@@ -212,7 +161,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
                 /* iconAppearAmount= */ 1f,
                 /* maxVisibleIcons= */ 5
         )
-        assertTrue(forceOverflow)
+        assertTrue(forceOverflow);
     }
 
     @Test
@@ -223,7 +172,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
                 /* iconAppearAmount= */ 0f,
                 /* maxVisibleIcons= */ 5
         )
-        assertTrue(forceOverflow)
+        assertTrue(forceOverflow);
     }
 
     @Test
@@ -234,7 +183,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
                 /* iconAppearAmount= */ 0f,
                 /* maxVisibleIcons= */ 5
         )
-        assertFalse(forceOverflow)
+        assertFalse(forceOverflow);
     }
 
     @Test
@@ -254,17 +203,6 @@ class NotificationIconContainerTest : SysuiTestCase() {
         val isOverflowing = iconContainer.isOverflowing(
                 /* isLastChild= */ true,
                 /* translationX= */ 10f,
-                /* layoutEnd= */ 10f,
-                /* iconSize= */ 2f,
-        )
-        assertTrue(isOverflowing)
-    }
-
-    @Test
-    fun isOverflowing_lastChildXGreaterThanDotX_true() {
-        val isOverflowing = iconContainer.isOverflowing(
-                /* isLastChild= */ true,
-                /* translationX= */ 9f,
                 /* layoutEnd= */ 10f,
                 /* iconSize= */ 2f,
         )
@@ -315,7 +253,7 @@ class NotificationIconContainerTest : SysuiTestCase() {
         assertTrue(isOverflowing)
     }
 
-    private fun mockStatusBarIcon(): StatusBarIconView {
+    private fun mockStatusBarIcon() : StatusBarIconView {
         val iconView = mock(StatusBarIconView::class.java)
         whenever(iconView.width).thenReturn(10)
 

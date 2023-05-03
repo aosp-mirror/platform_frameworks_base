@@ -2884,6 +2884,7 @@ public class BubbleStackView extends FrameLayout
     /** Hide or show the manage menu for the currently expanded bubble. */
     @VisibleForTesting
     public void showManageMenu(boolean show) {
+        if ((mManageMenu.getVisibility() == VISIBLE) == show) return;
         mShowingManage = show;
 
         // This should not happen, since the manage menu is only visible when there's an expanded

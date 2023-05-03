@@ -1015,6 +1015,12 @@ public final class CachedAppOptimizer {
     private static native String getFreezerCheckPath();
 
     /**
+     * Check if task_profiles.json includes valid freezer profiles and actions
+     * @return false if there are invalid profiles or actions
+     */
+    private static native boolean isFreezerProfileValid();
+
+    /**
      * Determines whether the freezer is supported by this system
      */
     public static boolean isFreezerSupported() {
@@ -1031,16 +1037,19 @@ public final class CachedAppOptimizer {
                 // Also check freezer binder ioctl
                 Slog.d(TAG_AM, "Checking binder freezer ioctl");
                 getBinderFreezeInfo(Process.myPid());
-                supported = true;
+
+                // Check if task_profiles.json contains invalid profiles
+                Slog.d(TAG_AM, "Checking freezer profiles");
+                supported = isFreezerProfileValid();
             } else {
-                Slog.e(TAG_AM, "unexpected value in cgroup.freeze");
+                Slog.e(TAG_AM, "Unexpected value in cgroup.freeze");
             }
         } catch (java.io.FileNotFoundException e) {
-            Slog.w(TAG_AM, "cgroup.freeze not present");
+            Slog.w(TAG_AM, "File cgroup.freeze not present");
         } catch (RuntimeException e) {
-            Slog.w(TAG_AM, "unable to read freezer info");
+            Slog.w(TAG_AM, "Unable to read freezer info");
         } catch (Exception e) {
-            Slog.w(TAG_AM, "unable to read cgroup.freeze: " + e.toString());
+            Slog.w(TAG_AM, "Unable to read cgroup.freeze: " + e.toString());
         }
 
         if (fr != null) {

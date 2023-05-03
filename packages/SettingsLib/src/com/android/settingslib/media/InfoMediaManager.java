@@ -50,6 +50,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.DoNotInline;
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -634,6 +635,11 @@ public class InfoMediaManager extends MediaManager {
 
         @Override
         public void onSessionUpdated(RoutingSessionInfo sessionInfo) {
+            refreshDevices();
+        }
+
+        @Override
+        public void onSessionReleased(@NonNull RoutingSessionInfo session) {
             refreshDevices();
         }
 
