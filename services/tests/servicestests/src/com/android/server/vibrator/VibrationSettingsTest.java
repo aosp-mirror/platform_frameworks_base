@@ -16,6 +16,9 @@
 
 package com.android.server.vibrator;
 
+import static android.os.BatteryManager.BATTERY_PLUGGED_USB;
+import static android.os.BatteryManager.BATTERY_PLUGGED_WIRELESS;
+import static android.os.BatteryManager.EXTRA_PLUGGED;
 import static android.os.VibrationAttributes.USAGE_ACCESSIBILITY;
 import static android.os.VibrationAttributes.USAGE_ALARM;
 import static android.os.VibrationAttributes.USAGE_COMMUNICATION_REQUEST;
@@ -38,6 +41,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.spy;
@@ -47,6 +51,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -132,6 +137,7 @@ public class VibrationSettingsTest {
     private ContextWrapper mContextSpy;
     private VibrationSettings mVibrationSettings;
     private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
+    private BroadcastReceiver mRegisteredBatteryBroadcastReceiver;
     private VirtualDeviceManagerInternal.VirtualDisplayListener mRegisteredVirtualDisplayListener;
     private VirtualDeviceManagerInternal.AppsOnVirtualDeviceListener
             mRegisteredAppsOnVirtualDeviceListener;
@@ -163,10 +169,16 @@ public class VibrationSettingsTest {
         addServicesForTest();
 
         setDefaultIntensity(VIBRATION_INTENSITY_MEDIUM);
-        mVibrationSettings = new VibrationSettings(mContextSpy,
-                new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
+
+        setIgnoreVibrationsOnWirelessCharger(false);
+        createSystemReadyVibrationSettings();
 
         mockGoToSleep(/* goToSleepTime= */ 0, PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+    }
+
+    private void createSystemReadyVibrationSettings() {
+        mVibrationSettings = new VibrationSettings(mContextSpy,
+                new Handler(mTestLooper.getLooper()), mVibrationConfigMock);
 
         // Simulate System defaults.
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_ENABLED, 1);
@@ -174,6 +186,7 @@ public class VibrationSettingsTest {
         setUserSetting(Settings.System.VIBRATE_WHEN_RINGING, 1);
         setUserSetting(Settings.System.APPLY_RAMPING_RINGER, 0);
         setRingerMode(AudioManager.RINGER_MODE_NORMAL);
+
         mVibrationSettings.onSystemReady();
     }
 
@@ -301,6 +314,87 @@ public class VibrationSettingsTest {
     public void shouldIgnoreVibration_fromForeground_allowsAnyUsage() {
         mVibrationSettings.mUidObserver.onUidStateChanged(
                 UID, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+
+        for (int usage : ALL_USAGES) {
+            assertVibrationNotIgnoredForUsage(usage);
+        }
+    }
+
+    @Test
+    public void wirelessChargingVibrationsEnabled_doesNotRegisterBatteryReceiver_allowsAnyUsage() {
+        setBatteryReceiverRegistrationResult(getBatteryChangedIntent(BATTERY_PLUGGED_WIRELESS));
+        setIgnoreVibrationsOnWirelessCharger(false);
+        createSystemReadyVibrationSettings();
+
+        assertNull(mRegisteredBatteryBroadcastReceiver);
+        for (int usage : ALL_USAGES) {
+            assertVibrationNotIgnoredForUsage(usage);
+        }
+    }
+
+    @Test
+    public void shouldIgnoreVibration_noBatteryIntentWhenSystemReady_allowsAnyUsage() {
+        setBatteryReceiverRegistrationResult(null);
+        setIgnoreVibrationsOnWirelessCharger(true);
+        createSystemReadyVibrationSettings();
+
+        for (int usage : ALL_USAGES) {
+            assertVibrationNotIgnoredForUsage(usage);
+        }
+    }
+
+    @Test
+    public void shouldIgnoreVibration_onNonWirelessChargerWhenSystemReady_allowsAnyUsage() {
+        Intent nonWirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_USB);
+        setBatteryReceiverRegistrationResult(nonWirelessChargingIntent);
+        setIgnoreVibrationsOnWirelessCharger(true);
+        createSystemReadyVibrationSettings();
+
+        for (int usage : ALL_USAGES) {
+            assertVibrationNotIgnoredForUsage(usage);
+        }
+    }
+
+    @Test
+    public void shouldIgnoreVibration_onWirelessChargerWhenSystemReady_doesNotAllowFromAnyUsage() {
+        Intent wirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_WIRELESS);
+        setBatteryReceiverRegistrationResult(wirelessChargingIntent);
+        setIgnoreVibrationsOnWirelessCharger(true);
+        createSystemReadyVibrationSettings();
+
+        for (int usage : ALL_USAGES) {
+            assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_ON_WIRELESS_CHARGER);
+        }
+    }
+
+    @Test
+    public void shouldIgnoreVibration_receivesWirelessChargingIntent_doesNotAllowFromAnyUsage() {
+        Intent nonWirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_USB);
+        setBatteryReceiverRegistrationResult(nonWirelessChargingIntent);
+        setIgnoreVibrationsOnWirelessCharger(true);
+        createSystemReadyVibrationSettings();
+
+        Intent wirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_WIRELESS);
+        mRegisteredBatteryBroadcastReceiver.onReceive(mContextSpy, wirelessChargingIntent);
+
+        for (int usage : ALL_USAGES) {
+            assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_ON_WIRELESS_CHARGER);
+        }
+    }
+
+    @Test
+    public void shouldIgnoreVibration_receivesNonWirelessChargingIntent_allowsAnyUsage() {
+        Intent wirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_WIRELESS);
+        setBatteryReceiverRegistrationResult(wirelessChargingIntent);
+        setIgnoreVibrationsOnWirelessCharger(true);
+        createSystemReadyVibrationSettings();
+        // Check that initially, all usages are ignored due to the wireless charging.
+        for (int usage : ALL_USAGES) {
+            assertVibrationIgnoredForUsage(usage, Vibration.Status.IGNORED_ON_WIRELESS_CHARGER);
+        }
+
+        Intent nonWirelessChargingIntent = getBatteryChangedIntent(BATTERY_PLUGGED_USB);
+        mRegisteredBatteryBroadcastReceiver.onReceive(mContextSpy, nonWirelessChargingIntent);
 
         for (int usage : ALL_USAGES) {
             assertVibrationNotIgnoredForUsage(usage);
@@ -846,6 +940,10 @@ public class VibrationSettingsTest {
         when(mVibrationConfigMock.getDefaultVibrationIntensity(eq(usage))).thenReturn(intensity);
     }
 
+    private void setIgnoreVibrationsOnWirelessCharger(boolean ignore) {
+        when(mVibrationConfigMock.ignoreVibrationsOnWirelessCharger()).thenReturn(ignore);
+    }
+
     private void deleteUserSetting(String settingName) {
         Settings.System.putStringForUser(
                 mContextSpy.getContentResolver(), settingName, null, UserHandle.USER_CURRENT);
@@ -876,5 +974,19 @@ public class VibrationSettingsTest {
             @VibrationAttributes.Usage int usage) {
         VibrationAttributes attrs = VibrationAttributes.createForUsage(usage);
         return new Vibration.CallerInfo(attrs, uid, VIRTUAL_DISPLAY_ID, opPkg, null);
+    }
+
+    private void setBatteryReceiverRegistrationResult(Intent result) {
+        doAnswer(invocation -> {
+            mRegisteredBatteryBroadcastReceiver = invocation.getArgument(0);
+            return result;
+        }).when(mContextSpy).registerReceiver(any(BroadcastReceiver.class),
+                argThat(filter -> filter.matchAction(Intent.ACTION_BATTERY_CHANGED)), anyInt());
+    }
+
+    private Intent getBatteryChangedIntent(int extraPluggedValue) {
+        Intent batteryIntent = new Intent(Intent.ACTION_BATTERY_CHANGED);
+        batteryIntent.putExtra(EXTRA_PLUGGED, extraPluggedValue);
+        return batteryIntent;
     }
 }

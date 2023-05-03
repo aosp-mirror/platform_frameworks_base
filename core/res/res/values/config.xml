@@ -3871,6 +3871,10 @@
          non-zero amplitudes, to bring the vibrator amplitude down to zero using this timing. -->
     <integer name="config_vibrationWaveformRampDownDuration">0</integer>
 
+    <!-- Ignores vibrations when the device is on a wireless charger.
+         A vibrating device may move out of alignment with the charging pad. -->
+    <bool name="config_ignoreVibrationsOnWirelessCharger">false</bool>
+
     <!-- Number of retries Cell Data should attempt for a given error code before
          restarting the modem.
          Error codes not listed will not lead to modem restarts.
