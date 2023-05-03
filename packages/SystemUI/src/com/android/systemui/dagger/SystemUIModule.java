@@ -69,6 +69,7 @@ import com.android.systemui.qs.FgsManagerControllerImpl;
 import com.android.systemui.qs.QSFragmentStartableModule;
 import com.android.systemui.qs.footer.dagger.FooterActionsModule;
 import com.android.systemui.recents.Recents;
+import com.android.systemui.retail.dagger.RetailModeModule;
 import com.android.systemui.screenrecord.ScreenRecordModule;
 import com.android.systemui.screenshot.dagger.ScreenshotModule;
 import com.android.systemui.security.data.repository.SecurityRepositoryModule;
@@ -179,6 +180,7 @@ import javax.inject.Named;
             PrivacyModule.class,
             QRCodeScannerModule.class,
             QSFragmentStartableModule.class,
+            RetailModeModule.class,
             ScreenshotModule.class,
             SensorModule.class,
             SecurityRepositoryModule.class,
