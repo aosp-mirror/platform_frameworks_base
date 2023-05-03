@@ -400,7 +400,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private static final Bundle USER_PRESENT_INTENT_OPTIONS =
             BroadcastOptions.makeBasic()
-                    .setDeferUntilActive(true)
+                    .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
                     .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
                     .toBundle();
 
