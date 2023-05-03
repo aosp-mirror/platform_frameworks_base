@@ -68,7 +68,6 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
-@Ignore("b/279650412")
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
@@ -281,6 +280,7 @@ class AuthContainerViewTest : SysuiTestCase() {
         assertThat(authContainer!!.parent).isNull()
     }
 
+    @Ignore("b/279650412")
     @Test
     fun testActionUseDeviceCredential_sendsOnDeviceCredentialPressed() {
         val container = initializeFingerprintContainer(
