@@ -156,6 +156,7 @@ void HintSessionWrapper::updateTargetWorkDuration(long targetWorkDurationNanos) 
 
 void HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
     if (!init()) return;
+    mResetsSinceLastReport = 0;
     if (actualDurationNanos > kSanityCheckLowerBound &&
         actualDurationNanos < kSanityCheckUpperBound) {
         gAPH_reportActualWorkDurationFn(mHintSession, actualDurationNanos);
@@ -163,9 +164,12 @@ void HintSessionWrapper::reportActualWorkDuration(long actualDurationNanos) {
 }
 
 void HintSessionWrapper::sendLoadResetHint() {
+    static constexpr int kMaxResetsSinceLastReport = 2;
     if (!init()) return;
     nsecs_t now = systemTime();
-    if (now - mLastFrameNotification > kResetHintTimeout) {
+    if (now - mLastFrameNotification > kResetHintTimeout &&
+        mResetsSinceLastReport <= kMaxResetsSinceLastReport) {
+        ++mResetsSinceLastReport;
         gAPH_sendHintFn(mHintSession, static_cast<int>(SessionHint::CPU_LOAD_RESET));
     }
     mLastFrameNotification = now;
