@@ -20,6 +20,7 @@ import static com.android.server.companion.transport.Transport.MESSAGE_REQUEST_C
 
 import android.app.admin.DevicePolicyManager;
 import android.companion.AssociationInfo;
+import android.companion.CompanionDeviceManager;
 import android.companion.ContextSyncMessage;
 import android.companion.IOnMessageReceivedListener;
 import android.companion.IOnTransportsChangedListener;
@@ -44,8 +45,10 @@ import com.android.server.companion.CompanionDeviceConfig;
 import com.android.server.companion.transport.CompanionTransportManager;
 
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,6 +57,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Monitors connections and sending / receiving of synced data.
@@ -61,6 +65,13 @@ import java.util.UUID;
 public class CrossDeviceSyncController {
 
     private static final String TAG = "CrossDeviceSyncController";
+
+    public static final String EXTRA_CALL_ID =
+            "com.android.companion.datatransfer.contextsync.extra.CALL_ID";
+    static final String EXTRA_FACILITATOR_ICON =
+            "com.android.companion.datatransfer.contextsync.extra.FACILITATOR_ICON";
+    static final String EXTRA_IS_REMOTE_ORIGIN =
+            "com.android.companion.datatransfer.contextsync.extra.IS_REMOTE_ORIGIN";
 
     static final String EXTRA_ASSOCIATION_ID =
             "com.android.server.companion.datatransfer.contextsync.extra.ASSOCIATION_ID";
@@ -78,11 +89,13 @@ public class CrossDeviceSyncController {
     private final Context mContext;
     private final CompanionTransportManager mCompanionTransportManager;
     private final PhoneAccountManager mPhoneAccountManager;
+    private final CallManager mCallManager;
     private final List<AssociationInfo> mConnectedAssociations = new ArrayList<>();
     private final Set<Integer> mBlocklist = new HashSet<>();
     private final List<CallMetadataSyncData.CallFacilitator> mCallFacilitators = new ArrayList<>();
 
-    private CrossDeviceSyncControllerCallback mCrossDeviceSyncControllerCallback;
+    private WeakReference<CrossDeviceSyncControllerCallback> mInCallServiceCallbackRef;
+    private WeakReference<CrossDeviceSyncControllerCallback> mConnectionServiceCallbackRef;
 
     public CrossDeviceSyncController(Context context,
             CompanionTransportManager companionTransportManager) {
@@ -104,25 +117,73 @@ public class CrossDeviceSyncController {
                         mConnectedAssociations);
                 mConnectedAssociations.clear();
                 mConnectedAssociations.addAll(newAssociations);
-                if (mCrossDeviceSyncControllerCallback == null) {
-                    Slog.w(TAG, "No callback to report transports changed");
-                    return;
-                }
                 for (AssociationInfo associationInfo : newAssociations) {
-                    if (!existingAssociations.contains(associationInfo)
-                            && !isAssociationBlocked(associationInfo.getId())) {
-                        mCrossDeviceSyncControllerCallback.updateNumberOfActiveSyncAssociations(
-                                associationInfo.getUserId(), /* added= */ true);
-                        mCrossDeviceSyncControllerCallback.requestCrossDeviceSync(associationInfo);
+                    if (!existingAssociations.contains(associationInfo)) {
+                        // New association.
+                        if (!isAssociationBlocked(associationInfo)) {
+                            final CrossDeviceSyncControllerCallback callback =
+                                    mInCallServiceCallbackRef != null
+                                            ? mInCallServiceCallbackRef.get() : null;
+                            if (callback != null) {
+                                callback.updateNumberOfActiveSyncAssociations(
+                                        associationInfo.getUserId(), /* added= */ true);
+                                callback.requestCrossDeviceSync(associationInfo);
+                            } else {
+                                Slog.w(TAG, "No callback to report new transport");
+                            }
+                        } else {
+                            mBlocklist.add(associationInfo.getId());
+                            Slog.i(TAG, "New association was blocked from context syncing");
+                        }
                     }
                 }
                 for (AssociationInfo associationInfo : existingAssociations) {
                     if (!newAssociations.contains(associationInfo)) {
-                        if (isAssociationBlocked(associationInfo.getId())) {
-                            mBlocklist.remove(associationInfo.getId());
-                        } else {
-                            mCrossDeviceSyncControllerCallback.updateNumberOfActiveSyncAssociations(
-                                    associationInfo.getUserId(), /* added= */ false);
+                        // Removed association!
+                        mBlocklist.remove(associationInfo.getId());
+                        if (!isAssociationBlockedLocal(associationInfo.getId())) {
+                            final CrossDeviceSyncControllerCallback callback =
+                                    mInCallServiceCallbackRef != null
+                                            ? mInCallServiceCallbackRef.get() : null;
+                            if (callback != null) {
+                                callback.updateNumberOfActiveSyncAssociations(
+                                        associationInfo.getUserId(), /* added= */ false);
+                            } else {
+                                Slog.w(TAG, "No callback to report removed transport");
+                            }
+                        }
+                    } else {
+                        // Stable association!
+                        final boolean systemBlocked = isAssociationBlocked(associationInfo);
+                        if (isAssociationBlockedLocal(associationInfo.getId()) != systemBlocked) {
+                            // Block state has changed.
+                            final CrossDeviceSyncControllerCallback callback =
+                                    mInCallServiceCallbackRef != null
+                                            ? mInCallServiceCallbackRef.get() : null;
+                            if (!systemBlocked) {
+                                Slog.i(TAG, "Unblocking existing association for context sync");
+                                mBlocklist.remove(associationInfo.getId());
+                                if (callback != null) {
+                                    callback.updateNumberOfActiveSyncAssociations(
+                                            associationInfo.getUserId(), /* added= */ true);
+                                    callback.requestCrossDeviceSync(associationInfo);
+                                } else {
+                                    Slog.w(TAG, "No callback to report changed transport");
+                                }
+                            } else {
+                                Slog.i(TAG, "Blocking existing association for context sync");
+                                mBlocklist.add(associationInfo.getId());
+                                if (callback != null) {
+                                    callback.updateNumberOfActiveSyncAssociations(
+                                            associationInfo.getUserId(), /* added= */ false);
+                                } else {
+                                    Slog.w(TAG, "No callback to report changed transport");
+                                }
+                                // Send empty message to device to clear its data (otherwise it
+                                // will get stale)
+                                syncMessageToDevice(associationInfo.getId(),
+                                        createEmptyMessage());
+                            }
                         }
                     }
                 }
@@ -132,18 +193,48 @@ public class CrossDeviceSyncController {
                 new IOnMessageReceivedListener.Stub() {
                     @Override
                     public void onMessageReceived(int associationId, byte[] data) {
+                        if (isAssociationBlockedLocal(associationId)) {
+                            return;
+                        }
                         final CallMetadataSyncData processedData = processTelecomDataFromSync(data);
                         mPhoneAccountManager.updateFacilitators(associationId, processedData);
-                        processCallCreateRequests(associationId, processedData);
-                        if (mCrossDeviceSyncControllerCallback == null) {
+                        mCallManager.updateCalls(associationId, processedData);
+                        processCallCreateRequests(processedData);
+                        if (mInCallServiceCallbackRef == null
+                                && mConnectionServiceCallbackRef == null) {
                             Slog.w(TAG, "No callback to process context sync message");
                             return;
                         }
-                        mCrossDeviceSyncControllerCallback.processContextSyncMessage(associationId,
-                                processedData);
+                        final CrossDeviceSyncControllerCallback inCallServiceCallback =
+                                mInCallServiceCallbackRef != null ? mInCallServiceCallbackRef.get()
+                                        : null;
+                        if (inCallServiceCallback != null) {
+                            inCallServiceCallback.processContextSyncMessage(associationId,
+                                    processedData);
+                        } else {
+                            // This is dead; get rid of it lazily
+                            mInCallServiceCallbackRef = null;
+                        }
+
+                        final CrossDeviceSyncControllerCallback connectionServiceCallback =
+                                mConnectionServiceCallbackRef != null
+                                        ? mConnectionServiceCallbackRef.get() : null;
+                        if (connectionServiceCallback != null) {
+                            connectionServiceCallback.processContextSyncMessage(associationId,
+                                    processedData);
+                        } else {
+                            // This is dead; get rid of it lazily
+                            mConnectionServiceCallbackRef = null;
+                        }
                     }
                 });
         mPhoneAccountManager = new PhoneAccountManager(mContext);
+        mCallManager = new CallManager(mContext, mPhoneAccountManager);
+    }
+
+    private static boolean isAssociationBlocked(AssociationInfo info) {
+        return (info.getSystemDataSyncFlags() & CompanionDeviceManager.FLAG_CALL_METADATA)
+                != CompanionDeviceManager.FLAG_CALL_METADATA;
     }
 
     /** Invoke set-up tasks that happen when boot is completed. */
@@ -155,7 +246,7 @@ public class CrossDeviceSyncController {
         mPhoneAccountManager.onBootCompleted();
 
         final TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
-        if (telecomManager.getCallCapablePhoneAccounts().size() != 0) {
+        if (telecomManager != null && telecomManager.getCallCapablePhoneAccounts().size() != 0) {
             final PhoneAccountHandle defaultOutgoingTelAccountHandle =
                     telecomManager.getDefaultOutgoingPhoneAccount(PhoneAccount.SCHEME_TEL);
             if (defaultOutgoingTelAccountHandle != null) {
@@ -171,8 +262,7 @@ public class CrossDeviceSyncController {
         }
     }
 
-    private void processCallCreateRequests(int associationId,
-            CallMetadataSyncData callMetadataSyncData) {
+    private void processCallCreateRequests(CallMetadataSyncData callMetadataSyncData) {
         final Iterator<CallMetadataSyncData.CallCreateRequest> iterator =
                 callMetadataSyncData.getCallCreateRequests().iterator();
         while (iterator.hasNext()) {
@@ -184,7 +274,7 @@ public class CrossDeviceSyncController {
                     final Uri uri = Uri.fromParts(PhoneAccount.SCHEME_TEL,
                             request.getAddress().replaceAll("\\D+", ""), /* fragment= */ null);
                     final Bundle extras = new Bundle();
-                    extras.putString(CrossDeviceCall.EXTRA_CALL_ID, request.getId());
+                    extras.putString(EXTRA_CALL_ID, request.getId());
                     final Bundle outerExtras = new Bundle();
                     outerExtras.putParcelable(TelecomManager.EXTRA_OUTGOING_CALL_EXTRAS, extras);
                     mContext.getSystemService(TelecomManager.class).placeCall(uri, outerExtras);
@@ -196,39 +286,33 @@ public class CrossDeviceSyncController {
         }
     }
 
-    private boolean isAssociationBlocked(int associationId) {
+    /**
+     * This keeps track of "previous" state to calculate deltas. Use {@link #isAssociationBlocked}
+     * for all other use cases.
+     */
+    private boolean isAssociationBlockedLocal(int associationId) {
         return mBlocklist.contains(associationId);
     }
 
     /** Registers the call metadata callback. */
-    public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback) {
-        mCrossDeviceSyncControllerCallback = callback;
-        for (AssociationInfo associationInfo : mConnectedAssociations) {
-            if (!isAssociationBlocked(associationInfo.getId())) {
-                mCrossDeviceSyncControllerCallback.updateNumberOfActiveSyncAssociations(
-                        associationInfo.getUserId(), /* added= */ true);
-                mCrossDeviceSyncControllerCallback.requestCrossDeviceSync(associationInfo);
+    public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback,
+            @CrossDeviceSyncControllerCallback.Type int type) {
+        if (type == CrossDeviceSyncControllerCallback.TYPE_IN_CALL_SERVICE) {
+            mInCallServiceCallbackRef = new WeakReference<>(callback);
+            for (AssociationInfo associationInfo : mConnectedAssociations) {
+                if (!isAssociationBlocked(associationInfo)) {
+                    mBlocklist.remove(associationInfo.getId());
+                    callback.updateNumberOfActiveSyncAssociations(associationInfo.getUserId(),
+                            /* added= */ true);
+                    callback.requestCrossDeviceSync(associationInfo);
+                } else {
+                    mBlocklist.add(associationInfo.getId());
+                }
             }
-        }
-    }
-
-    /** Allow specific associated devices to enable / disable syncing. */
-    public void setSyncEnabled(AssociationInfo associationInfo, boolean enabled) {
-        if (enabled) {
-            if (isAssociationBlocked(associationInfo.getId())) {
-                mBlocklist.remove(associationInfo.getId());
-                mCrossDeviceSyncControllerCallback.updateNumberOfActiveSyncAssociations(
-                        associationInfo.getUserId(), /* added= */ true);
-                mCrossDeviceSyncControllerCallback.requestCrossDeviceSync(associationInfo);
-            }
+        } else if (type == CrossDeviceSyncControllerCallback.TYPE_CONNECTION_SERVICE) {
+            mConnectionServiceCallbackRef = new WeakReference<>(callback);
         } else {
-            if (!isAssociationBlocked(associationInfo.getId())) {
-                mBlocklist.add(associationInfo.getId());
-                mCrossDeviceSyncControllerCallback.updateNumberOfActiveSyncAssociations(
-                        associationInfo.getUserId(), /* added= */ false);
-                // Send empty message to device to clear its data (otherwise it will get stale)
-                syncMessageToDevice(associationInfo.getId(), createEmptyMessage());
-            }
+            Slog.e(TAG, "Cannot register callback of unknown type: " + type);
         }
     }
 
@@ -246,8 +330,7 @@ public class CrossDeviceSyncController {
     public void syncToAllDevicesForUserId(int userId, Collection<CrossDeviceCall> calls) {
         final Set<Integer> associationIds = new HashSet<>();
         for (AssociationInfo associationInfo : mConnectedAssociations) {
-            if (associationInfo.getUserId() == userId && !isAssociationBlocked(
-                    associationInfo.getId())) {
+            if (associationInfo.getUserId() == userId && !isAssociationBlocked(associationInfo)) {
                 associationIds.add(associationInfo.getId());
             }
         }
@@ -269,7 +352,7 @@ public class CrossDeviceSyncController {
      */
     public void syncToSingleDevice(AssociationInfo associationInfo,
             Collection<CrossDeviceCall> calls) {
-        if (isAssociationBlocked(associationInfo.getId())) {
+        if (isAssociationBlocked(associationInfo)) {
             Slog.e(TAG, "Cannot sync to requested device; connection is blocked");
             return;
         }
@@ -286,7 +369,7 @@ public class CrossDeviceSyncController {
      * @param message         The message to sync.
      */
     public void syncMessageToDevice(int associationId, byte[] message) {
-        if (isAssociationBlocked(associationId)) {
+        if (isAssociationBlockedLocal(associationId)) {
             Slog.e(TAG, "Cannot sync to requested device; connection is blocked");
             return;
         }
@@ -491,6 +574,10 @@ public class CrossDeviceSyncController {
         pos.write(ContextSyncMessage.VERSION, CURRENT_VERSION);
         final long telecomToken = pos.start(ContextSyncMessage.TELECOM);
         for (CrossDeviceCall call : calls) {
+            if (call.isCallPlacedByContextSync()) {
+                // Do not sync any calls which our "ours" as that would be duplicative.
+                continue;
+            }
             final long callsToken = pos.start(Telecom.CALLS);
             pos.write(Telecom.Call.ID, call.getId());
             final long originToken = pos.start(Telecom.Call.ORIGIN);
@@ -557,6 +644,50 @@ public class CrossDeviceSyncController {
         final ProtoOutputStream pos = new ProtoOutputStream();
         pos.write(ContextSyncMessage.VERSION, CURRENT_VERSION);
         return pos.getBytes();
+    }
+
+    /** Create a facilitator-only message, used before any calls are available as a call intake. */
+    private byte[] createFacilitatorMessage() {
+        return createCallUpdateMessage(Collections.emptyList(), -1);
+    }
+
+    @VisibleForTesting
+    static class CallManager {
+
+        @VisibleForTesting final Map<Integer, Set<String>> mCallIds = new HashMap<>();
+        private final TelecomManager mTelecomManager;
+        private final PhoneAccountManager mPhoneAccountManager;
+
+        CallManager(Context context, PhoneAccountManager phoneAccountManager) {
+            mTelecomManager = context.getSystemService(TelecomManager.class);
+            mPhoneAccountManager = phoneAccountManager;
+        }
+
+        /** Add any new calls to Telecom. The ConnectionService will handle everything else. */
+        void updateCalls(int associationId, CallMetadataSyncData data) {
+            final Set<String> oldCallIds = mCallIds.getOrDefault(associationId, new HashSet<>());
+            final Set<String> newCallIds = data.getCalls().stream().map(
+                    CallMetadataSyncData.Call::getId).collect(Collectors.toSet());
+            if (oldCallIds.equals(newCallIds)) {
+                return;
+            }
+
+            for (CallMetadataSyncData.Call currentCall : data.getCalls()) {
+                if (!oldCallIds.contains(currentCall.getId())
+                        && currentCall.getFacilitator() != null) {
+                    final Bundle extras = new Bundle();
+                    extras.putInt(EXTRA_ASSOCIATION_ID, associationId);
+                    extras.putBoolean(EXTRA_IS_REMOTE_ORIGIN, true);
+                    extras.putParcelable(EXTRA_CALL, currentCall);
+                    extras.putString(EXTRA_CALL_ID, currentCall.getId());
+                    extras.putByteArray(EXTRA_FACILITATOR_ICON, currentCall.getAppIcon());
+                    final PhoneAccountHandle handle = mPhoneAccountManager.getPhoneAccountHandle(
+                            associationId, currentCall.getFacilitator().getIdentifier());
+                    mTelecomManager.addNewIncomingCall(handle, extras);
+                }
+            }
+            mCallIds.put(associationId, newCallIds);
+        }
     }
 
     static class PhoneAccountManager {

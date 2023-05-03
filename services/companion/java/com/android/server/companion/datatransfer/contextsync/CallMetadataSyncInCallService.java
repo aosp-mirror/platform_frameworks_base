@@ -79,16 +79,15 @@ public class CallMetadataSyncInCallService extends InCallService {
                         int callControlAction) {
                     final CrossDeviceCall crossDeviceCall = getCallForId(crossDeviceCallId,
                             mCurrentCalls.values());
+                    if (crossDeviceCall == null) {
+                        return;
+                    }
                     switch (callControlAction) {
                         case android.companion.Telecom.ACCEPT:
-                            if (crossDeviceCall != null) {
-                                crossDeviceCall.doAccept();
-                            }
+                            crossDeviceCall.doAccept();
                             break;
                         case android.companion.Telecom.REJECT:
-                            if (crossDeviceCall != null) {
-                                crossDeviceCall.doReject();
-                            }
+                            crossDeviceCall.doReject();
                             break;
                         case android.companion.Telecom.SILENCE:
                             doSilence();
@@ -100,19 +99,13 @@ public class CallMetadataSyncInCallService extends InCallService {
                             doUnmute();
                             break;
                         case android.companion.Telecom.END:
-                            if (crossDeviceCall != null) {
-                                crossDeviceCall.doEnd();
-                            }
+                            crossDeviceCall.doEnd();
                             break;
                         case android.companion.Telecom.PUT_ON_HOLD:
-                            if (crossDeviceCall != null) {
-                                crossDeviceCall.doPutOnHold();
-                            }
+                            crossDeviceCall.doPutOnHold();
                             break;
                         case android.companion.Telecom.TAKE_OFF_HOLD:
-                            if (crossDeviceCall != null) {
-                                crossDeviceCall.doTakeOffHold();
-                            }
+                            crossDeviceCall.doTakeOffHold();
                             break;
                         default:
                     }
@@ -148,7 +141,8 @@ public class CallMetadataSyncInCallService extends InCallService {
         super.onCreate();
         if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
             mCdmsi = LocalServices.getService(CompanionDeviceManagerServiceInternal.class);
-            mCdmsi.registerCallMetadataSyncCallback(mCrossDeviceSyncControllerCallback);
+            mCdmsi.registerCallMetadataSyncCallback(mCrossDeviceSyncControllerCallback,
+                    CrossDeviceSyncControllerCallback.TYPE_IN_CALL_SERVICE);
         }
     }
 
@@ -156,7 +150,7 @@ public class CallMetadataSyncInCallService extends InCallService {
         if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)
                 && mNumberOfActiveSyncAssociations > 0) {
             mCurrentCalls.putAll(getCalls().stream().collect(Collectors.toMap(call -> call,
-                    call -> new CrossDeviceCall(getPackageManager(), call, getCallAudioState()))));
+                    call -> new CrossDeviceCall(this, call, getCallAudioState()))));
             mCurrentCalls.keySet().forEach(call -> call.registerCallback(mTelecomCallback,
                     getMainThreadHandler()));
             sync(getUserId());
@@ -182,7 +176,7 @@ public class CallMetadataSyncInCallService extends InCallService {
         if (CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)
                 && mNumberOfActiveSyncAssociations > 0) {
             mCurrentCalls.put(call,
-                    new CrossDeviceCall(getPackageManager(), call, getCallAudioState()));
+                    new CrossDeviceCall(this, call, getCallAudioState()));
             call.registerCallback(mTelecomCallback);
             sync(getUserId());
         }

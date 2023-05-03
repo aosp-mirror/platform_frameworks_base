@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -210,5 +211,63 @@ public class CrossDeviceSyncControllerTest {
         phoneAccountManager.updateFacilitators(0, callMetadataSyncData2);
         verify(mMockTelecomManager, times(1)).registerPhoneAccount(any());
         verify(mMockTelecomManager, times(1)).unregisterPhoneAccount(any());
+    }
+
+    @Test
+    public void updateCalls_newCall() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        call.setFacilitator(new CallMetadataSyncData.CallFacilitator("name", "com.android.test"));
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, times(1)).addNewIncomingCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_newCall_noFacilitator() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, times(0)).addNewIncomingCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_existingCall() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.mCallIds.put(/* associationId= */ 0, Set.of(call.getId()));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+    }
+
+    @Test
+    public void updateCalls_removedCall() {
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId("123abc");
+        final CallMetadataSyncData callMetadataSyncData = new CallMetadataSyncData();
+        callMetadataSyncData.addCall(call);
+        final CrossDeviceSyncController.CallManager callManager =
+                new CrossDeviceSyncController.CallManager(mMockContext,
+                        new CrossDeviceSyncController.PhoneAccountManager(mMockContext));
+        callManager.mCallIds.put(/* associationId= */ 0, Set.of(call.getId(), "fakeCallId"));
+        callManager.updateCalls(/* associationId= */ 0, callMetadataSyncData);
+        verify(mMockTelecomManager, never()).addNewIncomingCall(any(), any());
+        assertWithMessage("Hasn't removed the id of the removed call")
+                .that(callManager.mCallIds)
+                .containsExactly(/* associationId= */ 0, Set.of(call.getId()));
     }
 }
