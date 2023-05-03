@@ -1908,18 +1908,21 @@ public class CameraDeviceImpl extends CameraDevice
                 Log.v(TAG, String.format("got error frame %d", frameNumber));
             }
 
-            // Update FrameNumberTracker for every frame during HFR mode.
-            if (mBatchOutputMap.containsKey(requestId)) {
-                for (int i = 0; i < mBatchOutputMap.get(requestId); i++) {
-                    mFrameNumberTracker.updateTracker(frameNumber - (subsequenceId - i),
+            // Do not update frame number tracker for physical camera result error.
+            if (errorPhysicalCameraId == null) {
+                // Update FrameNumberTracker for every frame during HFR mode.
+                if (mBatchOutputMap.containsKey(requestId)) {
+                    for (int i = 0; i < mBatchOutputMap.get(requestId); i++) {
+                        mFrameNumberTracker.updateTracker(frameNumber - (subsequenceId - i),
+                                /*error*/true, request.getRequestType());
+                    }
+                } else {
+                    mFrameNumberTracker.updateTracker(frameNumber,
                             /*error*/true, request.getRequestType());
                 }
-            } else {
-                mFrameNumberTracker.updateTracker(frameNumber,
-                        /*error*/true, request.getRequestType());
-            }
 
-            checkAndFireSequenceComplete();
+                checkAndFireSequenceComplete();
+            }
 
             // Dispatch the failure callback
             final long ident = Binder.clearCallingIdentity();
