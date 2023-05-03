@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<com.android.systemui.biometrics.UdfpsKeyguardView
+<com.android.systemui.biometrics.UdfpsKeyguardViewLegacy
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/udfps_animation_view"
@@ -23,4 +23,4 @@
 
     <!-- Add fingerprint views here. See udfps_keyguard_view_internal.xml. -->
 
-</com.android.systemui.biometrics.UdfpsKeyguardView>
+</com.android.systemui.biometrics.UdfpsKeyguardViewLegacy>
