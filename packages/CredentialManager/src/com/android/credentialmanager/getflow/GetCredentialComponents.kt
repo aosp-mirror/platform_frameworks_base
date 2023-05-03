@@ -216,10 +216,12 @@ fun PrimarySelectionCard(
                 HeadlineText(
                     text = stringResource(
                         if (hasSingleEntry) {
-                            if (sortedUserNameToCredentialEntryList.firstOrNull()
-                                    ?.sortedCredentialEntryList?.first()?.credentialType
-                                == CredentialType.PASSKEY
-                            ) R.string.get_dialog_title_use_passkey_for
+                            val singleEntryType = sortedUserNameToCredentialEntryList.firstOrNull()
+                                ?.sortedCredentialEntryList?.first()?.credentialType
+                            if (singleEntryType == CredentialType.PASSKEY)
+                                R.string.get_dialog_title_use_passkey_for
+                            else if (singleEntryType == CredentialType.PASSWORD)
+                                R.string.get_dialog_title_use_password_for
                             else R.string.get_dialog_title_use_sign_in_for
                         } else R.string.get_dialog_title_choose_sign_in_for,
                         requestDisplayInfo.appName
