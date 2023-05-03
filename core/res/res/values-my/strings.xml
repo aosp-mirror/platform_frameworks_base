@@ -250,7 +250,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာပြင် မှတ်တမ်း"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"စက်ရှင် ပြီးဆုံးပြီ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"ချွတ်ယွင်းမှတ်တမ်း"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"ချွတ်ယွင်းချက်အစီရင်ခံစာ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"လက်ငင်းတုံ့ပြန်နိုင်သည့် အစီရင်ခံချက်"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"အခြေအနေတော်တော်များများတွင် ၎င်းကိုအသုံးပြုပါ။ ၎င်းသည် အစီရင်ခံစာကို မှတ်သားခြင်း၊ ပြဿနာအကြောင်း နောက်ထပ်အသေးစိတ်များကို ထည့်သွင်းခြင်းနှင့် မျက်နှာပြင်ပုံဖမ်းယူခြင်းတို့ကို ပြုလုပ်ခွင့်ပေးပါသည်။ ပေးပို့ရန် အလွန်ကြာပြီး အသုံးပြုခြင်းနည်းပါးသည့်အပိုင်းကို ၎င်းက ချန်ခဲ့နိုင်ပါသည်။"</string>
@@ -682,7 +682,7 @@
     <string name="face_acquired_too_close" msgid="4453646176196302462">"ဖုန်းကို အဝေးသို့ခွာပါ"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"ဖုန်းကို အနားသို့ပိုတိုးပါ"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"ဖုန်းကို ပိုမြှင့်လိုက်ပါ"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"ဖုန်းကို အောက်ပိုနှိမ့်ပါ"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"ဖုန်းကို ပိုနှိမ့်လိုက်ပါ"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ဖုန်းကို သင့်ဘယ်ဘက်သို့ ရွှေ့ပါ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"ဖုန်းကို သင့်ညာဘက်သို့ ရွှေ့ပါ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"သင့်စက်ပစ္စည်းကို တည့်တည့်ကြည့်ပါ။"</string>
@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"သင့်မျက်နှာနမူနာ ပြုလုပ်၍မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"အရောင်ရင့်သောမျက်မှန် တွေ့သည်။ သင့်မျက်နှာကို အပြည့်အဝ မြင်ရရန်လိုအပ်သည်။"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"မျက်နှာဖုံး တွေ့သည်။ သင့်မျက်နှာကို အပြည့်အဝ မြင်ရရန်လိုအပ်သည်။"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"မျက်နှာ ဖုံးနေသည်။ သင့်မျက်နှာအပြည့် မြင်ရရန်လိုသည်။"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"မျက်နှာကို အတည်ပြု၍ မရပါ။ ဟာ့ဒ်ဝဲ မရနိုင်ပါ။"</string>
@@ -972,7 +972,7 @@
     <string name="lockscreen_password_wrong" msgid="8605355913868947490">"ထပ် စမ်းပါ"</string>
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ဝန်ဆောင်မှုနှင့် ဒေတာအားလုံးအတွက် လော့ခ်ဖွင့်ပါ"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"မျက်မှာပြ လော့ခ်ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
-    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"ဆင်းမ်မရှိပါ"</string>
+    <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"ဆင်းမ်ကတ် မရှိပါ"</string>
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"တက်ဘလက်တွင် ဆင်းမ်မရှိပါ။"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"သင့် Android TV စက်တွင် ဆင်းမ်မရှိပါ။"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"ဖုန်းတွင် ဆင်းမ်မရှိပါ။"</string>
@@ -1369,7 +1369,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ချိတ်ဆက်ထားသည့် စက်ပစ္စည်းကို အားသွင်းနေသည်။ နောက်ထပ်ရွေးချယ်စရာများအတွက် တို့ပါ။"</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"အန်နာလော့ အသံကိရိယာကို တွေ့ထားပါသည်"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"တပ်ဆင်ထားသော ကိရိယာကို ဤဖုန်းနှင့် တွဲသုံး၍မရပါ။ ပိုမိုလေ့လာရန် တို့ပါ။"</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB အမှားရှာပြင်စနစ် ချိတ်ဆက်ထားသည်"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB အမှားရှာပြင်ခြင်း ချိတ်ဆက်ထားသည်"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB အမှားရှာပြင်ခြင်းကို ပိတ်ရန် တို့ပါ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ဖြင့် အမှားရှာပြင်ခြင်းကို ပိတ်ရန် ရွေးပါ။"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ကြိုးမဲ့ အမှားရှာပြင်ခြင်းကို ချိတ်ဆက်ပြီးပြီ"</string>

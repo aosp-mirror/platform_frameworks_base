@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android அமைப்பு"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"தனிப்பட்ட சுயவிவரத்திற்கு மாற்றவும்"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"பணிச் சுயவிவரத்திற்கு மாற்றவும்"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"தனிப்பட்ட கணக்கிற்கு (<xliff:g id="APP_NAME">%1$s</xliff:g>) மாறு"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"பணிக் கணக்கிற்கு (<xliff:g id="APP_NAME">%1$s</xliff:g>) மாறு"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"தொடர்புகள்"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"தொடர்புகளை அணுக வேண்டும்"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"இருப்பிடம்"</string>

@@ -253,9 +253,9 @@
     <string name="bugreport_title" msgid="8549990811777373050">"バグレポート"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"現在のデバイスの状態に関する情報が収集され、その内容がメールで送信されます。バグレポートが開始してから送信可能な状態となるまでには多少の時間がかかりますのでご了承ください。"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"対話型レポート"</string>
-    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"ほとんどの場合はこのオプションを使用します。レポートの進行状況を追跡し、問題についての詳細情報の確認やスクリーンショットの作成が可能です。レポート作成に時間がかかる、あまり使用されない項目は省略されることがあります。"</string>
+    <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"ほとんどの場合はこのオプションを使用します。レポートの進行状況を追跡し、問題についての詳細情報の入力やスクリーンショットの作成が可能です。レポート作成に時間がかかる、あまり使用されない項目は省略されることがあります。"</string>
     <string name="bugreport_option_full_title" msgid="7681035745950045690">"完全レポート"</string>
-    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"デバイスの反応がないとき、または動作が遅すぎるときにシステムへの影響を最小限に抑えたい場合は、このオプションを使用します。また、すべてのレポート項目を表示したい場合もこのオプションを使用します。詳細情報は表示されず、追加のスクリーンショットは作成されません。"</string>
+    <string name="bugreport_option_full_summary" msgid="1975130009258435885">"デバイスの反応がないときや、動作が遅すぎるときにシステムへの影響を最小限に抑えたい場合、またすべてのレポート項目を表示したい場合にこのオプションを使用します。詳細情報の入力はできず、追加のスクリーンショットを撮ることもできません。"</string>
     <string name="bugreport_countdown" msgid="6418620521782120755">"{count,plural, =1{# 秒後にバグレポート用のスクリーンショットを撮影します。}other{# 秒後にバグレポート用のスクリーンショットを撮影します。}}"</string>
     <string name="bugreport_screenshot_success_toast" msgid="7986095104151473745">"バグレポートのスクリーンショットを取得しました"</string>
     <string name="bugreport_screenshot_failure_toast" msgid="6736320861311294294">"バグレポートのスクリーンショットを取得できませんでした"</string>

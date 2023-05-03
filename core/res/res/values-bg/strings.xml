@@ -299,7 +299,7 @@
     <string name="user_owner_label" msgid="8628726904184471211">"Превключване към личния потребителски профил"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Превключване към служебния потребителски профил"</string>
     <string name="user_owner_app_label" msgid="1553595155465750298">"Превключване към <xliff:g id="APP_NAME">%1$s</xliff:g> в личния потребителски профил"</string>
-    <string name="managed_profile_app_label" msgid="367401088383965725">"Превключване към <xliff:g id="APP_NAME">%1$s</xliff:g> в служебния пoтребителски профил"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Превключване към <xliff:g id="APP_NAME">%1$s</xliff:g> в служебния потребителски профил"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контакти"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"има достъп до контактите ви"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Местоположение"</string>

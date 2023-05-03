@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android ਸਿਸਟਮ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ ਵਰਤੋ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ ਵਰਤੋ"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਦੇ ਨਿੱਜੀ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਜਾਓ"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਦੇ ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ \'ਤੇ ਜਾਓ"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ਸੰਪਰਕ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ਆਪਣੇ ਸੰਪਰਕਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ਟਿਕਾਣਾ"</string>
@@ -1621,7 +1619,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ਟੈਬਲੈੱਟ"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ਫ਼ੋਨ ਕਰੋ"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ਡੌਕ ਸਪੀਕਰਸ"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"ਡੌਕ ਸਪੀਕਰ"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"ਬਾਹਰੀ ਡੀਵਾਈਸ"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"ਹੈੱਡਫ਼ੋਨ"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1731,7 +1729,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਵਿਚਾਲੇ ਅਦਲਾ-ਬਦਲੀ ਕਰਨ ਲਈ, ਤਿੰਨ ਉਂਗਲਾਂ ਨਾਲ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿਚ ਕਰ ਰਿਹਾ ਹੈ…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ਨੂੰ ਲਾਗ-ਆਉਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ …"</string>
     <string name="owner_name" msgid="8713560351570795743">"ਮਾਲਕ"</string>
     <string name="guest_name" msgid="8502103277839834324">"ਮਹਿਮਾਨ"</string>

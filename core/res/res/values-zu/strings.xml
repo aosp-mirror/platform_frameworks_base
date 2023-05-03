@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Uhlelo lwe-Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Shintshela kuphrofayela yomuntu siqu"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Shintshela kuphrofayela yomsebenzi"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Shintshela ku-<xliff:g id="APP_NAME">%1$s</xliff:g> yomuntu siqu"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Shintshela ku-<xliff:g id="APP_NAME">%1$s</xliff:g> yomsebenzi"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Oxhumana nabo"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"finyelela koxhumana nabo"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Indawo"</string>
@@ -683,8 +681,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Ukukhanya okunganele"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Yisa ifoni kude"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Sondeza ifoni eduze"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Yisa ifoni phezulu"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Yisa ifoni phansi"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Nyusa ifoni"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Yehlisa ifoni"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Yisa ifoni ngakwesokunxele sakho"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Yisa ifoni ngakwesokudla sakho"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Sicela ubheke ngokuqondile kakhulu kudivayisi yakho."</string>
