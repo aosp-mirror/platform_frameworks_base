@@ -27,15 +27,15 @@ import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
 import android.media.permission.PermissionUtil;
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -307,16 +307,15 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onRecognition(int modelHandle, RecognitionEvent event, int captureSession)
-                    throws RemoteException {
+            public void onRecognition(int modelHandle, RecognitionEventSys event,
+                    int captureSession) throws RemoteException {
                 enforcePermissions("Sound trigger recognition.");
                 mDelegate.onRecognition(modelHandle, event, captureSession);
             }
 
             @Override
-            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEvent event,
-                    int captureSession)
-                    throws RemoteException {
+            public void onPhraseRecognition(int modelHandle, PhraseRecognitionEventSys event,
+                    int captureSession) throws RemoteException {
                 enforcePermissions("Sound trigger phrase recognition.");
                 mDelegate.onPhraseRecognition(modelHandle, event, captureSession);
             }
