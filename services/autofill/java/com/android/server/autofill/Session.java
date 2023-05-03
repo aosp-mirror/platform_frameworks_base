@@ -205,6 +205,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         RemoteFieldClassificationService.FieldClassificationServiceCallbacks {
     private static final String TAG = "AutofillSession";
 
+    // This should never be true in production. This is only for local debugging.
+    // Otherwise it will spam logcat.
+    private static final boolean DBG = false;
+
     private static final String ACTION_DELAYED_FILL =
             "android.service.autofill.action.DELAYED_FILL";
     private static final String EXTRA_REQUEST_ID = "android.service.autofill.extra.REQUEST_ID";
@@ -1286,6 +1290,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     @GuardedBy("mLock")
     private void requestAssistStructureForPccLocked(int flags) {
+        if (!mClassificationState.shouldTriggerRequest()) return;
+        mClassificationState.updatePendingRequest();
         // Get request id
         int requestId;
         // TODO(b/158623971): Update this to prevent possible overflow
@@ -1623,11 +1629,17 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // TODO(b/266379948): Ideally wait for PCC request to finish for a while more
         // (say 100ms) before proceeding further on.
 
+        if (DBG) {
+            Slog.d(TAG, "DBG: Initial response: " + response);
+        }
         synchronized (mLock) {
             response = getEffectiveFillResponse(response);
             if (isEmptyResponse(response)) {
                 // Treat it as a null response.
                 processNullResponseLocked(requestId, requestFlags);
+            }
+            if (DBG) {
+                Slog.d(TAG, "DBG: Processed response: " + response);
             }
             processResponseLocked(response, null, requestFlags);
         }
@@ -1655,12 +1667,25 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         DatasetComputationContainer autofillProviderContainer = new DatasetComputationContainer();
         computeDatasetsForProviderAndUpdateContainer(response, autofillProviderContainer);
 
+        if (DBG) {
+            Slog.d(TAG, "DBG: computeDatasetsForProviderAndUpdateContainer: "
+                    + autofillProviderContainer);
+        }
         if (!mService.getMaster().isPccClassificationEnabled())  {
+            if (sVerbose) {
+                Slog.v(TAG, "PCC classification is disabled");
+            }
             return createShallowCopy(response, autofillProviderContainer);
         }
         synchronized (mLock) {
             if (mClassificationState.mState != ClassificationState.STATE_RESPONSE
                     || mClassificationState.mLastFieldClassificationResponse == null) {
+                if (sVerbose) {
+                    Slog.v(TAG, "PCC classification no last response:"
+                            + (mClassificationState.mLastFieldClassificationResponse == null)
+                            +   " ,ineligible state="
+                            + (mClassificationState.mState != ClassificationState.STATE_RESPONSE));
+                }
                 return createShallowCopy(response, autofillProviderContainer);
             }
             if (!mClassificationState.processResponse()) return response;
@@ -1668,11 +1693,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         boolean preferAutofillProvider = mService.getMaster().preferProviderOverPcc();
         boolean shouldUseFallback = mService.getMaster().shouldUsePccFallback();
         if (preferAutofillProvider && !shouldUseFallback) {
+            if (sVerbose) {
+                Slog.v(TAG, "preferAutofillProvider but no fallback");
+            }
             return createShallowCopy(response, autofillProviderContainer);
         }
 
+        if (DBG) {
+            synchronized (mLock) {
+                Slog.d(TAG, "DBG: ClassificationState: " + mClassificationState);
+            }
+        }
         DatasetComputationContainer detectionPccContainer = new DatasetComputationContainer();
         computeDatasetsForPccAndUpdateContainer(response, detectionPccContainer);
+        if (DBG) {
+            Slog.d(TAG, "DBG: computeDatasetsForPccAndUpdateContainer: " + detectionPccContainer);
+        }
 
         DatasetComputationContainer resultContainer;
         if (preferAutofillProvider) {
@@ -1746,6 +1782,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // FillResponse.
         Set<Dataset> mDatasets = new LinkedHashSet<>();
         ArrayMap<AutofillId, Set<Dataset>> mAutofillIdToDatasetMap = new ArrayMap<>();
+
+        public String toString() {
+            final StringBuilder builder = new StringBuilder("DatasetComputationContainer[");
+            if (mAutofillIds != null) {
+                builder.append(", autofillIds=").append(mAutofillIds);
+            }
+            if (mDatasets != null) {
+                builder.append(", mDatasets=").append(mDatasets);
+            }
+            if (mAutofillIdToDatasetMap != null) {
+                builder.append(", mAutofillIdToDatasetMap=").append(mAutofillIdToDatasetMap);
+            }
+            return builder.append(']').toString();
+        }
     }
 
     // Adds fallback datasets to the first container.
@@ -1897,7 +1947,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Dataset dataset = datasets.get(i);
                 if (dataset.getAutofillDatatypes() == null
                         || dataset.getAutofillDatatypes().isEmpty()) continue;
-                if (dataset.getFieldIds() != null && dataset.getFieldIds().size() > 0) continue;
 
                 ArrayList<AutofillId> fieldIds = new ArrayList<>();
                 ArrayList<AutofillValue> fieldValues = new ArrayList<>();
@@ -1906,9 +1955,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 ArrayList<InlinePresentation> fieldInlinePresentations = new ArrayList<>();
                 ArrayList<InlinePresentation> fieldInlineTooltipPresentations = new ArrayList<>();
                 ArrayList<Dataset.DatasetFieldFilter> fieldFilters = new ArrayList<>();
+                Set<AutofillId> datasetAutofillIds = new ArraySet<>();
 
                 for (int j = 0; j < dataset.getAutofillDatatypes().size(); j++) {
-                    if (dataset.getAutofillDatatypes().get(0) == null) continue;
+                    if (dataset.getAutofillDatatypes().get(j) == null) continue;
                     String hint = dataset.getAutofillDatatypes().get(j);
 
                     if (hintsToAutofillIdMap.containsKey(hint)) {
@@ -1917,6 +1967,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                         for (AutofillId autofillId : tempIds) {
                             eligibleAutofillIds.add(autofillId);
+                            datasetAutofillIds.add(autofillId);
                             // For each of the field, copy over values.
                             fieldIds.add(autofillId);
                             fieldValues.add(dataset.getFieldValues().get(j));
@@ -1930,43 +1981,40 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                     dataset.getFieldInlineTooltipPresentation(j));
                             fieldFilters.add(dataset.getFilter(j));
                         }
-
-                        Dataset newDataset =
-                                new Dataset(
-                                        fieldIds,
-                                        fieldValues,
-                                        fieldPresentations,
-                                        fieldDialogPresentations,
-                                        fieldInlinePresentations,
-                                        fieldInlineTooltipPresentations,
-                                        fieldFilters,
-                                        new ArrayList<>(),
-                                        dataset.getFieldContent(),
-                                        null,
-                                        null,
-                                        null,
-                                        null,
-                                        dataset.getId(),
-                                        dataset.getAuthentication());
-                        eligibleDatasets.add(newDataset);
-
-                        // Associate this dataset with all the ids that are represented with it.
-                        Set<Dataset> newDatasets;
-                        for (AutofillId autofillId : tempIds) {
-                            if (map.containsKey(autofillId)) {
-                                newDatasets = map.get(autofillId);
-                            } else {
-                                newDatasets = new ArraySet<>();
-                            }
-                            newDatasets.add(newDataset);
-                            map.put(autofillId, newDatasets);
-                        }
                     }
                     // TODO(b/266379948):  handle the case:
                     // groupHintsToAutofillIdMap.containsKey(hint))
                     // but the autofill id not being applicable to other hints.
                     // TODO(b/266379948):  also handle the case where there could be more types in
                     // the dataset, provided by the provider, however, they aren't applicable.
+                }
+                Dataset newDataset =
+                        new Dataset(
+                                fieldIds,
+                                fieldValues,
+                                fieldPresentations,
+                                fieldDialogPresentations,
+                                fieldInlinePresentations,
+                                fieldInlineTooltipPresentations,
+                                fieldFilters,
+                                new ArrayList<>(),
+                                dataset.getFieldContent(),
+                                null,
+                                null,
+                                null,
+                                null,
+                                dataset.getId(),
+                                dataset.getAuthentication());
+                eligibleDatasets.add(newDataset);
+                Set<Dataset> newDatasets;
+                for (AutofillId autofillId : datasetAutofillIds) {
+                    if (map.containsKey(autofillId)) {
+                        newDatasets = map.get(autofillId);
+                    } else {
+                        newDatasets = new ArraySet<>();
+                    }
+                    newDatasets.add(newDataset);
+                    map.put(autofillId, newDatasets);
                 }
             }
             container.mAutofillIds = eligibleAutofillIds;
@@ -5447,6 +5495,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             mState = STATE_PENDING_REQUEST;
             mPendingFieldClassificationRequest = null;
         }
+
+        @GuardedBy("mLock")
+        private boolean shouldTriggerRequest() {
+            return mState == STATE_INITIAL || mState == STATE_INVALIDATED;
+        }
+
+        @GuardedBy("mLock")
+        @Override
+        public String toString() {
+            return "ClassificationState: ["
+                    + "state=" + stateToString()
+                    + ", mPendingFieldClassificationRequest=" + mPendingFieldClassificationRequest
+                    + ", mLastFieldClassificationResponse=" + mLastFieldClassificationResponse
+                    + ", mClassificationHintsMap=" + mClassificationHintsMap
+                    + ", mClassificationGroupHintsMap=" + mClassificationGroupHintsMap
+                    + ", mHintsToAutofillIdMap=" + mHintsToAutofillIdMap
+                    + ", mGroupHintsToAutofillIdMap=" + mGroupHintsToAutofillIdMap
+                    + "]";
+        }
+
     }
 
     @Override
@@ -5971,7 +6039,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return serviceInfo == null ? Process.INVALID_UID : serviceInfo.applicationInfo.uid;
     }
 
-    // DetectionServiceCallbacks
+    // FieldClassificationServiceCallbacks
     public void onClassificationRequestSuccess(@Nullable FieldClassificationResponse response) {
         mClassificationState.updateResponseReceived(response);
     }
