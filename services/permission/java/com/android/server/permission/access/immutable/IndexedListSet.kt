@@ -32,6 +32,8 @@ sealed class IndexedListSet<T>(
     fun elementAt(index: Int): T = list.get(index)
 
     override fun toMutable(): MutableIndexedListSet<T> = MutableIndexedListSet(this)
+
+    override fun toString(): String = list.toString()
 }
 
 class MutableIndexedListSet<T>(

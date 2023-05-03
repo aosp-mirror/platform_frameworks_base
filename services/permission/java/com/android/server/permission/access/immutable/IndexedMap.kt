@@ -38,6 +38,8 @@ sealed class IndexedMap<K, V>(
     fun valueAt(index: Int): V = map.valueAt(index)
 
     override fun toMutable(): MutableIndexedMap<K, V> = MutableIndexedMap(this)
+
+    override fun toString(): String = map.toString()
 }
 
 class MutableIndexedMap<K, V>(
