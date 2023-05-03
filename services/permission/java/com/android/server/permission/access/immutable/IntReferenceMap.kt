@@ -38,6 +38,8 @@ sealed class IntReferenceMap<I : Immutable<M>, M : I>(
     fun valueAt(index: Int): I = array.valueAt(index).get()
 
     override fun toMutable(): MutableIntReferenceMap<I, M> = MutableIntReferenceMap(this)
+
+    override fun toString(): String = array.toString()
 }
 
 class MutableIntReferenceMap<I : Immutable<M>, M : I>(

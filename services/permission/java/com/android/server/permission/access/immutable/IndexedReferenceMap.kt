@@ -38,6 +38,8 @@ sealed class IndexedReferenceMap<K, I : Immutable<M>, M : I>(
     fun valueAt(index: Int): I = map.valueAt(index).get()
 
     override fun toMutable(): MutableIndexedReferenceMap<K, I, M> = MutableIndexedReferenceMap(this)
+
+    override fun toString(): String = map.toString()
 }
 
 class MutableIndexedReferenceMap<K, I : Immutable<M>, M : I>(

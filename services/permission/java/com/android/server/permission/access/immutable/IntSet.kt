@@ -33,6 +33,8 @@ sealed class IntSet(
     fun elementAt(index: Int): Int = array.keyAt(index)
 
     override fun toMutable(): MutableIntSet = MutableIntSet(this)
+
+    override fun toString(): String = array.toString()
 }
 
 class MutableIntSet(

@@ -30,6 +30,8 @@ sealed class IndexedList<T>(
     operator fun get(index: Int): T = list.get(index)
 
     override fun toMutable(): MutableIndexedList<T> = MutableIndexedList(this)
+
+    override fun toString(): String = list.toString()
 }
 
 class MutableIndexedList<T>(

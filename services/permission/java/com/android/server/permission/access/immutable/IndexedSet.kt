@@ -33,6 +33,8 @@ sealed class IndexedSet<T>(
     fun elementAt(index: Int): T = set.elementAt(index)
 
     override fun toMutable(): MutableIndexedSet<T> = MutableIndexedSet(this)
+
+    override fun toString(): String = set.toString()
 }
 
 class MutableIndexedSet<T>(

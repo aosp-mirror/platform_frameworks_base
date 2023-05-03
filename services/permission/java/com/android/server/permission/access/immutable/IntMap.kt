@@ -37,6 +37,8 @@ sealed class IntMap<T>(
     fun valueAt(index: Int): T = array.valueAt(index)
 
     override fun toMutable(): MutableIntMap<T> = MutableIntMap(this)
+
+    override fun toString(): String = array.toString()
 }
 
 class MutableIntMap<T>(
