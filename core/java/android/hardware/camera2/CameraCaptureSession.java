@@ -1397,6 +1397,11 @@ public abstract class CameraCaptureSession implements AutoCloseable {
          * the capture may have been pushed to their respective output
          * streams.</p>
          *
+         * <p>If a logical multi-camera fails to generate capture result for one of
+         * its physical cameras, this method will be called with a {@link CaptureFailure}
+         * for that physical camera. In such cases, as long as the logical camera capture
+         * result is valid, {@link #onCaptureCompleted} will still be called.</p>
+         *
          * <p>The default implementation of this method does nothing.</p>
          *
          * @param session
