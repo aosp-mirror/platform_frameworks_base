@@ -3195,6 +3195,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final ActiveAdmin admin = getActiveAdminUncheckedLocked(adminReceiver, userHandle);
         DevicePolicyData policy = getUserData(userHandle);
         if (admin != null && !policy.mRemovingAdmins.contains(adminReceiver)) {
+            Slogf.d(LOG_TAG, "Adding " + adminReceiver + " for user " + userHandle
+                    + " to list of removing admins.");
+            logStackTrace("removeActiveAdminLocked");
+
             policy.mRemovingAdmins.add(adminReceiver);
             sendAdminCommandLocked(admin,
                     DeviceAdminReceiver.ACTION_DEVICE_ADMIN_DISABLED,
@@ -18391,7 +18395,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             pushActiveAdminPackagesLocked(userHandle);
             saveSettingsLocked(userHandle);
             updateMaximumTimeToLockLocked(userHandle);
+
+            Slogf.d(LOG_TAG,
+                    "Removing device admin " + adminReceiver + " from user " + userHandle);
+            logStackTrace("removeAdminArtifacts");
+
             policy.mRemovingAdmins.remove(adminReceiver);
+            Slogf.d(LOG_TAG, "Current state of DevicePolicyData#mRemovingAdmins for user "
+                    + userHandle + ": " + policy.mRemovingAdmins);
+
             pushScreenCapturePolicy(userHandle);
 
             Slogf.i(LOG_TAG, "Device admin " + adminReceiver + " removed from user " + userHandle);
@@ -24314,5 +24326,29 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private String getFinancedDeviceKioskRoleHolderOnAnyUser() {
         return getRoleHolderPackageNameOnUser(
                 RoleManager.ROLE_FINANCED_DEVICE_KIOSK, UserHandle.USER_ALL);
+    }
+
+    /**
+     * TODO (b/278924166): this method is added for debugging the specified bug.
+     * Remove once fixed.
+     **/
+    private void logStackTrace(String methodName) {
+        try {
+            StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+            String stackMethod;
+            StringBuilder stackTrace = new StringBuilder();
+            for (StackTraceElement s : stackTraceElements) {
+                stackMethod = s.getMethodName();
+                if (stackMethod == null || stackMethod.equals("getThreadStackTrace")
+                        || stackMethod.equals("getStackTrace")
+                        || stackMethod.equals("logStackTrace")) {
+                    continue;
+                }
+                stackTrace.append(s.getMethodName() + ":" + s.getLineNumber() + "\n");
+            }
+            Slogf.d(LOG_TAG, "StackTrace for " + methodName + ": \n" + stackTrace);
+        } catch (Exception e) {
+            Slogf.d(LOG_TAG, "Unable to get stacktrace");
+        }
     }
 }
