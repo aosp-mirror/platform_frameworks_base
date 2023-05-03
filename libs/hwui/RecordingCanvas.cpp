@@ -675,12 +675,11 @@ public:
             // because the webview functor still doesn't respect the canvas clip stack.
             const SkIRect deviceBounds = c->getDeviceClipBounds();
             if (mLayerSurface == nullptr || c->imageInfo() != mLayerImageInfo) {
-                GrRecordingContext* directContext = c->recordingContext();
                 mLayerImageInfo =
                         c->imageInfo().makeWH(deviceBounds.width(), deviceBounds.height());
-                mLayerSurface = SkSurface::MakeRenderTarget(directContext, skgpu::Budgeted::kYes,
-                                                            mLayerImageInfo, 0,
-                                                            kTopLeft_GrSurfaceOrigin, nullptr);
+                // SkCanvas::makeSurface returns a new surface that will be GPU-backed if
+                // canvas was also.
+                mLayerSurface = c->makeSurface(mLayerImageInfo);
             }
 
             SkCanvas* layerCanvas = mLayerSurface->getCanvas();
