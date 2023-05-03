@@ -23,10 +23,10 @@ import static com.android.systemui.statusbar.notification.NotificationUtils.inte
 import android.content.res.Resources;
 import android.util.MathUtils;
 
+import com.android.app.animation.Interpolators;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.keyguard.KeyguardStatusView;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcherListView;
 
