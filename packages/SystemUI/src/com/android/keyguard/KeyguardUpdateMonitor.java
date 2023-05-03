@@ -587,6 +587,18 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         dispatchErrorMessage(message);
     }
 
+    @Override
+    public void onEnabledTrustAgentsChanged(int userId) {
+        Assert.isMainThread();
+
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onEnabledTrustAgentsChanged(userId);
+            }
+        }
+    }
+
     private void handleSimSubscriptionInfoChanged() {
         Assert.isMainThread();
         mLogger.v("onSubscriptionInfoChanged()");
