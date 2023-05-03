@@ -17,12 +17,12 @@
  */
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-        package="com.android.shell"
-        coreApp="true"
-        android:sharedUserId="android.uid.shell"
-        >
+   package="com.android.shell"
+   coreApp="true"
+   android:sharedUserId="android.uid.shell"
+   >
 
-        <!-- Standard permissions granted to the shell. -->
+    <!-- Standard permissions granted to the shell. -->
     <uses-permission android:name="android.permission.MANAGE_HEALTH_PERMISSIONS" />
     <uses-permission android:name="android.permission.MANAGE_HEALTH_DATA" />
     <uses-permission android:name="android.permission.health.READ_EXERCISE_ROUTE" />
@@ -125,7 +125,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <!-- BLUETOOTH_PRIVILEGED is needed for testing purposes only. -->
     <uses-permission android:name="android.permission.BLUETOOTH_PRIVILEGED" />
@@ -136,7 +136,7 @@
     <uses-permission android:name="android.permission.MANAGE_NETWORK_POLICY" />
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.USE_RESERVED_DISK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <!-- System tool permissions granted to the shell. -->
     <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
@@ -231,16 +231,16 @@
     <uses-permission android:name="android.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS" />
     <uses-permission android:name="android.permission.CLEAR_FREEZE_PERIOD" />
     <uses-permission android:name="android.permission.MODIFY_QUIET_MODE" />
-    <uses-permission android:name="android.permission.ACCESS_LOWPAN_STATE"/>
-    <uses-permission android:name="android.permission.CHANGE_LOWPAN_STATE"/>
-    <uses-permission android:name="android.permission.READ_LOWPAN_CREDENTIAL"/>
+    <uses-permission android:name="android.permission.ACCESS_LOWPAN_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_LOWPAN_STATE" />
+    <uses-permission android:name="android.permission.READ_LOWPAN_CREDENTIAL" />
     <uses-permission android:name="android.permission.BLUETOOTH_STACK" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_TOKEN" />
     <uses-permission android:name="android.permission.FRAME_STATS" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
     <uses-permission android:name="android.permission.UPDATE_APP_OPS_STATS" />
-    <uses-permission android:name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS"/>
+    <uses-permission android:name="android.permission.MODIFY_APPWIDGET_BIND_PERMISSIONS" />
     <uses-permission android:name="android.permission.CHANGE_APP_IDLE_STATE" />
     <uses-permission android:name="android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
@@ -304,7 +304,7 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.BACKGROUND_CAMERA" />
     <uses-permission android:name="android.permission.SYSTEM_CAMERA" />
-      <!-- Permissions needed to test onCameraOpened/Closed callbacks -->
+    <!-- Permissions needed to test onCameraOpened/Closed callbacks -->
     <uses-permission android:name="android.permission.CAMERA_OPEN_CLOSE_LISTENER" />
     <!-- Permissions needed for CTS camera test: RecordingTest.java when assuming shell id -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -344,7 +344,7 @@
     <uses-permission android:name="android.permission.LOADER_USAGE_STATS" />
 
     <!-- Permission required for storage tests - FuseDaemonHostTest -->
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <!-- Permission needed to run network tests in CTS -->
     <uses-permission android:name="android.permission.MANAGE_TEST_NETWORKS" />
@@ -386,54 +386,54 @@
     <uses-permission android:name="android.permission.BIND_EXPLICIT_HEALTH_CHECK_SERVICE" />
 
     <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
-    <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES"/>
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_PROFILES" />
 
     <!-- Permission required for CTS test - CrossProfileAppsHostSideTest -->
-    <uses-permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES"/>
+    <uses-permission android:name="android.permission.START_CROSS_PROFILE_ACTIVITIES" />
 
     <!-- permissions required for CTS test - PhoneStateListenerTest -->
     <uses-permission android:name="android.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH" />
 
     <!-- Permissions required for granting and logging -->
-    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE"/>
-    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
-    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
-    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD"/>
+    <uses-permission android:name="android.permission.LOG_COMPAT_CHANGE" />
+    <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG" />
+    <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG_ON_RELEASE_BUILD" />
 
     <!-- Permission required for CTS test - BatterySaverTest -->
-    <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
+    <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE" />
 
     <!-- Permission required for CTS test - UiModeManagerTest -->
-    <uses-permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
-    <uses-permission android:name="android.permission.READ_PROJECTION_STATE"/>
+    <uses-permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED" />
+    <uses-permission android:name="android.permission.READ_PROJECTION_STATE" />
 
     <!-- Permission required for CTS tests - UiModeManagerTest, CarModeInCallServiceTest -->
-    <uses-permission android:name="android.permission.TOGGLE_AUTOMOTIVE_PROJECTION"/>
+    <uses-permission android:name="android.permission.TOGGLE_AUTOMOTIVE_PROJECTION" />
 
     <!-- Permission required for CTS test - SystemConfigTest -->
-    <uses-permission android:name="android.permission.READ_CARRIER_APP_INFO"/>
+    <uses-permission android:name="android.permission.READ_CARRIER_APP_INFO" />
 
     <!-- Permission required for CTS test - CarModeInCallServiceTest -->
-    <uses-permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE"/>
+    <uses-permission android:name="android.permission.CONTROL_INCALL_EXPERIENCE" />
 
     <!-- Permission requried for CTS test - CellBroadcastIntentsTest -->
-    <uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS"/>
+    <uses-permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS_TO_TELEPHONY_DEFAULTS" />
 
     <!-- Permission required for CTS test - TetheringManagerTest -->
-    <uses-permission android:name="android.permission.TETHER_PRIVILEGED"/>
+    <uses-permission android:name="android.permission.TETHER_PRIVILEGED" />
 
     <!-- Permission required for CTS test - CtsOsTestCases -->
-    <uses-permission android:name="android.permission.MANAGE_CRATES"/>
+    <uses-permission android:name="android.permission.MANAGE_CRATES" />
 
     <!-- Allows setting brightness from the shell -->
-    <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS"/>
+    <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
 
     <!-- Permission required for CTS test - ShortcutManagerUsageTest -->
-    <uses-permission android:name="android.permission.ACCESS_SHORTCUTS"/>
+    <uses-permission android:name="android.permission.ACCESS_SHORTCUTS" />
 
     <!-- Permissions required for CTS test - UsageStatsTest -->
-    <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS"/>
-    <uses-permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"/>
+    <uses-permission android:name="android.permission.MANAGE_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS" />
 
     <!-- Permission needed for CTS test - MusicRecognitionManagerTest -->
     <uses-permission android:name="android.permission.MANAGE_MUSIC_RECOGNITION" />
@@ -442,8 +442,8 @@
     <uses-permission android:name="android.permission.MANAGE_SPEECH_RECOGNITION" />
 
     <!-- Permissions required to test ambient display. -->
-    <uses-permission android:name="android.permission.READ_DREAM_STATE"/>
-    <uses-permission android:name="android.permission.WRITE_DREAM_STATE"/>
+    <uses-permission android:name="android.permission.READ_DREAM_STATE" />
+    <uses-permission android:name="android.permission.WRITE_DREAM_STATE" />
 
     <!-- Permission required for CTS test - CtsLightsManagerTest -->
     <uses-permission android:name="android.permission.CONTROL_DEVICE_LIGHTS" />
@@ -470,7 +470,7 @@
     <uses-permission android:name="android.permission.MODIFY_SETTINGS_OVERRIDEABLE_BY_RESTORE" />
 
     <!-- Permission required for testing system audio effect APIs. -->
-    <uses-permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
+    <uses-permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS" />
 
     <!-- Permission required for running networking unit tests -->
     <uses-permission android:name="android.permission.CONNECTIVITY_USE_RESTRICTED_NETWORKS" />
@@ -495,7 +495,7 @@
     <uses-permission android:name="android.permission.TV_INPUT_HARDWARE" />
     <uses-permission android:name="android.permission.TIS_EXTENSION_INTERFACE" />
     <uses-permission android:name="com.android.providers.tv.permission.ACCESS_WATCHED_PROGRAMS" />
-    <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA"/>
+    <uses-permission android:name="com.android.providers.tv.permission.WRITE_EPG_DATA" />
 
     <!-- Permission needed for CTS test - PrivilegedLocationPermissionTest -->
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
@@ -560,14 +560,14 @@
     <uses-permission android:name="android.permission.BIND_CARRIER_SERVICES" />
 
     <!-- Allows overriding the system's device state from the shell -->
-    <uses-permission android:name="android.permission.CONTROL_DEVICE_STATE"/>
+    <uses-permission android:name="android.permission.CONTROL_DEVICE_STATE" />
 
     <!-- Permissions required for CTS tests to close system dialogs -->
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
 
     <!-- Permissions required for CTS test - HideOverlayWindowsTest -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY" />
 
     <!-- Permission required for CTS test - CtsHdmiCecHostTestCases -->
     <uses-permission android:name="android.permission.HDMI_CEC" />
@@ -630,21 +630,21 @@
     <uses-permission android:name="android.permission.UPDATE_FONTS" />
 
     <!-- Permission required for Launcher testing - DigitalWellbeingToastTest -->
-    <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO"/>
+    <uses-permission android:name="android.permission.GET_TOP_ACTIVITY_INFO" />
 
     <!-- Permission required for hotword detection service CTS tests -->
     <uses-permission android:name="android.permission.MANAGE_HOTWORD_DETECTION" />
     <uses-permission android:name="android.permission.BIND_HOTWORD_DETECTION_SERVICE" />
 
     <!-- Permission required for CTS test - CtsVoiceInteractionTestCases -->
-    <uses-permission android:name="android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER"/>
+    <uses-permission android:name="android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER" />
 
     <uses-permission android:name="android.permission.BIND_VISUAL_QUERY_DETECTION_SERVICE" />
 
     <!-- Permission required for CTS test - KeyguardLockedStateApiTest -->
     <uses-permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
 
-    <uses-permission android:name="android.permission.MANAGE_APP_HIBERNATION"/>
+    <uses-permission android:name="android.permission.MANAGE_APP_HIBERNATION" />
 
     <!-- Permission required for CTS test - MediaCodecResourceTest -->
     <uses-permission android:name="android.permission.MEDIA_RESOURCE_OVERRIDE_PID" />
@@ -820,8 +820,8 @@
     <uses-permission android:name="android.permission.DELETE_STAGED_HEALTH_CONNECT_REMOTE_DATA" />
     <uses-permission android:name="android.permission.STAGE_HEALTH_CONNECT_REMOTE_DATA" />
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SYSTEM_EXEMPTED" />
 
     <!-- Permissions required for CTS test - CtsBroadcastRadioTestCases -->
     <uses-permission android:name="android.permission.ACCESS_BROADCAST_RADIO" />
@@ -832,15 +832,17 @@
     <!-- Permission required for CTS test - CtsTelephonyProviderTestCases -->
     <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
 
-    <uses-permission android:name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
-
+    <uses-permission android:name="android.permission.LOG_FOREGROUND_RESOURCE_USE" />
     <!-- Permission required for GTS test - GtsAttestationVerificationDeviceSideTestCases -->
     <uses-permission android:name="android.permission.USE_ATTESTATION_VERIFICATION_SERVICE" />
+    <!-- Permission required for GTS test - GtsCredentialsTestCases -->
+    <uses-permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR" />
 
-    <application android:label="@string/app_label"
-                android:theme="@android:style/Theme.DeviceDefault.DayNight"
-                android:defaultToDeviceProtectedStorage="true"
-                android:directBootAware="true">
+    <application
+        android:label="@string/app_label"
+        android:theme="@android:style/Theme.DeviceDefault.DayNight"
+        android:defaultToDeviceProtectedStorage="true"
+        android:directBootAware="true">
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.android.shell"
@@ -863,10 +865,11 @@
             </intent-filter>
         </provider>
 
-        <provider android:name=".HeapDumpProvider"
-                  android:authorities="com.android.shell.heapdump"
-                  android:grantUriPermissions="true"
-                  android:exported="false" />
+        <provider
+            android:name=".HeapDumpProvider"
+            android:authorities="com.android.shell.heapdump"
+            android:grantUriPermissions="true"
+            android:exported="false" />
 
         <activity
             android:name=".BugreportWarningActivity"
@@ -875,13 +878,14 @@
             android:excludeFromRecents="true"
             android:exported="false" />
 
-        <activity android:name=".HeapDumpActivity"
-                  android:theme="@*android:style/Theme.Translucent.NoTitleBar"
-                  android:label="@*android:string/dump_heap_title"
-                  android:finishOnCloseSystemDialogs="true"
-                  android:noHistory="true"
-                  android:excludeFromRecents="true"
-                  android:exported="false" />
+        <activity
+            android:name=".HeapDumpActivity"
+            android:theme="@*android:style/Theme.Translucent.NoTitleBar"
+            android:label="@*android:string/dump_heap_title"
+            android:finishOnCloseSystemDialogs="true"
+            android:noHistory="true"
+            android:excludeFromRecents="true"
+            android:exported="false" />
 
         <receiver
             android:name=".BugreportRequestedReceiver"
@@ -906,7 +910,7 @@
         <receiver
             android:name=".ProfcollectUploadReceiver"
             android:exported="true"
-            android:permission="android.permission.TRIGGER_SHELL_PROFCOLLECT_UPLOAD" >
+            android:permission="android.permission.TRIGGER_SHELL_PROFCOLLECT_UPLOAD">
             <intent-filter>
                 <action android:name="com.android.shell.action.PROFCOLLECT_UPLOAD" />
             </intent-filter>
@@ -915,6 +919,6 @@
         <service
             android:name=".BugreportProgressService"
             android:foregroundServiceType="systemExempted"
-            android:exported="false"/>
+            android:exported="false" />
     </application>
 </manifest>
