@@ -19,16 +19,16 @@ package com.android.server.soundtrigger_middleware;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.SoundModelType;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -499,10 +499,10 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
 
             @Override
             public void recognitionCallback(int modelHandle,
-                    @NonNull RecognitionEvent recognitionEvent) {
+                    @NonNull RecognitionEventSys event) {
                 ISoundTriggerCallback callback;
                 synchronized (SoundTriggerModule.this) {
-                    if (!recognitionEvent.recognitionStillActive) {
+                    if (!event.recognitionEvent.recognitionStillActive) {
                         setState(ModelState.LOADED);
                     }
                     callback = mCallback;
@@ -510,7 +510,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                 // The callback must be invoked outside of the lock.
                 try {
                     if (callback != null) {
-                        callback.onRecognition(mHandle, recognitionEvent, mSession.mSessionHandle);
+                        callback.onRecognition(mHandle, event, mSession.mSessionHandle);
                     }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
@@ -520,10 +520,10 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
 
             @Override
             public void phraseRecognitionCallback(int modelHandle,
-                    @NonNull PhraseRecognitionEvent phraseRecognitionEvent) {
+                    @NonNull PhraseRecognitionEventSys event) {
                 ISoundTriggerCallback callback;
                 synchronized (SoundTriggerModule.this) {
-                    if (!phraseRecognitionEvent.common.recognitionStillActive) {
+                    if (!event.phraseRecognitionEvent.common.recognitionStillActive) {
                         setState(ModelState.LOADED);
                     }
                     callback = mCallback;
@@ -532,8 +532,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                 // The callback must be invoked outside of the lock.
                 try {
                     if (callback != null) {
-                        mCallback.onPhraseRecognition(mHandle, phraseRecognitionEvent,
-                                mSession.mSessionHandle);
+                        mCallback.onPhraseRecognition(mHandle, event, mSession.mSessionHandle);
                     }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.

@@ -22,13 +22,13 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
 import android.media.permission.SafeCloseable;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -398,7 +398,7 @@ public class SoundTriggerModule {
         }
 
         @Override
-        public synchronized void onRecognition(int handle, RecognitionEvent event,
+        public synchronized void onRecognition(int handle, RecognitionEventSys event,
                 int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,
@@ -407,7 +407,7 @@ public class SoundTriggerModule {
         }
 
         @Override
-        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEvent event,
+        public synchronized void onPhraseRecognition(int handle, PhraseRecognitionEventSys event,
                 int captureSession)
                 throws RemoteException {
             Message m = mHandler.obtainMessage(EVENT_RECOGNITION,
