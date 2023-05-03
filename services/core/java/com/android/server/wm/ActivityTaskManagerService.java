@@ -6287,6 +6287,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void cleanupDisabledPackageComponents(
                 String packageName, Set<String> disabledClasses, int userId, boolean booted) {
             synchronized (mGlobalLock) {
+                // In case if setWindowManager hasn't been called yet when booting.
+                if (mRootWindowContainer == null) return;
                 // Clean-up disabled activities.
                 if (mRootWindowContainer.finishDisabledPackageActivities(
                         packageName, disabledClasses, true /* doit */, false /* evenPersistent */,
