@@ -60,7 +60,8 @@ import org.mockito.MockitoAnnotations
 @RoboPilotTest
 @TestableLooper.RunWithLooper
 @kotlinx.coroutines.ExperimentalCoroutinesApi
-class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControllerBaseTest() {
+class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
+    UdfpsKeyguardViewLegacyControllerBaseTest() {
     lateinit var keyguardBouncerRepository: KeyguardBouncerRepository
     @Mock private lateinit var bouncerLogger: TableLogBuffer
 
@@ -82,7 +83,7 @@ class UdfpsKeyguardViewControllerWithCoroutinesTest : UdfpsKeyguardViewControlle
         super.setUp()
     }
 
-    override fun createUdfpsKeyguardViewController(): UdfpsKeyguardViewController? {
+    override fun createUdfpsKeyguardViewController(): UdfpsKeyguardViewControllerLegacy? {
         mPrimaryBouncerInteractor =
             PrimaryBouncerInteractor(
                 keyguardBouncerRepository,
