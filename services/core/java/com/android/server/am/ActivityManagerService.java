@@ -44,7 +44,6 @@ import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_CREATED;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED;
-import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_BACKUP;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FINISH_RECEIVER;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_BEGIN;
@@ -18848,6 +18847,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         pw.println("Gave up waiting for application barriers!");
         pw.flush();
+    }
+
+    void waitForBroadcastDispatch(@NonNull PrintWriter pw, @NonNull Intent intent) {
+        enforceCallingPermission(permission.DUMP, "waitForBroadcastDispatch");
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.waitForDispatched(intent, pw);
+        }
     }
 
     void setIgnoreDeliveryGroupPolicy(@NonNull String broadcastAction) {

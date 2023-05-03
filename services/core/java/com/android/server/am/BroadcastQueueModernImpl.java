@@ -1376,6 +1376,16 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     }
 
     @Override
+    public boolean isDispatchedLocked(@NonNull Intent intent) {
+        return isDispatchedLocked(intent, LOG_WRITER_INFO);
+    }
+
+    public boolean isDispatchedLocked(@NonNull Intent intent, @NonNull PrintWriter pw) {
+        return testAllProcessQueues(q -> q.isDispatched(intent),
+                "dispatch of " + intent, pw);
+    }
+
+    @Override
     public void waitForIdle(@NonNull PrintWriter pw) {
         waitFor(() -> isIdleLocked(pw));
     }
@@ -1383,28 +1393,35 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @Override
     public void waitForBarrier(@NonNull PrintWriter pw) {
         final long now = SystemClock.uptimeMillis();
-        waitFor(() -> isBeyondBarrierLocked(now, pw));
+        synchronized (mService) {
+            forEachMatchingQueue(QUEUE_PREDICATE_ANY,
+                    q -> q.addPrioritizeEarliestRequest());
+        }
+        try {
+            waitFor(() -> isBeyondBarrierLocked(now, pw));
+        } finally {
+            synchronized (mService) {
+                forEachMatchingQueue(QUEUE_PREDICATE_ANY,
+                        q -> q.removePrioritizeEarliestRequest());
+            }
+        }
+    }
+
+    @Override
+    public void waitForDispatched(@NonNull Intent intent, @NonNull PrintWriter pw) {
+        waitFor(() -> isDispatchedLocked(intent, pw));
     }
 
     private void waitFor(@NonNull BooleanSupplier condition) {
         final CountDownLatch latch = new CountDownLatch(1);
         synchronized (mService) {
             mWaitingFor.add(Pair.create(condition, latch));
-            forEachMatchingQueue(QUEUE_PREDICATE_ANY,
-                    (q) -> q.setPrioritizeEarliest(true));
         }
         enqueueUpdateRunningList();
         try {
             latch.await();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
-        } finally {
-            synchronized (mService) {
-                if (mWaitingFor.isEmpty()) {
-                    forEachMatchingQueue(QUEUE_PREDICATE_ANY,
-                            (q) -> q.setPrioritizeEarliest(false));
-                }
-            }
         }
     }
 
