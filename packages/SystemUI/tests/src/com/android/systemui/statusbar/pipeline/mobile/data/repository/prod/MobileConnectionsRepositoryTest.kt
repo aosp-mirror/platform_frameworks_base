@@ -53,13 +53,15 @@ import com.android.systemui.statusbar.pipeline.mobile.util.FakeSubscriptionManag
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlots
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
-import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository
-import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -94,7 +96,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private lateinit var carrierMergedFactory: CarrierMergedConnectionRepository.Factory
     private lateinit var fullConnectionFactory: FullMobileConnectionRepository.Factory
     private lateinit var connectivityRepository: ConnectivityRepository
-    private lateinit var wifiRepository: FakeWifiRepository
+    private lateinit var wifiRepository: WifiRepository
     private lateinit var carrierConfigRepository: CarrierConfigRepository
     @Mock private lateinit var connectivityManager: ConnectivityManager
     @Mock private lateinit var subscriptionManager: SubscriptionManager
@@ -147,7 +149,17 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 mock(),
             )
 
-        wifiRepository = FakeWifiRepository()
+        wifiRepository =
+            WifiRepositoryImpl(
+                fakeBroadcastDispatcher,
+                connectivityManager,
+                connectivityRepository,
+                mock(),
+                mock(),
+                FakeExecutor(FakeSystemClock()),
+                testScope.backgroundScope,
+                mock(),
+            )
 
         carrierConfigRepository =
             CarrierConfigRepository(
@@ -244,7 +256,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.subscriptions)
 
-            wifiRepository.setWifiNetwork(WIFI_NETWORK_CM)
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_CM)
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_CM))
             getSubscriptionCallback().onSubscriptionsChanged()
@@ -257,7 +269,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.subscriptions)
 
-            wifiRepository.setWifiNetwork(WIFI_NETWORK_CM)
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_CM)
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_2, SUB_CM))
             getSubscriptionCallback().onSubscriptionsChanged()
@@ -410,7 +422,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             collectLastValue(underTest.subscriptions)
 
-            wifiRepository.setWifiNetwork(WIFI_NETWORK_CM)
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_CM)
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_CM))
             getSubscriptionCallback().onSubscriptionsChanged()
@@ -426,7 +438,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             collectLastValue(underTest.subscriptions)
 
-            wifiRepository.setWifiNetwork(WIFI_NETWORK_CM)
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_CM)
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_CM))
             getSubscriptionCallback().onSubscriptionsChanged()
@@ -442,7 +454,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             collectLastValue(underTest.subscriptions)
 
-            wifiRepository.setWifiNetwork(WIFI_NETWORK_CM)
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_CM)
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_CM))
             getSubscriptionCallback().onSubscriptionsChanged()
@@ -453,7 +465,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(mobileRepo.getIsCarrierMerged()).isFalse()
 
             // WHEN the wifi network updates to be not carrier merged
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Active(networkId = 4, level = 1))
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_ACTIVE)
             runCurrent()
 
             // THEN the repos update
@@ -468,10 +480,11 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             collectLastValue(underTest.subscriptions)
 
-            wifiRepository.setWifiNetwork(WifiNetworkModel.Inactive)
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_ACTIVE)
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_CM))
             getSubscriptionCallback().onSubscriptionsChanged()
+            runCurrent()
 
             val notYetCarrierMergedRepo = underTest.getRepoForSubId(SUB_CM_ID)
             var mobileRepo = underTest.getRepoForSubId(SUB_1_ID)
@@ -479,7 +492,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             assertThat(mobileRepo.getIsCarrierMerged()).isFalse()
 
             // WHEN the wifi network updates to be carrier merged
-            wifiRepository.setWifiNetwork(WIFI_NETWORK_CM)
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_CM)
             runCurrent()
 
             // THEN the repos update
@@ -518,7 +531,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             collectLastValue(underTest.subscriptions)
 
-            wifiRepository.setWifiNetwork(WIFI_NETWORK_CM)
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_CM)
             whenever(subscriptionManager.completeActiveSubscriptionInfoList)
                 .thenReturn(listOf(SUB_1, SUB_2, SUB_CM))
             getSubscriptionCallback().onSubscriptionsChanged()
@@ -902,8 +915,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             yield()
 
             // BUT the wifi repo has gotten updates that it *is* carrier merged
-            wifiRepository.setWifiNetwork(WIFI_NETWORK_CM)
-            yield()
+            getNormalNetworkCallback().onCapabilitiesChanged(NETWORK, WIFI_NETWORK_CAPS_CM)
 
             // THEN hasCarrierMergedConnection is true
             assertThat(latest).isTrue()
@@ -1058,6 +1070,14 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         return callbackCaptor.value!!
     }
 
+    // Note: This is used to update the [WifiRepository].
+    private fun TestScope.getNormalNetworkCallback(): ConnectivityManager.NetworkCallback {
+        runCurrent()
+        val callbackCaptor = argumentCaptor<ConnectivityManager.NetworkCallback>()
+        verify(connectivityManager).registerNetworkCallback(any(), callbackCaptor.capture())
+        return callbackCaptor.value!!
+    }
+
     private fun TestScope.getSubscriptionCallback():
         SubscriptionManager.OnSubscriptionsChangedListener {
         runCurrent()
@@ -1138,11 +1158,30 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         private val SUB_CM =
             mock<SubscriptionInfo>().also { whenever(it.subscriptionId).thenReturn(SUB_CM_ID) }
         private val MODEL_CM = SubscriptionModel(subscriptionId = SUB_CM_ID)
-        private val WIFI_NETWORK_CM =
-            WifiNetworkModel.CarrierMerged(
-                networkId = 3,
-                subscriptionId = SUB_CM_ID,
-                level = 1,
-            )
+
+        private val WIFI_INFO_CM =
+            mock<WifiInfo>().apply {
+                whenever(this.isPrimary).thenReturn(true)
+                whenever(this.isCarrierMerged).thenReturn(true)
+                whenever(this.subscriptionId).thenReturn(SUB_CM_ID)
+            }
+        private val WIFI_NETWORK_CAPS_CM =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(WIFI_INFO_CM)
+                whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(true)
+            }
+
+        private val WIFI_INFO_ACTIVE =
+            mock<WifiInfo>().apply {
+                whenever(this.isPrimary).thenReturn(true)
+                whenever(this.isCarrierMerged).thenReturn(false)
+            }
+        private val WIFI_NETWORK_CAPS_ACTIVE =
+            mock<NetworkCapabilities>().also {
+                whenever(it.hasTransport(TRANSPORT_WIFI)).thenReturn(true)
+                whenever(it.transportInfo).thenReturn(WIFI_INFO_ACTIVE)
+                whenever(it.hasCapability(NET_CAPABILITY_VALIDATED)).thenReturn(true)
+            }
     }
 }
