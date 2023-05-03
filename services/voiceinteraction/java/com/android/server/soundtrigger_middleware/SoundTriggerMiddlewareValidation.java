@@ -21,17 +21,17 @@ import android.annotation.Nullable;
 import android.media.permission.Identity;
 import android.media.permission.IdentityContext;
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.SoundModel;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -710,8 +710,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             }
         }
 
-        class CallbackWrapper implements ISoundTriggerCallback,
-                IBinder.DeathRecipient {
+        class CallbackWrapper implements ISoundTriggerCallback, IBinder.DeathRecipient {
             private final ISoundTriggerCallback mCallback;
 
             CallbackWrapper(ISoundTriggerCallback callback) {
@@ -728,11 +727,11 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onRecognition(int modelHandle, @NonNull RecognitionEvent event,
+            public void onRecognition(int modelHandle, @NonNull RecognitionEventSys event,
                     int captureSession) {
                 synchronized (SoundTriggerMiddlewareValidation.this) {
                     ModelState modelState = mLoadedModels.get(modelHandle);
-                    if (!event.recognitionStillActive) {
+                    if (!event.recognitionEvent.recognitionStillActive) {
                         modelState.activityState = ModelState.Activity.LOADED;
                     }
                 }
@@ -744,7 +743,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     Log.w(TAG, "Client callback exception.", e);
                     synchronized (SoundTriggerMiddlewareValidation.this) {
                         ModelState modelState = mLoadedModels.get(modelHandle);
-                        if (event.status != RecognitionStatus.FORCED) {
+                        if (event.recognitionEvent.status != RecognitionStatus.FORCED) {
                             modelState.activityState = ModelState.Activity.INTERCEPTED;
                             // If we failed to deliver an actual event to the client, they would
                             // never know to restart it whenever circumstances change. Thus, we
@@ -758,10 +757,10 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
             @Override
             public void onPhraseRecognition(int modelHandle,
-                    @NonNull PhraseRecognitionEvent event, int captureSession) {
+                    @NonNull PhraseRecognitionEventSys event, int captureSession) {
                 synchronized (SoundTriggerMiddlewareValidation.this) {
                     ModelState modelState = mLoadedModels.get(modelHandle);
-                    if (!event.common.recognitionStillActive) {
+                    if (!event.phraseRecognitionEvent.common.recognitionStillActive) {
                         modelState.activityState = ModelState.Activity.LOADED;
                     }
                 }
@@ -773,7 +772,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
                     Log.w(TAG, "Client callback exception.", e);
                     synchronized (SoundTriggerMiddlewareValidation.this) {
                         ModelState modelState = mLoadedModels.get(modelHandle);
-                        if (!event.common.recognitionStillActive) {
+                        if (!event.phraseRecognitionEvent.common.recognitionStillActive) {
                             modelState.activityState = ModelState.Activity.INTERCEPTED;
                             // If we failed to deliver an actual event to the client, they would
                             // never know to restart it whenever circumstances change. Thus, we

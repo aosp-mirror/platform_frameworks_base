@@ -16,6 +16,8 @@
 
 package com.android.server.soundtrigger_middleware;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -34,12 +36,12 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.RecognitionStatus;
 import android.media.soundtrigger.Status;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
 import android.os.HwParcel;
 import android.os.IBinder;
 import android.os.IHwBinder;
@@ -617,13 +619,16 @@ public class SoundHw2CompatTest {
             final int handle = 85;
             final int status =
                     android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.ABORT;
-            ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    RecognitionEvent.class);
+            ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    RecognitionEventSys.class);
 
             hwCallback.recognitionCallback(TestUtil.createRecognitionEvent_2_0(handle, status), 99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eq(handle), eventCaptor.capture());
-            TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.ABORTED,
+            RecognitionEventSys lastEvent = eventCaptor.getValue();
+            assertThat(lastEvent.halEventReceivedMillis).isGreaterThan(0);
+            TestUtil.validateRecognitionEvent(lastEvent.recognitionEvent,
+                    RecognitionStatus.ABORTED,
                     false);
         }
 
@@ -631,14 +636,16 @@ public class SoundHw2CompatTest {
             final int handle = 92;
             final int status =
                     android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.SUCCESS;
-            ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    PhraseRecognitionEvent.class);
+            ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    PhraseRecognitionEventSys.class);
 
             hwCallback.phraseRecognitionCallback(
                     TestUtil.createPhraseRecognitionEvent_2_0(handle, status), 99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eq(handle), eventCaptor.capture());
-            TestUtil.validatePhraseRecognitionEvent(eventCaptor.getValue(),
+            PhraseRecognitionEventSys lastEvent = eventCaptor.getValue();
+            assertThat(lastEvent.halEventReceivedMillis).isGreaterThan(0);
+            TestUtil.validatePhraseRecognitionEvent(lastEvent.phraseRecognitionEvent,
                     RecognitionStatus.SUCCESS, false);
         }
         verifyNoMoreInteractions(canonicalCallback);
@@ -652,28 +659,34 @@ public class SoundHw2CompatTest {
             final int handle = 85;
             final int status =
                     android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.ABORT;
-            ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    RecognitionEvent.class);
+            ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    RecognitionEventSys.class);
 
             hwCallback.recognitionCallback_2_1(TestUtil.createRecognitionEvent_2_1(handle, status),
                     99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eq(handle), eventCaptor.capture());
-            TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.ABORTED,
+            RecognitionEventSys lastEvent = eventCaptor.getValue();
+            assertThat(lastEvent.halEventReceivedMillis).isGreaterThan(0);
+            TestUtil.validateRecognitionEvent(lastEvent.recognitionEvent,
+                    RecognitionStatus.ABORTED,
                     false);
         }
 
         {
             final int handle = 87;
             final int status = 3; // FORCED;
-            ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    RecognitionEvent.class);
+            ArgumentCaptor<RecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    RecognitionEventSys.class);
 
             hwCallback.recognitionCallback_2_1(TestUtil.createRecognitionEvent_2_1(handle, status),
                     99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).recognitionCallback(eq(handle), eventCaptor.capture());
-            TestUtil.validateRecognitionEvent(eventCaptor.getValue(), RecognitionStatus.FORCED,
+            RecognitionEventSys lastEvent = eventCaptor.getValue();
+            assertThat(lastEvent.halEventReceivedMillis).isGreaterThan(0);
+            TestUtil.validateRecognitionEvent(lastEvent.recognitionEvent,
+                    RecognitionStatus.FORCED,
                     true);
         }
 
@@ -681,28 +694,32 @@ public class SoundHw2CompatTest {
             final int handle = 92;
             final int status =
                     android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.RecognitionStatus.SUCCESS;
-            ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    PhraseRecognitionEvent.class);
+            ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    PhraseRecognitionEventSys.class);
 
             hwCallback.phraseRecognitionCallback_2_1(
                     TestUtil.createPhraseRecognitionEvent_2_1(handle, status), 99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eq(handle), eventCaptor.capture());
-            TestUtil.validatePhraseRecognitionEvent(eventCaptor.getValue(),
+            PhraseRecognitionEventSys lastEvent = eventCaptor.getValue();
+            assertThat(lastEvent.halEventReceivedMillis).isGreaterThan(0);
+            TestUtil.validatePhraseRecognitionEvent(lastEvent.phraseRecognitionEvent,
                     RecognitionStatus.SUCCESS, false);
         }
 
         {
             final int handle = 102;
             final int status = 3; // FORCED;
-            ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
-                    PhraseRecognitionEvent.class);
+            ArgumentCaptor<PhraseRecognitionEventSys> eventCaptor = ArgumentCaptor.forClass(
+                    PhraseRecognitionEventSys.class);
 
             hwCallback.phraseRecognitionCallback_2_1(
                     TestUtil.createPhraseRecognitionEvent_2_1(handle, status), 99);
             mCanonical.flushCallbacks();
             verify(canonicalCallback).phraseRecognitionCallback(eq(handle), eventCaptor.capture());
-            TestUtil.validatePhraseRecognitionEvent(eventCaptor.getValue(),
+            PhraseRecognitionEventSys lastEvent = eventCaptor.getValue();
+            assertThat(lastEvent.halEventReceivedMillis).isGreaterThan(0);
+            TestUtil.validatePhraseRecognitionEvent(lastEvent.phraseRecognitionEvent,
                     RecognitionStatus.FORCED, true);
         }
         verifyNoMoreInteractions(canonicalCallback);
