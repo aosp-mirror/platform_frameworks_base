@@ -356,13 +356,15 @@ public class AccountManagerService
             @Override
             public void onPackageAdded(String packageName, int uid) {
                 // Called on a handler, and running as the system
-                cancelAccountAccessRequestNotificationIfNeeded(uid, true);
+                UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
+                cancelAccountAccessRequestNotificationIfNeeded(uid, true, accounts);
             }
 
             @Override
             public void onPackageUpdateFinished(String packageName, int uid) {
                 // Called on a handler, and running as the system
-                cancelAccountAccessRequestNotificationIfNeeded(uid, true);
+                UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
+                cancelAccountAccessRequestNotificationIfNeeded(uid, true, accounts);
             }
         }.register(mContext, mHandler.getLooper(), UserHandle.ALL, true);
 
@@ -379,7 +381,9 @@ public class AccountManagerService
                     if (mode == AppOpsManager.MODE_ALLOWED) {
                         final long identity = Binder.clearCallingIdentity();
                         try {
-                            cancelAccountAccessRequestNotificationIfNeeded(packageName, uid, true);
+                            UserAccounts accounts = getUserAccounts(userId);
+                            cancelAccountAccessRequestNotificationIfNeeded(
+                                    packageName, uid, true, accounts);
                         } finally {
                             Binder.restoreCallingIdentity(identity);
                         }
@@ -417,10 +421,10 @@ public class AccountManagerService
                                 return;
                             }
                         }
-
+                        UserAccounts userAccounts = getUserAccounts(UserHandle.getUserId(uid));
                         for (Account account : accounts) {
                             cancelAccountAccessRequestNotificationIfNeeded(
-                                    account, uid, packageName, true);
+                                    account, uid, packageName, true, userAccounts);
                         }
                     }
                 } finally {
@@ -440,39 +444,40 @@ public class AccountManagerService
     }
 
     private void cancelAccountAccessRequestNotificationIfNeeded(int uid,
-            boolean checkAccess) {
+            boolean checkAccess, UserAccounts userAccounts) {
         Account[] accounts = getAccountsAsUser(null, UserHandle.getUserId(uid), "android");
         for (Account account : accounts) {
-            cancelAccountAccessRequestNotificationIfNeeded(account, uid, checkAccess);
+            cancelAccountAccessRequestNotificationIfNeeded(account, uid, checkAccess, userAccounts);
         }
     }
 
     private void cancelAccountAccessRequestNotificationIfNeeded(String packageName, int uid,
-            boolean checkAccess) {
+            boolean checkAccess, UserAccounts userAccounts) {
         Account[] accounts = getAccountsAsUser(null, UserHandle.getUserId(uid), "android");
         for (Account account : accounts) {
-            cancelAccountAccessRequestNotificationIfNeeded(account, uid, packageName, checkAccess);
+            cancelAccountAccessRequestNotificationIfNeeded(account,
+                    uid, packageName, checkAccess, userAccounts);
         }
     }
 
     private void cancelAccountAccessRequestNotificationIfNeeded(Account account, int uid,
-            boolean checkAccess) {
+            boolean checkAccess, UserAccounts accounts) {
         String[] packageNames = mPackageManager.getPackagesForUid(uid);
         if (packageNames != null) {
             for (String packageName : packageNames) {
                 cancelAccountAccessRequestNotificationIfNeeded(account, uid,
-                        packageName, checkAccess);
+                        packageName, checkAccess, accounts);
             }
         }
     }
 
     private void cancelAccountAccessRequestNotificationIfNeeded(Account account,
-            int uid, String packageName, boolean checkAccess) {
+            int uid, String packageName, boolean checkAccess, UserAccounts accounts) {
         if (!checkAccess || hasAccountAccess(account, packageName,
                 UserHandle.getUserHandleForUid(uid))) {
             cancelNotification(getCredentialPermissionNotificationId(account,
-                    AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE, uid),
-                    UserHandle.getUserHandleForUid(uid));
+                    AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE, uid, accounts),
+                    accounts);
         }
     }
 
@@ -2158,13 +2163,13 @@ public class AccountManagerService
          */
         cancelNotification(
                 getSigninRequiredNotificationId(accounts, accountToRename),
-                new UserHandle(accounts.userId));
+                accounts);
         synchronized(accounts.credentialsPermissionNotificationIds) {
             for (Pair<Pair<Account, String>, Integer> pair:
                     accounts.credentialsPermissionNotificationIds.keySet()) {
                 if (accountToRename.equals(pair.first.first)) {
                     NotificationId id = accounts.credentialsPermissionNotificationIds.get(pair);
-                    cancelNotification(id, new UserHandle(accounts.userId));
+                    cancelNotification(id, accounts);
                 }
             }
         }
@@ -2316,13 +2321,13 @@ public class AccountManagerService
         }
         final long identityToken = clearCallingIdentity();
         UserAccounts accounts = getUserAccounts(userId);
-        cancelNotification(getSigninRequiredNotificationId(accounts, account), user);
+        cancelNotification(getSigninRequiredNotificationId(accounts, account), accounts);
         synchronized(accounts.credentialsPermissionNotificationIds) {
             for (Pair<Pair<Account, String>, Integer> pair:
                 accounts.credentialsPermissionNotificationIds.keySet()) {
                 if (account.equals(pair.first.first)) {
                     NotificationId id = accounts.credentialsPermissionNotificationIds.get(pair);
-                    cancelNotification(id, user);
+                    cancelNotification(id, accounts);
                 }
             }
         }
@@ -2516,7 +2521,7 @@ public class AccountManagerService
                             && AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE.equals(key.first.second)) {
                         final int uid = (Integer) key.second;
                         mHandler.post(() -> cancelAccountAccessRequestNotificationIfNeeded(
-                                account, uid, false));
+                                account, uid, false, accounts));
                     }
                 }
             }
@@ -2597,8 +2602,7 @@ public class AccountManagerService
         if (account == null || tokenType == null || callerPkg == null || callerSigDigest == null) {
             return;
         }
-        cancelNotification(getSigninRequiredNotificationId(accounts, account),
-                UserHandle.of(accounts.userId));
+        cancelNotification(getSigninRequiredNotificationId(accounts, account), accounts);
         synchronized (accounts.cacheLock) {
             accounts.accountTokenCaches.put(
                     account, token, tokenType, callerPkg, callerSigDigest, expiryMillis);
@@ -2610,8 +2614,7 @@ public class AccountManagerService
         if (account == null || type == null) {
             return false;
         }
-        cancelNotification(getSigninRequiredNotificationId(accounts, account),
-                UserHandle.of(accounts.userId));
+        cancelNotification(getSigninRequiredNotificationId(accounts, account), accounts);
         synchronized (accounts.dbLock) {
             accounts.accountsDb.beginTransaction();
             boolean updateCache = false;
@@ -3202,7 +3205,8 @@ public class AccountManagerService
     }
 
     private void createNoCredentialsPermissionNotification(Account account, Intent intent,
-            String packageName, int userId) {
+            String packageName, UserAccounts accounts) {
+        int userId = accounts.userId;
         int uid = intent.getIntExtra(
                 GrantCredentialsPermissionActivity.EXTRAS_REQUESTING_UID, -1);
         String authTokenType = intent.getStringExtra(
@@ -3232,7 +3236,7 @@ public class AccountManagerService
                             null, user))
                     .build();
         installNotification(getCredentialPermissionNotificationId(
-                account, authTokenType, uid), n, "android", user.getIdentifier());
+                account, authTokenType, uid, accounts), n, "android", user.getIdentifier());
     }
 
     private String getApplicationLabel(String packageName, int userId) {
@@ -3256,8 +3260,9 @@ public class AccountManagerService
             // the intent from a non-Activity context. This is the default behavior.
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         }
+        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
         intent.addCategory(getCredentialPermissionNotificationId(account,
-                authTokenType, uid).mTag + (packageName != null ? packageName : ""));
+                authTokenType, uid, accounts).mTag + (packageName != null ? packageName : ""));
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_ACCOUNT, account);
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_AUTH_TOKEN_TYPE, authTokenType);
         intent.putExtra(GrantCredentialsPermissionActivity.EXTRAS_RESPONSE, response);
@@ -3267,9 +3272,8 @@ public class AccountManagerService
     }
 
     private NotificationId getCredentialPermissionNotificationId(Account account,
-            String authTokenType, int uid) {
+            String authTokenType, int uid, UserAccounts accounts) {
         NotificationId nId;
-        UserAccounts accounts = getUserAccounts(UserHandle.getUserId(uid));
         synchronized (accounts.credentialsPermissionNotificationIds) {
             final Pair<Pair<Account, String>, Integer> key =
                     new Pair<Pair<Account, String>, Integer>(
@@ -4226,9 +4230,9 @@ public class AccountManagerService
             }
 
             private void handleAuthenticatorResponse(boolean accessGranted) throws RemoteException {
+                UserAccounts userAccounts = getUserAccounts(UserHandle.getUserId(uid));
                 cancelNotification(getCredentialPermissionNotificationId(account,
-                        AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE, uid),
-                        UserHandle.getUserHandleForUid(uid));
+                        AccountManager.ACCOUNT_ACCESS_TOKEN_TYPE, uid, userAccounts), userAccounts);
                 if (callback != null) {
                     Bundle result = new Bundle();
                     result.putBoolean(AccountManager.KEY_BOOLEAN_RESULT, accessGranted);
@@ -5166,7 +5170,7 @@ public class AccountManagerService
                 if (!TextUtils.isEmpty(accountName) && !TextUtils.isEmpty(accountType)) {
                     Account account = new Account(accountName, accountType);
                     cancelNotification(getSigninRequiredNotificationId(mAccounts, account),
-                            new UserHandle(mAccounts.userId));
+                            mAccounts);
                 }
             }
             IAccountManagerResponse response;
@@ -5488,7 +5492,7 @@ public class AccountManagerService
             if (intent.getComponent() != null &&
                     GrantCredentialsPermissionActivity.class.getName().equals(
                             intent.getComponent().getClassName())) {
-                createNoCredentialsPermissionNotification(account, intent, packageName, userId);
+                createNoCredentialsPermissionNotification(account, intent, packageName, accounts);
             } else {
                 Context contextForUser = getContextForUser(new UserHandle(userId));
                 final NotificationId id = getSigninRequiredNotificationId(accounts, account);
@@ -5534,16 +5538,17 @@ public class AccountManagerService
         }
     }
 
-    private void cancelNotification(NotificationId id, UserHandle user) {
-        cancelNotification(id, mContext.getPackageName(), user);
+    private void cancelNotification(NotificationId id, UserAccounts accounts) {
+        cancelNotification(id, mContext.getPackageName(), accounts);
     }
 
-    private void cancelNotification(NotificationId id, String packageName, UserHandle user) {
+    private void cancelNotification(NotificationId id, String packageName, UserAccounts accounts) {
         final long identityToken = clearCallingIdentity();
         try {
             INotificationManager service = mInjector.getNotificationManager();
             service.cancelNotificationWithTag(
-                    packageName, "android", id.mTag, id.mId, user.getIdentifier());
+                    packageName, "android", id.mTag, id.mId,
+                    UserHandle.of(accounts.userId).getIdentifier());
         } catch (RemoteException e) {
             /* ignore - local call */
         } finally {
@@ -6000,10 +6005,11 @@ public class AccountManagerService
                     accounts.accountsDb.insertGrant(accountId, authTokenType, uid);
                 }
                 cancelNotification(
-                        getCredentialPermissionNotificationId(account, authTokenType, uid),
-                        UserHandle.of(accounts.userId));
+                        getCredentialPermissionNotificationId(
+                                account, authTokenType, uid, accounts),
+                        accounts);
 
-                cancelAccountAccessRequestNotificationIfNeeded(account, uid, true);
+                cancelAccountAccessRequestNotificationIfNeeded(account, uid, true, accounts);
             }
         }
 
@@ -6043,8 +6049,9 @@ public class AccountManagerService
                 }
 
                 cancelNotification(
-                        getCredentialPermissionNotificationId(account, authTokenType, uid),
-                        UserHandle.of(accounts.userId));
+                        getCredentialPermissionNotificationId(
+                                account, authTokenType, uid, accounts),
+                        accounts);
             }
         }
 
