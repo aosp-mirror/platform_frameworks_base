@@ -20,6 +20,7 @@ import android.annotation.UserIdInt
 import android.content.res.Resources
 import android.database.ContentObserver
 import android.provider.Settings
+import com.android.systemui.R
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -27,12 +28,16 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.retail.data.repository.RetailModeRepository
 import com.android.systemui.util.settings.SecureSettings
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -84,6 +89,9 @@ interface TileSpecRepository {
  * [Settings.Secure.QS_TILES].
  *
  * All operations against [Settings] will be performed in a background thread.
+ *
+ * If the device is in retail mode, the tiles are fixed to the value of
+ * [R.string.quick_settings_tiles_retail_mode].
  */
 @SysUISingleton
 class TileSpecSettingsRepository
@@ -92,9 +100,31 @@ constructor(
     private val secureSettings: SecureSettings,
     @Main private val resources: Resources,
     private val logger: QSPipelineLogger,
+    private val retailModeRepository: RetailModeRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : TileSpecRepository {
+
+    private val retailModeTiles by lazy {
+        resources
+            .getString(R.string.quick_settings_tiles_retail_mode)
+            .split(DELIMITER)
+            .map(TileSpec::create)
+            .filter { it !is TileSpec.Invalid }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun tilesSpecs(userId: Int): Flow<List<TileSpec>> {
+        return retailModeRepository.retailMode.flatMapLatest { inRetailMode ->
+            if (inRetailMode) {
+                logger.logUsingRetailTiles()
+                flowOf(retailModeTiles)
+            } else {
+                settingsTiles(userId)
+            }
+        }
+    }
+
+    private fun settingsTiles(userId: Int): Flow<List<TileSpec>> {
         return conflatedCallbackFlow {
                 val observer =
                     object : ContentObserver(null) {
@@ -157,6 +187,10 @@ constructor(
     }
 
     private suspend fun storeTiles(@UserIdInt forUser: Int, tiles: List<TileSpec>) {
+        if (retailModeRepository.inRetailMode) {
+            // No storing tiles when in retail mode
+            return
+        }
         val toStore =
             tiles
                 .filter { it !is TileSpec.Invalid }
