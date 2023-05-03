@@ -270,7 +270,7 @@ public class CrossDeviceSyncController {
         while (pis.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
             switch (pis.getFieldNumber()) {
                 case (int) Telecom.Call.ID:
-                    call.setId(pis.readLong(Telecom.Call.ID));
+                    call.setId(pis.readString(Telecom.Call.ID));
                     break;
                 case (int) Telecom.Call.ORIGIN:
                     final long originToken = pis.start(Telecom.Call.ORIGIN);
@@ -336,7 +336,7 @@ public class CrossDeviceSyncController {
     }
 
     /** Create a call control message. */
-    public static byte[] createCallControlMessage(long callId, int control) {
+    public static byte[] createCallControlMessage(String callId, int control) {
         final ProtoOutputStream pos = new ProtoOutputStream();
         pos.write(ContextSyncMessage.VERSION, CURRENT_VERSION);
         final long telecomToken = pos.start(ContextSyncMessage.TELECOM);

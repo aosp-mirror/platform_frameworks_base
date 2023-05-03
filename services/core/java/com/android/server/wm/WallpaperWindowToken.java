@@ -128,6 +128,20 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
+    /**
+     * Update the visibility of the token to {@param visible}. If a transition will collect the
+     * wallpaper, then the visibility will be committed during the execution of the transition.
+     *
+     * waitingToShow is reset at the beginning of the transition:
+     * {@link Transition#onTransactionReady(int, SurfaceControl.Transaction)}
+     */
+    void updateWallpaperWindowsInTransition(boolean visible) {
+        if (mTransitionController.isCollecting() && mVisibleRequested != visible) {
+            waitingToShow = true;
+        }
+        updateWallpaperWindows(visible);
+    }
+
     void updateWallpaperWindows(boolean visible) {
         if (mVisibleRequested != visible) {
             ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
@@ -199,11 +213,11 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     /**
-     * Commits the visibility of this token. This will directly update the visibility without
-     * regard for other state (like being in a transition).
+     * Commits the visibility of this token. This will directly update the visibility unless the
+     * wallpaper is in a transition.
      */
     void commitVisibility(boolean visible) {
-        if (visible == isVisible()) return;
+        if (visible == isVisible() || waitingToShow) return;
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "commitVisibility: %s: visible=%b mVisibleRequested=%b", this,

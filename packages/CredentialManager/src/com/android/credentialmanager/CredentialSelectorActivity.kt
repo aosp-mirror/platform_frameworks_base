@@ -50,6 +50,8 @@ class CredentialSelectorActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN,
             0, 0)
+        overrideActivityTransition(Activity.OVERRIDE_TRANSITION_CLOSE,
+            0, 0)
         Log.d(Constants.LOG_TAG, "Creating new CredentialSelectorActivity")
         try {
             val (isCancellationRequest, shouldShowCancellationUi, _) =

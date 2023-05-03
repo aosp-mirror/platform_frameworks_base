@@ -834,6 +834,9 @@
 
     <uses-permission android:name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
 
+    <!-- Permission required for GTS test - GtsAttestationVerificationDeviceSideTestCases -->
+    <uses-permission android:name="android.permission.USE_ATTESTATION_VERIFICATION_SERVICE" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"

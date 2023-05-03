@@ -18,19 +18,19 @@ package com.android.systemui.log.dagger
 
 import javax.inject.Qualifier
 
-/** A [com.android.systemui.plugins.log.LogBuffer] for keyguard clock logs. */
+/** A [com.android.systemui.log.LogBuffer] for keyguard clock logs. */
 @Qualifier
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 annotation class KeyguardClockLog
 
-/** A [com.android.systemui.plugins.log.LogBuffer] for small keyguard clock logs. */
+/** A [com.android.systemui.log.LogBuffer] for small keyguard clock logs. */
 @Qualifier
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)
 annotation class KeyguardSmallClockLog
 
-/** A [com.android.systemui.plugins.log.LogBuffer] for large keyguard clock logs. */
+/** A [com.android.systemui.log.LogBuffer] for large keyguard clock logs. */
 @Qualifier
 @MustBeDocumented
 @Retention(AnnotationRetention.RUNTIME)

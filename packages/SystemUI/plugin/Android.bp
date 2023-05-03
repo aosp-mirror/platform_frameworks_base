@@ -36,10 +36,10 @@ java_library {
     // in PluginInstance. That will ensure that loaded plugins have access to the related classes.
     static_libs: [
         "androidx.annotation_annotation",
-        "error_prone_annotations",
         "PluginCoreLib",
         "SystemUIAnimationLib",
         "SystemUICommon",
+        "SystemUILogLib",
     ],
 
 }

@@ -37,6 +37,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import kotlinx.coroutines.CoroutineScope;
+
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 @SmallTest
@@ -46,6 +48,9 @@ public class SystemProcessConditionTest extends SysuiTestCase {
 
     @Mock
     Monitor.Callback mCallback;
+
+    @Mock
+    CoroutineScope mScope;
 
     private final FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -61,7 +66,7 @@ public class SystemProcessConditionTest extends SysuiTestCase {
     @Test
     public void testConditionFailsWithNonSystemProcess() {
 
-        final Condition condition = new SystemProcessCondition(mProcessWrapper);
+        final Condition condition = new SystemProcessCondition(mScope, mProcessWrapper);
         when(mProcessWrapper.isSystemUser()).thenReturn(false);
 
         final Monitor monitor = new Monitor(mExecutor);
@@ -82,7 +87,7 @@ public class SystemProcessConditionTest extends SysuiTestCase {
     @Test
     public void testConditionSucceedsWithSystemProcess() {
 
-        final Condition condition = new SystemProcessCondition(mProcessWrapper);
+        final Condition condition = new SystemProcessCondition(mScope, mProcessWrapper);
         when(mProcessWrapper.isSystemUser()).thenReturn(true);
 
         final Monitor monitor = new Monitor(mExecutor);

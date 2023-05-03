@@ -20,6 +20,7 @@ import static android.app.ActivityManager.PROCESS_STATE_BOUND_TOP;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
+import static android.os.PowerManager.USER_ACTIVITY_EVENT_BUTTON;
 import static android.os.PowerManagerInternal.WAKEFULNESS_ASLEEP;
 import static android.os.PowerManagerInternal.WAKEFULNESS_AWAKE;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
@@ -41,6 +42,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.atMost;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -112,6 +114,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.stubbing.Answer;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -2468,4 +2471,18 @@ public class PowerManagerServiceTest {
         verify(mNotifierMock).onWakeLockReleased(anyInt(), eq(tag), eq(packageName), anyInt(),
                 anyInt(), any(), any(), same(callback2));
     }
+
+    @Test
+    public void testUserActivity_futureEventsAreIgnored() {
+        createService();
+        startSystem();
+        // Starting the system triggers a user activity event, so clear that before calling
+        // userActivity() directly.
+        clearInvocations(mNotifierMock);
+        final long eventTime = mClock.now() + Duration.ofHours(10).toMillis();
+        mService.getBinderServiceInstance().userActivity(Display.DEFAULT_DISPLAY, eventTime,
+                USER_ACTIVITY_EVENT_BUTTON, /* flags= */ 0);
+        verify(mNotifierMock, never()).onUserActivity(anyInt(),  anyInt(), anyInt());
+    }
+
 }
