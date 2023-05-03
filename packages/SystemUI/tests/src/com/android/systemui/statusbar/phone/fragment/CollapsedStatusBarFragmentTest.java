@@ -28,10 +28,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
@@ -71,6 +74,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
@@ -83,7 +87,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -125,6 +128,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     private StatusBarIconController.DarkIconManager.Factory mIconManagerFactory;
     @Mock
     private StatusBarIconController.DarkIconManager mIconManager;
+    private FakeCollapsedStatusBarViewModel mCollapsedStatusBarViewModel;
     @Mock
     private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock
@@ -280,15 +284,15 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
 
-        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
 
         fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
 
-        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
 
         fragment.disable(DEFAULT_DISPLAY, StatusBarManager.DISABLE_NOTIFICATION_ICONS, 0, false);
 
-        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
     }
 
     @Test
@@ -320,7 +324,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.INVISIBLE, getClockView().getVisibility());
-        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -336,7 +340,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -353,7 +357,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are hidden
         assertEquals(View.INVISIBLE, getClockView().getVisibility());
-        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
         assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
 
         // WHEN the shade is updated to no longer be open
@@ -364,7 +368,58 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         // THEN all views are shown
         assertEquals(View.VISIBLE, getClockView().getVisibility());
-        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    public void disable_notTransitioningToOccluded_everythingShown() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        mCollapsedStatusBarViewModel.isTransitioningFromLockscreenToOccluded().setValue(false);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN all views are shown
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    public void disable_isTransitioningToOccluded_everythingHidden() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        mCollapsedStatusBarViewModel.isTransitioningFromLockscreenToOccluded().setValue(true);
+
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN all views are hidden
+        assertEquals(View.GONE, getClockView().getVisibility());
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+    }
+
+    @Test
+    public void disable_wasTransitioningToOccluded_transitionFinished_everythingShown() {
+        CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN the transition is occurring
+        mCollapsedStatusBarViewModel.isTransitioningFromLockscreenToOccluded().setValue(true);
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN all views are hidden
+        assertEquals(View.GONE, getClockView().getVisibility());
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        assertEquals(View.INVISIBLE, getEndSideContentView().getVisibility());
+
+        // WHEN the transition has finished
+        mCollapsedStatusBarViewModel.isTransitioningFromLockscreenToOccluded().setValue(false);
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN all views are shown
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.VISIBLE));
         assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
     }
 
@@ -397,7 +452,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         assertEquals(View.VISIBLE,
                 mFragment.getView().findViewById(R.id.ongoing_call_chip).getVisibility());
-        Mockito.verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
+        verify(mNotificationAreaInner, atLeast(1)).setVisibility(eq(View.INVISIBLE));
     }
 
     @Test
@@ -575,6 +630,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         mSecureSettings = mock(SecureSettings.class);
 
         mShadeExpansionStateManager = new ShadeExpansionStateManager();
+        mCollapsedStatusBarViewModel = new FakeCollapsedStatusBarViewModel();
 
         setUpNotificationIconAreaController();
         return new CollapsedStatusBarFragment(
@@ -587,6 +643,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mock(FeatureFlags.class),
                 mStatusBarIconController,
                 mIconManagerFactory,
+                mCollapsedStatusBarViewModel,
                 mStatusBarHideIconsForBouncerManager,
                 mKeyguardStateController,
                 mShadeViewController,
@@ -619,7 +676,14 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         when(mNotificationAreaInner.getLayoutParams()).thenReturn(
                 new FrameLayout.LayoutParams(100, 100));
-        when(mNotificationAreaInner.animate()).thenReturn(mock(ViewPropertyAnimator.class));
+        // We should probably start using a real view so that we don't need to mock these methods.
+        ViewPropertyAnimator viewPropertyAnimator = mock(ViewPropertyAnimator.class);
+        when(mNotificationAreaInner.animate()).thenReturn(viewPropertyAnimator);
+        when(viewPropertyAnimator.alpha(anyFloat())).thenReturn(viewPropertyAnimator);
+        when(viewPropertyAnimator.setDuration(anyLong())).thenReturn(viewPropertyAnimator);
+        when(viewPropertyAnimator.setInterpolator(any())).thenReturn(viewPropertyAnimator);
+        when(viewPropertyAnimator.setStartDelay(anyLong())).thenReturn(viewPropertyAnimator);
+        when(viewPropertyAnimator.withEndAction(any())).thenReturn(viewPropertyAnimator);
 
         when(mMockNotificationAreaController.getNotificationInnerAreaView()).thenReturn(
                 mNotificationAreaInner);
