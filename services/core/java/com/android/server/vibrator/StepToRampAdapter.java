@@ -33,11 +33,11 @@ import java.util.List;
  * start and end amplitudes/frequencies, which can then be converted to PWLE compositions. This
  * adapter leaves the segments unchanged if the device doesn't have the PWLE composition capability.
  */
-final class StepToRampAdapter implements VibrationEffectAdapters.SegmentsAdapter<VibratorInfo> {
+final class StepToRampAdapter implements VibrationSegmentsAdapter {
 
     @Override
-    public int apply(List<VibrationEffectSegment> segments, int repeatIndex,
-            VibratorInfo info) {
+    public int adaptToVibrator(VibratorInfo info, List<VibrationEffectSegment> segments,
+            int repeatIndex) {
         if (!info.hasCapability(IVibrator.CAP_COMPOSE_PWLE_EFFECTS)) {
             // The vibrator does not have PWLE capability, so keep the segments unchanged.
             return repeatIndex;
@@ -148,6 +148,9 @@ final class StepToRampAdapter implements VibrationEffectAdapters.SegmentsAdapter
     }
 
     private static float fillEmptyFrequency(VibratorInfo info, float frequencyHz) {
+        if (Float.isNaN(info.getResonantFrequencyHz())) {
+            return frequencyHz;
+        }
         return frequencyHz == 0 ? info.getResonantFrequencyHz() : frequencyHz;
     }
 }

@@ -44,7 +44,7 @@ import java.util.List;
 public class RampDownAdapterTest {
     private static final int TEST_RAMP_DOWN_DURATION = 20;
     private static final int TEST_STEP_DURATION = 5;
-    private static final VibratorInfo TEST_VIBRATOR_INFO = new VibratorInfo.Builder(0).build();
+    private static final VibratorInfo EMPTY_VIBRATOR_INFO = new VibratorInfo.Builder(0).build();
 
     private RampDownAdapter mAdapter;
 
@@ -61,8 +61,8 @@ public class RampDownAdapterTest {
                 new PrimitiveSegment(VibrationEffect.Composition.PRIMITIVE_TICK, 1, 10)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        assertEquals(-1, mAdapter.apply(segments, -1, TEST_VIBRATOR_INFO));
-        assertEquals(1, mAdapter.apply(segments, 1, TEST_VIBRATOR_INFO));
+        assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
+        assertEquals(1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 1));
 
         assertEquals(originalSegments, segments);
     }
@@ -75,8 +75,8 @@ public class RampDownAdapterTest {
                         /* startFrequencyHz= */ 10, /* endFrequencyHz= */ 50, /* duration= */ 20)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        assertEquals(-1, mAdapter.apply(segments, -1, TEST_VIBRATOR_INFO));
-        assertEquals(0, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
+        assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
+        assertEquals(0, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 0));
 
         assertEquals(originalSegments, segments);
     }
@@ -94,8 +94,8 @@ public class RampDownAdapterTest {
                         /* startFrequencyHz= */ 0, /* endFrequencyHz= */ 0, /* duration= */ 50)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        assertEquals(-1, mAdapter.apply(segments, -1, TEST_VIBRATOR_INFO));
-        assertEquals(2, mAdapter.apply(segments, 2, TEST_VIBRATOR_INFO));
+        assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
+        assertEquals(2, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 2));
         assertEquals(originalSegments, segments);
     }
 
@@ -109,7 +109,7 @@ public class RampDownAdapterTest {
                 new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 5),
                 new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 5));
 
-        assertEquals(-1, mAdapter.apply(segments, -1, TEST_VIBRATOR_INFO));
+        assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
         assertEquals(expectedSegments, segments);
     }
 
@@ -128,7 +128,7 @@ public class RampDownAdapterTest {
                 new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 35),
                 new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 100));
 
-        assertEquals(-1, mAdapter.apply(segments, -1, TEST_VIBRATOR_INFO));
+        assertEquals(-1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, -1));
         assertEquals(expectedSegments, segments);
     }
 
@@ -147,7 +147,7 @@ public class RampDownAdapterTest {
                 new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 100));
 
         // Repeat index fixed after intermediate steps added
-        assertEquals(5, mAdapter.apply(segments, 2, TEST_VIBRATOR_INFO));
+        assertEquals(5, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 2));
         assertEquals(expectedSegments, segments);
     }
 
@@ -163,7 +163,7 @@ public class RampDownAdapterTest {
                 new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 5),
                 new StepSegment(/* amplitude= */ 0.8f, /* frequencyHz= */ 0, /* duration= */ 100));
 
-        assertEquals(3, mAdapter.apply(segments, 2, TEST_VIBRATOR_INFO));
+        assertEquals(3, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 2));
         assertEquals(expectedSegments, segments);
     }
 
@@ -188,7 +188,7 @@ public class RampDownAdapterTest {
                 new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 35));
 
         // Repeat index fixed after intermediate steps added
-        assertEquals(5, mAdapter.apply(segments, 1, TEST_VIBRATOR_INFO));
+        assertEquals(5, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 1));
         assertEquals(expectedSegments, segments);
     }
 
@@ -199,7 +199,7 @@ public class RampDownAdapterTest {
                 new StepSegment(/* amplitude= */ 0.5f, /* frequencyHz= */ 0, /* duration= */ 100)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        assertEquals(0, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
+        assertEquals(0, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 0));
 
         assertEquals(originalSegments, segments);
     }
@@ -218,7 +218,7 @@ public class RampDownAdapterTest {
                 new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 5));
 
         // Shift repeat index to the right to use append instead of zero segment.
-        assertEquals(1, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
+        assertEquals(1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 0));
 
         assertEquals(expectedSegments, segments);
     }
@@ -239,7 +239,7 @@ public class RampDownAdapterTest {
                 new StepSegment(/* amplitude= */ 0, /* frequencyHz= */ 0, /* duration= */ 5));
 
         // Shift repeat index to the right to use append with part of the zero segment.
-        assertEquals(1, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
+        assertEquals(1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 0));
 
         assertEquals(expectedSegments, segments);
     }
@@ -263,7 +263,7 @@ public class RampDownAdapterTest {
                         /* startFrequencyHz= */ 200, /* endFrequencyHz= */ 200,
                         /* duration= */ 30));
 
-        assertEquals(2, mAdapter.apply(segments, 2, TEST_VIBRATOR_INFO));
+        assertEquals(2, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 2));
 
         assertEquals(expectedSegments, segments);
     }
@@ -290,7 +290,7 @@ public class RampDownAdapterTest {
                         /* duration= */ 30));
 
         // Repeat index fixed after intermediate steps added
-        assertEquals(3, mAdapter.apply(segments, 2, TEST_VIBRATOR_INFO));
+        assertEquals(3, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 2));
 
         assertEquals(expectedSegments, segments);
     }
@@ -305,7 +305,7 @@ public class RampDownAdapterTest {
                         /* duration= */ 30)));
         List<VibrationEffectSegment> originalSegments = new ArrayList<>(segments);
 
-        assertEquals(0, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
+        assertEquals(0, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 0));
 
         assertEquals(originalSegments, segments);
     }
@@ -324,7 +324,7 @@ public class RampDownAdapterTest {
                         /* startFrequencyHz= */ 80, /* endFrequencyHz= */ 80, /* duration= */ 20));
 
         // Shift repeat index to the right to use append instead of zero segment.
-        assertEquals(1, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
+        assertEquals(1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 0));
 
         assertEquals(expectedSegments, segments);
     }
@@ -348,7 +348,7 @@ public class RampDownAdapterTest {
                         /* startFrequencyHz= */ 1, /* endFrequencyHz= */ 1, /* duration= */ 20));
 
         // Shift repeat index to the right to use append with part of the zero segment.
-        assertEquals(1, mAdapter.apply(segments, 0, TEST_VIBRATOR_INFO));
+        assertEquals(1, mAdapter.adaptToVibrator(EMPTY_VIBRATOR_INFO, segments, 0));
 
         assertEquals(expectedSegments, segments);
     }

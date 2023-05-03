@@ -22,7 +22,6 @@ import android.os.CombinedVibration;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.VibrationEffect;
-import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.StepSegment;
@@ -162,8 +161,7 @@ final class StartSequentialEffectStep extends Step {
      * waveforms return {@link Long#MAX_VALUE}. Zero or negative values indicate the vibrators
      * have ignored all effects.
      */
-    private long startVibrating(
-            DeviceEffectMap effectMapping, List<Step> nextSteps) {
+    private long startVibrating(DeviceEffectMap effectMapping, List<Step> nextSteps) {
         int vibratorCount = effectMapping.size();
         if (vibratorCount == 0) {
             // No effect was mapped to any available vibrator.
@@ -257,17 +255,22 @@ final class StartSequentialEffectStep extends Step {
 
         DeviceEffectMap(CombinedVibration.Mono mono) {
             SparseArray<VibratorController> vibrators = conductor.getVibrators();
-            mVibratorEffects = new SparseArray<>(vibrators.size());
-            mVibratorIds = new int[vibrators.size()];
-            for (int i = 0; i < vibrators.size(); i++) {
-                int vibratorId = vibrators.keyAt(i);
-                VibratorInfo vibratorInfo = vibrators.valueAt(i).getVibratorInfo();
-                VibrationEffect effect = conductor.deviceEffectAdapter.apply(
-                        mono.getEffect(), vibratorInfo);
-                if (effect instanceof VibrationEffect.Composed) {
-                    mVibratorEffects.put(vibratorId, (VibrationEffect.Composed) effect);
+            VibrationEffect effect = mono.getEffect();
+            if (effect instanceof VibrationEffect.Composed) {
+                mVibratorEffects = new SparseArray<>(vibrators.size());
+                mVibratorIds = new int[vibrators.size()];
+
+                VibrationEffect.Composed composedEffect = (VibrationEffect.Composed) effect;
+                for (int i = 0; i < vibrators.size(); i++) {
+                    int vibratorId = vibrators.keyAt(i);
+                    mVibratorEffects.put(vibratorId, composedEffect);
                     mVibratorIds[i] = vibratorId;
                 }
+            } else {
+                Slog.wtf(VibrationThread.TAG,
+                        "Unable to map device vibrators to unexpected effect: " + effect);
+                mVibratorEffects = new SparseArray<>();
+                mVibratorIds = new int[0];
             }
             mRequiredSyncCapabilities = calculateRequiredSyncCapabilities(mVibratorEffects);
         }
@@ -279,11 +282,12 @@ final class StartSequentialEffectStep extends Step {
             for (int i = 0; i < stereoEffects.size(); i++) {
                 int vibratorId = stereoEffects.keyAt(i);
                 if (vibrators.contains(vibratorId)) {
-                    VibratorInfo vibratorInfo = vibrators.valueAt(i).getVibratorInfo();
-                    VibrationEffect effect = conductor.deviceEffectAdapter.apply(
-                            stereoEffects.valueAt(i), vibratorInfo);
+                    VibrationEffect effect = stereoEffects.valueAt(i);
                     if (effect instanceof VibrationEffect.Composed) {
                         mVibratorEffects.put(vibratorId, (VibrationEffect.Composed) effect);
+                    } else {
+                        Slog.wtf(VibrationThread.TAG,
+                                "Unable to map device vibrators to unexpected effect: " + effect);
                     }
                 }
             }

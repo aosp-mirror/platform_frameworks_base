@@ -269,8 +269,9 @@ public class VibrationScalerTest {
         when(mVibrationConfigMock.getDefaultVibrationIntensity(eq(usage))).thenReturn(intensity);
     }
 
-    private <T extends VibrationEffectSegment> T getFirstSegment(VibrationEffect.Composed effect) {
-        return (T) effect.getSegments().get(0);
+    private <T extends VibrationEffectSegment> T getFirstSegment(VibrationEffect effect) {
+        assertTrue(effect instanceof VibrationEffect.Composed);
+        return (T) ((VibrationEffect.Composed) effect).getSegments().get(0);
     }
 
     private void setUserSetting(String settingName, int value) {

@@ -28,7 +28,6 @@ import android.content.Context;
 import android.hardware.vibrator.V1_0.EffectStrength;
 import android.hardware.vibrator.V1_3.Effect;
 import android.net.Uri;
-import android.os.Vibrator;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.PrimitiveSegment;
 import android.os.vibrator.RampSegment;
@@ -355,7 +354,7 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * @param effectId The ID of the effect to perform:
      *                 {@link #EFFECT_CLICK}, {@link #EFFECT_DOUBLE_CLICK}, {@link #EFFECT_TICK}
-     * @param fallback Whether to fallback to a generic pattern if a hardware specific
+     * @param fallback Whether to fall back to a generic pattern if a hardware specific
      *                 implementation doesn't exist.
      *
      * @return The desired effect.
@@ -548,44 +547,6 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
-     * Resolve default values into integer amplitude numbers.
-     *
-     * @param defaultAmplitude the default amplitude to apply, must be between 0 and
-     *                         MAX_AMPLITUDE
-     * @return this if amplitude value is already set, or a copy of this effect with given default
-     *         amplitude otherwise
-     *
-     * @hide
-     */
-    public abstract <T extends VibrationEffect> T resolve(int defaultAmplitude);
-
-    /**
-     * Scale the vibration effect intensity with the given constraints.
-     *
-     * @param scaleFactor scale factor to be applied to the intensity. Values within [0,1) will
-     *                    scale down the intensity, values larger than 1 will scale up
-     * @return this if there is no scaling to be done, or a copy of this effect with scaled
-     *         vibration intensity otherwise
-     *
-     * @hide
-     */
-    public abstract <T extends VibrationEffect> T scale(float scaleFactor);
-
-    /**
-     * Applies given effect strength to prebaked effects represented by one of
-     * VibrationEffect.EFFECT_*.
-     *
-     * @param effectStrength new effect strength to be applied, one of
-     *                       VibrationEffect.EFFECT_STRENGTH_*.
-     * @return this if there is no change to this effect, or a copy of this effect with applied
-     * effect strength otherwise.
-     * @hide
-     */
-    public <T extends VibrationEffect> T applyEffectStrength(int effectStrength) {
-        return (T) this;
-    }
-
-    /**
      * Ensures that the effect is repeating indefinitely or not. This is a lossy operation and
      * should only be applied once to an original effect - it shouldn't be applied to the
      * result of this method.
@@ -601,12 +562,12 @@ public abstract class VibrationEffect implements Parcelable {
      * @param loopDelayMs The milliseconds to pause between loops, if repeating is to be added to
      *                    the effect. Ignored if {@code repeating==false} or the effect is already
      *                    repeating itself. No delay is added if <= 0.
-     * @return this if the effect already satifies the repeating requirement, or a copy of this
+     * @return this if the effect already satisfies the repeating requirement, or a copy of this
      *         adjusted to repeat or not repeat as appropriate.
      * @hide
      */
     @NonNull
-    public abstract <T extends VibrationEffect> T applyRepeatingIndefinitely(
+    public abstract VibrationEffect applyRepeatingIndefinitely(
             boolean wantRepeating, int loopDelayMs);
 
     /**
@@ -681,6 +642,22 @@ public abstract class VibrationEffect implements Parcelable {
     }
 
     /**
+     * Transforms a {@link VibrationEffect} using a generic parameter.
+     *
+     * <p>This can be used for scaling effects based on user settings or adapting them to the
+     * capabilities of a specific device vibrator.
+     *
+     * @param <ParamT> The type of parameter to be used on the effect by this transformation
+     * @hide
+     */
+    public interface Transformation<ParamT> {
+
+        /** Transforms given effect by applying the given parameter. */
+        @NonNull
+        VibrationEffect transform(@NonNull VibrationEffect effect, @NonNull ParamT param);
+    }
+
+    /**
      * Implementation of {@link VibrationEffect} described by a composition of one or more
      * {@link VibrationEffectSegment}, with an optional index to represent repeating effects.
      *
@@ -692,7 +669,9 @@ public abstract class VibrationEffect implements Parcelable {
         private final int mRepeatIndex;
 
         Composed(@NonNull Parcel in) {
-            this(in.readArrayList(VibrationEffectSegment.class.getClassLoader(), android.os.vibrator.VibrationEffectSegment.class), in.readInt());
+            this(in.readArrayList(
+                    VibrationEffectSegment.class.getClassLoader(), VibrationEffectSegment.class),
+                    in.readInt());
         }
 
         Composed(@NonNull VibrationEffectSegment segment) {
@@ -843,57 +822,6 @@ public abstract class VibrationEffect implements Parcelable {
         /** @hide */
         @NonNull
         @Override
-        public Composed resolve(int defaultAmplitude) {
-            int segmentCount = mSegments.size();
-            ArrayList<VibrationEffectSegment> resolvedSegments = new ArrayList<>(segmentCount);
-            for (int i = 0; i < segmentCount; i++) {
-                resolvedSegments.add(mSegments.get(i).resolve(defaultAmplitude));
-            }
-            if (resolvedSegments.equals(mSegments)) {
-                return this;
-            }
-            Composed resolved = new Composed(resolvedSegments, mRepeatIndex);
-            resolved.validate();
-            return resolved;
-        }
-
-        /** @hide */
-        @NonNull
-        @Override
-        public Composed scale(float scaleFactor) {
-            int segmentCount = mSegments.size();
-            ArrayList<VibrationEffectSegment> scaledSegments = new ArrayList<>(segmentCount);
-            for (int i = 0; i < segmentCount; i++) {
-                scaledSegments.add(mSegments.get(i).scale(scaleFactor));
-            }
-            if (scaledSegments.equals(mSegments)) {
-                return this;
-            }
-            Composed scaled = new Composed(scaledSegments, mRepeatIndex);
-            scaled.validate();
-            return scaled;
-        }
-
-        /** @hide */
-        @NonNull
-        @Override
-        public Composed applyEffectStrength(int effectStrength) {
-            int segmentCount = mSegments.size();
-            ArrayList<VibrationEffectSegment> scaledSegments = new ArrayList<>(segmentCount);
-            for (int i = 0; i < segmentCount; i++) {
-                scaledSegments.add(mSegments.get(i).applyEffectStrength(effectStrength));
-            }
-            if (scaledSegments.equals(mSegments)) {
-                return this;
-            }
-            Composed scaled = new Composed(scaledSegments, mRepeatIndex);
-            scaled.validate();
-            return scaled;
-        }
-
-        /** @hide */
-        @NonNull
-        @Override
         public Composed applyRepeatingIndefinitely(boolean wantRepeating, int loopDelayMs) {
             boolean isRepeating = mRepeatIndex >= 0;
             if (isRepeating == wantRepeating) {
@@ -917,6 +845,9 @@ public abstract class VibrationEffect implements Parcelable {
 
         @Override
         public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
             if (!(o instanceof Composed)) {
                 return false;
             }

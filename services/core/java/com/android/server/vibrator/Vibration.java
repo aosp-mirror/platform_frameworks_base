@@ -31,6 +31,7 @@ import android.util.proto.ProtoOutputStream;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -205,13 +206,13 @@ abstract class Vibration {
         private final long mStartTime;
         private final long mEndTime;
         private final long mDurationMs;
-        private final CombinedVibration mEffect;
-        private final CombinedVibration mOriginalEffect;
+        @Nullable private final CombinedVibration mOriginalEffect;
+        @Nullable private final CombinedVibration mPlayedEffect;
         private final float mScale;
         private final CallerInfo mCallerInfo;
         private final Status mStatus;
 
-        DebugInfo(Status status, VibrationStats stats, @Nullable CombinedVibration effect,
+        DebugInfo(Status status, VibrationStats stats, @Nullable CombinedVibration playedEffect,
                 @Nullable CombinedVibration originalEffect, float scale,
                 @NonNull CallerInfo callerInfo) {
             Objects.requireNonNull(callerInfo);
@@ -219,7 +220,7 @@ abstract class Vibration {
             mStartTime = stats.getStartTimeDebug();
             mEndTime = stats.getEndTimeDebug();
             mDurationMs = stats.getDurationDebug();
-            mEffect = effect;
+            mPlayedEffect = playedEffect;
             mOriginalEffect = originalEffect;
             mScale = scale;
             mCallerInfo = callerInfo;
@@ -228,27 +229,16 @@ abstract class Vibration {
 
         @Override
         public String toString() {
-            return new StringBuilder()
-                    .append("createTime: ")
-                    .append(DEBUG_DATE_FORMAT.format(new Date(mCreateTime)))
-                    .append(", startTime: ")
-                    .append(DEBUG_DATE_FORMAT.format(new Date(mStartTime)))
-                    .append(", endTime: ")
-                    .append(mEndTime == 0 ? null
-                            : DEBUG_DATE_FORMAT.format(new Date(mEndTime)))
-                    .append(", durationMs: ")
-                    .append(mDurationMs)
-                    .append(", status: ")
-                    .append(mStatus.name().toLowerCase())
-                    .append(", effect: ")
-                    .append(mEffect)
-                    .append(", originalEffect: ")
-                    .append(mOriginalEffect)
-                    .append(", scale: ")
-                    .append(String.format("%.2f", mScale))
-                    .append(", callerInfo: ")
-                    .append(mCallerInfo)
-                    .toString();
+            return "createTime: " + DEBUG_DATE_FORMAT.format(new Date(mCreateTime))
+                    + ", startTime: " + DEBUG_DATE_FORMAT.format(new Date(mStartTime))
+                    + ", endTime: "
+                    + (mEndTime == 0 ? null : DEBUG_DATE_FORMAT.format(new Date(mEndTime)))
+                    + ", durationMs: " + mDurationMs
+                    + ", status: " + mStatus.name().toLowerCase(Locale.ROOT)
+                    + ", playedEffect: " + mPlayedEffect
+                    + ", originalEffect: " + mOriginalEffect
+                    + ", scale: " + String.format(Locale.ROOT, "%.2f", mScale)
+                    + ", callerInfo: " + mCallerInfo;
         }
 
         /** Write this info into given {@code fieldId} on {@link ProtoOutputStream}. */
@@ -266,8 +256,8 @@ abstract class Vibration {
             proto.write(VibrationAttributesProto.FLAGS, attrs.getFlags());
             proto.end(attrsToken);
 
-            if (mEffect != null) {
-                dumpEffect(proto, VibrationProto.EFFECT, mEffect);
+            if (mPlayedEffect != null) {
+                dumpEffect(proto, VibrationProto.PLAYED_EFFECT, mPlayedEffect);
             }
             if (mOriginalEffect != null) {
                 dumpEffect(proto, VibrationProto.ORIGINAL_EFFECT, mOriginalEffect);
