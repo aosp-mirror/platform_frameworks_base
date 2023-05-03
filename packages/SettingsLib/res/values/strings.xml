@@ -244,7 +244,7 @@
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the Hearing Aid profile. -->
     <string name="bluetooth_profile_hearing_aid">Hearing Aids</string>
     <!-- Bluetooth settings.  The user-visible string that is used whenever referring to the LE audio profile. -->
-    <string name="bluetooth_profile_le_audio">LE audio</string>
+    <string name="bluetooth_profile_le_audio">LE audio (experimental)</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the Hearing Aid checkbox preference when Hearing Aid is connected. -->
     <string name="bluetooth_hearing_aid_profile_summary_connected">Connected to Hearing Aids</string>
     <!-- Bluetooth settings.  Connection options screen.  The summary for the LE audio checkbox preference when LE audio is connected. -->
