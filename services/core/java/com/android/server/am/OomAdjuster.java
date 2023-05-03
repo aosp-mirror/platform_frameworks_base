@@ -3253,7 +3253,11 @@ public class OomAdjuster {
                 // {@link SCHED_GROUP_TOP_APP}. We don't check render thread because it
                 // is not ready when attaching.
                 app.getWindowProcessController().onTopProcChanged();
-                setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                if (mService.mUseFifoUiScheduling) {
+                    mService.scheduleAsFifoPriority(app.getPid(), true);
+                } else {
+                    setThreadPriority(app.getPid(), THREAD_PRIORITY_TOP_APP_BOOST);
+                }
                 initialSchedGroup = SCHED_GROUP_TOP_APP;
             } catch (Exception e) {
                 Slog.w(TAG, "Failed to pre-set top priority to " + app + " " + e);
