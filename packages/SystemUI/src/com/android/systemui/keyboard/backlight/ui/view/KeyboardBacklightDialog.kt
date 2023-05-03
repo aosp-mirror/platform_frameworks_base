@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyboard.backlight.ui.view
 
+import android.annotation.AttrRes
 import android.annotation.ColorInt
 import android.app.Dialog
 import android.content.Context
@@ -31,6 +32,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
 import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.util.children
 
@@ -38,7 +40,7 @@ class KeyboardBacklightDialog(
     context: Context,
     initialCurrentLevel: Int,
     initialMaxLevel: Int,
-) : Dialog(context) {
+) : Dialog(context, R.style.Theme_SystemUI_Dialog) {
 
     private data class RootProperties(
         val cornerRadius: Float,
@@ -69,9 +71,14 @@ class KeyboardBacklightDialog(
     private lateinit var rootProperties: RootProperties
     private lateinit var iconProperties: BacklightIconProperties
     private lateinit var stepProperties: StepViewProperties
-    @ColorInt var filledRectangleColor: Int = 0
-    @ColorInt var emptyRectangleColor: Int = 0
-    @ColorInt var backgroundColor: Int = 0
+    @ColorInt
+    var filledRectangleColor = getColorFromStyle(com.android.internal.R.attr.materialColorPrimary)
+    @ColorInt
+    var emptyRectangleColor =
+        getColorFromStyle(com.android.internal.R.attr.materialColorOutlineVariant)
+    @ColorInt
+    var backgroundColor = getColorFromStyle(com.android.internal.R.attr.materialColorSurfaceBright)
+    @ColorInt var iconColor = getColorFromStyle(com.android.internal.R.attr.materialColorOnPrimary)
 
     init {
         currentLevel = initialCurrentLevel
@@ -90,9 +97,6 @@ class KeyboardBacklightDialog(
 
     private fun updateResources() {
         context.resources.apply {
-            filledRectangleColor = getColor(R.color.backlight_indicator_step_filled, context.theme)
-            emptyRectangleColor = getColor(R.color.backlight_indicator_step_empty, context.theme)
-            backgroundColor = getColor(R.color.backlight_indicator_background, context.theme)
             rootProperties =
                 RootProperties(
                     cornerRadius =
@@ -124,6 +128,11 @@ class KeyboardBacklightDialog(
                             .toFloat(),
                 )
         }
+    }
+
+    @ColorInt
+    fun getColorFromStyle(@AttrRes colorId: Int): Int {
+        return Utils.getColorAttrDefaultColor(context, colorId)
     }
 
     fun updateState(current: Int, max: Int, forceRefresh: Boolean = false) {
@@ -215,6 +224,7 @@ class KeyboardBacklightDialog(
     private fun createBacklightIconView(): ImageView {
         return ImageView(context).apply {
             setImageResource(R.drawable.ic_keyboard_backlight)
+            setColorFilter(iconColor)
             layoutParams =
                 FrameLayout.LayoutParams(iconProperties.width, iconProperties.height).apply {
                     gravity = Gravity.CENTER
