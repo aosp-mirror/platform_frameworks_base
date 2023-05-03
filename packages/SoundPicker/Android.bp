@@ -17,6 +17,8 @@ android_library {
     ],
     static_libs: [
         "androidx.appcompat_appcompat",
+        "hilt_android",
+        "guava",
     ],
 }
 
