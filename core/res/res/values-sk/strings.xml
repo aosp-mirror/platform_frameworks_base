@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Systém Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Prepnúť na osobný profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Prepnúť na pracovný profil"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Prepnúť na osobnú verziu aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Prepnúť na pracovnú verziu aplikácie <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"prístup ku kontaktom"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Poloha"</string>
@@ -505,8 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikácii ovládať vibrácie."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Povoľuje aplikácii prístup k stavu vibrátora."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"priamo volať na telefónne čísla"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Umožňuje aplikácii volať na telefónne čísla bez vášho zásahu. Môže to viesť k neočakávaným poplatkom alebo hovorov. Upozorňujeme, že aplikácia nemôže volať na tiesňové linky. Škodlivé aplikácie vám môžu spôsobiť poplatky, pretože volajú bez vášho vedomia alebo vytáčajú kódy operátorov, ktoré automaticky presmerovávajú prichádzajúce hovory na iné číslo."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"prístup k službe volania IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Umožňuje aplikácii používať službu okamžitých správ (IMS) na volanie bez intervencie používateľa."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"čítať stav a identitu telefónu"</string>
@@ -695,7 +696,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Pozrite sa na telefón priamejšie"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Pozrite sa na telefón priamejšie"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Pozrite sa na telefón priamejšie"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Odstráňte všetko, čo vám zakrýva tvár."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Odstráňte všetko, čo vám zakrýva tvár"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Vyčistite hornú časť obrazovky vrátane čierneho panela"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -712,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Operácia týkajúca sa tváre bola zrušená"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Odomknutie tvárou zrušil používateľ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Príliš veľa pokusov. Skúste to neskôr."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Priveľa pokusov. Odomknutie tvárou nie je k dispozícii."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Príliš veľa pokusov. Zadajte namiesto toho zámku obrazovky."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nedá sa overiť tvár. Skúste to znova."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Nenastavili ste odomknutie tvárou"</string>
@@ -2162,16 +2162,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tento obsah sa nedá otvoriť pomocou pracovných aplikácií"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tento obsah sa nedá zdieľať pomocou osobných aplikácií"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tento obsah sa nedá otvoriť pomocou osobných aplikácií"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Pracovné aplikácie sú pozastavené"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Zrušiť pozastavenie"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Žiadne pracovné aplikácie"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Žiadne osobné aplikácie"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Otvorte osobnú aplikáciu <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Otvorte pracovnú aplikáciu <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Použiť osobný prehliadač"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Použiť pracovný prehliadač"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN na odomknutie siete pre SIM kartu"</string>
@@ -2323,8 +2319,8 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Umožňuje sprievodnej aplikácii spúšťať služby na popredí z pozadia."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofón je k dispozícii"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofón je blokovaný"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dvojitá obrazovka"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dvojitá obrazovka je zapnutá"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Je zapnutá funkcia Dual Screen"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> zobrazuje obsah na oboch obrazovkách"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Zariadenie je príliš horúce"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dvojitá obrazovka nie je k dispozícii, pretože telefón sa prehrieva"</string>

@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android sistema"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Aldatu profil pertsonalera"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Aldatu laneko profilera"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Aldatu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioko profil pertsonalera"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Aldatu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioko laneko profilera"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktuak"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"atzitu kontaktuak"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Kokapena"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Bibragailua kontrolatzeko baimena ematen die aplikazioei."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Dardara-egoera erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"deitu zuzenean telefono-zenbakietara"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Zuk ezer egin beharrik gabe, telefono-zenbakietara deitzeko baimena ematen die aplikazioei. Ondorioz, baliteke ustekabeko gastuak edo deiak eragitea. Kontuan izan aplikazioak ezingo duela deitu larrialdietarako zenbakietara. Zuk berretsi gabeko deiak eginda, asmo txarreko aplikazioek baimen hori erabil dezakete gastuak eragiteko edo operadore-kode jakin batzuk markatzeko, sarrerako deiak beste zenbaki batera automatikoki desbideratzeko asmoarekin."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"atzitu IMS dei-zerbitzua"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Zuk ezer egin beharrik gabe deiak egiteko IMS zerbitzua erabiltzeko baimena ematen die aplikazioei."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"irakurri telefonoaren egoera eta identitatea"</string>
@@ -644,7 +645,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hatz-marken hardwarea ez dago erabilgarri."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Ezin da konfiguratu hatz-marka"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Gainditu egin da hatz-marka konfiguratzeko denbora-muga. Saiatu berriro."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Hatz-marka konfiguratzeko denbora-muga gainditu da. Saiatu berriro."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Hatz-markaren eragiketa bertan behera utzi da."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Erabiltzaileak bertan behera utzi du hatz-marka bidezko eragiketa."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Saiakera gehiegi egin dira. Erabili pantailaren blokeoa."</string>
@@ -667,7 +668,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Aurpegi bidez desblokeatzea"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Arazoak ditugu aurpegi bidez desblokeatzeko eginbidearekin"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Sakatu hau aurpegi-eredua ezabatzeko eta, gero, gehitu aurpegia berriro"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguratu aurpegi bidez desblokeatzeko eginbidea"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Konfiguratu Aurpegi bidez desblokeatzea"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Telefonoa desblokeatzeko, begira iezaiozu"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Aurpegi bidez desblokeatzeko aukera erabiltzeko, aktibatu "<b>"kamera erabiltzeko baimena"</b>" Ezarpenak &gt; Pribatutasuna atalean"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Konfiguratu telefonoa desblokeatzeko modu gehiago"</string>
@@ -1712,11 +1713,11 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Eginda"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desaktibatu lasterbidea"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Erabili lasterbidea"</string>
-    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Kolore-alderantzikatzea"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Koloreen alderantzikatzea"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Koloreen zuzenketa"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Esku bakarreko modua"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Are ilunago"</string>
-    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Audifonoak"</string>
+    <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Entzumen-gailuak"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatu egin da."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desaktibatu egin da."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Askatu bolumen-botoiak. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatzeko, eduki sakatuta berriro bi bolumen-botoiak hiru segundoz."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Eduki hau ezin da laneko aplikazioekin ireki"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Eduki hau ezin da aplikazio pertsonalekin partekatu"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Eduki hau ezin da aplikazio pertsonalekin ireki"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Pausatuta daude laneko aplikazioak"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Berraktibatu"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ez dago laneko aplikaziorik"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ez dago aplikazio pertsonalik"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Ireki <xliff:g id="APP">%s</xliff:g> pertsonala"</string>

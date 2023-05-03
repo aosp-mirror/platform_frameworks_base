@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistem Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Beralih ke profil pribadi"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Beralih ke profil kerja"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Beralih ke <xliff:g id="APP_NAME">%1$s</xliff:g> pribadi"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Beralih ke <xliff:g id="APP_NAME">%1$s</xliff:g> kerja"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontak"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"mengakses kontak"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokasi"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Mengizinkan aplikasi untuk mengendalikan vibrator."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Mengizinkan aplikasi untuk mengakses status vibrator."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"panggil nomor telepon secara langsung"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Mengizinkan aplikasi memanggil nomor telepon tanpa intervensi Anda. Hal ini dapat mengakibatkan adanya biaya atau panggilan yang tidak terduga. Perhatikan bahwa hal ini tidak memungkinkan aplikasi menghubungi nomor darurat. Anda dapat dikenai biaya oleh aplikasi berbahaya dengan melakukan panggilan tanpa konfirmasi dari Anda, atau menghubungi kode operator yang menyebabkan panggilan masuk dialihkan secara otomatis ke nomor lain."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"akses layanan panggilan IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Memungkinkan aplikasi menggunakan layanan IMS untuk melakukan panggilan tanpa campur tangan Anda."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"baca identitas dan status ponsel"</string>
@@ -680,10 +681,10 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Cahaya tidak cukup"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Jauhkan ponsel"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Dekatkan ponsel"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Gerakkan ponsel ke atas"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Gerakkan ponsel ke bawah"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Gerakkan ponsel ke kiri Anda"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Gerakkan ponsel ke kanan Anda"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Geser ponsel ke atas"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Geser ponsel ke bawah"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Geser ponsel ke kiri"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Geser ponsel ke kanan"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lihat langsung ke perangkat."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Wajah tidak terlihat. Pegang ponsel sejajar mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Terlalu banyak gerakan. Stabilkan ponsel."</string>
@@ -693,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Lihat lebih lurus ke arah ponsel"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Lihat lebih lurus ke arah ponsel"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Lihat lebih lurus ke arah ponsel"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Singkirkan apa saja yang menutupi wajah Anda."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Singkirkan semua yang menutupi wajah."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Bersihkan bagian atas layar, termasuk kotak hitam"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Tidak dapat membuat model wajah Anda. Coba lagi."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Kacamata hitam terdeteksi. Wajah Anda harus terlihat sepenuhnya."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Penutup wajah terdeteksi. Wajah Anda harus terlihat sepenuhnya."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Penutup wajah terdeteksi. Wajah harus terlihat sepenuhnya."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tidak dapat memverifikasi wajah. Hardware tidak tersedia."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Konten ini tidak dapat dibuka dengan aplikasi kerja"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Konten ini tidak dapat dibagikan dengan aplikasi pribadi"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Konten ini tidak dapat dibuka dengan aplikasi pribadi"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Aplikasi kerja dijeda"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Batalkan jeda"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Tidak ada aplikasi kerja"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Tidak ada aplikasi pribadi"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Buka <xliff:g id="APP">%s</xliff:g> pribadi"</string>
@@ -2319,7 +2318,7 @@
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon tersedia"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon diblokir"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Layar ganda"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Layar ganda aktif"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual screen aktif"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> menggunakan kedua layar untuk menampilkan konten"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Suhu perangkat terlalu panas"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Layar ganda tidak tersedia karena suhu ponsel terlalu panas"</string>

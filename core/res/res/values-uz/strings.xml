@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android tizimi"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Shaxsiy profilga almashtirish"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Ishchi profilga almashtirish"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Shaxsiy <xliff:g id="APP_NAME">%1$s</xliff:g> ilovasiga almashish"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Ishga oid <xliff:g id="APP_NAME">%1$s</xliff:g> ilovasiga almashish"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktlar"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"kontaktlarga kirish"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Joylashuv"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ilova tebranishli signallarni boshqarishi mumkin."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ilovaga tebranish holatini aniqlash ruxsatini beradi."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon raqamlariga tog‘ridan to‘g‘ri qo‘ng‘iroq qilish"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Ilova sizning ishtirokingizsiz raqamlarga telefon qilishi mumkin. Bu kutilmagan toʻlovlar yoki chaqiruvlarga olib kelishi mumkin. Yodda tuting, bu favqulodda xizmat raqamlariga telefon qilishiga ruxsat bermaydi. Zararli ilovalar beruxsat telefon qilishi yoki kiruvchi chaqiruvlarni avtomatik ravishda boshqa raqamga yoʻnaltiruvchi operator kodlarini terish orqali xarajatlaringizni oshirishi mumkin."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS qo‘ng‘iroq xizmatiga kirish"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ilovaga sizning ishtirokingizsiz qo‘ng‘iroqlarni amalga oshirish uchun IMS xizmatidan foydalanishga ruxsat beradi."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefon holati haqidagi ma’lumotlarni olish"</string>
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Yuzingiz modeli yaratilmadi. Qayta urining."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Qora koʻzoynak aniqlandi. Yuzingiz toʻliq koʻrinishi kerak."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yuzning bir qismi yopilib qolgan. Yuzingiz toʻliq koʻrinishi kerak."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yuz qismi yopilib qolgan. Yuzingiz toʻliq koʻrinishi kerak."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yuzingiz tasdiqlanmadi. Qurilma ishlamayapti."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bu kontent ishga oid ilovalar bilan ochilmaydi"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bu kontent shaxsiy ilovalar bilan ulashilmaydi"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bu kontent shaxsiy ilovalar bilan ochilmaydi"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Ishga oid ilovalar pauza qilingan"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Davom ettirish"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ishga oid ilovalar topilmadi"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Shaxsiy ilovalar topilmadi"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Shaxsiy <xliff:g id="APP">%s</xliff:g> ochish"</string>
@@ -2318,7 +2317,7 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Hamroh ilovaga faol xizmatlarni fonda ishga tushirishga ruxsat beradi."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon yoqildi"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon bloklandi"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Ikki ekranli rejim"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Ikkita ekran"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Ikki ekranli rejim yoniq"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> kontentni ikkala ekranda chiqarmoqda"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Qurilma qizib ketdi"</string>
