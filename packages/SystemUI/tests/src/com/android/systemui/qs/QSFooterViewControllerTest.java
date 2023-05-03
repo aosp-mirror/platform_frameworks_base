@@ -37,6 +37,8 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.retail.data.repository.FakeRetailModeRepository;
+import com.android.systemui.retail.domain.interactor.RetailModeInteractorImpl;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.utils.leaks.LeakCheckedTest;
 
@@ -67,12 +69,17 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
     @Mock
     private ActivityStarter mActivityStarter;
 
+    private FakeRetailModeRepository mRetailModeRepository;
+
     private QSFooterViewController mController;
     private View mEditButton;
 
     @Before
     public void setup() throws Exception {
         MockitoAnnotations.initMocks(this);
+
+        mRetailModeRepository = new FakeRetailModeRepository();
+        mRetailModeRepository.setRetailMode(false);
 
         mEditButton = new View(mContext);
 
@@ -89,7 +96,8 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         when(mView.findViewById(android.R.id.edit)).thenReturn(mEditButton);
 
         mController = new QSFooterViewController(mView, mUserTracker, mFalsingManager,
-                mActivityStarter, mQSPanelController);
+                mActivityStarter, mQSPanelController,
+                new RetailModeInteractorImpl(mRetailModeRepository));
 
         mController.init();
     }
@@ -131,5 +139,21 @@ public class QSFooterViewControllerTest extends LeakCheckedTest {
         verify(mActivityStarter).postQSRunnableDismissingKeyguard(captor.capture());
         captor.getValue().run();
         verify(mQSPanelController).showEdit(mEditButton);
+    }
+
+    @Test
+    public void testEditButton_notRetailMode_visible() {
+        mRetailModeRepository.setRetailMode(false);
+
+        mController.setVisibility(View.VISIBLE);
+        assertThat(mEditButton.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testEditButton_retailMode_notVisible() {
+        mRetailModeRepository.setRetailMode(true);
+
+        mController.setVisibility(View.VISIBLE);
+        assertThat(mEditButton.getVisibility()).isEqualTo(View.GONE);
     }
 }
