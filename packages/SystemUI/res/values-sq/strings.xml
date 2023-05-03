@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> zbuloi këtë pamje ekrani."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> dhe aplikacionet e tjera të hapura zbuluan këtë pamje ekrani."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Shto te shënimi"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"Regjistruesi i ekranit"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Regjistrimi i ekranit po përpunohet"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Njoftim i vazhdueshëm për një seancë regjistrimi të ekranit"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Të niset regjistrimi?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Kur ti regjistron, Android ka qasje te çdo gjë e dukshme në ekranin tënd ose që po luhet në pajisjen tënde. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Kur ti regjistron një aplikacion, Android ka qasje te çdo gjë e dukshme ose që po luhet në atë aplikacion. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesës, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Nis regjistrimin"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Regjistro audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audioja e pajisjes"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Tingulli nga pajisja, si muzika, telefonatat dhe tonet e ziles"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofoni"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audioja e pajisjes dhe mikrofoni"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Nis"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Po regjistron ekranin"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Po regjistron ekranin dhe audion"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Shfaq prekjet në ekran"</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Të gjitha aplikacionet dhe të dhënat e këtij përdoruesi do të fshihen."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Hiqe"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Fillo regjistrimin ose transmetimin me <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet, si dhe audion që luan ti."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Të niset regjistrimi ose transmetimi?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Shërbimi që e ofron këtë funksion do të ketë qasje te të gjitha informacionet që janë të dukshme në ekran ose që luhen nga pajisja jote gjatë regjistrimit ose transmetimit. Kjo përfshin informacione, si p.sh.: fjalëkalimet, detajet e pagesave, fotografitë, mesazhet, si dhe audion që luan ti."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Të gjithë ekranin"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Vetëm një aplikacion"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Ndaj ose regjistro një aplikacion"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Të niset regjistrimi ose transmetimi me <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kur ti ndan, regjistron ose transmeton, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ka qasje te çdo gjë e dukshme në ekranin tënd ose që po luhet në pajisjen tënde. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kur ti ndan, regjistron ose transmeton një aplikacion, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ka qasje te çdo gjë e dukshme në ekranin tënd ose që po luhet në atë aplikacion. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Nis"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Të niset transmetimi?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kur ti transmeton, Android ka qasje te çdo gjë e dukshme në ekranin tënd ose që po luhet në pajisjen tënde. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Kur ti transmeton një aplikacion, Android ka qasje te çdo gjë e dukshme ose që po luhet në atë aplikacion. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesës, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Nis transmetimin"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Të niset ndarja?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kur ti ndan, regjistron ose transmeton, Android ka qasje te çdo gjë e dukshme në ekranin tënd ose që po luhet në pajisjen tënde. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kur ti ndan, regjistron ose transmeton një aplikacion, Android ka qasje te çdo gjë e dukshme në ekranin tënd ose që po luhet në atë aplikacion. Prandaj, ki kujdes me gjërat si fjalëkalimet, detajet e pagesave, mesazhet, fotografitë, si dhe audion dhe videon."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Nis"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"U bllokua nga administratori yt i teknologjisë së informacionit"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Regjistrimi i ekranit është çaktivizuar nga politika e pajisjes."</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Pastroji të gjitha"</string>
@@ -484,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Në këtë pajisje është instaluar një autoritet certifikate. Trafiku i rrjetit tënd të sigurt mund të monitorohet ose modifikohet."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratori ka aktivizuar regjistrimin e rrjetit, i cili monitoron trafikun në pajisjen tënde."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratori yt ka aktivizuar regjistrimin e rrjetit, i cili monitoron trafikun në profilin tënd të punës, por jo në profilin tënd personal."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për ofruesin e VPN-së."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për administratorin tënd të teknologjisë së informacionit."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Kjo pajisje është e lidhur me internetin nëpërmjet <xliff:g id="VPN_APP_0">%1$s</xliff:g> dhe <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për administratorin tënd të teknologjisë së informacionit."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Aplikacionet e tua të punës janë të lidhura me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet në aplikacionet e punës, duke përfshirë email-et dhe të dhënat e shfletimit, është i dukshëm për administratorin e teknologjisë së informacionit dhe ofruesin e VPN-së."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Aplikacionet e tua personale janë të lidhura me internetin nëpërmjet <xliff:g id="VPN_APP">%1$s</xliff:g>. Aktiviteti yt në rrjet, duke përfshirë email-et e dhe të dhënat e shfletimit, është i dukshëm për ofruesin tënd të VPN-së."</string>
@@ -1148,6 +1122,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Të instalosh një aplikacion të kamerës"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikacioni është konfiguruar"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ofrohet të paktën një pajisje"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Zgjidh një aplikacion të parazgjedhur shënimesh për të përdorur shkurtoren e mbajtjes së shënimeve"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Zgjidh aplikacionin"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Prek dhe mbaj shtypur shkurtoren"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Anulo"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Ndërro ekranet tani"</string>

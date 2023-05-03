@@ -273,7 +273,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Ez dago gailurik erabilgarri"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Ez zaude konektatuta wifi-sarera"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Distira"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Kolore-alderantzikatzea"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Koloreen alderantzikatzea"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Koloreen zuzenketa"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Letra-tamaina"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Kudeatu erabiltzaileak"</string>
@@ -484,10 +484,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Autoritate ziurtagiri-emaile bat dago instalatuta gailuan. Baliteke sareko trafiko segurua gainbegiratzea edo aldatzea."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure gailuko trafikoa gainbegira dezake."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratzaileak sarearen erregistroak aktibatu ditu; horrela, zure laneko profileko trafikoa gainbegira dezake, baina ez zure profil pertsonalekoa."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Gailua <xliff:g id="VPN_APP">%1$s</xliff:g> bidez dago konektatuta Internetera. IKT saileko administratzaileak sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Gailua <xliff:g id="VPN_APP">%1$s</xliff:g> bidez dago konektatuta Internetera. IKT saileko administratzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Gailua <xliff:g id="VPN_APP_0">%1$s</xliff:g> eta <xliff:g id="VPN_APP_1">%2$s</xliff:g> bidez dago konektatuta Internetera. IKT saileko administratzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Laneko aplikazioak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera. IKT saileko administratzaileak eta VPNaren hornitzaileak laneko aplikazioen bidez egiten dituzun sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko dituzte."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Aplikazio pertsonalak <xliff:g id="VPN_APP">%1$s</xliff:g> bidez daude konektatuta Internetera. IKT saileko administratzaileak sareko jarduerak (mezu elektronikoak eta arakatze-datuak barne) ikusi ahalko ditu."</string>
@@ -1148,6 +1146,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera-aplikazio bat instalatu da."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikazioa konfiguratuta dago."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Gutxienez gailu bat erabilgarri dago."</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Eduki sakatuta lasterbidea"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Utzi"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Aldatu pantaila batetik bestera"</string>
