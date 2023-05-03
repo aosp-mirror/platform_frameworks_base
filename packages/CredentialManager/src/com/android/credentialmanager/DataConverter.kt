@@ -482,7 +482,8 @@ class CreateFlowUtils {
                     CredentialType.PASSWORD,
                     appLabel,
                     context.getDrawable(R.drawable.ic_password_24) ?: return null,
-                    preferImmediatelyAvailableCredentials = false,
+                    preferImmediatelyAvailableCredentials =
+                    createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                     appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                     userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
                 )
@@ -509,7 +510,8 @@ class CreateFlowUtils {
                         appName = appLabel,
                         typeIcon = displayInfo.credentialTypeIcon?.loadDrawable(context)
                             ?: context.getDrawable(R.drawable.ic_other_sign_in_24) ?: return null,
-                        preferImmediatelyAvailableCredentials = false,
+                        preferImmediatelyAvailableCredentials =
+                        createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                         appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                         userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
                     )

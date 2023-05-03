@@ -32,7 +32,7 @@ import com.android.settingslib.Utils
 import com.android.settingslib.udfps.UdfpsOverlayParams
 import com.android.systemui.CoreStartable
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags

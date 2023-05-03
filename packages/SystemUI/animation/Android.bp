@@ -43,6 +43,7 @@ android_library {
         "androidx.core_core-ktx",
         "androidx.annotation_annotation",
         "SystemUIShaderLib",
+        "animationlib",
     ],
 
     manifest: "AndroidManifest.xml",
