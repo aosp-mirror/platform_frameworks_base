@@ -139,7 +139,10 @@ public final class DeviceState {
     @Override
     public String toString() {
         return "DeviceState{" + "identifier=" + mIdentifier + ", name='" + mName + '\''
-                + ", app_accessible=" + !hasFlag(FLAG_APP_INACCESSIBLE) + "}";
+                + ", app_accessible=" + !hasFlag(FLAG_APP_INACCESSIBLE)
+                + ", cancel_when_requester_not_on_top="
+                + hasFlag(FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP)
+                + "}";
     }
 
     @Override
