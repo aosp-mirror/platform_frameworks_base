@@ -19,7 +19,6 @@ package com.android.systemui.mediaprojection.appselector
 import android.content.ComponentName
 import android.os.UserHandle
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.mediaprojection.appselector.data.RecentTask
 import com.android.systemui.mediaprojection.appselector.data.RecentTaskListProvider
 import javax.inject.Inject
@@ -59,13 +58,7 @@ constructor(
      * Removes all recent tasks that are different from the profile of the host app to avoid any
      * cross-profile sharing
      */
-    private fun List<RecentTask>.filterDevicePolicyRestrictedTasks(): List<RecentTask> =
-        if (flags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
-            // TODO(b/263950746): filter tasks based on the enterprise policies
-            this
-        } else {
-            filter { UserHandle.of(it.userId) == hostUserHandle }
-        }
+    private fun List<RecentTask>.filterDevicePolicyRestrictedTasks(): List<RecentTask> = this
 
     private fun List<RecentTask>.filterAppSelector(): List<RecentTask> = filter {
         // Only take tasks that is not the app selector
