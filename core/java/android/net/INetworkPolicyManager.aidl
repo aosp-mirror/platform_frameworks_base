@@ -30,29 +30,38 @@ import android.telephony.SubscriptionPlan;
 interface INetworkPolicyManager {
 
     /** Control UID policies. */
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     @UnsupportedAppUsage
     void setUidPolicy(int uid, int policy);
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     void addUidPolicy(int uid, int policy);
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     void removeUidPolicy(int uid, int policy);
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     @UnsupportedAppUsage
     int getUidPolicy(int uid);
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     int[] getUidsWithPolicy(int policy);
 
     void registerListener(INetworkPolicyListener listener);
     void unregisterListener(INetworkPolicyListener listener);
 
     /** Control network policies atomically. */
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     @UnsupportedAppUsage
     void setNetworkPolicies(in NetworkPolicy[] policies);
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     NetworkPolicy[] getNetworkPolicies(String callingPackage);
 
     /** Snooze limit on policy matching given template. */
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     @UnsupportedAppUsage
     void snoozeLimit(in NetworkTemplate template);
 
     /** Control if background data is restricted system-wide. */
     @UnsupportedAppUsage
     void setRestrictBackground(boolean restrictBackground);
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     @UnsupportedAppUsage
     boolean getRestrictBackground();
 
@@ -61,10 +70,13 @@ interface INetworkPolicyManager {
         2 - whitelisted
         3 - enabled
     */
+    @EnforcePermission("ACCESS_NETWORK_STATE")
     int getRestrictBackgroundByCaller();
     int getRestrictBackgroundStatus(int uid);
 
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     void setDeviceIdleMode(boolean enabled);
+    @EnforcePermission("MANAGE_NETWORK_POLICY")
     void setWifiMeteredOverride(String networkId, int meteredOverride);
 
     int getMultipathPreference(in Network network);
@@ -76,8 +88,10 @@ interface INetworkPolicyManager {
     String getSubscriptionPlansOwner(int subId);
     void setSubscriptionOverride(int subId, int overrideMask, int overrideValue, in int[] networkTypes, long expirationDurationMillis, String callingPackage);
 
+    @EnforcePermission("NETWORK_SETTINGS")
     void factoryReset(String subscriber);
 
     boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork);
+    @EnforcePermission("OBSERVE_NETWORK_POLICY")
     boolean isUidRestrictedOnMeteredNetworks(int uid);
 }
