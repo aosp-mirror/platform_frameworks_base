@@ -383,24 +383,6 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
     int checkUidPermission(int uid, String permName);
 
     /**
-     * Adds a listener for runtime permission state (permissions or flags) changes.
-     *
-     * @param listener The listener.
-     */
-    void addOnRuntimePermissionStateChangedListener(
-            @NonNull PermissionManagerServiceInternal
-                    .OnRuntimePermissionStateChangedListener listener);
-
-    /**
-     * Removes a listener for runtime permission state (permissions or flags) changes.
-     *
-     * @param listener The listener.
-     */
-    void removeOnRuntimePermissionStateChangedListener(
-            @NonNull PermissionManagerServiceInternal
-                    .OnRuntimePermissionStateChangedListener listener);
-
-    /**
      * Get all the package names requesting app op permissions.
      *
      * @return a map of app op permission names to package names requesting them

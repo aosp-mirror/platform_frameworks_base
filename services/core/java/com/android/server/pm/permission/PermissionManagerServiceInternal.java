@@ -66,22 +66,6 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     int checkUidPermission(int uid, @NonNull String permissionName);
 
     /**
-     * Adds a listener for runtime permission state (permissions or flags) changes.
-     *
-     * @param listener The listener.
-     */
-    void addOnRuntimePermissionStateChangedListener(
-            @NonNull OnRuntimePermissionStateChangedListener listener);
-
-    /**
-     * Removes a listener for runtime permission state (permissions or flags) changes.
-     *
-     * @param listener The listener.
-     */
-    void removeOnRuntimePermissionStateChangedListener(
-            @NonNull OnRuntimePermissionStateChangedListener listener);
-
-    /**
      * Get whether permission review is required for a package.
      *
      * @param packageName the name of the package
@@ -311,22 +295,6 @@ public interface PermissionManagerServiceInternal extends PermissionManagerInter
     void onPackageUninstalled(@NonNull String packageName, int appId,
             @Nullable PackageState packageState, @Nullable AndroidPackage pkg,
             @NonNull List<AndroidPackage> sharedUserPkgs, @UserIdInt int userId);
-
-    /**
-     * Listener for package permission state (permissions or flags) changes.
-     */
-    interface OnRuntimePermissionStateChangedListener {
-
-        /**
-         * Called when the runtime permission state (permissions or flags) changed.
-         *
-         * @param packageName The package for which the change happened.
-         * @param userId the user id for which the change happened.
-         */
-        @Nullable
-        void onRuntimePermissionStateChanged(@NonNull String packageName,
-                @UserIdInt int userId);
-    }
 
     /**
      * The permission-related parameters passed in for package installation.
