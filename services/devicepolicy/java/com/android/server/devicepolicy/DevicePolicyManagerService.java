@@ -3435,7 +3435,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             // Given that the parent user has just started, profile should be locked.
             updatePersonalAppsSuspension(profileUserHandle, false /* unlocked */);
         } else {
-            suspendPersonalAppsInternal(userHandle, false);
+            suspendPersonalAppsInternal(userHandle, profileUserHandle, false);
         }
     }
 
@@ -7714,7 +7714,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         // Unsuspend personal apps if needed.
-        suspendPersonalAppsInternal(parentId, false);
+        suspendPersonalAppsInternal(parentId, getManagedUserId(parentId), false);
 
         // Notify FRP agent, LSS and WindowManager to ensure they don't hold on to stale policies.
         final int frpAgentUid = getFrpManagementAgentUid();
@@ -20845,7 +20845,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         final int parentUserId = getProfileParentId(profileUserId);
-        suspendPersonalAppsInternal(parentUserId, shouldSuspend);
+        suspendPersonalAppsInternal(parentUserId, profileUserId, shouldSuspend);
         return shouldSuspend;
     }
 
@@ -20929,23 +20929,40 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return notificationState;
     }
 
-    private void suspendPersonalAppsInternal(int userId, boolean suspended) {
-        if (getUserData(userId).mAppsSuspended == suspended) {
+    private void suspendPersonalAppsInternal(
+            int parentUserId, int profileUserId, boolean suspended) {
+        if (getUserData(parentUserId).mAppsSuspended == suspended) {
             return;
         }
         Slogf.i(LOG_TAG, "%s personal apps for user %d", suspended ? "Suspending" : "Unsuspending",
-                userId);
+                parentUserId);
 
-        if (suspended) {
-            suspendPersonalAppsInPackageManager(userId);
+        if (isPolicyEngineForFinanceFlagEnabled()) {
+            // TODO(b/280602237): migrate properly
+            ActiveAdmin profileOwner = getProfileOwnerAdminLocked(profileUserId);
+            if (profileOwner != null) {
+                EnforcingAdmin admin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                        profileOwner.info.getComponent(),
+                        profileUserId,
+                        profileOwner);
+                mDevicePolicyEngine.setLocalPolicy(
+                        PolicyDefinition.PERSONAL_APPS_SUSPENDED,
+                        admin,
+                        new BooleanPolicyValue(suspended),
+                        parentUserId);
+            }
         } else {
-            mInjector.getPackageManagerInternal().unsuspendForSuspendingPackage(
-                    PLATFORM_PACKAGE_NAME, userId);
+            if (suspended) {
+                suspendPersonalAppsInPackageManager(parentUserId);
+            } else {
+                mInjector.getPackageManagerInternal().unsuspendForSuspendingPackage(
+                        PLATFORM_PACKAGE_NAME, parentUserId);
+            }
         }
 
         synchronized (getLockObject()) {
-            getUserData(userId).mAppsSuspended = suspended;
-            saveSettingsLocked(userId);
+            getUserData(parentUserId).mAppsSuspended = suspended;
+            saveSettingsLocked(parentUserId);
         }
     }
 
