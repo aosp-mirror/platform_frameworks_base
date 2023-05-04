@@ -2788,8 +2788,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     /** Call this when starting the open-recents animation while split-screen is active. */
-    public void onRecentsInSplitAnimationStart(@NonNull SurfaceControl.Transaction t) {
-        setDividerVisibility(false, t);
+    public void onRecentsInSplitAnimationStart(TransitionInfo info) {
+        addDividerBarToTransition(info, false /* show */);
     }
 
     /** Call this when the recents animation during split-screen finishes. */
@@ -2806,6 +2806,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                     || mSideStage.containsContainer(container))) {
                 updateSurfaceBounds(mSplitLayout, finishT,
                         false /* applyResizingOffset */);
+                finishT.reparent(mSplitLayout.getDividerLeash(), mRootTaskLeash);
                 setDividerVisibility(true, finishT);
                 return;
             }
