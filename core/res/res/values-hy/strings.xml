@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android համակարգ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Բացել անձնական պրոֆիլը"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Բացել աշխատանքային պրոֆիլը"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Անցնել անձնական <xliff:g id="APP_NAME">%1$s</xliff:g> պրոֆիլին"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Անցնել աշխատանքային <xliff:g id="APP_NAME">%1$s</xliff:g> պրոֆիլին"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Կոնտակտներ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"օգտագործել ձեր կոնտակտները"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղորոշում"</string>

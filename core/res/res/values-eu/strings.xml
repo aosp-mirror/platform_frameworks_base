@@ -298,8 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android sistema"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Aldatu profil pertsonalera"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Aldatu laneko profilera"</string>
-    <string name="user_owner_app_label" msgid="1553595155465750298">"Aldatu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazio pertsonalera"</string>
-    <string name="managed_profile_app_label" msgid="367401088383965725">"Aldatu laneko <xliff:g id="APP_NAME">%1$s</xliff:g> aplikaziora"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Aldatu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioko profil pertsonalera"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Aldatu <xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioko laneko profilera"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktuak"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"atzitu kontaktuak"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Kokapena"</string>
@@ -645,7 +645,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Hatz-marken hardwarea ez dago erabilgarri."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Ezin da konfiguratu hatz-marka"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Gainditu egin da hatz-marka konfiguratzeko denbora-muga. Saiatu berriro."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Hatz-marka konfiguratzeko denbora-muga gainditu da. Saiatu berriro."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Hatz-markaren eragiketa bertan behera utzi da."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Erabiltzaileak bertan behera utzi du hatz-marka bidezko eragiketa."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Saiakera gehiegi egin dira. Erabili pantailaren blokeoa."</string>
@@ -1713,7 +1713,7 @@
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Eginda"</string>
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Desaktibatu lasterbidea"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Erabili lasterbidea"</string>
-    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Kolore-alderantzikatzea"</string>
+    <string name="color_inversion_feature_name" msgid="2672824491933264951">"Koloreen alderantzikatzea"</string>
     <string name="color_correction_feature_name" msgid="7975133554160979214">"Koloreen zuzenketa"</string>
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Esku bakarreko modua"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Are ilunago"</string>

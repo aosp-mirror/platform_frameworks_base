@@ -683,10 +683,10 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nedostatečné osvětlení"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Umístěte telefon dál"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Umístěte telefon blíž"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Umístěte telefon výš"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Umístěte telefon níž"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Umístěte telefon víc doleva"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Umístěte telefon víc doprava"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Posuňte telefon výš"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Posuňte telefon níž"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Posuňte telefon doleva"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Posuňte telefon doprava"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Dívejte se přímo na zařízení."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Obličej není vidět. Držte telefon v úrovni očí."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Příliš mnoho pohybu. Držte telefon nehybně."</string>

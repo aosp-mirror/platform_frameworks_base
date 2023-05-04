@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-järjestelmä"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Vaihda henkilökohtaiseen profiiliin"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Vaihda työprofiiliin"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Siirry henkilökohtaiseen profiiliin: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Siirry työprofiiliin: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Yhteystiedot"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"pääsy yhteystietoihin"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Sijainti"</string>
@@ -696,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Katso suoremmin puhelimeen"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Katso suoremmin puhelimeen"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Katso suoremmin puhelimeen"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Poista esteet kasvojesi edestä."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Poista esteet kasvojesi edestä"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Puhdista näytön yläreuna, mukaan lukien musta palkki"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />

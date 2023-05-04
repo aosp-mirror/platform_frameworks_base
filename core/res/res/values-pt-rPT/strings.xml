@@ -679,7 +679,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Visite um fornecedor de serviços de reparação."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Impossível criar modelo de rosto. Tente novamente."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Demasiado clara. Experimente uma luz mais suave."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Não há luz suficiente"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Sem luz suficiente"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Afaste ainda mais o telemóvel"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Aproxime o telemóvel do rosto"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Mova o telemóvel mais para cima"</string>
@@ -703,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Não é possível criar o seu modelo de rosto. Tente novamente."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Óculos escuros detetados. O seu rosto tem de estar completamente visível."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Cobertura facial detetada. O seu rosto tem de estar completamente visível."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Cobertura facial detetada. Todo o rosto tem de estar visível."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Não pode validar o rosto. Hardware não disponível."</string>

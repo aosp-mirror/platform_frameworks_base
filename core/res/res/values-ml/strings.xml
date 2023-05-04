@@ -298,8 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android സിസ്റ്റം"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"വ്യക്തിഗത പ്രൊഫൈലിലേക്ക് മാറുക"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ഔദ്യോഗിക പ്രൊഫൈലിലേക്ക് മാറുക"</string>
-    <string name="user_owner_app_label" msgid="1553595155465750298">"വ്യക്തിഗത <xliff:g id="APP_NAME">%1$s</xliff:g> ആപ്പിലേക്ക് മാറുക"</string>
-    <string name="managed_profile_app_label" msgid="367401088383965725">"ഔദ്യോഗിക <xliff:g id="APP_NAME">%1$s</xliff:g> ആപ്പിലേക്ക് മാറുക"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"വ്യക്തിപരമായ ആവശ്യത്തിനുള്ള <xliff:g id="APP_NAME">%1$s</xliff:g>-ലേക്ക് മാറുക"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"ഔദ്യോഗിക ആവശ്യത്തിനുള്ള <xliff:g id="APP_NAME">%1$s</xliff:g>-ലേക്ക് മാറുക"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"കോൺടാക്റ്റുകൾ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"നിങ്ങളുടെ കോൺടാക്റ്റുകൾ ആക്‌സസ്സ് ചെയ്യുക"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ലൊക്കേഷൻ"</string>
@@ -625,17 +625,17 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"പിശക് പരിശോധിച്ചുറപ്പിക്കുന്നു"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"സ്‌ക്രീൻ ലോക്ക് ഉപയോഗിക്കുക"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"തുടരാൻ നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് നൽകുക"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"സെൻസറിന് മുകളിൽ ശക്തിയായി അമർത്തുക"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"സെൻസറിൽ നന്നായി അമർത്തുക"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിയാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"ഫിംഗർപ്രിന്റ് സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"സെൻസർ വൃത്തിയാക്കിയ ശേഷം വീണ്ടും ശ്രമിക്കുക"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"സെൻസറിന് മുകളിൽ ശക്തിയായി അമർത്തുക"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"സെൻസറിൽ നന്നായി അമർത്തുക"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"വിരൽ വളരെ പതുക്കെ നീക്കി. വീണ്ടും ശ്രമിക്കുക."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"മറ്റൊരു ഫിംഗർപ്രിന്റ് ഉപയോഗിച്ച് നോക്കുക"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"തെളിച്ചം വളരെയധികമാണ്"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"പവർ ബട്ടൺ അമർത്തിയത് തിരിച്ചറിഞ്ഞു"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"അൽപ്പം നീക്കി നോക്കൂ"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ഓരോ തവണയും നിങ്ങളുടെ വിരലിന്റെ സ്ഥാനം ചെറുതായി മാറ്റുക"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ഓരോ തവണയും വിരലിന്റെ സ്ഥാനം ചെറുതായി മാറ്റുക"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"ഫിംഗർപ്രിന്റ് തിരിച്ചറിഞ്ഞില്ല"</string>
@@ -686,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"ഫോൺ നിങ്ങളുടെ ഇടതുവശത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"ഫോൺ നിങ്ങളുടെ വലതുവശത്തേക്ക് നീക്കുക"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"നിങ്ങളുടെ ഉപകരണത്തിന് നേരെ കൂടുതൽ നന്നായി നോക്കുക."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"മുഖം കാണാനാകുന്നില്ല. ഫോൺ കണ്ണിന് നേരെ പിടിക്കുക."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"മുഖം കാണുന്നില്ല. ഫോൺ കണ്ണിന് നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"വളരെയധികം ചലനം. ഫോൺ അനക്കാതെ നേരെ പിടിക്കുക."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"നിങ്ങളുടെ മുഖം വീണ്ടും എൻറോൾ ചെയ്യുക."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"മുഖം തിരിച്ചറിയാനാകുന്നില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"മുഖ മോഡൽ സൃഷ്ടിക്കാനാകില്ല. വീണ്ടും ശ്രമിക്കൂ."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"കറുത്ത കണ്ണട കണ്ടെത്തി. നിങ്ങളുടെ മുഖം പൂർണ്ണമായും ദൃശ്യമായിരിക്കണം."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"മുഖം മറച്ചിരിക്കുന്നതായി കണ്ടെത്തി. നിങ്ങളുടെ മുഖം പൂർണ്ണമായും ദൃശ്യമായിരിക്കണം."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"മുഖം മറച്ചിരിക്കുന്നു. മുഖം പൂർണ്ണമായും ദൃശ്യമായിരിക്കണം."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"മുഖം പരിശോധിക്കാൻ കഴിയില്ല. ഹാർഡ്‌വെയർ ലഭ്യമല്ല."</string>
@@ -1065,7 +1065,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"ഈ പേജ് വിടുക"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"ഈ പേജിൽ തുടരുക"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nഈ പേജിൽ നിന്നും നാവിഗേറ്റുചെയ്‌തു പോകണമെന്ന് തീർച്ചയാണോ?"</string>
-    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ഉപയോഗിച്ച് സ്വമേധയാ പൂരിപ്പിക്കുക"</string>
+    <string name="autofill_window_title" msgid="4379134104008111961">"<xliff:g id="SERVICENAME">%1$s</xliff:g> ഉപയോഗിച്ച് സ്വയമേവ പൂരിപ്പിക്കുക"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"ഒരു അലാറം സജ്ജീകരിക്കുക"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"ഒരു ഇൻസ്റ്റാളുചെയ്‌ത അലാറം ക്ലോക്ക് അപ്ലിക്കേഷനിൽ അലാറം സജ്ജീകരിക്കുന്നതിന് അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ചില അലാറം ക്ലോക്ക് അപ്ലിക്കേഷനുകൾ ഈ സവിശേഷത നടപ്പിലാക്കാതിരുന്നേക്കാം."</string>
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"വോയ്‌സ് മെയിൽ ചേർക്കുക"</string>

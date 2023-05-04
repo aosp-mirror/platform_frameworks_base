@@ -298,8 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android సిస్టమ్"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"వ్యక్తిగత ప్రొఫైల్‌కి మార్చు"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"కార్యాలయ ప్రొఫైల్‌కి మార్చు"</string>
-    <string name="user_owner_app_label" msgid="1553595155465750298">"వ్యక్తిగత <xliff:g id="APP_NAME">%1$s</xliff:g>‌కు స్విచ్ చేయండి"</string>
-    <string name="managed_profile_app_label" msgid="367401088383965725">"వర్క్ <xliff:g id="APP_NAME">%1$s</xliff:g>‌కు స్విచ్ చేయండి"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"వ్యక్తిగత <xliff:g id="APP_NAME">%1$s</xliff:g>‌కు మార్చండి"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"వర్క్ <xliff:g id="APP_NAME">%1$s</xliff:g>‌కు మార్చండి"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"కాంటాక్ట్‌లు"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"మీ కాంటాక్ట్‌లను యాక్సెస్ చేయడానికి"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"లొకేషన్"</string>
@@ -635,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"వెలుతురు అధికంగా ఉంది"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"పవర్ బటన్ కనుగొనబడింది"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"సర్దుబాటు చేయడానికి ట్రై చేయండి"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ప్రతిసారీ మీ వేలి స్థానాన్ని కొద్దిగా మార్చండి"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"ప్రతిసారి మీ వేలిని కొద్ది కొద్దిగా జరపండి"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"వేలిముద్ర గుర్తించబడలేదు"</string>
@@ -694,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి అడ్డుగా ఉన్నవాటిని తీసివేయండి."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"మీ ముఖానికి ఏదైనా అడ్డుగా ఉంటే దాన్ని తీసివేయండి."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"నల్లని బార్‌తో సహా మీ స్క్రీన్ పైభాగం అంతటినీ శుభ్రంగా తుడవండి"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1256,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"యాప్‌లను ప్రారంభిస్తోంది."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"బూట్‌ను ముగిస్తోంది."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను సెటప్ చేస్తున్నప్పుడు తేలికగా ట్యాప్ చేయడానికి ట్రై చేయండి."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"సెటప్ ముగించడానికి, స్క్రీన్‌ను ఆఫ్ చేయి"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"సెటప్ ముగించడానికి, స్క్రీన్‌ను ఆఫ్ చేయండి"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ఆఫ్ చేయండి"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"మీ వేలిముద్ర వెరిఫై‌ను కొనసాగించాలా?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"మీరు పవర్ బటన్‌ను నొక్కారు — ఇది సాధారణంగా స్క్రీన్‌ను ఆఫ్ చేస్తుంది.\n\nమీ వేలిముద్రను వెరిఫై చేయడానికి తేలికగా ట్యాప్ చేయడం ట్రై చేయండి."</string>

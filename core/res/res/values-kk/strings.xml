@@ -298,10 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android жүйесі"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Жеке профильге ауысу"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Жұмыс профиліне ауысу"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Жеке профильге (<xliff:g id="APP_NAME">%1$s</xliff:g>) ауысу"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Жұмыс профиліне (<xliff:g id="APP_NAME">%1$s</xliff:g>) ауысу"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Контактілер"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"контактілерге кіру"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Локация"</string>
@@ -627,7 +625,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Аутентификациялауда қате шықты."</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Экран құлпын пайдалану"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Жалғастыру үшін экран құлпын енгізіңіз."</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сканерді қатты басыңыз."</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Сканерді қатты басыңыз"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Саусақ ізін тану мүмкін емес. Қайталап көріңіз."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Саусақ ізін оқу сканерін тазалап, әрекетті қайталаңыз."</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Сканерді тазалап, әрекетті қайталаңыз."</string>
@@ -637,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Тым жарық."</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Қуат түймесін басу әрекеті анықталды."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Дұрыстап қойып көріңіз."</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Саусағыңыздың қалпын аздап өзгертіп тұрыңыз."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Саусағыңыздың орнын аздап өзгертіп тұрыңыз"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Саусақ ізі танылмады."</string>
@@ -685,17 +683,17 @@
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Телефонды жақынырақ ұстаңыз."</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Телефонды жоғарырақ ұстаңыз."</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Телефонды төменірек ұстаңыз."</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай ұстаңыз."</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай ұстаңыз."</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Телефонды солға қарай жылжытыңыз."</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Телефонды оңға қарай жылжытыңыз."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Құрылғының камерасына тура қараңыз."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Бетіңіз көрінбей тұр. Телефонды көз деңгейінде ұстаңыз."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Қозғалыс тым көп. Телефонды қозғалтпаңыз."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Қайта тіркеліңіз."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Бет танылмады. Қайталап көріңіз."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"Басыңыздың қалпын сәл өзгертіңіз."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға барынша тура қараңыз."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға барынша тура қараңыз."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға барынша тура қараңыз."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Телефонға тура қараңыз."</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Телефонға тура қараңыз."</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Телефонға тура қараңыз."</string>
     <string name="face_acquired_obscured" msgid="4917643294953326639">"Бетіңізді жауып тұрған нәрсені алып тастаңыз."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Экранның жоғарғы жағын, сонымен қатар қара жолақты өшіріңіз."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
@@ -2318,7 +2316,7 @@
     <string name="permlab_startForegroundServicesFromBackground" msgid="6363004936218638382">"Экрандық режимдегі қызметтерді фоннан іске қосу"</string>
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Қосымша қолданбаға экрандық режимдегі қызметтерді фоннан іске қосуға рұқсат беріледі."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Микрофон қолжетімді."</string>
-    <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон бөгелген."</string>
+    <string name="mic_access_off_toast" msgid="8111040892954242437">"Микрофон блокталған."</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Қос экран"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Қос экран функциясы қосулы"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> қолданбасы контентті көрсету үшін екі дисплейді де пайдаланады."</string>

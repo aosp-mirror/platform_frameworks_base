@@ -299,10 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android sistem"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Pređi na lični profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Pređi na poslovni profil"</string>
-    <!-- no translation found for user_owner_app_label (1553595155465750298) -->
-    <skip />
-    <!-- no translation found for managed_profile_app_label (367401088383965725) -->
-    <skip />
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Pređi na lični profil aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Pređi na poslovni profil aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakti"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"pristupi kontaktima"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokacija"</string>
@@ -1259,7 +1257,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Pokretanje aplikacija."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Završavanje pokretanja."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Pritisnuli ste dugme za uključivanje – time obično isključujete ekran.\n\nProbajte lagano da dodirnete dok podešavate otisak prsta."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Završite podešavanje isključivanjem ekrana"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Isključite ekran i napustite podešavanje"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Isključi"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Nastavljate verifikaciju otiska prsta?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Pritisnuli ste dugme za uključivanje – time obično isključujete ekran.\n\nProbajte lagano da dodirnete da biste verifikovali otisak prsta."</string>
@@ -1849,7 +1847,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Potvrdite novi PIN"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Napravite PIN za izmenu ograničenja"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-ovi se ne podudaraju. Probajte ponovo."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN je prekratak. Mora da sadrži najmanje 4 cifre."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN je prekratak. Mora da ima bar 4 cifre."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Probajte ponovo kasnije"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Prikazuje se ceo ekran"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Da biste izašli, prevucite nadole odozgo."</string>
