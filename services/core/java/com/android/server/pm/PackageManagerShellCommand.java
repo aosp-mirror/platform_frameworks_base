@@ -697,7 +697,7 @@ class PackageManagerShellCommand extends ShellCommand {
                         null /* usesSplitNames */, null /* configForSplit */,
                         null /* splitApkPaths */, null /* splitRevisionCodes */,
                         apkLite.getTargetSdkVersion(), null /* requiredSplitTypes */,
-                        null /* splitTypes */, apkLite.isAllowUpdateOwnership());
+                        null /* splitTypes */);
                 sessionSize += InstallLocationUtils.calculateInstalledSize(pkgLite,
                         params.sessionParams.abiOverride, fd.getFileDescriptor());
             } catch (IOException e) {

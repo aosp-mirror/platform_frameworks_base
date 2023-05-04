@@ -422,8 +422,7 @@ public class DexMetadataHelperTest {
                     null /* splitNames */, null /* isFeatureSplits */, null /* usesSplitNames */,
                     null /* configForSplit */, null /* splitApkPaths */,
                     null /* splitRevisionCodes */, baseApk.getTargetSdkVersion(),
-                    null /* requiredSplitTypes */, null /* splitTypes */,
-                    false /* allowUpdateOwnership */);
+                    null /* requiredSplitTypes */, null /* splitTypes */);
             Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkgLite));
         }
 
