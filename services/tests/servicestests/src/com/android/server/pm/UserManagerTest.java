@@ -1278,6 +1278,24 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
+    public void testConcurrentUserSwitch() {
+        final int startUser = ActivityManager.getCurrentUser();
+        final UserInfo user1 = createUser("User 1", 0);
+        assertThat(user1).isNotNull();
+        final UserInfo user2 = createUser("User 2", 0);
+        assertThat(user2).isNotNull();
+        final UserInfo user3 = createUser("User 3", 0);
+        assertThat(user3).isNotNull();
+
+        // Switch to the users just created without waiting for the completion of the previous one.
+        switchUserThenRun(user1.id, () -> switchUserThenRun(user2.id, () -> switchUser(user3.id)));
+
+        // Switch back to the starting user.
+        switchUser(startUser);
+    }
+
+    @MediumTest
+    @Test
     public void testConcurrentUserCreate() throws Exception {
         int userCount = mUserManager.getUsers().size();
         int maxSupportedUsers = UserManager.getMaxSupportedUsers();
