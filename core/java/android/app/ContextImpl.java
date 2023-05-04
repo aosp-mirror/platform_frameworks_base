@@ -3478,6 +3478,9 @@ class ContextImpl extends Context {
             ((CompatResources) r).setContext(this);
         }
         mResources = r;
+
+        LocaleConfig lc = LocaleConfig.fromContextIgnoringOverride(this);
+        mResourcesManager.setLocaleList(lc != null ? lc.getSupportedLocales() : null);
     }
 
     void installSystemApplicationInfo(ApplicationInfo info, ClassLoader classLoader) {
