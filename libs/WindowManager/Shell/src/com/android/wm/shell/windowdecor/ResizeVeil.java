@@ -19,8 +19,10 @@ package com.android.wm.shell.windowdecor;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.annotation.ColorRes;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -109,6 +111,10 @@ public class ResizeVeil {
             t.reparent(mVeilSurface, parentSurface);
             mParentSurface = parentSurface;
         }
+
+        int backgroundColorId = getBackgroundColorId();
+        mViewHost.getView().setBackgroundColor(mContext.getColor(backgroundColorId));
+
         t.show(mVeilSurface)
                 .apply();
         final ValueAnimator animator = new ValueAnimator();
@@ -156,6 +162,17 @@ public class ResizeVeil {
             }
         });
         animator.start();
+    }
+
+    @ColorRes
+    private int getBackgroundColorId() {
+        Configuration configuration = mContext.getResources().getConfiguration();
+        if ((configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES) {
+            return R.color.desktop_mode_resize_veil_dark;
+        } else {
+            return R.color.desktop_mode_resize_veil_light;
+        }
     }
 
     /**
