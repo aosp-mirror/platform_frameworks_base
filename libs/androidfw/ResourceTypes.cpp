@@ -5436,37 +5436,66 @@ bool ResTable::stringToInt(const char16_t* s, size_t len, Res_value* outValue)
     return U16StringToInt(s, len, outValue);
 }
 
-bool ResTable::stringToFloat(const char16_t* s, size_t len, Res_value* outValue)
-{
-    while (len > 0 && isspace16(*s)) {
-        s++;
-        len--;
+template <typename T>
+bool parseFloatingPoint(const char16_t* inBuf, size_t inLen, char* tempBuf,
+                                  const char** outEnd, T& out){
+    while (inLen > 0 && isspace16(*inBuf)) {
+        inBuf++;
+        inLen--;
     }
 
-    if (len <= 0) {
+    if (inLen <= 0) {
         return false;
     }
 
-    char buf[128];
     int i=0;
-    while (len > 0 && *s != 0 && i < 126) {
-        if (*s > 255) {
+    while (inLen > 0 && *inBuf != 0 && i < 126) {
+        if (*inBuf > 255) {
             return false;
         }
-        buf[i++] = *s++;
-        len--;
+        tempBuf[i++] = *inBuf++;
+        inLen--;
     }
 
-    if (len > 0) {
+    if (inLen > 0) {
         return false;
     }
-    if ((buf[0] < '0' || buf[0] > '9') && buf[0] != '.' && buf[0] != '-' && buf[0] != '+') {
+    if ((tempBuf[0] < '0' || tempBuf[0] > '9') && tempBuf[0] != '.' && tempBuf[0] != '-' && tempBuf[0] != '+') {
         return false;
     }
 
-    buf[i] = 0;
-    const char* end;
-    float f = strtof(buf, (char**)&end);
+    tempBuf[i] = 0;
+    if constexpr(std::is_same_v<T, float>) {
+        out = strtof(tempBuf, (char**)outEnd);
+    } else {
+        out = strtod(tempBuf, (char**)outEnd);
+    }
+    return true;
+}
+
+bool ResTable::stringToDouble(const char16_t* s, size_t len, double& d){
+    char buf[128];
+    const char* end = nullptr;
+    if (!parseFloatingPoint(s, len, buf, &end, d)) {
+        return false;
+    }
+
+    while (*end != 0 && isspace((unsigned char)*end)) {
+        end++;
+    }
+
+    return *end == 0;
+}
+
+bool ResTable::stringToFloat(const char16_t* s, size_t len, Res_value* outValue)
+{
+    char buf[128];
+    const char* end = nullptr;
+    float f;
+
+    if (!parseFloatingPoint(s, len, buf, &end, f)) {
+        return false;
+    }
 
     if (*end != 0 && !isspace((unsigned char)*end)) {
         // Might be a unit...

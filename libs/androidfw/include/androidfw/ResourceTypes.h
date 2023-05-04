@@ -2162,6 +2162,7 @@ public:
 
     static bool stringToInt(const char16_t* s, size_t len, Res_value* outValue);
     static bool stringToFloat(const char16_t* s, size_t len, Res_value* outValue);
+    static bool stringToDouble(const char16_t* s, size_t len, double& outValue);
 
     // Used with stringToValue.
     class Accessor
