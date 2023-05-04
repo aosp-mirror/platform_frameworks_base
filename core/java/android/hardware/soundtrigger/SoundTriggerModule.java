@@ -247,6 +247,16 @@ public class SoundTriggerModule {
     }
 
     /**
+     * Same as above, but return a binder token associated with the session.
+     * @hide
+     */
+    public synchronized IBinder startRecognitionWithToken(int soundModelHandle,
+            SoundTrigger.RecognitionConfig config) throws RemoteException {
+        return mService.startRecognition(soundModelHandle,
+                ConversionUtil.api2aidlRecognitionConfig(config));
+    }
+
+    /**
      * Stop listening to all key phrases in a {@link SoundTrigger.SoundModel}
      * @param soundModelHandle The sound model handle to stop listening to
      * @return - {@link SoundTrigger#STATUS_OK} in case of success
