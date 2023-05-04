@@ -28,8 +28,11 @@ import com.android.server.power.stats.wakeups.CpuWakeupStats.WakingActivityHisto
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 @RunWith(AndroidJUnit4.class)
 public class WakingActivityHistoryTest {
+    private volatile long mTestRetention = 54;
 
     private static boolean areSame(SparseIntArray a, SparseIntArray b) {
         if (a == b) {
@@ -55,7 +58,7 @@ public class WakingActivityHistoryTest {
 
     @Test
     public void recordActivityAppendsUids() {
-        final WakingActivityHistory history = new WakingActivityHistory();
+        final WakingActivityHistory history = new WakingActivityHistory(() -> Long.MAX_VALUE);
         final int subsystem = 42;
         final long timestamp = 54;
 
@@ -100,7 +103,7 @@ public class WakingActivityHistoryTest {
 
     @Test
     public void recordActivityDoesNotDeleteExistingUids() {
-        final WakingActivityHistory history = new WakingActivityHistory();
+        final WakingActivityHistory history = new WakingActivityHistory(() -> Long.MAX_VALUE);
         final int subsystem = 42;
         long timestamp = 101;
 
@@ -150,5 +153,121 @@ public class WakingActivityHistoryTest {
         assertThat(recordedUids.get(15, -1)).isEqualTo(2);
         assertThat(recordedUids.get(62, -1)).isEqualTo(31);
         assertThat(recordedUids.get(85, -1)).isEqualTo(39);
+    }
+
+    @Test
+    public void removeBetween() {
+        final WakingActivityHistory history = new WakingActivityHistory(() -> Long.MAX_VALUE);
+
+        final int subsystem = 43;
+
+        final SparseIntArray uids = new SparseIntArray();
+        uids.put(1, 17);
+        uids.put(15, 2);
+        uids.put(62, 31);
+        history.recordActivity(subsystem, 123, uids);
+
+        uids.put(54, 91);
+        history.recordActivity(subsystem, 150, uids);
+
+        uids.put(101, 32);
+        uids.delete(1);
+        history.recordActivity(subsystem, 191, uids);
+
+        SparseIntArray removedUids = history.removeBetween(subsystem, 100, 122);
+        assertThat(removedUids).isNull();
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(3);
+
+        removedUids = history.removeBetween(subsystem, 124, 149);
+        assertThat(removedUids).isNull();
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(3);
+
+        removedUids = history.removeBetween(subsystem, 151, 190);
+        assertThat(removedUids).isNull();
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(3);
+
+        removedUids = history.removeBetween(subsystem, 192, 240);
+        assertThat(removedUids).isNull();
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(3);
+
+
+        // Removing from a different subsystem should do nothing.
+        removedUids = history.removeBetween(subsystem + 1, 0, 300);
+        assertThat(removedUids).isNull();
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(3);
+
+        removedUids = history.removeBetween(subsystem, 0, 300);
+        assertThat(removedUids.size()).isEqualTo(5);
+        assertThat(removedUids.get(1, -1)).isEqualTo(17);
+        assertThat(removedUids.get(15, -1)).isEqualTo(2);
+        assertThat(removedUids.get(62, -1)).isEqualTo(31);
+        assertThat(removedUids.get(54, -1)).isEqualTo(91);
+        assertThat(removedUids.get(101, -1)).isEqualTo(32);
+
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(0);
+
+        history.recordActivity(subsystem, 23, uids);
+        uids.put(31, 123);
+        history.recordActivity(subsystem, 49, uids);
+        uids.put(177, 432);
+        history.recordActivity(subsystem, 89, uids);
+
+        removedUids = history.removeBetween(subsystem, 23, 23);
+        assertThat(removedUids.size()).isEqualTo(4);
+        assertThat(removedUids.get(15, -1)).isEqualTo(2);
+        assertThat(removedUids.get(62, -1)).isEqualTo(31);
+        assertThat(removedUids.get(54, -1)).isEqualTo(91);
+        assertThat(removedUids.get(101, -1)).isEqualTo(32);
+
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(2);
+
+        removedUids = history.removeBetween(subsystem, 49, 54);
+        assertThat(removedUids.size()).isEqualTo(5);
+        assertThat(removedUids.get(15, -1)).isEqualTo(2);
+        assertThat(removedUids.get(62, -1)).isEqualTo(31);
+        assertThat(removedUids.get(54, -1)).isEqualTo(91);
+        assertThat(removedUids.get(101, -1)).isEqualTo(32);
+        assertThat(removedUids.get(31, -1)).isEqualTo(123);
+
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(1);
+
+        removedUids = history.removeBetween(subsystem, 23, 89);
+        assertThat(removedUids.size()).isEqualTo(6);
+        assertThat(removedUids.get(15, -1)).isEqualTo(2);
+        assertThat(removedUids.get(62, -1)).isEqualTo(31);
+        assertThat(removedUids.get(54, -1)).isEqualTo(91);
+        assertThat(removedUids.get(101, -1)).isEqualTo(32);
+        assertThat(removedUids.get(31, -1)).isEqualTo(123);
+        assertThat(removedUids.get(177, -1)).isEqualTo(432);
+
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(0);
+    }
+
+    @Test
+    public void deletesActivityPastRetention() {
+        final WakingActivityHistory history = new WakingActivityHistory(() -> mTestRetention);
+        final int subsystem = 49;
+
+        mTestRetention = 454;
+
+        final long firstTime = 342;
+        for (int i = 0; i < mTestRetention; i++) {
+            history.recordActivity(subsystem, firstTime + i, new SparseIntArray());
+        }
+        assertThat(history.mWakingActivity.get(subsystem)).isNotNull();
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(mTestRetention);
+
+        history.recordActivity(subsystem, firstTime + mTestRetention + 7, new SparseIntArray());
+        assertThat(history.mWakingActivity.get(subsystem).size()).isEqualTo(mTestRetention - 7);
+
+        final ThreadLocalRandom random = ThreadLocalRandom.current();
+
+        for (int i = 0; i < 100; i++) {
+            final long time = random.nextLong(firstTime + mTestRetention + 100,
+                    456 * mTestRetention);
+            history.recordActivity(subsystem, time, new SparseIntArray());
+            assertThat(history.mWakingActivity.get(subsystem).closestIndexOnOrBefore(
+                    time - mTestRetention)).isLessThan(0);
+        }
     }
 }
