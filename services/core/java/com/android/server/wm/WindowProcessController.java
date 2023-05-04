@@ -721,6 +721,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
+    List<String> getPackageList() {
+        synchronized (mPkgList) {
+            return new ArrayList<>(mPkgList);
+        }
+    }
+
     void addActivityIfNeeded(ActivityRecord r) {
         // even if we already track this activity, note down that it has been launched
         setLastActivityLaunchTime(r);
