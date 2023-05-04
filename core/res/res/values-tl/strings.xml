@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android System"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Lumipat sa personal na profile"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Lumipat sa profile sa trabaho"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Lumipat sa personal na <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Lumipat sa <xliff:g id="APP_NAME">%1$s</xliff:g> para sa trabaho"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Mga Contact"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"i-access ang iyong mga contact"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokasyon"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Pinapayagan ang app na kontrolin ang vibrator."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Pinapayagan ang app na ma-access ang naka-vibrate na status."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"direktang tawagan ang mga numero ng telepono"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Pinapayagan ang app na tumawag sa mga numero ng telepono nang walang pamamagitan mo. Puwede itong magresulta sa mga hindi inaasahang singil o tawag. Tandaang hindi nito binibigyang-daan ang app na tumawag sa mga numerong pang-emergency. Posibleng may kailanganin kang bayaran dahil sa pagtawag ng mga nakakapinsalang app nang wala ang iyong kumpirmasyon, o mag-dial ang mga ito sa mga code ng carrier na nagdudulot ng awtomatikong pag-forward ng mga papasok na tawag sa ibang numero."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"i-access ang serbisyo sa tawag ng IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Pinapahintulutan ang app na gamitin ang serbisyo ng IMS upang tumawag nang walang pahintulot mo."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"basahin ang katayuan at pagkakakilanlan ng telepono"</string>
@@ -685,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Iusog pakaliwa ang telepono mo"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Iusog pakanan ang telepono mo"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Tumingin nang mas direkta sa iyong device."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Hindi makita ang mukha mo. Hawakan ang telepono mo nang kapantay ng mata."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Hindi makita ang mukha mo. Hawakan ang telepono kapantay ng mata."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Masyadong magalaw. Hawakang mabuti ang telepono."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Paki-enroll muli ang iyong mukha."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Hindi makilala ang mukha. Subukan ulit."</string>
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Hindi magawa ang iyong face model. Subukan ulit."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"May na-detect na madilim na salamin. Dapat ganap na nakikita ang iyong mukha."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"May na-detect na pantakip sa mukha. Dapat ganap na nakikita ang iyong mukha."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"May na-detect na mask. Dapat ganap na nakikita ang mukha."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Di ma-verify ang mukha. Di available ang hardware."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Hindi puwedeng buksan sa mga app para sa trabaho ang content na ito"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Hindi puwedeng ibahagi sa mga personal na app ang content na ito"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Hindi puwedeng buksan sa mga personal na app ang content na ito"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Naka-pause ang mga app para sa trabaho"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"I-unpause"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Walang app para sa trabaho"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Walang personal na app"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Buksan ang <xliff:g id="APP">%s</xliff:g> na personal"</string>

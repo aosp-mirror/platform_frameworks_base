@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Système Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Passer au profil personnel"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Passer au profil professionnel"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Passer à <xliff:g id="APP_NAME">%1$s</xliff:g> dans le profil personnel"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Passer à <xliff:g id="APP_NAME">%1$s</xliff:g> dans le profil professionnel"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accéder à vos contacts"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Localisation"</string>
@@ -702,7 +704,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Impossible de créer votre modèle facial. Réessayez."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Lunettes sombres détectées. Votre visage doit être entièrement visible."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Couvre-visage détecté. Votre visage doit être entièrement visible."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Couvre-visage détecté. Montrez votre visage entier."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Imposs. de vérif. visage. Matériel non accessible."</string>
@@ -711,8 +713,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Opération de reconnaissance du visage annulée."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Le déverrouillage par reconnaissance faciale a été annulé"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Trop de tentatives. Veuillez réessayer plus tard."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Trop de tentatives. Le déverrouillage par reconnaissance faciale est inaccessible."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Trop de tentatives. Entrez plutôt le verrouillage de l\'écran."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossible de vérifier le visage. Réessayez."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Déverrouillage par reconnaissance faciale non configuré"</string>
@@ -1730,7 +1731,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Pour basculer entre les fonctionnalités, balayez l\'écran vers le haut avec trois doigts et maintenez-les-y."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Agrandissement"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utilisateur actuel : <xliff:g id="NAME">%1$s</xliff:g>"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Passage au profil : <xliff:g id="NAME">%1$s</xliff:g> en cours…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Déconnexion de <xliff:g id="NAME">%1$s</xliff:g> en cours..."</string>
     <string name="owner_name" msgid="8713560351570795743">"Propriétaire"</string>
     <string name="guest_name" msgid="8502103277839834324">"Invité"</string>
@@ -2167,10 +2168,8 @@
     <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Aucune application professionnelle"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Aucune application personnelle"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans le profil personnel"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans le profil professionnel"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utiliser le navigateur du profil personnel"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utiliser le navigateur du profil professionnel"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"NIP de déverrouillage du réseau associé au module SIM"</string>

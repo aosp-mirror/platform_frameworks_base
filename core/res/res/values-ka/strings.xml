@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-ის სისტემა"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"პერსონალურ პროფილზე გადართვა"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"სამსახურის პროფილზე გადართვა"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ის პირად ვერსიაზე გადასვლა"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g>-ის სამსახურის ვერსიაზე გადასვლა"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"კონტაქტები"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"თქვენს კონტაქტებზე წვდომა"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"მდებარეობა"</string>

@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"System Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Przełącz na profil osobisty"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Przełącz na profil służbowy"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Przełącz na osobistą aplikację <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Przełącz na służbową aplikację <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"dostęp do kontaktów"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokalizacja"</string>
@@ -505,8 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Pozwala aplikacji na sterowanie wibracjami."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Zezwala aplikacji na dostęp do stanu wibracji"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"bezpośrednie wybieranie numerów telefonów"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Zezwala aplikacji na nawiązywanie połączeń telefonicznych bez Twojego udziału. Mogą wystąpić nieoczekiwane opłaty lub połączenia. Pamiętaj, że te uprawnienia nie zezwalają aplikacji na dzwonienie pod numery alarmowe. Złośliwe aplikacje mogą generować koszty wynikające z nawiązywania połączeń bez Twojej wiedzy, a także wybierać określone kody powodujące przekierowywanie połączeń przychodzących na inny numer."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"usługa telefoniczna z dostępem do komunikatora"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Zezwala aplikacji na korzystanie z usługi komunikatora, by nawiązywać połączenia bez Twojego udziału."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"odczytywanie stanu i informacji o telefonie"</string>
@@ -687,7 +688,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Przesuń telefon w lewo"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Przesuń telefon w prawo"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Patrz prosto na urządzenie."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nie widzę twarzy. Trzymaj telefon na wysokości oczu."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Nie widać twarzy. Trzymaj telefon na wysokości oczu."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Telefon się porusza. Trzymaj go nieruchomo."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Zarejestruj swoją twarz ponownie."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Nie rozpoznaję twarzy. Spróbuj ponownie."</string>
@@ -695,7 +696,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Patrz prosto na telefon"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Patrz prosto na telefon"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Patrz prosto na telefon"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Usuń wszystko, co zasłania Ci twarz."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Usuń wszystko, co zasłania Ci twarz"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Wyczyść górną krawędź ekranu, w tym czarny pasek"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1241,7 +1242,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Zawsze pokazuj"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> została skompilowana pod niezgodną wersję systemu Android i może zachowywać się niezgodnie z oczekiwaniami. Sprawdź, czy jest dostępna zaktualizowana wersja aplikacji."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Zawsze pokazuj"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Sprawdź aktualizację"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Sprawdź dostępność aktualizacji"</string>
     <string name="smv_application" msgid="3775183542777792638">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) naruszyła wymuszone przez siebie zasady StrictMode."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> naruszył wymuszone przez siebie zasady StrictMode."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon się aktualizuje…"</string>
@@ -1699,7 +1700,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"WŁ."</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"WYŁ."</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Pozwolić usłudze <xliff:g id="SERVICE">%1$s</xliff:g> na pełną kontrolę nad urządzeniem?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pełna kontrola jest odpowiednia dla aplikacji, które pomagają Ci radzić sobie z niepełnosprawnością, ale nie należy jej przyznawać wszystkim aplikacjom."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Pełna kontrola jest odpowiednia dla aplikacji, które ułatwiają Ci dostęp, ale nie należy jej przyznawać wszystkim aplikacjom."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Wyświetlaj i kontroluj ekran"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Może odczytywać całą zawartość ekranu i wyświetlać treść nad innymi aplikacjami."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Wyświetlaj i wykonuj działania"</string>
@@ -2161,10 +2162,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tych treści nie można otworzyć w aplikacjach służbowych"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tych treści nie można udostępniać w aplikacjach osobistych"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tych treści nie można otworzyć w aplikacjach osobistych"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Aplikacje służbowe zostały wstrzymane"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Cofnij wstrzymanie"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Brak aplikacji służbowych"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Brak aplikacji osobistych"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Otwórz aplikację osobistą <xliff:g id="APP">%s</xliff:g>"</string>

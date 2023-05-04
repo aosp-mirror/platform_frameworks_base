@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"‏Android سسٹم"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ذاتی پروفائل پر سوئچ کریں"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"دفتری پروفائل پر سوئچ کریں"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ذاتی <xliff:g id="APP_NAME">%1$s</xliff:g> پر سوئچ کریں"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"دفتری <xliff:g id="APP_NAME">%1$s</xliff:g> پر سوئچ کریں"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"رابطے"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"اپنے رابطوں تک رسائی حاصل کریں"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"مقام"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ایپ کو وائبریٹر کنٹرول کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ایپ کو وائبریٹر اسٹیٹ تک رسائی حاصل کرنے کی اجازت دیتا ہے۔"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"براہ راست فون نمبرز پر کال کریں"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"ایپ کو آپ کی مداخلت کے بغیر فون نمبرز پر کال کرنے کی سہولت حاصل ہوتی ہے۔ اس کی وجہ سے غیر متوقع چارجز وصول کئے جا سکتے ہیں یا غیر متوقع کالز موصول ہو سکتی ہیں۔ یاد رکھیں کہ اس سے ایپ کو ایمرجنسی نمبرز پر کال کرنے کی سہولت حاصل نہیں ہوتی ہے۔ نقصان دہ ایپس آپ کی تصدیق کے بغیر کالز کر کے آپ کی رقم خرچ کروا سکتی ہیں یا کیریئر کوڈز ڈائل کر سکتی ہیں جس سے اِن کمنگ کالز خودکار طور پر دوسرے نمبر پر فارورڈ ہو جاتی ہیں۔"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"‏IMS کال سروس تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏آپ کی مداخلت کے بغیر کالیں کرنے کیلئے ایپ کو IMS سروس استعمال کرنے کی اجازت دیتی ہے۔"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"فون کے اسٹیٹس اور شناخت کو پڑھیں"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"اس مواد کو ورک ایپس کے ساتھ نہیں کھولا جا سکتا"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"اس مواد کا اشتراک ذاتی ایپس کے ساتھ نہیں کیا جا سکتا"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"اس مواد کو ذاتی ایپس کے ساتھ نہیں کھولا جا سکتا"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"ورک ایپس موقوف ہیں"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"غیر موقوف کریں"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"کوئی ورک ایپ نہیں"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"کوئی ذاتی ایپ نہیں"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ذاتی <xliff:g id="APP">%s</xliff:g> کھولیں"</string>
@@ -2320,7 +2319,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"مائیکروفون مسدود ہے"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"دوہری اسکرین"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"دوہری اسکرین آن ہے"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> مواد دکھانے کیلئے دونوں ڈسپلیز استعمال کر رہی ہے"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"مواد دکھانے کیلئے <xliff:g id="APP_NAME">%1$s</xliff:g> دونوں ڈسپلیز استعمال کر رہی ہے"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"آلہ بہت زیادہ گرم ہے"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"دوہری اسکرین دستیاب نہیں ہے کیونکہ آپ کا فون بہت زیادہ گرم ہو رہا ہے"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"‏Dual Screen دستیاب نہیں ہے"</string>

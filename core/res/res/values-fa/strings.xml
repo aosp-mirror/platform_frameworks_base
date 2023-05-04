@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"‏سیستم Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"جابه‌جا شدن به نمایه شخصی"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"رفتن به نمایه کاری"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"رفتن به نمایه شخصی <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"رفتن به نمایه کاری <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"مخاطبین"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"دسترسی به مخاطبین شما"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"مکان"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"‏به برنامه اجازه می‎دهد تا لرزاننده را کنترل کند."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"به برنامه اجازه می‌دهد تا به وضعیت لرزاننده دسترسی داشته باشد."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"تماس مستقیم با شماره تلفن‌ها"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"به این برنامه اجازه می‌دهد بدون دخالت شما با شماره‌های تلفن تماس بگیرد. این کار ممکن است باعث تماس‌ها یا کسر هزینه‌های غیرمنتظره شود. توجه داشته باشید این کار به برنامه اجازه نمی‌دهد با شماره‌های تلفن اضطراری تماس بگیرد. برنامه‌های مخرب ممکن است با برقراری تماس بدون تأیید شما، یا شماره‌گیری کدهای شرکت مخابراتی که باعث می‌شود تماس‌های ورودی به‌طور خودکار به شماره دیگری هدایت شود، برای شما هزینه‌هایی به‌بار آورد."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"‏دسترسی به سرویس تماس IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"‏به برنامه اجازه می‌دهد از سرویس IMS برای برقراری تماس‌ها بدون دخالت شما استفاده کند."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"خواندن وضعیت تلفن و شناسه"</string>
@@ -644,7 +645,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"چهره اصالت‌سنجی شد، لطفاً تأیید را فشار دهید"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"اثر انگشت راه‌اندازی نشد"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"مهلت راه‌اندازی اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"مهلت تنظیم اثر انگشت به‌پایان رسید. دوباره امتحان کنید."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"عملکرد اثر انگشت لغو شد."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"کاربر عملیات اثر انگشت را لغو کرد"</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"تلاش‌ها از حد مجاز بیشتر شده است. به‌جای آن از قفل صفحه استفاده کنید."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"نمی‌توان این محتوا را با برنامه‌های کاری باز کرد"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"نمی‌توان این محتوا را با برنامه‌های شخصی هم‌رسانی کرد"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"نمی‌توان این محتوا را با برنامه‌های شخصی باز کرد"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"برنامه‌های کاری موقتاً متوقف شده است"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ازسرگیری"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"برنامه کاری‌ای وجود ندارد"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"برنامه شخصی‌ای وجود ندارد"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"باز کردن <xliff:g id="APP">%s</xliff:g> شخصی"</string>
@@ -2320,7 +2319,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"میکروفون مسدود شد"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"صفحه دوتایی"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"«صفحه دوتایی» روشن است"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> از هر دو نمایشگر برای نمایش محتوا استفاده می‌کند"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"‫<xliff:g id="APP_NAME">%1$s</xliff:g> از هر دو نمایشگر برای نمایش محتوا استفاده می‌کند"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"دستگاه بیش‌ازحد گرم شده است"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"«صفحه دوتایی» دردسترس نیست زیرا تلفن بیش‌ازحد گرم شده است"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"‏Dual Screen دردسترس نیست"</string>
