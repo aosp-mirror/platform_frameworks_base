@@ -718,6 +718,51 @@ public class AccessibilityNodeInfo implements Parcelable {
     public static final String ACTION_ARGUMENT_DIRECTION_INT =
             "android.view.accessibility.action.ARGUMENT_DIRECTION_INT";
 
+    /**
+     * <p>Argument to represent the scroll amount as a percent of the visible area of a node, with
+     * 1.0F as the default. Values smaller than 1.0F represent a partial scroll of the node, and
+     * values larger than 1.0F represent a scroll that extends beyond the currently visible node
+     * Rect. Setting this to {@link Float#POSITIVE_INFINITY} or to another "too large" value should
+     * scroll to the end of the node. Negative values should not be used with this argument.
+     * </p>
+     *
+     * <p>
+     *     This argument should be used with the following scroll actions:
+     *     <ul>
+     *         <li>{@link AccessibilityAction#ACTION_SCROLL_FORWARD}</li>
+     *         <li>{@link AccessibilityAction#ACTION_SCROLL_BACKWARD}</li>
+     *         <li>{@link AccessibilityAction#ACTION_SCROLL_UP}</li>
+     *         <li>{@link AccessibilityAction#ACTION_SCROLL_DOWN}</li>
+     *         <li>{@link AccessibilityAction#ACTION_SCROLL_LEFT}</li>
+     *         <li>{@link AccessibilityAction#ACTION_SCROLL_RIGHT}</li>
+     *     </ul>
+     * </p>
+     * <p>
+     *     Example: if a view representing a list of items implements
+     *     {@link AccessibilityAction#ACTION_SCROLL_FORWARD} to scroll forward by an entire screen
+     *     (one "page"), then passing a value of .25F via this argument should scroll that view
+     *     only by 1/4th of a screen. Passing a value of 1.50F via this argument should scroll the
+     *     view by 1 1/2 screens or to end of the node if the node doesn't extend to 1 1/2 screens.
+     * </p>
+     *
+     * <p>
+     *     This argument should not be used with the following scroll actions, which don't cleanly
+     *     conform to granular scroll semantics:
+     *     <ul>
+     *         <li>{@link AccessibilityAction#ACTION_SCROLL_IN_DIRECTION}</li>
+     *         <li>{@link AccessibilityAction#ACTION_SCROLL_TO_POSITION}</li>
+     *     </ul>
+     * </p>
+     *
+     * <p>
+     *     Views that support this argument should set
+     *     {@link #setGranularScrollingSupported(boolean)} to true. Clients should use
+     *     {@link #isGranularScrollingSupported()} to check if granular scrolling is supported.
+     * </p>
+     */
+    public static final String ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT =
+            "android.view.accessibility.action.ARGUMENT_SCROLL_AMOUNT_FLOAT";
+
     // Focus types.
 
     /**
@@ -875,6 +920,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     private static final int BOOLEAN_PROPERTY_REQUEST_INITIAL_ACCESSIBILITY_FOCUS = 1 << 24;
 
     private static final int BOOLEAN_PROPERTY_ACCESSIBILITY_DATA_SENSITIVE = 1 << 25;
+
+    private static final int BOOLEAN_PROPERTY_SUPPORTS_GRANULAR_SCROLLING = 1 << 26;
 
     /**
      * Bits that provide the id of a virtual descendant of a view.
@@ -2547,6 +2594,35 @@ public class AccessibilityNodeInfo implements Parcelable {
      */
     public void setScrollable(boolean scrollable) {
         setBooleanProperty(BOOLEAN_PROPERTY_SCROLLABLE, scrollable);
+    }
+
+    /**
+     * Gets if the node supports granular scrolling.
+     *
+     * @return True if all scroll actions that could support
+     * {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT} have done so, false otherwise.
+     */
+    public boolean isGranularScrollingSupported() {
+        return getBooleanProperty(BOOLEAN_PROPERTY_SUPPORTS_GRANULAR_SCROLLING);
+    }
+
+    /**
+     * Sets if the node supports granular scrolling. This should be set to true if all scroll
+     * actions which could support {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT} have done so.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
+     *
+     * @param granularScrollingSupported True if the node supports granular scrolling, false
+     *                                  otherwise.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setGranularScrollingSupported(boolean granularScrollingSupported) {
+        setBooleanProperty(BOOLEAN_PROPERTY_SUPPORTS_GRANULAR_SCROLLING,
+                granularScrollingSupported);
     }
 
     /**
@@ -4976,6 +5052,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; enabled: ").append(isEnabled());
         builder.append("; password: ").append(isPassword());
         builder.append("; scrollable: ").append(isScrollable());
+        builder.append("; granularScrollingSupported: ").append(isGranularScrollingSupported());
         builder.append("; importantForAccessibility: ").append(isImportantForAccessibility());
         builder.append("; visible: ").append(isVisibleToUser());
         builder.append("; actions: ").append(mActions);
@@ -5260,12 +5337,21 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Action to scroll the node content forward.
+         *
+         * <p>
+         *     <strong>Arguments:</strong>
+         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
+         * </p>
          */
         public static final AccessibilityAction ACTION_SCROLL_FORWARD =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
 
         /**
          * Action to scroll the node content backward.
+         * <p>
+         *     <strong>Arguments:</strong>
+         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
+         * </p>
          */
         public static final AccessibilityAction ACTION_SCROLL_BACKWARD =
                 new AccessibilityAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
@@ -5403,24 +5489,40 @@ public class AccessibilityNodeInfo implements Parcelable {
 
         /**
          * Action to scroll the node content up.
+         * <p>
+         *     <strong>Arguments:</strong>
+         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
+         * </p>
          */
         public static final AccessibilityAction ACTION_SCROLL_UP =
                 new AccessibilityAction(R.id.accessibilityActionScrollUp);
 
         /**
          * Action to scroll the node content left.
+         * <p>
+         *     <strong>Arguments:</strong>
+         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
+         * </p>
          */
         public static final AccessibilityAction ACTION_SCROLL_LEFT =
                 new AccessibilityAction(R.id.accessibilityActionScrollLeft);
 
         /**
          * Action to scroll the node content down.
+         * <p>
+         *     <strong>Arguments:</strong>
+         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
+         * </p>
          */
         public static final AccessibilityAction ACTION_SCROLL_DOWN =
                 new AccessibilityAction(R.id.accessibilityActionScrollDown);
 
         /**
          * Action to scroll the node content right.
+         * <p>
+         *     <strong>Arguments:</strong>
+         *     {@link #ACTION_ARGUMENT_SCROLL_AMOUNT_FLOAT}. This is an optional argument.
+         * </p>
          */
         public static final AccessibilityAction ACTION_SCROLL_RIGHT =
                 new AccessibilityAction(R.id.accessibilityActionScrollRight);
