@@ -305,4 +305,16 @@ public class WifiStatusTrackerTest {
 
         assertThat(mWifiStatusTracker.isDefaultNetwork).isTrue();
     }
+
+    /** Regression test for b/280169520. */
+    @Test
+    public void networkCallbackNullCapabilities_noCrash() {
+        Network primaryNetwork = Mockito.mock(Network.class);
+
+        // WHEN the network capabilities are null
+        mNetworkCallbackCaptor.getValue().onCapabilitiesChanged(
+                primaryNetwork, /* networkCapabilities= */ null);
+
+        // THEN there's no crash (no assert needed)
+    }
 }
