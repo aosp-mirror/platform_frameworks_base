@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone.fragment.dagger;
 
 import android.view.View;
+import android.view.ViewStub;
 
 import com.android.systemui.R;
 import com.android.systemui.battery.BatteryMeterView;
@@ -95,7 +96,7 @@ public interface StatusBarFragmentModule {
     @StatusBarFragmentScope
     @Named(OPERATOR_NAME_VIEW)
     static View provideOperatorNameView(@RootView PhoneStatusBarView view) {
-        return view.findViewById(R.id.operator_name);
+        return ((ViewStub) view.findViewById(R.id.operator_name_stub)).inflate();
     }
 
     /** */
