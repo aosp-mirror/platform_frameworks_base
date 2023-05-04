@@ -1652,8 +1652,12 @@ public class UserManagerService extends IUserManager.Stub {
         checkManageUsersPermission("evict CE key");
         final IActivityManager am = ActivityManagerNative.getDefault();
         final long identity = Binder.clearCallingIdentity();
+        // TODO(b/280054081): save userStartMode when user started and re-use it here instead
+        final int userStartMode = isProfileUnchecked(userId)
+                ? UserManagerInternal.USER_START_MODE_BACKGROUND_VISIBLE
+                : UserManagerInternal.USER_START_MODE_BACKGROUND;
         try {
-            am.restartUserInBackground(userId);
+            am.restartUserInBackground(userId, userStartMode);
         } catch (RemoteException re) {
             throw re.rethrowAsRuntimeException();
         } finally {
