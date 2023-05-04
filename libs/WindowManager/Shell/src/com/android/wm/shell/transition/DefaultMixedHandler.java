@@ -150,9 +150,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     @Override
     public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
             @NonNull TransitionRequestInfo request) {
-        if (mPipHandler.requestHasPipEnter(request) && mSplitHandler.isSplitScreenVisible()) {
+        if (mPipHandler.requestHasPipEnter(request) && mSplitHandler.isSplitActive()) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a PiP-enter request while "
-                    + "Split-Screen is foreground, so treat it as Mixed.");
+                    + "Split-Screen is active, so treat it as Mixed.");
             if (request.getRemoteTransition() != null) {
                 throw new IllegalStateException("Unexpected remote transition in"
                         + "pip-enter-from-split request");
