@@ -36,6 +36,7 @@ import android.service.credentials.CredentialProviderInfoFactory;
 import android.util.Slog;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -154,7 +155,9 @@ public class CredentialManagerUi {
                         mContext,
                         mUserId,
                         CredentialManager.PROVIDER_FILTER_USER_PROVIDERS_ONLY,
-                        mEnabledProviders);
+                        mEnabledProviders,
+                        // Don't need primary providers here.
+                        new HashSet<String>());
 
         List<DisabledProviderData> disabledProviderDataList = allProviders.stream()
                 .filter(provider -> !provider.isEnabled())

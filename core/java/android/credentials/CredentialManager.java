@@ -355,7 +355,11 @@ public final class CredentialManager {
      * Sets a list of all user configurable credential providers registered on the system. This API
      * is intended for settings apps.
      *
-     * @param providers the list of enabled providers
+     * @param primaryProviders the primary providers that user selected for saving credentials. In
+     *                         the most case, there should be only one primary provider, However,
+     *                         if there are more than one CredentialProviderService in the same APK,
+     *                         they should be passed in altogether.
+     * @param providers the list of enabled providers.
      * @param userId the user ID to configure credential manager for
      * @param executor the callback will take place on this {@link Executor}
      * @param callback the callback invoked when the request succeeds or fails
@@ -363,6 +367,7 @@ public final class CredentialManager {
      */
     @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
     public void setEnabledProviders(
+            @NonNull List<String> primaryProviders,
             @NonNull List<String> providers,
             int userId,
             @CallbackExecutor @NonNull Executor executor,
@@ -370,9 +375,11 @@ public final class CredentialManager {
         requireNonNull(executor, "executor must not be null");
         requireNonNull(callback, "callback must not be null");
         requireNonNull(providers, "providers must not be null");
+        requireNonNull(primaryProviders, "primaryProviders must not be null");
 
         try {
             mService.setEnabledProviders(
+                    primaryProviders,
                     providers, userId, new SetEnabledProvidersTransport(executor, callback));
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
