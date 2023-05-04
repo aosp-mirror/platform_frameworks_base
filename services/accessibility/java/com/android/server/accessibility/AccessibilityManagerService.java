@@ -490,7 +490,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mMainHandler, context,
                 new PolicyWarningUIController.NotificationController(context));
         mSecurityPolicy = new AccessibilitySecurityPolicy(policyWarningUIController, mContext,
-                this);
+                this, LocalServices.getService(PackageManagerInternal.class));
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this, mTraceManager);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
