@@ -149,14 +149,17 @@ public class ProviderSessionMetric {
      * @param isFailureStatus indicates the candidate provider sent back a terminated response
      * @param isCompletionStatus indicates the candidate provider sent back a completion response
      * @param providerSessionUid the uid of the provider
+     * @param isPrimary indicates if this candidate provider was the primary provider
      */
     public void collectCandidateMetricUpdate(boolean isFailureStatus,
-            boolean isCompletionStatus, int providerSessionUid, boolean isAuthEntry) {
+            boolean isCompletionStatus, int providerSessionUid, boolean isAuthEntry,
+            boolean isPrimary) {
         try {
             if (isAuthEntry) {
                 collectAuthEntryUpdate(isFailureStatus, isCompletionStatus, providerSessionUid);
                 return;
             }
+            mCandidatePhasePerProviderMetric.setPrimary(isPrimary);
             mCandidatePhasePerProviderMetric.setCandidateUid(providerSessionUid);
             mCandidatePhasePerProviderMetric
                     .setQueryFinishTimeNanoseconds(System.nanoTime());

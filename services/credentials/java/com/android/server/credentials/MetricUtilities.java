@@ -307,6 +307,7 @@ public class MetricUtilities {
             int[] candidateAuthEntryCountList = new int[providerSize];
             int[] candidateRemoteEntryCountList = new int[providerSize];
             String[] frameworkExceptionList = new String[providerSize];
+            boolean[] candidatePrimaryProviderList = new boolean[providerSize];
             int index = 0;
             for (var session : providerSessions) {
                 CandidatePhaseMetric metric = session.mProviderSessionMetric
@@ -339,6 +340,7 @@ public class MetricUtilities {
                 candidateRemoteEntryCountList[index] = metric.getResponseCollective()
                         .getCountForEntry(EntryEnum.REMOTE_ENTRY);
                 frameworkExceptionList[index] = metric.getFrameworkException();
+                candidatePrimaryProviderList[index] = metric.isPrimary();
                 index++;
             }
             FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_CANDIDATE_PHASE_REPORTED,
@@ -372,7 +374,7 @@ public class MetricUtilities {
                     /* api_name */
                     initialPhaseMetric.getApiName(),
                     /* primary_candidates_indicated */
-                    DEFAULT_REPEATED_BOOL
+                    candidatePrimaryProviderList
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during candidate provider uid metric emit: " + e);
