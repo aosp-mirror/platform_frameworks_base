@@ -258,7 +258,7 @@
     <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Инвертиране на цветовете"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Корекция на цветове"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Размер на шрифта"</string>
-    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Управление на потребителите"</string>
+    <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Управляване"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Готово"</string>
     <string name="quick_settings_close_user_panel" msgid="5599724542275896849">"Затваряне"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Установена е връзка"</string>
@@ -322,7 +322,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Този режим блокира ВСИЧКИ звуци и вибрирания, включително от будилници, музика, видеоклипове и игри."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Докоснете отново, за да отворите"</string>
     <string name="tap_again" msgid="1315420114387908655">"Докоснете отново"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Прекарайте пръст нагоре, за да отключите"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Плъзнете нагоре, за да отключите"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Натиснете иконата за отключване, за да отворите"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Отключено с лице. Прекарайте пръст нагоре за отваряне."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Отключено с лице. Натиснете иконата за отключване, за да отворите."</string>
@@ -844,7 +844,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Прекарайте пръст, за да видите повече"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Препоръките се зареждат"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мултимедия"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Скриване за <xliff:g id="APP_NAME">%1$s</xliff:g> на контролата за мултимедия?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Скриване на мултимед. контрола за <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Текущата сесия за мултимедия не бе скрита."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Скриване"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Възобновяване"</string>

@@ -255,7 +255,7 @@
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"Ez dago gailurik erabilgarri"</string>
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"Ez zaude konektatuta wifi-sarera"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Distira"</string>
-    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Kolore-alderantzikatzea"</string>
+    <string name="quick_settings_inversion_label" msgid="3501527749494755688">"Koloreen alderantzikatzea"</string>
     <string name="quick_settings_color_correction_label" msgid="5636617913560474664">"Koloreen zuzenketa"</string>
     <string name="quick_settings_font_scaling_label" msgid="5289001009876936768">"Letra-tamaina"</string>
     <string name="quick_settings_more_user_settings" msgid="7634653308485206306">"Kudeatu erabiltzaileak"</string>
@@ -778,7 +778,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"pantaila-grabaketa"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ez du izenik"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Egonean"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Letraren tamaina"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Letra-tamaina"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"Txikitu"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"Handitu"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Lupa-leihoa"</string>
@@ -844,7 +844,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pasatu hatza aukera gehiago ikusteko"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Gomendioak kargatzen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia-edukia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren multimedia kontr. aukerak ezkutatu?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Multimedia kontrolatzeko aukerak (<xliff:g id="APP_NAME">%1$s</xliff:g>) ezkutatu?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Ezin da ezkutatu multimedia-saioa."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ezkutatu"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Berrekin"</string>

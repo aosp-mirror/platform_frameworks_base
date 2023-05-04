@@ -750,7 +750,7 @@
     <string name="auto_data_switch_disable_message" msgid="5885533647399535852">"وضعیت داده تلفن همراه به‌طور خودکار براساس دردسترس بودن تغییر نخواهد کرد"</string>
     <string name="auto_data_switch_dialog_negative_button" msgid="2370876875999891444">"نه متشکرم"</string>
     <string name="auto_data_switch_dialog_positive_button" msgid="8531782041263087564">"بله، عوض شود"</string>
-    <string name="touch_filtered_warning" msgid="8119511393338714836">"چون برنامه‌ای درحال ایجاد تداخل در درخواست مجوز است، «تنظیمات» نمی‌تواند پاسخ شما را تأیید کند."</string>
+    <string name="touch_filtered_warning" msgid="8119511393338714836">"چون برنامه‌ای درحال ایجاد تداخل در درخواست اجازه است، «تنظیمات» نمی‌تواند پاسخ شما را تأیید کند."</string>
     <string name="slice_permission_title" msgid="3262615140094151017">"به <xliff:g id="APP_0">%1$s</xliff:g> اجازه داده شود تکه‌های <xliff:g id="APP_2">%2$s</xliff:g> را نشان دهد؟"</string>
     <string name="slice_permission_text_1" msgid="6675965177075443714">"- می‌تواند اطلاعات <xliff:g id="APP">%1$s</xliff:g> را بخواند"</string>
     <string name="slice_permission_text_2" msgid="6758906940360746983">"- می‌تواند در <xliff:g id="APP">%1$s</xliff:g> اقدام انجام دهد"</string>
@@ -816,7 +816,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"حذف کردن از موارد دلخواه"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"انتقال به موقعیت <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"کنترل‌ها"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"برای دسترس از «تنظیمات سریع»، کنترل‌ها را انتخاب کنید"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"انتخاب کنید به کدام کنترل‌ها از «تنظیمات سریع» دسترسی داشته باشید."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"برای تغییر دادن ترتیب کنترل‌ها، آن‌ها را نگه دارید و بکشید"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"همه کنترل‌ها برداشته شده‌اند"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"تغییرات ذخیره نشد"</string>

@@ -817,7 +817,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"다음 위치로 이동: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"제어"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"빠른 설정에서 액세스할 컨트롤 선택"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"길게 누르고 드래그하여 컨트롤 재정렬"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"길게 누른 다음 드래그하여 컨트롤 재정렬"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"모든 컨트롤 삭제됨"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"변경사항이 저장되지 않음"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"다른 앱 보기"</string>
@@ -844,7 +844,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"자세히 보려면 스와이프하세요."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"추천 제어 기능 로드 중"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"미디어"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g>에 대한 미디어 컨트롤을 숨길까요?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g>의 미디어 컨트롤을 숨길까요?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"현재 미디어 세션은 숨길 수 없습니다."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"숨기기"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"다시 시작"</string>

@@ -322,7 +322,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"To blokira SVE zvukove i vibracije, uključujući alarme, glazbu, videozapise i igre."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite opet za otvaranje"</string>
     <string name="tap_again" msgid="1315420114387908655">"Dodirnite ponovo"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Prijeđite prstom prema gore da biste otvorili"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Prijeđite prstom prema gore za otvaranje"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pritisnite ikonu otključavanja da biste otvorili"</string>
     <string name="keyguard_face_successful_unlock_swipe" msgid="6180997591385846073">"Otključano licem. Prijeđite prstom prema gore za otvaranje."</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Otključano pomoću lica. Pritisnite ikonu otključavanja da biste otvorili."</string>
@@ -887,7 +887,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Odabrano uređaja: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(nije povezano)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nije prebačeno. Dodirnite da biste pokušali ponovo."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Povezivanje uređaja"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Povežite uređaj"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Da biste emitirali ovu sesiju, otvorite aplikaciju."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Nepoznata aplikacija"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zaustavi emitiranje"</string>
@@ -979,7 +979,7 @@
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi dodati sljedeću pločicu u Brze postavke"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj pločicu"</string>
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"Nemoj dodati pločicu"</string>
-    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Odabir korisnika"</string>
+    <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Odaberite korisnika"</string>
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplikacija je aktivna}one{# aplikacija je aktivna}few{# aplikacije su aktivne}other{# aplikacija je aktivno}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Nove informacije"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktivne aplikacije"</string>

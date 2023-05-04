@@ -773,7 +773,7 @@
     <string name="ongoing_privacy_dialog_attribution_label" msgid="3385241594101496292">"(<xliff:g id="ATTRIBUTION_LABEL">%s</xliff:g>)"</string>
     <string name="ongoing_privacy_dialog_attribution_proxy_label" msgid="1111829599659403249">"(<xliff:g id="ATTRIBUTION_LABEL">%1$s</xliff:g> • <xliff:g id="PROXY_LABEL">%2$s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"કૅમેરા"</string>
-    <string name="privacy_type_location" msgid="7991481648444066703">"સ્થાન"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"લોકેશન"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"માઇક્રોફોન"</string>
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"સ્ક્રીન રેકોર્ડિંગ"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"કોઈ શીર્ષક નથી"</string>

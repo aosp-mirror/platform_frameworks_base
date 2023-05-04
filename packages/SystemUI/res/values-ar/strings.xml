@@ -913,7 +913,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"رقم الإصدار"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"تم نسخ رقم الإصدار إلى الحافظة."</string>
     <string name="basic_status" msgid="2315371112182658176">"محادثة مفتوحة"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"أدوات المحادثة"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"التطبيقات المصغّرة للمحادثات"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"انقر على محادثة لإضافتها إلى \"الشاشة الرئيسية\"."</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"ستظهر هنا المحادثات الحديثة."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"المحادثات ذات الأولوية"</string>

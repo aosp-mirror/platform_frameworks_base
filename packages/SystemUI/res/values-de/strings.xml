@@ -844,7 +844,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Wischen, um weitere zu sehen"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Empfehlungen werden geladen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Medien"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Dieses Mediensteuerelement für <xliff:g id="APP_NAME">%1$s</xliff:g> ausblenden?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Mediensteuerung für <xliff:g id="APP_NAME">%1$s</xliff:g> ausblenden?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Die Mediensitzung kann nicht ausgeblendet werden."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ausblenden"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>

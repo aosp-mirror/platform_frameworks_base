@@ -24,7 +24,7 @@
     <string name="battery_low_description" msgid="3282977755476423966">"আপোনাৰ <xliff:g id="PERCENTAGE">%s</xliff:g> বেটাৰী বাকী আছে। বেটাৰী সঞ্চয়কাৰীয়ে গাঢ় ৰঙৰ থীম অন কৰে, নেপথ্যৰ কাৰ্যকলাপ সীমাবদ্ধ কৰে আৰু জাননী পলম কৰে।"</string>
     <string name="battery_low_intro" msgid="5148725009653088790">"বেটাৰী সঞ্চয়কাৰীয়ে গাঢ় ৰঙৰ থীম অন কৰে, নেপথ্যৰ কাৰ্যকলাপ সীমাবদ্ধ কৰে আৰু জাননী পলম কৰে।"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> বাকী আছে"</string>
-    <string name="invalid_charger_title" msgid="938685362320735167">"ইউএছবি জৰিয়তে চ্চাৰ্জ কৰিব নোৱাৰি"</string>
+    <string name="invalid_charger_title" msgid="938685362320735167">"ইউএছবি জৰিয়তে চাৰ্জ কৰিব নোৱাৰি"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"আপোনাৰ ডিভাইচৰ লগত পোৱা চ্চাৰ্জাৰটো ব্যৱহাৰ কৰক।"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"বেটাৰী সঞ্চয়কাৰী অন কৰিবনে?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"বেটাৰী সঞ্চয়কাৰীৰ বিষয়ে"</string>
@@ -666,7 +666,7 @@
   </string-array>
   <string-array name="battery_options">
     <item msgid="7714004721411852551">"সদায় শতাংশত দেখুৱাব"</item>
-    <item msgid="3805744470661798712">"চ্চাৰ্জ কৰি থকাৰ সময়ত শতাংশ দেখুৱাওক (ডিফ\'ল্ট)"</item>
+    <item msgid="3805744470661798712">"চাৰ্জ কৰি থকাৰ সময়ত শতাংশ দেখুৱাওক (ডিফ\'ল্ট)"</item>
     <item msgid="8619482474544321778">"এই আইকনটো নেদেখুৱাব"</item>
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"কম গুৰুত্বপূৰ্ণ জাননীৰ আইকনসমূহ দেখুৱাওক"</string>

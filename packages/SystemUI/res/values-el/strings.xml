@@ -83,7 +83,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Επεξεργασία"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Επεξεργασία στιγμιότυπου οθόνης"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Κοινοποίηση στιγμιότυπου οθόνης"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Λήψη περισσότερων"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Περισσότερα"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Παράβλεψη στιγμιότυπου οθόνης"</string>
     <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"Παράβλεψη μηνύματος προφίλ εργασίας"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Προεπισκόπηση στιγμιότυπου οθόνης"</string>
@@ -844,7 +844,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Σύρετε για να δείτε περισσότερα."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Φόρτωση προτάσεων"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Μέσα"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Απόκρυψη στοιχείων ελέγχου μέσων για την εφαρμ. <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Απόκρυψη στοιχ. ελέγχου μέσων για <xliff:g id="APP_NAME">%1$s</xliff:g>;"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Αδυναμία απόκρ. τρέχουσας περιόδ. λειτουργ. μέσου."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Απόκρυψη"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Συνέχιση"</string>

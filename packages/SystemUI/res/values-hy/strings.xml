@@ -845,7 +845,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Բեռնման խորհուրդներ"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Մեդիա"</string>
     <string name="controls_media_close_session" msgid="4780485355795635052">"Թաքցնե՞լ <xliff:g id="APP_NAME">%1$s</xliff:g>-ի մեդիա աշխատաշրջանի կառավարման տարրը։"</string>
-    <string name="controls_media_active_session" msgid="3146882316024153337">"Չհաջողվեց թաքցնել մեդիայի ընթացիկ աշխատաշրջանը։"</string>
+    <string name="controls_media_active_session" msgid="3146882316024153337">"Չհաջողվեց թաքցնել ընթացիկ մուլտիմեդիա աշխատաշրջանը։"</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Թաքցնել"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Շարունակել"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Կարգավորումներ"</string>
