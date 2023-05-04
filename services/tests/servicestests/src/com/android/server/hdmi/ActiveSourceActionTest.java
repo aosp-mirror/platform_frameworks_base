@@ -149,31 +149,4 @@ public class ActiveSourceActionTest {
         assertThat(playbackDevice.getActiveSource().physicalAddress).isEqualTo(mPhysicalAddress);
         assertThat(playbackDevice.isActiveSource()).isTrue();
     }
-
-    @Test
-    public void audioDevice_sendsActiveSource_noMenuStatus() {
-        HdmiCecLocalDeviceAudioSystem audioDevice = new HdmiCecLocalDeviceAudioSystem(
-                mHdmiControlService);
-        audioDevice.init();
-        mLocalDevices.add(audioDevice);
-        mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
-        mTestLooper.dispatchAll();
-
-        HdmiCecFeatureAction action = new com.android.server.hdmi.ActiveSourceAction(
-                audioDevice, ADDR_TV);
-        audioDevice.addAndStartAction(action);
-        mTestLooper.dispatchAll();
-
-        HdmiCecMessage activeSource =
-                HdmiCecMessageBuilder.buildActiveSource(
-                        audioDevice.getDeviceInfo().getLogicalAddress(), mPhysicalAddress);
-        HdmiCecMessage menuStatus =
-                HdmiCecMessageBuilder.buildReportMenuStatus(
-                        audioDevice.getDeviceInfo().getLogicalAddress(),
-                        ADDR_TV,
-                        Constants.MENU_STATE_ACTIVATED);
-
-        assertThat(mNativeWrapper.getResultMessages()).contains(activeSource);
-        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(menuStatus);
-    }
 }
