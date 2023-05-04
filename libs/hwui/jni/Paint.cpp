@@ -18,13 +18,29 @@
 #undef LOG_TAG
 #define LOG_TAG "Paint"
 
-#include <utils/Log.h>
-
-#include "GraphicsJNI.h"
+#include <hwui/BlurDrawLooper.h>
+#include <hwui/MinikinSkia.h>
+#include <hwui/MinikinUtils.h>
+#include <hwui/Paint.h>
+#include <hwui/Typeface.h>
+#include <minikin/GraphemeBreak.h>
+#include <minikin/LocaleList.h>
+#include <minikin/Measurement.h>
+#include <minikin/MinikinPaint.h>
+#include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedStringChars.h>
 #include <nativehelper/ScopedUtfChars.h>
-#include <nativehelper/ScopedPrimitiveArray.h>
+#include <unicode/utf16.h>
+#include <utils/Log.h>
 
+#include <cassert>
+#include <cstring>
+#include <memory>
+#include <vector>
+
+#include "ColorFilter.h"
+#include "GraphicsJNI.h"
+#include "SkBlendMode.h"
 #include "SkColorFilter.h"
 #include "SkColorSpace.h"
 #include "SkFont.h"
@@ -35,25 +51,8 @@
 #include "SkPathEffect.h"
 #include "SkPathUtils.h"
 #include "SkShader.h"
-#include "SkBlendMode.h"
 #include "unicode/uloc.h"
 #include "utils/Blur.h"
-
-#include <hwui/BlurDrawLooper.h>
-#include <hwui/MinikinSkia.h>
-#include <hwui/MinikinUtils.h>
-#include <hwui/Paint.h>
-#include <hwui/Typeface.h>
-#include <minikin/GraphemeBreak.h>
-#include <minikin/LocaleList.h>
-#include <minikin/Measurement.h>
-#include <minikin/MinikinPaint.h>
-#include <unicode/utf16.h>
-
-#include <cassert>
-#include <cstring>
-#include <memory>
-#include <vector>
 
 namespace android {
 
@@ -821,9 +820,11 @@ namespace PaintGlue {
 
     static jlong setColorFilter(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong filterHandle) {
         Paint* obj = reinterpret_cast<Paint *>(objHandle);
-        SkColorFilter* filter  = reinterpret_cast<SkColorFilter *>(filterHandle);
-        obj->setColorFilter(sk_ref_sp(filter));
-        return reinterpret_cast<jlong>(obj->getColorFilter());
+        auto colorFilter = uirenderer::ColorFilter::fromJava(filterHandle);
+        auto skColorFilter =
+                colorFilter != nullptr ? colorFilter->getInstance() : sk_sp<SkColorFilter>();
+        obj->setColorFilter(skColorFilter);
+        return filterHandle;
     }
 
     static void setXfermode(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle, jint xfermodeHandle) {
