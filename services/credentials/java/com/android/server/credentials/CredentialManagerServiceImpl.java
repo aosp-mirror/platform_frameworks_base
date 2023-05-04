@@ -38,7 +38,6 @@ public final class CredentialManagerServiceImpl extends
         AbstractPerUserSystemService<CredentialManagerServiceImpl, CredentialManagerService> {
     private static final String TAG = "CredManSysServiceImpl";
 
-    // TODO(b/210531) : Make final when update flow is fixed
     @GuardedBy("mLock")
     @NonNull
     private CredentialProviderInfo mInfo;
@@ -72,7 +71,6 @@ public final class CredentialManagerServiceImpl extends
     @GuardedBy("mLock")
     protected ServiceInfo newServiceInfoLocked(@NonNull ComponentName serviceComponent)
             throws PackageManager.NameNotFoundException {
-        // TODO : Test update flows with multiple providers
         if (mInfo != null) {
             Slog.i(TAG, "newServiceInfoLocked, mInfo not null : "
                     + mInfo.getServiceInfo().getComponentName().flattenToString() + " , "
