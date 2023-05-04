@@ -51,7 +51,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
     private static final int FIRST_POSITION = POSITION_TOP;
     private static final int LAST_POSITION = POSITION_END;
 
-    private static final int MARGIN_UNSPECIFIED = 0xFFFFFFFF;
+    private static final int DIRECTIONAL_SPACING_UNSPECIFIED = 0xFFFFFFFF;
     private static final int CONSTRAINT_UNSPECIFIED = 0xFFFFFFFF;
 
     @Retention(RetentionPolicy.SOURCE)
@@ -80,7 +80,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
 
     private final int mWeight;
 
-    private final int mMargin;
+    private final int mDirectionalSpacing;
 
     private final int mConstraint;
 
@@ -113,7 +113,25 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      */
     public ComplicationLayoutParams(int width, int height, @Position int position,
             @Direction int direction, int weight) {
-        this(width, height, position, direction, weight, MARGIN_UNSPECIFIED, CONSTRAINT_UNSPECIFIED,
+        this(width, height, position, direction, weight, DIRECTIONAL_SPACING_UNSPECIFIED,
+                CONSTRAINT_UNSPECIFIED, false);
+    }
+
+    /**
+     * Constructs a {@link ComplicationLayoutParams}.
+     * @param width The width {@link android.view.View.MeasureSpec} for the view.
+     * @param height The height {@link android.view.View.MeasureSpec} for the view.
+     * @param position The place within the parent container where the view should be positioned.
+     * @param direction The direction the view should be laid out from either the parent container
+     *                  or preceding view.
+     * @param weight The weight that should be considered for this view when compared to other
+     *               views. This has an impact on the placement of the view but not the rendering of
+     *               the view.
+     * @param directionalSpacing The spacing to apply between complications.
+     */
+    public ComplicationLayoutParams(int width, int height, @Position int position,
+            @Direction int direction, int weight, int directionalSpacing) {
+        this(width, height, position, direction, weight, directionalSpacing, CONSTRAINT_UNSPECIFIED,
                 false);
     }
 
@@ -127,31 +145,14 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      * @param weight The weight that should be considered for this view when compared to other
      *               views. This has an impact on the placement of the view but not the rendering of
      *               the view.
-     * @param margin The margin to apply between complications.
-     */
-    public ComplicationLayoutParams(int width, int height, @Position int position,
-            @Direction int direction, int weight, int margin) {
-        this(width, height, position, direction, weight, margin, CONSTRAINT_UNSPECIFIED, false);
-    }
-
-    /**
-     * Constructs a {@link ComplicationLayoutParams}.
-     * @param width The width {@link android.view.View.MeasureSpec} for the view.
-     * @param height The height {@link android.view.View.MeasureSpec} for the view.
-     * @param position The place within the parent container where the view should be positioned.
-     * @param direction The direction the view should be laid out from either the parent container
-     *                  or preceding view.
-     * @param weight The weight that should be considered for this view when compared to other
-     *               views. This has an impact on the placement of the view but not the rendering of
-     *               the view.
-     * @param margin The margin to apply between complications.
+     * @param directionalSpacing The spacing to apply between complications.
      * @param constraint The max width or height the complication is allowed to spread, depending on
      *                   its direction. For horizontal directions, this would be applied on width,
      *                   and for vertical directions, height.
      */
     public ComplicationLayoutParams(int width, int height, @Position int position,
-            @Direction int direction, int weight, int margin, int constraint) {
-        this(width, height, position, direction, weight, margin, constraint, false);
+            @Direction int direction, int weight, int directionalSpacing, int constraint) {
+        this(width, height, position, direction, weight, directionalSpacing, constraint, false);
     }
 
     /**
@@ -172,8 +173,8 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      */
     public ComplicationLayoutParams(int width, int height, @Position int position,
             @Direction int direction, int weight, boolean snapToGuide) {
-        this(width, height, position, direction, weight, MARGIN_UNSPECIFIED, CONSTRAINT_UNSPECIFIED,
-                snapToGuide);
+        this(width, height, position, direction, weight, DIRECTIONAL_SPACING_UNSPECIFIED,
+                CONSTRAINT_UNSPECIFIED, snapToGuide);
     }
 
     /**
@@ -186,7 +187,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      * @param weight The weight that should be considered for this view when compared to other
      *               views. This has an impact on the placement of the view but not the rendering of
      *               the view.
-     * @param margin The margin to apply between complications.
+     * @param directionalSpacing The spacing to apply between complications.
      * @param constraint The max width or height the complication is allowed to spread, depending on
      *                   its direction. For horizontal directions, this would be applied on width,
      *                   and for vertical directions, height.
@@ -197,7 +198,8 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
      *                    from the end of the parent to the guide.
      */
     public ComplicationLayoutParams(int width, int height, @Position int position,
-            @Direction int direction, int weight, int margin, int constraint, boolean snapToGuide) {
+            @Direction int direction, int weight, int directionalSpacing, int constraint,
+            boolean snapToGuide) {
         super(width, height);
 
         if (!validatePosition(position)) {
@@ -213,7 +215,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
 
         mWeight = weight;
 
-        mMargin = margin;
+        mDirectionalSpacing = directionalSpacing;
 
         mConstraint = constraint;
 
@@ -228,7 +230,7 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
         mPosition = source.mPosition;
         mDirection = source.mDirection;
         mWeight = source.mWeight;
-        mMargin = source.mMargin;
+        mDirectionalSpacing = source.mDirectionalSpacing;
         mConstraint = source.mConstraint;
         mSnapToGuide = source.mSnapToGuide;
     }
@@ -300,11 +302,12 @@ public class ComplicationLayoutParams extends ViewGroup.LayoutParams {
     }
 
     /**
-     * Returns the margin to apply between complications, or the given default if no margin is
+     * Returns the spacing to apply between complications, or the given default if no spacing is
      * specified.
      */
-    public int getMargin(int defaultMargin) {
-        return mMargin == MARGIN_UNSPECIFIED ? defaultMargin : mMargin;
+    public int getDirectionalSpacing(int defaultSpacing) {
+        return mDirectionalSpacing == DIRECTIONAL_SPACING_UNSPECIFIED
+                ? defaultSpacing : mDirectionalSpacing;
     }
 
     /**
