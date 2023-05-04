@@ -78,6 +78,7 @@ constructor(
                             sendFoldStateUpdate(isFolded)
                         }
                     }
+
                 sendFoldStateUpdate(false)
                 screenSizeFoldProvider.registerCallback(callback, mainExecutor)
                 awaitClose { screenSizeFoldProvider.unregisterCallback(callback) }

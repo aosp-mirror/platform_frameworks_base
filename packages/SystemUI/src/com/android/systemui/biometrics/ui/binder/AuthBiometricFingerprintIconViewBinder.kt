@@ -17,18 +17,31 @@
 
 package com.android.systemui.biometrics.ui.binder
 
+import android.view.DisplayInfo
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import com.airbnb.lottie.LottieAnimationView
 import com.android.systemui.biometrics.AuthBiometricFingerprintView
 import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel
+import com.android.systemui.lifecycle.repeatWhenAttached
+import kotlinx.coroutines.launch
 
-object AuthBiometricFingerprintViewBinder {
+/** Sub-binder for [AuthBiometricFingerprintView.mIconView]. */
+object AuthBiometricFingerprintIconViewBinder {
 
     /**
      * Binds a [AuthBiometricFingerprintView.mIconView] to a [AuthBiometricFingerprintViewModel].
      */
     @JvmStatic
-    fun bind(view: AuthBiometricFingerprintView, viewModel: AuthBiometricFingerprintViewModel) {
-        if (view.isSfps) {
-            AuthBiometricFingerprintIconViewBinder.bind(view.getIconView(), viewModel)
+    fun bind(view: LottieAnimationView, viewModel: AuthBiometricFingerprintViewModel) {
+        view.repeatWhenAttached {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                val displayInfo = DisplayInfo()
+                view.context.display?.getDisplayInfo(displayInfo)
+                viewModel.setRotation(displayInfo.rotation)
+                viewModel.onConfigurationChanged(view.context.resources.configuration)
+                launch { viewModel.iconAsset.collect { iconAsset -> view.setAnimation(iconAsset) } }
+            }
         }
     }
 }
