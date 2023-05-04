@@ -1468,6 +1468,11 @@ public class BatteryStatsHistory {
         mHistoryLastLastWritten.setTo(mHistoryLastWritten);
         final boolean hasTags = mHistoryLastWritten.tagsFirstOccurrence || cur.tagsFirstOccurrence;
         mHistoryLastWritten.setTo(mHistoryBaseTimeMs + elapsedRealtimeMs, cmd, cur);
+        if (mHistoryLastWritten.time < mHistoryLastLastWritten.time - 60000) {
+            Slog.wtf(TAG, "Significantly earlier event written to battery history:"
+                    + " time=" + mHistoryLastWritten.time
+                    + " previous=" + mHistoryLastLastWritten.time);
+        }
         mHistoryLastWritten.tagsFirstOccurrence = hasTags;
         writeHistoryDelta(mHistoryBuffer, mHistoryLastWritten, mHistoryLastLastWritten);
         mLastHistoryElapsedRealtimeMs = elapsedRealtimeMs;
@@ -1908,12 +1913,6 @@ public class BatteryStatsHistory {
             in.setDataPosition(curPos + bufSize);
         }
 
-        if (DEBUG) {
-            StringBuilder sb = new StringBuilder(128);
-            sb.append("****************** OLD mHistoryBaseTimeMs: ");
-            TimeUtils.formatDuration(mHistoryBaseTimeMs, sb);
-            Slog.i(TAG, sb.toString());
-        }
         mHistoryBaseTimeMs = historyBaseTime;
         if (DEBUG) {
             StringBuilder sb = new StringBuilder(128);
@@ -1922,11 +1921,10 @@ public class BatteryStatsHistory {
             Slog.i(TAG, sb.toString());
         }
 
-        // We are just arbitrarily going to insert 1 minute from the sample of
-        // the last run until samples in this run.
         if (mHistoryBaseTimeMs > 0) {
-            long oldnow = mClock.elapsedRealtime();
-            mHistoryBaseTimeMs = mHistoryBaseTimeMs - oldnow + 1;
+            long elapsedRealtimeMs = mClock.elapsedRealtime();
+            mLastHistoryElapsedRealtimeMs = elapsedRealtimeMs;
+            mHistoryBaseTimeMs = mHistoryBaseTimeMs - elapsedRealtimeMs + 1;
             if (DEBUG) {
                 StringBuilder sb = new StringBuilder(128);
                 sb.append("****************** ADJUSTED mHistoryBaseTimeMs: ");
