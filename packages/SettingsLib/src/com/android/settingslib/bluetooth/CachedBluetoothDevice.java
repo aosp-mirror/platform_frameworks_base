@@ -581,9 +581,14 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public void setName(String name) {
         // Prevent getName() to be set to null if setName(null) is called
-        if (name != null && !TextUtils.equals(name, getName())) {
-            mDevice.setAlias(name);
-            dispatchAttributesChanged();
+        if (name == null || TextUtils.equals(name, getName())) {
+            return;
+        }
+        mDevice.setAlias(name);
+        dispatchAttributesChanged();
+
+        for (CachedBluetoothDevice cbd : mMemberDevices) {
+            cbd.setName(name);
         }
     }
 
