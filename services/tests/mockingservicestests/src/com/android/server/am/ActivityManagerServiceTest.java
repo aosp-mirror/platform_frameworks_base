@@ -48,8 +48,11 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -59,13 +62,16 @@ import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.IApplicationThread;
 import android.app.IUidObserver;
 import android.app.SyncNotedAppOp;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -84,6 +90,7 @@ import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
+import com.android.server.am.ActivityManagerService.StickyBroadcast;
 import com.android.server.am.ProcessList.IsolatedUidRange;
 import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
 import com.android.server.am.UidObserverController.ChangeRecord;
@@ -102,10 +109,12 @@ import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -119,6 +128,15 @@ import java.util.function.Function;
 @SmallTest
 public class ActivityManagerServiceTest {
     private static final String TAG = ActivityManagerServiceTest.class.getSimpleName();
+
+    private static final int TEST_USER = 11;
+
+    private static final String TEST_ACTION1 = "com.android.server.am.TEST_ACTION1";
+    private static final String TEST_ACTION2 = "com.android.server.am.TEST_ACTION2";
+    private static final String TEST_ACTION3 = "com.android.server.am.TEST_ACTION3";
+
+    private static final String TEST_EXTRA_KEY1 = "com.android.server.am.TEST_EXTRA_KEY1";
+    private static final String TEST_EXTRA_VALUE1 = "com.android.server.am.TEST_EXTRA_VALUE1";
 
     private static final int TEST_UID = 11111;
     private static final int USER_ID = 666;
@@ -150,11 +168,14 @@ public class ActivityManagerServiceTest {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
     }
 
-    @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
+    @Rule
+    public final ApplicationExitInfoTest.ServiceThreadRule
+            mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
 
     private Context mContext = getInstrumentation().getTargetContext();
 
     @Mock private AppOpsService mAppOpsService;
+    @Mock private UserController mUserController;
 
     private TestInjector mInjector;
     private ActivityManagerService mAms;
@@ -169,7 +190,14 @@ public class ActivityManagerServiceTest {
         mHandlerThread.start();
         mHandler = new TestHandler(mHandlerThread.getLooper());
         mInjector = new TestInjector(mContext);
-        mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread());
+        doAnswer(invocation -> {
+            final int userId = invocation.getArgument(2);
+            return userId;
+        }).when(mUserController).handleIncomingUser(anyInt(), anyInt(), anyInt(), anyBoolean(),
+                anyInt(), any(), any());
+        doReturn(true).when(mUserController).isUserOrItsParentRunning(anyInt());
+        mAms = new ActivityManagerService(mInjector, mServiceThreadRule.getThread(),
+                mUserController);
         mAms.mConstants.mNetworkAccessTimeoutMs = 2000;
         mAms.mActivityTaskManager = new ActivityTaskManagerService(mContext);
         mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
@@ -311,7 +339,8 @@ public class ActivityManagerServiceTest {
     }
 
     private void verifyUidRangesNoOverlap(IsolatedUidRange uidRange1, IsolatedUidRange uidRange2) {
-        IsolatedUidRange lowRange = uidRange1.mFirstUid <= uidRange2.mFirstUid ? uidRange1 : uidRange2;
+        IsolatedUidRange lowRange = uidRange1.mFirstUid <= uidRange2.mFirstUid
+                ? uidRange1 : uidRange2;
         IsolatedUidRange highRange = lowRange == uidRange1  ? uidRange2 : uidRange1;
 
         assertTrue(highRange.mFirstUid > lowRange.mLastUid);
@@ -607,6 +636,69 @@ public class ActivityManagerServiceTest {
             // Verify there are no other callbacks for this observer.
             verifyNoMoreInteractions(observerToTest);
         }
+    }
+
+    @Test
+    public void testBroadcastStickyIntent() {
+        final Intent intent1 = new Intent(TEST_ACTION1);
+        final Intent intent2 = new Intent(TEST_ACTION2)
+                .putExtra(TEST_EXTRA_KEY1, TEST_EXTRA_VALUE1);
+        final Intent intent3 = new Intent(TEST_ACTION3);
+        final BroadcastOptions options = BroadcastOptions.makeWithDeferUntilActive(true);
+
+        broadcastIntent(intent1, null, true);
+        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
+                StickyBroadcast.create(intent1, false));
+        assertNull(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER));
+        assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
+
+        broadcastIntent(intent2, options.toBundle(), true);
+        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
+                StickyBroadcast.create(intent1, false));
+        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
+                StickyBroadcast.create(intent2, true));
+        assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
+
+        broadcastIntent(intent3, null, true);
+        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
+                StickyBroadcast.create(intent1, false));
+        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
+                StickyBroadcast.create(intent2, true));
+        assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER),
+                StickyBroadcast.create(intent3, false));
+    }
+
+    @SuppressWarnings("GuardedBy")
+    private void broadcastIntent(Intent intent, Bundle options, boolean sticky) {
+        final int res = mAms.broadcastIntentLocked(null, null, null, intent, null, null, 0,
+                null, null, null, null, null, 0, options, false, sticky,
+                Process.myPid(), Process.myUid(), Process.myUid(), Process.myPid(), TEST_USER);
+        assertEquals(ActivityManager.BROADCAST_SUCCESS, res);
+    }
+
+    private void assertStickyBroadcasts(ArrayList<StickyBroadcast> actualBroadcasts,
+            StickyBroadcast... expectedBroadcasts) {
+        final String errMsg = "Expected: " + Arrays.toString(expectedBroadcasts)
+                + "; Actual: " + Arrays.toString(actualBroadcasts.toArray());
+        assertEquals(errMsg, expectedBroadcasts.length, actualBroadcasts.size());
+        for (int i = 0; i < expectedBroadcasts.length; ++i) {
+            final StickyBroadcast expected = expectedBroadcasts[i];
+            final StickyBroadcast actual = actualBroadcasts.get(i);
+            assertTrue(errMsg, areEquals(expected, actual));
+        }
+    }
+
+    private boolean areEquals(StickyBroadcast a, StickyBroadcast b) {
+        if (!Objects.equals(a.intent.getAction(), b.intent.getAction())) {
+            return false;
+        }
+        if (!Bundle.kindofEquals(a.intent.getExtras(), b.intent.getExtras())) {
+            return false;
+        }
+        if (a.deferUntilActive != b.deferUntilActive) {
+            return false;
+        }
+        return true;
     }
 
     private interface ObserverChangesVerifier {

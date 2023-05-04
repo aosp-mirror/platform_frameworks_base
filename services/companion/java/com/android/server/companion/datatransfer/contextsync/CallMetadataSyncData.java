@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.companion.ContextSyncMessage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telecom.PhoneAccountHandle;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +35,9 @@ import java.util.Set;
 class CallMetadataSyncData {
 
     final Map<String, CallMetadataSyncData.Call> mCalls = new HashMap<>();
-    final List<CallMetadataSyncData.Call> mRequests = new ArrayList<>();
+    final List<CallMetadataSyncData.CallCreateRequest> mCallCreateRequests = new ArrayList<>();
+    final List<CallMetadataSyncData.CallControlRequest> mCallControlRequests = new ArrayList<>();
+    final List<CallMetadataSyncData.CallFacilitator> mCallFacilitators = new ArrayList<>();
 
     public void addCall(CallMetadataSyncData.Call call) {
         mCalls.put(call.getId(), call);
@@ -48,20 +51,145 @@ class CallMetadataSyncData {
         return mCalls.values();
     }
 
-    public void addRequest(CallMetadataSyncData.Call call) {
-        mRequests.add(call);
+    public void addCallCreateRequest(CallMetadataSyncData.CallCreateRequest request) {
+        mCallCreateRequests.add(request);
     }
 
-    public List<CallMetadataSyncData.Call> getRequests() {
-        return mRequests;
+    public List<CallMetadataSyncData.CallCreateRequest> getCallCreateRequests() {
+        return mCallCreateRequests;
+    }
+
+    public void addCallControlRequest(CallMetadataSyncData.CallControlRequest request) {
+        mCallControlRequests.add(request);
+    }
+
+    public List<CallMetadataSyncData.CallControlRequest> getCallControlRequests() {
+        return mCallControlRequests;
+    }
+
+    public void addFacilitator(CallFacilitator facilitator) {
+        mCallFacilitators.add(facilitator);
+    }
+
+    public List<CallFacilitator> getFacilitators() {
+        return mCallFacilitators;
+    }
+
+    public static class CallFacilitator implements Parcelable {
+        private String mName;
+        private String mIdentifier;
+
+        CallFacilitator() {}
+
+        CallFacilitator(String name, String identifier) {
+            mName = name;
+            mIdentifier = identifier;
+        }
+
+        CallFacilitator(Parcel parcel) {
+            this(parcel.readString(), parcel.readString());
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int parcelableFlags) {
+            parcel.writeString(mName);
+            parcel.writeString(mIdentifier);
+        }
+
+        public String getName() {
+            return mName;
+        }
+
+        public String getIdentifier() {
+            return mIdentifier;
+        }
+
+        public void setName(String name) {
+            mName = name;
+        }
+
+        public void setIdentifier(String identifier) {
+            mIdentifier = identifier;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @NonNull
+        public static final Parcelable.Creator<CallFacilitator> CREATOR =
+                new Parcelable.Creator<>() {
+
+                    @Override
+                    public CallFacilitator createFromParcel(Parcel source) {
+                        return new CallFacilitator(source);
+                    }
+
+                    @Override
+                    public CallFacilitator[] newArray(int size) {
+                        return new CallFacilitator[size];
+                    }
+                };
+    }
+
+    public static class CallControlRequest {
+        private String mId;
+        private int mControl;
+
+        public void setId(String id) {
+            mId = id;
+        }
+
+        public void setControl(int control) {
+            mControl = control;
+        }
+
+        public String getId() {
+            return mId;
+        }
+
+        public int getControl() {
+            return mControl;
+        }
+    }
+
+    public static class CallCreateRequest {
+        private String mId;
+        private String mAddress;
+        private CallFacilitator mFacilitator;
+
+        public void setId(String id) {
+            mId = id;
+        }
+
+        public void setAddress(String address) {
+            mAddress = address;
+        }
+
+        public void setFacilitator(CallFacilitator facilitator) {
+            mFacilitator = facilitator;
+        }
+
+        public String getId() {
+            return mId;
+        }
+
+        public String getAddress() {
+            return mAddress;
+        }
+
+        public CallFacilitator getFacilitator() {
+            return mFacilitator;
+        }
     }
 
     public static class Call implements Parcelable {
         private String mId;
         private String mCallerId;
         private byte[] mAppIcon;
-        private String mAppName;
-        private String mAppIdentifier;
+        private CallFacilitator mFacilitator;
+        private PhoneAccountHandle mPhoneAccountHandle;
         private int mStatus;
         private final Set<Integer> mControls = new HashSet<>();
 
@@ -70,8 +198,11 @@ class CallMetadataSyncData {
             call.setId(parcel.readString());
             call.setCallerId(parcel.readString());
             call.setAppIcon(parcel.readBlob());
-            call.setAppName(parcel.readString());
-            call.setAppIdentifier(parcel.readString());
+            call.setFacilitator(parcel.readParcelable(CallFacilitator.class.getClassLoader(),
+                    CallFacilitator.class));
+            call.setPhoneAccountHandle(
+                    parcel.readParcelable(PhoneAccountHandle.class.getClassLoader(),
+                            android.telecom.PhoneAccountHandle.class));
             call.setStatus(parcel.readInt());
             final int numberOfControls = parcel.readInt();
             for (int i = 0; i < numberOfControls; i++) {
@@ -85,8 +216,8 @@ class CallMetadataSyncData {
             parcel.writeString(mId);
             parcel.writeString(mCallerId);
             parcel.writeBlob(mAppIcon);
-            parcel.writeString(mAppName);
-            parcel.writeString(mAppIdentifier);
+            parcel.writeParcelable(mFacilitator, parcelableFlags);
+            parcel.writeParcelable(mPhoneAccountHandle, parcelableFlags);
             parcel.writeInt(mStatus);
             parcel.writeInt(mControls.size());
             for (int control : mControls) {
@@ -106,12 +237,12 @@ class CallMetadataSyncData {
             mAppIcon = appIcon;
         }
 
-        void setAppName(String appName) {
-            mAppName = appName;
+        void setFacilitator(CallFacilitator facilitator) {
+            mFacilitator = facilitator;
         }
 
-        void setAppIdentifier(String appIdentifier) {
-            mAppIdentifier = appIdentifier;
+        void setPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
+            mPhoneAccountHandle = phoneAccountHandle;
         }
 
         void setStatus(int status) {
@@ -134,12 +265,12 @@ class CallMetadataSyncData {
             return mAppIcon;
         }
 
-        String getAppName() {
-            return mAppName;
+        CallFacilitator getFacilitator() {
+            return mFacilitator;
         }
 
-        String getAppIdentifier() {
-            return mAppIdentifier;
+        PhoneAccountHandle getPhoneAccountHandle() {
+            return mPhoneAccountHandle;
         }
 
         int getStatus() {

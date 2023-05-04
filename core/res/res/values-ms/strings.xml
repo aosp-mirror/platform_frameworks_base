@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistem Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Beralih ke profil peribadi"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Beralih ke profil kerja"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Beralih kepada <xliff:g id="APP_NAME">%1$s</xliff:g> peribadi"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Beralih kepada <xliff:g id="APP_NAME">%1$s</xliff:g> kerja"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"mengakses kenalan anda"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokasi"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Membenarkan apl mengawal penggetar."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Membenarkan apl mengakses keadaan penggetar."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"panggil terus nombor telefon"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Membenarkan apl memanggil nombor telefon tanpa campur tangan anda. Tindakan ini boleh menyebabkan caj atau panggilan yang tidak dijangka. Harap maklum bahawa tindakan ini tidak membenarkan apl menghubungi nombor kecemasan. Apl yang berniat jahat mungkin memakan belanja dengan membuat panggilan tanpa pengesahan anda atau mendail kod pembawa yang menyebabkan panggilan masuk dimajukan kepada nombor lain secara automatik."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"akses perkhidmatan panggilan IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Membenarkan apl menggunakan perkhidmatan IMS untuk membuat panggilan tanpa campur tangan anda."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"baca status dan identiti telefon"</string>
@@ -634,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Terlalu terang"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Penekanan Kuasa dikesan"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Cuba selaraskan"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Tukar sedikit kedudukan jari anda setiap kali pergerakan dilakukan"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ubah sedikit kedudukan jari pada setiap percubaan"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Cap jari tidak dikenali"</string>
@@ -693,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Lihat terus pada telefon anda"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Lihat terus pada telefon anda"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Lihat terus pada telefon anda"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Alih keluar apa-apa yang melindungi wajah anda."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Tanggalkan apa-apa yang menutup wajah anda."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Bersihkan bahagian atas skrin anda, termasuk bar hitam"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Tidak dapat membuat model wajah anda. Cuba lagi."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Cermin mata gelap dikesan. Wajah anda mesti terlihat sepenuhnya."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Pelitup muka dikesan. Wajah anda mesti terlihat sepenuhnya."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Pelitup muka dikesan. Wajah anda mesti kelihatan sepenuhnya."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Tdk dpt sahkan wajah. Perkakasan tidak tersedia."</string>
@@ -1728,7 +1729,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Untuk beralih antara ciri, leret ke atas menggunakan tiga jari dan tahan."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Pembesaran"</string>
     <string name="user_switched" msgid="7249833311585228097">"Pengguna semasa <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Bertukar kepada <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Beralih kepada <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Log keluar daripada <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Pemilik"</string>
     <string name="guest_name" msgid="8502103277839834324">"Tetamu"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Kandungan ini tidak boleh dibuka dengan apl kerja"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Kandungan ini tidak boleh dikongsi dengan apl peribadi"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Kandungan ini tidak boleh dibuka dengan apl peribadi"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Apl kerja dijeda"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Nyahjeda"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Tiada apl kerja"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Tiada apl peribadi"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Buka <xliff:g id="APP">%s</xliff:g> peribadi"</string>

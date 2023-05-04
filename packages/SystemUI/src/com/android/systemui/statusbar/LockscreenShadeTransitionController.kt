@@ -18,8 +18,7 @@ import com.android.systemui.Dumpable
 import com.android.systemui.ExpandHelper
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
-import com.android.app.animation.Interpolators
-import com.android.systemui.biometrics.UdfpsKeyguardViewController
+import com.android.systemui.biometrics.UdfpsKeyguardViewControllerLegacy
 import com.android.systemui.classifier.Classifier
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
@@ -43,6 +42,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.LSShadeTransitionLogger
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.LargeScreenUtils
+import com.android.wm.shell.animation.Interpolators
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -170,7 +170,7 @@ class LockscreenShadeTransitionController @Inject constructor(
     /**
      * The udfpsKeyguardViewController if it exists.
      */
-    var udfpsKeyguardViewController: UdfpsKeyguardViewController? = null
+    var mUdfpsKeyguardViewControllerLegacy: UdfpsKeyguardViewControllerLegacy? = null
 
     /**
      * The touch helper responsible for the drag down animation.
@@ -452,7 +452,7 @@ class LockscreenShadeTransitionController @Inject constructor(
 
         val udfpsProgress = MathUtils.saturate(dragDownAmount / udfpsTransitionDistance)
         shadeRepository.setUdfpsTransitionToFullShadeProgress(udfpsProgress)
-        udfpsKeyguardViewController?.setTransitionToFullShadeProgress(udfpsProgress)
+        mUdfpsKeyguardViewControllerLegacy?.setTransitionToFullShadeProgress(udfpsProgress)
 
         val statusBarProgress = MathUtils.saturate(dragDownAmount / statusBarTransitionDistance)
         centralSurfaces.setTransitionToFullShadeProgress(statusBarProgress)

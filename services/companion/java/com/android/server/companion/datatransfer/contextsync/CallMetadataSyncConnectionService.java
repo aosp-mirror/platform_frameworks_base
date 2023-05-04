@@ -16,18 +16,21 @@
 
 package com.android.server.companion.datatransfer.contextsync;
 
-import android.content.ComponentName;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.telecom.Call;
 import android.telecom.Connection;
+import android.telecom.ConnectionRequest;
 import android.telecom.ConnectionService;
+import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
+import com.android.server.companion.CompanionDeviceManagerServiceInternal;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,10 +42,47 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
 
     private static final String TAG = "CallMetadataSyncConnectionService";
 
-    private AudioManager mAudioManager;
-    private TelecomManager mTelecomManager;
-    private final Map<PhoneAccountHandleIdentifier, PhoneAccountHandle> mPhoneAccountHandles =
-            new HashMap<>();
+    @VisibleForTesting
+    AudioManager mAudioManager;
+    @VisibleForTesting
+    TelecomManager mTelecomManager;
+    private CompanionDeviceManagerServiceInternal mCdmsi;
+    @VisibleForTesting
+    final Map<CallMetadataSyncConnectionIdentifier, CallMetadataSyncConnection>
+            mActiveConnections = new HashMap<>();
+    @VisibleForTesting
+    final CrossDeviceSyncControllerCallback
+            mCrossDeviceSyncControllerCallback = new CrossDeviceSyncControllerCallback() {
+
+                @Override
+                void processContextSyncMessage(int associationId,
+                        CallMetadataSyncData callMetadataSyncData) {
+                    // Add new calls or update existing calls.
+                    for (CallMetadataSyncData.Call call : callMetadataSyncData.getCalls()) {
+                        final CallMetadataSyncConnection existingConnection =
+                                mActiveConnections.get(new CallMetadataSyncConnectionIdentifier(
+                                        associationId, call.getId()));
+                        if (existingConnection == null) {
+                            final Bundle extras = new Bundle();
+                            extras.putInt(CrossDeviceSyncController.EXTRA_ASSOCIATION_ID,
+                                    associationId);
+                            extras.putParcelable(CrossDeviceSyncController.EXTRA_CALL, call);
+                            mTelecomManager.addNewIncomingCall(call.getPhoneAccountHandle(),
+                                    extras);
+                        } else {
+                            existingConnection.update(call);
+                        }
+                    }
+                    // Remove obsolete calls.
+                    mActiveConnections.values().removeIf(connection -> {
+                        if (!callMetadataSyncData.hasCall(connection.getCallId())) {
+                            connection.setDisconnected(new DisconnectCause(DisconnectCause.REMOTE));
+                            return true;
+                        }
+                        return false;
+                    });
+                }
+            };
 
     @Override
     public void onCreate() {
@@ -50,83 +90,96 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
 
         mAudioManager = getSystemService(AudioManager.class);
         mTelecomManager = getSystemService(TelecomManager.class);
+        mCdmsi = LocalServices.getService(CompanionDeviceManagerServiceInternal.class);
+        mCdmsi.registerCallMetadataSyncCallback(mCrossDeviceSyncControllerCallback);
     }
 
-    /**
-     * Registers a {@link android.telecom.PhoneAccount} for a given call-capable app on the synced
-     * device.
-     */
-    private void registerPhoneAccount(int associationId, String appIdentifier,
-            String humanReadableAppName) {
-        final PhoneAccountHandleIdentifier phoneAccountHandleIdentifier =
-                new PhoneAccountHandleIdentifier(associationId, appIdentifier);
-        final PhoneAccount phoneAccount = createPhoneAccount(phoneAccountHandleIdentifier,
-                humanReadableAppName);
-        mTelecomManager.registerPhoneAccount(phoneAccount);
-        mTelecomManager.enablePhoneAccount(mPhoneAccountHandles.get(phoneAccountHandleIdentifier),
-                true);
+    @Override
+    public Connection onCreateIncomingConnection(PhoneAccountHandle phoneAccountHandle,
+            ConnectionRequest connectionRequest) {
+        final int associationId = connectionRequest.getExtras().getInt(
+                CrossDeviceSyncController.EXTRA_ASSOCIATION_ID);
+        final CallMetadataSyncData.Call call = connectionRequest.getExtras().getParcelable(
+                CrossDeviceSyncController.EXTRA_CALL, CallMetadataSyncData.Call.class);
+        final CallMetadataSyncConnection connection = new CallMetadataSyncConnection(
+                mTelecomManager,
+                mAudioManager,
+                associationId,
+                call,
+                new CallMetadataSyncConnectionCallback() {
+                    @Override
+                    void sendCallAction(int associationId, String callId, int action) {
+                        mCdmsi.sendCrossDeviceSyncMessage(associationId,
+                                CrossDeviceSyncController.createCallControlMessage(callId, action));
+                    }
+                });
+        connection.setConnectionProperties(
+                Connection.PROPERTY_IS_EXTERNAL_CALL | Connection.PROPERTY_SELF_MANAGED);
+        return connection;
     }
 
-    /**
-     * Unregisters a {@link android.telecom.PhoneAccount} for a given call-capable app on the synced
-     * device.
-     */
-    private void unregisterPhoneAccount(int associationId, String appIdentifier) {
-        mTelecomManager.unregisterPhoneAccount(mPhoneAccountHandles.remove(
-                new PhoneAccountHandleIdentifier(associationId, appIdentifier)));
+    @Override
+    public void onCreateIncomingConnectionFailed(PhoneAccountHandle phoneAccountHandle,
+            ConnectionRequest connectionRequest) {
+        Slog.e(TAG, "onCreateIncomingConnectionFailed for: " + phoneAccountHandle.getId());
+    }
+
+    @Override
+    public Connection onCreateOutgoingConnection(PhoneAccountHandle phoneAccountHandle,
+            ConnectionRequest connectionRequest) {
+        final PhoneAccount phoneAccount = mTelecomManager.getPhoneAccount(phoneAccountHandle);
+
+        final CallMetadataSyncData.Call call = new CallMetadataSyncData.Call();
+        call.setId(UUID.randomUUID().toString());
+        call.setStatus(android.companion.Telecom.Call.UNKNOWN_STATUS);
+        call.setPhoneAccountHandle(phoneAccountHandle);
+        final CallMetadataSyncData.CallFacilitator callFacilitator =
+                new CallMetadataSyncData.CallFacilitator(phoneAccount.getLabel().toString(),
+                        phoneAccount.getExtras().getString(
+                                CrossDeviceSyncController.EXTRA_CALL_FACILITATOR_ID));
+        call.setFacilitator(callFacilitator);
+
+        final int associationId = connectionRequest.getExtras().getInt(
+                CrossDeviceSyncController.EXTRA_ASSOCIATION_ID);
+
+        final CallMetadataSyncConnection connection = new CallMetadataSyncConnection(
+                mTelecomManager,
+                mAudioManager,
+                associationId,
+                call,
+                new CallMetadataSyncConnectionCallback() {
+                    @Override
+                    void sendCallAction(int associationId, String callId, int action) {
+                        mCdmsi.sendCrossDeviceSyncMessage(associationId,
+                                CrossDeviceSyncController.createCallControlMessage(callId, action));
+                    }
+                });
+        connection.setConnectionProperties(
+                Connection.PROPERTY_IS_EXTERNAL_CALL | Connection.PROPERTY_SELF_MANAGED);
+
+        mCdmsi.sendCrossDeviceSyncMessage(associationId,
+                CrossDeviceSyncController.createCallCreateMessage(call.getId(),
+                        connectionRequest.getAddress().toString(),
+                        call.getFacilitator().getIdentifier()));
+
+        return connection;
+    }
+
+    @Override
+    public void onCreateOutgoingConnectionFailed(PhoneAccountHandle phoneAccountHandle,
+            ConnectionRequest connectionRequest) {
+        Slog.e(TAG, "onCreateIncomingConnectionFailed for: " + phoneAccountHandle.getId());
+    }
+
+    @Override
+    public void onCreateConnectionComplete(Connection connection) {
+        if (connection instanceof CallMetadataSyncConnection) {
+            ((CallMetadataSyncConnection) connection).initialize();
+        }
     }
 
     @VisibleForTesting
-    PhoneAccount createPhoneAccount(PhoneAccountHandleIdentifier phoneAccountHandleIdentifier,
-            String humanReadableAppName) {
-        if (mPhoneAccountHandles.containsKey(phoneAccountHandleIdentifier)) {
-            // Already exists!
-            return null;
-        }
-        final PhoneAccountHandle handle = new PhoneAccountHandle(
-                new ComponentName(this, CallMetadataSyncConnectionService.class),
-                UUID.randomUUID().toString());
-        mPhoneAccountHandles.put(phoneAccountHandleIdentifier, handle);
-        return new PhoneAccount.Builder(handle, humanReadableAppName)
-                .setCapabilities(PhoneAccount.CAPABILITY_CALL_PROVIDER
-                        | PhoneAccount.CAPABILITY_SELF_MANAGED).build();
-    }
-
-    static final class PhoneAccountHandleIdentifier {
-        private final int mAssociationId;
-        private final String mAppIdentifier;
-
-        PhoneAccountHandleIdentifier(int associationId, String appIdentifier) {
-            mAssociationId = associationId;
-            mAppIdentifier = appIdentifier;
-        }
-
-        public int getAssociationId() {
-            return mAssociationId;
-        }
-
-        public String getAppIdentifier() {
-            return mAppIdentifier;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(mAssociationId, mAppIdentifier);
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (other instanceof PhoneAccountHandleIdentifier) {
-                return ((PhoneAccountHandleIdentifier) other).getAssociationId() == mAssociationId
-                        && mAppIdentifier != null
-                        && mAppIdentifier.equals(
-                        ((PhoneAccountHandleIdentifier) other).getAppIdentifier());
-            }
-            return false;
-        }
-    }
-
-    private static final class CallMetadataSyncConnectionIdentifier {
+    static final class CallMetadataSyncConnectionIdentifier {
         private final int mAssociationId;
         private final String mCallId;
 
@@ -153,18 +206,21 @@ public class CallMetadataSyncConnectionService extends ConnectionService {
             if (other instanceof CallMetadataSyncConnectionIdentifier) {
                 return ((CallMetadataSyncConnectionIdentifier) other).getAssociationId()
                         == mAssociationId
-                        && (((CallMetadataSyncConnectionIdentifier) other).getCallId() == mCallId);
+                        && mCallId != null && mCallId.equals(
+                                ((CallMetadataSyncConnectionIdentifier) other).getCallId());
             }
             return false;
         }
     }
 
-    private abstract static class CallMetadataSyncConnectionCallback {
+    @VisibleForTesting
+    abstract static class CallMetadataSyncConnectionCallback {
 
         abstract void sendCallAction(int associationId, String callId, int action);
     }
 
-    private static class CallMetadataSyncConnection extends Connection {
+    @VisibleForTesting
+    static class CallMetadataSyncConnection extends Connection {
 
         private final TelecomManager mTelecomManager;
         private final AudioManager mAudioManager;

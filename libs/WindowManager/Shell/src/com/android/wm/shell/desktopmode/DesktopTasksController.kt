@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.desktopmode
 
-import android.app.ActivityManager
 import android.app.ActivityManager.RunningTaskInfo
 import android.app.WindowConfiguration.ACTIVITY_TYPE_HOME
 import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
@@ -202,16 +201,15 @@ class DesktopTasksController(
         }
     }
 
-
     /**
      * Move a task to fullscreen after being dragged from fullscreen and released back into
      * status bar area
      */
-    fun cancelMoveToFreeform(task: RunningTaskInfo, startPosition: Point) {
+    fun cancelMoveToFreeform(task: RunningTaskInfo, position: Point) {
         val wct = WindowContainerTransaction()
         addMoveToFullscreenChanges(wct, task.token)
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
-            enterDesktopTaskTransitionHandler.startCancelMoveToDesktopMode(wct, startPosition,
+            enterDesktopTaskTransitionHandler.startCancelMoveToDesktopMode(wct, position,
                     mOnAnimationFinishedCallback)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
@@ -219,13 +217,13 @@ class DesktopTasksController(
         }
     }
 
-    private fun moveToFullscreenWithAnimation(task: ActivityManager.RunningTaskInfo) {
+    private fun moveToFullscreenWithAnimation(task: RunningTaskInfo, position: Point) {
         val wct = WindowContainerTransaction()
         addMoveToFullscreenChanges(wct, task.token)
 
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             exitDesktopTaskTransitionHandler.startTransition(
-            Transitions.TRANSIT_EXIT_DESKTOP_MODE, wct, mOnAnimationFinishedCallback)
+            Transitions.TRANSIT_EXIT_DESKTOP_MODE, wct, position, mOnAnimationFinishedCallback)
         } else {
             shellTaskOrganizer.applyTransaction(wct)
             releaseVisualIndicator()
@@ -499,15 +497,15 @@ class DesktopTasksController(
      * Perform checks required on drag end. Move to fullscreen if drag ends in status bar area.
      *
      * @param taskInfo the task being dragged.
-     * @param y height of drag, to be checked against status bar height.
+     * @param position position of surface when drag ends
      */
     fun onDragPositioningEnd(
             taskInfo: RunningTaskInfo,
-            y: Float
+            position: Point
     ) {
         val statusBarHeight = getStatusBarHeight(taskInfo)
-        if (y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
-            moveToFullscreenWithAnimation(taskInfo)
+        if (position.y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+            moveToFullscreenWithAnimation(taskInfo, position)
         }
     }
 

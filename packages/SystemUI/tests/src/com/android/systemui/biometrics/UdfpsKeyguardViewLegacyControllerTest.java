@@ -45,9 +45,10 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
-public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewControllerBaseTest {
+public class UdfpsKeyguardViewLegacyControllerTest extends
+        UdfpsKeyguardViewLegacyControllerBaseTest {
     @Override
-    public UdfpsKeyguardViewController createUdfpsKeyguardViewController() {
+    public UdfpsKeyguardViewControllerLegacy createUdfpsKeyguardViewController() {
         return createUdfpsKeyguardViewController(/* useModernBouncer */ false,
                 /* useExpandedOverlay */ false);
     }
@@ -90,7 +91,7 @@ public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewController
         mController.onViewAttached();
         verify(mView, atLeast(1)).setPauseAuth(true);
         verify(mView).onDozeAmountChanged(dozeAmount, dozeAmount,
-                UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
+                UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
     }
 
     @Test
@@ -118,7 +119,7 @@ public class UdfpsKeyguardViewControllerTest extends UdfpsKeyguardViewController
         mStatusBarStateListener.onDozeAmountChanged(linear, eased);
 
         verify(mView).onDozeAmountChanged(linear, eased,
-                UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
+                UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN);
     }
 
     @Test

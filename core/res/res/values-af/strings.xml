@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-stelsel"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Skakel oor na persoonlike profiel"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Skakel oor na werkprofiel"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Skakel oor na persoonlike <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Skakel oor na werk-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakte"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"in te gaan by jou kontakte"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ligging"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Stel die program in staat om toegang tot die vibreerderstand te kry."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"skakel foonnommers direk"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Laat die app toe om foonnommers sonder jou insae te bel. Dit kan onvoorsiene heffings of oproepe tot gevolg hê. Neem kennis dat dit nie die app toelaat om noodnommers te bel nie. Kwaadwillige apps kan jou geld kos deur oproepe te maak sonder jou bevestiging of diensverskafferkodes te bel wat veroorsaak dat inkomende oproepe outomaties na ’n ander nommer aangestuur word."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"toegang tot kitsboodskapoproepdiens"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Laat die program toe om die kitsboodskapdiens te gebruik om oproepe sonder jou ingryping te maak."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lees foonstatus en identiteit"</string>
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kan nie jou gesigmodel skep nie. Probeer weer."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Donkerbril bespeur. Jou gesig moet heeltemal sigbaar wees."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesigbedekking bespeur. Jou gesig moet heeltemal sigbaar wees."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Gesigbedekking bespeur. Gesig moet heel sigbaar wees."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kan nie gesig verifieer nie. Hardeware nie beskikbaar nie."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Hierdie inhoud kan nie met werkprogramme oopgemaak word nie"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Hierdie inhoud kan nie met persoonlike programme gedeel word nie"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Hierdie inhoud kan nie met persoonlike programme oopgemaak word nie"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Werkapps is onderbreek"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Hervat"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Geen werkprogramme nie"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Geen persoonlike programme nie"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Maak persoonlike <xliff:g id="APP">%s</xliff:g> oop"</string>

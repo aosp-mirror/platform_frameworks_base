@@ -360,15 +360,42 @@ public class CompanionTransportManager {
     /**
      * For testing purpose only.
      *
-     * Create a dummy RawTransport and notify onTransportChanged listeners.
+     * Create an emulated RawTransport and notify onTransportChanged listeners.
      */
-    public void createDummyTransport(int associationId) {
+    public EmulatedTransport createEmulatedTransport(int associationId) {
         synchronized (mTransports) {
             FileDescriptor fd = new FileDescriptor();
             ParcelFileDescriptor pfd = new ParcelFileDescriptor(fd);
-            Transport transport = new RawTransport(associationId, pfd, mContext);
+            EmulatedTransport transport = new EmulatedTransport(associationId, pfd, mContext);
+            addMessageListenersToTransport(transport);
             mTransports.put(associationId, transport);
             notifyOnTransportsChanged();
+            return transport;
+        }
+    }
+
+    /**
+     * For testing purposes only.
+     *
+     * Emulates a transport for incoming messages but black-holes all messages sent back through it.
+     */
+    public static class EmulatedTransport extends RawTransport {
+
+        EmulatedTransport(int associationId, ParcelFileDescriptor fd, Context context) {
+            super(associationId, fd, context);
+        }
+
+        /** Process an incoming message for testing purposes. */
+        public void processMessage(int messageType, int sequence, byte[] data) throws IOException {
+            handleMessage(messageType, sequence, data);
+        }
+
+        @Override
+        protected void sendMessage(int messageType, int sequence, @NonNull byte[] data)
+                throws IOException {
+            Slog.e(TAG, "Black-holing emulated message type 0x" + Integer.toHexString(messageType)
+                    + " sequence " + sequence + " length " + data.length
+                    + " to association " + mAssociationId);
         }
     }
 

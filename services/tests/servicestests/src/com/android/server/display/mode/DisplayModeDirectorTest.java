@@ -915,6 +915,69 @@ public class DisplayModeDirectorTest {
     }
 
     @Test
+    public void setBrightness_doesNotLockFpsIfSmoothDisplayIsOff() {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+        setPeakRefreshRate(60); // set smooth display ON
+        director.getSettingsObserver().setDefaultRefreshRate(90);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        final FakeDeviceConfig config = mInjector.getDeviceConfig();
+        config.setRefreshRateInLowZone(90);
+        config.setLowDisplayBrightnessThresholds(new int[] { 10 });
+        config.setLowAmbientBrightnessThresholds(new int[] { 20 });
+
+        director.start(createMockSensorManager(createLightSensor()));
+
+        ArgumentCaptor<DisplayListener> displayListenerCaptor =
+                ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+                any(Handler.class),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+        DisplayListener displayListener = displayListenerCaptor.getValue();
+
+        setBrightness(10, 10, displayListener);
+
+        Vote vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
+        assertThat(vote).isNull();
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+        assertThat(vote).isNull();
+    }
+
+    @Test
+    public void setBrightness_locksFpsIfSmoothDisplayIsOn() {
+        DisplayModeDirector director =
+                createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);
+        setPeakRefreshRate(90); // set smooth display ON
+        director.getSettingsObserver().setDefaultRefreshRate(90);
+        director.getBrightnessObserver().setDefaultDisplayState(Display.STATE_ON);
+
+        final FakeDeviceConfig config = mInjector.getDeviceConfig();
+        config.setRefreshRateInLowZone(90);
+        config.setLowDisplayBrightnessThresholds(new int[] { 10 });
+        config.setLowAmbientBrightnessThresholds(new int[] { 20 });
+
+        director.start(createMockSensorManager(createLightSensor()));
+
+        ArgumentCaptor<DisplayListener> displayListenerCaptor =
+                ArgumentCaptor.forClass(DisplayListener.class);
+        verify(mInjector).registerDisplayListener(displayListenerCaptor.capture(),
+                any(Handler.class),
+                eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS));
+        DisplayListener displayListener = displayListenerCaptor.getValue();
+
+        setBrightness(10, 10, displayListener);
+
+        Vote vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE);
+        assertVoteForPhysicalRefreshRate(vote, 90 /*fps*/);
+        vote = director.getVote(Display.DEFAULT_DISPLAY, Vote.PRIORITY_FLICKER_REFRESH_RATE_SWITCH);
+        assertThat(vote).isNotNull();
+        assertThat(vote.disableRefreshRateSwitching).isTrue();
+    }
+
+    @Test
     public void testLockFpsForLowZone() throws Exception {
         DisplayModeDirector director =
                 createDirectorFromRefreshRateArray(new float[] {60.f, 90.f}, 0);

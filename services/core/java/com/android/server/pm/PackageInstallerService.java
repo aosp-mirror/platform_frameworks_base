@@ -724,7 +724,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
         } else {
             params.installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
-            params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
         if (mDisableVerificationForUid != INVALID_UID) {

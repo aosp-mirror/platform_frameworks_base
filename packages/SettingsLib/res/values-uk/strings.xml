@@ -379,9 +379,9 @@
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Налагодити непрямокутну обрізку"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Обробка HWUI за профілем"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Увімкнути шари налагодження ГП"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дозвольте завантажувати шари налагодження ГП для додатків налагодження"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Увімкнути докладну реєстрацію постачальника"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Включати у звіти про помилки додаткові записи про постачальника пристрою, які можуть містити особисті дані, призводити до надмірного споживання заряду акумулятора та/або використовувати більший обсяг пам\'яті."</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дозволити завантажувати шари налагодження ГП для додатків налагодження"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Увімкнути докладний журнал постачальника"</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Включати у звіти про помилки додаткові записи постачальника про пристрій, які можуть містити особисті дані, призводити до надмірного споживання заряду акумулятора та/або використовувати більший обсяг пам\'яті."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Анімація вікон"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Анімація переходів"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Тривалість анімації"</string>
@@ -677,7 +677,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Змінити додаток для трансляції на <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Змінити аудіовихід"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Анімації з підказками для жесту \"Назад\""</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Увімкніть системну анімацію з підказками для жесту \"Назад\"."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Увімкнути системну анімацію з підказками для жесту \"Назад\"."</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Якщо вибрати це налаштування, для жесту \"Назад\" відображатиметься анімація з підказками. У файлі маніфесту атрибуту enableOnBackInvokedCallback додатка потрібно присвоїти значення true."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1737722959616802157">"Перемістіть палець ліворуч"</item>

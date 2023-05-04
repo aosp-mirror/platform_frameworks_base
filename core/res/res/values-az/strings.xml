@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android sistemi"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Şəxsi profilə keçin"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"İş profilinə keçin"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> üzrə şəxsi profilə keçin"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> üzrə iş profilinə keçin"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktlar"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"kontaktlarınıza daxil olun"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Məkan"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Tətbiqə vibratoru idarə etmə icazəsi verir."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Tətbiqə vibrasiya vəziyyətinə daxil olmaq imkanı verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon nömrələrinə birbaşa zəng edir"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Tətbiqə telefon nömrələrinə müdaxiləsiz zəng etmək icazəsi verir. Gözlənilməz ödəmə və ya zənglə nəticələnə bilər. Bununla tətbiq təcili nömrələrə zəng edə bilmir. Zərərli tətbiqlər təsdiq olmadan zəng etməklə və ya gələn zənglərin başqa nömrəyə avtomatik yönləndirilməsinə səbəb olan operator kodları yığmaqla xərc yarada bilər."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS zəng xidmətinə giriş"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Tətbiqə müdaxilə olmadan zəng etmək üçün IMS xidmətindən istifadə etməyə imkan verir."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefon statusunu və identifikasiyanı oxuyur"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bu kontenti iş tətbiqləri ilə açmaq mümkün deyil"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bu kontenti şəxsi tətbiqlər ilə paylaşmaq mümkün deyil"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bu kontenti şəxsi tətbiqlər ilə açmaq mümkün deyil"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"İş tətbiqlərinə pauza verilib"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Pauzanı bitirin"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"İş tətbiqi yoxdur"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Şəxsi tətbiq yoxdur"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Açın: <xliff:g id="APP">%s</xliff:g> (şəxsi)"</string>

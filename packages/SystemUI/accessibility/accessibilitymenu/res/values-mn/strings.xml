@@ -9,7 +9,7 @@
     <string name="power_label" msgid="7699720321491287839">"Асаах/унтраах"</string>
     <string name="power_utterance" msgid="7444296686402104807">"Асаах/унтраах сонголт"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Саяхны апп"</string>
-    <string name="lockscreen_label" msgid="648347953557887087">"Түгжигдсэн дэлгэц"</string>
+    <string name="lockscreen_label" msgid="648347953557887087">"Түгжээтэй дэлгэц"</string>
     <string name="quick_settings_label" msgid="2999117381487601865">"Шуурхай тохиргоо"</string>
     <string name="notifications_label" msgid="6829741046963013567">"Мэдэгдэл"</string>
     <string name="screenshot_label" msgid="863978141223970162">"Дэлгэцийн агшин"</string>

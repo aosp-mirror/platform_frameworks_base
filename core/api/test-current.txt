@@ -2037,6 +2037,7 @@ package android.media.metrics {
 package android.media.soundtrigger {
 
   public final class SoundTriggerInstrumentation {
+    method public void setInPhoneCallState(boolean);
     method public void setResourceContention(boolean);
     method public void triggerOnResourcesAvailable();
     method public void triggerRestart();

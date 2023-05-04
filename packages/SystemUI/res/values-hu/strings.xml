@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> észlelte ezt a képernyőképet."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> és más nyitott alkalmazások észlelték ezt a képernyőképet."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Hozzáadás jegyzethez"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Képernyőrögzítő"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Képernyőrögzítő"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Képernyőrögzítés feldolgozása"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Folyamatban lévő értesítés képernyőrögzítési munkamenethez"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Elindítja a felvételt?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"A felvétel készítése során az Android rendszer rögzítheti az eszközön lejátszott, illetve a képernyőjén megjelenő bizalmas információkat. Ide tartoznak például a jelszavak, a fizetési információk, a fotók, az üzenetek és az audiotartalmak is."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Teljes képernyő rögzítése"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Egyetlen alkalmazás rögzítése"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Rögzítés közben az Android a képernyőn látható vagy az eszközön lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Alkalmazás rögzítése közben az Android az adott appban látható vagy lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Rögzítés indítása"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Elindítja a felvételt?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Rögzítés közben az Android a képernyőn látható vagy az eszközön lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel, a fotókkal, valamint a hang- és videófelvételekkel."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Alkalmazás rögzítése közben az Android az adott alkalmazásban látható vagy lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel, a fotókkal, valamint a hang- és videófelvételekkel."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Felvétel indítása"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Hang rögzítése"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Eszköz hangja"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Az eszköz által lejátszott hangok, például zeneszámok, hívások és csengőhangok"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Eszköz hangja és mikrofon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Indítás"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Indítás"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Kép rögzítése folyamatban"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Kép és hang rögzítése folyamatban"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"A képernyőn végzett érintések mutatása"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Amennyiben helytelen mintát ad meg a következő kísérletnél, a rendszer törli munkaprofilját és a kapcsolódó adatokat."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Amennyiben helytelen PIN-kódot ad meg a következő kísérletnél, a rendszer törli munkaprofilját és a kapcsolódó adatokat."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Amennyiben helytelen jelszót ad meg a következő kísérletnél, a rendszer törli munkaprofilját és a kapcsolódó adatokat."</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Beállítás"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Most nem"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"A műveletre a biztonság és a teljesítmény fokozása érdekében van szükség"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"A Feloldás ujjlenyomattal funkció újbóli beállítása"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Feloldás ujjlenyomattal"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Ujjlenyomattal való feloldás beállítása"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"A Feloldás ujjlenyomattal funkció újbóli beállításához a rendszer törli majd jelenlegi ujjlenyomatképeit és -modelljeit.\n\nTörlésüket követően újból be kell állítania a Feloldás ujjlenyomattal funkciót ahhoz, hogy ujjlenyomatával oldhassa fel telefonja zárolását, illetve igazolhassa személyazonosságát."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"A Feloldás ujjlenyomattal funkció újbóli beállításához a rendszer törli majd jelenlegi ujjlenyomatképeit és -modelljeit.\n\nTörlésüket követően újból be kell állítania a Feloldás ujjlenyomattal funkciót ahhoz, hogy ujjlenyomatával oldhassa fel telefonja zárolását, illetve igazolhassa személyazonosságát."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Nem sikerült beállítani a Feloldás ujjlenyomattal funkciót. Próbálkozzon újra a Beállításokban."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Állítsa be újra az Arcalapú feloldást"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Arcalapú feloldás"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Az Arcalapú feloldás beállítása"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Az Arcalapú feloldás újbóli beállításához a rendszer törli majd arcmodelljét.\n\nA funkciót újból be kell állítania ahhoz, hogy arca segítségével tudja feloldani telefonja zárolását."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Nem sikerült beállítani az arcalapú feloldást. Próbálkozzon újra a Beállításokban."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Érintse meg az ujjlenyomat-érzékelőt"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Az arc nem felismerhető. Használjon ujjlenyomatot."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -331,9 +314,9 @@
     <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Normál"</string>
     <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Közepes"</string>
     <string name="quick_settings_contrast_high" msgid="656049259587494499">"Nagy"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Feloldja az eszközmikrofon letiltását?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Feloldja az eszközkamera letiltását?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Feloldja az eszközkamera és -mikrofon letiltását?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Feloldja az eszköz mikrofonjának letiltását?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Feloldja az eszköz kamerájának letiltását?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Feloldja az eszköz kamerájának és mikrofonjának letiltását?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ezzel feloldja a hozzáférés letiltását az összes olyan alkalmazás és szolgáltatás esetében, amelyek számára engedélyezte a mikrofon használatát."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ezzel feloldja a hozzáférés letiltását az összes olyan alkalmazás és szolgáltatás esetében, amelyek számára engedélyezte a kamera használatát."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ezzel feloldja a hozzáférés letiltását az összes olyan alkalmazás és szolgáltatás esetében, amelyek számára engedélyezte a kamera vagy a mikrofon használatát."</string>
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Törli a felhasználót?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"A felhasználóhoz tartozó minden adat és alkalmazás törölve lesz."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Eltávolítás"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"A(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> hozzáfér majd minden olyan információhoz, amely látható az Ön képernyőjén, vagy amelyet az Ön eszközéről játszanak le rögzítés vagy átküldés során. Ez olyan információkat is tartalmaz, mint a jelszavak, a fizetési részletek, fotók, üzenetek és lejátszott audiotartalmak."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"A funkciót biztosító szolgáltatás hozzáfér majd minden olyan információhoz, amely látható az Ön képernyőjén, illetve amelyet az Ön eszközéről játszanak le rögzítés vagy átküldés közben. Ez olyan információkat is tartalmaz, mint a jelszavak, a fizetési részletek, fotók, üzenetek és lejátszott audiotartalmak."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Biztosan elkezdi a rögzítést vagy az átküldést?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Elkezdi a rögzítést vagy átküldést a következővel: <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Engedélyezi a(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> számára a megosztást és rögzítést?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Teljes képernyő"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Egyetlen alkalmazás"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Amikor Ön megosztást, rögzítést vagy átküldést végez, a(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a képernyőn látható vagy az eszközön lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Amikor Ön megoszt, rögzít vagy átküld egy alkalmazást, a(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> az adott appban látható vagy lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Folytatás"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Alkalmazás megosztása és rögzítése"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Engedélyezi ennek az alkalmazásnak a megosztást és a rögzítést?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Amikor Ön megosztást, rögzítést vagy átküldést végez, az alkalmazás a képernyőn látható vagy az eszközön lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Amikor Ön megoszt, rögzít vagy átküld egy alkalmazást, az alkalmazás az adott appban látható vagy lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel és más bizalmas információkkal."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"A(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> hozzáfér majd minden olyan információhoz, amely látható az Ön képernyőjén, vagy amelyet az Ön eszközéről játszanak le rögzítés vagy átküldés során. Ez olyan információkat is tartalmaz, mint a jelszavak, a fizetési részletek, a fotók, az üzenetek és a lejátszott audiotartalmak."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Biztosan elkezdi a rögzítést vagy az átküldést?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"A funkciót biztosító szolgáltatás hozzáfér majd minden olyan információhoz, amely látható az Ön képernyőjén, illetve amelyet az Ön eszközéről játszanak le rögzítés vagy átküldés közben. Ez olyan információkat is tartalmaz, mint a jelszavak, a fizetési részletek, a fotók, az üzenetek és a lejátszott audiotartalmak."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Teljes képernyő"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Egyetlen alkalmazás"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Alkalmazás megosztása vagy rögzítése"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Elkezdi a rögzítést vagy az átküldést a következővel: <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Amikor Ön megosztást, rögzítést vagy átküldést végez, a(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a képernyőn látható vagy az eszközön lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel, a fotókkal, valamint a hang- és videófelvételekkel."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Amikor Ön megoszt, rögzít vagy átküld egy alkalmazást, a(z) <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> az adott appban látható vagy lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel, a fotókkal, valamint a hang- és videófelvételekkel."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Indítás"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Elindítja az átküldést?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Amikor Ön átküldést végez, az Android a képernyőn látható vagy az eszközön lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel, a fotókkal, valamint a hang- és videófelvételekkel."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Alkalmazás átküldése közben az Android az adott appban látható vagy lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel, a fotókkal, valamint a hang- és videófelvételekkel."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Az átküldés indítása"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Megkezdi a megosztást?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Amikor Ön megosztást, rögzítést vagy átküldést végez, az Android a képernyőn látható vagy az eszközön lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel, a fotókkal, valamint a hang- és videófelvételekkel."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Amikor Ön megoszt, rögzít vagy átküld egy alkalmazást, az Android az adott alkalmazásban látható vagy lejátszott minden tartalomhoz hozzáfér. Ezért legyen elővigyázatos a jelszavakkal, a fizetési adatokkal, az üzenetekkel, a fotókkal, valamint a hang- és videófelvételekkel."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Indítás"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Rendszergazda által letiltva"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"A képernyőfelvételt eszközszabályzat tiltja"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Az összes törlése"</string>
@@ -472,7 +460,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Az eszközre tanúsítványkibocsátó van telepítve. Ezáltal figyelhetik és befolyásolhatják az Ön biztonságos hálózati forgalmát."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"A rendszergazda bekapcsolta az eszköz forgalmát figyelő hálózati naplózást."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"A rendszergazda bekapcsolta a hálózati naplózást, amely a munkaprofilban figyeli a forgalmat, a személyes profilban azonban nem."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Ez az eszköz a következőn keresztül csatlakozik az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája számára."</string>
+    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
+    <skip />
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Ez az eszköz a következőkön keresztül csatlakozik az internethez: <xliff:g id="VPN_APP_0">%1$s</xliff:g> és <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája és VPN-szolgáltatója számára."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Munkahelyi alkalmazásai a következőn keresztül csatlakoznak az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. A munkahelyi alkalmazásaiban végzett hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a rendszergazdája és VPN-szolgáltatója számára."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Személyes alkalmazásai a következőn keresztül csatlakoznak az internethez: <xliff:g id="VPN_APP">%1$s</xliff:g>. Hálózati tevékenységei (pl. az e-mailek és a böngészési adatok) láthatók a VPN-szolgáltatója számára."</string>
@@ -913,9 +904,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"eltávolítás a kedvencek közül"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Áthelyezés a következő pozícióba: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Vezérlők"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tartsa lenyomva, és húzza a vezérlők átrendezéséhez"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Válasszon ki eszközvezérlőket a gyors hozzáféréshez"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"A vezérlőket húzással lehet átrendezni"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Minden vezérlő eltávolítva"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"A rendszer nem mentette a módosításokat"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Többi alkalmazás megtekintése"</string>
@@ -1134,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kameraalkalmazás telepítése"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Az alkalmazás be van állítva"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Legalább egy eszköz rendelkezésre áll"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Tartsa nyomva a parancsikont"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Mégse"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Váltson képernyőt most"</string>

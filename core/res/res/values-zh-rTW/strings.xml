@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android 系統"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"切換至個人設定檔"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"切換至工作資料夾"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"切換至個人 <xliff:g id="APP_NAME">%1$s</xliff:g> 帳戶"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"切換至工作用 <xliff:g id="APP_NAME">%1$s</xliff:g> 帳戶"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"聯絡人"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"存取你的聯絡人"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"位置"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允許應用程式控制震動。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允許應用程式存取震動功能狀態。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"直接撥打電話號碼"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"允許應用程式在你未操作的情況下自行撥打電話號碼，但可能產生非預期的費用或撥打非預期的電話。請注意，這項權限並不允許應用程式撥打緊急電話號碼。惡意應用程式可能利用此功能擅自撥打電話或撥打電信業者的代碼，導致來電自動轉接到其他號碼，增加不必要的額外支出。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"存取 IMS 撥號服務"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"允許應用程式自動使用 IMS 服務撥打電話。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"讀取手機狀態和識別碼"</string>
@@ -1697,7 +1698,7 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"開啟"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"關閉"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"要將裝置的完整控制權授予「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，可以將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"如果你有無障礙服務需求，建議可將完整控制權授予具有相關功能的應用程式，但請勿將完整控制權授予大多數的應用程式。"</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"查看及控制螢幕"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"可讀取螢幕上的所有內容及在其他應用程式上顯示內容。"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"查看及執行動作"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"無法使用工作應用程式開啟這項內容"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"無法透過個人應用程式分享這項內容"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"無法使用個人應用程式開啟這項內容"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"工作應用程式目前為暫停狀態"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暫停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"沒有適用的工作應用程式"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"沒有適用的個人應用程式"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"開啟個人用「<xliff:g id="APP">%s</xliff:g>」"</string>

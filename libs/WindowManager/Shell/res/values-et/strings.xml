@@ -89,7 +89,7 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Selge"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Laiendage lisateabe saamiseks."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Kas taaskäivitada parema vaate saavutamiseks?"</string>
-    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Saate rakenduse taaskäivitada, et see näeks ekraanikuval parem välja, kuid võite kaotada edenemise või salvestamata muudatused"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Saate rakenduse taaskäivitada, et see näeks ekraanikuval parem välja, kuid võite kaotada edenemise või salvestamata muudatused."</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Tühista"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Taaskäivita"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ära kuva uuesti"</string>

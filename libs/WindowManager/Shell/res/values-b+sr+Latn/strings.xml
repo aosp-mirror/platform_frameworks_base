@@ -89,7 +89,7 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"Važi"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Proširite za još informacija."</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Želite li da restartujete radi boljeg prikaza?"</string>
-    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Možete da restartujete aplikaciju da bi izgledala bolje na ekranu, s tim što možete da izgubite ono što ste uradili ili nesačuvane promene, ako ih ima"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Možete da restartujete aplikaciju da bi izgledala bolje na ekranu, ali možete da izgubite napredak ili nesačuvane promene"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Otkaži"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Restartuj"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ne prikazuj ponovo"</string>

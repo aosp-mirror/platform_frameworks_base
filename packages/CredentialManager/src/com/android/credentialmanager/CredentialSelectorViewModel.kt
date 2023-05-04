@@ -232,6 +232,14 @@ class CredentialSelectorViewModel(
         )
     }
 
+    fun getFlowOnBackToHybridSnackBarScreen() {
+        uiState = uiState.copy(
+            getCredentialUiState = uiState.getCredentialUiState?.copy(
+                currentScreenState = GetScreenState.REMOTE_ONLY
+            )
+        )
+    }
+
     fun getFlowOnBackToPrimarySelectionScreen() {
         uiState = uiState.copy(
             getCredentialUiState = uiState.getCredentialUiState?.copy(

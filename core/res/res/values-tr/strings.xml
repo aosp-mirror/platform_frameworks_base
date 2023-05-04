@@ -268,7 +268,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Ayarlar"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Asist"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Sesli Yardım"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Tam gizlilik"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Tam kilitleme"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Yeni bildirim"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Fiziksel klavye"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android Sistemi"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Kişisel profile geçiş yap"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"İş profiline geç"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"<xliff:g id="APP_NAME">%1$s</xliff:g> kişisel profiline geç"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"<xliff:g id="APP_NAME">%1$s</xliff:g> iş profiline geç"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kişiler"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"kişilerinize erişme"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Konum"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Uygulamaya, titreşimi denetleme izni verir."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Uygulamanın titreşim durumuna erişimesine izni verir."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"telefon numaralarına doğrudan çağrı yap"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Uygulamaya, sizin müdahaleniz olmadan telefon numaralarını arama izni verir. Bunun sonucunda beklenmedik ücretlerle veya aramalarla karşılaşabilirsiniz. Bunun, uygulamaya acil durum numaralarını arama izni vermediğini unutmayın. Kötü amaçlı uygulamalar sizin onayınızı almadan arama yaparak veya gelen aramaların otomatik olarak başka bir numaraya yönlendirilmesine neden olan operatör kodlarını arayarak faturanızı kabartabilir."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS çağrı hizmetine erişme"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Uygulamanın, sizin müdahaleniz olmadan telefon etmek için IMS hizmetini kullanmasına izin verir."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"telefonun durumunu ve kimliğini okuma"</string>
@@ -634,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Çok parlak"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Güç düğmesine basma algılandı"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ayarlamayı deneyin"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Her defasında parmağınızın konumunu biraz değiştirin"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Her defasında parmağınızı biraz kaydırın"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Parmak izi tanınmadı"</string>
@@ -680,8 +681,8 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Yeterli ışık yok"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Telefonu uzaklaştırın"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Telefonu yaklaştırın"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonu daha yukarı kaldırın"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Telefonu daha aşağı indirin"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Telefonu yukarı kaldırın"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Telefonu aşağı indirin"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Telefonu solunuza kaydırın"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Telefonu sağınıza kaydırın"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Lütfen cihazınıza daha doğrudan bakın."</string>
@@ -693,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Telefonunuza daha doğrudan bakın"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Telefonunuza daha doğrudan bakın"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Telefonunuza daha doğrudan bakın"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Yüzünüzün görünmesini engelleyen şeyleri kaldırın."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Yüzünüzü engelleyen şeyleri kaldırın"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Siyah çubuk da dahil olmak üzere ekranınızın üst kısmını temizleyin"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Yüzünüzün modeli oluşturulamıyor. Tekrar deneyin."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Koyu renk gözlükler algılandı. Yüzünüz tamamen görünür olmalıdır."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yüzünüzü kapattığınız algılandı. Yüzünüz tamamen görünür olmalıdır."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Yüzünüz algılanamıyor. Yüzünüz tamamen görünür olmalıdır."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Yüz doğrulanamıyor. Donanım kullanılamıyor."</string>
@@ -964,7 +965,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Kilidi açmak veya acil çağrı yapmak için Menü\'ye basın."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Kilidi açmak için Menü\'ye basın."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Kilit açmak için deseni çizin"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Acil durum çağrısı"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Acil durum araması"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Çağrıya dön"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Doğru!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Tekrar deneyin"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Bu içerik, iş uygulamalarıyla açılamaz"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Bu içerik, kişisel uygulamalarla paylaşılamaz"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Bu içerik, kişisel uygulamalarla açılamaz"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"İş uygulamaları duraklatıldı"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Devam ettir"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"İş uygulaması yok"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Kişisel uygulama yok"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Kişisel uygulamayı (<xliff:g id="APP">%s</xliff:g>) aç"</string>
@@ -2319,7 +2318,7 @@
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofon kullanılabilir"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofon engellenmiş"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Çift ekran"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Çift Ekran açık"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Çift ekran açık"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g>, içeriği göstermek için her iki ekranı da kullanıyor"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Cihaz çok ısındı"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Telefonunuz çok ısındığı için Çift Ekran kullanılamıyor"</string>

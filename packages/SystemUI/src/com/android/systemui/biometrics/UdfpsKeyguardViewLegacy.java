@@ -53,9 +53,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * View corresponding with udfps_keyguard_view.xml
+ * View corresponding with udfps_keyguard_view_legacy.xml
  */
-public class UdfpsKeyguardView extends UdfpsAnimationView {
+public class UdfpsKeyguardViewLegacy extends UdfpsAnimationView {
     private UdfpsDrawable mFingerprintDrawable; // placeholder
     private LottieAnimationView mAodFp;
     private LottieAnimationView mLockScreenFp;
@@ -80,7 +80,7 @@ public class UdfpsKeyguardView extends UdfpsAnimationView {
     private int mAnimationType = ANIMATION_NONE;
     private boolean mFullyInflated;
 
-    public UdfpsKeyguardView(Context context, @Nullable AttributeSet attrs) {
+    public UdfpsKeyguardViewLegacy(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         mFingerprintDrawable = new UdfpsFpDrawable(context);
 

@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Systém Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Přepnout na osobní profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Přepnout na pracovní profil"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Přepnout na osobní verzi aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Přepnout na pracovní verzi aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakty"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"přístup ke kontaktům"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Poloha"</string>
@@ -505,8 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Umožňuje aplikaci ovládat vibrace."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Umožňuje aplikaci přístup ke stavu vibrací."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"přímé volání na telefonní čísla"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Umožňuje aplikaci volat na telefonní čísla bez vašeho přičinění. Může to mít za následek neočekávané poplatky nebo hovory. Toto oprávnění neumožňuje aplikaci volat na tísňová čísla. Škodlivé aplikace mohou způsobit poplatky tím, že budou volat bez vašeho svolení nebo budou vytáčet kódy operátora, které příchozí hovory automaticky přesměrují na jiné číslo."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"přístup ke službě zasílání rychlých zpráv pro účely hovorů"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Umožňuje aplikaci používat službu zasílání rychlých zpráv k uskutečňování hovorů bez vašeho zásahu."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"čtení stavu a identity telefonu"</string>
@@ -626,11 +627,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Při ověřování došlo k chybě"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použít zámek obrazovky"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadáním zámku obrazovky"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevně zatlačte na senzor"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevně zatlačte na snímač"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Otisk prstu se nepodařilo rozpoznat. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistěte snímač otisků prstů a zkuste to znovu"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistěte senzor a zkuste to znovu"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Zatlačte silně na senzor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevně zatlačte na snímač"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zkuste jiný otisk prstu"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Je příliš světlo"</string>
@@ -682,10 +683,10 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nedostatečné osvětlení"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Umístěte telefon dál"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Umístěte telefon blíž"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Umístěte telefon výš"</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"Umístěte telefon níž"</string>
-    <string name="face_acquired_too_right" msgid="6245286514593540859">"Umístěte telefon víc doleva"</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"Umístěte telefon víc doprava"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Posuňte telefon výš"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"Posuňte telefon níž"</string>
+    <string name="face_acquired_too_right" msgid="6245286514593540859">"Posuňte telefon doleva"</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"Posuňte telefon doprava"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Dívejte se přímo na zařízení."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"Obličej není vidět. Držte telefon v úrovni očí."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Příliš mnoho pohybu. Držte telefon nehybně."</string>
@@ -1241,7 +1242,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Vždy zobrazovat"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byla vytvořena nekompatibilní systému Android a může se chovat neočekávaně. K dispozici může být aktualizovaná verze aplikace."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Vždy zobrazovat"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Zkontrolovat aktualizace"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Zkontrolovat dostupnost aktualizace"</string>
     <string name="smv_application" msgid="3775183542777792638">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon se aktualizuje…"</string>
@@ -2161,10 +2162,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Tento obsah nelze otevřít pomocí pracovních aplikací"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Tento obsah nelze sdílet pomocí osobních aplikací"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Tento obsah nelze otevřít pomocí osobních aplikací"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Pracovní aplikace jsou pozastaveny"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Zrušit pozastavení"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Žádné pracovní aplikace"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Žádné osobní aplikace"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Otevřít osobní aplikaci <xliff:g id="APP">%s</xliff:g>"</string>

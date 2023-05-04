@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.CentralSurfaces
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
+import com.android.systemui.unfold.UnfoldTransitionProgressProvider
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
@@ -71,6 +72,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import java.util.Optional
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidTestingRunner::class)
@@ -103,6 +105,8 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
     @Mock private lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock
     private lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
+    @Mock
+    private lateinit var unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
     @Mock private lateinit var notificationInsetsController: NotificationInsetsController
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
@@ -141,6 +145,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
         featureFlags.set(Flags.TRACKPAD_GESTURE_COMMON, true)
         featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.DUAL_SHADE, false)
+        featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
         val inputProxy = MultiShadeInputProxy()
         testScope = TestScope()
         val multiShadeInteractor =
@@ -169,6 +174,7 @@ class NotificationShadeWindowViewTest : SysuiTestCase() {
                 lockIconViewController,
                 centralSurfaces,
                 notificationShadeWindowController,
+                unfoldTransitionProgressProvider,
                 keyguardUnlockAnimationController,
                 notificationInsetsController,
                 ambientState,

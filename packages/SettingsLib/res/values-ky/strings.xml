@@ -487,7 +487,7 @@
     <string name="external_source_trusted" msgid="1146522036773132905">"Уруксат берилген"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Тыюу салынган"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Белгисиз колдонмолорду орнотуу"</string>
-    <string name="home" msgid="973834627243661438">"Жөндөөлөрдүн башкы бети"</string>
+    <string name="home" msgid="973834627243661438">"Параметрлердин башкы бети"</string>
   <string-array name="battery_labels">
     <item msgid="7878690469765357158">"0%"</item>
     <item msgid="8894873528875953317">"50%"</item>
