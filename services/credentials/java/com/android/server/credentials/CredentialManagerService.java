@@ -706,11 +706,18 @@ public final class CredentialManagerService
         public void setEnabledProviders(
                 List<String>  primaryProviders, List<String> providers, int userId,
                 ISetEnabledProvidersCallback callback) {
+            final int callingUid = Binder.getCallingUid();
             if (!hasWriteSecureSettingsPermission()) {
                 try {
+                    MetricUtilities.logApiCalledSimpleV2(
+                            ApiName.SET_ENABLED_PROVIDERS,
+                            ApiStatus.FAILURE, callingUid);
                     callback.onError(
                             PERMISSION_DENIED_ERROR, PERMISSION_DENIED_WRITE_SECURE_SETTINGS_ERROR);
                 } catch (RemoteException e) {
+                    MetricUtilities.logApiCalledSimpleV2(
+                            ApiName.SET_ENABLED_PROVIDERS,
+                            ApiStatus.FAILURE, callingUid);
                     Slog.e(TAG, "Issue with invoking response: ", e);
                 }
                 return;
@@ -744,10 +751,16 @@ public final class CredentialManagerService
             if (!writeEnabledStatus || !writePrimaryStatus) {
                 Slog.e(TAG, "Failed to store setting containing enabled or primary providers");
                 try {
+                    MetricUtilities.logApiCalledSimpleV2(
+                            ApiName.SET_ENABLED_PROVIDERS,
+                            ApiStatus.FAILURE, callingUid);
                     callback.onError(
                             "failed_setting_store",
                             "Failed to store setting containing enabled or primary providers");
                 } catch (RemoteException e) {
+                    MetricUtilities.logApiCalledSimpleV2(
+                            ApiName.SET_ENABLED_PROVIDERS,
+                            ApiStatus.FAILURE, callingUid);
                     Slog.e(TAG, "Issue with invoking error response: ", e);
                     return;
                 }
@@ -755,8 +768,14 @@ public final class CredentialManagerService
 
             // Call the callback.
             try {
+                MetricUtilities.logApiCalledSimpleV2(
+                        ApiName.SET_ENABLED_PROVIDERS,
+                        ApiStatus.SUCCESS, callingUid);
                 callback.onResponse();
             } catch (RemoteException e) {
+                MetricUtilities.logApiCalledSimpleV2(
+                        ApiName.SET_ENABLED_PROVIDERS,
+                        ApiStatus.FAILURE, callingUid);
                 Slog.e(TAG, "Issue with invoking response: ", e);
                 // TODO: Propagate failure
             }
@@ -805,10 +824,15 @@ public final class CredentialManagerService
         public List<CredentialProviderInfo> getCredentialProviderServices(
                 int userId, int providerFilter) {
             verifyGetProvidersPermission();
+            final int callingUid = Binder.getCallingUid();
+            MetricUtilities.logApiCalledSimpleV2(
+                    ApiName.GET_CREDENTIAL_PROVIDER_SERVICES,
+                    ApiStatus.SUCCESS, callingUid);
+            return CredentialProviderInfoFactory
+            .getCredentialProviderServices(
+                mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
+                getPrimaryProvidersForUserId(mContext, userId));
 
-            return CredentialProviderInfoFactory.getCredentialProviderServices(
-                    mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
-                    getPrimaryProvidersForUserId(mContext, userId));
         }
 
         @Override
