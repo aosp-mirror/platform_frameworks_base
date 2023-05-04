@@ -266,7 +266,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"বাগ ৰিপৰ্টৰ শ্ৱৰ্টকাট"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"পাৱাৰ মেনুত বাগ প্ৰতিবেদন গ্ৰহণ কৰিবলৈ এটা বুটাম দেখুৱাওক"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"জাগ্ৰত কৰি ৰাখক"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"চ্চাৰ্জ হৈ থকাৰ সময়ত স্ক্ৰীন কেতিয়াও সুপ্ত অৱস্থালৈ নাযায়"</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"চাৰ্জ হৈ থকাৰ সময়ত স্ক্ৰীন কেতিয়াও সুপ্ত অৱস্থালৈ নাযায়"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"ব্লুটুথ HCI স্নুপ ল’গ সক্ষম কৰক"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"ব্লুটুথ পেকেট সংগ্ৰহ কৰক। (এই ছেটিংটো সলনি কৰাৰ পাছত ব্লুটুথ ট’গল কৰক)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"ঔইএম আনলক"</string>
@@ -364,12 +364,12 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"চলিত স্পৰ্শ-বিষয়ক তথ্যসহ স্ক্ৰীন অভাৰলে’"</string>
     <string name="show_touches" msgid="8437666942161289025">"টেপসমূহ দেখুৱাওক"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"টিপিলে দৃশ্যায়িত ফীডবেক দিয়ক"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"পৃষ্ঠভাগৰ আপডেইট দেখুৱাওক"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"আপডেইট হওতে গোটেই ৱিণ্ড পৃষ্ঠসমূহ ফ্লাশ্ব কৰক"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"পৃষ্ঠভাগৰ আপডে’ট দেখুৱাওক"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"আপডে’ট হওতে গোটেই ৱিণ্ড পৃষ্ঠসমূহ ফ্লাশ্ব কৰক"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"ভিউৰ আপডে’ট দেখুৱাওক"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"অঁকাৰ সময়ত ৱিণ্ড\'ৰ ভিতৰত ফ্লাশ্ব দৰ্শন"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"হাৰ্ডৱেৰৰ স্তৰৰ আপডে\'ট দেখুৱাওক"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"হাৰ্ডৱেৰ লেয়াৰ আপডেইট হওতে সিঁহতক সেউজীয়া ৰঙেৰে ফ্লাশ্ব কৰক"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"হাৰ্ডৱেৰ লেয়াৰ আপডে’ট হওতে সিঁহতক সেউজীয়া ৰঙেৰে ফ্লাশ্ব কৰক"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU অভাৰড্ৰ ডিবাগ কৰক"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW অ’ভাৰলে অক্ষম কৰক"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"স্ক্ৰীন কম্প’জিট কৰাৰ বাবে সদায় জিপিইউ ব্যৱহাৰ কৰক"</string>
@@ -379,7 +379,7 @@
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"স্বয়ংক্ৰিয়ভাৱে ইউএছবি ধ্বনিৰ আনুষংগিক আহিলাবিলাকলৈ ৰাউটিং কৰাটো অক্ষম কৰক"</string>
     <string name="debug_layout" msgid="1659216803043339741">"লেআউটৰ সময় দেখুৱাওক"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউণ্ড, মাৰ্জিন আদিসমূহ দেখুৱাওক"</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"আৰটিএল চানেকিৰ দিশ বলেৰে সলনি কৰক"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"সজ্জাৰ দিশ সোঁফালৰ পৰা বাওঁফাললৈ কৰক"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"আটাইবোৰ ভাষাৰ বাবে স্ক্ৰীনৰ চানেকিৰ দিশ RTLলৈ বলেৰে সলনি কৰক"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ৱিণ্ড’ স্তৰত অস্পষ্ট কৰাৰ অনুমতি দিয়ক"</string>
     <string name="force_msaa" msgid="4081288296137775550">"বল ৪গুণ MSAA"</string>
@@ -485,7 +485,7 @@
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"লাহে লাহে চাৰ্জ হৈছে"</string>
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"বেতাঁৰৰ মাধ্যমেৰে চাৰ্জ হৈ আছে"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"চাৰ্জ কৰি থকা হৈছে"</string>
-    <string name="battery_info_status_discharging" msgid="6962689305413556485">"চ্চাৰ্জ কৰা নাই"</string>
+    <string name="battery_info_status_discharging" msgid="6962689305413556485">"চাৰ্জ কৰা নাই"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"সংযোগ হৈ আছে, চাৰ্জ হৈ থকা নাই"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"চাৰ্জ হ’ল"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"সম্পূৰ্ণ চাৰ্জ হৈছে"</string>

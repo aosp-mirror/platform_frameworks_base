@@ -612,7 +612,7 @@
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"সেভ করুন"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"\'অতিথি মোড\' ছেড়ে বেরিয়ে আসুন"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"অতিথি সেশন রিসেট করুন"</string>
-    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"\'অতিথি মোড\' ছেড়ে বেরিয়ে আসুন"</string>
+    <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"\'অতিথি\' প্রোফাইল ছেড়ে বেরিয়ে আসুন"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"ছেড়ে বেরিয়ে যাওয়ার সময় সব অ্যাক্টিভিটি মুছে দেওয়া হবে"</string>
     <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"ছেড়ে বেরিয়ে যাওয়ার সময় আপনি অ্যাক্টিভিটি সেভ করতে পারবেন বা মুছতে পারবেন"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"সেশন অ্যাক্টিভিটি মুছে দিতে এখন রিসেট করুন বা ছেড়ে বেরিয়ে আসার সময় আপনি অ্যাক্টিভিটি সেভ করতে বা মুছতে পারবেন"</string>

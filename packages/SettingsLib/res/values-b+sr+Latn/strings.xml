@@ -265,7 +265,7 @@
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, otklanjanje grešaka, programer"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Prečica za izveštaj o greškama"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Prikazuje dugme u meniju dugmeta za uključivanje za pravljenje izveštaja o greškama"</string>
-    <string name="keep_screen_on" msgid="1187161672348797558">"Ne zaključavaj"</string>
+    <string name="keep_screen_on" msgid="1187161672348797558">"Ne gasi ekran"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Ekran neće biti u režimu spavanja tokom punjenja"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Omogući snoop evid. za Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Snimi Bluetooth pakete. (Uključite/isključite Bluetooth kada promenite ovo podešavanje)"</string>
@@ -572,7 +572,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"Korisnik"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"Ograničeni profil"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"Dodajete novog korisnika?"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ovaj uređaj možete da delite sa drugim ljudima ako napravite još korisnika. Svaki korisnik ima sopstveni prostor, koji može da prilagođava pomoću aplikacija, pozadine i slično. Korisnici mogu da prilagođavaju i podešavanja uređaja koja utiču na svakoga, poput Wi‑Fi-ja.\n\nKada dodate novog korisnika, ta osoba treba da podesi sopstveni prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike. Podešavanja i usluge pristupačnosti ne mogu da se prenose na novog korisnika."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"Ovaj uređaj možete da delite sa drugim ljudima ako napravite još korisnika. Svaki korisnik ima sopstveni prostor, koji može da prilagođava pomoću aplikacija, pozadine i slično. Korisnici mogu da prilagođavaju i podešavanja uređaja koja utiču na svakoga, poput WiFi-ja.\n\nKada dodate novog korisnika, ta osoba treba da podesi sopstveni prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike. Podešavanja i usluge pristupačnosti ne mogu da se prenose na novog korisnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kada dodate novog korisnika, ta osoba treba da podesi sopstveni prostor.\n\nSvaki korisnik može da ažurira aplikacije za sve ostale korisnike."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Podešavate korisnika?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Ta osoba treba da uzme uređaj i podesi svoj prostor"</string>

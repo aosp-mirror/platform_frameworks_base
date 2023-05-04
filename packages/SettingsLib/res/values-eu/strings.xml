@@ -352,7 +352,7 @@
     <string name="select_application" msgid="2543228890535466325">"Hautatu aplikazioa"</string>
     <string name="no_application" msgid="9038334538870247690">"Ezer ez"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"Itxaron araztaileari"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Araztutako aplikazioa araztailea erantsi arte itxaroten ari da exekutatu aurretik"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Araztutako aplikazioak araztailea erantsi arte itxaroten du exekutatu aurretik"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Sarrera"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Marrazketa"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Hardware bidez bizkortutako errendatzea"</string>
@@ -582,7 +582,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Gehitu"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Erabiltzaile berria"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Profil berria"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Erabiltzaile-info."</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Erabiltzaile-informazioa"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Profileko informazioa"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Profil murriztua sortu aurretik, aplikazioak eta datu pertsonalak babesteko, pantaila blokeatzeko metodo bat konfiguratu beharko duzu."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Ezarri blokeoa"</string>
