@@ -268,7 +268,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Seaded"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Abi"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Häälabi"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Lukustamine"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Lukusta"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Uus märguanne"</string>
     <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"Füüsiline klaviatuur"</string>
@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-süsteem"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Lülitu isiklikule profiilile"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Lülitu tööprofiilile"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Lülita <xliff:g id="APP_NAME">%1$s</xliff:g> isiklikule profiilile"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Lülita <xliff:g id="APP_NAME">%1$s</xliff:g> tööprofiilile"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktid"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"juurdepääs kontaktidele"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Asukoht"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Võimaldab rakendusel juhtida vibreerimist."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Võimaldab rakendusel juurde pääseda vibreerimise olekule."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"helista otse telefoninumbritele"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Võimaldab rakendusel telefoninumbritele helistada ilma teie sekkumiseta. See võib kaasa tuua ootamatuid tasusid või kõnesid. Pange tähele, et see ei luba rakendusel helistada hädaabinumbritele. Pahatahtlike rakenduste tõttu võib tekkida soovimatuid kulusid, kuna need võivad teha kõnesid ilma teie kinnituseta või valida operaatori koode, mille tõttu suunatakse sissetulevad kõned automaatselt teisele numbrile."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"juurdepääs IMS-kõneteenusele"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Võimaldab rakendusel kasutada IMS-teenust kõnede tegemiseks ilma, et peaksite sekkuma."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Telefoni oleku ja identiteedi lugemine"</string>
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Teie näomudelit ei saa luua. Proovige uuesti."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Tuvastati tumedad prillid. Teie nägu peab olema täielikult nähtaval."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tuvastati nägu kattev ese. Teie nägu peab olema täielikult nähtaval."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Tuvastati näokate. Nägu peab olema täielikult nähtaval."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Nägu ei saa kinnitada. Riistvara pole saadaval."</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Seda sisu ei saa töörakendustega avada"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Seda sisu ei saa isiklike rakendustega jagada"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Seda sisu ei saa isiklike rakendustega avada"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Töörakendused on peatatud"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Jätka"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Töörakendusi pole"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Isiklikke rakendusi pole"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Ava isikliku profiili <xliff:g id="APP">%s</xliff:g>"</string>

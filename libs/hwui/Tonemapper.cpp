@@ -97,7 +97,6 @@ void tonemapPaint(const SkImageInfo& source, const SkImageInfo& destination, flo
                 .inputDataspace = sourceDataspace,
                 .outputDataspace = destinationDataspace,
                 .undoPremultipliedAlpha = source.alphaType() == kPremul_SkAlphaType,
-                .fakeInputDataspace = destinationDataspace,
                 .type = shaders::LinearEffect::SkSLType::ColorFilter};
         constexpr float kMaxDisplayBrightnessNits = 1000.f;
         constexpr float kCurrentDisplayBrightnessNits = 500.f;

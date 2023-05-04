@@ -121,9 +121,10 @@ fun GetCredentialScreen(
                                 providerDisplayInfo = getCredentialUiState.providerDisplayInfo,
                                 onEntrySelected = viewModel::getFlowOnEntrySelected,
                                 onBackButtonClicked =
-                                viewModel::getFlowOnBackToPrimarySelectionScreen,
+                                if (getCredentialUiState.isNoAccount)
+                                    viewModel::getFlowOnBackToHybridSnackBarScreen
+                                else viewModel::getFlowOnBackToPrimarySelectionScreen,
                                 onCancel = viewModel::onUserCancel,
-                                isNoAccount = getCredentialUiState.isNoAccount,
                                 onLog = { viewModel.logUiEvent(it) },
                             )
                             viewModel.uiMetrics.log(GetCredentialEvent
@@ -215,10 +216,12 @@ fun PrimarySelectionCard(
                 HeadlineText(
                     text = stringResource(
                         if (hasSingleEntry) {
-                            if (sortedUserNameToCredentialEntryList.firstOrNull()
-                                    ?.sortedCredentialEntryList?.first()?.credentialType
-                                == CredentialType.PASSKEY
-                            ) R.string.get_dialog_title_use_passkey_for
+                            val singleEntryType = sortedUserNameToCredentialEntryList.firstOrNull()
+                                ?.sortedCredentialEntryList?.first()?.credentialType
+                            if (singleEntryType == CredentialType.PASSKEY)
+                                R.string.get_dialog_title_use_passkey_for
+                            else if (singleEntryType == CredentialType.PASSWORD)
+                                R.string.get_dialog_title_use_password_for
                             else R.string.get_dialog_title_use_sign_in_for
                         } else R.string.get_dialog_title_choose_sign_in_for,
                         requestDisplayInfo.appName
@@ -327,7 +330,6 @@ fun AllSignInOptionCard(
     onEntrySelected: (BaseEntry) -> Unit,
     onBackButtonClicked: () -> Unit,
     onCancel: () -> Unit,
-    isNoAccount: Boolean,
     onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     val sortedUserNameToCredentialEntryList =
@@ -336,7 +338,7 @@ fun AllSignInOptionCard(
     SheetContainerCard(topAppBar = {
         MoreOptionTopAppBar(
             text = stringResource(R.string.get_dialog_title_sign_in_options),
-            onNavigationIconClicked = if (isNoAccount) onCancel else onBackButtonClicked,
+            onNavigationIconClicked = onBackButtonClicked,
             bottomPadding = 0.dp,
         )
     }) {

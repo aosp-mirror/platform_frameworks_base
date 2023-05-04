@@ -70,6 +70,10 @@ class OpenAppInSizeCompatModeTest(flicker: FlickerTest) : BaseAppCompat(flicker)
     @Test
     fun letterboxedAppHasRoundedCorners() = assertLetterboxAppAtEndHasRoundedCorners()
 
+    @Postsubmit
+    @Test
+    fun appIsLetterboxedAtEnd() = assertAppLetterboxedAtEnd()
+
     /**
      * Checks that the [ComponentNameMatcher.ROTATION] layer appears during the transition, doesn't
      * flicker, and disappears before the transition is complete

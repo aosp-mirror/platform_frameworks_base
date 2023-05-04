@@ -198,9 +198,9 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsFpmEmptyView mFpmEmptyView;
     @Mock
-    private UdfpsKeyguardView mKeyguardView;
+    private UdfpsKeyguardViewLegacy mKeyguardView;
     private final UdfpsAnimationViewController mUdfpsKeyguardViewController =
-            mock(UdfpsKeyguardViewController.class);
+            mock(UdfpsKeyguardViewControllerLegacy.class);
     @Mock
     private SystemUIDialogManager mSystemUIDialogManager;
     @Mock
@@ -248,7 +248,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false))
                 .thenReturn(mUdfpsView);
-        when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view, null))
+        when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view_legacy, null))
                 .thenReturn(mKeyguardView); // for showOverlay REASON_AUTH_FPM_KEYGUARD
         when(mLayoutInflater.inflate(R.layout.udfps_bp_view, null))
                 .thenReturn(mBpView);
@@ -1388,7 +1388,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onTouch_withNewTouchDetection_doNotPilferWhenPullingUpBouncer()
+    public void onTouch_withNewTouchDetection_doNotProcessTouchWhenPullingUpBouncer()
             throws RemoteException {
         final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
                 0L);
@@ -1427,8 +1427,10 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mBiometricExecutor.runAllReady();
         moveEvent.recycle();
 
-        // THEN the touch is NOT pilfered
-        verify(mInputManager, never()).pilferPointers(any());
+        // THEN the touch is NOT processed
+        verify(mFingerprintManager, never()).onPointerDown(anyLong(), anyInt(), anyInt(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
+                anyBoolean());
     }
 
     @Test

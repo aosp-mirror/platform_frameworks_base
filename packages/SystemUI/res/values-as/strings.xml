@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g>এ এই স্ক্ৰীনশ্বটটো চিনাক্ত কৰিছে।"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> আৰু আন খোলা এপ্‌সমূহে এই স্ক্ৰীনশ্বটটো চিনাক্ত কৰিছে।"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"টোকাত যোগ দিয়ক"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"স্ক্ৰীন ৰেকৰ্ডাৰ"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"স্ক্ৰীন ৰেকৰ্ডাৰ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"স্ক্রীন ৰেকৰ্ডিঙৰ প্ৰক্ৰিয়াকৰণ হৈ আছে"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"স্ক্রীন ৰেকৰ্ডিং ছেশ্বন চলি থকা সময়ত পোৱা জাননী"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"ৰেকৰ্ড কৰা আৰম্ভ কৰিবনে?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"ৰেকৰ্ড কৰি থাকোঁতে, Android Systemএ আপোনাৰ স্ক্রীনত দৃশ্যমান হোৱা অথবা আপোনাৰ ডিভাইচত প্লে’ হৈ থকা যিকোনো সংবেনদশীল তথ্য কেপচাৰ কৰিব পাৰে। এইটোত পাছৱর্ড, পৰিশোধৰ তথ্য, ফট’, বার্তাসমূহ আৰু অডিঅ’ অন্তর্ভুক্ত হয়।"</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"গোটেই স্ক্ৰীনখন ৰেকৰ্ড কৰক"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"এটা এপ্ ৰেকৰ্ড কৰক"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"আপুনি ৰেকৰ্ড কৰাৰ সময়ত, আপোনাৰ স্ক্ৰীনখনত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা অথবা অন্য সংবেদনশীল তথ্যৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"আপুনি এপ এপ্ ৰেকৰ্ড কৰাৰ সময়ত সেইটো এপত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা অথবা অন্য সংবেদনশীল তথ্যৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"ৰেকৰ্ডিং আৰম্ভ কৰক"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ৰেকৰ্ড কৰা আৰম্ভ কৰিবনে?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"আপুনি ৰেকৰ্ড কৰাৰ সময়ত, আপোনাৰ স্ক্ৰীনখনত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"আপুনি এটা এপ্ ৰেকৰ্ড কৰাৰ সময়ত সেইটো এপত দৃশ্যমান হোৱা যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ৰেকৰ্ডিং আৰম্ভ কৰক"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"অডিঅ’ ৰেকৰ্ড কৰক"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ডিভাইচৰ অডিঅ’"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"সংগীত, কল আৰু ৰিংট’নসমূহৰ দৰে আপোনাৰ ডিভাইচৰ পৰা কেপচাৰ কৰিব পৰা ধ্বনি"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"মাইক্ৰ’ফ’ন"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"ডিভাইচৰ অডিঅ’ আৰু মাইক্ৰ’ফ’ন"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"আৰম্ভ কৰক"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"আৰম্ভ কৰক"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"স্ক্ৰীন ৰেকৰ্ড কৰি থকা হৈছে"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"স্ক্ৰীন আৰু অডিঅ’ ৰেকৰ্ড কৰি থকা হৈছে"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"স্ক্ৰীনত স্পৰ্শসমূহ প্ৰদৰ্শন কৰক"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল আৰ্হি দিলে, আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইল আৰু ইয়াৰ ডেটা মচি পেলোৱা হ’ব।"</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল পিন দিলে, আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইল আৰু ইয়াৰ ডেটা মচি পেলোৱা হ’ব।"</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"আপুনি পৰৱৰ্তী প্ৰয়াসত এটা ভুল পাছৱৰ্ড দিলে, আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইল আৰু ইয়াৰ ডেটা মচি পেলোৱা হ’ব।"</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"ছেট আপ কৰক"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"এতিয়া নহয়"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"সুৰক্ষা আৰু কাৰ্যক্ষমতা উন্নত কৰিবলৈ এইটোৰ আৱশ্যক"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰক"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"ফিংগাৰপ্ৰিণ্ট আনলক"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"ফিংগাৰপ্ৰিণ্ট আনলক ছেট আপ কৰক"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰিবলৈ, আপোনাৰ বৰ্তমানৰ ফিংগাৰপ্ৰিণ্টৰ প্ৰতিচ্ছবি আৰু মডেলসমূহ মচা হ’ব।\n\nসেইসমূহ মচাৰ পাছত, আপোনাৰ ফ’নটো আনলক কৰিবলৈ অথবা এয়া আপুনিয়েই বুলি সত্যাপন কৰিবলৈ আপোনাৰ ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰাৰ বাবে আপুনি ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰিব লাগিব।"</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰিবলৈ, আপোনাৰ বৰ্তমানৰ ফিংগাৰপ্ৰিণ্টৰ প্ৰতিচ্ছবিসমূহ আৰু মডেলটো মচা হ’ব।\n\nসেইসমূহ মচাৰ পাছত, আপোনাৰ ফ’নটো আনলক কৰিবলৈ অথবা এয়া আপুনিয়েই বুলি সত্যাপন কৰিবলৈ আপোনাৰ ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰাৰ বাবে আপুনি ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰিব লাগিব।"</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"ফিংগাৰপ্ৰিণ্ট আনলক ছেট আপ কৰিব পৰা নগ’ল। পুনৰ চেষ্টা কৰিবলৈ ছেটিঙলৈ যাওক।"</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"ফে’চ আনলক পুনৰ ছেট আপ কৰক"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"ফে’চ আনলক"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"ফে’চ আনলক ছেট আপ কৰক"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"ফে’চ আনলক পুনৰ ছেট আপ কৰিবলৈ, আপোনাৰ বৰ্তমানৰ মুখাৱয়বৰ মডেলটো মচা হ’ব।\n\nআপোনাৰ ফ’নটো আনলক কৰিবৰ বাবে আপোনাৰ মুখাৱয়ব ব্যৱহাৰ কৰিবলৈ আপুনি এই সুবিধাটো পুনৰ ছেট আপ কৰিব লাগিব।"</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"ফে’চ আনলক ছেট আপ কৰিব পৰা নগ’ল। পুনৰ চেষ্টা কৰিবলৈ ছেটিঙলৈ যাওক।"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"ফিংগাৰপ্ৰিণ্ট ছেন্সৰটো স্পৰ্শ কৰক"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"মুখাৱয়ব চিনিব নোৱাৰি। ফিংগাৰপ্ৰিণ্ট ব্যৱহাৰ কৰক।"</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"ব্যৱহাৰকাৰীক আঁতৰাবনে?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"এই ব্যৱহাৰকাৰীৰ আটাইবোৰ এপ্ আৰু ডেটা মচা হ\'ব।"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"আঁতৰাওক"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিঙৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা আটাইবোৰ তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"এই সুবিধাটো প্ৰদান কৰা সেৱাটোৱে আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকর্ডিং অথবা কাষ্টিঙৰ সময়ত আপোনাৰ ডিভাইচত প্লে\' কৰা আটাইবোৰ তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱর্ড, পৰিশোধৰ সবিশেষ, ফট\', বার্তাসমূহ আৰু আপুনি প্লে\' কৰা অডিঅ\'ৰ দৰে তথ্য অন্তর্ভুক্ত হয়।"</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"ৰেকর্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ৰ জৰিয়তে ৰেকর্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে ?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ক শ্বেয়াৰ অথবা ৰেকৰ্ড কৰিবলৈ অনুমতি দিবনে?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"সম্পূৰ্ণ স্ক্ৰীন"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"এটা একক এপ্"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, আপোনাৰ স্ক্ৰীনখনত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা অথবা অন্য সংবেদনশীল তথ্যৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, সেইটো এপত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা অথবা অন্য সংবেদনশীল তথ্যৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"অব্যাহত ৰাখক"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"এটা এপ্ শ্বেয়াৰ অথবা ৰেকৰ্ড কৰক"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"এই এপ্‌টোক শ্বেয়াৰ অথবা ৰেকৰ্ড কৰিবলৈ অনুমতি দিবনে?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, আপোনাৰ স্ক্ৰীনখনত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ এই এপ্‌টোৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা অথবা অন্য সংবেদনশীল তথ্যৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, সেইটো এপত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ এই এপ্‌টোৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা অথবা অন্য সংবেদনশীল তথ্যৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>এ আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকৰ্ডিং অথবা কাষ্টিঙৰ সময়ত আপোনাৰ ডিভাইচত প্লে’ কৰা আটাইবোৰ তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, ফট’, বাৰ্তাসমূহ আৰু আপুনি প্লে’ কৰা অডিঅ’ৰ দৰে তথ্য অন্তৰ্ভুক্ত হয়।"</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ৰেকৰ্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"এই সুবিধাটো প্ৰদান কৰা সেৱাটোৱে আপোনাৰ স্ক্ৰীনত দৃশ্যমান হোৱা অথবা ৰেকৰ্ডিং অথবা কাষ্টিঙৰ সময়ত আপোনাৰ ডিভাইচত প্লে’ কৰা আটাইবোৰ তথ্যলৈ এক্সেছ পাব। এইটোত পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, ফট’, বাৰ্তাসমূহ আৰু আপুনি প্লে’ কৰা অডিঅ’ৰ দৰে তথ্য অন্তৰ্ভুক্ত হয়।"</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"সম্পূৰ্ণ স্ক্ৰীন"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"এটা একক এপ্"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"এটা এপ্ শ্বেয়াৰ অথবা ৰেকৰ্ড কৰক"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ৰ জৰিয়তে ৰেকৰ্ডিং অথবা কাষ্টিং আৰম্ভ কৰিবনে?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, আপোনাৰ স্ক্ৰীনখনত দৃশ্যমান হোৱা যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, সেইটো এপত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>ৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"আৰম্ভ কৰক"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"কাষ্ট কৰিবলৈ আৰম্ভ কৰিবনে?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"আপুনি কাষ্ট কৰাৰ সময়ত, আপোনাৰ স্ক্ৰীনখনত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"আপুনি এটা এপ্ কাষ্ট কৰাৰ সময়ত সেইটো এপত দৃশ্যমান হোৱা যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"কাষ্ট কৰিবলৈ আৰম্ভ কৰক"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"শ্বেয়াৰ কৰিবলৈ আৰম্ভ কৰিবনে?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, আপোনাৰ স্ক্ৰীনখনত দৃশ্যমান হোৱা যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"আপুনি শ্বেয়াৰ কৰা, ৰেকৰ্ড কৰা অথবা কাষ্ট কৰাৰ সময়ত, সেইটো এপত দৃশ্যমান যিকোনো বস্তু অথবা আপোনাৰ ডিভাইচত প্লে’ কৰা যিকোনো সমললৈ Androidৰ এক্সেছ থাকে। গতিকে, পাছৱৰ্ড, পৰিশোধৰ সবিশেষ, বাৰ্তা, ফট’ আৰু অডিঅ’ আৰু ভিডিঅ’ৰ ক্ষেত্ৰত সাৱধান হওক।"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"আৰম্ভ কৰক"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"আপোনাৰ আইটি প্ৰশাসকে অৱৰোধ কৰিছে"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ডিভাইচ সম্পৰ্কীয় নীতিয়ে স্ক্ৰীন কেপশ্বাৰ কৰাটো অক্ষম কৰিছে"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"আটাইবোৰ মচক"</string>
@@ -472,7 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"এই ডিভাইচটোত এটা প্ৰমাণপত্ৰ সম্পৰ্কীয় কৰ্তৃপক্ষ ইনষ্টল কৰা হৈছে। আপোনাৰ সুৰক্ষিত নেটৱৰ্কৰ ট্ৰেফিক পৰ্যবেক্ষণ বা সংশোধন কৰা হ\'ব পাৰে।"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"আপোনাৰ প্ৰশাসকে নেটৱৰ্ক লগিং অন কৰিছে, যিয়ে আপোনাৰ ডিভাইচটোত নেটৱৰ্ক ট্ৰেফিক পৰ্যবেক্ষণ কৰে।"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"আপোনাৰ প্ৰশাসকে নেটৱৰ্ক লগিং অন কৰিছে, যিয়ে আপোনাৰ কৰ্মস্থানৰ প্ৰ’ফাইলত ট্ৰেফিক নিৰীক্ষণ কৰে কিন্তু আপোনাৰ ব্যক্তিগত প্ৰ’ফাইলত নকৰে।"</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"এই ডিভাইচটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপোনাৰ নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ আপোনাৰ আইটি প্ৰশাসকে দেখা পায়।"</string>
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"এই ডিভাইচটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপোনাৰ নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ ভিপিএন প্ৰদানকাৰীয়ে দেখা পায়।"</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"এই ডিভাইচটো <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপোনাৰ নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ আপোনাৰ আইটি প্ৰশাসকে দেখা পায়।"</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"এই ডিভাইচটো <xliff:g id="VPN_APP_0">%1$s</xliff:g> আৰু <xliff:g id="VPN_APP_1">%2$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপোনাৰ নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ আপোনাৰ আইটি প্ৰশাসকে দেখা পায়।"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"আপোনাৰ কৰ্মস্থানৰ এপ্‌সমূহ <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপুনি কৰ্মস্থানৰ এপ্‌সমূহত কৰা নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ আপোনাৰ আইটি প্ৰশাসক আৰু ভিপিএন প্ৰদানকাৰীয়ে দেখা পায়।"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"আপোনাৰ ব্যক্তিগত এপ্‌সমূহ <xliff:g id="VPN_APP">%1$s</xliff:g>ৰ জৰিয়তে ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ আছে। ইমেইল আৰু ব্ৰাউজিঙৰ ডেটাকে ধৰি আপোনাৰ নেটৱৰ্ক সম্পৰ্কীয় কাৰ্যকলাপ আপোনাৰ ভিপিএন প্ৰদানকাৰীয়ে দেখা পায়।"</string>
@@ -868,7 +857,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"স্ক্ৰীনৰ কিছু অংশ বিবৰ্ধন কৰক"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"বিবৰ্ধন কৰাৰ ছেটিং খোলক"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"আকাৰ সলনি কৰিবলৈ চুককেইটা টানি আনি এৰক"</string>
-    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"কৰ্ণডালৰ দিশত স্ক্ৰ’ল কৰাৰ সুবিধা"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"কোণীয়াকৈ স্ক্ৰ’ল কৰাৰ অনুমতি দিয়ক"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"আকাৰ সলনি কৰক"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"বিবৰ্ধনৰ প্ৰকাৰ সলনি কৰক"</string>
     <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"আকাৰ সলনি কৰাটো অন্ত পেলাওক"</string>
@@ -913,8 +902,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"অপ্ৰিয়"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> নম্বৰ অৱস্থানলৈ স্থানান্তৰিত কৰক"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্ৰণসমূহ"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"দ্ৰুতভাৱে এক্সেছ কৰিবলৈ ডিভাইচৰ নিয়ন্ত্ৰণসমূহ বাছনি কৰক"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"নিয়ন্ত্ৰণসমূহ পুনৰ সজাবলৈ ধৰি ৰাখক আৰু টানি আনি এৰক"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"আটাইবোৰ নিয়ন্ত্ৰণ আঁতৰোৱা হৈছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"সালসলনিসমূহ ছেভ নহ’ল"</string>
@@ -1134,6 +1122,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• এটা কেমেৰা এপ্ ইনষ্টল কৰক"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• এপ্‌টো ছেট আপ কৰা হৈছে"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• অতি কমেও এটা ডিভাইচ উপলব্ধ"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"টোকাগ্ৰহণৰ শ্বৰ্টকাটটো ব্যৱহাৰ কৰিবলৈ এটা ডিফ’ল্ট টোকা লোৱা এপ্‌ বাছনি কৰক"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"এপ্‌ বাছনি কৰক"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"শ্বৰ্টকাটটোত স্পৰ্শ কৰি ধৰি ৰাখক"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল কৰক"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"এতিয়াই স্ক্ৰীন সলনি কৰক"</string>

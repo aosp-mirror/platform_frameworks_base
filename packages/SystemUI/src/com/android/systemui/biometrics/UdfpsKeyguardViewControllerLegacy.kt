@@ -23,11 +23,11 @@ import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.animation.Interpolators
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -53,9 +53,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 /** Class that coordinates non-HBM animations during keyguard authentication. */
-open class UdfpsKeyguardViewController
+open class UdfpsKeyguardViewControllerLegacy
 constructor(
-    private val view: UdfpsKeyguardView,
+    private val view: UdfpsKeyguardViewLegacy,
     statusBarStateController: StatusBarStateController,
     shadeExpansionStateManager: ShadeExpansionStateManager,
     private val keyguardViewManager: StatusBarKeyguardViewManager,
@@ -72,7 +72,7 @@ constructor(
     private val primaryBouncerInteractor: PrimaryBouncerInteractor,
     private val alternateBouncerInteractor: AlternateBouncerInteractor,
 ) :
-    UdfpsAnimationViewController<UdfpsKeyguardView>(
+    UdfpsAnimationViewController<UdfpsKeyguardViewLegacy>(
         view,
         statusBarStateController,
         shadeExpansionStateManager,
@@ -100,7 +100,7 @@ constructor(
                 view.onDozeAmountChanged(
                     animation.animatedFraction,
                     animation.animatedValue as Float,
-                    UdfpsKeyguardView.ANIMATION_UNLOCKED_SCREEN_OFF
+                    UdfpsKeyguardViewLegacy.ANIMATION_UNLOCKED_SCREEN_OFF
                 )
             }
         }
@@ -123,7 +123,7 @@ constructor(
                     view.onDozeAmountChanged(
                         linear,
                         eased,
-                        UdfpsKeyguardView.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN
+                        UdfpsKeyguardViewLegacy.ANIMATION_BETWEEN_AOD_AND_LOCKSCREEN
                     )
                 }
                 lastDozeAmount = linear
@@ -131,7 +131,7 @@ constructor(
             }
 
             override fun onStateChanged(statusBarState: Int) {
-                this@UdfpsKeyguardViewController.statusBarState = statusBarState
+                this@UdfpsKeyguardViewControllerLegacy.statusBarState = statusBarState
                 updateAlpha()
                 updatePauseAuth()
             }
@@ -198,7 +198,7 @@ constructor(
     private val statusBarKeyguardViewManagerCallback: KeyguardViewManagerCallback =
         object : KeyguardViewManagerCallback {
             override fun onQSExpansionChanged(qsExpansion: Float) {
-                this@UdfpsKeyguardViewController.qsExpansion = qsExpansion
+                this@UdfpsKeyguardViewControllerLegacy.qsExpansion = qsExpansion
                 updateAlpha()
                 updatePauseAuth()
             }
@@ -296,7 +296,7 @@ constructor(
         updateAlpha()
         updatePauseAuth()
         keyguardViewManager.setOccludingAppBiometricUI(occludingAppBiometricUI)
-        lockScreenShadeTransitionController.udfpsKeyguardViewController = this
+        lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = this
         activityLaunchAnimator.addListener(activityLaunchAnimatorListener)
         view.mUseExpandedOverlay = useExpandedOverlay
         view.startIconAsyncInflate()
@@ -312,8 +312,8 @@ constructor(
         keyguardUpdateMonitor.requestFaceAuthOnOccludingApp(false)
         configurationController.removeCallback(configurationListener)
         shadeExpansionStateManager.removeExpansionListener(shadeExpansionListener)
-        if (lockScreenShadeTransitionController.udfpsKeyguardViewController === this) {
-            lockScreenShadeTransitionController.udfpsKeyguardViewController = null
+        if (lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy === this) {
+            lockScreenShadeTransitionController.mUdfpsKeyguardViewControllerLegacy = null
         }
         activityLaunchAnimator.removeListener(activityLaunchAnimatorListener)
         keyguardViewManager.removeCallback(statusBarKeyguardViewManagerCallback)

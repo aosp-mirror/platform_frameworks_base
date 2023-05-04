@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Système Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Passer au profil personnel"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Passer au profil pro"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Passer au <xliff:g id="APP_NAME">%1$s</xliff:g> personnel"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Passer au <xliff:g id="APP_NAME">%1$s</xliff:g> professionnel"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accéder à vos contacts"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Position"</string>
@@ -504,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permet à l\'application de contrôler le vibreur."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permet à l\'application d\'accéder à l\'état du vibreur."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"appeler directement les numéros de téléphone"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Permet à l\'appli de composer des numéros de téléphone sans votre intervention. Cela peut entraîner des frais ou des appels inattendus. Notez que cette autorisation ne permet pas à l\'appli d\'appeler des numéros d\'urgence. Les applis malveillantes peuvent engendrer des frais en passant des appels sans votre confirmation ou en composant des codes d\'opérateur qui transfèrent automatiquement des appels entrants vers un autre numéro."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"accéder au service d\'appel IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permet à l\'application d\'utiliser le service IMS pour passer des appels sans votre intervention."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Voir l\'état et l\'identité du téléphone"</string>
@@ -681,7 +682,7 @@
     <string name="face_acquired_too_dark" msgid="8539853432479385326">"Lumière insuffisante"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Éloignez le téléphone."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Rapprochez le téléphone"</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"Déplacez le téléphone vers le haut"</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"Levez le téléphone"</string>
     <string name="face_acquired_too_low" msgid="4075391872960840081">"Déplacez le téléphone vers le bas"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Déplacez le téléphone vers la gauche"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Déplacez le téléphone vers la droite"</string>
@@ -711,8 +712,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Opération de reconnaissance faciale annulée."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Déverrouillage par reconnaissance faciale annulé par l\'utilisateur"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Trop de tentatives. Réessayez plus tard."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Trop de tentatives. Déverrouillage par reconnaissance faciale indisponible."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Tentatives trop nombreuses. Utilisez le verrouillage de l\'écran."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Impossible de valider votre visage. Réessayez."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Déverrouillage par reconnaissance faciale non configuré"</string>
@@ -1620,7 +1620,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablette"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Téléviseur"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Téléphone"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Haut-parleurs de la station d\'accueil"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Haut-parleur de la station de recharge"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Appareil externe"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Écouteurs"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1647,7 +1647,7 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Schéma incorrect."</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Mot de passe incorrect."</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Code PIN incorrect."</string>
-    <string name="kg_pattern_instructions" msgid="8366024510502517748">"Dessinez votre schéma."</string>
+    <string name="kg_pattern_instructions" msgid="8366024510502517748">"Tracez votre schéma"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Saisissez le code PIN de la carte SIM."</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Saisissez le code PIN."</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Saisissez votre mot de passe."</string>
@@ -2161,16 +2161,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Impossible d\'ouvrir ce contenu avec des applis professionnelles"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Impossible de partager ce contenu avec des applis personnelles"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Impossible d\'ouvrir ce contenu avec des applis personnelles"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Les applis professionnelles sont en pause"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Réactiver"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Aucune appli professionnelle"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Aucune appli personnelle"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Ouvrir l\'appli personnelle <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Ouvrir l\'appli professionnelle <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utiliser le navigateur personnel"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utiliser le navigateur professionnel"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Code PIN de déblocage du réseau SIM"</string>
@@ -2290,7 +2286,7 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activer dans les paramètres"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Fermer"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Débloquer le micro de l\'appareil"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Débloquer l\'appareil photo de l\'appareil"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Débloquer la caméra de l\'appareil"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Pour &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; et tous les services et applis"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Débloquer"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Confidentialité du capteur"</string>

@@ -40,10 +40,10 @@ import android.widget.LinearLayout;
 import androidx.annotation.VisibleForTesting;
 import androidx.core.animation.Animator;
 
+import com.android.app.animation.Interpolators;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
@@ -68,6 +68,8 @@ import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentCom
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent.Startable;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateListener;
@@ -128,6 +130,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
     private final CarrierConfigTracker mCarrierConfigTracker;
+    private final CollapsedStatusBarViewModel mCollapsedStatusBarViewModel;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final StatusBarIconController.DarkIconManager.Factory mDarkIconManagerFactory;
     private final SecureSettings mSecureSettings;
@@ -197,6 +200,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             FeatureFlags featureFlags,
             StatusBarIconController statusBarIconController,
             StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
+            CollapsedStatusBarViewModel collapsedStatusBarViewModel,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
             ShadeViewController shadeViewController,
@@ -219,6 +223,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mFeatureFlags = featureFlags;
         mStatusBarIconController = statusBarIconController;
+        mCollapsedStatusBarViewModel = collapsedStatusBarViewModel;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mDarkIconManagerFactory = darkIconManagerFactory;
         mKeyguardStateController = keyguardStateController;
@@ -290,6 +295,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                 new StatusBarSystemEventAnimator(mEndSideContent, getResources());
         mCarrierConfigTracker.addCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
+
+        CollapsedStatusBarViewBinder.bind(
+                mStatusBar, mCollapsedStatusBarViewModel, this::updateStatusBarVisibilities);
     }
 
     @Override
@@ -415,6 +423,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         updateStatusBarVisibilities(animate);
     }
 
+    private void updateStatusBarVisibilities() {
+        updateStatusBarVisibilities(/* animate= */ true);
+    }
+
     private void updateStatusBarVisibilities(boolean animate) {
         StatusBarVisibilityModel previousModel = mLastModifiedVisibility;
         StatusBarVisibilityModel newModel = calculateInternalModel(mLastSystemVisibility);
@@ -457,7 +469,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
         if (!mKeyguardStateController.isLaunchTransitionFadingAway()
                 && !mKeyguardStateController.isKeyguardFadingAway()
-                && shouldHideNotificationIcons()
+                && shouldHideStatusBar()
                 && !(mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                         && headsUpVisible)) {
             // Hide everything
@@ -505,7 +517,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mOngoingCallController.notifyChipVisibilityChanged(showOngoingCallChip);
     }
 
-    private boolean shouldHideNotificationIcons() {
+    private boolean shouldHideStatusBar() {
         if (!mShadeExpansionStateManager.isClosed()
                 && mShadeViewController.shouldHideStatusBarIconsWhenExpanded()) {
             return true;
@@ -521,6 +533,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         // icons don't remain hidden somehow) we double check that the camera is still showing, the
         // status bar window isn't hidden, and we're still occluded as well, though these checks
         // are typically unnecessary.
+        //
+        // TODO(b/273314977): Can this be deleted now that we have the
+        //   [isTransitioningFromLockscreenToOccluded] check below?
         final boolean hideIconsForSecureCamera =
                 (mWaitingForWindowStateChangeAfterCameraLaunch ||
                         !mStatusBarWindowStateController.windowIsShowing()) &&
@@ -528,6 +543,16 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                         mKeyguardStateController.isOccluded();
 
         if (hideIconsForSecureCamera) {
+            return true;
+        }
+
+        // While the status bar is transitioning from lockscreen to an occluded, we don't yet know
+        // if the occluding activity is fullscreen or not. If it *is* fullscreen, we don't want to
+        // briefly show the status bar just to immediately hide it again. So, we wait for the
+        // transition to occluding to finish before allowing us to potentially show the status bar
+        // again. (This status bar is always hidden on keyguard, so it's safe to continue hiding it
+        // during this transition.) See b/273314977.
+        if (mCollapsedStatusBarViewModel.isTransitioningFromLockscreenToOccluded().getValue()) {
             return true;
         }
 

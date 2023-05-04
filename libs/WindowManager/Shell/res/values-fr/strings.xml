@@ -79,7 +79,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bulle"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gérer"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Bulle fermée."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Appuyez pour redémarrer cette appli et avoir une meilleure vue."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Pour un meilleur affichage, appuyez pour redémarrer cette appli."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Problèmes d\'appareil photo ?\nAppuyez pour réajuster"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Problème non résolu ?\nAppuyez pour rétablir"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Aucun problème d\'appareil photo ? Appuyez pour ignorer."</string>
@@ -89,7 +89,7 @@
     <string name="letterbox_education_got_it" msgid="4057634570866051177">"OK"</string>
     <string name="letterbox_education_expand_button_description" msgid="1729796567101129834">"Développez pour obtenir plus d\'informations"</string>
     <string name="letterbox_restart_dialog_title" msgid="8543049527871033505">"Redémarrer pour améliorer l\'affichage ?"</string>
-    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Vous pouvez redémarrer l\'appli pour en améliorer son aspect sur votre écran, mais vous risquez de perdre votre progression ou les modifications non enregistrées"</string>
+    <string name="letterbox_restart_dialog_description" msgid="6096946078246557848">"Vous pouvez redémarrer l\'appli pour un meilleur rendu sur votre écran, mais il se peut que vous perdiez votre progression ou les modifications non enregistrées"</string>
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"Annuler"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"Redémarrer"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"Ne plus afficher"</string>

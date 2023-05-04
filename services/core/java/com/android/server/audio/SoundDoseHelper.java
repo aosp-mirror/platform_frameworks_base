@@ -34,11 +34,13 @@ import android.media.ISoundDose;
 import android.media.ISoundDoseCallback;
 import android.media.SoundDoseRecord;
 import android.os.Binder;
+import android.os.HandlerExecutor;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -119,6 +121,8 @@ public class SoundDoseHelper {
     private static final long GLOBAL_TIME_OFFSET_UNINITIALIZED = -1;
 
     private static final int SAFE_MEDIA_VOLUME_UNINITIALIZED = -1;
+
+    private static final String FEATURE_FLAG_ENABLE_CSD = "enable_csd";
 
     private final EventLogger mLogger = new EventLogger(AudioService.LOG_NB_EVENTS_SOUND_DOSE,
             "CSD updates");
@@ -290,6 +294,10 @@ public class SoundDoseHelper {
 
         mAlarmManager = (AlarmManager) mContext.getSystemService(
                 Context.ALARM_SERVICE);
+
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_MEDIA,
+                new HandlerExecutor(mAudioHandler),
+                p -> updateCsdEnabled("onPropertiesChanged"));
     }
 
     void initSafeVolumes() {
@@ -302,8 +310,6 @@ public class SoundDoseHelper {
         mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_BLE_HEADSET,
                 SAFE_MEDIA_VOLUME_UNINITIALIZED);
         mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_BLE_BROADCAST,
-                SAFE_MEDIA_VOLUME_UNINITIALIZED);
-        mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_HEARING_AID,
                 SAFE_MEDIA_VOLUME_UNINITIALIZED);
         mSafeMediaVolumeDevices.append(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP_HEADPHONES,
                 SAFE_MEDIA_VOLUME_UNINITIALIZED);
@@ -866,14 +872,29 @@ public class SoundDoseHelper {
                         mAudioHandler.obtainMessage(MSG_PERSIST_SAFE_VOLUME_STATE,
                                 persistedState, /*arg2=*/0,
                                 /*obj=*/null), /*delay=*/0);
-
-                boolean newEnableCsd = SystemProperties.getBoolean("audio.safemedia.force", false)
-                        || mContext.getResources().getBoolean(
-                        R.bool.config_safe_sound_dosage_enabled);
-                if (mEnableCsd.compareAndSet(!newEnableCsd, newEnableCsd)) {
-                    initCsd();
-                }
             }
+
+            updateCsdEnabled(caller);
+        }
+    }
+
+    private void updateCsdEnabled(String caller) {
+        boolean newEnableCsd = SystemProperties.getBoolean("audio.safemedia.force", false);
+        if (!newEnableCsd) {
+            final String featureFlagEnableCsdValue = DeviceConfig.getProperty(
+                    DeviceConfig.NAMESPACE_MEDIA,
+                    FEATURE_FLAG_ENABLE_CSD);
+            if (featureFlagEnableCsdValue != null) {
+                newEnableCsd = Boolean.parseBoolean(featureFlagEnableCsdValue);
+            } else {
+                newEnableCsd = mContext.getResources().getBoolean(
+                        R.bool.config_safe_sound_dosage_enabled);
+            }
+        }
+
+        if (mEnableCsd.compareAndSet(!newEnableCsd, newEnableCsd)) {
+            Log.i(TAG, caller + ": enable CSD " + newEnableCsd);
+            initCsd();
         }
     }
 

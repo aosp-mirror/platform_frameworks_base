@@ -175,9 +175,9 @@
     <string name="launch_defaults_none" msgid="8049374306261262709">"Нема поставено стандардни вредности"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Поставки на текст-во-говор"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Претворање текст во говор"</string>
-    <string name="tts_default_rate_title" msgid="3964187817364304022">"Брзина на говор"</string>
+    <string name="tts_default_rate_title" msgid="3964187817364304022">"Брзина на говорот"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Брзина со која се кажува текстот"</string>
-    <string name="tts_default_pitch_title" msgid="6988592215554485479">"Интензитет"</string>
+    <string name="tts_default_pitch_title" msgid="6988592215554485479">"Висина на тонот"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"Влијае на тонот на синтетизираниот говор"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"Јазик"</string>
     <string name="tts_lang_use_system" msgid="6312945299804012406">"Користи системски јазик"</string>
@@ -267,14 +267,14 @@
     <string name="mock_location_app_not_set" msgid="6972032787262831155">"Не е поставена апликација за лажна локација"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"Апликација за лажна локација: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Вмрежување"</string>
-    <string name="wifi_display_certification" msgid="1805579519992520381">"Приказ на сертификација на безжична мрежа"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Овозможи преопширно пријавување Wi‑Fi"</string>
+    <string name="wifi_display_certification" msgid="1805579519992520381">"Сертификација на безжичен приказ"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Овозможи детално евидентирање за Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Регулирање на скенирањето за Wi‑Fi"</string>
-    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Непостојана MAC-рандомизација на Wi‑Fi"</string>
-    <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобилниот интернет е секогаш активен"</string>
+    <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Рандомизација на непостојана MAC-адреса за Wi‑Fi"</string>
+    <string name="mobile_data_always_on" msgid="8275958101875563572">"Секогаш активен мобилен интернет"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Хардверско забрзување за врзување"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Прикажувај уреди со Bluetooth без имиња"</string>
-    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Оневозможете апсолутна јачина на звук"</string>
+    <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Оневозможи апсолутна јачина на звук"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Овозможи Gabeldorsche"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Верзија на AVRCP за Bluetooth"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Изберете верзија на AVRCP за Bluetooth"</string>
@@ -299,24 +299,24 @@
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Име на хост на оператор на приватен DNS"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Внесете име на хост на операторот на DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Не може да се поврзе"</string>
-    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Покажи ги опциите за безжичен приказ на сертификат"</string>
-    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Зголеми Wi‑Fi ниво на пријавување, прикажи по SSID RSSI во Wi‑Fi бирач"</string>
-    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Го намалува искористувањето на батеријата и ја подобрува изведбата на мрежата"</string>
-    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Кога е овозможен режимов, MAC-адресата на уредов може да се промени секој пат кога ќе се поврзе со мрежа што има овозможена MAC-рандомизација."</string>
+    <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Прикажувај ги опциите за сертификација на безжичен приказ"</string>
+    <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Зголеми го нивото на евидентирање за Wi‑Fi, прикажувај RSSI по SSID во избирачот за Wi‑Fi"</string>
+    <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Го намалува трошењето на батеријата и ги подобрува мрежните перформанси"</string>
+    <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Кога е овозможен режимов, MAC-адресата на уредов може да се менува секојпат кога ќе се поврзе на мрежа што има овозможена рандомизација на MAC-адреси."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Со ограничен интернет"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Без ограничен интернет"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Величини на меѓумеморија за дневникот"</string>
-    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Величина/меѓумеморија на дневник"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Големини на евиденциски меѓумемории"</string>
+    <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Изберете големини за секоја евиденциска меѓумеморија"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Да се избрише постојаната меморија на дневникот?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Кога веќе не го следиме постојаниот дневник, мора да ги избришеме податоците на дневникот што се наоѓаат на вашиот уред."</string>
-    <string name="select_logpersist_title" msgid="447071974007104196">"Трајно зачувувај податоци од дневникот на уредот"</string>
+    <string name="select_logpersist_title" msgid="447071974007104196">"Трајно зачувувај евиденциски податоци на уредот"</string>
     <string name="select_logpersist_dialog_title" msgid="7745193591195485594">"Изберете привремена меморија на евиденција што ќе се користи постојано на уредот"</string>
     <string name="select_usb_configuration_title" msgid="6339801314922294586">"Изберете конфигурација за USB"</string>
     <string name="select_usb_configuration_dialog_title" msgid="3579567144722589237">"Изберете конфигурација за USB"</string>
     <string name="allow_mock_location" msgid="2102650981552527884">"Овозможи лажни локации"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"Овозможи лажни локации"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"Овозможете проверка на атрибутот на приказот"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Секогаш држи го активен мобилниот интернет, дури и при активно Wi-Fi (за брзо префрлување мрежа)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Секогаш држи го активен мобилниот интернет, дури и при активно Wi-Fi (заради брзо менување мрежа)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Ако е достапно, користи хардверско забрзување за врзување"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"Овозможи отстранување грешки на USB?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"Отстранувањето грешки на USB е наменето само за целите на развој. Користете го за копирање податоци меѓу вашиот компјутер и вашиот уред, за инсталирање апликации на вашиот уред без известување и за читање евиденција на податоци."</string>
@@ -367,24 +367,24 @@
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Овозможи траги на OpenGL"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Исклучи USB-пренасочување"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Исклучи автоматско пренасочување до USB-аудиоуреди"</string>
-    <string name="debug_layout" msgid="1659216803043339741">"Прикажи граници на слој"</string>
-    <string name="debug_layout_summary" msgid="8825829038287321978">"Прикажи граници на клип, маргини итн."</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Принудно користи RTL за насока"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Принудно постави насока на распоред на екранот во RTL за сите локални стандарди"</string>
+    <string name="debug_layout" msgid="1659216803043339741">"Прикажи граници на распоред"</string>
+    <string name="debug_layout_summary" msgid="8825829038287321978">"Прикажувај граници на исечок, маргини итн."</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Наметни насока „оддесно налево“"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Наметни насока „оддесно налево“ за распоредот на екранот за сите локални стандарди"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"Проѕирна лента за навигација"</string>
     <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Направете ја заднината на лентата за навигација стандардно проѕирна"</string>
-    <string name="window_blurs" msgid="6831008984828425106">"Дозволи замаглување прозорец"</string>
+    <string name="window_blurs" msgid="6831008984828425106">"Дозволи замаглувања на ниво на прозорци"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Принудно користи 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Овозможи 4x MSAA за апликации OpenGL ES 2.0"</string>
-    <string name="show_non_rect_clip" msgid="7499758654867881817">"Отстрани грешка на неправоаголни клип операции"</string>
-    <string name="track_frame_time" msgid="522674651937771106">"HWUI-прикажување профил"</string>
+    <string name="show_non_rect_clip" msgid="7499758654867881817">"Отстранување грешки при операции за неправоаголни исечоци"</string>
+    <string name="track_frame_time" msgid="522674651937771106">"Профилирај HWUI-приказ"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Овозм. отстр. греш. на GPU"</string>
-    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дозволи отстр. греш. на GPU за поправање апликации"</string>
+    <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дозволи вчитување GPU-слоеви за отстранув. грешки"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Опширна евиденција на продавачи"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Вклучува дополнителна евиденција на продавачи во извештаите за грешки за конкретен уред, којашто може да содржи приватни податоци, повеќе да ја користи батеријата и/или да користи повеќе капацитет."</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"Опсег на аним. на прозор."</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Опсег на преодна анимац."</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Скала за времетраење на аниматор"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"Брзина на анимации за прозорци"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Брзина на преодни анимации"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Брзина на општи анимации"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Симул. секундарен екран"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Апликации"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Не чувај активности"</string>
@@ -392,12 +392,12 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"Граница на процес во зад."</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Прикажи заднински ANR"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Прикажи го дијалогот „Апликацијата не реагира“ за апликации во заднина"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Прикажи ги предупредувањата на каналот за известувањe"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Прикажувај предупредувања за каналот за известувања"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Предупредува кога апликација дава известување без важечки канал"</string>
-    <string name="force_allow_on_external" msgid="9187902444231637880">"Принуд. дозволете апликации на надворешна меморија"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Прави секоја апликација да биде подобна за запишување на надворешна меморија, независно од вредностите на манифестот"</string>
-    <string name="force_resizable_activities" msgid="7143612144399959606">"Принуди ги активностите да ја менуваат големината"</string>
-    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Направете сите активности да бидат со променлива големина за повеќе прозорци, без разлика на вредностите на манифестот."</string>
+    <string name="force_allow_on_external" msgid="9187902444231637880">"Наметни апликации во надворешната меморија"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Сите апликации ќе бидат подобни за запишување во надворешната меморија, независно од вредностите на манифестот"</string>
+    <string name="force_resizable_activities" msgid="7143612144399959606">"Наметни променлива големина на активностите"</string>
+    <string name="force_resizable_activities_summary" msgid="2490382056981583062">"Сите активности ќе имаат променлива големина во режимот со повеќе прозорци, независно од вредностите на манифестот."</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"Овозможи прозорци со слободна форма"</string>
     <string name="enable_freeform_support_summary" msgid="1822862728719276331">"Овозможи поддршка за експериментални прозорци со слободна форма."</string>
     <string name="desktop_mode" msgid="2389067840550544462">"Режим за компјутер"</string>
@@ -587,7 +587,7 @@
     <string name="user_add_user_type_title" msgid="551279664052914497">"Додај"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"Нов корисник"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"Нов профил"</string>
-    <string name="user_info_settings_title" msgid="6351390762733279907">"Информации за корисникот"</string>
+    <string name="user_info_settings_title" msgid="6351390762733279907">"Податоци за корисникот"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"Информации за профил"</string>
     <string name="user_need_lock_message" msgid="4311424336209509301">"Пред да може да создадете ограничен профил, треба да поставите заклучување на екранот за да ги заштити вашите апликации и лични податоци."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Постави заклучување"</string>
@@ -609,7 +609,7 @@
     <string name="guest_reset_and_restart_dialog_title" msgid="3396657008451616041">"Да се ресетира гостинската сесија?"</string>
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Ова ќе започне нова гостинска сесија и ќе ги избрише сите апликации и податоци од тековната сесија"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Да се излезе од режим на гостин?"</string>
-    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ова ќе ги избрише сите апликации и податоци од тековната гостинска сесија"</string>
+    <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ова ќе ги избрише апликациите и податоците од тековната гостинска сесија"</string>
     <string name="grant_admin" msgid="4323199171790522574">"Да, направи да биде администратор"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"Не, не прави да биде администратори"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Излези"</string>

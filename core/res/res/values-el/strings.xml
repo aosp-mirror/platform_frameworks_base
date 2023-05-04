@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Σύστημα Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Εναλλαγή σε προσωπικό προφίλ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Εναλλαγή σε προφίλ εργασίας"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Μετάβαση στο προσωπικό προφίλ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Μετάβαση στο προφίλ εργασίας <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Επαφές"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"πρόσβαση στις επαφές σας"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Τοποθεσία"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Επιτρέπει στην εφαρμογή τον έλεγχο της δόνησης."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Επιτρέπει στην εφαρμογή να έχει πρόσβαση στην κατάσταση δόνησης."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"πραγματοποιεί απευθείας κλήση τηλεφωνικών αριθμών"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Επιτρέπει στην εφαρμογή να καλεί αριθμούς τηλεφώνου χωρίς τη δική σας παρέμβαση. Αυτό μπορεί να οδηγήσει σε απροσδόκητες χρεώσεις ή κλήσεις. Λάβετε υπόψη ότι αυτό δεν επιτρέπει την κλήση αριθμών έκτακτης ανάγκης. Οι κακόβουλες εφαρμογές ενδέχεται να σας επιφέρουν χρεώσεις πραγματοποιώντας κλήσεις χωρίς την επιβεβαίωσή σας ή καλώντας κωδικούς εταιρείας κινητής τηλεφωνίας που προκαλούν την αυτόματη προώθηση των εισερχόμενων κλήσεων σε άλλον αριθμό."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"έχει πρόσβαση στην υπηρεσία κλήσεων της IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Επιτρέπει στην εφαρμογή τη χρήση της υπηρεσίας IMS για την πραγματοποίηση κλήσεων χωρίς τη δική σας παρέμβαση."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"διαβάζει την κατάσταση και ταυτότητα τηλεφώνου"</string>
@@ -634,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Υπερβολικά έντονος φωτισμός"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Εντοπίστηκε πάτημα του κουμπιού λειτουργίας"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Δοκιμάστε να το προσαρμόσετε"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Αλλάζετε ελαφρώς τη θέση του δακτύλου σας κάθε φορά."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Αλλάζετε ελαφρώς τη θέση του δακτύλου σας κάθε φορά"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Δεν είναι δυνατή η αναγνώριση του δακτυλικού αποτυπώματος"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Δεν είναι δυνατό το άνοιγμα αυτού του περιεχομένου με εφαρμογές εργασιών"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Δεν είναι δυνατή η κοινοποίηση αυτού του περιεχομένου με προσωπικές εφαρμογές"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Δεν είναι δυνατό το άνοιγμα αυτού του περιεχομένου με προσωπικές εφαρμογές"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Οι εφαρμογές εργασιών τέθηκαν σε παύση"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Αναίρεση παύσης"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Δεν υπάρχουν εφαρμογές εργασιών"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Δεν υπάρχουν προσωπικές εφαρμογές"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Άνοιγμα προσωπικού <xliff:g id="APP">%s</xliff:g>"</string>

@@ -166,6 +166,7 @@ applications that come with the platform
         <permission name="com.android.voicemail.permission.WRITE_VOICEMAIL"/>
         <permission name="android.permission.LOG_COMPAT_CHANGE"/>
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
+        <permission name="android.permission.UWB_PRIVILEGED"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.calendar">
@@ -522,6 +523,8 @@ applications that come with the platform
         <permission name="android.permission.SATELLITE_COMMUNICATION"/>
         <!-- Permission required for GTS test - GtsAttestationVerificationDeviceSideTestCases -->
         <permission name="android.permission.USE_ATTESTATION_VERIFICATION_SERVICE" />
+        <!-- Permission required for GTS test - GtsCredentialsTestCases -->
+        <permission name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

@@ -72,18 +72,28 @@ public class DisplayWhiteBalanceTintControllerTest {
 
         mResources = InstrumentationRegistry.getContext().getResources();
         // These Resources are common to all tests.
-        doReturn(mResources.getInteger(R.integer.config_displayWhiteBalanceColorTemperatureMin))
+        doReturn(4000)
             .when(mMockedResources)
             .getInteger(R.integer.config_displayWhiteBalanceColorTemperatureMin);
-        doReturn(mResources.getInteger(R.integer.config_displayWhiteBalanceColorTemperatureMax))
+        doReturn(8000)
             .when(mMockedResources)
             .getInteger(R.integer.config_displayWhiteBalanceColorTemperatureMax);
-        doReturn(mResources.getInteger(R.integer.config_displayWhiteBalanceColorTemperatureDefault))
+        doReturn(6500)
             .when(mMockedResources)
             .getInteger(R.integer.config_displayWhiteBalanceColorTemperatureDefault);
-        doReturn(mResources.getStringArray(R.array.config_displayWhiteBalanceDisplayNominalWhite))
-            .when(mMockedResources)
-            .getStringArray(R.array.config_displayWhiteBalanceDisplayNominalWhite);
+        doReturn(new String[] {"0.950456", "1.000000", "1.089058"})
+                .when(mMockedResources)
+                .getStringArray(R.array.config_displayWhiteBalanceDisplayNominalWhite);
+        doReturn(6500)
+                .when(mMockedResources)
+                .getInteger(R.integer.config_displayWhiteBalanceDisplayNominalWhiteCct);
+        doReturn(new int[] {0})
+                .when(mMockedResources)
+                .getIntArray(R.array.config_displayWhiteBalanceDisplaySteps);
+        doReturn(new int[] {20})
+                .when(mMockedResources)
+                .getIntArray(R.array.config_displayWhiteBalanceDisplayRangeMinimums);
+
         doReturn(mMockedResources).when(mMockedContext).getResources();
 
         mDisplayToken = new Binder();
@@ -195,7 +205,7 @@ public class DisplayWhiteBalanceTintControllerTest {
      * Matrix should match the precalculated one for given cct and display primaries.
      */
     @Test
-    public void displayWhiteBalance_validateTransformMatrix() {
+    public void displayWhiteBalance_getAndSetMatrix_validateTransformMatrix() {
         DisplayPrimaries displayPrimaries = new DisplayPrimaries();
         displayPrimaries.red = new CieXyz();
         displayPrimaries.red.X = 0.412315f;
@@ -223,10 +233,12 @@ public class DisplayWhiteBalanceTintControllerTest {
 
         final int cct = 6500;
         mDisplayWhiteBalanceTintController.setMatrix(cct);
+        mDisplayWhiteBalanceTintController.setAppliedCct(
+                mDisplayWhiteBalanceTintController.getTargetCct());
+
         assertWithMessage("Failed to set temperature")
                 .that(mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
                 .isEqualTo(cct);
-
         float[] matrixDwb = mDisplayWhiteBalanceTintController.getMatrix();
         final float[] expectedMatrixDwb = {
             0.971848f,   -0.001421f,  0.000491f, 0.0f,
@@ -236,6 +248,54 @@ public class DisplayWhiteBalanceTintControllerTest {
         };
         assertArrayEquals("Unexpected DWB matrix", expectedMatrixDwb, matrixDwb,
             1e-6f /* tolerance */);
+    }
+
+    /**
+     * Matrix should match the precalculated one for given cct and display primaries.
+     */
+    @Test
+    public void displayWhiteBalance_targetApplied_validateTransformMatrix() {
+        DisplayPrimaries displayPrimaries = new DisplayPrimaries();
+        displayPrimaries.red = new CieXyz();
+        displayPrimaries.red.X = 0.412315f;
+        displayPrimaries.red.Y = 0.212600f;
+        displayPrimaries.red.Z = 0.019327f;
+        displayPrimaries.green = new CieXyz();
+        displayPrimaries.green.X = 0.357600f;
+        displayPrimaries.green.Y = 0.715200f;
+        displayPrimaries.green.Z = 0.119200f;
+        displayPrimaries.blue = new CieXyz();
+        displayPrimaries.blue.X = 0.180500f;
+        displayPrimaries.blue.Y = 0.072200f;
+        displayPrimaries.blue.Z = 0.950633f;
+        displayPrimaries.white = new CieXyz();
+        displayPrimaries.white.X = 0.950456f;
+        displayPrimaries.white.Y = 1.000000f;
+        displayPrimaries.white.Z = 1.089058f;
+        when(mDisplayManagerInternal.getDisplayNativePrimaries(DEFAULT_DISPLAY))
+                .thenReturn(displayPrimaries);
+
+        setUpTintController();
+        assertWithMessage("Setup with valid SurfaceControl failed")
+                .that(mDisplayWhiteBalanceTintController.mSetUp)
+                .isTrue();
+
+        final int cct = 6500;
+        mDisplayWhiteBalanceTintController.setTargetCct(cct);
+        final float[] matrixDwb = mDisplayWhiteBalanceTintController.computeMatrixForCct(cct);
+        mDisplayWhiteBalanceTintController.setAppliedCct(cct);
+
+        assertWithMessage("Failed to set temperature")
+                .that(mDisplayWhiteBalanceTintController.mCurrentColorTemperature)
+                .isEqualTo(cct);
+        final float[] expectedMatrixDwb = {
+                0.971848f,   -0.001421f,  0.000491f, 0.0f,
+                0.028193f,    0.945798f,  0.003207f, 0.0f,
+                -0.000042f,  -0.000989f,  0.988659f, 0.0f,
+                0.0f,         0.0f,       0.0f,      1.0f
+        };
+        assertArrayEquals("Unexpected DWB matrix", expectedMatrixDwb, matrixDwb,
+                1e-6f /* tolerance */);
     }
 
     private void setUpTintController() {

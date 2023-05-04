@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Cambiar al perfil personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Cambiar al perfil de trabajo"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Cambiar a <xliff:g id="APP_NAME">%1$s</xliff:g> (personal)"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Cambiar a <xliff:g id="APP_NAME">%1$s</xliff:g> (trabajo)"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contactos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acceder a los contactos"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ubicación"</string>
@@ -504,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la vibración."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que la app acceda al estado del modo de vibración."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Permite que la app llame a números de teléfono sin tu intervención. Esta acción podría ocasionar cargos o llamadas inesperados. Ten en cuenta que no permite que la app llame a números de emergencia. Las apps maliciosas pueden generar cargos realizando llamadas sin tu confirmación o marcando códigos de operador que desvíen automáticamente las llamadas entrantes a otro número."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"acceder al servicio IMS para realizar llamadas"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite que la aplicación utilice el servicio IMS para hacer llamadas sin tu intervención."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"leer la identidad y el estado del dispositivo"</string>
@@ -702,7 +703,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"No se puede crear modelo de rostro. Vuelve a intentarlo."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Se detectaron lentes oscuros. Tu rostro debe verse completamente."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Se detectó que llevas mascarilla. Tu rostro debe verse completamente."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Llevas mascarilla. Tu rostro debe verse completamente."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"No se verificó el rostro. Hardware no disponible."</string>
@@ -711,8 +712,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Se canceló el reconocimiento facial."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"El usuario canceló Desbloqueo facial"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Demasiados intentos. Inténtalo de nuevo más tarde."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Demasiados intentos. El Desbloqueo facial no está disponible."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Demasiados intentos. En su lugar, utiliza el bloqueo de pantalla."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"No se pudo verificar el rostro. Vuelve a intentarlo."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"No configuraste Desbloqueo facial"</string>
@@ -1371,7 +1371,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se detectó un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Presiona para obtener más información."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Depuración por USB activada"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Presiona para desactivar"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Presiona para desactivarla"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Seleccionar para desactivar la depuración por USB"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Se conectó la depuración inalámbrica"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Presiona para desactivar la depuración inalámbrica"</string>
@@ -2161,16 +2161,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"No se puede abrir este contenido con apps de trabajo"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"No se pueden usar apps personales para compartir este contenido"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"No se puede abrir este contenido con apps personales"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Se pausaron las apps de trabajo"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reanudar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"El contenido no es compatible con apps de trabajo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"El contenido no es compatible con apps personales"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Abrir <xliff:g id="APP">%s</xliff:g> personal"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Abrir <xliff:g id="APP">%s</xliff:g> de trabajo"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar un navegador personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar un navegador de trabajo"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueo del dispositivo para la red de tarjeta SIM"</string>

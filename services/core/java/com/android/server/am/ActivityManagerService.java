@@ -44,7 +44,6 @@ import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_CREATED;
 import static android.app.ActivityManagerInternal.MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED;
-import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_BACKUP;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FINISH_RECEIVER;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_BEGIN;
@@ -1169,8 +1168,26 @@ public class ActivityManagerService extends IActivityManager.Stub
      * for stickies that are sent to all users.
      */
     @GuardedBy("this")
-    final SparseArray<ArrayMap<String, ArrayList<Intent>>> mStickyBroadcasts =
-            new SparseArray<ArrayMap<String, ArrayList<Intent>>>();
+    final SparseArray<ArrayMap<String, ArrayList<StickyBroadcast>>> mStickyBroadcasts =
+            new SparseArray<>();
+
+    @VisibleForTesting
+    static final class StickyBroadcast {
+        public Intent intent;
+        public boolean deferUntilActive;
+
+        public static StickyBroadcast create(Intent intent, boolean deferUntilActive) {
+            final StickyBroadcast b = new StickyBroadcast();
+            b.intent = intent;
+            b.deferUntilActive = deferUntilActive;
+            return b;
+        }
+
+        @Override
+        public String toString() {
+            return "{intent=" + intent + ", defer=" + deferUntilActive + "}";
+        }
+    }
 
     final ActiveServices mServices;
 
@@ -2349,6 +2366,13 @@ public class ActivityManagerService extends IActivityManager.Stub
     /** Provides the basic functionality for unit tests. */
     @VisibleForTesting
     ActivityManagerService(Injector injector, @NonNull ServiceThread handlerThread) {
+        this(injector, handlerThread, null);
+    }
+
+    /** Provides the basic functionality for unit tests. */
+    @VisibleForTesting
+    ActivityManagerService(Injector injector, @NonNull ServiceThread handlerThread,
+            @Nullable UserController userController) {
         mInjector = injector;
         mContext = mInjector.getContext();
         mUiContext = null;
@@ -2375,7 +2399,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mSystemThread = null;
         mUiHandler = injector.getUiHandler(null /* service */);
         mUidObserverController = new UidObserverController(mUiHandler);
-        mUserController = new UserController(this);
+        mUserController = userController == null ? new UserController(this) : userController;
         mInjector.mUserController = mUserController;
         mPendingIntentController =
                 new PendingIntentController(handlerThread.getLooper(), mUserController, mConstants);
@@ -10844,12 +10868,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (int user=0; user<mStickyBroadcasts.size(); user++) {
             long token = proto.start(ActivityManagerServiceDumpBroadcastsProto.STICKY_BROADCASTS);
             proto.write(StickyBroadcastProto.USER, mStickyBroadcasts.keyAt(user));
-            for (Map.Entry<String, ArrayList<Intent>> ent
+            for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
                     : mStickyBroadcasts.valueAt(user).entrySet()) {
                 long actionToken = proto.start(StickyBroadcastProto.ACTIONS);
                 proto.write(StickyBroadcastProto.StickyAction.NAME, ent.getKey());
-                for (Intent intent : ent.getValue()) {
-                    intent.dumpDebug(proto, StickyBroadcastProto.StickyAction.INTENTS,
+                for (StickyBroadcast broadcast : ent.getValue()) {
+                    broadcast.intent.dumpDebug(proto, StickyBroadcastProto.StickyAction.INTENTS,
                             false, true, true, false);
                 }
                 proto.end(actionToken);
@@ -11004,22 +11028,28 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.print("  Sticky broadcasts for user ");
                         pw.print(mStickyBroadcasts.keyAt(user)); pw.println(":");
                 StringBuilder sb = new StringBuilder(128);
-                for (Map.Entry<String, ArrayList<Intent>> ent
+                for (Map.Entry<String, ArrayList<StickyBroadcast>> ent
                         : mStickyBroadcasts.valueAt(user).entrySet()) {
                     pw.print("  * Sticky action "); pw.print(ent.getKey());
                     if (dumpAll) {
                         pw.println(":");
-                        ArrayList<Intent> intents = ent.getValue();
-                        final int N = intents.size();
+                        ArrayList<StickyBroadcast> broadcasts = ent.getValue();
+                        final int N = broadcasts.size();
                         for (int i=0; i<N; i++) {
+                            final Intent intent = broadcasts.get(i).intent;
+                            final boolean deferUntilActive = broadcasts.get(i).deferUntilActive;
                             sb.setLength(0);
                             sb.append("    Intent: ");
-                            intents.get(i).toShortString(sb, false, true, false, false);
-                            pw.println(sb.toString());
-                            Bundle bundle = intents.get(i).getExtras();
+                            intent.toShortString(sb, false, true, false, false);
+                            pw.print(sb);
+                            if (deferUntilActive) {
+                                pw.print(" [D]");
+                            }
+                            pw.println();
+                            Bundle bundle = intent.getExtras();
                             if (bundle != null) {
-                                pw.print("      ");
-                                pw.println(bundle.toString());
+                                pw.print("      extras: ");
+                                pw.println(bundle);
                             }
                         }
                     } else {
@@ -13635,7 +13665,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             String callerFeatureId, String receiverId, IIntentReceiver receiver,
             IntentFilter filter, String permission, int userId, int flags) {
         enforceNotIsolatedCaller("registerReceiver");
-        ArrayList<Intent> stickyIntents = null;
+        ArrayList<StickyBroadcast> stickyBroadcasts = null;
         ProcessRecord callerApp = null;
         final boolean visibleToInstantApps
                 = (flags & Context.RECEIVER_VISIBLE_TO_INSTANT_APPS) != 0;
@@ -13711,14 +13741,15 @@ public class ActivityManagerService extends IActivityManager.Stub
             while (actions.hasNext()) {
                 String action = actions.next();
                 for (int id : userIds) {
-                    ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(id);
+                    ArrayMap<String, ArrayList<StickyBroadcast>> stickies =
+                            mStickyBroadcasts.get(id);
                     if (stickies != null) {
-                        ArrayList<Intent> intents = stickies.get(action);
-                        if (intents != null) {
-                            if (stickyIntents == null) {
-                                stickyIntents = new ArrayList<Intent>();
+                        ArrayList<StickyBroadcast> broadcasts = stickies.get(action);
+                        if (broadcasts != null) {
+                            if (stickyBroadcasts == null) {
+                                stickyBroadcasts = new ArrayList<>();
                             }
-                            stickyIntents.addAll(intents);
+                            stickyBroadcasts.addAll(broadcasts);
                         }
                     }
                 }
@@ -13799,12 +13830,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Dynamic receivers are exported by default for versions prior to T
         final boolean exported = (flags & Context.RECEIVER_EXPORTED) != 0;
 
-        ArrayList<Intent> allSticky = null;
-        if (stickyIntents != null) {
+        ArrayList<StickyBroadcast> allSticky = null;
+        if (stickyBroadcasts != null) {
             final ContentResolver resolver = mContext.getContentResolver();
             // Look for any matching sticky broadcasts...
-            for (int i = 0, N = stickyIntents.size(); i < N; i++) {
-                Intent intent = stickyIntents.get(i);
+            for (int i = 0, N = stickyBroadcasts.size(); i < N; i++) {
+                final StickyBroadcast broadcast = stickyBroadcasts.get(i);
+                Intent intent = broadcast.intent;
                 // Don't provided intents that aren't available to instant apps.
                 if (instantApp &&
                         (intent.getFlags() & Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS) == 0) {
@@ -13816,15 +13848,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // cannot lock ActivityManagerService here.
                 if (filter.match(resolver, intent, true, TAG) >= 0) {
                     if (allSticky == null) {
-                        allSticky = new ArrayList<Intent>();
+                        allSticky = new ArrayList<>();
                     }
-                    allSticky.add(intent);
+                    allSticky.add(broadcast);
                 }
             }
         }
 
         // The first sticky in the list is returned directly back to the client.
-        Intent sticky = allSticky != null ? allSticky.get(0) : null;
+        Intent sticky = allSticky != null ? allSticky.get(0).intent : null;
         if (DEBUG_BROADCAST) Slog.v(TAG_BROADCAST, "Register receiver " + filter + ": " + sticky);
         if (receiver == null) {
             return sticky;
@@ -13906,10 +13938,11 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 final int stickyCount = allSticky.size();
                 for (int i = 0; i < stickyCount; i++) {
-                    Intent intent = allSticky.get(i);
-                    BroadcastQueue queue = broadcastQueueForIntent(intent);
-                    BroadcastRecord r = new BroadcastRecord(queue, intent, null,
-                            null, null, -1, -1, false, null, null, null, null, OP_NONE, null,
+                    final StickyBroadcast broadcast = allSticky.get(i);
+                    BroadcastQueue queue = broadcastQueueForIntent(broadcast.intent);
+                    BroadcastRecord r = new BroadcastRecord(queue, broadcast.intent, null,
+                            null, null, -1, -1, false, null, null, null, null, OP_NONE,
+                            BroadcastOptions.makeWithDeferUntilActive(broadcast.deferUntilActive),
                             receivers, null, null, 0, null, null, false, true, true, -1,
                             BackgroundStartPrivileges.NONE,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */,
@@ -14247,7 +14280,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 throw new SecurityException(
                         "Intent " + intent.getAction() + " may not be broadcast from an SDK sandbox"
                         + " uid. Given caller package " + callerPackage + " (pid=" + callingPid
-                        + ", uid=" + callingUid + ")");
+                        + ", realCallingUid=" + realCallingUid + ", callingUid= " + callingUid
+                        + ")");
             }
         }
 
@@ -14287,7 +14321,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG_BROADCAST,
                 (sticky ? "Broadcast sticky: ": "Broadcast: ") + intent
-                + " ordered=" + ordered + " userid=" + userId);
+                        + " ordered=" + ordered + " userid=" + userId
+                        + " options=" + (brOptions == null ? "null" : brOptions.toBundle()));
         if ((resultTo != null) && !ordered) {
             if (!mEnableModernQueue) {
                 Slog.w(TAG, "Broadcast " + intent + " not ordered but result callback requested!");
@@ -14752,15 +14787,15 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // But first, if this is not a broadcast to all users, then
                 // make sure it doesn't conflict with an existing broadcast to
                 // all users.
-                ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(
+                ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(
                         UserHandle.USER_ALL);
                 if (stickies != null) {
-                    ArrayList<Intent> list = stickies.get(intent.getAction());
+                    ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
                     if (list != null) {
                         int N = list.size();
                         int i;
                         for (i=0; i<N; i++) {
-                            if (intent.filterEquals(list.get(i))) {
+                            if (intent.filterEquals(list.get(i).intent)) {
                                 throw new IllegalArgumentException(
                                         "Sticky broadcast " + intent + " for user "
                                         + userId + " conflicts with existing global broadcast");
@@ -14769,27 +14804,30 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
             }
-            ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(userId);
+            ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(userId);
             if (stickies == null) {
                 stickies = new ArrayMap<>();
                 mStickyBroadcasts.put(userId, stickies);
             }
-            ArrayList<Intent> list = stickies.get(intent.getAction());
+            ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
             if (list == null) {
                 list = new ArrayList<>();
                 stickies.put(intent.getAction(), list);
             }
+            final boolean deferUntilActive = BroadcastRecord.calculateDeferUntilActive(
+                    callingUid, brOptions, resultTo, ordered,
+                    BroadcastRecord.calculateUrgent(intent, brOptions));
             final int stickiesCount = list.size();
             int i;
             for (i = 0; i < stickiesCount; i++) {
-                if (intent.filterEquals(list.get(i))) {
+                if (intent.filterEquals(list.get(i).intent)) {
                     // This sticky already exists, replace it.
-                    list.set(i, new Intent(intent));
+                    list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive));
                     break;
                 }
             }
             if (i >= stickiesCount) {
-                list.add(new Intent(intent));
+                list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive));
             }
         }
 
@@ -14983,6 +15021,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         return ActivityManager.BROADCAST_SUCCESS;
     }
 
+    @VisibleForTesting
+    ArrayList<StickyBroadcast> getStickyBroadcasts(String action, int userId) {
+        final ArrayMap<String, ArrayList<StickyBroadcast>> stickyBroadcasts =
+                mStickyBroadcasts.get(userId);
+        if (stickyBroadcasts == null) {
+            return null;
+        }
+        return stickyBroadcasts.get(action);
+    }
+
     /**
      * @return uid from the extra field {@link Intent#EXTRA_UID} if present, Otherwise -1
      */
@@ -15164,14 +15212,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 Slog.w(TAG, msg);
                 throw new SecurityException(msg);
             }
-            ArrayMap<String, ArrayList<Intent>> stickies = mStickyBroadcasts.get(userId);
+            ArrayMap<String, ArrayList<StickyBroadcast>> stickies = mStickyBroadcasts.get(userId);
             if (stickies != null) {
-                ArrayList<Intent> list = stickies.get(intent.getAction());
+                ArrayList<StickyBroadcast> list = stickies.get(intent.getAction());
                 if (list != null) {
                     int N = list.size();
                     int i;
                     for (i=0; i<N; i++) {
-                        if (intent.filterEquals(list.get(i))) {
+                        if (intent.filterEquals(list.get(i).intent)) {
                             list.remove(i);
                             break;
                         }
