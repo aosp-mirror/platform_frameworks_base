@@ -1829,7 +1829,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Потврдите нови PIN"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Направите PIN за измену ограничења"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PIN-ови се не подударају. Пробајте поново."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN је прекратак. Мора да садржи најмање 4 цифре."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN је прекратак. Мора да има бар 4 цифре."</string>
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Пробајте поново касније"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Приказује се цео екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Да бисте изашли, превуците надоле одозго."</string>
