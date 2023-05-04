@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> bu skrinşotu aşkarladı."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> və digər açıq tətbiqlər bu skrinşotu aşkarladı."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Qeydə əlavə edin"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"Ekran yazıcısı"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekran çəkilişi emal edilir"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Ekranın video çəkimi ərzində silinməyən bildiriş"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Qeydəalma başladılsın?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Qeydə aldıqda Android-in ekranda görünən və ya cihazda oxudulan məlumatlara girişi olur. Parol, ödəniş detalları, mesaj, foto, habelə audio və video kimi məlumatlarla bağlı diqqətli olun."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Tətbiq qeydə aldıqda Android-in həmin tətbiqdə göstərilən və ya oxudulan məlumatlara girişi olur. Parol, ödəniş detalları, mesaj, foto, habelə audio və video kimi məlumatlarla bağlı diqqətli olun."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Qeydə almağa başlayın"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio yazın"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Cihaz audiosu"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Cihazınızdan gələn musiqi, zənglər və zəng melodiyaları kimi səslər"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Cihaz audiosu və mikrofon"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Başlayın"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Ekran yazılır"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Ekran və audio yazılır"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Ekrana toxunuş göstərilsin"</string>
@@ -181,8 +175,8 @@
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Barmaqla Kiliddən Açmanı yenidən ayarlamaq üçün cari barmaq izi şəkil və modelləri silinəcək.\n\nSilindikdən sonra telefonu barmaq izi ilə kiliddən çıxarmaq və ya kimliyi doğrulamaq üçün Barmaqla Kiliddən Açmanı yenidən ayarlamalısınız."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Barmaqla kiliddən açma ayarlanmadı. Yenidən cəhd etmək üçün Ayarlara keçin."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Üz ilə Kiliddən Açmanı yenidən ayarlayın"</string>
-    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Üz ilə Kiliddən Açma"</string>
-    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Üz ilə Kiliddən Açmanı ayarlayın"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Üz tanıma kilidi"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Üz tanıma kilidini qurun"</string>
     <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Üz ilə Kiliddən Açmanı yenidən ayarlamaq üçün cari üz modeli silinəcək.\n\nTelefonu üz ilə kiliddən çıxarmaq üçün bu funksiyanı yenidən ayarlamalısınız."</string>
     <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Üz ilə Kiliddən Açma ayarlanmadı. Yenidən cəhd etmək üçün Ayarlara keçin."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Barmaq izi sensoruna klikləyin"</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Bu istifadəçinin bütün tətbiqləri və datası silinəcək."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Silin"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilə yazma və ya yayımlama başladılsın?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> qeydəalma və ya yayım zamanı ekranda görünən, yaxud cihazda oxudulan məlumatlara giriş edə biləcək. Bura parol, ödəniş detalları, foto, mesaj və oxudulan audio kimi məlumatlar daxildir."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Qeydəalma və ya yayım başladılsın?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Bu funksiyanı təmin edən xidmətin qeydəalma və ya yayım zamanı ekranda görünən, yaxud cihazda oxudulan məlumatlara girişi olacaq. Bura parol, ödəniş detalları, foto, mesaj və oxudulan audio kimi məlumatlar daxildir."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Bütün ekran"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Tək tətbiq"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Tətbiq paylaşın və ya qeydə alın"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ilə qeydəalma və ya yayım başladılsın?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Paylaşım, qeydəalma və ya yayım zamanı <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ekranda görünən, yaxud cihazda oxudulan məlumatlara giriş edə bilir. Parol, ödəniş detalları, mesaj, foto, habelə audio və video kimi məlumatlarla bağlı diqqətli olun."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Tətbiq paylaşdıqda, qeydə aldıqda və ya yayımladıqda <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> həmin tətbiqdə göstərilən, yaxud oxudulan məlumatlara giriş edə bilir. Parol, ödəniş detalları, mesaj, foto, habelə audio və video kimi məlumatlarla bağlı diqqətli olun."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Başlayın"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Yayım başladılsın?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Yayım zamanı Android-in ekranda görünən, yaxud cihazda oxudulan məlumatlara girişi olur. Parol, ödəniş detalları, mesaj, foto, habelə audio və video kimi məlumatlarla bağlı diqqətli olun."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Tətbiq yayımladıqda Android-in həmin tətbiqdə göstərilən və ya oxudulan məlumatlara girişi olur. Parol, ödəniş detalları, mesaj, foto, habelə audio və video kimi məlumatlarla bağlı diqqətli olun."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Yayıma başlayın"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Paylaşım başladılsın?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Paylaşım, qeydəalma və ya yayım zamanı Android-in ekranda görünən, yaxud cihazda oxudulan məlumatlara girişi olur. Parol, ödəniş detalları, mesaj, foto, habelə audio və video kimi məlumatlarla bağlı diqqətli olun."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Tətbiq paylaşdıqda, qeydə aldıqda və ya yayımladıqda Android-in həmin tətbiqdə göstərilən, yaxud oxudulan məlumatlara girişi olur. Parol, ödəniş detalları, mesaj, foto, habelə audio və video kimi məlumatlarla bağlı diqqətli olun."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Başlayın"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"İT admininiz tərəfindən bloklanıb"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Ekran çəkimi cihaz siyasəti ilə deaktiv edilib"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hamısını silin"</string>
@@ -1148,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera tətbiqini quraşdırın"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Tətbiq ayarlanmalıdır"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ən azı bir cihaz əlçatandır"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Qısayola toxunub saxlayın"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Ləğv edin"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"İndi ekranları dəyişin"</string>

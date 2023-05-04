@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> បានរកឃើញ​រូបថតអេក្រង់នេះ។"</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> និងកម្មវិធីដែលបើក​ផ្សេងទៀតបានរកឃើញ​រូបថតអេក្រង់នេះ។"</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"បញ្ចូលទៅក្នុងកំណត់ចំណាំ"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"មុខងារថត​វីដេអូអេក្រង់"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"កំពុង​ដំណើរការ​ការថតអេក្រង់"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ការជូនដំណឹង​ដែល​កំពុង​ដំណើរការ​សម្រាប់​រយៈពេលប្រើ​ការថត​សកម្មភាព​អេក្រង់"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ចាប់ផ្តើម​ថត​ឬ?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"នៅពេលអ្នក​កំពុងថត, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញនៅលើ​អេក្រង់របស់អ្នក ឬចាក់នៅលើឧបករណ៍របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"នៅពេលអ្នក​កំពុងថតកម្មវិធី, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលបង្ហាញ ឬចាក់នៅលើកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ចាប់ផ្តើមថត"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ថត​សំឡេង"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"សំឡេង​ឧបករណ៍"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"សំឡេង​ពី​ឧបករណ៍​របស់អ្នក​ដូចជា តន្ត្រី ការហៅទូរសព្ទ និងសំឡេងរោទ៍​ជាដើម"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"មីក្រូហ្វូន"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"មីក្រូហ្វូន និង​សំឡេង​ឧបករណ៍"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"ចាប់ផ្ដើម"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"កំពុងថត​អេក្រង់"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"កំពុងថត​អេក្រង់ និងសំឡេង"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"បង្ហាញ​ការប៉ះ​នៅលើ​អេក្រង់"</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"កម្មវិធី និងទិន្នន័យទាំងអស់របស់អ្នកប្រើនេះនឹងត្រូវបានលុប។"</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"ដកចេញ"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​ដោយប្រើ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ឬ?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> នឹងមានសិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​មែនទេ?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"សេវាកម្មដែលផ្ដល់មុខងារនេះ​នឹងមានសិទ្ធិ​ចូលប្រើ​ព័ត៌មាន​ទាំងអស់​ដែលអាច​មើលឃើញ​នៅលើ​អេក្រង់​របស់អ្នក ឬចាក់​ពីឧបករណ៍​របស់អ្នក នៅពេល​កំពុង​ថត ឬភ្ជាប់។ ព័ត៌មាន​នេះមាន​ដូចជា ពាក្យសម្ងាត់ ព័ត៌មាន​លម្អិត​អំពីការទូទាត់​ប្រាក់ រូបថត សារ និង​សំឡេង​ដែល​អ្នកចាក់​ជាដើម។"</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"អេក្រង់ទាំងមូល"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"កម្មវិធីតែមួយ"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"ចែករំលែក ឬថតកម្មវិធី"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"ចាប់ផ្ដើម​ថត ឬភ្ជាប់​ដោយប្រើ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ឬ?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬភ្ជាប់, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> មានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញនៅលើអេក្រង់របស់អ្នក ឬចាក់នៅលើឧបករណ៍របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬភ្ជាប់កម្មវិធី, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> មានសិទ្ធិចូលប្រើអ្វីៗដែលបង្ហាញ ឬចាក់នៅលើកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"ចាប់ផ្ដើម"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"ចាប់ផ្តើមភ្ជាប់ឬ?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"នៅពេលអ្នក​កំពុងភ្ជាប់, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញនៅលើ​អេក្រង់របស់អ្នក ឬចាក់នៅលើឧបករណ៍របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"នៅពេលអ្នក​កំពុងភ្ជាប់កម្មវិធី, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលបង្ហាញ ឬចាក់នៅលើកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"ចាប់ផ្តើមភ្ជាប់"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ចាប់ផ្ដើម​ចែករំលែកឬ?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬភ្ជាប់, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលអាចមើលឃើញនៅលើអេក្រង់របស់អ្នក ឬចាក់នៅលើឧបករណ៍របស់អ្នក។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"នៅពេលអ្នកកំពុងចែករំលែក ថត ឬភ្ជាប់កម្មវិធី, Android មានសិទ្ធិចូលប្រើអ្វីៗដែលបង្ហាញ ឬចាក់នៅលើកម្មវិធីនោះ។ ដូច្នេះ សូមប្រុងប្រយ័ត្នចំពោះអ្វីៗដូចជា ពាក្យសម្ងាត់ ព័ត៌មានលម្អិតអំពីការទូទាត់ប្រាក់ សារ រូបថត ព្រមទាំងសំឡេង និងវីដេអូ។"</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ចាប់ផ្ដើម"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"បានទប់ស្កាត់ដោយអ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា​របស់អ្នក"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ការថតអេក្រង់ត្រូវបានបិទ​ដោយគោលការណ៍ឧបករណ៍"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"សម្អាត​ទាំងអស់"</string>
@@ -484,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"បាន​ដំឡើង​អាជ្ញាធរវិញ្ញាបនបត្រ​នៅលើ​ឧបករណ៍​នេះ។ ចរាចរណ៍​បណ្តាញដែលមានសុវត្ថិភាព​របស់អ្នក​អាច​ត្រូវបាន​តាមដាន ឬ​កែសម្រួល។"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"អ្នក​គ្រប់គ្រង​របស់អ្នក​បាន​បើក​ការ​ធ្វើ​កំណត់ហេតុ​បណ្តាញ​ ដែល​នឹង​តាមដាន​ចរាចរណ៍​នៅលើ​ឧបករណ៍​របស់អ្នក។"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"អ្នកគ្រប់គ្រង​របស់អ្នក​បានបើក​ការធ្វើ​កំណត់ហេតុ​បណ្តាញ ដែល​តាមដាន​ចរាចរណ៍​នៅក្នុងកម្រងព័ត៌មាន​ការងាររបស់អ្នក ប៉ុន្តែមិនតាមដាន​នៅក្នុងកម្រងព័ត៌មានផ្ទាល់ខ្លួន​របស់អ្នកឡើយ។"</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"ឧបករណ៍នេះត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>។ ក្រុមហ៊ុន​ផ្តល់សេវា VPN អាចមើលឃើញសកម្មភាពបណ្ដាញរបស់អ្នក រួមទាំងអ៊ីមែល និងទិន្នន័យរុករកផងដែរ។"</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"ឧបករណ៍នេះត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>។ អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យារបស់អ្នកអាចមើលឃើញសកម្មភាពបណ្ដាញរបស់អ្នក រួមទាំងអ៊ីមែល និងទិន្នន័យរុករកផងដែរ។"</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ឧបករណ៍នេះត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP_0">%1$s</xliff:g> និង <xliff:g id="VPN_APP_1">%2$s</xliff:g>។ អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យារបស់អ្នកអាចមើលឃើញសកម្មភាពបណ្ដាញរបស់អ្នក រួមទាំងអ៊ីមែល និងទិន្នន័យរុករកផងដែរ។"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"កម្មវិធី​ការងាររបស់អ្នកត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>។ អ្នកគ្រប់គ្រង​ផ្នែកព័ត៌មានវិទ្យា និងក្រុមហ៊ុន​ផ្តល់សេវា VPN របស់អ្នកអាចមើលឃើញសកម្មភាពបណ្ដាញរបស់អ្នកនៅក្នុងកម្មវិធី​ការងារ រួមទាំងអ៊ីមែល និងទិន្នន័យរុករកផងដែរ។"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"កម្មវិធី​ផ្ទាល់ខ្លួនរបស់អ្នកត្រូវបានភ្ជាប់អ៊ីនធឺណិតតាមរយៈ <xliff:g id="VPN_APP">%1$s</xliff:g>។ ក្រុមហ៊ុន​ផ្តល់សេវា VPN របស់អ្នកអាចមើលឃើញសកម្មភាពបណ្ដាញរបស់អ្នក រួមទាំងអ៊ីមែល និងទិន្នន័យរុករកផងដែរ។"</string>
@@ -1148,6 +1122,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ដំឡើងកម្មវិធីកាមេរ៉ា"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• កម្មវិធីត្រូវបានរៀបចំ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ឧបករណ៍យ៉ាងតិចមួយអាចប្រើបាន"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"ជ្រើសរើសកម្មវិធីកំណត់ចំណាំលំនាំដើម ដើម្បីប្រើផ្លូវកាត់សម្រាប់ការកត់ចំណាំ"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ជ្រើសរើសកម្មវិធី"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ចុចឱ្យជាប់លើផ្លូវកាត់"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"បោះបង់"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"ប្ដូរអេក្រង់ឥឡូវនេះ"</string>

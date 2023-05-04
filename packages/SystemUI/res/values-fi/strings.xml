@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> havaitsi tämän kuvakaappauksen."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ja jotkin muut sovellukset havaitsivat tämän kuvakaappauksen."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Lisää muistiinpanoon"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"Näytön tallentaja"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Näytön tallennusta käsitellään"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pysyvä ilmoitus näytön tallentamisesta"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Aloitetaanko tallennus?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Kun tallennat, Android saa pääsyn kaikkeen näytölläsi näkyvään tai laitteellasi toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Kun striimaat sovellusta, Android saa pääsyn kaikkeen sovelluksessa näkyvään tai toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, audiota tai videoita."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Aloita tallennus"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Tallenna audiota"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Laitteen audio"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Musiikki, puhelut, soittoäänet ja muut äänet laitteesta"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofoni"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Laitteen äänet ja mikrofoni"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Aloita"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Näyttöä tallennetaan"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Tallennetaan näyttöä ja ääniä"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Näytä kosketukset näytöllä"</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Kaikki käyttäjän tiedot ja sovellukset poistetaan."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Poista"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Haluatko, että <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aloittaa tallennuksen tai striimauksen?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> saa pääsyn kaikkiin näytölläsi näkyviin tietoihin ja tietoihin laitteesi toistamasta sisällöstä tallennuksen tai striimauksen aikana. Näitä tietoja ovat esimerkiksi salasanat, maksutiedot, kuvat, viestit ja toistettava audiosisältö."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Aloitetaanko tallentaminen tai striimaus?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Ominaisuuden tarjoavalla palvelulla on pääsy kaikkiin näytölläsi näkyviin tietoihin ja tietoihin laitteesi toistamasta sisällöstä tallennuksen tai striimauksen aikana. Näitä tietoja ovat esimerkiksi salasanat, maksutiedot, kuvat, viestit ja toistettava audiosisältö."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Koko näyttö"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Yksittäinen sovellus"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Jaa sovellus tai tallenna sen sisältöä"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Haluatko, että <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aloittaa tallennuksen tai striimauksen?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Kun jaat, tallennat tai striimaat, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> saa pääsyn kaikkeen näytölläsi näkyvään tai laitteellasi toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Kun jaat, tallennat tai striimaat sovellusta, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> saa pääsyn kaikkeen sovelluksessa näkyvään tai toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Aloita"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Aloitetaanko striimaus?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Kun striimaat, Android saa pääsyn kaikkeen näytölläsi näkyvään tai laitteellasi toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Kun striimaat sovellusta, Android saa pääsyn kaikkeen sovelluksessa näkyvään tai toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Aloita striimaus"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Aloitetaanko jakaminen?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Kun jaat, tallennat tai striimaat, Android saa pääsyn kaikkeen näytölläsi näkyvään tai laitteellasi toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Kun jaat, tallennat tai striimaat, Android saa pääsyn kaikkeen sovelluksella näkyvään tai toistettuun sisältöön. Ole siis varovainen, kun lisäät salasanoja, maksutietoja, viestejä, kuvia, audiota tai videoita."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Aloita"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"IT-järjestelmänvalvojasi estämä"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Kuvakaappaus on poistettu käytöstä laitekäytännön perusteella"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tyhjennä kaikki"</string>
@@ -883,7 +859,7 @@
     <string name="magnification_mode_switch_state_window" msgid="8597100249594076965">"Suurenna osa näytöstä"</string>
     <string name="magnification_open_settings_click_label" msgid="6151849212725923363">"Avaa suurennusasetukset"</string>
     <string name="magnification_drag_corner_to_resize" msgid="1249766311052418130">"Muuta kokoa vetämällä kulmaa"</string>
-    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Diagonaalisen vierittämisen salliminen"</string>
+    <string name="accessibility_allow_diagonal_scrolling" msgid="3258050349191496398">"Salli diagonaalinen vierittäminen"</string>
     <string name="accessibility_resize" msgid="5733759136600611551">"Muuta kokoa"</string>
     <string name="accessibility_change_magnification_type" msgid="666000085077432421">"Suurennustyypin muuttaminen"</string>
     <string name="accessibility_magnification_end_resizing" msgid="4881690585800302628">"Lopeta koon muuttaminen"</string>
@@ -934,7 +910,7 @@
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Muutoksia ei tallennettu"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Katso muita sovelluksia"</string>
     <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Järjestä uudelleen"</string>
-    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Lisää asetuksia"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Lisää säätimiä"</string>
     <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Palaa muokkaukseen"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Säätimiä ei voitu ladata. Avaa <xliff:g id="APP">%s</xliff:g> ja tarkista, että sovelluksen asetukset eivät ole muuttuneet."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Yhteensopivat säätimet eivät käytettävissä"</string>
@@ -1148,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Asenna kamerasovellus"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Sovellus on otettu käyttöön"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Ainakin yksi laite on käytettävissä"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Kosketa pikakuvaketta pitkään"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Peru"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Vaihda näyttöä nyt"</string>

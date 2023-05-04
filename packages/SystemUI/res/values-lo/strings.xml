@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> ກວດພົບຮູບໜ້າຈໍນີ້."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> ແລະ ແອັບອື່ນໆທີ່ເປີດຢູ່ກວດພົບຮູບໜ້າຈໍນີ້."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"ເພີ່ມໃສ່ບັນທຶກ"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"ໂປຣແກຣມບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"ກຳລັງປະມວນຜົນການບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ການແຈ້ງເຕືອນສຳລັບເຊດຊັນການບັນທຶກໜ້າຈໍໃດໜຶ່ງ"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"ເລີ່ມການບັນທຶກບໍ?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"ໃນຂະນະທີ່ທ່ານກຳລັງບັນທຶກ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"ໃນຂະນະທີ່ທ່ານກຳລັງບັນທຶກແອັບ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"ເລີ່ມການບັນທຶກ"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"ບັນທຶກສຽງ"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"ສຽງອຸປະກອນ"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"ສຽງຈາກອຸປະກອນຂອງທ່ານ ເຊັ່ນ: ສຽງເພງ, ສຽງລົມໂທລະສັບ ແລະ ສຽງຣິງໂທນ"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"ໄມໂຄຣໂຟນ"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"ສຽງ ແລະ ໄມໂຄຣໂຟນອຸປະກອນ"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"ເລີ່ມ"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"ກຳລັງບັນທຶກໜ້າຈໍ"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"ກຳລັງບັນທຶກໜ້າຈໍ ແລະ ສຽງ"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"ສະແດງການສຳຜັດຢູ່ໜ້າຈໍ"</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"ທຸກ​ແອັບ ແລະ ຂໍ້​ມູນ​ຂອງ​ຜູ້​ໃຊ້​ນີ້​ຈະ​ຖືກ​ລຶບ."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"ເອົາ​ອອກ"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານໜ້າຈໍກັບ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ບໍ?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ຈະມີສິດເຂົ້າເຖິງຂໍ້ມູນທັງໝົດທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຈາກອຸປະກອນຂອງທ່ານໃນຂະນະທີ່ບັນທຶກ ຫຼື ສົ່ງສັນຍານ. ເຊິ່ງຈະຮວມທັງຂໍ້ມູນຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຮູບພາບ, ຂໍ້ຄວາມ ແລະ ສຽງທີ່ທ່ານຫຼິ້ນ."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານບໍ?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"ບໍລິການທີ່ມີຟັງຊັນນີ້ຈະມີສິດເຂົ້າເຖິງຂໍ້ມູນທັງໝົດທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຈາກອຸປະກອນຂອງທ່ານໃນຂະນະທີ່ບັນທຶກ ຫຼື ສົ່ງສັນຍານ. ເຊິ່ງຈະຮວມທັງຂໍ້ມູນຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຮູບພາບ, ຂໍ້ຄວາມ ແລະ ສຽງທີ່ທ່ານຫຼິ້ນ."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"ທັງໝົດໜ້າຈໍ"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"ແອັບດຽວ"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"ແບ່ງປັນ ຫຼື ບັນທຶກແອັບ"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"ເລີ່ມການບັນທຶກ ຫຼື ການສົ່ງສັນຍານດ້ວຍ <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ເລີຍບໍ?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານ, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານແອັບ, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"ເລີ່ມ"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"ເລີ່ມການສົ່ງສັນຍານບໍ?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"ເມື່ອທ່ານກຳລັງສົ່ງສັນຍານ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"ເມື່ອທ່ານກຳລັງສົ່ງສັນຍານແອັບ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"ເລີ່ມການສົ່ງສັນຍານ"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"ເລີ່ມການແບ່ງປັນບໍ?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ປາກົດຢູ່ໜ້າຈໍຂອງທ່ານ ຫຼື ຫຼິ້ນຢູ່ອຸປະກອນຂອງທ່ານ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"ເມື່ອທ່ານກຳລັງແບ່ງປັນ, ບັນທຶກ ຫຼື ສົ່ງສັນຍານແອັບ, Android ຈະມີສິດເຂົ້າເຖິງທຸກສິ່ງທີ່ສະແດງ ຫຼື ຫຼິ້ນຢູ່ແອັບດັ່ງກ່າວ. ດັ່ງນັ້ນ, ໃຫ້ລະມັດລະວັງສິ່ງຕ່າງໆ ເຊັ່ນ: ລະຫັດຜ່ານ, ລາຍລະອຽດການຈ່າຍເງິນ, ຂໍ້ຄວາມ, ຮູບພາບ ພ້ອມທັງສຽງ ແລະ ວິດີໂອ."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"ເລີ່ມ"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"ຖືກບລັອກໄວ້ໂດຍຜູ້ເບິ່ງແຍງລະບົບໄອທີຂອງທ່ານ"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"ການຖ່າຍຮູບໜ້າຈໍຖືກປິດການນຳໃຊ້ໄວ້ໂດຍນະໂຍບາຍອຸປະກອນ"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ລຶບລ້າງທັງໝົດ"</string>
@@ -484,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ມີອຳນາດໃບຮັບຮອງຕິດຕັ້ງຢູ່ໃນອຸປະກອນນີ້. ທຣາບຟິກເຄືອຂ່າຍທີ່ເຂົ້າລະຫັດໄວ້ຂອງທ່ານອາດຖືກຕິດຕາມ ຫຼື ແກ້ໄຂໄດ້."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ຜູ້ເບິ່ງແຍງຂອງທ່ານໄດ້ເປີດໃຊ້ການບັນທຶກເຄືອຂ່າຍໄວ້, ເຊິ່ງຈະຕິດຕາມທຣາບຟິກໃນອຸປະກອນຂອງທ່ານ."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ຜູ້ເບິ່ງແຍງຂອງທ່ານໄດ້ເປີດໃຊ້ການບັນທຶກເຄືອຂ່າຍໄວ້, ເຊິ່ງຈະຕິດຕາມທຣາບຟິກໃນໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານ ແຕ່ຈະບໍ່ຕິດຕາມໃນໂປຣໄຟລ໌ສ່ວນຕົວຂອງທ່ານ."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ຜູ້ໃຫ້ບໍລິການ VPN ສາມາດເບິ່ງການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການທ່ອງເວັບໄດ້."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ຜູ້ເບິ່ງແຍງໄອທີຂອງທ່ານສາມາດເບິ່ງການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການທ່ອງເວັບໄດ້."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"ອຸປະກອນນີ້ເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP_0">%1$s</xliff:g> ແລະ <xliff:g id="VPN_APP_1">%2$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ເບິ່ງແຍງໄອທີເຫັນໄດ້."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"ແອັບບ່ອນເຮັດວຽກຂອງທ່ານເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານໃນແອັບບ່ອນເຮັດວຽກ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ເບິ່ງແຍງໄອທີ ແລະ ຜູ້ໃຫ້ບໍລິການ VPN ຂອງທ່ານເຫັນໄດ້."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"ແອັບສ່ວນຕົວຂອງທ່ານເຊື່ອມຕໍ່ອິນເຕີເນັດຜ່ານ <xliff:g id="VPN_APP">%1$s</xliff:g>. ການເຄື່ອນໄຫວເຄືອຂ່າຍຂອງທ່ານ, ຮວມທັງອີເມວ ແລະ ຂໍ້ມູນການນຳໃຊ້, ແມ່ນສະແດງໃຫ້ຜູ້ໃຫ້ບໍລິການ VPN ຂອງທ່ານເຫັນໄດ້."</string>
@@ -1148,6 +1122,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ຕິດຕັ້ງແອັບກ້ອງຖ່າຍຮູບ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• ແອັບໄດ້ຮັບການຕັ້ງຄ່າແລ້ວ"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• ມີຢ່າງໜ້ອຍ 1 ອຸປະກອນພ້ອມໃຫ້ນຳໃຊ້"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ແຕະທາງລັດຄ້າງໄວ້"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ຍົກເລີກ"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"ສະຫຼັບໜ້າຈໍດຽວນີ້"</string>

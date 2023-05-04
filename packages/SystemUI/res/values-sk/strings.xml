@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Aplikácia <xliff:g id="APPNAME">%1$s</xliff:g> zaznamenala túto snímku obrazovky."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> a ďalšie otvorené aplikácie zaznamenali túto snímku obrazovky."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Pridať do poznámky"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"Rekordér obrazovky"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Spracúva sa záznam obrazovky"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Chcete spustiť nahrávanie?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Počas nahrávania bude mať Android prístup k všetkému, čo sa zobrazuje na obrazovke alebo prehráva v zariadení. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Počas nahrávania v aplikácii bude mať Android prístup k všetkému, čo sa v danej aplikácii zobrazuje alebo prehráva. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Spustiť nahrávanie"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrávať zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk zariadenia"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk zo zariadenia, napríklad hudba, hovory a tóny zvonenia"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofón"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk a mikrofón zariadenia"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Začať"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Nahráva sa obrazovka"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Nahráva sa obrazovka a zvuk"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Zobrazovať klepnutia na obrazovku"</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Všetky aplikácie a údaje tohto používateľa budú odstránené."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Odstrániť"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Chcete spustiť nahrávanie alebo prenos s aktivovaným povolením <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mať prístup k všetkým informáciám zobrazovaným na obrazovke alebo prehrávaným v zariadení počas nahrávania či prenosu. Patria medzi ne informácie, ako sú heslá, platobné údaje, fotky, správy a prehrávaný zvuk."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Chcete spustiť nahrávanie alebo prenos?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Služba poskytujúca túto funkciu bude mať prístup k všetkým informáciám zobrazovaným na obrazovke alebo prehrávaným v zariadení počas nahrávania či prenosu. Patria medzi ne informácie, ako sú heslá, platobné údaje, fotky, správy a prehrávaný zvuk."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Celá obrazovka"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Jedna aplikácia"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Aplikácia na zdieľanie alebo nahrávanie"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Chcete spustiť nahrávanie alebo prenos s aktivovaným povolením <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Počas zdieľania, nahrávania alebo prenosu bude mať <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> prístup k všetkému, čo sa zobrazuje na obrazovke alebo prehráva v zariadení. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Počas zdieľania, nahrávania alebo prenosu v aplikácii bude mať <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> prístup k všetkému, čo sa v danej aplikácii zobrazuje alebo prehráva. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Začať"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Chcete spustiť prenos?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Počas prenosu bude mať Android prístup k všetkému, čo sa zobrazuje na obrazovke alebo prehráva v zariadení. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Počas prenosu v aplikácii bude mať Android prístup k všetkému, čo sa v danej aplikácii zobrazuje alebo prehráva. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Spustiť prenos"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Chcete spustiť zdieľanie?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Počas zdieľania, nahrávania alebo prenosu bude mať Android prístup k všetkému, čo sa zobrazuje na obrazovke alebo prehráva v zariadení. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Počas zdieľania, nahrávania alebo prenosu v aplikácii bude mať Android prístup k všetkému zobrazovanému alebo prehrávaného obsahu v danej aplikácii. Preto zvýšte pozornosť v prípade položiek, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Začať"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokované vaším správcom IT"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Snímanie obrazovky je zakázané pravidlami pre zariadenie"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Vymazať všetko"</string>
@@ -1051,7 +1027,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Počúvam"</string>
     <string name="game_status" msgid="1340694320630973259">"Hrám hru"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Priatelia"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Poďme sa rozprávať."</string>
+    <string name="empty_status" msgid="5938893404951307749">"Poďme večer četovať."</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah sa čoskoro zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
@@ -1148,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Nainštalujte si aplikáciu kamery"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikácia je nastavená"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• K dispozícii je minimálne jedno zariadenie"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pridržte skratku"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Zrušiť"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Prepnite obrazovky"</string>
