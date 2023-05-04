@@ -362,9 +362,6 @@ public final class WMShell implements
 
     @Override
     public void writeToProto(SystemUiTraceProto proto) {
-        if (proto.wmShell == null) {
-            proto.wmShell = new WmShellTraceProto();
-        }
         // Dump to WMShell proto here
         // TODO: Figure out how we want to synchronize while dumping to proto
     }

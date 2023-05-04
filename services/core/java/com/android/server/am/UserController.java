@@ -583,7 +583,10 @@ class UserController implements Handler.Callback {
                 // user transitions to RUNNING_LOCKED.  However, in "headless system user mode", the
                 // system user is explicitly started before the device has finished booting.  In
                 // that case, we need to wait until onBootComplete() to send the broadcast.
-                if (!(mInjector.isHeadlessSystemUserMode() && uss.mHandle.isSystem())) {
+                // Similarly, this occurs after a user switch, but in HSUM we switch to the main
+                // user before boot is complete, so again this should be delayed until
+                // onBootComplete if boot has not yet completed.
+                if (mAllowUserUnlocking) {
                     // ACTION_LOCKED_BOOT_COMPLETED
                     sendLockedBootCompletedBroadcast(resultTo, userId);
                 }
@@ -2564,9 +2567,9 @@ class UserController implements Handler.Callback {
         // we should *not* transition users out of the BOOTING state using finishUserBoot(), as that
         // doesn't handle issuing the needed onUserStarting() call, and it would just race with an
         // explicit start anyway.  We do, however, need to send the "locked boot complete" broadcast
-        // for the system user, as that got skipped earlier due to the *device* boot not being
-        // complete yet.  We also need to try to unlock all started users, since until now explicit
-        // user starts didn't proceed to unlocking, due to it being too early in the device boot.
+        // as that got skipped earlier due to the *device* boot not being complete yet.
+        // We also need to try to unlock all started users, since until now explicit user starts
+        // didn't proceed to unlocking, due to it being too early in the device boot.
         //
         // USER_SYSTEM must be processed first.  It will be first in the array, as its ID is lowest.
         Preconditions.checkArgument(startedUsers.keyAt(0) == UserHandle.USER_SYSTEM);
@@ -2576,9 +2579,7 @@ class UserController implements Handler.Callback {
             if (!mInjector.isHeadlessSystemUserMode()) {
                 finishUserBoot(uss, resultTo);
             } else {
-                if (userId == UserHandle.USER_SYSTEM) {
-                    sendLockedBootCompletedBroadcast(resultTo, userId);
-                }
+                sendLockedBootCompletedBroadcast(resultTo, userId);
                 maybeUnlockUser(userId);
             }
         }

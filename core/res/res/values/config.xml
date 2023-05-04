@@ -991,6 +991,25 @@
         <!-- Nominal White Z --> <item>1.089058</item>
     </string-array>
 
+    <!-- The CCT closest to the white coordinates (primary) above and in SurfaceControl. -->
+    <integer name="config_displayWhiteBalanceDisplayNominalWhiteCct">6500</integer>
+
+    <!-- Range minimums corresponding to config_displayWhiteBalanceDisplaySteps. For example, if the
+         range minimums are [0, 3000] and the steps are [10, 20] then between 0 and 3000, exclusive,
+         the step between them will be 10 (i.e. 0, 10, 20, etc.) and the step between 3000 and the
+         maximum value is 20 (i.e. 3000, 3020, 3040, etc.). -->
+    <integer-array name="config_displayWhiteBalanceDisplayRangeMinimums">
+        <item>0</item>
+    </integer-array>
+
+    <!-- Steps corresponding to config_displayWhiteBalanceDisplayRangeMinimums. For example, if the
+         range minimums are [0, 3000] and the steps are [10, 20] then between 0 and 3000, exclusive,
+         the step between them will be 10 (i.e. 0, 10, 20, etc.) and the step between 3000 and the
+         maximum value is 20 (i.e. 3000, 3020, 3040, etc.). -->
+    <integer-array name="config_displayWhiteBalanceDisplaySteps">
+        <item>1</item>
+    </integer-array>
+
     <!-- Boolean indicating whether light mode is allowed when DWB is turned on. -->
     <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
@@ -6396,7 +6415,7 @@
         Packages can be added by OEMs in an allowlist, to prevent them from being scanned as
         "stopped" during initial boot of a device, or after an OTA update. Stopped state of
         an app is not changed during subsequent reboots.  -->
-    <bool name="config_stopSystemPackagesByDefault">false</bool>
+    <bool name="config_stopSystemPackagesByDefault">true</bool>
 
     <!-- Whether to show weather on the lock screen by default. -->
     <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>

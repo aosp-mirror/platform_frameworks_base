@@ -42,6 +42,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
@@ -54,7 +55,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
     private final Context mContext;
     private final Transitions mTransitions;
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
-
+    private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
     private Supplier<SurfaceControl.Transaction> mTransactionSupplier;
 
     public ExitDesktopTaskTransitionHandler(
@@ -76,9 +77,12 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
      * Starts Transition of a given type
      * @param type Transition type
      * @param wct WindowContainerTransaction for transition
+     * @param onAnimationEndCallback to be called after animation
      */
     public void startTransition(@WindowManager.TransitionType int type,
-            @NonNull WindowContainerTransaction wct) {
+            @NonNull WindowContainerTransaction wct,
+            Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
+        mOnAnimationFinishedCallback = onAnimationEndCallback;
         final IBinder token = mTransitions.startTransition(type, wct, this);
         mPendingTransitionTokens.add(token);
     }
@@ -101,7 +105,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
 
             if (change.getMode() == WindowManager.TRANSIT_CHANGE) {
                 transitionHandled |= startChangeTransition(
-                        transition, info.getType(), change, startT, finishCallback);
+                        transition, info.getType(), change, startT, finishT, finishCallback);
             }
         }
 
@@ -116,6 +120,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             @WindowManager.TransitionType int type,
             @NonNull TransitionInfo.Change change,
             @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (!mPendingTransitionTokens.contains(transition)) {
             return false;
@@ -156,6 +161,9 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    if (mOnAnimationFinishedCallback != null) {
+                        mOnAnimationFinishedCallback.accept(finishT);
+                    }
                     mTransitions.getMainExecutor().execute(
                             () -> finishCallback.onTransitionFinished(null, null));
                 }
