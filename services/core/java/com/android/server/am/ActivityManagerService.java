@@ -2497,13 +2497,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         final File systemDir = SystemServiceManager.ensureSystemDir();
 
         // TODO: Move creation of battery stats service outside of activity manager service.
-        mBatteryStatsService = new BatteryStatsService(systemContext, systemDir,
-                BackgroundThread.get().getHandler());
-        mBatteryStatsService.getActiveStatistics().readLocked();
-        mBatteryStatsService.scheduleWriteToDisk();
+        mBatteryStatsService = BatteryStatsService.create(systemContext, systemDir,
+                BackgroundThread.getHandler(), this);
         mOnBattery = DEBUG_POWER ? true
                 : mBatteryStatsService.getActiveStatistics().getIsOnBattery();
-        mBatteryStatsService.getActiveStatistics().setCallback(this);
         mOomAdjProfiler.batteryPowerChanged(mOnBattery);
 
         mProcessStats = new ProcessStatsService(this, new File(systemDir, "procstats"));
