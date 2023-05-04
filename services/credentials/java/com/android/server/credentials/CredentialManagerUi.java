@@ -47,7 +47,7 @@ public class CredentialManagerUi {
     private final CredentialManagerUiCallback mCallbacks;
     @NonNull
     private final Context mContext;
-    // TODO : Use for starting the activity for this user
+
     private final int mUserId;
 
     private UiStatus mStatus;
