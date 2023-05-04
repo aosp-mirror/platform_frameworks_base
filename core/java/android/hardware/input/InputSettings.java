@@ -233,7 +233,7 @@ public class InputSettings {
      */
     public static boolean useTouchpadNaturalScrolling(@NonNull Context context) {
         return Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_NATURAL_SCROLLING, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.System.TOUCHPAD_NATURAL_SCROLLING, 1, UserHandle.USER_CURRENT) == 1;
     }
 
     /**
