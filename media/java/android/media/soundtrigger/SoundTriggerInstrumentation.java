@@ -66,6 +66,8 @@ public final class SoundTriggerInstrumentation {
     @GuardedBy("mLock")
     private IBinder mClientToken = null;
 
+    private final ISoundTriggerService mService;
+
     private final GlobalCallback mClientCallback;
     private final Executor mGlobalCallbackExecutor;
 
@@ -562,6 +564,7 @@ public final class SoundTriggerInstrumentation {
             @NonNull GlobalCallback callback) {
         mClientCallback = Objects.requireNonNull(callback);
         mGlobalCallbackExecutor = Objects.requireNonNull(executor);
+        mService = service;
         try {
             service.attachInjection(new Injection());
         } catch (RemoteException e) {
@@ -649,6 +652,25 @@ public final class SoundTriggerInstrumentation {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    /**
+     * Simulate a phone call for {@link com.android.server.soundtrigger.SoundTriggerService}.
+     * If the phone call state changes, the service will be notified to respond.
+     * The service should pause recognition for the duration of the call.
+     *
+     * @param isInPhoneCall - {@code true} to cause the SoundTriggerService to
+     * see the phone call state as off-hook. {@code false} to cause the service to
+     * see the state as normal.
+     * @hide
+     */
+    @TestApi
+    public void setInPhoneCallState(boolean isInPhoneCall) {
+        try {
+            mService.setInPhoneCallState(isInPhoneCall);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }
