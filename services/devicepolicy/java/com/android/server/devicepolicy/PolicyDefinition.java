@@ -315,6 +315,14 @@ final class PolicyDefinition<V> {
             (Set<String> value, Context context, Integer userId, PolicyKey policyKey) -> true,
             new StringSetPolicySerializer());
 
+
+    static PolicyDefinition<Boolean> SCREEN_CAPTURE_DISABLED = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY),
+            TRUE_MORE_RESTRICTIVE,
+            /* flags= */ 0,
+            PolicyEnforcerCallbacks::setScreenCaptureDisabled,
+            new BooleanPolicySerializer());
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -342,6 +350,8 @@ final class PolicyDefinition<V> {
                 GENERIC_ACCOUNT_MANAGEMENT_DISABLED);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY,
                 PERMITTED_INPUT_METHODS);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY,
+                SCREEN_CAPTURE_DISABLED);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
