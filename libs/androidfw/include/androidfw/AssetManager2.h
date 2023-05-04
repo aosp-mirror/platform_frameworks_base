@@ -17,14 +17,16 @@
 #ifndef ANDROIDFW_ASSETMANAGER2_H_
 #define ANDROIDFW_ASSETMANAGER2_H_
 
-#include "android-base/function_ref.h"
-#include "android-base/macros.h"
+#include <utils/RefBase.h>
 
 #include <array>
 #include <limits>
 #include <set>
+#include <span>
 #include <unordered_map>
 
+#include "android-base/function_ref.h"
+#include "android-base/macros.h"
 #include "androidfw/ApkAssets.h"
 #include "androidfw/Asset.h"
 #include "androidfw/AssetManager.h"
@@ -94,8 +96,14 @@ class AssetManager2 {
     size_t entry_len = 0u;
   };
 
-  AssetManager2();
+  using ApkAssetsPtr = sp<const ApkAssets>;
+  using ApkAssetsWPtr = wp<const ApkAssets>;
+  using ApkAssetsList = std::span<const ApkAssetsPtr>;
+
+  AssetManager2() = default;
   explicit AssetManager2(AssetManager2&& other) = default;
+
+  AssetManager2(ApkAssetsList apk_assets, const ResTable_config& configuration);
 
   // Sets/resets the underlying ApkAssets for this AssetManager. The ApkAssets
   // are not owned by the AssetManager, and must have a longer lifetime.
@@ -103,9 +111,10 @@ class AssetManager2 {
   // Only pass invalidate_caches=false when it is known that the structure
   // change in ApkAssets is due to a safe addition of resources with completely
   // new resource IDs.
-  bool SetApkAssets(std::vector<const ApkAssets*> apk_assets, bool invalidate_caches = true);
+  bool SetApkAssets(ApkAssetsList apk_assets, bool invalidate_caches = true);
+  bool SetApkAssets(std::initializer_list<ApkAssetsPtr> apk_assets, bool invalidate_caches = true);
 
-  inline const std::vector<const ApkAssets*>& GetApkAssets() const {
+  inline const std::vector<ApkAssetsWPtr>& GetApkAssets() const {
     return apk_assets_;
   }
 
@@ -399,7 +408,7 @@ class AssetManager2 {
 
   // Assigns package IDs to all shared library ApkAssets.
   // Should be called whenever the ApkAssets are changed.
-  void BuildDynamicRefTable();
+  void BuildDynamicRefTable(ApkAssetsList assets);
 
   // Purge all resources that are cached and vary by the configuration axis denoted by the
   // bitmask `diff`.
@@ -410,7 +419,7 @@ class AssetManager2 {
   void RebuildFilterList();
 
   // Retrieves the APK paths of overlays that overlay non-system packages.
-  std::set<const ApkAssets*> GetNonSystemOverlays() const;
+  std::set<ApkAssetsPtr> GetNonSystemOverlays() const;
 
   // AssetManager2::GetBag(resid) wraps this function to track which resource ids have already
   // been seen while traversing bag parents.
@@ -419,7 +428,7 @@ class AssetManager2 {
 
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
-  std::vector<const ApkAssets*> apk_assets_;
+  std::vector<ApkAssetsWPtr> apk_assets_;
 
   // DynamicRefTables for shared library package resolution.
   // These are ordered according to apk_assets_. The mappings may change depending on what is
@@ -433,7 +442,7 @@ class AssetManager2 {
 
   // The current configuration set for this AssetManager. When this changes, cached resources
   // may need to be purged.
-  ResTable_config configuration_;
+  ResTable_config configuration_ = {};
 
   // Cached set of bags. These are cached because they can inherit keys from parent bags,
   // which involves some calculation.

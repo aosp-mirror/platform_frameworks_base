@@ -220,15 +220,9 @@ std::unique_ptr<SymbolTable::Symbol> ResourceTableSymbolSource::FindByName(
 
 bool AssetManagerSymbolSource::AddAssetPath(StringPiece path) {
   TRACE_CALL();
-  if (std::unique_ptr<const ApkAssets> apk = ApkAssets::Load(path.data())) {
+  if (auto apk = ApkAssets::Load(path.data())) {
     apk_assets_.push_back(std::move(apk));
-
-    std::vector<const ApkAssets*> apk_assets;
-    for (const std::unique_ptr<const ApkAssets>& apk_asset : apk_assets_) {
-      apk_assets.push_back(apk_asset.get());
-    }
-
-    asset_manager_.SetApkAssets(apk_assets);
+    asset_manager_.SetApkAssets(apk_assets_);
     return true;
   }
   return false;
@@ -251,7 +245,7 @@ bool AssetManagerSymbolSource::IsPackageDynamic(uint32_t packageId,
     return true;
   }
 
-  for (const std::unique_ptr<const ApkAssets>& assets : apk_assets_) {
+  for (auto&& assets : apk_assets_) {
     for (const std::unique_ptr<const android::LoadedPackage>& loaded_package
          : assets->GetLoadedArsc()->GetPackages()) {
       if (package_name == loaded_package->GetPackageName() && loaded_package->IsDynamic()) {
