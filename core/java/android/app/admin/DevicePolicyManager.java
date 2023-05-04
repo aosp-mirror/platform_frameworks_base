@@ -8716,6 +8716,7 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(value = SET_TIME, conditional = true)
     public void setAutoTimeEnabled(@Nullable ComponentName admin, boolean enabled) {
+        throwIfParentInstance("setAutoTimeEnabled");
         if (mService != null) {
             try {
                 mService.setAutoTimeEnabled(admin, mContext.getPackageName(), enabled);
@@ -16938,6 +16939,7 @@ public class DevicePolicyManager {
      * android.app.role.RoleManager.ROLE_SYSTEM_SUPERVISION.
      */
     public boolean isDeviceFinanced() {
+        throwIfParentInstance("isDeviceFinanced");
         if (mService != null) {
             try {
                 return mService.isDeviceFinanced(mContext.getPackageName());
