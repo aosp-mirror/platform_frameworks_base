@@ -90,6 +90,7 @@ public final class TimeController extends StateController {
             final long nowElapsedMillis = sElapsedRealtimeClock.millis();
             if (job.hasDeadlineConstraint() && evaluateDeadlineConstraint(job, nowElapsedMillis)) {
                 // We're intentionally excluding jobs whose deadlines have passed
+                // from the job_scheduler.value_job_scheduler_job_deadline_expired_counter count
                 // (mostly like deadlines of 0) when the job was scheduled.
                 return;
             } else if (job.hasTimingDelayConstraint() && evaluateTimingDelayConstraint(job,
