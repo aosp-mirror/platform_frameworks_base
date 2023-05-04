@@ -281,13 +281,13 @@ public final class CredentialManagerService
         }
     }
 
-    private Set<String> getPrimaryProvidersForUserId(int userId) {
+    private static Set<String> getPrimaryProvidersForUserId(Context context, int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(
                 Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false,
                 "getPrimaryProvidersForUserId", null);
         SecureSettingsServiceNameResolver resolver = new SecureSettingsServiceNameResolver(
-                mContext, Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                context, Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
                 /* isMultipleMode= */ true);
         String[] serviceNames = resolver.readServiceNameList(resolvedUserId);
         return new HashSet<String>(Arrays.asList(serviceNames));
@@ -653,6 +653,7 @@ public final class CredentialManagerService
                             callback,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
                             getEnabledProviders(),
+                            getPrimaryProvidersForUserId(getContext(), userId),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);
@@ -801,7 +802,7 @@ public final class CredentialManagerService
 
             return CredentialProviderInfoFactory.getCredentialProviderServices(
                     mContext, userId, providerFilter, getEnabledProviders(),
-                    getPrimaryProvidersForUserId(userId));
+                    getPrimaryProvidersForUserId(mContext, userId));
         }
 
         @Override
@@ -812,7 +813,7 @@ public final class CredentialManagerService
             final int userId = UserHandle.getCallingUserId();
             return CredentialProviderInfoFactory.getCredentialProviderServicesForTesting(
                     mContext, userId, providerFilter, getEnabledProviders(),
-                    getPrimaryProvidersForUserId(userId));
+                    getPrimaryProvidersForUserId(mContext, userId));
         }
 
         @Override
