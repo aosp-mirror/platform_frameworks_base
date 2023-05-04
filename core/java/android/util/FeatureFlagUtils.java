@@ -152,6 +152,13 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_BIOMETRICS2_ENROLLMENT = "settings_biometrics2_enrollment";
 
+    /**
+     * Flag to enable/disable FingerprintSettings v2
+     * @hide
+     */
+    public static final String SETTINGS_BIOMETRICS2_FINGERPRINT_SETTINGS =
+            "settings_biometrics2_fingerprint";
+
     /** Flag to enable/disable entire page in Accessibility -> Hearing aids
      *  @hide
      */
@@ -243,6 +250,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API, "true");
         DEFAULT_FLAGS.put(SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, "true");
+        DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_FINGERPRINT_SETTINGS, "false");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;
