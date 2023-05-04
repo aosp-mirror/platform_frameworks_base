@@ -719,5 +719,6 @@ object Flags {
 
     // TODO(b/278761837): Tracking Bug
     @JvmField
-    val USE_NEW_ACTIVITY_STARTER = releasedFlag(2801, name = "use_new_activity_starter")
+    val USE_NEW_ACTIVITY_STARTER = unreleasedFlag(2801, name = "use_new_activity_starter",
+            teamfood = true)
 }
