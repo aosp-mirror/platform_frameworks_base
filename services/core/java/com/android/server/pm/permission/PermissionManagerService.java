@@ -386,8 +386,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public void startOneTimePermissionSession(String packageName, @UserIdInt int userId,
-            long timeoutMillis, long revokeAfterKilledDelayMillis, int importanceToResetTimer,
-            int importanceToKeepSessionAlive) {
+            long timeoutMillis, long revokeAfterKilledDelayMillis) {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS,
                 "Must hold " + Manifest.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS
@@ -397,8 +396,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final long token = Binder.clearCallingIdentity();
         try {
             getOneTimePermissionUserManager(userId).startPackageOneTimeSession(packageName,
-                    timeoutMillis, revokeAfterKilledDelayMillis, importanceToResetTimer,
-                    importanceToKeepSessionAlive);
+                    timeoutMillis, revokeAfterKilledDelayMillis);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
