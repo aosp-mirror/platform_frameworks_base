@@ -54,6 +54,7 @@ import android.os.VibrationEffect;
 import android.os.VibratorInfo;
 import android.os.vibrator.PrebakedSegment;
 import android.os.vibrator.VibrationEffectSegment;
+import android.os.vibrator.persistence.VibrationXmlParser;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -70,7 +71,9 @@ import com.android.server.SystemService;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.lang.ref.WeakReference;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -1898,6 +1901,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 if ("sequential".equals(cmd)) {
                     return runSequential();
                 }
+                if ("xml".equals(cmd)) {
+                    return runXml();
+                }
                 if ("cancel".equals(cmd)) {
                     return runCancel();
                 }
@@ -1969,6 +1975,14 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 combination.addNext(vibratorId, nextEffect());
             }
             runVibrate(commonOptions, combination.combine());
+            return 0;
+        }
+
+        private int runXml() {
+            CommonOptions commonOptions = new CommonOptions();
+            String xml = getNextArgRequired();
+            CombinedVibration vibration = parseXml(xml);
+            runVibrate(commonOptions, vibration);
             return 0;
         }
 
@@ -2165,6 +2179,18 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                     .build();
         }
 
+        private CombinedVibration parseXml(String xml) {
+            try {
+                VibrationEffect effect = VibrationXmlParser.parse(new StringReader(xml));
+                if (effect == null) {
+                    throw new IllegalArgumentException("Error parsing vibration XML " + xml);
+                }
+                return CombinedVibration.createParallel(effect);
+            } catch (IOException e) {
+                throw new RuntimeException("Error parsing vibration XML " + xml, e);
+            }
+        }
+
         @Override
         public void onHelp() {
             try (PrintWriter pw = getOutPrintWriter();) {
@@ -2181,6 +2207,9 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                 pw.println("    Vibrates different effects on each vibrator in sync.");
                 pw.println("  sequential [options] (-v <vibrator-id> <effect>...)...");
                 pw.println("    Vibrates different effects on each vibrator in sequence.");
+                pw.println("  xml [options] <xml>");
+                pw.println("    Vibrates using combined vibration described in given XML string.");
+                pw.println("    XML containing a single effect it runs on all vibrators in sync.");
                 pw.println("  cancel");
                 pw.println("    Cancels any active vibration");
                 pw.println("");

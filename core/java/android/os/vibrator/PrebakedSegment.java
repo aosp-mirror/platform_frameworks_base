@@ -33,6 +33,13 @@ import java.util.Objects;
  */
 @TestApi
 public final class PrebakedSegment extends VibrationEffectSegment {
+
+    /** @hide */
+    public static final int DEFAULT_STRENGTH = VibrationEffect.EFFECT_STRENGTH_MEDIUM;
+
+    /** @hide */
+    public static final boolean DEFAULT_SHOULD_FALLBACK = true;
+
     private final int mEffectId;
     private final boolean mFallback;
     private final int mEffectStrength;

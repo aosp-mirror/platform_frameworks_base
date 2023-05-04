@@ -36,6 +36,13 @@ import java.util.Objects;
  */
 @TestApi
 public final class PrimitiveSegment extends VibrationEffectSegment {
+
+    /** @hide */
+    public static final float DEFAULT_SCALE = 1f;
+
+    /** @hide */
+    public static final int DEFAULT_DELAY_MILLIS = 0;
+
     private final int mPrimitiveId;
     private final float mScale;
     private final int mDelay;
