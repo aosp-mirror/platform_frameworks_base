@@ -25,9 +25,14 @@ import android.hardware.lights.LightState;
  * {@hide}
  */
 interface ILightsManager {
+  @EnforcePermission("CONTROL_DEVICE_LIGHTS")
   List<Light> getLights();
+  @EnforcePermission("CONTROL_DEVICE_LIGHTS")
   LightState getLightState(int lightId);
+  @EnforcePermission("CONTROL_DEVICE_LIGHTS")
   void openSession(in IBinder sessionToken, in int priority);
+  @EnforcePermission("CONTROL_DEVICE_LIGHTS")
   void closeSession(in IBinder sessionToken);
+  @EnforcePermission("CONTROL_DEVICE_LIGHTS")
   void setLightStates(in IBinder sessionToken, in int[] lightIds, in LightState[] states);
 }
