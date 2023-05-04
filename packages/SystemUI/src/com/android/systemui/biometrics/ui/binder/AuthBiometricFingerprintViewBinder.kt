@@ -36,7 +36,9 @@ object AuthBiometricFingerprintViewBinder {
                 viewModel.setRotation(view.context.display?.orientation ?: Surface.ROTATION_0)
                 launch {
                     viewModel.iconAsset.collect { iconAsset ->
-                        view.updateIconViewAnimation(iconAsset)
+                        if (view.isSfps) {
+                            view.updateIconViewAnimation(iconAsset)
+                        }
                     }
                 }
             }
