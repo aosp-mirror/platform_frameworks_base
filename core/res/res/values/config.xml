@@ -774,11 +774,6 @@
          we rely on gravity to determine the effective orientation. -->
     <bool name="config_deskDockEnablesAccelerometer">true</bool>
 
-    <!-- Control whether nosensor and locked orientation requests are respected from the app when
-         config_deskDockEnablesAccelerometer is set to false.
-         TODO(b/274763533): Consider making true by default and removing this. -->
-    <bool name="config_deskRespectsNoSensorAndLockedWithoutAccelerometer">false</bool>
-
     <!-- Car dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a car dock.
