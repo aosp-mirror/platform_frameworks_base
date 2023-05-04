@@ -34,6 +34,8 @@ java_library {
 
     // If you add a static lib here, you may need to also add the package to the ClassLoaderFilter
     // in PluginInstance. That will ensure that loaded plugins have access to the related classes.
+    // You should also add it to proguard_common.flags so that proguard does not remove the portions
+    // of the library which are used by the plugins but not by systemui itself.
     static_libs: [
         "androidx.annotation_annotation",
         "PluginCoreLib",

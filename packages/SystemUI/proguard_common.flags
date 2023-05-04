@@ -62,9 +62,15 @@
 -keep class ** extends androidx.preference.PreferenceFragment
 -keep class com.android.systemui.tuner.*
 
-# The plugins subpackage acts as a shared library that might be referenced in
+# The plugins, log & common subpackages act as shared libraries that might be referenced in
 # dynamically-loaded plugin APKs.
 -keep class com.android.systemui.plugins.** {
+    *;
+}
+-keep class com.android.systemui.log.** {
+    *;
+}
+-keep class com.android.systemui.common.** {
     *;
 }
 -keep class com.android.systemui.fragments.FragmentService$FragmentCreator {
