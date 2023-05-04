@@ -306,4 +306,14 @@ public class TransitionUtil {
         if (rootIdx >= 0) return rootIdx;
         return 0;
     }
+
+    /**
+     * Gets the {@link TransitionInfo.Root} for the given {@link TransitionInfo.Change}.
+     * @see #rootIndexFor(TransitionInfo.Change, TransitionInfo)
+     */
+    @NonNull
+    public static TransitionInfo.Root getRootFor(@NonNull TransitionInfo.Change change,
+            @NonNull TransitionInfo info) {
+        return info.getRoot(rootIndexFor(change, info));
+    }
 }
