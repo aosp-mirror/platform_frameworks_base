@@ -31,11 +31,8 @@ message Telecom {
       // Caller's name and/or phone number; what a user would see displayed when receiving an
       // incoming call on the local device
       string caller_id = 1;
-      // Human-readable name of the app processing this call
-      string app_name = 2;
-      bytes app_icon = 3;
-      // Unique identifier for this app, such as a package name.
-      string app_identifier = 4;
+      bytes app_icon = 2;
+      CallFacilitator facilitator = 3;
     }
     Origin origin = 2;
 
@@ -49,6 +46,37 @@ message Telecom {
     Status status = 3;
 
     repeated Control controls = 4;
+  }
+
+  message Request {
+    message CreateAction {
+      // UUID representing this request.
+      string id = 1;
+      // URI representing the address of the intended callee.
+      string address = 2;
+      // Which facilitator should handle this call.
+      CallFacilitator facilitator = 3;
+    }
+    message ControlAction {
+      // UUID representing the call to perform the control action on
+      string id = 1;
+      // The control to perform
+      Control control = 2;
+    }
+
+    oneof action {
+      CreateAction create_action = 1;
+      ControlAction control_action = 2;
+    }
+  }
+
+  // A facilitator (namely an app) that can be directed to place calls.
+  // Next index: 3
+  message CallFacilitator {
+    // Human-readable name of the facilitator
+    string name = 1;
+    // Unique identifier for this facilitator, such as a package name.
+    string identifier = 2;
   }
 
   enum Control {
@@ -68,5 +96,7 @@ message Telecom {
   // The list of active calls.
   repeated Call calls = 1;
   // The list of requested calls or call changes.
-  repeated Call requests = 2;
+  repeated Request requests = 2;
+  // The list of call facilitators that this device currently supports.
+  repeated CallFacilitator facilitators = 3;
 }
