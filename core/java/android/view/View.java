@@ -14763,7 +14763,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         return mode == IMPORTANT_FOR_ACCESSIBILITY_YES || isActionableForAccessibility()
-                || hasListenersForAccessibility() || getAccessibilityNodeProvider() != null
+                || hasListenersForAccessibility() || mAccessibilityDelegate != null
                 || getAccessibilityLiveRegion() != ACCESSIBILITY_LIVE_REGION_NONE
                 || isAccessibilityPane();
     }
