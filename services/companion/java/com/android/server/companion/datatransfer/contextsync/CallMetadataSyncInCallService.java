@@ -66,16 +66,11 @@ public class CallMetadataSyncInCallService extends InCallService {
                 @Override
                 void processContextSyncMessage(int associationId,
                         CallMetadataSyncData callMetadataSyncData) {
-                    final Iterator<CallMetadataSyncData.Call> iterator =
-                            callMetadataSyncData.getRequests().iterator();
+                    final Iterator<CallMetadataSyncData.CallControlRequest> iterator =
+                            callMetadataSyncData.getCallControlRequests().iterator();
                     while (iterator.hasNext()) {
-                        final CallMetadataSyncData.Call call = iterator.next();
-                        if (call.getId() != null) {
-                            // The call is already assigned an id; treat as control invocations.
-                            for (int control : call.getControls()) {
-                                processCallControlAction(call.getId(), control);
-                            }
-                        }
+                        final CallMetadataSyncData.CallControlRequest request = iterator.next();
+                        processCallControlAction(request.getId(), request.getControl());
                         iterator.remove();
                     }
                 }
