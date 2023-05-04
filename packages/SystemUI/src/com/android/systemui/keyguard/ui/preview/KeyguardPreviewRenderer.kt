@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyguard.ui.preview
 
+import android.annotation.ColorInt
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -79,6 +80,7 @@ constructor(
         get() = host.surfacePackage
 
     private var clockView: View? = null
+    private var colorOverride: Int? = null
 
     private val disposables = mutableSetOf<DisposableHandle>()
     private var isDestroyed = false
@@ -150,6 +152,14 @@ constructor(
         disposables.forEach { it.dispose() }
     }
 
+    /** Sets the clock's color to the overridden seed color. */
+    fun onColorOverridden(@ColorInt color: Int?) {
+        runBlocking(mainDispatcher) {
+            colorOverride = color
+            clockController.clock?.run { events.onSeedColorChanged(color) }
+        }
+    }
+
     private fun setUpBottomArea(parentView: ViewGroup) {
         val bottomAreaView =
             LayoutInflater.from(context)
@@ -188,8 +198,10 @@ constructor(
         val receiver =
             object : BroadcastReceiver() {
                 override fun onReceive(context: Context?, intent: Intent?) {
-                    clockController.clock?.smallClock?.events?.onTimeTick()
-                    clockController.clock?.largeClock?.events?.onTimeTick()
+                    clockController.clock?.run {
+                        smallClock.events.onTimeTick()
+                        largeClock.events.onTimeTick()
+                    }
                 }
             }
         broadcastDispatcher.registerReceiver(
@@ -205,19 +217,27 @@ constructor(
     }
 
     private fun onClockChanged(parentView: ViewGroup) {
-        clockController.clock = clockRegistry.createCurrentClock()
-        clockController.clock
-            ?.largeClock
-            ?.events
-            ?.onTargetRegionChanged(KeyguardClockSwitch.getLargeClockRegion(parentView))
-        clockView?.let { parentView.removeView(it) }
-        clockView =
-            clockController.clock?.largeClock?.view?.apply {
-                if (shouldHighlightSelectedAffordance) {
-                    alpha = DIM_ALPHA
+        val clock = clockRegistry.createCurrentClock()
+        clockController.clock = clock
+
+        colorOverride?.let { clock.events.onSeedColorChanged(it) }
+        if (!shouldHideClock) {
+            clock.largeClock.events.onTargetRegionChanged(
+                KeyguardClockSwitch.getLargeClockRegion(parentView)
+            )
+
+            clockView?.let { parentView.removeView(it) }
+            clockView =
+                clock.largeClock.view.apply {
+                    if (shouldHighlightSelectedAffordance) {
+                        alpha = DIM_ALPHA
+                    }
+                    parentView.addView(this)
+                    visibility = View.VISIBLE
                 }
-                parentView.addView(this)
-            }
+        } else {
+            clockView?.visibility = View.GONE
+        }
     }
 
     companion object {
