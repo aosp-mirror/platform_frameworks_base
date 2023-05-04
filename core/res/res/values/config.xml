@@ -4483,17 +4483,27 @@
     -->
     <string name="config_defaultCredentialManagerHybridService" translatable="false"></string>
 
-    <!-- The component name, flattened to a string, for the system's credential manager
-      provider service. This service allows credential retrieval and storage od credentials.
+    <!-- The component name(s), flattened to a string, for the system's credential manager
+      provider services. These services allow retrieving and storing credentials.
 
-     This service must be trusted, as it can be activated without explicit consent of the user.
+     These services must be trusted, as they can be activated without explicit consent of the user.
      If no service with the specified name exists on the device, there will be no user configurable
      provider to service credential manager requests. However, credential manager system
      services that do not require user consent, will still work.
 
      See android.credentials.CredentialManager
     -->
-    <string-array name="config_defaultCredentialProviderService" translatable="false">
+    <string-array name="config_enabledCredentialProviderService" translatable="false">
+    </string-array>
+
+    <!-- The component name(s), flattened to a string, for the system's primary credential manager
+      provider services. These service will be used by default for storing credentials.
+
+     These services must be trusted, as they can be activated without explicit consent of the user.
+
+     See android.credentials.CredentialManager
+    -->
+    <string-array name="config_primaryCredentialProviderService" translatable="false">
     </string-array>
 
     <!-- The package name for the system's smartspace service.
