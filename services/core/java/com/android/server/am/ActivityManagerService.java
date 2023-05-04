@@ -19111,8 +19111,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public int restartUserInBackground(final int userId) {
-        return mUserController.restartUser(userId, USER_START_MODE_BACKGROUND);
+    public int restartUserInBackground(int userId, int userStartMode) {
+        return mUserController.restartUser(userId, userStartMode);
     }
 
     @Override
