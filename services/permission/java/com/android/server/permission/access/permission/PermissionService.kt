@@ -1263,13 +1263,7 @@ class PermissionService(
             // not add) permission restriction flags, we now consistently ignore them altogether.
             val ignoredMask = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED or
                 PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT or
-                // REVIEW_REQUIRED can be set on any permission by the shell, or by any app for the
-                // NOTIFICATIONS permissions specifically.
-                if (isShell(callingUid) || permissionName in NOTIFICATIONS_PERMISSIONS) {
-                    0
-                } else {
-                    PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
-                } or PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT or
+                PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT or
                 PackageManager.FLAG_PERMISSION_RESTRICTION_INSTALLER_EXEMPT or
                 PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT or
                 PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION
