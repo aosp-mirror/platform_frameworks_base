@@ -135,29 +135,4 @@ public class KeyguardStatusView extends GridLayout {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         Trace.endSection();
     }
-
-
-    /**
-     * Clock content will be clipped when goes beyond bounds,
-     * so we setAlpha for all views except clock
-     */
-    public void setAlpha(float alpha, boolean excludeClock) {
-        if (!excludeClock) {
-            setAlpha(alpha);
-            return;
-        }
-        for (int i = 0; i < getChildCount(); i++) {
-            View child = getChildAt(i);
-            if (child == mStatusViewContainer) {
-                for (int j = 0; j < mStatusViewContainer.getChildCount(); j++) {
-                    View innerChild = mStatusViewContainer.getChildAt(j);
-                    if (innerChild != mClockView) {
-                        innerChild.setAlpha(alpha);
-                    }
-                }
-            } else {
-                child.setAlpha(alpha);
-            }
-        }
-    }
 }
