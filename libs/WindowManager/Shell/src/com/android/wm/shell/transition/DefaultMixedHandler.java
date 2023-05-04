@@ -524,7 +524,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             finishCallback.onTransitionFinished(wct, wctCB);
         };
         mixed.mInFlightSubAnimations = 1;
-        mSplitHandler.onRecentsInSplitAnimationStart(startTransaction);
+        mSplitHandler.onRecentsInSplitAnimationStart(info);
         final boolean handled = mixed.mLeftoversHandler.startAnimation(mixed.mTransition, info,
                 startTransaction, finishTransaction, finishCB);
         if (!handled) {
