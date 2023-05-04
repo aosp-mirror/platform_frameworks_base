@@ -1640,7 +1640,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (isState(RESUMED)) {
                 newParent.setResumedActivity(this, "onParentChanged");
             }
-            mLetterboxUiController.onActivityParentChanged(newParent);
+            mLetterboxUiController.updateInheritedLetterbox();
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
