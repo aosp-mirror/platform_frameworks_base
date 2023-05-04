@@ -361,4 +361,16 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         mRequestSessionMetric.logFailureOrUserCancel(isUserCanceled);
         finishSession(/*propagateCancellation=*/false);
     }
+
+    /**
+     * Reveals if a certain provider is primary after ensuring it exists at all in the designated
+     * provider info.
+     *
+     * @param componentName used to identify the provider we want to check primary status for
+     */
+    protected boolean isPrimaryProviderViaProviderInfo(ComponentName componentName) {
+        var chosenProviderSession = mProviders.get(componentName.flattenToString());
+        return chosenProviderSession != null && chosenProviderSession.mProviderInfo != null
+                && chosenProviderSession.mProviderInfo.isPrimary();
+    }
 }
