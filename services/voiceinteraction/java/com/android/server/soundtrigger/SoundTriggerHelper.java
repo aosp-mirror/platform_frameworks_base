@@ -487,7 +487,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
         }
 
-        if (unloadModel && (modelData.isModelLoaded() || modelData.isStopPending())) {
+        if (unloadModel && modelData.isModelLoaded()) {
             Slog.d(TAG, "Unloading previously loaded stale model.");
             if (mModule == null) {
                 return STATUS_ERROR;
@@ -870,7 +870,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         Slog.w(TAG, "Recognition aborted");
         MetricsLogger.count(mContext, "sth_recognition_aborted", 1);
         ModelData modelData = getModelDataForLocked(event.soundModelHandle);
-        if (modelData != null && (modelData.isModelStarted() || modelData.isStopPending())) {
+        if (modelData != null && modelData.isModelStarted()) {
             modelData.setStopped();
             try {
                 IRecognitionStatusCallback callback = modelData.getCallback();
@@ -884,7 +884,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                         .printLog(ALOGW, TAG));
                 forceStopAndUnloadModelLocked(modelData, e);
             }
-            updateRecognitionLocked(modelData, true);
         }
     }
 
@@ -955,7 +954,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
     private int updateRecognitionLocked(ModelData model, boolean notifyClientOnError) {
         boolean shouldStartModel = model.isRequested() && isRecognitionAllowedByDeviceState(model);
-        if (shouldStartModel == model.isModelStarted() || model.isStopPending()) {
+        if (shouldStartModel == model.isModelStarted()) {
             // No-op.
             return STATUS_OK;
         }
@@ -1060,10 +1059,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (mModule == null) {
             return;
         }
-        if (modelData.isStopPending()) {
-            // No need to wait for the stop to be confirmed.
-            modelData.setStopped();
-        } else if (modelData.isModelStarted()) {
+        if (modelData.isModelStarted()) {
             Slog.d(TAG, "Stopping previously started dangling model " + modelData.getHandle());
             if (mModule.stopRecognition(modelData.getHandle()) == STATUS_OK) {
                 modelData.setStopped();
@@ -1275,7 +1271,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 }
             }
         } else {
-            modelData.setStopPending();
+            modelData.setStopped();
             MetricsLogger.count(mContext, "sth_stop_recognition_success", 1);
             // Notify of pause if needed.
             if (notify) {
@@ -1321,9 +1317,6 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         // Started implies model was successfully loaded and start was called.
         static final int MODEL_STARTED = 2;
-
-        // Model stop request has been sent. Waiting for an event to signal model being stopped.
-        static final int MODEL_STOP_PENDING = 3;
 
         // One of MODEL_NOTLOADED, MODEL_LOADED, MODEL_STARTED (which implies loaded).
         private int mModelState;
@@ -1402,20 +1395,12 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return mModelState == MODEL_NOTLOADED;
         }
 
-        synchronized boolean isStopPending() {
-            return mModelState == MODEL_STOP_PENDING;
-        }
-
         synchronized void setStarted() {
             mModelState = MODEL_STARTED;
         }
 
         synchronized void setStopped() {
             mModelState = MODEL_LOADED;
-        }
-
-        synchronized void setStopPending() {
-            mModelState = MODEL_STOP_PENDING;
         }
 
         synchronized void setLoaded() {
