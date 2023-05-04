@@ -49,10 +49,16 @@
     <string name="sign_ins" msgid="4710739369149469208">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‏‎‎‏‏‎‏‎‎‎‎‏‎‎‏‎‎‎‎‏‏‎‎‎‎sign-ins‎‏‎‎‏‎"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‎‏‏‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‏‏‎‎‎‏‏‏‏‎‎‏‎‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‎‎‏‎‎‎‎sign-in info‎‏‎‎‏‎"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‎‏‏‎‏‏‎‎‏‎‎‎‎‎‎‏‎‏‎‎‏‎‏‏‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‎Save ‎‏‎‎‏‏‎<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>‎‏‎‎‏‏‏‎ to‎‏‎‎‏‎"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‏‏‏‎‎‏‎‏‎‏‎‎‏‏‎‏‏‎‎‏‎‎‏‎‎‏‎‎‎‎‎‎‏‎‏‏‏‎‎‏‎‏‏‎‎‏‏‎‎‏‏‏‎‎Create passkey in another device?‎‏‎‎‏‎"</string>
+    <!-- no translation found for create_passkey_in_other_device_title (2360053098931886245) -->
+    <skip />
+    <!-- no translation found for save_password_on_other_device_title (5829084591948321207) -->
+    <skip />
+    <!-- no translation found for save_sign_in_on_other_device_title (2827990118560134692) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‎‎‏‏‎‏‎‎‎‎‎‏‎‏‏‎‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‎‏‏‏‎‏‏‏‎‎‏‎‏‏‏‏‎‎‏‎‏‎‏‎Use ‎‏‎‎‏‏‎<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ for all your sign-ins?‎‏‎‎‏‎"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‏‎‏‏‏‏‎‏‎‎‎‏‎‎‎‏‎‎‏‏‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‏‎‎‎‎‎‏‏‎‎‏‎‏‏‏‎‏‎‏‎‏‎This password manager for ‎‏‎‎‏‏‎<xliff:g id="USERNAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ will store your passwords and passkeys to help you easily sign in‎‏‎‎‏‎"</string>
     <string name="set_as_default" msgid="4415328591568654603">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‏‏‎‎‏‎‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‏‎‏‏‎Set as default‎‏‎‎‏‎"</string>
+    <string name="settings" msgid="6536394145760913145">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‏‏‎‏‎‏‏‏‏‎‏‏‏‏‏‏‎‏‏‎‎‎‎‎‏‎‎‎‏‎‎‎‎‎‎‏‎‏‏‎‏‎‎‏‏‎‏‏‏‏‏‎‎‏‎Settings‎‏‎‎‏‎"</string>
     <string name="use_once" msgid="9027366575315399714">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‎‎‏‏‏‏‎‏‎‎‏‏‎‎‎‎‏‎‎‏‎‎‎‏‏‏‎‏‎‏‏‏‎‏‎‎‎‏‎‏‏‎‏‎‎‎‎‏‎‎‎‏‎‎Use once‎‏‎‎‏‎"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‎‎‎‎‎‏‎‏‎‎‎‎‏‎‏‎‎‏‎‎‎‏‏‏‏‏‎‏‎‏‏‏‏‏‎‏‏‏‎‎‎‏‎‏‎‎‎‏‎‎‎‏‎‎‎‎‏‏‏‎‎‏‎‎‏‏‎<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>‎‏‎‎‏‏‏‎ passwords • ‎‏‎‎‏‏‎<xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>‎‏‎‎‏‏‏‎ passkeys‎‏‎‎‏‎"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‎‏‎‏‎‎‏‏‎‎‎‏‏‎‎‏‎‎‏‎‏‏‎‏‎‎‎‏‎‎‏‎‏‎‏‎‏‎‏‎‏‎‏‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‎‏‎‎‏‏‎<xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>‎‏‎‎‏‏‏‎ passwords‎‏‎‎‏‎"</string>
