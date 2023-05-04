@@ -226,7 +226,6 @@ public class ZenModeHelper {
         mPm = mContext.getPackageManager();
         mHandler.postMetricsTimer();
         cleanUpZenRules();
-        evaluateZenMode("onSystemReady", true);
         mIsBootComplete = true;
         showZenUpgradeNotification(mZenMode);
     }
@@ -936,7 +935,10 @@ public class ZenModeHelper {
             if (policyChanged) {
                 dispatchOnPolicyChanged();
             }
-            mHandler.postApplyConfig(config, reason, triggeringComponent, setRingerMode);
+            final String val = Integer.toString(config.hashCode());
+            Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
+            evaluateZenMode(reason, setRingerMode);
+            mConditions.evaluateConfig(config, triggeringComponent, true /*processSubscriptions*/);
             return true;
         } catch (SecurityException e) {
             Log.wtf(TAG, "Invalid rule in config", e);
@@ -944,14 +946,6 @@ public class ZenModeHelper {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-    }
-
-    private void applyConfig(ZenModeConfig config, String reason,
-            ComponentName triggeringComponent, boolean setRingerMode) {
-        final String val = Integer.toString(config.hashCode());
-        Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_CONFIG_ETAG, val);
-        evaluateZenMode(reason, setRingerMode);
-        mConditions.evaluateConfig(config, triggeringComponent, true /*processSubscriptions*/);
     }
 
     private int getZenModeSetting() {
@@ -987,21 +981,23 @@ public class ZenModeHelper {
         mZenMode = zen;
         setZenModeSetting(mZenMode);
         updateConsolidatedPolicy(reason);
-        updateRingerModeAffectedStreams();
-        if (setRingerMode && (zen != zenBefore || (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                && policyHashBefore != mConsolidatedPolicy.hashCode()))) {
-            applyZenToRingerMode();
-        }
-        applyRestrictions();
+        boolean shouldApplyToRinger = setRingerMode && (zen != zenBefore || (
+                zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
+                        && policyHashBefore != mConsolidatedPolicy.hashCode()));
+        mHandler.postUpdateRingerAndAudio(shouldApplyToRinger);
         if (zen != zenBefore) {
             mHandler.postDispatchOnZenModeChanged();
         }
     }
 
-    private void updateRingerModeAffectedStreams() {
+    private void updateRingerAndAudio(boolean shouldApplyToRinger) {
         if (mAudioManager != null) {
             mAudioManager.updateRingerModeAffectedStreamsInternal();
         }
+        if (shouldApplyToRinger) {
+            applyZenToRingerMode();
+        }
+        applyRestrictions();
     }
 
     private int computeZenMode() {
@@ -1620,22 +1616,7 @@ public class ZenModeHelper {
     private final class H extends Handler {
         private static final int MSG_DISPATCH = 1;
         private static final int MSG_METRICS = 2;
-        private static final int MSG_APPLY_CONFIG = 4;
-
-        private final class ConfigMessageData {
-            public final ZenModeConfig config;
-            public ComponentName triggeringComponent;
-            public final String reason;
-            public final boolean setRingerMode;
-
-            ConfigMessageData(ZenModeConfig config, String reason,
-                    ComponentName triggeringComponent, boolean setRingerMode) {
-                this.config = config;
-                this.reason = reason;
-                this.setRingerMode = setRingerMode;
-                this.triggeringComponent = triggeringComponent;
-            }
-        }
+        private static final int MSG_RINGER_AUDIO = 5;
 
         private static final long METRICS_PERIOD_MS = 6 * 60 * 60 * 1000;
 
@@ -1653,10 +1634,9 @@ public class ZenModeHelper {
             sendEmptyMessageDelayed(MSG_METRICS, METRICS_PERIOD_MS);
         }
 
-        private void postApplyConfig(ZenModeConfig config, String reason,
-                ComponentName triggeringComponent, boolean setRingerMode) {
-            sendMessage(obtainMessage(MSG_APPLY_CONFIG,
-                    new ConfigMessageData(config, reason, triggeringComponent, setRingerMode)));
+        private void postUpdateRingerAndAudio(boolean shouldApplyToRinger) {
+            removeMessages(MSG_RINGER_AUDIO);
+            sendMessage(obtainMessage(MSG_RINGER_AUDIO, shouldApplyToRinger));
         }
 
         @Override
@@ -1668,10 +1648,9 @@ public class ZenModeHelper {
                 case MSG_METRICS:
                     mMetrics.emit();
                     break;
-                case MSG_APPLY_CONFIG:
-                    ConfigMessageData applyConfigData = (ConfigMessageData) msg.obj;
-                    applyConfig(applyConfigData.config, applyConfigData.reason,
-                            applyConfigData.triggeringComponent, applyConfigData.setRingerMode);
+                case MSG_RINGER_AUDIO:
+                    boolean shouldApplyToRinger = (boolean) msg.obj;
+                    updateRingerAndAudio(shouldApplyToRinger);
             }
         }
     }
