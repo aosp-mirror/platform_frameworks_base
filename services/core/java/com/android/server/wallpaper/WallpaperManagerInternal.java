@@ -33,4 +33,7 @@ public abstract class WallpaperManagerInternal {
 
     /** Notifies when the screen starts turning on and is not yet visible to the user. */
     public abstract void onScreenTurningOn(int displayId);
+
+    /** Notifies when the keyguard is going away. Sent right after the bouncer is gone. */
+    public abstract void onKeyguardGoingAway();
 }
