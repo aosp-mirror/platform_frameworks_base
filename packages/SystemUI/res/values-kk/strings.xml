@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> қолданбасы осы скриншотты анықтады."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> және басқа да ашық қолданбалар осы скриншотты анықтады."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Ескертпеге қосу"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"Экран жазғыш"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экран жазғыш бейнесін өңдеу"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды бейнеге жазудың ағымдағы хабарландыруы"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Жазу басталсын ба?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Жазу кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Қолданбаны жазу кезінде Android жүйесі қолданбада көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Жазуды бастау"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Аудио жазу"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Құрылғыдан шығатын дыбыс"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Музыка, қоңыраулар және рингтондар сияқты құрылғыдан шығатын дыбыс"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Микрофон"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Құрылғыдан шығатын дыбыс және микрофон"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Бастау"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Экран жазылып жатыр."</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Экрандағы бейне және аудио жазылуда."</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Экранды түрткенде көрсету"</string>
@@ -326,9 +320,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Камераңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Камераңызды немесе микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
-    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон бөгелген"</string>
-    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера бөгелген"</string>
-    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон мен камера бөгелген"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон блокталған"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера блокталған"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон мен камера блокталған"</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын микрофонға жылжытыңыз, оның қалпы микрофонды пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын камераға жылжытыңыз, оның қалпы камераны пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Оның бөгеуін алу үшін құрылғыдағы құпиялық ауыстырғышын ашық қалыпқа жылжытып, пайдалану мүмкіндігін қамтамасыз етіңіз. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Осы пайдаланушының барлық қолданбалары мен деректері жойылады."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Жою"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> арқылы жазу немесе трансляциялау басталсын ба?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> экранда көрсетілетін немесе жазу не трансляциялау кезінде құрылғыда ойнатылған барлық ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және ойнатылатын аудио сияқты ақпарат кіреді."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Жазу немесе трансляциялау басталсын ба?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Осы функцияны ұсынатын қызмет экранда көрсетілетін немесе жазу не трансляциялау кезінде құрылғыда ойнатылған барлық ақпаратты пайдалана алады. Бұған құпия сөздер, төлем туралы мәліметтер, суреттер, хабарлар және ойнатылатын аудио сияқты ақпарат кіреді."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Бүкіл экран"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Жалғыз қолданба"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Қолданба экранын бөлісу не жазу"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> арқылы жазу немесе трансляциялау басталсын ба?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Бөлісу, жазу не трансляциялау кезінде <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Қолданба экранын бөлісу, жазу не трансляциялау кезінде <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> онда көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Бастау"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Трансляциялау басталсын ба?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Трансляциялау кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Қолданба экранын трансляциялау кезінде Android жүйесі қолданбада көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Трансляциялауды бастау"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Бөлісу басталсын ба?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Бөлісу, жазу не трансляциялау кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Қолданба экранын бөлісу, жазу не трансляциялау кезінде Android жүйесі онда көрінетін не ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізген кезде сақ болыңыз."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Бастау"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Әкімшіңіз бөгеген"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Құрылғы саясатына байланысты экранды түсіру өшірілді."</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Барлығын тазалау"</string>
@@ -904,7 +880,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Арнайы мүмкіндікті ашу үшін түртіңіз. Түймені параметрден реттеңіз не ауыстырыңыз.\n\n"<annotation id="link">"Параметрді көру"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Түймені уақытша жасыру үшін оны шетке қарай жылжытыңыз."</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Қайтару"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> таңбашасы өшірілді."</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> жылдам пәрмені өшірілді."</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# таңбаша өшірілді.}other{# таңбаша өшірілді.}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Жоғарғы сол жаққа жылжыту"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Жоғарғы оң жаққа жылжыту"</string>
@@ -1148,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Камера қолданбасын орнатыңыз"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Қолданба реттелген"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Кемінде бір құрылғы қолжетімді"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Таңбашаны басып тұрыңыз."</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Бас тарту"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Экрандарды қазір ауыстыру"</string>
@@ -1168,9 +1148,9 @@
     <string name="lock_screen_settings" msgid="6152703934761402399">"Құлып экранын бейімдеу"</string>
     <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Құлып экранын бейімдеу үшін құлыпты ашыңыз"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi қолжетімсіз."</string>
-    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера бөгелген."</string>
-    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера мен микрофон бөгелген."</string>
-    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон бөгелген."</string>
+    <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера блокталған."</string>
+    <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера мен микрофон блокталған."</string>
+    <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон блокталған."</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\"Маңызды\" режимі қосулы."</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant қосулы."</string>
     <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Параметрлерден әдепкі жазба қолданбасын орнатыңыз."</string>
