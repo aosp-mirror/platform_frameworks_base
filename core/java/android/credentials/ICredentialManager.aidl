@@ -47,7 +47,7 @@ interface ICredentialManager {
 
     @nullable ICancellationSignal clearCredentialState(in ClearCredentialStateRequest request, in IClearCredentialStateCallback callback, String callingPackage);
 
-    void setEnabledProviders(in List<String> providers, in int userId, in ISetEnabledProvidersCallback callback);
+    void setEnabledProviders(in List<String> primaryProviders, in List<String> providers, in int userId, in ISetEnabledProvidersCallback callback);
 
     void registerCredentialDescription(in RegisterCredentialDescriptionRequest request, String callingPackage);
 
