@@ -106,6 +106,8 @@ import com.android.internal.os.SomeArgs;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.expresslog.Counter;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.AppSchedulingModuleThread;
 import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
@@ -377,6 +379,28 @@ public class JobSchedulerService extends com.android.server.SystemService
             new JobStatus[DEBUG ? NUM_COMPLETED_JOB_HISTORY : 0];
     private final long[] mLastCancelledJobTimeElapsed =
             new long[DEBUG ? NUM_COMPLETED_JOB_HISTORY : 0];
+
+    private static final Histogram sEnqueuedJwiHighWaterMarkLogger = new Histogram(
+            "job_scheduler.value_hist_w_uid_enqueued_work_items_high_water_mark",
+            new Histogram.ScaledRangeOptions(25, 0, 5, 1.4f));
+    private static final Histogram sInitialJobEstimatedNetworkDownloadKBLogger = new Histogram(
+            "job_scheduler.value_hist_initial_job_estimated_network_download_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sInitialJwiEstimatedNetworkDownloadKBLogger = new Histogram(
+            "job_scheduler.value_hist_initial_jwi_estimated_network_download_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sInitialJobEstimatedNetworkUploadKBLogger = new Histogram(
+            "job_scheduler.value_hist_initial_job_estimated_network_upload_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sInitialJwiEstimatedNetworkUploadKBLogger = new Histogram(
+            "job_scheduler.value_hist_initial_jwi_estimated_network_upload_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sJobMinimumChunkKBLogger = new Histogram(
+            "job_scheduler.value_hist_w_uid_job_minimum_chunk_kilobytes",
+            new Histogram.ScaledRangeOptions(25, 0, 5 /* 5 KB */, 1.76f));
+    private static final Histogram sJwiMinimumChunkKBLogger = new Histogram(
+            "job_scheduler.value_hist_w_uid_jwi_minimum_chunk_kilobytes",
+            new Histogram.ScaledRangeOptions(25, 0, 5 /* 5 KB */, 1.76f));
 
     /**
      * A mapping of which uids are currently in the foreground to their effective bias.
@@ -1422,6 +1446,32 @@ public class JobSchedulerService extends com.android.server.SystemService
             return JobScheduler.RESULT_FAILURE;
         }
 
+        if (job.getRequiredNetwork() != null) {
+            sInitialJobEstimatedNetworkDownloadKBLogger.logSample(
+                    safelyScaleBytesToKBForHistogram(
+                            job.getEstimatedNetworkDownloadBytes()));
+            sInitialJobEstimatedNetworkUploadKBLogger.logSample(
+                    safelyScaleBytesToKBForHistogram(job.getEstimatedNetworkUploadBytes()));
+            sJobMinimumChunkKBLogger.logSampleWithUid(uId,
+                    safelyScaleBytesToKBForHistogram(job.getMinimumNetworkChunkBytes()));
+            if (work != null) {
+                sInitialJwiEstimatedNetworkDownloadKBLogger.logSample(
+                        safelyScaleBytesToKBForHistogram(
+                                work.getEstimatedNetworkDownloadBytes()));
+                sInitialJwiEstimatedNetworkUploadKBLogger.logSample(
+                        safelyScaleBytesToKBForHistogram(
+                                work.getEstimatedNetworkUploadBytes()));
+                sJwiMinimumChunkKBLogger.logSampleWithUid(uId,
+                        safelyScaleBytesToKBForHistogram(
+                                work.getMinimumNetworkChunkBytes()));
+            }
+        }
+
+        if (work != null) {
+            Counter.logIncrementWithUid(
+                    "job_scheduler.value_cntr_w_uid_job_work_items_enqueued", uId);
+        }
+
         synchronized (mLock) {
             final JobStatus toCancel = mJobs.getJobByUidAndJobId(uId, namespace, job.getId());
 
@@ -1451,6 +1501,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                     toCancel.enqueueWorkLocked(work);
                     mJobs.touchJob(toCancel);
+                    sEnqueuedJwiHighWaterMarkLogger.logSampleWithUid(uId, toCancel.getWorkCount());
 
                     // If any of work item is enqueued when the source is in the foreground,
                     // exempt the entire job.
@@ -1483,6 +1534,8 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (packageName == null) {
                 if (mJobs.countJobsForUid(uId) > MAX_JOBS_PER_APP) {
                     Slog.w(TAG, "Too many jobs for uid " + uId);
+                    Counter.logIncrementWithUid(
+                            "job_scheduler.value_cntr_w_uid_max_scheduling_limit_hit", uId);
                     throw new IllegalStateException("Apps may not schedule more than "
                             + MAX_JOBS_PER_APP + " distinct jobs");
                 }
@@ -1522,6 +1575,7 @@ public class JobSchedulerService extends com.android.server.SystemService
             if (work != null) {
                 // If work has been supplied, enqueue it into the new job.
                 jobStatus.enqueueWorkLocked(work);
+                sEnqueuedJwiHighWaterMarkLogger.logSampleWithUid(uId, jobStatus.getWorkCount());
             }
 
             FrameworkStatsLog.write_non_chained(FrameworkStatsLog.SCHEDULED_JOB_STATE_CHANGED,
@@ -3832,6 +3886,18 @@ public class JobSchedulerService extends com.android.server.SystemService
             Slog.v(TAG, packageName + "/" + userId + " standby bucket index: " + bucket);
         }
         return bucket;
+    }
+
+    static int safelyScaleBytesToKBForHistogram(long bytes) {
+        long kilobytes = bytes / 1000;
+        // Anything over Integer.MAX_VALUE or under Integer.MIN_VALUE isn't expected and will
+        // be put into the overflow buckets.
+        if (kilobytes > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        } else if (kilobytes < Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+        return (int) kilobytes;
     }
 
     private class CloudProviderChangeListener implements

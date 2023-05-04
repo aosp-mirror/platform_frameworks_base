@@ -90,7 +90,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testParameterValidation() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final int uid = 10123;
         final int pid = 42;
         final int notificationId = 23;
@@ -137,7 +137,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_DetachOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification = createValidNotification();
         final int uid = 10123;
         final int pid = 42;
@@ -159,7 +159,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_RemoveOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification = createValidNotification();
         final int uid = 10123;
         final int pid = 42;
@@ -181,7 +181,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_EnqueueDifferentNotificationId_DetachOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -210,7 +210,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_EnqueueDifferentNotificationId_RemoveOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -239,7 +239,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testSingleJob_EnqueueSameNotificationId() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -267,8 +267,8 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testMultipleJobs_sameApp_EnqueueDifferentNotificationId() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -313,8 +313,8 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testMultipleJobs_sameApp_EnqueueSameNotificationId() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -355,8 +355,8 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testMultipleJobs_sameApp_DifferentUsers() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid1 = 10123;
@@ -403,8 +403,8 @@ public class JobNotificationCoordinatorTest {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
         final String pkg1 = "pkg1";
         final String pkg2 = "pkg2";
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -448,7 +448,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testUserStop_SingleJob_DetachOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification = createValidNotification();
         final int uid = 10123;
         final int pid = 42;
@@ -470,8 +470,8 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testUserStop_MultipleJobs_sameApp_EnqueueSameNotificationId_DetachOnStop() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc1 = mock(JobServiceContext.class);
-        final JobServiceContext jsc2 = mock(JobServiceContext.class);
+        final JobServiceContext jsc1 = createJobServiceContext();
+        final JobServiceContext jsc2 = createJobServiceContext();
         final Notification notification1 = createValidNotification();
         final Notification notification2 = createValidNotification();
         final int uid = 10123;
@@ -512,10 +512,9 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testUserInitiatedJob_hasNotificationFlag() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
-        final JobStatus js = mock(JobStatus.class);
+        final JobServiceContext jsc = createJobServiceContext();
+        final JobStatus js = jsc.getRunningJobLocked();
         js.startedAsUserInitiatedJob = true;
-        doReturn(js).when(jsc).getRunningJobLocked();
         final Notification notification = createValidNotification();
         final int uid = 10123;
         final int pid = 42;
@@ -532,8 +531,7 @@ public class JobNotificationCoordinatorTest {
     @Test
     public void testNonUserInitiatedJob_doesNotHaveNotificationFlag() {
         final JobNotificationCoordinator coordinator = new JobNotificationCoordinator();
-        final JobServiceContext jsc = mock(JobServiceContext.class);
-        doReturn(mock(JobStatus.class)).when(jsc).getRunningJobLocked();
+        final JobServiceContext jsc = createJobServiceContext();
         final Notification notification = createValidNotification();
         final int uid = 10123;
         final int pid = 42;
@@ -545,6 +543,12 @@ public class JobNotificationCoordinatorTest {
                 .enqueueNotification(eq(TEST_PACKAGE), eq(TEST_PACKAGE), eq(uid), eq(pid), any(),
                         eq(notificationId), eq(notification), eq(UserHandle.getUserId(uid)));
         assertEquals(notification.flags & Notification.FLAG_USER_INITIATED_JOB, 0);
+    }
+
+    private JobServiceContext createJobServiceContext() {
+        final JobServiceContext jsc = mock(JobServiceContext.class);
+        doReturn(mock(JobStatus.class)).when(jsc).getRunningJobLocked();
+        return jsc;
     }
 
     private Notification createValidNotification() {
