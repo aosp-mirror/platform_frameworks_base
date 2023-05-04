@@ -17,6 +17,7 @@
 package com.android.server.security.rkp;
 
 import android.os.CancellationSignal;
+import android.os.IBinder;
 import android.os.OperationCanceledException;
 import android.os.OutcomeReceiver;
 import android.security.rkp.IGetKeyCallback;
@@ -39,23 +40,23 @@ import java.util.concurrent.Executor;
  */
 final class RemoteProvisioningRegistration extends IRegistration.Stub {
     static final String TAG = RemoteProvisioningService.TAG;
-    private final ConcurrentHashMap<IGetKeyCallback, CancellationSignal> mGetKeyOperations =
+    private final ConcurrentHashMap<IBinder, CancellationSignal> mGetKeyOperations =
             new ConcurrentHashMap<>();
-    private final Set<IStoreUpgradedKeyCallback> mStoreUpgradedKeyOperations =
-            ConcurrentHashMap.newKeySet();
+    private final Set<IBinder> mStoreUpgradedKeyOperations = ConcurrentHashMap.newKeySet();
     private final RegistrationProxy mRegistration;
     private final Executor mExecutor;
 
     private class GetKeyReceiver implements OutcomeReceiver<RemotelyProvisionedKey, Exception> {
         IGetKeyCallback mCallback;
+
         GetKeyReceiver(IGetKeyCallback callback) {
             mCallback = callback;
         }
 
         @Override
         public void onResult(RemotelyProvisionedKey result) {
-            mGetKeyOperations.remove(mCallback);
-            Log.i(TAG, "Successfully fetched key for client " + mCallback.hashCode());
+            mGetKeyOperations.remove(mCallback.asBinder());
+            Log.i(TAG, "Successfully fetched key for client " + mCallback.asBinder().hashCode());
             android.security.rkp.RemotelyProvisionedKey parcelable =
                     new android.security.rkp.RemotelyProvisionedKey();
             parcelable.keyBlob = result.getKeyBlob();
@@ -65,19 +66,21 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
 
         @Override
         public void onError(Exception e) {
-            mGetKeyOperations.remove(mCallback);
+            mGetKeyOperations.remove(mCallback.asBinder());
             if (e instanceof OperationCanceledException) {
-                Log.i(TAG, "Operation cancelled for client " + mCallback.hashCode());
+                Log.i(TAG, "Operation cancelled for client " + mCallback.asBinder().hashCode());
                 wrapCallback(mCallback::onCancel);
             } else if (e instanceof RkpProxyException) {
-                Log.e(TAG, "RKP error fetching key for client " + mCallback.hashCode() + ": "
+                Log.e(TAG, "RKP error fetching key for client " + mCallback.asBinder().hashCode()
+                        + ": "
                         + e.getMessage());
                 RkpProxyException rkpException = (RkpProxyException) e;
                 wrapCallback(() -> mCallback.onError(toGetKeyError(rkpException),
                         e.getMessage()));
             } else {
-                Log.e(TAG, "Unknown error fetching key for client " + mCallback.hashCode() + ": "
-                        + e.getMessage());
+                Log.e(TAG,
+                        "Unknown error fetching key for client " + mCallback.asBinder().hashCode()
+                                + ": " + e.getMessage());
                 wrapCallback(() -> mCallback.onError(IGetKeyCallback.ErrorCode.ERROR_UNKNOWN,
                         e.getMessage()));
             }
@@ -108,20 +111,23 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
     @Override
     public void getKey(int keyId, IGetKeyCallback callback) {
         CancellationSignal cancellationSignal = new CancellationSignal();
-        if (mGetKeyOperations.putIfAbsent(callback, cancellationSignal) != null) {
-            Log.e(TAG, "Client can only request one call at a time " + callback.hashCode());
+        if (mGetKeyOperations.putIfAbsent(callback.asBinder(), cancellationSignal) != null) {
+            Log.e(TAG,
+                    "Client can only request one call at a time " + callback.asBinder().hashCode());
             throw new IllegalArgumentException(
                     "Callback is already associated with an existing operation: "
-                            + callback.hashCode());
+                            + callback.asBinder().hashCode());
         }
 
         try {
-            Log.i(TAG, "Fetching key " + keyId + " for client " + callback.hashCode());
+            Log.i(TAG, "Fetching key " + keyId + " for client " + callback.asBinder().hashCode());
             mRegistration.getKeyAsync(keyId, cancellationSignal, mExecutor,
                     new GetKeyReceiver(callback));
         } catch (Exception e) {
-            Log.e(TAG, "getKeyAsync threw an exception for client " + callback.hashCode(), e);
-            mGetKeyOperations.remove(callback);
+            Log.e(TAG,
+                    "getKeyAsync threw an exception for client " + callback.asBinder().hashCode(),
+                    e);
+            mGetKeyOperations.remove(callback.asBinder());
             wrapCallback(() -> callback.onError(IGetKeyCallback.ErrorCode.ERROR_UNKNOWN,
                     e.getMessage()));
         }
@@ -129,23 +135,23 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
 
     @Override
     public void cancelGetKey(IGetKeyCallback callback) {
-        CancellationSignal cancellationSignal = mGetKeyOperations.remove(callback);
+        CancellationSignal cancellationSignal = mGetKeyOperations.remove(callback.asBinder());
         if (cancellationSignal == null) {
             throw new IllegalArgumentException(
-                    "Invalid client in cancelGetKey: " + callback.hashCode());
+                    "Invalid client in cancelGetKey: " + callback.asBinder().hashCode());
         }
 
-        Log.i(TAG, "Requesting cancellation for client " + callback.hashCode());
+        Log.i(TAG, "Requesting cancellation for client " + callback.asBinder().hashCode());
         cancellationSignal.cancel();
     }
 
     @Override
     public void storeUpgradedKeyAsync(byte[] oldKeyBlob, byte[] newKeyBlob,
             IStoreUpgradedKeyCallback callback) {
-        if (!mStoreUpgradedKeyOperations.add(callback)) {
+        if (!mStoreUpgradedKeyOperations.add(callback.asBinder())) {
             throw new IllegalArgumentException(
                     "Callback is already associated with an existing operation: "
-                            + callback.hashCode());
+                            + callback.asBinder().hashCode());
         }
 
         try {
@@ -153,20 +159,20 @@ final class RemoteProvisioningRegistration extends IRegistration.Stub {
                     new OutcomeReceiver<>() {
                         @Override
                         public void onResult(Void result) {
-                            mStoreUpgradedKeyOperations.remove(callback);
+                            mStoreUpgradedKeyOperations.remove(callback.asBinder());
                             wrapCallback(callback::onSuccess);
                         }
 
                         @Override
                         public void onError(Exception e) {
-                            mStoreUpgradedKeyOperations.remove(callback);
+                            mStoreUpgradedKeyOperations.remove(callback.asBinder());
                             wrapCallback(() -> callback.onError(e.getMessage()));
                         }
                     });
         } catch (Exception e) {
             Log.e(TAG, "storeUpgradedKeyAsync threw an exception for client "
-                    + callback.hashCode(), e);
-            mStoreUpgradedKeyOperations.remove(callback);
+                    + callback.asBinder().hashCode(), e);
+            mStoreUpgradedKeyOperations.remove(callback.asBinder());
             wrapCallback(() -> callback.onError(e.getMessage()));
         }
     }

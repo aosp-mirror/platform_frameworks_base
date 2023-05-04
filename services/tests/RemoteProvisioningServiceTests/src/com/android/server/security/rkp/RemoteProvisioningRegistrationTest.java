@@ -23,8 +23,10 @@ import static org.mockito.AdditionalAnswers.answerVoid;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.contains;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -32,6 +34,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.OperationCanceledException;
 import android.os.OutcomeReceiver;
@@ -101,8 +104,10 @@ public class RemoteProvisioningRegistrationTest {
                 .when(mRegistrationProxy).getKeyAsync(eq(42), any(), any(), any());
 
         IGetKeyCallback callback = mock(IGetKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
         mRegistration.getKey(42, callback);
         verify(callback).onSuccess(matches(expectedKey));
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
@@ -114,8 +119,10 @@ public class RemoteProvisioningRegistrationTest {
                         executor.execute(() -> receiver.onError(expectedException))))
                 .when(mRegistrationProxy).getKeyAsync(eq(0), any(), any(), any());
         IGetKeyCallback callback = mock(IGetKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
         mRegistration.getKey(0, callback);
         verify(callback).onError(eq(IGetKeyCallback.ErrorCode.ERROR_UNKNOWN), eq("oops!"));
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
@@ -140,18 +147,28 @@ public class RemoteProvisioningRegistrationTest {
                             executor.execute(() -> receiver.onError(expectedException))))
                     .when(mRegistrationProxy).getKeyAsync(eq(0), any(), any(), any());
             IGetKeyCallback callback = mock(IGetKeyCallback.class);
+            doReturn(new Binder()).when(callback).asBinder();
             mRegistration.getKey(0, callback);
             verify(callback).onError(eq(error), contains(errorField.getName()));
+            verify(callback, atLeastOnce()).asBinder();
             verifyNoMoreInteractions(callback);
         }
     }
 
     @Test
     public void getKeyCancelDuringProxyOperation() throws Exception {
+        final Binder theBinder = new Binder();
         IGetKeyCallback callback = mock(IGetKeyCallback.class);
+        doReturn(theBinder).when(callback).asBinder();
         doAnswer(
                 answerGetKeyAsync((keyId, cancelSignal, executor, receiver) -> {
-                    mRegistration.cancelGetKey(callback);
+                    // Use a different callback object to ensure that the callback equivalence
+                    // relies on the actual IBinder object.
+                    IGetKeyCallback differentCallback = mock(IGetKeyCallback.class);
+                    doReturn(theBinder).when(differentCallback).asBinder();
+                    mRegistration.cancelGetKey(differentCallback);
+                    verify(differentCallback, atLeastOnce()).asBinder();
+                    verifyNoMoreInteractions(differentCallback);
                     assertThat(cancelSignal.isCanceled()).isTrue();
                     executor.execute(() -> receiver.onError(new OperationCanceledException()));
                 }))
@@ -159,18 +176,21 @@ public class RemoteProvisioningRegistrationTest {
 
         mRegistration.getKey(Integer.MAX_VALUE, callback);
         verify(callback).onCancel();
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
     @Test
     public void cancelGetKeyWithInvalidCallback() throws Exception {
         IGetKeyCallback callback = mock(IGetKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
         assertThrows(IllegalArgumentException.class, () -> mRegistration.cancelGetKey(callback));
     }
 
     @Test
     public void getKeyRejectsDuplicateCallback() throws Exception {
         IGetKeyCallback callback = mock(IGetKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
         doAnswer(
                 answerGetKeyAsync((keyId, cancelSignal, executor, receiver) -> {
                     assertThrows(IllegalArgumentException.class, () ->
@@ -181,12 +201,14 @@ public class RemoteProvisioningRegistrationTest {
 
         mRegistration.getKey(0, callback);
         verify(callback, times(1)).onSuccess(any());
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
     @Test
     public void getKeyCancelAfterCompleteFails() throws Exception {
         IGetKeyCallback callback = mock(IGetKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
         doAnswer(
                 answerGetKeyAsync((keyId, cancelSignal, executor, receiver) ->
                         executor.execute(() ->
@@ -197,6 +219,7 @@ public class RemoteProvisioningRegistrationTest {
         mRegistration.getKey(Integer.MIN_VALUE, callback);
         verify(callback).onSuccess(any());
         assertThrows(IllegalArgumentException.class, () -> mRegistration.cancelGetKey(callback));
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
@@ -208,10 +231,12 @@ public class RemoteProvisioningRegistrationTest {
                 .getKeyAsync(anyInt(), any(), any(), any());
 
         IGetKeyCallback callback = mock(IGetKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
         mRegistration.getKey(0, callback);
         verify(callback).onError(eq(IGetKeyCallback.ErrorCode.ERROR_UNKNOWN),
                 eq(expectedException.getMessage()));
         assertThrows(IllegalArgumentException.class, () -> mRegistration.cancelGetKey(callback));
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
@@ -224,8 +249,10 @@ public class RemoteProvisioningRegistrationTest {
                 .storeUpgradedKeyAsync(any(), any(), any(), any());
 
         IStoreUpgradedKeyCallback callback = mock(IStoreUpgradedKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
         mRegistration.storeUpgradedKeyAsync(new byte[0], new byte[0], callback);
         verify(callback).onSuccess();
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
@@ -239,8 +266,10 @@ public class RemoteProvisioningRegistrationTest {
                 .storeUpgradedKeyAsync(any(), any(), any(), any());
 
         IStoreUpgradedKeyCallback callback = mock(IStoreUpgradedKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
         mRegistration.storeUpgradedKeyAsync(new byte[0], new byte[0], callback);
         verify(callback).onError(errorString);
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
@@ -252,14 +281,17 @@ public class RemoteProvisioningRegistrationTest {
                 .storeUpgradedKeyAsync(any(), any(), any(), any());
 
         IStoreUpgradedKeyCallback callback = mock(IStoreUpgradedKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
         mRegistration.storeUpgradedKeyAsync(new byte[0], new byte[0], callback);
         verify(callback).onError(errorString);
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
     @Test
     public void storeUpgradedKeyDuplicateCallback() throws Exception {
         IStoreUpgradedKeyCallback callback = mock(IStoreUpgradedKeyCallback.class);
+        doReturn(new Binder()).when(callback).asBinder();
 
         doAnswer(
                 answerStoreUpgradedKeyAsync((oldBlob, newBlob, executor, receiver) -> {
@@ -273,6 +305,7 @@ public class RemoteProvisioningRegistrationTest {
 
         mRegistration.storeUpgradedKeyAsync(new byte[0], new byte[0], callback);
         verify(callback).onSuccess();
+        verify(callback, atLeastOnce()).asBinder();
         verifyNoMoreInteractions(callback);
     }
 
