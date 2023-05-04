@@ -1095,7 +1095,8 @@ public final class AutofillManager {
         // or if other functions need to call it.
         if (view.getAutofillType() == View.AUTOFILL_TYPE_NONE) return false;
 
-        if (isActivityDeniedForAutofill()) {
+        // denylist only applies to not important views
+        if (!view.isImportantForAutofill() && isActivityDeniedForAutofill()) {
             Log.d(TAG, "view is not autofillable - activity denied for autofill");
             return false;
         }
