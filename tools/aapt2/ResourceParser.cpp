@@ -800,7 +800,7 @@ std::unique_ptr<Item> ResourceParser::ParseXml(const FlattenedXmlSubTree& xmlsub
 
   // Process the raw value.
   std::unique_ptr<Item> processed_item = ResourceUtils::TryParseItemForAttribute(
-      xmlsub_tree.raw_value, type_mask, on_create_reference);
+      &diag, xmlsub_tree.raw_value, type_mask, on_create_reference);
   if (processed_item) {
     // Fix up the reference.
     if (auto ref = ValueCast<Reference>(processed_item.get())) {

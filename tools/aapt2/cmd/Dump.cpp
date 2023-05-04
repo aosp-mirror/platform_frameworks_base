@@ -112,6 +112,7 @@ class DumpContext : public IAaptContext {
 
   void SetVerbose(bool val) {
     verbose_ = val;
+    diagnostics_.SetVerbose(val);
   }
 
   int GetMinSdkVersion() override {

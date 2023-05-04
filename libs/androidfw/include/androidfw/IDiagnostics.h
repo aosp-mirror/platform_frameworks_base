@@ -86,6 +86,17 @@ struct IDiagnostics {
     DiagMessageActual actual = message.Build();
     Log(Level::Note, actual);
   }
+
+  virtual void SetVerbose(bool val) {
+    verbose_ = val;
+  }
+
+  virtual bool IsVerbose() {
+    return verbose_;
+  }
+
+  private:
+    bool verbose_ = false;
 };
 
 class SourcePathDiagnostics : public IDiagnostics {
@@ -103,6 +114,14 @@ class SourcePathDiagnostics : public IDiagnostics {
 
   bool HadError() {
     return error;
+  }
+
+  void SetVerbose(bool val) override {
+    diag_->SetVerbose(val);
+  }
+
+  bool IsVerbose() override {
+    return diag_->IsVerbose();
   }
 
  private:

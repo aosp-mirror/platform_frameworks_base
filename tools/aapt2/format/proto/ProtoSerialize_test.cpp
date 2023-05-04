@@ -250,6 +250,7 @@ TEST(ProtoSerializeTest, SerializeSinglePackage) {
 }
 
 TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   xml::Element element;
   element.line_number = 22;
   element.column_number = 23;
@@ -269,8 +270,8 @@ TEST(ProtoSerializeTest, SerializeAndDeserializeXml) {
   attr.namespace_uri = xml::kSchemaAndroid;
   attr.value = "23dp";
   attr.compiled_attribute = xml::AaptAttribute(Attribute{}, ResourceId(0x01010000));
-  attr.compiled_value =
-      ResourceUtils::TryParseItemForAttribute(attr.value, android::ResTable_map::TYPE_DIMENSION);
+  attr.compiled_value = ResourceUtils::TryParseItemForAttribute(
+      context->GetDiagnostics(), attr.value, android::ResTable_map::TYPE_DIMENSION);
   attr.compiled_value->SetSource(android::Source().WithLine(25));
   element.attributes.push_back(std::move(attr));
 
