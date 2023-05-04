@@ -1645,13 +1645,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new SecurityException("link() can only be run by the system");
         }
 
+        final File target = new File(path);
+        final File source = new File(stageDir, target.getName());
+        var sourcePath = source.getAbsolutePath();
         try {
-            final File target = new File(path);
-            final File source = new File(stageDir, target.getName());
             try {
-                Os.link(path, source.getAbsolutePath());
+                Os.link(path, sourcePath);
                 // Grant READ access for APK to be read successfully
-                Os.chmod(source.getAbsolutePath(), 0644);
+                Os.chmod(sourcePath, 0644);
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
             }
@@ -1659,6 +1660,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IOException("Can't relabel file: " + source);
             }
         } catch (IOException e) {
+            try {
+                Os.unlink(sourcePath);
+            } catch (Exception ignored) {
+                Slog.d(TAG, "Failed to unlink session file: " + sourcePath);
+            }
+
             throw ExceptionUtils.wrap(e);
         }
     }
