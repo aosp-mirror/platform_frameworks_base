@@ -38,8 +38,15 @@ public final class InputFeatureFlagProvider {
     private static final boolean KEYBOARD_BACKLIGHT_ANIMATION_ENABLED =
             InputProperties.enable_keyboard_backlight_animation().orElse(false);
 
+    // To disable Custom keyboard backlight levels support via IDC files run:
+    // adb shell setprop persist.input.keyboard_backlight_custom_levels.enabled false (requires
+    // restart)
+    private static final boolean KEYBOARD_BACKLIGHT_CUSTOM_LEVELS_ENABLED =
+            InputProperties.enable_keyboard_backlight_custom_levels().orElse(true);
+
     private static Optional<Boolean> sKeyboardBacklightControlOverride = Optional.empty();
     private static Optional<Boolean> sKeyboardBacklightAnimationOverride = Optional.empty();
+    private static Optional<Boolean> sKeyboardBacklightCustomLevelsOverride = Optional.empty();
 
     public static boolean isKeyboardBacklightControlEnabled() {
         return sKeyboardBacklightControlOverride.orElse(KEYBOARD_BACKLIGHT_CONTROL_ENABLED);
@@ -47,6 +54,11 @@ public final class InputFeatureFlagProvider {
 
     public static boolean isKeyboardBacklightAnimationEnabled() {
         return sKeyboardBacklightAnimationOverride.orElse(KEYBOARD_BACKLIGHT_ANIMATION_ENABLED);
+    }
+
+    public static boolean isKeyboardBacklightCustomLevelsEnabled() {
+        return sKeyboardBacklightCustomLevelsOverride.orElse(
+                KEYBOARD_BACKLIGHT_CUSTOM_LEVELS_ENABLED);
     }
 
     public static void setKeyboardBacklightControlEnabled(boolean enabled) {
@@ -57,11 +69,16 @@ public final class InputFeatureFlagProvider {
         sKeyboardBacklightAnimationOverride = Optional.of(enabled);
     }
 
+    public static void setKeyboardBacklightCustomLevelsEnabled(boolean enabled) {
+        sKeyboardBacklightCustomLevelsOverride = Optional.of(enabled);
+    }
+
     /**
      * Clears all input feature flag overrides.
      */
     public static void clearOverrides() {
         sKeyboardBacklightControlOverride = Optional.empty();
         sKeyboardBacklightAnimationOverride = Optional.empty();
+        sKeyboardBacklightCustomLevelsOverride = Optional.empty();
     }
 }
