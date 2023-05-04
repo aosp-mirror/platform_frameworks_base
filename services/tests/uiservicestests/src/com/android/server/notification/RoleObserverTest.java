@@ -55,6 +55,7 @@ import android.telecom.TelecomManager;
 import android.telephony.TelephonyManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -103,6 +104,7 @@ public class RoleObserverTest extends UiServiceTestCase {
     private RoleManager mRoleManager;
     @Mock
     private Looper mMainLooper;
+    private TestableLooper mTestableLooper;
     NotificationRecordLoggerFake mNotificationRecordLogger = new NotificationRecordLoggerFake();
     private InstanceIdSequence mNotificationInstanceIdSequence = new InstanceIdSequenceFake(
             1 << 30);
@@ -144,9 +146,10 @@ public class RoleObserverTest extends UiServiceTestCase {
         mService = new TestableNotificationManagerService(mContext, mNotificationRecordLogger,
                 mNotificationInstanceIdSequence);
         mRoleObserver = mService.new RoleObserver(mContext, mRoleManager, mPm, mMainLooper);
+        mTestableLooper = TestableLooper.get(this);
 
         try {
-            mService.init(mService.new WorkerHandler(mock(Looper.class)),
+            mService.init(mService.new WorkerHandler(mTestableLooper.getLooper()),
                     mock(RankingHandler.class),
                     mock(IPackageManager.class), mock(PackageManager.class),
                     mock(LightsManager.class),
