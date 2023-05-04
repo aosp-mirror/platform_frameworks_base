@@ -273,7 +273,7 @@ public class SplitTransitionTests extends ShellTestCase {
         // simulate the start of recents transition
         mMainStage.onTaskVanished(mMainChild);
         mSideStage.onTaskVanished(mSideChild);
-        mStageCoordinator.onRecentsInSplitAnimationStart(mock(SurfaceControl.Transaction.class));
+        mStageCoordinator.onRecentsInSplitAnimationStart(mock(TransitionInfo.class));
         assertTrue(mStageCoordinator.isSplitScreenVisible());
 
         // Make sure it cleans-up if recents doesn't restore
@@ -307,7 +307,7 @@ public class SplitTransitionTests extends ShellTestCase {
         // simulate the start of recents transition
         mMainStage.onTaskVanished(mMainChild);
         mSideStage.onTaskVanished(mSideChild);
-        mStageCoordinator.onRecentsInSplitAnimationStart(mock(SurfaceControl.Transaction.class));
+        mStageCoordinator.onRecentsInSplitAnimationStart(mock(TransitionInfo.class));
         assertTrue(mStageCoordinator.isSplitScreenVisible());
 
         // Make sure we remain in split after recents restores.
