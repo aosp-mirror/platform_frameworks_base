@@ -154,16 +154,24 @@ public abstract class PackageManagerInternal {
 
 
     /**
+     * Variant of {@link #isSameApp(String, long, int, int)} with no flags.
+     * @see #isSameApp(String, long, int, int)
+     */
+    public abstract boolean isSameApp(String packageName, int callingUid, int userId);
+
+    /**
      * Gets whether a given package name belongs to the calling uid. If the calling uid is an
      * {@link Process#isSdkSandboxUid(int) sdk sandbox uid}, checks whether the package name is
      * equal to {@link PackageManager#getSdkSandboxPackageName()}.
      *
      * @param packageName The package name to check.
+     * @param flags The PackageInfoFlagsBits flags to use during uid lookup.
      * @param callingUid The calling uid.
      * @param userId The user under which to check.
      * @return True if the package name belongs to the calling uid.
      */
-    public abstract boolean isSameApp(String packageName, int callingUid, int userId);
+    public abstract boolean isSameApp(String packageName,
+            @PackageManager.PackageInfoFlagsBits long flags, int callingUid, int userId);
 
     /**
      * Retrieve all of the information we know about a particular package/application.
