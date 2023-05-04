@@ -231,6 +231,16 @@ public class WallpaperManager {
     public static final String COMMAND_WAKING_UP = "android.wallpaper.wakingup";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported by System UI when the device keyguard
+     * starts going away.
+     * This command is triggered by {@link android.app.IActivityTaskManager#keyguardGoingAway(int)}.
+     *
+     * @hide
+     */
+    public static final String COMMAND_KEYGUARD_GOING_AWAY =
+            "android.wallpaper.keyguardgoingaway";
+
+    /**
      * Command for {@link #sendWallpaperCommand}: reported by System UI when the device is going to
      * sleep. The x and y arguments are a location (possibly very roughly) corresponding to the
      * action that caused the device to go to sleep. For example, if the power button was pressed,
