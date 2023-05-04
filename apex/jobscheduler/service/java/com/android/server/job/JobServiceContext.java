@@ -350,6 +350,7 @@ public final class JobServiceContext implements ServiceConnection {
                     job.shouldTreatAsUserInitiatedJob(), triggeredUris, triggeredAuthorities,
                     passedNetwork);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
+            mLastExecutionDurationStampTimeElapsed = mExecutionStartTimeElapsed;
             mMinExecutionGuaranteeMillis = mService.getMinJobExecutionGuaranteeMs(job);
             mMaxExecutionTimeMillis =
                     Math.max(mService.getMaxJobExecutionTimeMs(job), mMinExecutionGuaranteeMillis);
