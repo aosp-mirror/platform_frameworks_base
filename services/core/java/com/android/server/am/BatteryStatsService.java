@@ -399,6 +399,20 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mCpuWakeupStats = new CpuWakeupStats(context, R.xml.irq_device_map, mHandler);
     }
 
+    /**
+     * Creates an instance of BatteryStatsService and restores data from stored state.
+     */
+    public static BatteryStatsService create(Context context, File systemDir, Handler handler,
+            BatteryStatsImpl.BatteryCallback callback) {
+        BatteryStatsService service = new BatteryStatsService(context, systemDir, handler);
+        service.mStats.setCallback(callback);
+        synchronized (service.mStats) {
+            service.mStats.readLocked();
+        }
+        service.scheduleWriteToDisk();
+        return service;
+    }
+
     public void publish() {
         LocalServices.addService(BatteryStatsInternal.class, new LocalService());
         ServiceManager.addService(BatteryStats.SERVICE_NAME, asBinder());
