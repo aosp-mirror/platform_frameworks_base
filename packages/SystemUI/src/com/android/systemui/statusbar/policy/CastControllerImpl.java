@@ -217,6 +217,12 @@ public class CastControllerImpl implements CastController {
         }
     }
 
+    @Override
+    public boolean hasConnectedCastDevice() {
+        return getCastDevices().stream().anyMatch(
+                castDevice -> castDevice.state == CastDevice.STATE_CONNECTED);
+    }
+
     private void setProjection(MediaProjectionInfo projection, boolean started) {
         boolean changed = false;
         final MediaProjectionInfo oldProjection = mProjection;
