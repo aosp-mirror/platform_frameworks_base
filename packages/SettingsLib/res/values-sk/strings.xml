@@ -305,7 +305,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Keď je tento režim aktivovaný, adresa MAC tohto zariadenia sa môže pri každom pripojení k sieti s aktivovanou randomizáciou adries MAC zmeniť."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Merané"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez merania dát"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Vyrovnávacia pamäť nástroja denníkov"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Vyrovnávacia pamäť zapisovača do denníkov"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Veľkosť vyrovnávacej pamäte nástroja denníkov"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Vymazať trvalé úložisko zapisovača do denníka?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Keď prestaneme monitorovať pomocou trvalého zapisovača do denníka, musíme vymazať jeho dáta, ktoré sa nachádzajú vo vašom zariadení."</string>
@@ -327,7 +327,7 @@
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Tieto nastavenia sú určené len pre vývojárov. Môžu spôsobiť poruchu alebo nesprávne fungovanie zariadenia a nainštalovaných aplikácií."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Overovať aplikácie z USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kontrolovať škodlivosť aplikácií nainštalovaných pomocou nástroja ADB alebo ADT"</string>
-    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Zariadenia Bluetooth sa budú zobrazovať bez názvov (iba adresy MAC)"</string>
+    <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Zobraziť zariadenia Bluetooth zobrazovať bez názvov (iba adresy MAC)"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Zakázať funkciu absolútnej hlasitosti rozhrania Bluetooth pri problémoch s hlasitosťou vo vzdialených zariadeniach (napr. príliš vysoká hlasitosť alebo absencia ovládacích prvkov)"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Povoliť skupinu funkcií Bluetooth Gabeldorche"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Povoľuje funkciu Zlepšené možnosti pripojenia."</string>
@@ -363,16 +363,16 @@
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Ladiť prekresľovanie grafickým procesorom"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Zakázať hardvérové prekrytia"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Vždy skladať obrazovku grafickým procesorom"</string>
-    <string name="simulate_color_space" msgid="1206503300335835151">"Simulácia far. priestoru"</string>
+    <string name="simulate_color_space" msgid="1206503300335835151">"Simulácia farebného priestoru"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"Trasovanie OpenGL"</string>
-    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Vyp. smer. zvuku do USB"</string>
+    <string name="usb_audio_disable_routing" msgid="3367656923544254975">"Vypnúť smerovanie zvuku do USB"</string>
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"Vypnúť automatické smerovanie do audio periférií USB"</string>
     <string name="debug_layout" msgid="1659216803043339741">"Zobrazovať ohraničenia"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"Zobraziť vo výstrižku ohraničenie, okraje a pod."</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Rozloženie sprava doľava"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"Vynútiť rozloženie sprava doľava"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"Vynútiť pre všetky jazyky rozloženie obrazovky sprava doľava"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"Priehľadný navigačný panel"</string>
-    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Nastaviť farbu pozadia navigačné panela predvolene priehľadnú"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Nastaviť farbu pozadia navigačného panela predvolene priehľadnú"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Povoliť rozmazanie na úrovni okna"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Vynútiť 4x MSAA"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"Povoliť 4x MSAA v aplikáciách OpenGL ES 2.0"</string>
@@ -380,7 +380,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"Vykresľovanie HWUI profilu"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Povoliť vrstvy ladenia grafického procesora"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Povoliť načítanie vrstiev ladenia grafického procesora na ladenie aplikácií"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivovať podr. zapis. dodáv. do denníka"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Aktivovať podrobný zápis dodávateľov do denníka"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Zahŕňať do hlásení chýb ďalšie denníky dodávateľa pre konkrétne zariadenie, ktoré môžu obsahovať osobné údaje, zvýšiť spotrebu batérie alebo zabrať viac ukladacieho priestoru"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Mierka animácie okna"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Mierka animácie premeny"</string>
@@ -392,7 +392,7 @@
     <string name="app_process_limit_title" msgid="8361367869453043007">"Limit procesov na pozadí"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Zobrazovať nereagovania aplikácií na pozadí"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Zobrazovať dialógové okno „Aplikácia nereaguje“ pre aplikácie na pozadí"</string>
-    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť hlásenia kanála upozornení"</string>
+    <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť varovania kanála upozornení"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Zobrazovať na obrazovke varovné hlásenie, keď aplikácia zverejní upozornenie bez platného kanála"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožniť zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
@@ -677,7 +677,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"Vysielanie aplikácie <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Zmena výstupu"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"Prediktívne animácie gesta Späť"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Povoľte animácie v systéme pre prediktívne gesto Späť"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Povoliť animácie v systéme pre prediktívne gesto Späť"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Toto nastavenie povoľuje animácie v systéme na účely prediktívnej animácie gest. Vyžaduje nastavenie povolenia enableOnBackInvokedCallback na pravdu v súbore manifestu konkrétnej aplikácie."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1737722959616802157">"Posuňte doľava"</item>

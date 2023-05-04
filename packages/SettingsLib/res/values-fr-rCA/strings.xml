@@ -393,7 +393,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"Afficher ANR arrière-plan"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Afficher le message « L\'application ne répond plus » pour les applications en arrière-plan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Affich. avertiss. canal notification"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afficher avertiss. à l\'écran quand une app présente une notific. sans canal valide"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afficher avertiss. à l\'écran quand une appli présente une notif. sans canal valide"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forcer l\'autor. d\'applis sur stockage externe"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Rend possible l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forcer les activités à être redimensionnables"</string>
