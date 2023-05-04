@@ -5624,7 +5624,12 @@ public class ComputerEngine implements Computer {
             return sus.getPackages();
         } else if (settingBase instanceof PackageSetting) {
             final PackageSetting ps = (PackageSetting) settingBase;
-            return List.of(ps.getPkg());
+            final AndroidPackage pkg = ps.getPkg();
+            if (pkg != null) {
+                return Collections.singletonList(pkg);
+            } else {
+                return Collections.emptyList();
+            }
         } else {
             return Collections.emptyList();
         }
