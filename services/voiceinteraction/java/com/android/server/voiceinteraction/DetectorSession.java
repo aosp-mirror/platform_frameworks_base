@@ -47,7 +47,6 @@ import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPH
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__DETECT_UNEXPECTED_CALLBACK;
 import static com.android.internal.util.FrameworkStatsLog.HOTWORD_DETECTOR_KEYPHRASE_TRIGGERED__RESULT__REJECT_UNEXPECTED_CALLBACK;
 import static com.android.server.voiceinteraction.HotwordDetectionConnection.ENFORCE_HOTWORD_PHRASE_ID;
-import static com.android.server.voiceinteraction.SoundTriggerSessionPermissionsDecorator.enforcePermissionForPreflight;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -743,7 +742,14 @@ abstract class DetectorSession {
     void enforcePermissionsForDataDelivery() {
         Binder.withCleanCallingIdentity(() -> {
             synchronized (mLock) {
-                enforcePermissionForPreflight(mContext, mVoiceInteractorIdentity, RECORD_AUDIO);
+                int result = PermissionChecker.checkPermissionForPreflight(
+                        mContext, RECORD_AUDIO, /* pid */ -1, mVoiceInteractorIdentity.uid,
+                        mVoiceInteractorIdentity.packageName);
+                if (result != PermissionChecker.PERMISSION_GRANTED) {
+                    throw new SecurityException(
+                        "Failed to obtain permission RECORD_AUDIO for identity "
+                        + mVoiceInteractorIdentity);
+                }
                 int hotwordOp = AppOpsManager.strOpToOp(AppOpsManager.OPSTR_RECORD_AUDIO_HOTWORD);
                 mAppOpsManager.noteOpNoThrow(hotwordOp,
                         mVoiceInteractorIdentity.uid, mVoiceInteractorIdentity.packageName,
@@ -770,7 +776,7 @@ abstract class DetectorSession {
             throw new SecurityException(
                     TextUtils.formatSimple("Failed to obtain permission %s for identity %s",
                             permission,
-                            SoundTriggerSessionPermissionsDecorator.toString(identity)));
+                            identity));
         }
     }
 
