@@ -43,10 +43,10 @@
     <string name="consent_yes" msgid="8344487259618762872">"Permet"</string>
     <string name="consent_no" msgid="2640796915611404382">"No permetis"</string>
     <string name="consent_back" msgid="2560683030046918882">"Enrere"</string>
-    <string name="permission_expanded" msgid="5234121789170200621">"Desplegat"</string>
-    <string name="permission_expand" msgid="1464954219517793480">"Desplega"</string>
-    <string name="permission_collapsed" msgid="3193316780088731226">"Replegat"</string>
-    <string name="permission_collapse" msgid="6555844383912351944">"Replega"</string>
+    <!-- no translation found for permission_expand (893185038020887411) -->
+    <skip />
+    <!-- no translation found for permission_collapse (3320833884220844084) -->
+    <skip />
     <string name="permission_sync_confirmation_title" msgid="4409622174437248702">"Vols concedir a les aplicacions del dispositiu &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME">%1$s</xliff:g>&lt;/strong&gt; els mateixos permisos que tenen a &lt;strong&gt;<xliff:g id="PRIMARY_DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="permission_sync_summary" msgid="765497944331294275">"Això pot incloure l\'accés al &lt;strong&gt;micròfon&lt;/strong&gt;, a la &lt;strong&gt;càmera&lt;/strong&gt; i a la &lt;strong&gt;ubicació&lt;/strong&gt;, així com altres permisos sensibles a &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_0">%1$s</xliff:g>&lt;/strong&gt;. &lt;br/&gt;&lt;br/&gt;Pots canviar aquestes permisos en qualsevol moment a Configuració, a &lt;strong&gt;<xliff:g id="COMPANION_DEVICE_NAME_1">%1$s</xliff:g>&lt;/strong&gt;."</string>
     <string name="vendor_header_button_description" msgid="7994879208461111473">"Més informació"</string>
