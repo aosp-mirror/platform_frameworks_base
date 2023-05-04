@@ -2789,6 +2789,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
+     * Returns true if there is a static wallpaper on the specified screen. With which=FLAG_LOCK,
+     * always return false if the lockscreen doesn't run its own wallpaper engine.
+     */
+    @Override
+    public boolean isStaticWallpaper(int which) {
+        synchronized (mLock) {
+            WallpaperData wallpaperData = (which == FLAG_LOCK ? mLockWallpaperMap : mWallpaperMap)
+                    .get(mCurrentUserId);
+            if (wallpaperData == null) return false;
+            return mImageWallpaper.equals(wallpaperData.wallpaperComponent);
+        }
+    }
+
+    /**
      * Sets wallpaper dim amount for the calling UID. This applies to all destinations (home, lock)
      * with an active wallpaper engine.
      *
