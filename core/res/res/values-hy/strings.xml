@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android համակարգ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Բացել անձնական պրոֆիլը"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Բացել աշխատանքային պրոֆիլը"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Անցնել անձնական <xliff:g id="APP_NAME">%1$s</xliff:g> պրոֆիլին"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Անցնել աշխատանքային <xliff:g id="APP_NAME">%1$s</xliff:g> պրոֆիլին"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Կոնտակտներ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"օգտագործել ձեր կոնտակտները"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղորոշում"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Թույլ է տալիս հավելվածին կառավարել թրթռոցը:"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Հավելվածին թույլ է տալիս օգտագործել սարքի թրթռալու ռեժիմը։"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ուղղակիորեն զանգել հեռախոսահամարներին"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Թույլ է տալիս հավելվածին զանգել հեռախոսահամարների՝ առանց ձեր միջամտության։ Սա կարող է հանգեցնել անկանխատեսելի գանձումների կամ զանգերի: Նկատի ունեցեք, որ սա թույլ չի տալիս հավելվածին զանգել արտակարգ իրավիճակների համարներին: Վնասակար հավելվածները կարող են գումար կորզել՝ կատարելով զանգեր առանց ձեր հաստատման կամ հավաքել համարներ, որոնց արդյունքում ստանում եք մուտքային զանգեր՝ այլ համարի ավտոմատ փոխանցելու համար։"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"օգտվել IMS զանգերի ծառայությունից"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Թույլ է տալիս հավելվածին IMS ծառայության միջոցով կատարել զանգեր՝ առանց ձեր միջամտության:"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"կարդալ հեռախոսի կարգավիճակը և ինքնությունը"</string>
@@ -634,7 +635,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Շատ լուսավոր է"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Հայտնաբերվել է սնուցման կոճակի սեղմում"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Փորձեք փոխել մատի դիրքը"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ամեն անգամ թեթևակի փոխեք մատի դիրքը"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ամեն անգամ թեթևա­­կի փոխեք մատի դիրքը"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Մատնահետքը չի ճանաչվել"</string>
@@ -685,7 +686,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Տեղափոխեք հեռախոսը ձախ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Տեղափոխեք հեռախոսը աջ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Նայեք ուղիղ էկրանին։"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մակարդակում։"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մա­­կարդակում։"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Նորից փորձեք։"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Դեմքը չի հաջողվում ճանաչել։ Նորից փորձեք։"</string>
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Չհաջողվեց ստեղծել ձեր դեմքի մոդելը։ Նորից փորձեք։"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Հանեք ակնոցը։ Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի։"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Դեմքի մի մասը ծածկված է։ Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի։"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Դեմքի մի մասը ծածկված է։ Ձեր դեմքը պետք է ամբող­ջովին տեսանելի լինի։"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Չհաջողվեց հաստատել դեմքը։ Սարքն անհասանելի է:"</string>
@@ -710,8 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Դեմքի ճանաչումը չեղարկվել է։"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Դեմքով ապակողմումը չեղարկվել է օգտատիրոջ կողմից"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Չափից շատ փորձեր եք կատարել: Փորձեք ավելի ուշ:"</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Չափազանց շատ փորձեր են արվել։ Դեմքով ապակողպումն անհասանելի է։"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Չափազանց շատ փորձեր են արվել։ Օգտագործեք էկրանի կողպումը։"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Չհաջողվեց հաստատել դեմքը։ Նորից փորձեք։"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Դուք չեք կարգավորել դեմքով ապակողպումը։"</string>
@@ -1729,7 +1729,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Մի գործառույթից մյուսին անցնելու համար երեք մատը սահեցրեք վերև և պահեք։"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Խոշորացում"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Անցում հետևյալ պրոֆիլին՝ <xliff:g id="NAME">%1$s</xliff:g>..."</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Անցում <xliff:g id="NAME">%1$s</xliff:g> պրոֆիլին..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Ելք <xliff:g id="NAME">%1$s</xliff:g>-ից…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Սեփականատեր"</string>
     <string name="guest_name" msgid="8502103277839834324">"Հյուր"</string>
@@ -2160,16 +2160,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Այս բովանդակությունը հնարավոր չէ բացել աշխատանքային հավելվածներով"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Այս բովանդակությունը հնարավոր չէ ուղարկել անձնական հավելվածներով"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Այս բովանդակությունը հնարավոր չէ բացել անձնական հավելվածներով"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Աշխատանքային հավելվածները դադարեցված են"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Վերսկսել"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Աշխատանքային հավելվածներ չկան"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Անձնական հավելվածներ չկան"</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Անձնական <xliff:g id="APP">%s</xliff:g> պրոֆիլի բացում"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Աշխատանքային <xliff:g id="APP">%s</xliff:g> պրոֆիլի բացում"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Օգտագործել անձնական դիտարկիչը"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Օգտագործել աշխատանքային դիտարկիչը"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM Network քարտի ապակողպման PIN"</string>
@@ -2323,7 +2319,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Խոսափողն արգելափակված է"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Կրկնակի էկրան"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Կրկնակի էկրանը միացված է"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը երկու էկրաններն էլ օգտագործում է բովանդակություն ցուցադրելու համար"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն օգտագործում է երկու էկրանները"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Սարքը գերտաքացել է"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Կրկնակի էկրանն անհասանելի է, քանի որ ձեր հեռախոսը գերտաքանում է"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen-ը հասանելի չէ"</string>

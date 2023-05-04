@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android 系統"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"切換至個人設定檔"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"切換至工作設定檔"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"轉去個人應用程式「<xliff:g id="APP_NAME">%1$s</xliff:g>」"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"轉去工作應用程式「<xliff:g id="APP_NAME">%1$s</xliff:g>」"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"通訊錄"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"存取你的通訊錄"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"位置"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"允許應用程式控制震動。"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"允許應用程式存取震動狀態。"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"直接撥打電話號碼"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"允許應用程式未經您操作自行撥打電話號碼，但這可能會產生非預期的費用或通話。請注意，此權限並不允許應用程式撥打緊急電話號碼。惡意應用程式可能利用此功能擅自撥打電話或撥打流動網絡供應商代碼，導致來電自動轉駁至其他號碼，產生不必要的額外費用。"</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"使用 IMS 通話服務"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"允許應用程式自行使用 IMS 服務撥打電話。"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"讀取手機狀態和識別碼"</string>
@@ -710,7 +711,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"面孔操作已取消。"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"使用者已取消「面孔解鎖」"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"嘗試次數過多，請稍後再試。"</string>
-    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"嘗試次數過多，人臉解鎖功能無法使用。"</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"嘗試次數過多，無法使用面孔解鎖。"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"嘗試次數過多，請改為解除螢幕鎖定來驗證身分。"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"無法驗證面孔。請再試一次。"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"你尚未設定「面孔解鎖」"</string>
@@ -2159,14 +2160,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"無法使用工作應用程式開啟此內容"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"無法使用個人應用程式分享此內容"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"無法使用個人應用程式開啟此內容"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"已暫停工作應用程式"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暫停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"沒有適用的工作應用程式"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"沒有適用的個人應用程式"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"開啟個人用「<xliff:g id="APP">%s</xliff:g>」"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"開啟工作用「<xliff:g id="APP">%s</xliff:g>」"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"開啟個人用 <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"開啟工作用 <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用個人瀏覽器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作瀏覽器"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 網絡解鎖 PIN"</string>
