@@ -16,6 +16,8 @@
 
 package com.android.server.devicepolicy;
 
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
@@ -46,6 +48,7 @@ import android.util.Slog;
 import android.view.IWindowManager;
 
 import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
@@ -274,5 +277,29 @@ final class PolicyEnforcerCallbacks {
                 Slogf.w(LOG_TAG, "Unable to notify WindowManager.", e);
             }
         });
+    }
+
+    static boolean setPersonalAppsSuspended(
+            @Nullable Boolean suspended, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        Binder.withCleanCallingIdentity(() -> {
+            if (suspended != null && suspended) {
+                suspendPersonalAppsInPackageManager(context, userId);
+            } else {
+                LocalServices.getService(PackageManagerInternal.class)
+                        .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, userId);
+            }
+        });
+        return true;
+    }
+
+    private static void suspendPersonalAppsInPackageManager(Context context, int userId) {
+        final String[] appsToSuspend = PersonalAppsSuspensionHelper.forUser(context, userId)
+                .getPersonalAppsForSuspension();
+        final String[] failedApps = LocalServices.getService(PackageManagerInternal.class)
+                .setPackagesSuspendedByAdmin(userId, appsToSuspend, true);
+        if (!ArrayUtils.isEmpty(failedApps)) {
+            Slogf.wtf(LOG_TAG, "Failed to suspend apps: " + String.join(",", failedApps));
+        }
     }
 }

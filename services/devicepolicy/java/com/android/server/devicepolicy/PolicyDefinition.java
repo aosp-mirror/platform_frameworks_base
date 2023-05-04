@@ -323,6 +323,14 @@ final class PolicyDefinition<V> {
             PolicyEnforcerCallbacks::setScreenCaptureDisabled,
             new BooleanPolicySerializer());
 
+    static PolicyDefinition<Boolean> PERSONAL_APPS_SUSPENDED = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY),
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            PolicyEnforcerCallbacks::setPersonalAppsSuspended,
+            new BooleanPolicySerializer());
+
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
@@ -352,6 +360,8 @@ final class PolicyDefinition<V> {
                 PERMITTED_INPUT_METHODS);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY,
                 SCREEN_CAPTURE_DISABLED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY,
+                PERSONAL_APPS_SUSPENDED);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
