@@ -17,7 +17,6 @@ package com.android.systemui.qs.tiles
 
 import android.content.Intent
 import android.os.Handler
-import android.os.HandlerExecutor
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
@@ -40,8 +39,10 @@ import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SystemSettings
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 
 class FontScalingTile
@@ -50,7 +51,7 @@ constructor(
     host: QSHost,
     uiEventLogger: QsEventLogger,
     @Background backgroundLooper: Looper,
-    @Main mainHandler: Handler,
+    @Main private val mainHandler: Handler,
     falsingManager: FalsingManager,
     metricsLogger: MetricsLogger,
     statusBarStateController: StatusBarStateController,
@@ -59,7 +60,9 @@ constructor(
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val systemSettings: SystemSettings,
     private val secureSettings: SecureSettings,
-    private val featureFlags: FeatureFlags
+    private val systemClock: SystemClock,
+    private val featureFlags: FeatureFlags,
+    @Background private val backgroundDelayableExecutor: DelayableExecutor
 ) :
     QSTileImpl<QSTile.State?>(
         host,
@@ -89,7 +92,9 @@ constructor(
                     mContext,
                     systemSettings,
                     secureSettings,
-                    HandlerExecutor(mHandler)
+                    systemClock,
+                    mainHandler,
+                    backgroundDelayableExecutor
                 )
             if (view != null) {
                 dialogLaunchAnimator.showFromView(

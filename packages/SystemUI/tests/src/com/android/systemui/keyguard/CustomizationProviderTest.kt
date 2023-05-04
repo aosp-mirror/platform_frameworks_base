@@ -33,6 +33,7 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
@@ -94,6 +95,8 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
+    private lateinit var dockManager: DockManagerFake
+
     private lateinit var underTest: CustomizationProvider
     private lateinit var testScope: TestScope
 
@@ -103,6 +106,8 @@ class CustomizationProviderTest : SysuiTestCase() {
         whenever(previewRenderer.surfacePackage).thenReturn(previewSurfacePackage)
         whenever(previewRendererFactory.create(any())).thenReturn(previewRenderer)
         whenever(backgroundHandler.looper).thenReturn(TestableLooper.get(this).looper)
+
+        dockManager = DockManagerFake()
 
         underTest = CustomizationProvider()
         val testDispatcher = UnconfinedTestDispatcher()
@@ -188,6 +193,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                 launchAnimator = launchAnimator,
                 logger = logger,
                 devicePolicyManager = devicePolicyManager,
+                dockManager = dockManager,
                 backgroundDispatcher = testDispatcher,
             )
         underTest.previewManager =

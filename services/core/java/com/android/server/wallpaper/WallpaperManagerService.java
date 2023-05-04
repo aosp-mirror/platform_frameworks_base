@@ -1617,6 +1617,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         public void onScreenTurningOn(int displayId) {
             notifyScreenTurningOn(displayId);
         }
+
+        @Override
+        public void onKeyguardGoingAway() {
+            notifyKeyguardGoingAway();
+        }
     }
 
     void initialize() {
@@ -2654,6 +2659,45 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    /**
+     * Propagate a keyguard going away event to the wallpaper engine.
+     */
+    private void notifyKeyguardGoingAway() {
+        synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    data.connection.forEachDisplayConnector(displayConnector -> {
+                        if (displayConnector.mEngine != null) {
+                            try {
+                                displayConnector.mEngine.dispatchWallpaperCommand(
+                                        WallpaperManager.COMMAND_KEYGUARD_GOING_AWAY,
+                                        -1, -1, -1, new Bundle());
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to notify that the keyguard is going away", e);
+                            }
+                        }
+                    });
+                }
+                return;
+            }
+
+            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            if (data != null && data.connection != null) {
+                data.connection.forEachDisplayConnector(displayConnector -> {
+                    if (displayConnector.mEngine != null) {
+                        try {
+                            displayConnector.mEngine.dispatchWallpaperCommand(
+                                    WallpaperManager.COMMAND_KEYGUARD_GOING_AWAY,
+                                    -1, -1, -1, new Bundle());
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        }
+    }
+
     @Override
     public boolean setLockWallpaperCallback(IWallpaperManagerCallback cb) {
         checkPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW);
@@ -2745,8 +2789,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
-     * Sets wallpaper dim amount for the calling UID. This only applies to FLAG_SYSTEM wallpaper as
-     * the lock screen does not have a wallpaper component, so we use mWallpaperMap.
+     * Sets wallpaper dim amount for the calling UID. This applies to all destinations (home, lock)
+     * with an active wallpaper engine.
      *
      * @param dimAmount Dim amount which would be blended with the system default dimming.
      */
@@ -2756,8 +2800,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
-     * Sets wallpaper dim amount for a given UID. This only applies to FLAG_SYSTEM wallpaper as the
-     * lock screen does not have a wallpaper component, so we use mWallpaperMap.
+     * Sets wallpaper dim amount for the calling UID. This applies to all destinations (home, lock)
+     * with an active wallpaper engine.
      *
      * @param uid Caller UID that wants to set the wallpaper dim amount
      * @param dimAmount Dim amount where 0f reverts any dimming applied by the caller (fully bright)
@@ -2786,26 +2830,55 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     lockWallpaper.mWallpaperDimAmount = maxDimAmount;
                 }
 
-                if (wallpaper.connection != null) {
-                    wallpaper.connection.forEachDisplayConnector(connector -> {
-                        if (connector.mEngine != null) {
-                            try {
-                                connector.mEngine.applyDimming(maxDimAmount);
-                            } catch (RemoteException e) {
-                                Slog.w(TAG,
-                                        "Can't apply dimming on wallpaper display connector", e);
-                            }
+                if (mIsLockscreenLiveWallpaperEnabled) {
+                    boolean changed = false;
+                    for (WallpaperData wp : getActiveWallpapers()) {
+                        if (wp != null && wp.connection != null) {
+                            wp.connection.forEachDisplayConnector(connector -> {
+                                if (connector.mEngine != null) {
+                                    try {
+                                        connector.mEngine.applyDimming(maxDimAmount);
+                                    } catch (RemoteException e) {
+                                        Slog.w(TAG,
+                                                "Can't apply dimming on wallpaper display "
+                                                        + "connector",
+                                                e);
+                                    }
+                                }
+                            });
+                            // Need to extract colors again to re-calculate dark hints after
+                            // applying dimming.
+                            wp.mIsColorExtractedFromDim = true;
+                            notifyWallpaperColorsChanged(wp, wp.mWhich);
+                            changed = true;
                         }
-                    });
-                    // Need to extract colors again to re-calculate dark hints after
-                    // applying dimming.
-                    wallpaper.mIsColorExtractedFromDim = true;
-                    notifyWallpaperColorsChanged(wallpaper, FLAG_SYSTEM);
-                    if (lockWallpaper != null) {
-                        lockWallpaper.mIsColorExtractedFromDim = true;
-                        notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
                     }
-                    saveSettingsLocked(wallpaper.userId);
+                    if (changed) {
+                        saveSettingsLocked(wallpaper.userId);
+                    }
+                } else {
+                    if (wallpaper.connection != null) {
+                        wallpaper.connection.forEachDisplayConnector(connector -> {
+                            if (connector.mEngine != null) {
+                                try {
+                                    connector.mEngine.applyDimming(maxDimAmount);
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG,
+                                            "Can't apply dimming on wallpaper display connector",
+                                            e);
+                                }
+                            }
+                        });
+                        // Need to extract colors again to re-calculate dark hints after
+                        // applying dimming.
+                        wallpaper.mIsColorExtractedFromDim = true;
+                        notifyWallpaperColorsChanged(wallpaper, FLAG_SYSTEM);
+                        if (lockWallpaper != null) {
+                            lockWallpaper.mIsColorExtractedFromDim = true;
+                            notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
+                        }
+                        saveSettingsLocked(wallpaper.userId);
+                    }
                 }
             }
         } finally {

@@ -25,7 +25,9 @@ import android.util.SparseIntArray;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -47,6 +49,13 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
      */
     @GuardedBy("mLock")
     private int mScreenCaptureDisallowedUser = UserHandle.USER_NULL;
+
+    /**
+     * Indicates if screen capture is disallowed on a specific user or all users if
+     * it contains {@link UserHandle#USER_ALL}.
+     */
+    @GuardedBy("mLock")
+    private Set<Integer> mScreenCaptureDisallowedUsers = new HashSet<>();
 
     @GuardedBy("mLock")
     private final SparseIntArray mPasswordQuality = new SparseIntArray();
@@ -70,9 +79,21 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
 
     @Override
     public boolean isScreenCaptureAllowed(int userHandle) {
+        if (DevicePolicyManagerService.isPolicyEngineForFinanceFlagEnabled()) {
+            return isScreenCaptureAllowedInPolicyEngine(userHandle);
+        } else {
+            synchronized (mLock) {
+                return mScreenCaptureDisallowedUser != UserHandle.USER_ALL
+                        && mScreenCaptureDisallowedUser != userHandle;
+            }
+        }
+    }
+
+    private boolean isScreenCaptureAllowedInPolicyEngine(int userHandle) {
+        // This won't work if resolution mechanism is not strictest applies, but it's ok for now.
         synchronized (mLock) {
-            return mScreenCaptureDisallowedUser != UserHandle.USER_ALL
-                    && mScreenCaptureDisallowedUser != userHandle;
+            return !mScreenCaptureDisallowedUsers.contains(userHandle)
+                    && !mScreenCaptureDisallowedUsers.contains(UserHandle.USER_ALL);
         }
     }
 
@@ -85,6 +106,16 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     public void setScreenCaptureDisallowedUser(int userHandle) {
         synchronized (mLock) {
             mScreenCaptureDisallowedUser = userHandle;
+        }
+    }
+
+    public void setScreenCaptureDisallowedUser(int userHandle, boolean disallowed) {
+        synchronized (mLock) {
+            if (disallowed) {
+                mScreenCaptureDisallowedUsers.add(userHandle);
+            } else {
+                mScreenCaptureDisallowedUsers.remove(userHandle);
+            }
         }
     }
 
@@ -151,7 +182,11 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
         synchronized (mLock) {
             pw.println("Device policy cache:");
             pw.increaseIndent();
-            pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
+            if (DevicePolicyManagerService.isPolicyEngineForFinanceFlagEnabled()) {
+                pw.println("Screen capture disallowed users: " + mScreenCaptureDisallowedUsers);
+            } else {
+                pw.println("Screen capture disallowed user: " + mScreenCaptureDisallowedUser);
+            }
             pw.println("Password quality: " + mPasswordQuality);
             pw.println("Permission policy: " + mPermissionPolicy);
             pw.println("Admin can grant sensors permission: " + mCanGrantSensorsPermissions.get());

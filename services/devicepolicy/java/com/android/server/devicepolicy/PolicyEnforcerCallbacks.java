@@ -16,9 +16,12 @@
 
 package com.android.server.devicepolicy;
 
+import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
+import android.app.admin.DevicePolicyCache;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IntentFilterPolicyKey;
 import android.app.admin.LockTaskPolicy;
@@ -35,13 +38,17 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.permission.AdminPermissionControlParams;
 import android.permission.PermissionControllerManager;
 import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.view.IWindowManager;
 
+import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ArrayUtils;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.utils.Slogf;
@@ -243,5 +250,56 @@ final class PolicyEnforcerCallbacks {
             return packageManager.setApplicationHiddenSettingAsUser(
                     packageName, hide != null && hide, userId);
         }));
+    }
+
+    static boolean setScreenCaptureDisabled(
+            @Nullable Boolean disabled, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        Binder.withCleanCallingIdentity(() -> {
+            DevicePolicyCache cache = DevicePolicyCache.getInstance();
+            if (cache instanceof DevicePolicyCacheImpl) {
+                DevicePolicyCacheImpl parsedCache = (DevicePolicyCacheImpl) cache;
+                parsedCache.setScreenCaptureDisallowedUser(
+                        userId, disabled != null && disabled);
+                updateScreenCaptureDisabled();
+            }
+        });
+        return true;
+    }
+
+    private static void updateScreenCaptureDisabled() {
+        BackgroundThread.getHandler().post(() -> {
+            try {
+                IWindowManager.Stub
+                        .asInterface(ServiceManager.getService(Context.WINDOW_SERVICE))
+                        .refreshScreenCaptureDisabled();
+            } catch (RemoteException e) {
+                Slogf.w(LOG_TAG, "Unable to notify WindowManager.", e);
+            }
+        });
+    }
+
+    static boolean setPersonalAppsSuspended(
+            @Nullable Boolean suspended, @NonNull Context context, int userId,
+            @NonNull PolicyKey policyKey) {
+        Binder.withCleanCallingIdentity(() -> {
+            if (suspended != null && suspended) {
+                suspendPersonalAppsInPackageManager(context, userId);
+            } else {
+                LocalServices.getService(PackageManagerInternal.class)
+                        .unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, userId);
+            }
+        });
+        return true;
+    }
+
+    private static void suspendPersonalAppsInPackageManager(Context context, int userId) {
+        final String[] appsToSuspend = PersonalAppsSuspensionHelper.forUser(context, userId)
+                .getPersonalAppsForSuspension();
+        final String[] failedApps = LocalServices.getService(PackageManagerInternal.class)
+                .setPackagesSuspendedByAdmin(userId, appsToSuspend, true);
+        if (!ArrayUtils.isEmpty(failedApps)) {
+            Slogf.wtf(LOG_TAG, "Failed to suspend apps: " + String.join(",", failedApps));
+        }
     }
 }

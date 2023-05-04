@@ -463,6 +463,10 @@ public class VoiceInteractionService extends Service {
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
      *
+     * @throws SecurityException if the caller does not hold required permissions
+     * @throws IllegalStateException if there is no DSP hardware support when a caller has a
+     * target SDK of API level 34 or above.
+     *
      * @deprecated Use {@link #createAlwaysOnHotwordDetector(String, Locale, Executor,
      *             AlwaysOnHotwordDetector.Callback)} instead.
      * @hide
@@ -499,6 +503,10 @@ public class VoiceInteractionService extends Service {
      * @param executor The executor on which to run the callback.
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
+     *
+     * @throws SecurityException if the caller does not hold required permissions
+     * @throws IllegalStateException if there is no DSP hardware support when a caller has a
+     * target SDK of API level 34 or above.
      *
      * @hide
      */
@@ -581,6 +589,11 @@ public class VoiceInteractionService extends Service {
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
      *
+     * @throws SecurityException if the caller does not hold required permissions
+     * @throws IllegalStateException if the hotword detection service is not set, isolated process
+     * is not set, or there is no DSP hardware support when a caller has a target SDK of API
+     * level 34 or above.
+     *
      * @deprecated Use {@link #createAlwaysOnHotwordDetector(String, Locale, PersistableBundle,
      *             SharedMemory, Executor, AlwaysOnHotwordDetector.Callback)} instead.
      * @hide
@@ -630,6 +643,11 @@ public class VoiceInteractionService extends Service {
      * @param executor The executor on which to run the callback.
      * @param callback The callback to notify of detection events.
      * @return An always-on hotword detector for the given keyphrase and locale.
+     *
+     * @throws SecurityException if the caller does not hold required permissions
+     * @throws IllegalStateException if the hotword detection service is not set, isolated process
+     * is not set, or there is no DSP hardware support when a caller has a target SDK of API level
+     * 34 or above.
      *
      * @hide
      */

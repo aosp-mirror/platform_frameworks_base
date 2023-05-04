@@ -3615,6 +3615,19 @@ public class WindowManagerService extends IWindowManager.Stub
         return mUmInternal.isUserVisible(userId);
     }
 
+    @UserIdInt int getUserAssignedToDisplay(int displayId) {
+        return mUmInternal.getUserAssignedToDisplay(displayId);
+    }
+
+    boolean shouldPlacePrimaryHomeOnDisplay(int displayId) {
+        int userId = mUmInternal.getUserAssignedToDisplay(displayId);
+        return shouldPlacePrimaryHomeOnDisplay(displayId, userId);
+    }
+
+    boolean shouldPlacePrimaryHomeOnDisplay(int displayId, int userId) {
+        return mUmInternal.getMainDisplayAssignedToUser(userId) == displayId;
+    }
+
     public void enableScreenAfterBoot() {
         synchronized (mGlobalLock) {
             ProtoLog.i(WM_DEBUG_BOOT, "enableScreenAfterBoot: mDisplayEnabled=%b "

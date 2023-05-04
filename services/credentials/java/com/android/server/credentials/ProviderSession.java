@@ -110,9 +110,7 @@ public abstract class ProviderSession<T, R>
      * and is ready to return the final credential back to the user.
      */
     public static boolean isCompletionStatus(Status status) {
-        return status == Status.CREDENTIAL_RECEIVED_FROM_INTENT
-                || status == Status.CREDENTIAL_RECEIVED_FROM_SELECTION
-                || status == Status.COMPLETE;
+        return status == Status.COMPLETE || status == Status.EMPTY_RESPONSE;
     }
 
     /**
@@ -151,26 +149,17 @@ public abstract class ProviderSession<T, R>
         mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
     }
 
-    /** Provider status at various states of the request session. */
-    // TODO: Review status values, and adjust where needed
+    /** Provider status at various states of the provider session. */
     enum Status {
         NOT_STARTED,
         PENDING,
-        REQUIRES_AUTHENTICATION,
         CREDENTIALS_RECEIVED,
         SERVICE_DEAD,
-        CREDENTIAL_RECEIVED_FROM_INTENT,
-        PENDING_INTENT_INVOKED,
-        CREDENTIAL_RECEIVED_FROM_SELECTION,
-        SAVE_ENTRIES_RECEIVED, CANCELED,
-        NO_CREDENTIALS, EMPTY_RESPONSE, NO_CREDENTIALS_FROM_AUTH_ENTRY, COMPLETE
-    }
-
-    /** Converts exception to a provider session status. */
-    @NonNull
-    public static Status toStatus(int errorCode) {
-        // TODO : Add more mappings as more flows are supported
-        return Status.CANCELED;
+        SAVE_ENTRIES_RECEIVED,
+        CANCELED,
+        EMPTY_RESPONSE,
+        NO_CREDENTIALS_FROM_AUTH_ENTRY,
+        COMPLETE
     }
 
     protected static String generateUniqueId() {

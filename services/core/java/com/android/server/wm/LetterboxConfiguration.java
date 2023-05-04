@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ALLOW_IGNORE_ORIENTATION_REQUEST;
-import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_CAMERA_COMPAT_TREATMENT;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_COMPAT_FAKE_FOCUS;
 import static com.android.server.wm.LetterboxConfigurationDeviceConfig.KEY_ENABLE_DISPLAY_ROTATION_IMMERSIVE_APP_COMPAT_POLICY;
@@ -330,9 +329,6 @@ final class LetterboxConfiguration {
         mDeviceConfig.updateFlagActiveStatus(
                 /* isActive */ mTranslucentLetterboxingEnabled,
                 /* key */ KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY);
-        mDeviceConfig.updateFlagActiveStatus(
-                /* isActive */ true,
-                /* key */ KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP);
 
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
@@ -344,16 +340,6 @@ final class LetterboxConfiguration {
      */
     boolean isIgnoreOrientationRequestAllowed() {
         return mDeviceConfig.getFlag(KEY_ALLOW_IGNORE_ORIENTATION_REQUEST);
-    }
-
-    /**
-     * Whether size compat mode is disabled after an orientation change request comes from the app.
-     * This value is controlled via {@link android.provider.DeviceConfig}.
-     */
-    // TODO(b/270356567) Clean up this flag
-    boolean isSizeCompatModeDisabledAfterOrientationChangeFromApp() {
-        return mDeviceConfig.getFlag(
-                KEY_DISABLE_SIZE_COMPAT_MODE_AFTER_ORIENTATION_CHANGE_FROM_APP);
     }
 
     /**

@@ -608,6 +608,9 @@ object Flags {
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
     // TODO(b/278714186) Tracking Bug
     @JvmField val CLIPBOARD_IMAGE_TIMEOUT = unreleasedFlag(1702, "clipboard_image_timeout")
+    // TODO(b/279405451): Tracking Bug
+    @JvmField
+    val CLIPBOARD_SHARED_TRANSITIONS = unreleasedFlag(1703, "clipboard_shared_transitions")
 
     // 1800 - shade container
     // TODO(b/265944639): Tracking Bug
@@ -712,5 +715,6 @@ object Flags {
 
     // TODO(b/278761837): Tracking Bug
     @JvmField
-    val USE_NEW_ACTIVITY_STARTER = releasedFlag(2801, name = "use_new_activity_starter")
+    val USE_NEW_ACTIVITY_STARTER = unreleasedFlag(2801, name = "use_new_activity_starter",
+            teamfood = true)
 }

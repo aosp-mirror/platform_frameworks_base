@@ -413,6 +413,12 @@ public class SoundTriggerService extends SystemService {
         }
 
         @Override
+        public void setInPhoneCallState(boolean isInPhoneCall) {
+            Slog.i(TAG, "Overriding phone call state: " + isInPhoneCall);
+            mDeviceStateHandler.onPhoneCallStateChanged(isInPhoneCall);
+        }
+
+        @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             // Event loggers
             pw.println("##Service-Wide logs:");

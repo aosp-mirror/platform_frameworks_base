@@ -654,7 +654,7 @@ final class InstallPackageHelper {
             synchronized (mPm.mLock) {
                 final Computer snapshot = mPm.snapshotComputer();
                 pkgSetting = mPm.mSettings.getPackageLPr(packageName);
-                if (pkgSetting == null) {
+                if (pkgSetting == null || pkgSetting.getPkg() == null) {
                     return PackageManager.INSTALL_FAILED_INVALID_URI;
                 }
                 if (!snapshot.canViewInstantApps(callingUid, UserHandle.getUserId(callingUid))) {

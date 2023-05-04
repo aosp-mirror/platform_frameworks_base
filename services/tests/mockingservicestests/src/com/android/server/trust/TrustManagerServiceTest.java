@@ -16,15 +16,26 @@
 
 package com.android.server.trust;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.argThat;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
+
+import android.Manifest;
 import android.annotation.Nullable;
+import android.app.trust.ITrustListener;
+import android.app.trust.ITrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -36,11 +47,16 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.service.trust.TrustAgentService;
 import android.testing.TestableContext;
+import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 
 import androidx.test.core.app.ApplicationProvider;
 
@@ -55,13 +71,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.mockito.Mock;
+import org.mockito.MockitoSession;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 public class TrustManagerServiceTest {
 
@@ -253,6 +272,43 @@ public class TrustManagerServiceTest {
 
         assertThat(mLockPatternUtils.getEnabledTrustAgents(TEST_USER_ID)).containsExactly(
                 systemTrustAgent1);
+    }
+
+    @Test
+    public void reportEnabledTrustAgentsChangedInformsListener() throws RemoteException {
+        final LockPatternUtils utils = mock(LockPatternUtils.class);
+        final TrustManagerService service = new TrustManagerService(mMockContext,
+                new TrustManagerService.Injector(utils, mLooper.getLooper()));
+        final ITrustListener trustListener = mock(ITrustListener.class);
+        final IWindowManager windowManager = mock(IWindowManager.class);
+        final int userId = new Random().nextInt();
+
+        mMockContext.getTestablePermissions().setPermission(Manifest.permission.TRUST_LISTENER,
+                PERMISSION_GRANTED);
+
+        when(utils.getKnownTrustAgents(anyInt())).thenReturn(new ArrayList<>());
+
+        MockitoSession mockSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(ServiceManager.class)
+                .mockStatic(WindowManagerGlobal.class)
+                .startMocking();
+
+        doReturn(windowManager).when(() -> {
+            WindowManagerGlobal.getWindowManagerService();
+        });
+
+        service.onStart();
+        ArgumentCaptor<IBinder> binderArgumentCaptor = ArgumentCaptor.forClass(IBinder.class);
+        verify(() -> ServiceManager.addService(eq(Context.TRUST_SERVICE),
+                binderArgumentCaptor.capture(), anyBoolean(), anyInt()));
+        ITrustManager manager = ITrustManager.Stub.asInterface(binderArgumentCaptor.getValue());
+        manager.registerTrustListener(trustListener);
+        mLooper.dispatchAll();
+        manager.reportEnabledTrustAgentsChanged(userId);
+        mLooper.dispatchAll();
+        verify(trustListener).onEnabledTrustAgentsChanged(eq(userId));
+        mockSession.finishMocking();
     }
 
     private void addTrustAgent(ComponentName agentComponentName, boolean isSystemApp) {
