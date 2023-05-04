@@ -33,10 +33,12 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -61,6 +63,8 @@ class FontScalingTileTest : SysuiTestCase() {
     @Mock private lateinit var uiEventLogger: QsEventLogger
 
     private lateinit var testableLooper: TestableLooper
+    private lateinit var systemClock: FakeSystemClock
+    private lateinit var backgroundDelayableExecutor: FakeExecutor
     private lateinit var fontScalingTile: FontScalingTile
 
     val featureFlags = FakeFeatureFlags()
@@ -70,6 +74,8 @@ class FontScalingTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         `when`(qsHost.getContext()).thenReturn(mContext)
+        systemClock = FakeSystemClock()
+        backgroundDelayableExecutor = FakeExecutor(systemClock)
 
         fontScalingTile =
             FontScalingTile(
@@ -85,7 +91,9 @@ class FontScalingTileTest : SysuiTestCase() {
                 dialogLaunchAnimator,
                 FakeSettings(),
                 FakeSettings(),
-                featureFlags
+                FakeSystemClock(),
+                featureFlags,
+                backgroundDelayableExecutor,
             )
         fontScalingTile.initialize()
         testableLooper.processAllMessages()
