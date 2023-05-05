@@ -31,7 +31,9 @@ object KeyguardBottomAreaVibrations {
         VibrationEffect.startComposition()
             .apply {
                 val vibrationDelayMs =
-                    (ShakeAnimationDuration.inWholeMilliseconds / ShakeAnimationCycles * 2).toInt()
+                    (ShakeAnimationDuration.inWholeMilliseconds / (ShakeAnimationCycles * 2))
+                    .toInt()
+
                 val vibrationCount = ShakeAnimationCycles.toInt() * 2
                 repeat(vibrationCount) {
                     addPrimitive(
