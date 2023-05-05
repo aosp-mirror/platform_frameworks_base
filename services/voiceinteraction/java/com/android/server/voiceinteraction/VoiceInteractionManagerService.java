@@ -408,7 +408,7 @@ public class VoiceInteractionManagerService extends SystemService {
                 try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
                         originatorIdentity)) {
                     session = new SoundTriggerSession(mSoundTriggerInternal.attach(client,
-                                moduleProperties));
+                                moduleProperties, false));
                 }
             }
             return new SoundTriggerSessionBinderProxy(session);
@@ -423,7 +423,7 @@ public class VoiceInteractionManagerService extends SystemService {
             return Binder.withCleanCallingIdentity(() -> {
                 try (SafeCloseable ignored = IdentityContext.create(identity)) {
                     return new SoundTriggerSession(
-                            mSoundTriggerInternal.attach(client, moduleProperties));
+                            mSoundTriggerInternal.attach(client, moduleProperties, false));
                 }
             });
         }

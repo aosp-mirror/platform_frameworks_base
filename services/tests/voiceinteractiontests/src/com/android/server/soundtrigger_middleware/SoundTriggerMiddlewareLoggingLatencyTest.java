@@ -20,6 +20,7 @@ import static com.android.internal.util.LatencyTracker.ACTION_SHOW_VOICE_INTERAC
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 
@@ -101,8 +102,9 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
             throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
                 ISoundTriggerCallback.class);
-        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback);
-        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture());
+        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback, false);
+        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture(),
+                anyBoolean());
 
         triggerPhraseRecognitionEvent(soundTriggerCallbackCaptor.getValue(),
                 RecognitionStatus.SUCCESS, 100 /* keyphraseId */);
@@ -116,8 +118,9 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
     public void testOnPhraseRecognitionRestartsActiveSession() throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
                 ISoundTriggerCallback.class);
-        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback);
-        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture());
+        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback, false);
+        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture(),
+                anyBoolean());
 
         triggerPhraseRecognitionEvent(soundTriggerCallbackCaptor.getValue(),
                 RecognitionStatus.SUCCESS, 100 /* keyphraseId */);
@@ -137,8 +140,9 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
             throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
                 ISoundTriggerCallback.class);
-        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback);
-        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture());
+        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback, false);
+        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture(),
+                anyBoolean());
 
         triggerPhraseRecognitionEvent(soundTriggerCallbackCaptor.getValue(),
                 RecognitionStatus.ABORTED, 100 /* keyphraseId */);
@@ -154,8 +158,9 @@ public class SoundTriggerMiddlewareLoggingLatencyTest {
             throws RemoteException {
         ArgumentCaptor<ISoundTriggerCallback> soundTriggerCallbackCaptor = ArgumentCaptor.forClass(
                 ISoundTriggerCallback.class);
-        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback);
-        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture());
+        mSoundTriggerMiddlewareLogging.attach(0, mISoundTriggerCallback, false);
+        verify(mDelegateMiddleware).attach(anyInt(), soundTriggerCallbackCaptor.capture(),
+                anyBoolean());
 
         triggerPhraseRecognitionEvent(soundTriggerCallbackCaptor.getValue(),
                 RecognitionStatus.SUCCESS);
