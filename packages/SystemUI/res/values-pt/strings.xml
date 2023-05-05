@@ -783,8 +783,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"remover dos favoritos"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover para a posição <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Escolha os controles disponíveis nas Configurações rápidas"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque no controle, mantenha-o pressionado e arraste para reorganizar as posições."</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Escolha quais controles incluir nas Configurações rápidas"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque e pressione, depois arraste para reorganizar as posições."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controles foram removidos"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"As mudanças não foram salvas"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver outros apps"</string>
@@ -890,7 +890,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Ouvindo"</string>
     <string name="game_status" msgid="1340694320630973259">"Jogando"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Amigos"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Vamos conversar hoje à noite."</string>
+    <string name="empty_status" msgid="5938893404951307749">"Nos falamos à noite."</string>
     <string name="status_before_loading" msgid="1500477307859631381">"O conteúdo será exibido em breve"</string>
     <string name="missed_call" msgid="4228016077700161689">"Ligação perdida"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
