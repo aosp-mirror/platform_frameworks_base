@@ -783,6 +783,12 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 currentConnectedMediaDevice);
     }
 
+    boolean isCurrentOutputDeviceHasSessionOngoing() {
+        MediaDevice currentConnectedMediaDevice = getCurrentConnectedMediaDevice();
+        return currentConnectedMediaDevice != null
+                && (currentConnectedMediaDevice.isHostForOngoingSession());
+    }
+
     public boolean isAdvancedLayoutSupported() {
         return mFeatureFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT);
     }
