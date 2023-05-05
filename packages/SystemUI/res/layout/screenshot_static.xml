@@ -16,6 +16,7 @@
   -->
 <com.android.systemui.screenshot.DraggableConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -68,7 +69,7 @@
         android:layout_marginTop="@dimen/overlay_border_width_neg"
         android:layout_marginEnd="@dimen/overlay_border_width_neg"
         android:layout_marginBottom="@dimen/overlay_preview_container_margin"
-        android:elevation="7dp"
+        android:elevation="8dp"
         android:alpha="0"
         android:background="@drawable/overlay_border"
         app:layout_constraintStart_toStartOf="@id/actions_container_background"
@@ -83,7 +84,7 @@
         android:layout_marginStart="@dimen/overlay_border_width"
         android:layout_marginBottom="@dimen/overlay_border_width"
         android:layout_gravity="center"
-        android:elevation="7dp"
+        android:elevation="8dp"
         android:contentDescription="@string/screenshot_edit_description"
         android:scaleType="fitEnd"
         android:background="@drawable/overlay_preview_background"
@@ -93,17 +94,17 @@
         app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"/>
     <ImageView
         android:id="@+id/screenshot_badge"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:visibility="gone"
-        android:elevation="8dp"
+        android:elevation="9dp"
         app:layout_constraintBottom_toBottomOf="@id/screenshot_preview_border"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview_border"/>
     <FrameLayout
         android:id="@+id/screenshot_dismiss_button"
         android:layout_width="@dimen/overlay_dismiss_button_tappable_size"
         android:layout_height="@dimen/overlay_dismiss_button_tappable_size"
-        android:elevation="10dp"
+        android:elevation="11dp"
         android:visibility="gone"
         app:layout_constraintStart_toEndOf="@id/screenshot_preview"
         app:layout_constraintEnd_toEndOf="@id/screenshot_preview"
@@ -115,7 +116,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_margin="@dimen/overlay_dismiss_button_margin"
-            android:src="@drawable/overlay_cancel"/>
+            android:background="@drawable/circular_background"
+            android:backgroundTint="?androidprv:attr/materialColorPrimary"
+            android:tint="?androidprv:attr/materialColorOnPrimary"
+            android:padding="4dp"
+            android:src="@drawable/ic_close"/>
     </FrameLayout>
     <ImageView
         android:id="@+id/screenshot_scrollable_preview"
@@ -150,8 +155,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintWidth_max="450dp"
-        app:layout_constraintHorizontal_bias="0"
-        >
+        app:layout_constraintHorizontal_bias="0">
         <include layout="@layout/screenshot_work_profile_first_run" />
         <include layout="@layout/screenshot_detection_notice" />
     </FrameLayout>
