@@ -43,8 +43,8 @@ public final class DisconnectCause implements Parcelable {
     /** Disconnected because of a local user-initiated action, such as hanging up. */
     public static final int LOCAL = TelecomProtoEnums.LOCAL; // = 2
     /**
-     * Disconnected because of a remote user-initiated action, such as the other party hanging up
-     * up.
+     * Disconnected because the remote party hung up an ongoing call, or because an outgoing call
+     * was not answered by the remote party.
      */
     public static final int REMOTE = TelecomProtoEnums.REMOTE; // = 3
     /** Disconnected because it has been canceled. */
