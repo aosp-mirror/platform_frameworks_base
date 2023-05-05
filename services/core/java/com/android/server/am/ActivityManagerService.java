@@ -162,6 +162,7 @@ import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.app.ApplicationErrorReport;
 import android.app.ApplicationExitInfo;
 import android.app.ApplicationThreadConstants;
+import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.ContentProviderHolder;
 import android.app.IActivityController;
@@ -364,6 +365,7 @@ import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.NeededUriGrants;
@@ -8329,7 +8331,54 @@ public class ActivityManagerService extends IActivityManager.Stub
             Binder token = new Binder();
             sCallerIdentity.set(new Identity(
                     token, Binder.getCallingPid(), Binder.getCallingUid()));
+            boolean handlingSecurityViolation = false;
             try {
+                // This method is exposed to the VNDK and to avoid changing its
+                // signature we just use the first package in the UID. For shared
+                // UIDs we may blame the wrong app but that is Okay as they are
+                // in the same security/privacy sandbox.
+                final int uid = Binder.getCallingUid();
+                // Here we handle some of the special UIDs (mediaserver, systemserver, etc)
+                // Note: This is moved to AppOpsManager.resolvePackageName in future versions.
+                final String packageName;
+                if (uid == Process.ROOT_UID) {
+                    packageName = "root";
+                } else if (uid == Process.SHELL_UID) {
+                    packageName = "com.android.shell";
+                } else if (uid == Process.MEDIA_UID) {
+                    packageName = "media";
+                } else if (uid == Process.AUDIOSERVER_UID) {
+                    packageName = "audioserver";
+                } else if (uid == Process.CAMERASERVER_UID) {
+                    packageName = "cameraserver";
+                } else if (uid == Process.SYSTEM_UID) {
+                    packageName = "android";
+                } else {
+                    packageName = null;
+                }
+
+                final AndroidPackage androidPackage;
+                if (packageName != null) {
+                    androidPackage = mPackageManagerInt.getPackage(packageName);
+                } else {
+                    androidPackage = mPackageManagerInt.getPackage(uid);
+                }
+                if (androidPackage == null) {
+                    Log.e(TAG, "Cannot find package for uid: " + uid);
+                    handlingSecurityViolation = true;
+                    return null;
+                }
+
+                final ApplicationInfo appInfo = mPackageManagerInt.getApplicationInfo(
+                        androidPackage.getPackageName(), /*flags*/0, Process.SYSTEM_UID,
+                        UserHandle.USER_SYSTEM);
+                if (!appInfo.isVendor() && !appInfo.isSystemApp() && !appInfo.isSystemExt()
+                        && !appInfo.isProduct()) {
+                    Log.e(TAG, "openContentUri may only be used by vendor/system/product.");
+                    handlingSecurityViolation = true;
+                    return null;
+                }
+
                 pfd = cph.provider.openFile(null, null, uri, "r", null, token);
             } catch (FileNotFoundException e) {
                 // do nothing; pfd will be returned null
@@ -8337,7 +8386,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Ensure that whatever happens, we clean up the identity state
                 sCallerIdentity.remove();
                 // Ensure we're done with the provider.
-                removeContentProviderExternalUnchecked(name, null, userId);
+                try {
+                    removeContentProviderExternalUnchecked(name, null, userId);
+                } catch (SecurityException e) {
+                    // A SecurityException may be thrown from computeOomAdjLocked if the calling
+                    // UID is that of a malicious app accessing this hidden API. In that case
+                    // we're already handling that by returning null, so tolerate this.
+                    if (!handlingSecurityViolation) {
+                        throw e;
+                    }
+                }
             }
         } else {
             Slog.d(TAG, "Failed to get provider for authority '" + name + "'");
