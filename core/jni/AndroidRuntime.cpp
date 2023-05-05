@@ -647,9 +647,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char saveResolvedClassesDelayMsOptsBuf[
             sizeof("-Xps-save-resolved-classes-delay-ms:")-1 + PROPERTY_VALUE_MAX];
     char profileMinSavePeriodOptsBuf[sizeof("-Xps-min-save-period-ms:")-1 + PROPERTY_VALUE_MAX];
-    char profileMinFirstSaveOptsBuf[
-            sizeof("-Xps-min-first-save-ms:")-1 + PROPERTY_VALUE_MAX];
-    char madviseRandomOptsBuf[sizeof("-XX:MadviseRandomAccess:")-1 + PROPERTY_VALUE_MAX];
+    char profileMinFirstSaveOptsBuf[sizeof("-Xps-min-first-save-ms:") - 1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeVdex[
             sizeof("-XMadviseWillNeedVdexFileSize:")-1 + PROPERTY_VALUE_MAX];
     char madviseWillNeedFileSizeOdex[
@@ -865,13 +863,8 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
                        jitprithreadweightOptBuf,
                        "-Xjitprithreadweight:");
 
-    parseRuntimeOption("dalvik.vm.jittransitionweight",
-                       jittransitionweightOptBuf,
+    parseRuntimeOption("dalvik.vm.jittransitionweight", jittransitionweightOptBuf,
                        "-Xjittransitionweight:");
-    /*
-     * Madvise related options.
-     */
-    parseRuntimeOption("dalvik.vm.madvise-random", madviseRandomOptsBuf, "-XX:MadviseRandomAccess:");
 
     /*
      * Use default platform configuration as limits for madvising,
