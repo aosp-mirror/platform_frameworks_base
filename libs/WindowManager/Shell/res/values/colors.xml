@@ -67,4 +67,6 @@
     <color name="desktop_mode_caption_menu_text_color">#191C1D</color>
     <color name="desktop_mode_caption_menu_buttons_color_inactive">#191C1D</color>
     <color name="desktop_mode_caption_menu_buttons_color_active">#00677E</color>
+    <color name="desktop_mode_resize_veil_light">#EFF1F2</color>
+    <color name="desktop_mode_resize_veil_dark">#1C1C17</color>
 </resources>
