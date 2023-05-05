@@ -969,6 +969,22 @@
                  android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <!-- region Note Task -->
+        <activity
+            android:name=".notetask.shortcut.CreateNoteTaskShortcutActivity"
+            android:enabled="false"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:resizeableActivity="false"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:label="@string/note_task_button_label"
+            android:icon="@drawable/ic_note_task_shortcut_widget">
+
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
         <service android:name=".notetask.NoteTaskControllerUpdateService" />
 
         <activity
