@@ -264,8 +264,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
          */
         @Override
         public void finish(boolean strongAuth, int targetUserId) {
-            if (mFeatureFlags.isEnabled(Flags.PREVENT_BYPASS_KEYGUARD)
-                    && !mKeyguardStateController.canDismissLockScreen() && !strongAuth) {
+            if (!mKeyguardStateController.canDismissLockScreen() && !strongAuth) {
                 Log.e(TAG,
                         "Tried to dismiss keyguard when lockscreen is not dismissible and user "
                                 + "was not authenticated with a primary security method "
