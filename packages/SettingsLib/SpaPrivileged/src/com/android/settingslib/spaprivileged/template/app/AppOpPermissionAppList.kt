@@ -46,7 +46,7 @@ data class AppOpPermissionRecord(
 ) : AppRecord
 
 abstract class AppOpPermissionListModel(
-    private val context: Context,
+    protected val context: Context,
     private val packageManagers: IPackageManagers = PackageManagers,
 ) : TogglePermissionAppListModel<AppOpPermissionRecord> {
 
