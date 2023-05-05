@@ -84,7 +84,7 @@ public class DebugDrawable extends Drawable {
                 Color.YELLOW, "calculatePanelHeightShade()");
         drawDebugInfo(canvas,
                 (int) mQsController.calculateNotificationsTopPadding(
-                        mNotificationPanelViewController.isExpanding(),
+                        mNotificationPanelViewController.isExpandingOrCollapsing(),
                         mNotificationPanelViewController.getKeyguardNotificationStaticPadding(),
                         mNotificationPanelViewController.getExpandedFraction()),
                 Color.MAGENTA, "calculateNotificationsTopPadding()");

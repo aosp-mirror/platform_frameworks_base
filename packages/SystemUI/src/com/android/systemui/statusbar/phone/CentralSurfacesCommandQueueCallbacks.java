@@ -339,7 +339,7 @@ public class CentralSurfacesCommandQueueCallbacks implements CommandQueue.Callba
                 mHeadsUpManager.unpinAll(true /* userUnpinned */);
                 mMetricsLogger.count("panel_open", 1);
             } else if (!mQsController.getExpanded()
-                    && !mShadeViewController.isExpanding()) {
+                    && !mShadeViewController.isExpandingOrCollapsing()) {
                 mQsController.flingQs(0 /* velocity */,
                         ShadeViewController.FLING_EXPAND);
                 mMetricsLogger.count("panel_open_qs", 1);

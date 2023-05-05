@@ -487,7 +487,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         final boolean hideBouncerOverDream =
                 mDreamOverlayStateController.isOverlayActive()
                         && (mShadeViewController.isExpanded()
-                        || mShadeViewController.isExpanding());
+                        || mShadeViewController.isExpandingOrCollapsing());
 
         final boolean isUserTrackingStarted =
                 event.getFraction() != EXPANSION_HIDDEN && event.getTracking();
