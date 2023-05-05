@@ -22,6 +22,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SharedMemory;
 
+import java.io.IOException;
+
 /**
  * Buffer for advertisement data.
  */
@@ -55,6 +57,16 @@ public final class AdBuffer implements Parcelable {
         this.mLength = length;
         this.mPresentationTimeUs = presentationTimeUs;
         this.mFlags = flags;
+    }
+
+    /** @hide **/
+    public static AdBuffer dupAdBuffer(AdBuffer buffer) throws IOException {
+        if (buffer == null) {
+            return null;
+        }
+        return new AdBuffer(buffer.mId, buffer.mMimeType,
+                SharedMemory.fromFileDescriptor(buffer.mBuffer.getFdDup()), buffer.mOffset,
+                buffer.mLength, buffer.mPresentationTimeUs, buffer.mFlags);
     }
 
     /**
