@@ -59,7 +59,7 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
 
     private static final String TAG = "RemoteCredentialService";
     /** Timeout for a single request. */
-    private static final long TIMEOUT_REQUEST_MILLIS = 5 * DateUtils.SECOND_IN_MILLIS;
+    private static final long TIMEOUT_REQUEST_MILLIS = 3 * DateUtils.SECOND_IN_MILLIS;
     /** Timeout to unbind after the task queue is empty. */
     private static final long TIMEOUT_IDLE_SERVICE_CONNECTION_MILLIS =
             5 * DateUtils.SECOND_IN_MILLIS;
