@@ -50,7 +50,8 @@ public class TransitionTracer {
     private static final int ALWAYS_ON_TRACING_CAPACITY = 15 * 1024; // 15 KB
     private static final int ACTIVE_TRACING_BUFFER_CAPACITY = 5000 * 1024; // 5 MB
     static final String WINSCOPE_EXT = ".winscope";
-    private static final String TRACE_FILE = "/data/misc/wmtrace/transition_trace" + WINSCOPE_EXT;
+    private static final String TRACE_FILE =
+            "/data/misc/wmtrace/wm_transition_trace" + WINSCOPE_EXT;
     private static final long MAGIC_NUMBER_VALUE = ((long) MAGIC_NUMBER_H << 32) | MAGIC_NUMBER_L;
 
     private final TransitionTraceBuffer mTraceBuffer = new TransitionTraceBuffer();
