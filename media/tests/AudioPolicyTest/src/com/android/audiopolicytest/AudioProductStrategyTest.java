@@ -29,10 +29,13 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.media.audiopolicy.AudioVolumeGroup;
+import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.google.common.testing.EqualsTester;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -230,5 +233,27 @@ public class AudioProductStrategyTest {
                 assertEquals(streamTypeFromUsage, AudioSystem.STREAM_MUSIC);
             }
         }
+    }
+
+    @Test
+    public void testEquals() {
+        final EqualsTester equalsTester = new EqualsTester();
+
+        AudioProductStrategy.getAudioProductStrategies().forEach(
+                strategy -> equalsTester.addEqualityGroup(strategy,
+                        writeToAndFromParcel(strategy)));
+
+        equalsTester.testEquals();
+    }
+
+    private static AudioProductStrategy writeToAndFromParcel(
+            AudioProductStrategy audioProductStrategy) {
+        Parcel parcel = Parcel.obtain();
+        audioProductStrategy.writeToParcel(parcel, /*flags=*/0);
+        parcel.setDataPosition(0);
+        AudioProductStrategy unmarshalledAudioProductStrategy =
+                AudioProductStrategy.CREATOR.createFromParcel(parcel);
+        parcel.recycle();
+        return unmarshalledAudioProductStrategy;
     }
 }
