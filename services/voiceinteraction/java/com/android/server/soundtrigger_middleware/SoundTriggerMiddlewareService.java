@@ -105,17 +105,17 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
     public ISoundTriggerModule attachAsOriginator(int handle, Identity identity,
             ISoundTriggerCallback callback) {
         try (SafeCloseable ignored = establishIdentityDirect(Objects.requireNonNull(identity))) {
-            return new ModuleService(mDelegate.attach(handle, callback));
+            return new ModuleService(mDelegate.attach(handle, callback, /* isTrusted= */ false));
         }
     }
 
     @Override
     public ISoundTriggerModule attachAsMiddleman(int handle, Identity middlemanIdentity,
-            Identity originatorIdentity, ISoundTriggerCallback callback) {
+            Identity originatorIdentity, ISoundTriggerCallback callback, boolean isTrusted) {
         try (SafeCloseable ignored = establishIdentityIndirect(
                 Objects.requireNonNull(middlemanIdentity),
                 Objects.requireNonNull(originatorIdentity))) {
-            return new ModuleService(mDelegate.attach(handle, callback));
+            return new ModuleService(mDelegate.attach(handle, callback, isTrusted));
         }
     }
 

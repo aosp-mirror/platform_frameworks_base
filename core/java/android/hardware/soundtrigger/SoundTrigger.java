@@ -2306,7 +2306,7 @@ public class SoundTrigger {
         Looper looper = handler != null ? handler.getLooper() : Looper.getMainLooper();
         try {
             return new SoundTriggerModule(getService(), moduleId, listener, looper,
-                    middlemanIdentity, originatorIdentity);
+                    middlemanIdentity, originatorIdentity, false);
         } catch (Exception e) {
             Log.e(TAG, "", e);
             return null;
