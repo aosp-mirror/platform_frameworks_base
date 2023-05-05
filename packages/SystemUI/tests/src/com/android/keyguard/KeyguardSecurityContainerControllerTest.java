@@ -64,7 +64,6 @@ import com.android.systemui.biometrics.SideFpsUiRequestSource;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
@@ -398,26 +397,6 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void showNextSecurityScreenOrFinish_DeviceNotSecure_prevent_bypass_on() {
-        when(mFeatureFlags.isEnabled(Flags.PREVENT_BYPASS_KEYGUARD)).thenReturn(true);
-        // GIVEN the current security method is SimPin
-        when(mKeyguardUpdateMonitor.getUserHasTrust(anyInt())).thenReturn(false);
-        when(mKeyguardUpdateMonitor.getUserUnlockedWithBiometric(TARGET_USER_ID)).thenReturn(false);
-        mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.SimPin);
-
-        // WHEN a request is made from the SimPin screens to show the next security method
-        when(mKeyguardSecurityModel.getSecurityMode(TARGET_USER_ID)).thenReturn(SecurityMode.None);
-        mKeyguardSecurityContainerController.showNextSecurityScreenOrFinish(
-                /* authenticated= */true,
-                TARGET_USER_ID,
-                /* bypassSecondaryLockScreen= */true,
-                SecurityMode.SimPin);
-
-        // THEN the next security method of None will dismiss keyguard.
-        verify(mViewMediatorCallback).keyguardDone(anyBoolean(), anyInt());
-    }
-
-    @Test
     public void showNextSecurityScreenOrFinish_ignoresCallWhenSecurityMethodHasChanged() {
         //GIVEN current security mode has been set to PIN
         mKeyguardSecurityContainerController.showSecurityScreen(SecurityMode.PIN);
@@ -608,7 +587,6 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
 
     @Test
     public void testSecurityCallbackFinish_cannotDismissLockScreenAndNotStrongAuth() {
-        when(mFeatureFlags.isEnabled(Flags.PREVENT_BYPASS_KEYGUARD)).thenReturn(true);
         when(mKeyguardStateController.canDismissLockScreen()).thenReturn(false);
         mKeyguardSecurityContainerController.finish(false, 0);
         verify(mViewMediatorCallback, never()).keyguardDone(anyBoolean(), anyInt());
