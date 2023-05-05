@@ -941,7 +941,6 @@ class TransitionController {
         }
         mPlayingTransitions.add(transition);
         updateRunningRemoteAnimation(transition, true /* isPlaying */);
-        mTransitionTracer.logState(transition);
         // Sync engine should become idle after this, so the idle listener will check the queue.
     }
 
@@ -1122,7 +1121,6 @@ class TransitionController {
                 mLatestOnTopTasksReported.clear();
             }
         }
-        mTransitionTracer.logState(transition);
         // This is called during Transition.abort whose codepath will eventually check the queue
         // via sync-engine idle.
     }
