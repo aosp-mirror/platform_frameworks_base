@@ -363,7 +363,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                     continue;
                 }
                 startTransaction.reparent(chg.getLeash(), tv.getSurfaceControl());
-                finishTransaction.reparent(chg.getLeash(), tv.getSurfaceControl());
+                finishTransaction.reparent(chg.getLeash(), tv.getSurfaceControl())
+                    .setPosition(chg.getLeash(), 0, 0);
                 changesHandled++;
             }
         }
@@ -377,7 +378,6 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
         // No animation, just show it immediately.
         startTransaction.apply();
-        finishTransaction.apply();
         finishCallback.onTransitionFinished(wct, null /* wctCB */);
         startNextTransition();
         return true;

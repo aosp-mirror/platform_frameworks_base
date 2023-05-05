@@ -453,7 +453,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             return;
         }
 
-        finishTransaction.reparent(mTaskLeash, null).apply();
+        finishTransaction.reparent(mTaskLeash, null);
 
         if (mListener != null) {
             final int taskId = mTaskInfo.taskId;
@@ -490,13 +490,11 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         if (mSurfaceCreated) {
             // Surface is ready, so just reparent the task to this surface control
             startTransaction.reparent(mTaskLeash, mSurfaceControl)
-                    .show(mTaskLeash)
-                    .apply();
+                    .show(mTaskLeash);
             // Also reparent on finishTransaction since the finishTransaction will reparent back
             // to its "original" parent by default.
             finishTransaction.reparent(mTaskLeash, mSurfaceControl)
-                    .setPosition(mTaskLeash, 0, 0)
-                    .apply();
+                    .setPosition(mTaskLeash, 0, 0);
             mTaskViewTransitions.updateBoundsState(this, mTaskViewBase.getCurrentBoundsOnScreen());
             mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
             wct.setBounds(mTaskToken, mTaskViewBase.getCurrentBoundsOnScreen());
