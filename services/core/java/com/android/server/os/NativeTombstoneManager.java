@@ -153,32 +153,31 @@ public final class NativeTombstoneManager {
             return Optional.empty();
         }
 
-        ParcelFileDescriptor pfd;
-        try {
-            pfd = ParcelFileDescriptor.open(path, MODE_READ_WRITE);
+        try (ParcelFileDescriptor pfd = ParcelFileDescriptor.open(path, MODE_READ_WRITE)) {
+            final Optional<TombstoneFile> parsedTombstone = TombstoneFile.parse(pfd);
+            if (!parsedTombstone.isPresent()) {
+                return Optional.empty();
+            }
+
+            if (addToList) {
+                synchronized (mLock) {
+                    TombstoneFile previous = mTombstones.get(number);
+                    if (previous != null) {
+                        previous.dispose();
+                    }
+
+                    mTombstones.put(number, parsedTombstone.get());
+                }
+            }
+
+            return parsedTombstone;
         } catch (FileNotFoundException ex) {
             Slog.w(TAG, "failed to open " + path, ex);
             return Optional.empty();
-        }
-
-        final Optional<TombstoneFile> parsedTombstone = TombstoneFile.parse(pfd);
-        if (!parsedTombstone.isPresent()) {
-            IoUtils.closeQuietly(pfd);
+        } catch (IOException ex) {
+            Slog.e(TAG, "IO exception during write to " + path, ex);
             return Optional.empty();
         }
-
-        if (addToList) {
-            synchronized (mLock) {
-                TombstoneFile previous = mTombstones.get(number);
-                if (previous != null) {
-                    previous.dispose();
-                }
-
-                mTombstones.put(number, parsedTombstone.get());
-            }
-        }
-
-        return parsedTombstone;
     }
 
     /**
