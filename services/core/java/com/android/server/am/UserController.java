@@ -126,6 +126,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.FactoryResetter;
@@ -146,6 +147,7 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -259,6 +261,10 @@ class UserController implements Handler.Callback {
     // once target user goes into the foreground. Use mLock when updating
     @GuardedBy("mLock")
     private volatile int mTargetUserId = UserHandle.USER_NULL;
+    // If a user switch request comes during an ongoing user switch, it is postponed to the end of
+    // the current switch, and this variable holds those user ids. Use mLock when updating
+    @GuardedBy("mLock")
+    private final ArrayDeque<Integer> mPendingTargetUserIds = new ArrayDeque<>();
 
     /**
      * Which users have been started, so are allowed to run code.
@@ -1691,7 +1697,6 @@ class UserController implements Handler.Callback {
                 boolean userSwitchUiEnabled;
                 synchronized (mLock) {
                     mCurrentUserId = userId;
-                    mTargetUserId = UserHandle.USER_NULL; // reset, mCurrentUserId has caught up
                     userSwitchUiEnabled = mUserSwitchUiEnabled;
                 }
                 mInjector.updateUserConfiguration();
@@ -1819,8 +1824,7 @@ class UserController implements Handler.Callback {
         boolean success = startUser(targetUserId, USER_START_MODE_FOREGROUND);
         if (!success) {
             mInjector.getWindowManager().setSwitchingUser(false);
-            mTargetUserId = UserHandle.USER_NULL;
-            dismissUserSwitchDialog(null);
+            dismissUserSwitchDialog(this::endUserSwitch);
         }
     }
 
@@ -1948,6 +1952,12 @@ class UserController implements Handler.Callback {
                         + ": UserController not ready yet");
                 return false;
             }
+            if (mTargetUserId != UserHandle.USER_NULL) {
+                Slogf.w(TAG, "There is already an ongoing user switch to User #" + mTargetUserId
+                        + ". User #" + targetUserId + " will be added to the queue.");
+                mPendingTargetUserIds.offer(targetUserId);
+                return true;
+            }
             mTargetUserId = targetUserId;
             userSwitchUiEnabled = mUserSwitchUiEnabled;
         }
@@ -2014,6 +2024,19 @@ class UserController implements Handler.Callback {
         sendUserSwitchBroadcasts(oldUserId, newUserId);
         t.traceEnd();
         t.traceEnd();
+
+        endUserSwitch();
+    }
+
+    private void endUserSwitch() {
+        final int nextUserId;
+        synchronized (mLock) {
+            nextUserId = ObjectUtils.getOrElse(mPendingTargetUserIds.poll(), UserHandle.USER_NULL);
+            mTargetUserId = UserHandle.USER_NULL;
+        }
+        if (nextUserId != UserHandle.USER_NULL) {
+            switchUser(nextUserId);
+        }
     }
 
     private void dispatchLockedBootComplete(@UserIdInt int userId) {
