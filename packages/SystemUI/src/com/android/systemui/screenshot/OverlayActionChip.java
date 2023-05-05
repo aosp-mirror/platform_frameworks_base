@@ -121,13 +121,15 @@ public class OverlayActionChip extends FrameLayout {
         LinearLayout.LayoutParams textParams =
                 (LinearLayout.LayoutParams) mTextView.getLayoutParams();
         if (hasText) {
-            int paddingHorizontal = mContext.getResources().getDimensionPixelSize(
-                    R.dimen.overlay_action_chip_padding_horizontal);
+            int paddingStart = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.overlay_action_chip_padding_start);
             int spacing = mContext.getResources().getDimensionPixelSize(
                     R.dimen.overlay_action_chip_spacing);
-            iconParams.setMarginStart(paddingHorizontal);
+            int paddingEnd = mContext.getResources().getDimensionPixelSize(
+                    R.dimen.overlay_action_chip_padding_end);
+            iconParams.setMarginStart(paddingStart);
             iconParams.setMarginEnd(spacing);
-            textParams.setMarginEnd(paddingHorizontal);
+            textParams.setMarginEnd(paddingEnd);
         } else {
             int paddingHorizontal = mContext.getResources().getDimensionPixelSize(
                     R.dimen.overlay_action_chip_icon_only_padding_horizontal);
