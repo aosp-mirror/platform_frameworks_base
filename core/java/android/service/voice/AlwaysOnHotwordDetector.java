@@ -30,6 +30,8 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -256,6 +258,16 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             MODEL_PARAM_THRESHOLD_FACTOR,
     })
     public @interface ModelParams {}
+
+    /**
+     * Gates returning {@code IllegalStateException} in {@link #initialize(
+     * PersistableBundle, SharedMemory, SoundTrigger.ModuleProperties)} when no DSP module
+     * is available. If the change is not enabled, the existing behavior of not throwing an
+     * exception and delivering {@link STATE_HARDWARE_UNAVAILABLE} is retained.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long THROW_ON_INITIALIZE_IF_NO_DSP = 269165460L;
 
     /**
      * Controls the sensitivity threshold adjustment factor for a given model.
@@ -870,8 +882,10 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                                 .equals(SoundTrigger.FAKE_HAL_ARCH))
                         .findFirst()
                         .orElse(null);
-                // (@atneya) intentionally let a null moduleProperties through until
-                // all CTS tests are fixed
+                if (CompatChanges.isChangeEnabled(THROW_ON_INITIALIZE_IF_NO_DSP) &&
+                        moduleProperties == null) {
+                    throw new IllegalStateException("No DSP module available to attach to");
+                }
             }
             mSoundTriggerSession =
                     mModelManagementService.createSoundTriggerSessionAsOriginator(
@@ -1753,17 +1767,19 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 }
             }
 
-            ModuleProperties dspModuleProperties;
-            try {
-                dspModuleProperties =
-                        mSoundTriggerSession.getDspModuleProperties();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
+            if (!CompatChanges.isChangeEnabled(THROW_ON_INITIALIZE_IF_NO_DSP)) {
+                ModuleProperties dspModuleProperties;
+                try {
+                    dspModuleProperties =
+                            mSoundTriggerSession.getDspModuleProperties();
+                } catch (RemoteException e) {
+                    throw e.rethrowFromSystemServer();
+                }
 
-            // No DSP available
-            if (dspModuleProperties == null) {
-                return STATE_HARDWARE_UNAVAILABLE;
+                // No DSP available
+                if (dspModuleProperties == null) {
+                    return STATE_HARDWARE_UNAVAILABLE;
+                }
             }
 
             return STATE_NOT_READY;

@@ -310,15 +310,16 @@ public class FakeSoundTriggerHal extends ISoundTriggerHw.Stub {
                         IAcknowledgeEvent callback) {
                 synchronized (FakeSoundTriggerHal.this.mLock) {
                     // oneway, so don't throw on death
-                    if (mIsDead || mIsResourceContended == isResourcesContended) {
+                    if (mIsDead) {
                         return;
                     }
+                    boolean oldIsResourcesContended = mIsResourceContended;
                     mIsResourceContended = isResourcesContended;
                     // Introducing contention is the only injection which can't be
                     // observed by the ST client.
                     mInjectionDispatcher.wrap((ISoundTriggerInjection unused) ->
                             callback.eventReceived());
-                    if (!mIsResourceContended) {
+                    if (!mIsResourceContended && oldIsResourcesContended) {
                         mGlobalCallbackDispatcher.wrap((ISoundTriggerHwGlobalCallback cb) ->
                                     cb.onResourcesAvailable());
                     }
@@ -501,8 +502,10 @@ public class FakeSoundTriggerHal extends ISoundTriggerHw.Stub {
                 Slog.wtf(TAG, "Attempted to stop recognition with invalid handle");
             }
             ModelSession.RecognitionSession recogSession = session.stopRecognitionForModel();
-            mInjectionDispatcher.wrap((ISoundTriggerInjection cb) ->
-                    cb.onRecognitionStopped(recogSession));
+            if (recogSession != null) {
+                mInjectionDispatcher.wrap((ISoundTriggerInjection cb) ->
+                        cb.onRecognitionStopped(recogSession));
+            }
         }
     }
 

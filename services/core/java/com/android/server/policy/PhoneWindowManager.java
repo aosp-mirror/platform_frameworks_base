@@ -216,6 +216,7 @@ import com.android.server.UiThread;
 import com.android.server.display.BrightnessUtils;
 import com.android.server.input.InputManagerInternal;
 import com.android.server.inputmethod.InputMethodManagerInternal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.KeyCombinationManager.TwoKeysCombinationRule;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate;
 import com.android.server.policy.keyguard.KeyguardServiceDelegate.DrawnListener;
@@ -413,6 +414,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     SensorPrivacyManager mSensorPrivacyManager;
     DisplayManager mDisplayManager;
     DisplayManagerInternal mDisplayManagerInternal;
+    UserManagerInternal mUserManagerInternal;
 
     private WallpaperManagerInternal mWallpaperManagerInternal;
 
@@ -2009,6 +2011,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mSensorPrivacyManager = mContext.getSystemService(SensorPrivacyManager.class);
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         mPackageManager = mContext.getPackageManager();
         mHasFeatureWatch = mPackageManager.hasSystemFeature(FEATURE_WATCH);
         mHasFeatureLeanback = mPackageManager.hasSystemFeature(FEATURE_LEANBACK);
@@ -5742,8 +5745,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             Log.d(TAG, "startDockOrHome: startReason= " + startReason);
         }
 
+        int userId = mUserManagerInternal.getUserAssignedToDisplay(displayId);
         // Start home.
-        mActivityTaskManagerInternal.startHomeOnDisplay(mCurrentUserId, startReason,
+        mActivityTaskManagerInternal.startHomeOnDisplay(userId, startReason,
                 displayId, true /* allowInstrumenting */, fromHomeKey);
     }
 

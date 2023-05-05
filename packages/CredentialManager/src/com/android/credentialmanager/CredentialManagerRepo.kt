@@ -168,7 +168,7 @@ class CredentialManagerRepo(
 
     // The dialog is canceled because we launched into settings.
     fun onSettingLaunchCancel() {
-        onCancel(BaseDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION)
+        onCancel(BaseDialogResult.RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS)
     }
 
     fun onParsingFailureCancel() {

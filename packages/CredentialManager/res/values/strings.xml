@@ -124,6 +124,14 @@
   <string name="get_dialog_title_use_password_for">Use your saved password for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
   <!-- This appears as the title of the dialog asking for user confirmation to use the single user credential (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_use_sign_in_for">Use your sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking for user confirmation to unlock / authenticate (e.g. via fingerprint, faceId, passcode etc.) so that we can retrieve their sign-in options. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_unlock_options_for">Unlock sign-in options for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g>?</string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved passkey to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_passkey_for">Choose a saved passkey for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved passwords to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_password_for">Choose a saved password for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+  <!-- This appears as the title of the dialog asking for user to make a choice from multiple previously saved credentials to sign in to the app. [CHAR LIMIT=200] -->
+  <string name="get_dialog_title_choose_saved_sign_in_for">Choose a saved sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
   <!-- This appears as the title of the dialog asking for user to make a choice from various available user credentials (previously saved or to be created) to sign in to the app. [CHAR LIMIT=200] -->
   <string name="get_dialog_title_choose_sign_in_for">Choose a sign-in for <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
   <!-- This appears as the title of the dialog asking for user to make a choice from options of available user information (e.g. driver's license, vaccination status) to pass to the app. [CHAR LIMIT=200] -->

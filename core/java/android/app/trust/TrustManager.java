@@ -43,6 +43,7 @@ public class TrustManager {
     private static final int MSG_TRUST_CHANGED = 1;
     private static final int MSG_TRUST_MANAGED_CHANGED = 2;
     private static final int MSG_TRUST_ERROR = 3;
+    private static final int MSG_ENABLED_TRUST_AGENTS_CHANGED = 4;
 
     private static final String TAG = "TrustManager";
     private static final String DATA_FLAGS = "initiatedByUser";
@@ -187,6 +188,13 @@ public class TrustManager {
                 }
 
                 @Override
+                public void onEnabledTrustAgentsChanged(int userId) {
+                    final Message m = mHandler.obtainMessage(MSG_ENABLED_TRUST_AGENTS_CHANGED,
+                            userId, 0, trustListener);
+                    m.sendToTarget();
+                }
+
+                @Override
                 public void onTrustManagedChanged(boolean managed, int userId) {
                     mHandler.obtainMessage(MSG_TRUST_MANAGED_CHANGED, (managed ? 1 : 0), userId,
                             trustListener).sendToTarget();
@@ -283,6 +291,10 @@ public class TrustManager {
                 case MSG_TRUST_ERROR:
                     final CharSequence message = msg.peekData().getCharSequence(DATA_MESSAGE);
                     ((TrustListener) msg.obj).onTrustError(message);
+                    break;
+                case MSG_ENABLED_TRUST_AGENTS_CHANGED:
+                    ((TrustListener) msg.obj).onEnabledTrustAgentsChanged(msg.arg1);
+                    break;
             }
         }
     };
@@ -316,5 +328,10 @@ public class TrustManager {
          * @param message A message that should be displayed on the UI.
          */
         void onTrustError(CharSequence message);
+
+        /**
+         * Reports that the enabled trust agents for the specified user has changed.
+         */
+        void onEnabledTrustAgentsChanged(int userId);
     }
 }

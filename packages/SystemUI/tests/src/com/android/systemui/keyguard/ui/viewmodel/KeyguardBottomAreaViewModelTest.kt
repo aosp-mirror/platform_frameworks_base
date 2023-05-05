@@ -28,6 +28,7 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -108,6 +109,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
     private lateinit var homeControlsQuickAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var quickAccessWalletAffordanceConfig: FakeKeyguardQuickAffordanceConfig
     private lateinit var qrCodeScannerAffordanceConfig: FakeKeyguardQuickAffordanceConfig
+    private lateinit var dockManager: DockManagerFake
 
     @Before
     fun setUp() {
@@ -123,6 +125,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             )
         qrCodeScannerAffordanceConfig =
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
+        dockManager = DockManagerFake()
         registry =
             FakeKeyguardQuickAffordanceRegistry(
                 mapOf(
@@ -235,6 +238,7 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
                         launchAnimator = launchAnimator,
                         logger = logger,
                         devicePolicyManager = devicePolicyManager,
+                        dockManager = dockManager,
                         backgroundDispatcher = testDispatcher,
                     ),
                 bottomAreaInteractor = KeyguardBottomAreaInteractor(repository = repository),

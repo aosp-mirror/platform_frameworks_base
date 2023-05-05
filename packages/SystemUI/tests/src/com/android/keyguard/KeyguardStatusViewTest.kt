@@ -24,6 +24,8 @@ class KeyguardStatusViewTest : SysuiTestCase() {
         get() = keyguardStatusView.findViewById(R.id.status_view_media_container)
     private val statusViewContainer: ViewGroup
         get() = keyguardStatusView.findViewById(R.id.status_view_container)
+    private val clockView: ViewGroup
+        get() = keyguardStatusView.findViewById(R.id.keyguard_clock_container)
     private val childrenExcludingMedia
         get() = statusViewContainer.children.filter { it != mediaView }
 
@@ -55,5 +57,13 @@ class KeyguardStatusViewTest : SysuiTestCase() {
         statusViewContainer.children.forEach {
             assertThat(it.translationY).isEqualTo(translationY)
         }
+    }
+
+    @Test
+    fun setAlphaExcludeClock() {
+        keyguardStatusView.setAlpha(0.5f, /* excludeClock= */true)
+        assertThat(statusViewContainer.alpha).isNotEqualTo(0.5f)
+        assertThat(mediaView.alpha).isEqualTo(0.5f)
+        assertThat(clockView.alpha).isNotEqualTo(0.5f)
     }
 }

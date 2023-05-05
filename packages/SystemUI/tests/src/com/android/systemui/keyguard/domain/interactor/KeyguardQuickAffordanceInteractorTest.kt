@@ -29,6 +29,8 @@ import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.dock.DockManager
+import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
@@ -61,6 +63,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -93,6 +96,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     private lateinit var quickAccessWallet: FakeKeyguardQuickAffordanceConfig
     private lateinit var qrCodeScanner: FakeKeyguardQuickAffordanceConfig
     private lateinit var featureFlags: FakeFeatureFlags
+    private lateinit var dockManager: DockManagerFake
 
     @Before
     fun setUp() {
@@ -111,6 +115,8 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.QR_CODE_SCANNER)
         val testDispatcher = StandardTestDispatcher()
         testScope = TestScope(testDispatcher)
+
+        dockManager = DockManagerFake()
 
         val localUserSelectionManager =
             KeyguardQuickAffordanceLocalUserSelectionManager(
@@ -192,6 +198,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 launchAnimator = launchAnimator,
                 logger = logger,
                 devicePolicyManager = devicePolicyManager,
+                dockManager = dockManager,
                 backgroundDispatcher = testDispatcher,
             )
     }
@@ -587,6 +594,46 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END to emptyList(),
                     )
                 )
+        }
+
+    @Test
+    fun useLongPress_whenDocked_isFalse() =
+        testScope.runTest {
+            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
+            dockManager.setIsDocked(true)
+
+            val useLongPress by collectLastValue(underTest.useLongPress())
+
+            assertThat(useLongPress).isFalse()
+        }
+
+    @Test
+    fun useLongPress_whenNotDocked_isTrue() =
+        testScope.runTest {
+            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
+            dockManager.setIsDocked(false)
+
+            val useLongPress by collectLastValue(underTest.useLongPress())
+
+            assertThat(useLongPress).isTrue()
+        }
+
+    @Test
+    fun useLongPress_whenNotDocked_isTrue_changedTo_whenDocked_isFalse() =
+        testScope.runTest {
+            featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
+            dockManager.setIsDocked(false)
+            val firstUseLongPress by collectLastValue (underTest.useLongPress())
+            runCurrent()
+
+            assertThat(firstUseLongPress).isTrue()
+
+            dockManager.setIsDocked(true)
+            dockManager.setDockEvent(DockManager.STATE_DOCKED)
+            val secondUseLongPress by collectLastValue(underTest.useLongPress())
+            runCurrent()
+
+            assertThat(secondUseLongPress).isFalse()
         }
 
     @Test

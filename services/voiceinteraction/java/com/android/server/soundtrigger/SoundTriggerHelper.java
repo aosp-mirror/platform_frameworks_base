@@ -322,12 +322,31 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             modelData.setRunInBatterySaverMode(runInBatterySaverMode);
             modelData.setSoundModel(soundModel);
 
-            if (!isRecognitionAllowedByDeviceState(modelData)) {
-                return STATUS_OK;
+            if (isRecognitionAllowedByDeviceState(modelData)) {
+                int startRecoResult = updateRecognitionLocked(modelData,
+                        false /* Don't notify for synchronous calls */);
+                if (startRecoResult == SoundTrigger.STATUS_OK) {
+                    return startRecoResult;
+                } else if (startRecoResult != SoundTrigger.STATUS_BUSY) {
+                    // If we are returning an unexpected error, don't mark the model as requested
+                    modelData.setRequested(false);
+                    return startRecoResult;
+                }
             }
-
-            return updateRecognitionLocked(modelData,
-                    false /* Don't notify for synchronous calls */);
+            // Either recognition isn't allowed by device state, or the module is busy.
+            // Dispatch a pause.
+            try {
+                if (callback != null) {
+                    mEventLogger.enqueue(new SessionEvent(Type.PAUSE, modelData.getModelId()));
+                    callback.onRecognitionPaused();
+                }
+            } catch (RemoteException e) {
+                mEventLogger.enqueue(new SessionEvent(
+                            Type.PAUSE, modelData.getModelId(), "RemoteException")
+                        .printLog(ALOGW, TAG));
+                forceStopAndUnloadModelLocked(modelData, e);
+            }
+            return STATUS_OK;
         }
     }
 

@@ -230,7 +230,10 @@ public class PluginInstance<T extends Plugin> implements PluginLifecycleManager 
 
         private ClassLoader getParentClassLoader(ClassLoader baseClassLoader) {
             return new PluginManagerImpl.ClassLoaderFilter(
-                    baseClassLoader, "com.android.systemui.log", "com.android.systemui.plugin");
+                    baseClassLoader,
+                    "com.android.systemui.common",
+                    "com.android.systemui.log",
+                    "com.android.systemui.plugin");
         }
 
         /** Returns class loader specific for the given plugin. */

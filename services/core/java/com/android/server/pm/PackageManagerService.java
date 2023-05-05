@@ -6843,6 +6843,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public boolean isSameApp(@Nullable String packageName, int callingUid, int userId) {
+            return isSameApp(packageName, /*flags=*/0, callingUid, userId);
+        }
+
+        @Override
+        public boolean isSameApp(@Nullable String packageName,
+                @PackageManager.PackageInfoFlagsBits long flags, int callingUid, int userId) {
             if (packageName == null) {
                 return false;
             }
@@ -6851,7 +6857,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return packageName.equals(mRequiredSdkSandboxPackage);
             }
             Computer snapshot = snapshot();
-            int uid = snapshot.getPackageUid(packageName, 0, userId);
+            int uid = snapshot.getPackageUid(packageName, flags, userId);
             return UserHandle.isSameApp(uid, callingUid);
         }
 

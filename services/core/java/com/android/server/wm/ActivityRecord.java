@@ -7941,9 +7941,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // This is necessary in order to avoid going into size compat mode when the orientation
         // change request comes from the app
-        if (mWmService.mLetterboxConfiguration
-                    .isSizeCompatModeDisabledAfterOrientationChangeFromApp()
-                && getRequestedConfigurationOrientation(false, requestedOrientation)
+        if (getRequestedConfigurationOrientation(false, requestedOrientation)
                     != getRequestedConfigurationOrientation(false /*forDisplay */)) {
             // Do not change the requested configuration now, because this will be done when setting
             // the orientation below with the new mCompatDisplayInsets
