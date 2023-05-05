@@ -44,6 +44,8 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -99,6 +101,7 @@ public final class DeviceConfigService extends Binder {
             PUT,
             DELETE,
             LIST,
+            LIST_NAMESPACES,
             RESET,
             SET_SYNC_DISABLED_FOR_TESTS,
             GET_SYNC_DISABLED_FOR_TESTS,
@@ -131,6 +134,11 @@ public final class DeviceConfigService extends Binder {
                 if (peekNextArg() == null) {
                     isValid = true;
                 }
+            } else if ("list_namespaces".equalsIgnoreCase(cmd)) {
+                verb = CommandVerb.LIST_NAMESPACES;
+                if (peekNextArg() == null) {
+                    isValid = true;
+                }
             } else if ("reset".equalsIgnoreCase(cmd)) {
                 verb = CommandVerb.RESET;
             } else if ("set_sync_disabled_for_tests".equalsIgnoreCase(cmd)) {
@@ -156,6 +164,7 @@ public final class DeviceConfigService extends Binder {
             String key = null;
             String value = null;
             String arg;
+            boolean publicOnly = false;
             while ((arg = getNextArg()) != null) {
                 if (verb == CommandVerb.RESET) {
                     if (resetMode == -1) {
@@ -197,6 +206,11 @@ public final class DeviceConfigService extends Binder {
                         if (peekNextArg() == null) {
                             isValid = true;
                         }
+                    }
+                } else if (verb == CommandVerb.LIST_NAMESPACES) {
+                    if (arg.equals("--public")) {
+                        isValid = true;
+                        publicOnly = true;
                     }
                 } else if (namespace == null) {
                     // GET, PUT, DELETE, LIST 1st arg
@@ -275,6 +289,30 @@ public final class DeviceConfigService extends Binder {
                         }
                     }
                     break;
+                case LIST_NAMESPACES:
+                    List<String> namespaces;
+                    if (publicOnly) {
+                        namespaces = DeviceConfig.getPublicNamespaces();
+                    } else {
+                        Field[] fields = DeviceConfig.class.getDeclaredFields();
+                        namespaces = new ArrayList<>(fields.length);
+                        // TODO(b/265948913): once moved to mainline, it should call a hidden method
+                        // directly
+                        for (Field field : fields) {
+                            int modifiers = field.getModifiers();
+                            try {
+                                if (Modifier.isStatic(modifiers) && Modifier.isFinal(modifiers)
+                                        && field.getType().equals(String.class)
+                                        && field.getName().startsWith("NAMESPACE_")) {
+                                    namespaces.add((String) field.get(null));
+                                }
+                            } catch (IllegalAccessException ignored) { }
+                        }
+                    }
+                    for (int i = 0; i < namespaces.size(); i++) {
+                        pout.println(namespaces.get(i));
+                    }
+                    break;
                 case RESET:
                     DeviceConfig.resetToDefaults(resetMode, namespace);
                     break;
@@ -310,6 +348,8 @@ public final class DeviceConfigService extends Binder {
             pw.println("      {default} to set as the default value.");
             pw.println("  delete NAMESPACE KEY");
             pw.println("      Delete the entry for KEY for the given NAMESPACE.");
+            pw.println("  list_namespaces [--public]");
+            pw.println("      Prints the name of all (or just the public) namespaces.");
             pw.println("  list [NAMESPACE]");
             pw.println("      Print all keys and values defined, optionally for the given "
                     + "NAMESPACE.");
