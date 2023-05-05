@@ -475,7 +475,25 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
-    public void testTranslucentActivitiesDontGoInSizeCompatMode() {
+    public void testNotApplyStrategyToTranslucentActivitiesOverEmbeddedActivities() {
+        mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
+        setUpDisplaySizeWithApp(2000, 1000);
+        mActivity.info.screenOrientation = SCREEN_ORIENTATION_PORTRAIT;
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        // Mock the activity as embedded without additional TaskFragment layer in the task for
+        // simplicity.
+        doReturn(true).when(mActivity).isEmbedded();
+        // Translucent Activity
+        final ActivityRecord translucentActivity = new ActivityBuilder(mAtm).build();
+        doReturn(false).when(translucentActivity).matchParentBounds();
+        doReturn(false).when(translucentActivity).fillsParent();
+        mTask.addChild(translucentActivity);
+        // Check the strategy has not being applied
+        assertFalse(translucentActivity.mLetterboxUiController.hasInheritedLetterboxBehavior());
+    }
+
+    @Test
+    public void testTranslucentActivitiesDontGoInSizeCompactMode() {
         mWm.mLetterboxConfiguration.setTranslucentLetterboxingOverrideEnabled(true);
         setUpDisplaySizeWithApp(2800, 1400);
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
