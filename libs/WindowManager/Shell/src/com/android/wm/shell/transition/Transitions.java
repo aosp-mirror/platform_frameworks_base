@@ -503,7 +503,9 @@ public class Transitions implements RemoteCallable<Transitions>,
      */
     private static void setupAnimHierarchy(@NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
-        boolean isOpening = isOpeningType(info.getType());
+        final int type = info.getType();
+        final boolean isOpening = isOpeningType(type);
+        final boolean isClosing = isClosingType(type);
         for (int i = 0; i < info.getRootCount(); ++i) {
             t.show(info.getRoot(i).getLeash());
         }
@@ -556,7 +558,13 @@ public class Transitions implements RemoteCallable<Transitions>,
                     layer = zSplitLine + numChanges - i;
                 }
             } else { // CHANGE or other
-                layer = zSplitLine + numChanges - i;
+                if (isClosing) {
+                    // Put below CLOSE mode.
+                    layer = zSplitLine - i;
+                } else {
+                    // Put above CLOSE mode.
+                    layer = zSplitLine + numChanges - i;
+                }
             }
             t.setLayer(leash, layer);
         }
