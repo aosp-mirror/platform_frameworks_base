@@ -2719,11 +2719,7 @@ public final class SystemServer implements Dumpable {
 
         // AdServicesManagerService (PP API service)
         t.traceBegin("StartAdServicesManagerService");
-        SystemService adServices = mSystemServiceManager
-                .startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
-        if (adServices instanceof Dumpable) {
-            mDumper.addDumpable((Dumpable) adServices);
-        }
+        mSystemServiceManager.startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
         t.traceEnd();
 
         // OnDevicePersonalizationSystemService
