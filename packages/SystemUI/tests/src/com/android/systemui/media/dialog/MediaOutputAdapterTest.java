@@ -26,6 +26,7 @@ import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECT
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import android.app.WallpaperColors;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -60,6 +62,7 @@ import java.util.stream.Collectors;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class MediaOutputAdapterTest extends SysuiTestCase {
 
     private static final String TEST_DEVICE_NAME_1 = "test_device_name_1";
@@ -613,6 +616,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Test
     public void onItemClick_clickDevice_verifyConnectDevice() {
+        when(mMediaOutputController.isCurrentOutputDeviceHasSessionOngoing()).thenReturn(false);
         assertThat(mMediaDevice2.getState()).isEqualTo(
                 LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
@@ -620,6 +624,21 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         mViewHolder.mContainerLayout.performClick();
 
         verify(mMediaOutputController).connectDevice(mMediaDevice2);
+    }
+
+    @Test
+    public void onItemClick_clickDeviceWithSessionOngoing_verifyShowsDialog() {
+        when(mMediaOutputController.isCurrentOutputDeviceHasSessionOngoing()).thenReturn(true);
+        assertThat(mMediaDevice2.getState()).isEqualTo(
+                LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+        MediaOutputAdapter.MediaDeviceViewHolder spyMediaDeviceViewHolder = spy(mViewHolder);
+
+        mMediaOutputAdapter.onBindViewHolder(spyMediaDeviceViewHolder, 0);
+        mMediaOutputAdapter.onBindViewHolder(spyMediaDeviceViewHolder, 1);
+        spyMediaDeviceViewHolder.mContainerLayout.performClick();
+
+        verify(mMediaOutputController, never()).connectDevice(mMediaDevice2);
+        verify(spyMediaDeviceViewHolder).showCustomEndSessionDialog(mMediaDevice2);
     }
 
     @Test
