@@ -361,6 +361,21 @@ class MobileIconsInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
+    @Test
+    fun failedConnection_carrierMergedDefault_notValidated_failed() =
+        testScope.runTest {
+            var latest: Boolean? = null
+            val job = underTest.isDefaultConnectionFailed.onEach { latest = it }.launchIn(this)
+
+            connectionsRepository.hasCarrierMergedConnection.value = true
+            connectionsRepository.defaultConnectionIsValidated.value = false
+            yield()
+
+            assertThat(latest).isTrue()
+
+            job.cancel()
+        }
+
     /** Regression test for b/275076959. */
     @Test
     fun failedConnection_dataSwitchInSameGroup_notFailed() =
