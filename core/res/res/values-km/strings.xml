@@ -639,8 +639,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ងងឹតជ្រុល។ សូមសាកល្បង​ប្រើ​ពន្លឺភ្លឺជាងនេះ។"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"រំកិល​ទូរសព្ទឱ្យឆ្ងាយ​ជាងមុន។"</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"ផ្លាស់ទី​ទូរសព្ទ​ឱ្យ​ជិត​ជាង​មុន។"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ផ្លាស់ទីទូរសព្ទឱ្យខ្ពស់ជាងមុន។"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ផ្លាស់ទីទូរសព្ទឱ្យទាបជាងមុន។"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"រំកិល​ទូរសព្ទឡើងលើ។"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"រំកិល​ទូរសព្ទចុះក្រោម។"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"ផ្លាស់ទី​ទូរសព្ទទៅខាងឆ្វេង។"</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"ផ្លាស់ទីទូរសព្ទទៅខាងស្ដាំ។"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"សូមមើល​ឱ្យចំ​ឧបករណ៍​របស់អ្នក​ជាងមុន។"</string>
