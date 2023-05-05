@@ -725,18 +725,6 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         @Override
-        public void addOnRuntimePermissionStateChangedListener(
-                OnRuntimePermissionStateChangedListener listener) {
-            mPermissionManagerServiceImpl.addOnRuntimePermissionStateChangedListener(listener);
-        }
-
-        @Override
-        public void removeOnRuntimePermissionStateChangedListener(
-                OnRuntimePermissionStateChangedListener listener) {
-            mPermissionManagerServiceImpl.removeOnRuntimePermissionStateChangedListener(listener);
-        }
-
-        @Override
         public void onSystemReady() {
             mPermissionManagerServiceImpl.onSystemReady();
         }

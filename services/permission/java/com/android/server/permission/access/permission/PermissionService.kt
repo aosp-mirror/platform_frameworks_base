@@ -1636,18 +1636,6 @@ class PermissionService(
         onPermissionsChangeListeners.removeListener(listener)
     }
 
-    override fun addOnRuntimePermissionStateChangedListener(
-        listener: PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener
-    ) {
-        // TODO: Should be removed once we remove PermissionPolicyService.
-    }
-
-    override fun removeOnRuntimePermissionStateChangedListener(
-        listener: PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener
-    ) {
-        // TODO: Should be removed once we remove PermissionPolicyService.
-    }
-
     override fun getSplitPermissions(): List<SplitPermissionInfoParcelable> {
         return PermissionManager.splitPermissionInfoListToParcelableList(
             systemConfig.splitPermissions

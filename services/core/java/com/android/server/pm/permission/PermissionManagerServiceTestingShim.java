@@ -313,20 +313,6 @@ public class PermissionManagerServiceTestingShim implements PermissionManagerSer
     }
 
     @Override
-    public void addOnRuntimePermissionStateChangedListener(@NonNull
-            PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener listener) {
-        mOldImplementation.addOnRuntimePermissionStateChangedListener(listener);
-        mNewImplementation.addOnRuntimePermissionStateChangedListener(listener);
-    }
-
-    @Override
-    public void removeOnRuntimePermissionStateChangedListener(@NonNull
-            PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener listener) {
-        mOldImplementation.removeOnRuntimePermissionStateChangedListener(listener);
-        mNewImplementation.removeOnRuntimePermissionStateChangedListener(listener);
-    }
-
-    @Override
     public Map<String, Set<String>> getAllAppOpPermissionPackages() {
         Map<String, Set<String>> oldVal = mOldImplementation.getAllAppOpPermissionPackages();
         Map<String, Set<String>> newVal = mNewImplementation.getAllAppOpPermissionPackages();

@@ -238,23 +238,6 @@ public class PermissionManagerServiceLoggingDecorator implements PermissionManag
     }
 
     @Override
-    public void addOnRuntimePermissionStateChangedListener(
-            @NonNull PermissionManagerServiceInternal
-                    .OnRuntimePermissionStateChangedListener listener) {
-        Log.i(LOG_TAG, "addOnRuntimePermissionStateChangedListener(listener = " + listener + ")");
-        mService.addOnRuntimePermissionStateChangedListener(listener);
-    }
-
-    @Override
-    public void removeOnRuntimePermissionStateChangedListener(
-            @NonNull PermissionManagerServiceInternal
-                    .OnRuntimePermissionStateChangedListener listener) {
-        Log.i(LOG_TAG, "removeOnRuntimePermissionStateChangedListener(listener = " + listener
-                + ")");
-        mService.removeOnRuntimePermissionStateChangedListener(listener);
-    }
-
-    @Override
     public Map<String, Set<String>> getAllAppOpPermissionPackages() {
         Log.i(LOG_TAG, "getAllAppOpPermissionPackages()");
         return mService.getAllAppOpPermissionPackages();

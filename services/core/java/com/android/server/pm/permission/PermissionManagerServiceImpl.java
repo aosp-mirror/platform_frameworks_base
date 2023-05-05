@@ -125,7 +125,6 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.PermissionThread;
@@ -311,12 +310,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     @GuardedBy("mLock")
     private final SparseBooleanArray mHasNoDelayedPermBackup = new SparseBooleanArray();
 
-    /** Listeners for permission state (granting and flags) changes */
-    @GuardedBy("mLock")
-    private final ArrayList<PermissionManagerServiceInternal
-            .OnRuntimePermissionStateChangedListener>
-            mRuntimePermissionStateChangedListeners = new ArrayList<>();
-
     private final boolean mIsLeanback;
 
     @NonNull
@@ -395,7 +388,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             mPackageManagerInt.writeSettings(true);
         }
         @Override
-        public void onPermissionUpdated(int[] userIds, boolean sync) {
+        public void onPermissionUpdated(int[] userIds, boolean sync, int appId) {
+            for (int i = 0; i < userIds.length; i++) {
+                int uid = UserHandle.getUid(userIds[i], appId);
+                mOnPermissionChangeListeners.onPermissionsChanged(uid);
+            }
             mPackageManagerInt.writePermissionSettings(userIds, !sync);
         }
         @Override
@@ -405,18 +402,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         @Override
         public void onPermissionRemoved() {
             mPackageManagerInt.writeSettings(false);
-        }
-        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
-                int uid) {
-            onPermissionUpdated(updatedUserIds, sync);
-            for (int i = 0; i < updatedUserIds.length; i++) {
-                int userUid = UserHandle.getUid(updatedUserIds[i], UserHandle.getAppId(uid));
-                mOnPermissionChangeListeners.onPermissionsChanged(userUid);
-            }
-        }
-        public void onInstallPermissionUpdatedNotifyListener(int uid) {
-            onInstallPermissionUpdated();
-            mOnPermissionChangeListeners.onPermissionsChanged(uid);
         }
     };
 
@@ -873,17 +858,13 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
             permissionUpdated = uidState.updatePermissionFlags(bp, flagMask, flagValues);
         }
 
-        if (permissionUpdated && isRuntimePermission) {
-            notifyRuntimePermissionStateChanged(packageName, userId);
-        }
         if (permissionUpdated && callback != null) {
             // Install and runtime permissions are stored in different places,
             // so figure out what permission changed and persist the change.
             if (!isRuntimePermission) {
-                int userUid = UserHandle.getUid(userId, pkg.getUid());
-                callback.onInstallPermissionUpdatedNotifyListener(userUid);
+                callback.onInstallPermissionUpdated();
             } else {
-                callback.onPermissionUpdatedNotifyListener(new int[]{userId}, false, pkg.getUid());
+                callback.onPermissionUpdated(new int[]{ userId }, false, pkg.getUid());
             }
         }
     }
@@ -1493,10 +1474,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 callback.onGidsChanged(UserHandle.getAppId(pkg.getUid()), userId);
             }
         }
-
-        if (isRuntimePermission) {
-            notifyRuntimePermissionStateChanged(packageName, userId);
-        }
     }
 
     @Override
@@ -1651,10 +1628,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 mDefaultPermissionCallback.onInstallPermissionRevoked();
             }
         }
-
-        if (isRuntimePermission) {
-            notifyRuntimePermissionStateChanged(packageName, userId);
-        }
     }
 
     private boolean mayManageRolePermission(int uid) {
@@ -1710,8 +1683,9 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                 mDefaultPermissionCallback.onInstallPermissionRevoked();
             }
 
-            public void onPermissionUpdated(int[] updatedUserIds, boolean sync) {
-                for (int userId : updatedUserIds) {
+            public void onPermissionUpdated(int[] userIds, boolean sync, int appId) {
+                mOnPermissionChangeListeners.onPermissionsChanged(appId);
+                for (int userId : userIds) {
                     if (sync) {
                         syncUpdatedUsers.add(userId);
                         asyncUpdatedUsers.remove(userId);
@@ -1730,16 +1704,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
             public void onInstallPermissionUpdated() {
                 mDefaultPermissionCallback.onInstallPermissionUpdated();
-            }
-
-            public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds,
-                    boolean sync, int uid) {
-                onPermissionUpdated(updatedUserIds, sync);
-                mOnPermissionChangeListeners.onPermissionsChanged(uid);
-            }
-
-            public void onInstallPermissionUpdatedNotifyListener(int uid) {
-                mDefaultPermissionCallback.onInstallPermissionUpdatedNotifyListener(uid);
             }
         };
 
@@ -2066,45 +2030,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                         mHasNoDelayedPermBackup.put(userId, true);
                     }
                 });
-    }
-
-    @Override
-    public void addOnRuntimePermissionStateChangedListener(
-            PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener listener) {
-        synchronized (mLock) {
-            mRuntimePermissionStateChangedListeners.add(listener);
-        }
-    }
-
-    @Override
-    public void removeOnRuntimePermissionStateChangedListener(
-            PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener listener) {
-        synchronized (mLock) {
-            mRuntimePermissionStateChangedListeners.remove(listener);
-        }
-    }
-
-    private void notifyRuntimePermissionStateChanged(@NonNull String packageName,
-            @UserIdInt int userId) {
-        FgThread.getHandler().sendMessage(PooledLambda.obtainMessage(
-                PermissionManagerServiceImpl::doNotifyRuntimePermissionStateChanged,
-                PermissionManagerServiceImpl.this, packageName, userId));
-    }
-
-    private void doNotifyRuntimePermissionStateChanged(@NonNull String packageName,
-            @UserIdInt int userId) {
-        final ArrayList<PermissionManagerServiceInternal.OnRuntimePermissionStateChangedListener>
-                listeners;
-        synchronized (mLock) {
-            if (mRuntimePermissionStateChangedListeners.isEmpty()) {
-                return;
-            }
-            listeners = new ArrayList<>(mRuntimePermissionStateChangedListeners);
-        }
-        final int listenerCount = listeners.size();
-        for (int i = 0; i < listenerCount; i++) {
-            listeners.get(i).onRuntimePermissionStateChanged(packageName, userId);
-        }
     }
 
     /**
@@ -3008,11 +2933,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         if (callback != null) {
             callback.onPermissionUpdated(updatedUserIds,
                     (changingPackageName != null && replace && installPermissionsChanged)
-                            || runtimePermissionsRevoked);
-        }
-
-        for (int userId : updatedUserIds) {
-            notifyRuntimePermissionStateChanged(pkg.getPackageName(), userId);
+                            || runtimePermissionsRevoked, pkg.getUid());
         }
     }
 
@@ -3858,7 +3779,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
                     isGranted = uidState.isPermissionGranted(permissionName);
                 }
                 if (!isGranted) {
-                    mDefaultPermissionCallback.onPermissionRevoked(pkg.getUid(), userId, null);
+                    mDefaultPermissionCallback.onPermissionRevoked(
+                            UserHandle.getUid(userId, pkg.getUid()), userId, null);
                     break;
                 }
             }
@@ -5342,25 +5264,14 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
         public void onPermissionGranted(int uid, @UserIdInt int userId) {}
         public void onInstallPermissionGranted() {}
         public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {
-            onPermissionRevoked(uid, userId, reason, false);
-        }
-        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason,
-                boolean overrideKill) {
             onPermissionRevoked(uid, userId, reason, false, null);
         }
         public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason,
                 boolean overrideKill, @Nullable String permissionName) {}
         public void onInstallPermissionRevoked() {}
-        public void onPermissionUpdated(@UserIdInt int[] updatedUserIds, boolean sync) {}
-        public void onPermissionUpdatedNotifyListener(@UserIdInt int[] updatedUserIds, boolean sync,
-                int uid) {
-            onPermissionUpdated(updatedUserIds, sync);
-        }
+        public void onPermissionUpdated(@UserIdInt int[] userIds, boolean sync, int appId) {}
         public void onPermissionRemoved() {}
         public void onInstallPermissionUpdated() {}
-        public void onInstallPermissionUpdatedNotifyListener(int uid) {
-            onInstallPermissionUpdated();
-        }
     }
 
     private static final class OnPermissionChangeListeners extends Handler {
