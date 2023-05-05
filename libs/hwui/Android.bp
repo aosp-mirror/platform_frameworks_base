@@ -129,6 +129,7 @@ cc_defaults {
                 "libandroidfw",
                 "libcrypto",
                 "libsync",
+                "libui",
             ],
             static_libs: [
                 "libEGL_blobCache",
