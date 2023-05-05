@@ -101,6 +101,29 @@ constructor(
     }
 
     /**
+     * Clicks the button to launch the secondary activity in RTL, which should split with the main
+     * activity based on the split pair rule.
+     */
+    fun launchSecondaryActivityRTL(wmHelper: WindowManagerStateHelper) {
+        val launchButton =
+                uiDevice.wait(
+                        Until.findObject(
+                                By.res(getPackage(),
+                                        "launch_secondary_activity_rtl_button")),
+                        FIND_TIMEOUT
+                )
+        require(launchButton != null) {
+            "Can't find launch secondary activity rtl button on screen."
+        }
+        launchButton.click()
+        wmHelper
+                .StateSyncBuilder()
+                .withActivityState(SECONDARY_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .withActivityState(MAIN_ACTIVITY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .waitForAndVerify()
+    }
+
+    /**
      * Clicks the button to launch the placeholder primary activity, which should launch the
      * placeholder secondary activity based on the placeholder rule.
      */
@@ -117,6 +140,29 @@ constructor(
             .withActivityState(PLACEHOLDER_PRIMARY_COMPONENT, PlatformConsts.STATE_RESUMED)
             .withActivityState(PLACEHOLDER_SECONDARY_COMPONENT, PlatformConsts.STATE_RESUMED)
             .waitForAndVerify()
+    }
+
+    /**
+     * Clicks the button to launch the placeholder primary activity in RTL, which should launch the
+     * placeholder secondary activity based on the placeholder rule.
+     */
+    fun launchPlaceholderSplitRTL(wmHelper: WindowManagerStateHelper) {
+        val launchButton =
+                uiDevice.wait(
+                        Until.findObject(
+                                By.res(getPackage(),
+                                        "launch_placeholder_split_rtl_button")),
+                        FIND_TIMEOUT
+                )
+        require(launchButton != null) {
+            "Can't find launch placeholder split button on screen."
+        }
+        launchButton.click()
+        wmHelper
+                .StateSyncBuilder()
+                .withActivityState(PLACEHOLDER_PRIMARY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .withActivityState(PLACEHOLDER_SECONDARY_COMPONENT, PlatformConsts.STATE_RESUMED)
+                .waitForAndVerify()
     }
 
     companion object {
