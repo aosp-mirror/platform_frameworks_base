@@ -314,7 +314,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         mLogger.mCreateWallTimeMs = System.currentTimeMillis();
         mLogger.mCreateTimeNs = SystemClock.elapsedRealtimeNanos();
-        controller.mTransitionTracer.logState(this);
     }
 
     @Nullable
@@ -532,7 +531,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         mLogger.mSyncId = mSyncId;
         mLogger.mCollectTimeNs = SystemClock.elapsedRealtimeNanos();
-        mController.mTransitionTracer.logState(this);
     }
 
     /**
@@ -555,7 +553,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         applyReady();
 
         mLogger.mStartTimeNs = SystemClock.elapsedRealtimeNanos();
-        mController.mTransitionTracer.logState(this);
 
         mController.updateAnimatingState(mTmpTransaction);
         // merge into the next-time the global transaction is applied. This is too-early to set
@@ -1232,7 +1229,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         validateVisibility();
 
         mState = STATE_FINISHED;
-        mController.mTransitionTracer.logState(this);
         // Rotation change may be deferred while there is a display change transition, so check
         // again in case there is a new pending change.
         if (hasParticipatedDisplay && !mController.useShellTransitionsRotation()) {
