@@ -259,7 +259,7 @@ constructor(
      */
     override val isDefaultConnectionFailed: StateFlow<Boolean> =
         combine(
-                mobileConnectionsRepo.mobileIsDefault,
+                mobileIsDefault,
                 mobileConnectionsRepo.defaultConnectionIsValidated,
                 forcingCellularValidation,
             ) { mobileIsDefault, defaultConnectionIsValidated, forcingCellularValidation ->
