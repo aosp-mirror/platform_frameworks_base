@@ -29,7 +29,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.shared.quickaffordance.shared.model.KeyguardQuickAffordancePreviewConstants
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope

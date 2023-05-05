@@ -40,7 +40,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.shared.clocks.ClockRegistry
 import com.android.systemui.shared.clocks.shared.model.ClockPreviewConstants
-import com.android.systemui.shared.quickaffordance.shared.model.KeyguardQuickAffordancePreviewConstants
+import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -68,7 +68,7 @@ constructor(
     private val height: Int = bundle.getInt(KEY_VIEW_HEIGHT)
     private val shouldHighlightSelectedAffordance: Boolean =
         bundle.getBoolean(
-            KeyguardQuickAffordancePreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES,
+            KeyguardPreviewConstants.KEY_HIGHLIGHT_QUICK_AFFORDANCES,
             false,
         )
     private val shouldHideClock: Boolean =
@@ -89,7 +89,7 @@ constructor(
         bottomAreaViewModel.enablePreviewMode(
             initiallySelectedSlotId =
                 bundle.getString(
-                    KeyguardQuickAffordancePreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
+                    KeyguardPreviewConstants.KEY_INITIALLY_SELECTED_SLOT_ID,
                 ),
             shouldHighlightSelectedAffordance = shouldHighlightSelectedAffordance,
         )
