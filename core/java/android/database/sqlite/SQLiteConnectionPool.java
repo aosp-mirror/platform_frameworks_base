@@ -1136,7 +1136,10 @@ public final class SQLiteConnectionPool implements Closeable {
         Printer indentedPrinter = PrefixPrinter.create(printer, "    ");
         synchronized (mLock) {
             if (directories != null) {
-                directories.add(new File(mConfiguration.path).getParent());
+                String parent = new File(mConfiguration.path).getParent();
+                if (parent != null) {
+                    directories.add(parent);
+                }
             }
             boolean isCompatibilityWalEnabled = mConfiguration.isLegacyCompatibilityWalEnabled();
             printer.println("Connection pool for " + mConfiguration.path + ":");
