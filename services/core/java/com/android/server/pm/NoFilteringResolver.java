@@ -23,6 +23,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
 
+import com.android.internal.R;
 import com.android.internal.config.appcloning.AppCloningDeviceConfigHelper;
 import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.resolution.ComponentResolverApi;
@@ -61,7 +62,8 @@ public class NoFilteringResolver extends CrossProfileResolver {
             long flags) {
         final long token = Binder.clearCallingIdentity();
         try {
-            return appCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks()
+            return  context.getResources().getBoolean(R.bool.config_enableAppCloningBuildingBlocks)
+                    && appCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks()
                     && (resolveForStart || (((flags & PackageManager.MATCH_CLONE_PROFILE) != 0)
                     && hasPermission(context, Manifest.permission.QUERY_CLONED_APPS)));
         } finally {
