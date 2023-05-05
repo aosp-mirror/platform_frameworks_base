@@ -44,6 +44,7 @@ import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_SANDBOXED;
+import static android.app.AppOpsManager.OP_RUN_ANY_IN_BACKGROUND;
 import static android.app.AppOpsManager.OP_VIBRATE;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
@@ -1845,6 +1846,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setUidMode(int code, int uid, int mode) {
         setUidMode(code, uid, mode, null);
+        if (code == OP_RUN_ANY_IN_BACKGROUND) {
+            // TODO (b/280869337): Remove this once we have the required data.
+            Slog.wtfStack(TAG, "setUidMode called for RUN_ANY_IN_BACKGROUND by uid: "
+                    + UserHandle.formatUid(Binder.getCallingUid()));
+        }
     }
 
     private void setUidMode(int code, int uid, int mode,
@@ -2099,6 +2105,17 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setMode(int code, int uid, @NonNull String packageName, int mode) {
         setMode(code, uid, packageName, mode, null);
+        final int callingUid = Binder.getCallingUid();
+        if (code == OP_RUN_ANY_IN_BACKGROUND && mode != MODE_ALLOWED) {
+            // TODO (b/280869337): Remove this once we have the required data.
+            final String callingPackage = ArrayUtils.firstOrNull(getPackagesForUid(callingUid));
+            Slog.wtfStack(TAG,
+                    "RUN_ANY_IN_BACKGROUND for package " + packageName + " changed to mode: "
+                            + modeToName(mode) + " via setMode. Calling package: " + callingPackage
+                            + ", calling uid: " + UserHandle.formatUid(callingUid)
+                            + ", calling pid: " + Binder.getCallingPid()
+                            + ", system pid: " + Process.myPid());
+        }
     }
 
     void setMode(int code, int uid, @NonNull String packageName, int mode,
