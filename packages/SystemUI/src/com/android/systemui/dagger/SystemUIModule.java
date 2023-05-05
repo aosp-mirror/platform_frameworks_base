@@ -50,6 +50,7 @@ import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.FlagsModule;
+import com.android.systemui.globalactions.ShutdownUiModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyguard.data.BouncerViewModule;
 import com.android.systemui.log.dagger.LogModule;
@@ -187,6 +188,7 @@ import javax.inject.Named;
             ScreenRecordModule.class,
             SettingsUtilModule.class,
             ShadeModule.class,
+            ShutdownUiModule.class,
             SmartRepliesInflationModule.class,
             SmartspaceModule.class,
             StatusBarPipelineModule.class,
