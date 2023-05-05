@@ -241,13 +241,14 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
         }
 
         @Override
-        public void startRecognition(int modelHandle, RecognitionConfig config)
+        public IBinder startRecognition(int modelHandle, RecognitionConfig config)
                 throws RemoteException {
             try {
-                mDelegate.startRecognition(modelHandle, config);
-                mEventLogger.enqueue(SessionEvent.createForVoid(
-                            START_RECOGNITION, modelHandle, config)
+                var result = mDelegate.startRecognition(modelHandle, config);
+                mEventLogger.enqueue(SessionEvent.createForReturn(
+                            START_RECOGNITION, result, modelHandle, config)
                         .printLog(ALOGI, TAG));
+                return result;
             } catch (Exception e) {
                 mEventLogger.enqueue(SessionEvent.createForException(
                             START_RECOGNITION, e, modelHandle, config)
