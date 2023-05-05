@@ -37,6 +37,7 @@ import androidx.annotation.RequiresApi;
 import androidx.core.widget.CompoundButtonCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.media.LocalMediaManager.MediaDeviceState;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
@@ -482,6 +483,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         private void onItemClick(View view, MediaDevice device) {
+            if (mController.isCurrentOutputDeviceHasSessionOngoing()) {
+                showCustomEndSessionDialog(device);
+            } else {
+                transferOutput(device);
+            }
+        }
+
+        private void transferOutput(MediaDevice device) {
             if (mController.isAnyDeviceTransferring()) {
                 return;
             }
@@ -494,6 +503,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);
             notifyDataSetChanged();
+        }
+
+        @VisibleForTesting
+        void showCustomEndSessionDialog(MediaDevice device) {
+            MediaSessionReleaseDialog mediaSessionReleaseDialog = new MediaSessionReleaseDialog(
+                    mContext, () -> transferOutput(device), mController.getColorButtonBackground(),
+                    mController.getColorItemContent());
+            mediaSessionReleaseDialog.show();
         }
 
         private void cancelMuteAwaitConnection() {
