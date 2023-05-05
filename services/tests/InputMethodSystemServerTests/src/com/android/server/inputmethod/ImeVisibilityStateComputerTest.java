@@ -23,6 +23,7 @@ import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_HIDE;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.internal.inputmethod.SoftInputShowHideReason.HIDE_WHEN_INPUT_TARGET_INVISIBLE;
@@ -241,8 +242,12 @@ public class ImeVisibilityStateComputerTest extends InputMethodManagerServiceTes
         final IBinder testImeTargetOverlay = new Binder();
         final IBinder testImeInputTarget = new Binder();
 
+        // Simulate a test IME input target was visible.
+        mListener.onImeInputTargetVisibilityChanged(testImeInputTarget, true, false);
+
         // Simulate a test IME layering target overlay fully occluded the IME input target.
-        mListener.onImeTargetOverlayVisibilityChanged(testImeTargetOverlay, true, false);
+        mListener.onImeTargetOverlayVisibilityChanged(testImeTargetOverlay,
+                TYPE_APPLICATION_OVERLAY, true, false);
         mListener.onImeInputTargetVisibilityChanged(testImeInputTarget, false, false);
         final ArgumentCaptor<IBinder> targetCaptor = ArgumentCaptor.forClass(IBinder.class);
         final ArgumentCaptor<ImeVisibilityResult> resultCaptor = ArgumentCaptor.forClass(

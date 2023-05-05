@@ -1390,7 +1390,8 @@ public class WindowStateTests extends WindowTestsBase {
         private boolean mIsVisibleForImeInputTarget;
 
         @Override
-        public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken, boolean visible,
+        public void onImeTargetOverlayVisibilityChanged(IBinder overlayWindowToken,
+                @WindowManager.LayoutParams.WindowType int windowType, boolean visible,
                 boolean removed) {
             mImeTargetToken = overlayWindowToken;
             mIsVisibleForImeTargetOverlay = visible;

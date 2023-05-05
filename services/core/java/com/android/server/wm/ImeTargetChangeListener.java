@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.os.IBinder;
+import android.view.WindowManager;
 
 /**
  * Callback the IME targeting window visibility change state for
@@ -32,11 +33,13 @@ public interface ImeTargetChangeListener {
      * has changed its window visibility.
      *
      * @param overlayWindowToken the window token of the overlay window.
+     * @param windowType         the window type of the overlay window.
      * @param visible            the visibility of the overlay window, {@code true} means visible
      *                           and {@code false} otherwise.
      * @param removed            Whether the IME target overlay window has being removed.
      */
     default void onImeTargetOverlayVisibilityChanged(@NonNull IBinder overlayWindowToken,
+            @WindowManager.LayoutParams.WindowType int windowType,
             boolean visible, boolean removed) {
     }
 
