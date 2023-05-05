@@ -892,9 +892,8 @@ public class SyncManager {
      * @return true/false if contact sharing is enabled/disabled
      */
     protected boolean isContactSharingAllowedForCloneProfile() {
-        // TODO(b/253449368): This method should also check for the config controlling
-        // all app-cloning features.
-        return mAppCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks();
+        return mContext.getResources().getBoolean(R.bool.config_enableAppCloningBuildingBlocks)
+                && mAppCloningDeviceConfigHelper.getEnableAppCloningBuildingBlocks();
     }
 
     /**
