@@ -40,6 +40,7 @@ import android.hardware.soundtrigger.SoundTriggerModule;
 import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
@@ -788,6 +789,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
         ModelData model = getModelDataForLocked(event.soundModelHandle);
+        if (!Objects.equals(event.getToken(), model.getToken())) {
+            // Stale event, do nothing
+            return;
+        }
         if (model == null || !model.isGenericModel()) {
             Slog.w(TAG, "Generic recognition event: Model does not exist for handle: "
                     + event.soundModelHandle);
@@ -870,6 +875,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         Slog.w(TAG, "Recognition aborted");
         MetricsLogger.count(mContext, "sth_recognition_aborted", 1);
         ModelData modelData = getModelDataForLocked(event.soundModelHandle);
+        if (!Objects.equals(event.getToken(), modelData.getToken())) {
+            // Stale event, do nothing
+            return;
+        }
         if (modelData != null && modelData.isModelStarted()) {
             modelData.setStopped();
             try {
@@ -907,6 +916,10 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         MetricsLogger.count(mContext, "sth_keyphrase_recognition_event", 1);
         int keyphraseId = getKeyphraseIdFromEvent(event);
         ModelData modelData = getKeyphraseModelDataLocked(keyphraseId);
+        if (!Objects.equals(event.getToken(), modelData.getToken())) {
+            // Stale event, do nothing
+            return;
+        }
 
         if (modelData == null || !modelData.isKeyphraseModel()) {
             Slog.e(TAG, "Keyphase model data does not exist for ID:" + keyphraseId);
@@ -1203,7 +1216,12 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         if (mModule == null) {
             return STATUS_ERROR;
         }
-        int status = mModule.startRecognition(modelData.getHandle(), config);
+        int status = STATUS_OK;
+        try {
+            modelData.setToken(mModule.startRecognitionWithToken(modelData.getHandle(), config));
+        } catch (Exception e) {
+            status = SoundTrigger.handleException(e);
+        }
         if (status != SoundTrigger.STATUS_OK) {
             Slog.w(TAG, "startRecognition failed with " + status);
             MetricsLogger.count(mContext, "sth_start_recognition_error", 1);
@@ -1358,6 +1376,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         // The SoundModel instance, one of KeyphraseSoundModel or GenericSoundModel.
         private SoundModel mSoundModel = null;
 
+        // Token used to disambiguate recognition sessions.
+        private IBinder mRecognitionToken = null;
+
         private ModelData(UUID modelId, int modelType) {
             mModelId = modelId;
             // Private constructor, since we require modelType to be one of TYPE_GENERIC,
@@ -1400,6 +1421,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
 
         synchronized void setStopped() {
+            // If we are moving to the stopped state, we should clear out our
+            // startRecognition token
+            mRecognitionToken = null;
             mModelState = MODEL_LOADED;
         }
 
@@ -1469,6 +1493,14 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
         synchronized SoundModel getSoundModel() {
             return mSoundModel;
+        }
+
+        synchronized IBinder getToken() {
+            return mRecognitionToken;
+        }
+
+        synchronized void setToken(IBinder token) {
+            mRecognitionToken = token;
         }
 
         synchronized int getModelType() {

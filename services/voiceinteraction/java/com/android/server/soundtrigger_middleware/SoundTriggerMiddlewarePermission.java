@@ -241,10 +241,10 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
         }
 
         @Override
-        public void startRecognition(int modelHandle, @NonNull RecognitionConfig config)
+        public IBinder startRecognition(int modelHandle, @NonNull RecognitionConfig config)
                 throws RemoteException {
             enforcePermissions();
-            mDelegate.startRecognition(modelHandle, config);
+            return mDelegate.startRecognition(modelHandle, config);
         }
 
         @Override

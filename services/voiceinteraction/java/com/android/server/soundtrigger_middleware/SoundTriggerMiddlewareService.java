@@ -34,6 +34,7 @@ import android.media.soundtrigger_middleware.ISoundTriggerInjection;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
+import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.server.SystemService;
@@ -176,10 +177,10 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
         }
 
         @Override
-        public void startRecognition(int modelHandle, RecognitionConfig config)
+        public IBinder startRecognition(int modelHandle, RecognitionConfig config)
                 throws RemoteException {
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-                mDelegate.startRecognition(modelHandle, config);
+                return mDelegate.startRecognition(modelHandle, config);
             }
         }
 
