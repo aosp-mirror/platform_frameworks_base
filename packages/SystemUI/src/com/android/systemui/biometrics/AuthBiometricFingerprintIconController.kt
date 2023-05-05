@@ -23,6 +23,7 @@ import android.hardware.fingerprint.FingerprintManager
 import android.view.DisplayInfo
 import android.view.Surface
 import android.view.View
+import androidx.annotation.VisibleForTesting
 import com.airbnb.lottie.LottieAnimationView
 import com.android.settingslib.widget.LottieColorUtils
 import com.android.systemui.R
@@ -133,13 +134,19 @@ open class AuthBiometricFingerprintIconController(
         }
     }
 
-    private fun getIconContentDescription(@BiometricState newState: Int): CharSequence? {
+    @VisibleForTesting
+    fun getIconContentDescription(@BiometricState newState: Int): CharSequence? {
         val id = when (newState) {
             STATE_IDLE,
             STATE_AUTHENTICATING_ANIMATING_IN,
             STATE_AUTHENTICATING,
             STATE_PENDING_CONFIRMATION,
-            STATE_AUTHENTICATED -> R.string.security_settings_sfps_enroll_find_sensor_message
+            STATE_AUTHENTICATED ->
+                if (isSideFps) {
+                    R.string.security_settings_sfps_enroll_find_sensor_message
+                } else {
+                    R.string.fingerprint_dialog_touch_sensor
+                }
             STATE_ERROR,
             STATE_HELP -> R.string.biometric_dialog_try_again
             else -> null
