@@ -764,7 +764,7 @@ public class PipTransition extends PipTransitionController {
         final Rect currentBounds = taskInfo.configuration.windowConfiguration.getBounds();
         int rotationDelta = deltaRotation(startRotation, endRotation);
         Rect sourceHintRect = PipBoundsAlgorithm.getValidSourceHintRect(
-                taskInfo.pictureInPictureParams, currentBounds);
+                taskInfo.pictureInPictureParams, currentBounds, destinationBounds);
         if (rotationDelta != Surface.ROTATION_0 && mInFixedRotation) {
             // Need to get the bounds of new rotation in old rotation for fixed rotation,
             computeEnterPipRotatedBounds(rotationDelta, startRotation, endRotation, taskInfo,
