@@ -25,6 +25,7 @@ import android.content.IntentFilter
 import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.SurfaceControlViewHost
@@ -57,6 +58,7 @@ class KeyguardPreviewRenderer
 constructor(
     @Application private val context: Context,
     @Main private val mainDispatcher: CoroutineDispatcher,
+    @Main private val mainHandler: Handler,
     private val bottomAreaViewModel: KeyguardBottomAreaViewModel,
     displayManager: DisplayManager,
     private val windowManager: WindowManager,
@@ -112,7 +114,7 @@ constructor(
     }
 
     fun render() {
-        runBlocking(mainDispatcher) {
+        mainHandler.post {
             val rootView = FrameLayout(context)
 
             setUpBottomArea(rootView)
@@ -168,14 +170,12 @@ constructor(
      * @param hide TRUE hides smartspace, FALSE shows smartspace
      */
     fun hideSmartspace(hide: Boolean) {
-        runBlocking(mainDispatcher) {
-            smartSpaceView?.visibility = if (hide) View.INVISIBLE else View.VISIBLE
-        }
+        mainHandler.post { smartSpaceView?.visibility = if (hide) View.INVISIBLE else View.VISIBLE }
     }
 
     /** Sets the clock's color to the overridden seed color. */
     fun onColorOverridden(@ColorInt color: Int?) {
-        runBlocking(mainDispatcher) {
+        mainHandler.post {
             colorOverride = color
             clockController.clock?.run { events.onSeedColorChanged(color) }
         }
