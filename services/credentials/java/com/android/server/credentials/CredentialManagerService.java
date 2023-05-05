@@ -290,6 +290,9 @@ public final class CredentialManagerService
                 mContext, Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
                 /* isMultipleMode= */ true);
         String[] serviceNames = resolver.readServiceNameList(resolvedUserId);
+        if (serviceNames == null) {
+            return new HashSet<String>();
+        }
         return new HashSet<String>(Arrays.asList(serviceNames));
     }
 
