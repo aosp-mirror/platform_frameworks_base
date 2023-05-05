@@ -1248,6 +1248,10 @@ public class DisplayPolicy {
         return mNavigationBar;
     }
 
+    boolean isImmersiveMode() {
+        return mIsImmersiveMode;
+    }
+
     /**
      * Control the animation to run when a window's state changes.  Return a positive number to
      * force the animation to a specific resource ID, {@link #ANIMATION_STYLEABLE} to use the
