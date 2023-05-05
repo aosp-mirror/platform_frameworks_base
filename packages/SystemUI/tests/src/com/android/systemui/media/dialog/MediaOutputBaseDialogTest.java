@@ -239,7 +239,7 @@ public class MediaOutputBaseDialogTest extends SysuiTestCase {
         when(mMediaOutputBaseAdapter.isDragging()).thenReturn(false);
         mMediaOutputBaseDialogImpl.refresh();
 
-        verify(mMediaOutputBaseAdapter).notifyDataSetChanged();
+        verify(mMediaOutputBaseAdapter).updateItems();
     }
 
     @Test
