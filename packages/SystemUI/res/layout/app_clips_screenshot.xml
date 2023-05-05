@@ -87,19 +87,4 @@
         tools:background="?android:colorBackground"
         tools:minHeight="100dp"
         tools:minWidth="100dp" />
-
-    <com.android.systemui.screenshot.MagnifierView
-        android:id="@+id/magnifier"
-        android:visibility="invisible"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:elevation="2dp"
-        app:layout_constraintTop_toTopOf="@id/preview"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:handleThickness="@dimen/screenshot_crop_handle_thickness"
-        app:handleColor="?android:attr/colorAccent"
-        app:scrimColor="?android:colorBackgroundFloating"
-        app:scrimAlpha="128"
-        app:borderThickness="4dp"
-        app:borderColor="#fff" />
 </androidx.constraintlayout.widget.ConstraintLayout>
