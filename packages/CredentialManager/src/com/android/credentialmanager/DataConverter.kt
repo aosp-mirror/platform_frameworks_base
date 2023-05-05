@@ -286,7 +286,8 @@ class GetFlowUtils {
                             pendingIntent = credentialEntry.pendingIntent,
                             fillInIntent = it.frameworkExtrasIntent,
                             credentialType = CredentialType.UNKNOWN,
-                            credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
+                            credentialTypeDisplayName =
+                            credentialEntry.typeDisplayName?.toString().orEmpty(),
                             userName = credentialEntry.title.toString(),
                             displayName = credentialEntry.subtitle?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
