@@ -26,6 +26,7 @@ import static com.android.internal.annotations.VisibleForTesting.Visibility.PACK
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PROTECTED;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.content.Context;
@@ -65,6 +66,9 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
     private DisplayLayout mDisplayLayout;
     private final Rect mStableBounds;
 
+    @NonNull
+    private TaskInfo mTaskInfo;
+
     /**
      * Utility class for adding and releasing a View hierarchy for this {@link
      * WindowlessWindowManager} to {@code mLeash}.
@@ -83,6 +87,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
             SyncTransactionQueue syncQueue, ShellTaskOrganizer.TaskListener taskListener,
             DisplayLayout displayLayout) {
         super(taskInfo.configuration, null /* rootSurface */, null /* hostInputToken */);
+        mTaskInfo = taskInfo;
         mContext = context;
         mSyncQueue = syncQueue;
         mTaskConfig = taskInfo.configuration;
@@ -92,6 +97,17 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         mDisplayLayout = displayLayout;
         mStableBounds = new Rect();
         mDisplayLayout.getStableBounds(mStableBounds);
+    }
+
+    /**
+     * @return {@code true} if the instance of the specific {@link CompatUIWindowManagerAbstract}
+     * for the current task id needs to be recreated loading the related resources. This happens
+     * if the user switches between Light/Dark mode, if the device is docked/undocked or if the
+     * user switches between multi-window mode to fullscreen where the
+     * {@link ShellTaskOrganizer.TaskListener} implementation is different.
+     */
+    boolean needsToBeRecreated(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener) {
+        return hasUiModeChanged(mTaskInfo, taskInfo) || hasTaskListenerChanged(taskListener);
     }
 
     /**
@@ -195,6 +211,7 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
     @VisibleForTesting(visibility = PROTECTED)
     public boolean updateCompatInfo(TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener, boolean canShow) {
+        mTaskInfo = taskInfo;
         final Configuration prevTaskConfig = mTaskConfig;
         final ShellTaskOrganizer.TaskListener prevTaskListener = mTaskListener;
         mTaskConfig = taskInfo.configuration;
@@ -315,6 +332,11 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
         updateSurfacePosition();
     }
 
+    @Nullable
+    protected TaskInfo getLastTaskInfo() {
+        return mTaskInfo;
+    }
+
     /**
      * Called following a change in the task bounds, display layout stable bounds, or the layout
      * direction.
@@ -401,5 +423,13 @@ public abstract class CompatUIWindowManagerAbstract extends WindowlessWindowMana
 
     protected final String getTag() {
         return getClass().getSimpleName();
+    }
+
+    protected boolean hasTaskListenerChanged(ShellTaskOrganizer.TaskListener newTaskListener) {
+        return !mTaskListener.equals(newTaskListener);
+    }
+
+    protected static boolean hasUiModeChanged(TaskInfo currentTaskInfo, TaskInfo newTaskInfo) {
+        return currentTaskInfo.configuration.uiMode != newTaskInfo.configuration.uiMode;
     }
 }
