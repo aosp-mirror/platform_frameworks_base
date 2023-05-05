@@ -604,6 +604,7 @@ public class NotificationIconAreaController implements
         }
         updateAodIconsVisibility(animate, false /* force */);
         updateAodNotificationIcons();
+        updateAodIconColors();
     }
 
     @Override
