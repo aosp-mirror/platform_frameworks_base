@@ -83,7 +83,8 @@ public class SoundTriggerModule {
      */
     public SoundTriggerModule(@NonNull ISoundTriggerMiddlewareService service,
             int moduleId, @NonNull SoundTrigger.StatusListener listener, @NonNull Looper looper,
-            @NonNull Identity middlemanIdentity, @NonNull Identity originatorIdentity) {
+            @NonNull Identity middlemanIdentity, @NonNull Identity originatorIdentity,
+            boolean isTrusted) {
         mId = moduleId;
         mEventHandlerDelegate = new EventHandlerDelegate(listener, looper);
 
@@ -91,7 +92,8 @@ public class SoundTriggerModule {
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
                 mService = service.attachAsMiddleman(moduleId, middlemanIdentity,
                         originatorIdentity,
-                        mEventHandlerDelegate);
+                        mEventHandlerDelegate,
+                        isTrusted);
             }
             mService.asBinder().linkToDeath(mEventHandlerDelegate, 0);
         } catch (RemoteException e) {
