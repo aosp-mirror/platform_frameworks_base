@@ -563,25 +563,7 @@ final class SaveUi {
     private void setServiceIcon(Context context, View view, Drawable serviceIcon) {
         final ImageView iconView = view.findViewById(R.id.autofill_save_icon);
         final Resources res = context.getResources();
-
-        final int maxWidth = res.getDimensionPixelSize(R.dimen.autofill_save_icon_max_size);
-        final int maxHeight = maxWidth;
-        final int actualWidth = serviceIcon.getMinimumWidth();
-        final int actualHeight = serviceIcon.getMinimumHeight();
-
-        if (actualWidth <= maxWidth && actualHeight <= maxHeight) {
-            if (sDebug) {
-                Slog.d(TAG, "Adding service icon "
-                        + "(" + actualWidth + "x" + actualHeight + ") as it's less than maximum "
-                        + "(" + maxWidth + "x" + maxHeight + ").");
-            }
-            iconView.setImageDrawable(serviceIcon);
-        } else {
-            Slog.w(TAG, "Not adding service icon of size "
-                    + "(" + actualWidth + "x" + actualHeight + ") because maximum is "
-                    + "(" + maxWidth + "x" + maxHeight + ").");
-            ((ViewGroup)iconView.getParent()).removeView(iconView);
-        }
+        iconView.setImageDrawable(serviceIcon);
     }
 
     private static boolean isValidLink(PendingIntent pendingIntent, Intent intent) {
