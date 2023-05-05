@@ -175,6 +175,10 @@ class UiAutomationManager {
         return ((mUiAutomationFlags & UiAutomation.FLAG_DONT_USE_ACCESSIBILITY) == 0);
     }
 
+    boolean canIntrospect() {
+        return mUiAutomationService != null;
+    }
+
     boolean isTouchExplorationEnabledLocked() {
         return (mUiAutomationService != null)
                 && mUiAutomationService.mRequestTouchExplorationMode;

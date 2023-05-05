@@ -1927,7 +1927,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private int getClientStateLocked(AccessibilityUserState userState) {
         return userState.getClientStateLocked(
-            mUiAutomationManager.isUiAutomationRunningLocked(),
+            mUiAutomationManager.canIntrospect(),
             mTraceManager.getTraceStateForAccessibilityManagerClientState());
     }
 
@@ -2877,7 +2877,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     private void updateAccessibilityEnabledSettingLocked(AccessibilityUserState userState) {
-        final boolean isA11yEnabled = mUiAutomationManager.isUiAutomationRunningLocked()
+        final boolean isA11yEnabled = mUiAutomationManager.canIntrospect()
                 || userState.isHandlingAccessibilityEventsLocked();
         final long identity = Binder.clearCallingIdentity();
         try {

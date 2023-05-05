@@ -410,9 +410,10 @@ class AccessibilityUserState {
         return mBoundServices;
     }
 
-    int getClientStateLocked(boolean isUiAutomationRunning, int traceClientState) {
+    int getClientStateLocked(boolean uiAutomationCanIntrospect,
+            int traceClientState) {
         int clientState = 0;
-        final boolean a11yEnabled = isUiAutomationRunning
+        final boolean a11yEnabled = uiAutomationCanIntrospect
                 || isHandlingAccessibilityEventsLocked();
         if (a11yEnabled) {
             clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;

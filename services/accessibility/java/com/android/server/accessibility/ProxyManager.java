@@ -359,8 +359,8 @@ public class ProxyManager {
      */
     public int getStateLocked(int deviceId) {
         int clientState = 0;
-        final boolean automationRunning = mUiAutomationManager.isUiAutomationRunningLocked();
-        if (automationRunning) {
+        final boolean uiAutomationCanIntrospect = mUiAutomationManager.canIntrospect();
+        if (uiAutomationCanIntrospect) {
             clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
         }
         for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
