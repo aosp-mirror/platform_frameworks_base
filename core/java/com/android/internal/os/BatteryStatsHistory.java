@@ -1542,7 +1542,7 @@ public class BatteryStatsHistory {
 
         State2 change int: if C in the first token is set,
         31              23              15               7             0
-        █M|L|K|J|I|H|H|G█F|E|D|C| | | | █ | | | | | | | █ |B|B|B|A|A|A|A█
+        █M|L|K|J|I|H|H|G█F|E|D|C| | | | █ | | | | | | |N█N|B|B|B|A|A|A|A█
 
         A: 4 bits indicating the wifi supplicant state: {@link BatteryStats#WIFI_SUPPL_STATE_NAMES}.
         B: 3 bits indicating the wifi signal strength: 0, 1, 2, 3, 4.
@@ -1557,6 +1557,7 @@ public class BatteryStatsHistory {
         K: wifi was running.
         L: video was playing.
         M: power save mode was on.
+        N: 2 bits indicating the gps signal strength: poor, good, none.
 
         Wakelock/wakereason struct: if D in the first token is set,
         Event struct: if E in the first token is set,

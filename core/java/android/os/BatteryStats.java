@@ -1966,7 +1966,7 @@ public abstract class BatteryStats {
         // Values for NUM_GPS_SIGNAL_QUALITY_LEVELS
         public static final int STATE2_GPS_SIGNAL_QUALITY_SHIFT = 7;
         public static final int STATE2_GPS_SIGNAL_QUALITY_MASK =
-            0x1 << STATE2_GPS_SIGNAL_QUALITY_SHIFT;
+                0x3 << STATE2_GPS_SIGNAL_QUALITY_SHIFT;
 
         public static final int STATE2_POWER_SAVE_FLAG = 1<<31;
         public static final int STATE2_VIDEO_ON_FLAG = 1<<30;
@@ -3028,7 +3028,7 @@ public abstract class BatteryStats {
                 "cellular_high_tx_power", "Chtp"),
         new BitDescription(HistoryItem.STATE2_GPS_SIGNAL_QUALITY_MASK,
             HistoryItem.STATE2_GPS_SIGNAL_QUALITY_SHIFT, "gps_signal_quality", "Gss",
-            new String[] { "poor", "good"}, new String[] { "poor", "good"})
+            new String[] { "poor", "good", "none"}, new String[] { "poor", "good", "none"})
     };
 
     public static final String[] HISTORY_EVENT_NAMES = new String[] {
