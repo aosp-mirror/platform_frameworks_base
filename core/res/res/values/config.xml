@@ -6435,4 +6435,8 @@
     <bool name="config_persistBrightnessNitsForDefaultDisplay">false</bool>
     <!-- Whether to request the approval before commit sessions. -->
     <bool name="config_isPreApprovalRequestAvailable">true</bool>
+
+    <!-- Whether the AOSP support for app cloning building blocks is to be enabled for the
+         device. -->
+    <bool name="config_enableAppCloningBuildingBlocks">true</bool>
 </resources>
