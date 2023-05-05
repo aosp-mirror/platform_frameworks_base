@@ -71,8 +71,8 @@ final class KeyboardBacklightController implements
     private static final int MSG_INTERACTIVE_STATE_CHANGED = 6;
     private static final int MAX_BRIGHTNESS = 255;
     private static final int NUM_BRIGHTNESS_CHANGE_STEPS = 10;
-    private static final long TRANSITION_ANIMATION_DURATION_MILLIS = Duration.ofSeconds(
-            1).toMillis();
+    private static final long TRANSITION_ANIMATION_DURATION_MILLIS =
+            Duration.ofSeconds(1).toMillis();
 
     private static final String UEVENT_KEYBOARD_BACKLIGHT_TAG = "kbd_backlight";
 

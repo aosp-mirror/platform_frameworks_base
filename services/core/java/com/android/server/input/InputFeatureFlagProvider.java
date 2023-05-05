@@ -16,7 +16,7 @@
 
 package com.android.server.input;
 
-import android.os.SystemProperties;
+import android.sysprop.InputProperties;
 
 import java.util.Optional;
 
@@ -30,13 +30,13 @@ public final class InputFeatureFlagProvider {
 
     // To disable Keyboard backlight control via Framework, run:
     // 'adb shell setprop persist.input.keyboard_backlight_control.enabled false' (requires restart)
-    private static final boolean KEYBOARD_BACKLIGHT_CONTROL_ENABLED = SystemProperties.getBoolean(
-            "persist.input.keyboard.backlight_control.enabled", true);
+    private static final boolean KEYBOARD_BACKLIGHT_CONTROL_ENABLED =
+            InputProperties.enable_keyboard_backlight_control().orElse(true);
 
     // To disable Framework controlled keyboard backlight animation run:
-    // adb shell setprop persist.input.keyboard_backlight_animation.enabled false (requires restart)
-    private static final boolean KEYBOARD_BACKLIGHT_ANIMATION_ENABLED = SystemProperties.getBoolean(
-            "persist.input.keyboard.keyboard_backlight_animation.enabled", false);
+    // adb shell setprop persist.input.keyboard.backlight_animation.enabled false (requires restart)
+    private static final boolean KEYBOARD_BACKLIGHT_ANIMATION_ENABLED =
+            InputProperties.enable_keyboard_backlight_animation().orElse(false);
 
     private static Optional<Boolean> sKeyboardBacklightControlOverride = Optional.empty();
     private static Optional<Boolean> sKeyboardBacklightAnimationOverride = Optional.empty();
