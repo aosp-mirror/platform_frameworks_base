@@ -1538,7 +1538,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     }
 
     void finishEnterSplitScreen(SurfaceControl.Transaction t) {
-        mSplitLayout.init();
+        mSplitLayout.update(t);
         setDividerVisibility(true, t);
         // Ensure divider surface are re-parented back into the hierarchy at the end of the
         // transition. See Transition#buildFinishTransaction for more detail.
