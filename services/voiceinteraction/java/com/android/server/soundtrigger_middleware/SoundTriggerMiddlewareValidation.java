@@ -434,7 +434,7 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
         }
 
         @Override
-        public void startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
+        public IBinder startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
             // Input validation.
             ValidationUtil.validateRecognitionConfig(config);
 
@@ -458,9 +458,10 @@ public class SoundTriggerMiddlewareValidation implements ISoundTriggerMiddleware
 
                 // From here on, every exception isn't client's fault.
                 try {
-                    mDelegate.startRecognition(modelHandle, config);
+                    var result = mDelegate.startRecognition(modelHandle, config);
                     modelState.config = config;
                     modelState.activityState = ModelState.Activity.ACTIVE;
+                    return result;
                 } catch (Exception e) {
                     throw handleException(e);
                 }
