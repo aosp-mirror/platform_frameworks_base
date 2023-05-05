@@ -233,6 +233,7 @@ constructor(
 
     override val defaultDataSubRatConfig: StateFlow<Config> =
         merge(defaultDataSubIdChangeEvent, carrierConfigChangedEvent)
+            .onStart { emit(Unit) }
             .mapLatest { Config.readConfig(context) }
             .distinctUntilChanged()
             .onEach { logger.logDefaultDataSubRatConfig(it) }

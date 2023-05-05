@@ -1112,6 +1112,33 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun carrierConfig_initialValueIsFetched() =
+        testScope.runTest {
+
+            // Value starts out false
+            assertThat(underTest.defaultDataSubRatConfig.value.showAtLeast3G).isFalse()
+
+            overrideResource(R.bool.config_showMin3G, true)
+            val configFromContext = MobileMappings.Config.readConfig(context)
+            assertThat(configFromContext.showAtLeast3G).isTrue()
+
+            // WHEN the change event is fired
+            fakeBroadcastDispatcher.registeredReceivers.forEach { receiver ->
+                receiver.onReceive(
+                    context,
+                    Intent(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED)
+                )
+            }
+
+            // WHEN collection starts AFTER the broadcast is sent out
+            val latest by collectLastValue(underTest.defaultDataSubRatConfig)
+
+            // THEN the config has the updated value
+            assertThat(latest!!.areEqual(configFromContext)).isTrue()
+            assertThat(latest!!.showAtLeast3G).isTrue()
+        }
+
+    @Test
     fun activeDataChange_inSameGroup_emitsUnit() =
         testScope.runTest {
             val latest by collectLastValue(underTest.activeSubChangedInGroupEvent)
