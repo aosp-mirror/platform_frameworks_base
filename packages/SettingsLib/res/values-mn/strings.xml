@@ -257,7 +257,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Цэсэд алдааны мэдэгдэл авахад зориулсан товчийг харуулах"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Идэвхтэй байлгах"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Цэнэглэж байх үед дэлгэц хэзээ ч амрахгүй"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI снүүп логыг идэвхжүүлэх"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI snoop log-г идэвхжүүлэх"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth-н багцыг авна уу. (Энэ тохиргоог өөрчилсний дараа Bluetooth-г унтрааж/асаана уу)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM түгжээ тайлагч"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Bootloader-н түгжээг тайлахыг зөвшөөрөх"</string>
@@ -268,7 +268,7 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"Хуурамч байршлын апп: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Сүлжээ"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Утасгүй дэлгэцийн сертификат"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi дэлгэрэнгүй лог-г идэвхжүүлэх"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi‑Fi дэлгэрэнгүй логийг идэвхжүүлэх"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi скан бууруулалт"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wi‑Fi-н байнгын бус MAC-г санамсаргүй байдлаар эмхлэх"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Мобайл дата байнга идэвхтэй"</string>
@@ -325,8 +325,8 @@
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Таны өмнө нь зөвшөөрөл өгсөн бүх компьютерээс USB дебаг хандалтыг нь хураах уу?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Хөгжлийн тохиргоог зөвшөөрөх үү?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Эдгээр тохиргоо нь зөвхөн хөгжүүлэлтэд ашиглах зорилготой. Эдгээр нь таны төхөөрөмж буюу түүн дээрх аппликейшнүүдийг эвдрэх, буруу ажиллах шалтгаан нь болж болно."</string>
-    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Апп-г USB-р баталгаажуулах"</string>
-    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT-р суулгасан апп-уудыг хорлонтой авиртай эсэхийг шалгах."</string>
+    <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Аппыг USB-р баталгаажуулах"</string>
+    <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"ADB/ADT-р суулгасан аппуудыг хорлонтой авиртай эсэхийг шалгана."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Нэргүй Bluetooth төхөөрөмжийг (зөвхөн MAC хаяг) харуулна"</string>
     <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"Хэт чанга дуугаралт эсвэл муу тохиргоо зэрэг алсын зайн төхөөрөмжийн дуугаралттай холбоотой асуудлын үед Bluetooth-ийн үнэмлэхүй дууны түвшнийг идэвхгүй болго."</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"Bluetooth Gabeldorsche онцлогийн өрөлтийг идэвхжүүлдэг."</string>
@@ -341,8 +341,8 @@
     <string name="debug_app_set" msgid="6599535090477753651">"Согог засах аппликейшн: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"Аппликейшн сонгох"</string>
     <string name="no_application" msgid="9038334538870247690">"Юуг ч биш"</string>
-    <string name="wait_for_debugger" msgid="7461199843335409809">"Дебаг-г хүлээх"</string>
-    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Дебаг хийгдсэн апп гүйцэтгэхийнхээ өмнө дебаг-г хавсаргахыг хүлээнэ"</string>
+    <string name="wait_for_debugger" msgid="7461199843335409809">"Дебагийг хүлээх"</string>
+    <string name="wait_for_debugger_summary" msgid="6846330006113363286">"Дебаг хийгдсэн апп гүйцэтгэхийнхээ өмнө дебагийг хавсаргахыг хүлээнэ"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"Оруулах"</string>
     <string name="debug_drawing_category" msgid="5066171112313666619">"Зураг"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"Техник хангамжийн хурдасгасан үзүүлэлт"</string>
@@ -375,16 +375,16 @@
     <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"Навигацын самбарын дэвсгэр өнгийг өгөгдмөлөөр нэвт харагддаг болгоно"</string>
     <string name="window_blurs" msgid="6831008984828425106">"Цонхны түвшний бүдгэрүүлэлтийг зөвшөөрөх"</string>
     <string name="force_msaa" msgid="4081288296137775550">"Хүчээр 4x MSAA ашиглах"</string>
-    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 апп-уудад 4x MSAA-г идэвхжүүлэх"</string>
+    <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 аппуудад 4x MSAA-г идэвхжүүлэх"</string>
     <string name="show_non_rect_clip" msgid="7499758654867881817">"Тэгш өнцөгт бус клипийн үйлдлүүдийн согогийг засах"</string>
     <string name="track_frame_time" msgid="522674651937771106">"Профайл HWUI-н буулгалт"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"GPU дебаг хийх давхаргыг идэвхжүүлэх"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Дебаг хийх аппад GPU дебаг хийх давхарга ачаалахыг зөвшөөрөх"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Нийлүүлэгчийн дэлгэрэнгүй логийг идэвхжүүлэх"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Төхөөрөмжийн тодорхойлсон нийлүүлэгчийн нэвтрэх үеийн алдааны нэмэлт мэдээг оруулах бөгөөд энэ нь хувийн мэдээлэл агуулж, батарейг илүү ашиглах болон/эсвэл хадгалах сан илүү ашиглаж болзошгүй."</string>
-    <string name="window_animation_scale_title" msgid="5236381298376812508">"Цонхны дүрс амилуулалтын далайц"</string>
-    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Шилжилтийн дүрс амилуулалтын далайц"</string>
-    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Дүрс амилуулалт үргэлжлэх далайц"</string>
+    <string name="window_animation_scale_title" msgid="5236381298376812508">"Цонхны анимацийн масштаб"</string>
+    <string name="transition_animation_scale_title" msgid="1278477690695439337">"Шилжилтийн анимацийн масштаб"</string>
+    <string name="animator_duration_scale_title" msgid="7082913931326085176">"Анимацийн хугацааны масштаб"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Хоёр дахь дэлгэцийн симуляци хийх"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Апп"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Үйлдлүүдийг хадгалахгүй"</string>

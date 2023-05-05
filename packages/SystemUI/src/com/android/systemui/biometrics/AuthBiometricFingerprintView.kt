@@ -31,6 +31,10 @@ open class AuthBiometricFingerprintView(
     context: Context,
     attrs: AttributeSet? = null
 ) : AuthBiometricView(context, attrs) {
+    /** If this view is for a SFPS sensor.  */
+    var isSfps = false
+        private set
+
     /** If this view is for a UDFPS sensor.  */
     var isUdfps = false
         private set
@@ -40,6 +44,7 @@ open class AuthBiometricFingerprintView(
 
     /** Set the [sensorProps] of this sensor so the view can be customized prior to layout. */
     fun setSensorProperties(sensorProps: FingerprintSensorPropertiesInternal) {
+        isSfps = sensorProps.isAnySidefpsType
         isUdfps = sensorProps.isAnyUdfpsType
         udfpsAdapter = if (isUdfps) UdfpsDialogMeasureAdapter(this, sensorProps) else null
     }

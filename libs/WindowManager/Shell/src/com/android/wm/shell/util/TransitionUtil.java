@@ -110,6 +110,11 @@ public class TransitionUtil {
                 && !change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
     }
 
+    /** Returns `true` if `change` is the divider. */
+    public static boolean isDividerBar(TransitionInfo.Change change) {
+        return isNonApp(change) && change.hasFlags(FLAG_IS_DIVIDER_BAR);
+    }
+
     /** Returns `true` if `change` is only re-ordering. */
     public static boolean isOrderOnly(TransitionInfo.Change change) {
         return change.getMode() == TRANSIT_CHANGE
@@ -174,6 +179,14 @@ public class TransitionUtil {
                 (mode == TRANSIT_OPEN) ? change.getEndAbsBounds() : change.getStartAbsBounds();
         t.setPosition(leash, absBounds.left - info.getRoot(rootIdx).getOffset().x,
                 absBounds.top - info.getRoot(rootIdx).getOffset().y);
+
+        if (isDividerBar(change)) {
+            if (isOpeningType(mode)) {
+                t.setAlpha(leash, 0.f);
+            }
+            t.setLayer(leash, Integer.MAX_VALUE);
+            return;
+        }
 
         // Put all the OPEN/SHOW on top
         if (TransitionUtil.isOpeningType(mode)) {
@@ -245,6 +258,10 @@ public class TransitionUtil {
      */
     public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
             SurfaceControl leash) {
+        if (isDividerBar(change)) {
+            return getDividerTarget(change, leash);
+        }
+
         int taskId;
         boolean isNotInRecents;
         ActivityManager.RunningTaskInfo taskInfo;
@@ -284,13 +301,23 @@ public class TransitionUtil {
                 new Rect(change.getStartAbsBounds()),
                 taskInfo,
                 change.getAllowEnterPip(),
-                (change.getFlags() & FLAG_IS_DIVIDER_BAR) != 0
-                        ? TYPE_DOCK_DIVIDER : INVALID_WINDOW_TYPE
+                INVALID_WINDOW_TYPE
         );
         target.setWillShowImeOnTarget(
                 (change.getFlags() & TransitionInfo.FLAG_WILL_IME_SHOWN) != 0);
         target.setRotationChange(change.getEndRotation() - change.getStartRotation());
         return target;
+    }
+
+    private static RemoteAnimationTarget getDividerTarget(TransitionInfo.Change change,
+            SurfaceControl leash) {
+        return new RemoteAnimationTarget(-1 /* taskId */, -1 /* mode */,
+                leash, false /* isTranslucent */, null /* clipRect */,
+                null /* contentInsets */, Integer.MAX_VALUE /* prefixOrderIndex */,
+                new android.graphics.Point(0, 0) /* position */, change.getStartAbsBounds(),
+                change.getStartAbsBounds(), new WindowConfiguration(), true, null /* startLeash */,
+                null /* startBounds */, null /* taskInfo */, false /* allowEnterPip */,
+                TYPE_DOCK_DIVIDER);
     }
 
     /**
@@ -305,5 +332,15 @@ public class TransitionUtil {
         rootIdx = info.findRootIndex(change.getStartDisplayId());
         if (rootIdx >= 0) return rootIdx;
         return 0;
+    }
+
+    /**
+     * Gets the {@link TransitionInfo.Root} for the given {@link TransitionInfo.Change}.
+     * @see #rootIndexFor(TransitionInfo.Change, TransitionInfo)
+     */
+    @NonNull
+    public static TransitionInfo.Root getRootFor(@NonNull TransitionInfo.Change change,
+            @NonNull TransitionInfo info) {
+        return info.getRoot(rootIndexFor(change, info));
     }
 }

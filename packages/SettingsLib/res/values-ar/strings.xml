@@ -256,7 +256,7 @@
     <string name="bugreport_in_power" msgid="8664089072534638709">"اختصار تقرير الأخطاء"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"عرض زر في قائمة زر التشغيل لإعداد تقرير بالأخطاء"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"البقاء في الوضع النشط"</string>
-    <string name="keep_screen_on_summary" msgid="1510731514101925829">"لا يتم مطلقًا دخول الشاشة في وضع السكون أثناء الشحن."</string>
+    <string name="keep_screen_on_summary" msgid="1510731514101925829">"عدم دخول الشاشة في وضع السكون مطلقًا أثناء الشحن"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"تفعيل سجلّ تطفل بواجهة وحدة تحكم المضيف في بلوتوث"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"رَقمِن محتوى حزم بيانات البلوتوث. (تبديل البلوتوث بعد تغيير هذا الإعداد)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"فتح قفل المصنّع الأصلي للجهاز"</string>
@@ -316,7 +316,7 @@
     <string name="allow_mock_location" msgid="2102650981552527884">"السماح بمواقع وهمية"</string>
     <string name="allow_mock_location_summary" msgid="179780881081354579">"السماح بمواقع وهمية"</string>
     <string name="debug_view_attributes" msgid="3539609843984208216">"تفعيل فحص سمة العرض"</string>
-    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"‏اجعل بيانات الجوّال نشطة دائمًا، حتى عندما يكون اتصال Wi‑Fi نشطًا (لتبديل الشبكة بسرعة)."</string>
+    <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"‏جعل بيانات الجوّال نشطة دائمًا حتى عندما يكون اتصال Wi‑Fi نشطًا (لتبديل الشبكة بسرعة)"</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"استخدام إعداد تسريع الأجهزة للتوصيل إن كان متاحًا"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"‏هل تريد السماح بتصحيح أخطاء USB؟"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"‏تم تصميم تصحيح أخطاء USB لأغراض التطوير فقط. يمكن استخدامه لنسخ البيانات بين الكمبيوتر والجهاز، وتثبيت التطبيقات على جهازك بدون تنبيه، وقراءة بيانات السجل."</string>
@@ -328,7 +328,7 @@
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"‏التحقق من التطبيقات عبر USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"‏التحقق من التطبيقات المثبتة عبر ADB/ADT لكشف السلوك الضار"</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"‏سيتم عرض أجهزة البلوتوث بدون أسماء (عناوين MAC فقط)."</string>
-    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"لإيقاف ميزة مستوى الصوت المطلق للبلوتوث في حال حدوث مشاكل متعلقة بمستوى الصوت في الأجهزة البعيدة، مثل مستوى صوت عالٍ بشكل غير مقبول أو عدم إمكانية التحكّم في الصوت"</string>
+    <string name="bluetooth_disable_absolute_volume_summary" msgid="2006309932135547681">"إيقاف ميزة مستوى الصوت المطلق للبلوتوث في حال حدوث مشاكل متعلقة بمستوى الصوت في الأجهزة البعيدة، مثل مستوى صوت عالٍ بشكل غير مقبول أو عدم إمكانية التحكّم في الصوت"</string>
     <string name="bluetooth_enable_gabeldorsche_summary" msgid="2054730331770712629">"‏تفعيل حِزم ميزة Bluetooth Gabeldorsche"</string>
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"لتفعيل الميزة \"إمكانية اتصال محسّن\""</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"تطبيق طرفي محلي"</string>
@@ -381,7 +381,7 @@
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"‏تفعيل طبقات تصحيح أخطاء GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"‏السماح بتحميل طبقات تصحيح أخطاء GPU لتطبيقات تصحيح الأخطاء"</string>
     <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"تفعيل التسجيل المطوَّل للمورّد"</string>
-    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"يمكنك تضمين سجلات المورّدين الإضافية الخاصة بالجهاز في تقارير الخطأ، وقد تحتوي على معلومات شخصية و/أو تستهلك المزيد من شحن البطارية و/أو تستهلك المزيد من مساحة التخزين."</string>
+    <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"تضمين سجلات المورّدين الإضافية الخاصة بالجهاز في تقارير الخطأ، والتي قد تحتوي على معلومات شخصية و/أو تستهلك المزيد من شحن البطارية و/أو تستهلك المزيد من مساحة التخزين"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"حجم الرسوم المتحركة للنافذة"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"حجم الرسوم المتحركة للنقل"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"طول مدة الرسوم المتحركة"</string>
@@ -574,7 +574,7 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"المستخدم"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"ملف شخصي محظور"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"هل تريد إضافة مستخدم جديد؟"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏يمكنك مشاركة هذا الجهاز مع أشخاص آخرين من خلال إنشاء حسابات لمستخدمين إضافيين. وسيحصل كل مستخدم على مساحته الخاصة التي يمكنه تخصيصها بتطبيقاته وخلفياته التي يريدها وغير ذلك. ويمكن أيضًا للمستخدمين ضبط إعدادات الجهاز مثل Wi-Fi والتي تؤثر في جميع المستخدمين.\n\nعند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nيمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين. وقد لا يتم نقل إعدادات وخدمات \"سهولة الاستخدام\" إلى المستخدم الجديد."</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"‏يمكنك مشاركة هذا الجهاز مع أشخاص آخرين من خلال إنشاء حسابات لمستخدمين إضافيين. وسيحصل كل مستخدم على مساحته الخاصة التي يمكنه تخصيصها بتطبيقاته وخلفياته التي يريدها وغير ذلك. ويمكن أيضًا للمستخدمين ضبط إعدادات الجهاز مثل Wi-Fi والتي تؤثر في جميع المستخدمين.\n\nعند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nيمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين. وقد لا يتم نقل إعدادات وخدمات \"تسهيل الاستخدام\" إلى المستخدم الجديد."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"عند إضافة مستخدم جديد، عليه إعداد مساحته.\n\nويمكن لأي مستخدم تحديث التطبيقات لجميع المستخدمين الآخرين."</string>
     <string name="user_grant_admin_title" msgid="5157031020083343984">"هل تريد منح هذا المستخدم امتيازات المشرف؟"</string>
     <string name="user_grant_admin_message" msgid="1673791931033486709">"تتوفّر للمشرفين امتيازات خاصة لا يتم منحها للمستخدمين الآخرين. يمكن للمشرف إدارة حسابات جميع المستخدمين، وتحديث الجهاز أو إعادة ضبطه، وتعديل الإعدادات، والاطّلاع على جميع التطبيقات المثبّتة، ومنح امتيازات المشرف للمستخدمين الآخرين أو إبطالها."</string>
@@ -677,7 +677,7 @@
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"بث تطبيق <xliff:g id="SWITCHAPP">%1$s</xliff:g>"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"تغيير جهاز الإخراج"</string>
     <string name="back_navigation_animation" msgid="8105467568421689484">"صور متحركة تعرض إيماءة الرجوع إلى الخلف التنبؤية"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"فعِّل الصور المتحركة في النظام لإيماءة الرجوع إلى الخلف التنبؤية."</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"تفعيل الصور المتحركة في النظام لإيماءة الرجوع إلى الخلف التنبؤية"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"‏يفعّل هذا الإعداد الصور المتحركة في النظام للصور المتحركة التي تعرض إيماءة الرجوع إلى الخلف التنبؤية. يتطلب الإعداد ضبط enableOnBackInvokedCallback إلى true لكل تطبيق في ملف البيان."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1737722959616802157">"نقل لليسار"</item>

@@ -302,6 +302,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"‏نظام Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"التبديل إلى الملف الشخصي"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"التبديل إلى الملف الشخصي للعمل"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"التبديل إلى تطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" في الملف الشخصي"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"التبديل إلى تطبيق \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" في الملف الشخصي للعمل"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"جهات الاتصال"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"الوصول إلى جهات اتصالك"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"الموقع الجغرافي"</string>
@@ -507,8 +509,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"للسماح للتطبيق بالتحكم في الهزّاز."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"يسمح هذا الإذن للتطبيق بالوصول إلى حالة الهزّاز."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"اتصال مباشر بأرقام الهواتف"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"يسمح هذا الإذن للتطبيق بالاتصال بأرقام الهواتف بدون تدخل منك. وقد يؤدي ذلك إلى تحصيل رسوم غير متوقّعة أو إجراء مكالمات غير متوقّعة. يُرجى العلم أنّ هذا الإذن لا يسمح للتطبيق بالاتصال بأرقام الطوارئ. قد يؤدي منح الإذن للتطبيقات الضارة إلى تحصيل رسوم منك عن طريق إجراء مكالمات بدون الحصول على موافقتك أو الاتصال برموز مشغّل شبكة الجوال والتي تتسبّب في إعادة توجيه المكالمات الواردة تلقائيًا إلى رقم آخر."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"الوصول إلى خدمة الاتصال عبر الرسائل الفورية"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"للسماح للتطبيق باستخدام خدمة الرسائل الفورية لإجراء المكالمات بدون تدخل منك."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"قراءة حالة الهاتف والهوية"</string>
@@ -638,7 +639,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"الصورة ساطعة للغاية."</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"تم رصد الضغط على زر التشغيل."</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"حاوِل تعديل بصمة الإصبع."</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"غيِّر موضع إصبعك قليلاً في كل مرة."</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"غيِّر موضع إصبعك قليلاً في كل مرة"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"لم يتمّ التعرّف على البصمة."</string>
@@ -681,23 +682,23 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"يُرجى التواصل مع مقدِّم خدمات إصلاح."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"يتعذّر إنشاء نموذج الوجه. يُرجى إعادة المحاولة."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"ساطع للغاية. تجربة مستوى سطوع أقلّ."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"الإضاءة غير كافية."</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"الإضاءة غير كافية"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"يُرجى إبعاد الهاتف عنك."</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"يُرجى تقريب الهاتف منك."</string>
-    <string name="face_acquired_too_high" msgid="8278815780046368576">"يُرجى رفع الهاتف للأعلى."</string>
-    <string name="face_acquired_too_low" msgid="4075391872960840081">"يُرجى خفض الهاتف للأسفل."</string>
+    <string name="face_acquired_too_high" msgid="8278815780046368576">"يُرجى رفع الهاتف للأعلى"</string>
+    <string name="face_acquired_too_low" msgid="4075391872960840081">"يُرجى خفض الهاتف للأسفل"</string>
     <string name="face_acquired_too_right" msgid="6245286514593540859">"يُرجى تحريك الهاتف جهة اليسار."</string>
-    <string name="face_acquired_too_left" msgid="9201762240918405486">"يُرجى تحريك الهاتف جهة اليمين."</string>
+    <string name="face_acquired_too_left" msgid="9201762240918405486">"يُرجى تحريك الهاتف لجهة اليمين"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"يُرجى النظر إلى جهازك مباشرة أكثر."</string>
     <string name="face_acquired_not_detected" msgid="1057966913397548150">"تتعذّر رؤية وجهك. ارفع هاتفك إلى مستوى العينَين."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"حركة أكثر من اللازم يُرجى حمل بدون حركة."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"يُرجى إعادة تسجيل وجهك."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"يتعذّر التعرّف على الوجه. يُرجى إعادة المحاولة."</string>
     <string name="face_acquired_too_similar" msgid="8882920552674125694">"غيِّر موضع رأسك قليلاً."</string>
-    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"يُرجى النظر إلى هاتفك مباشرةً."</string>
-    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"يُرجى النظر إلى هاتفك مباشرةً."</string>
-    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"يُرجى النظر إلى هاتفك مباشرةً."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"عليك بإزالة أي شيء يُخفي وجهك."</string>
+    <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"يُرجى النظر إلى هاتفك مباشرةً"</string>
+    <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"يُرجى النظر إلى هاتفك مباشرةً"</string>
+    <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"يُرجى النظر إلى هاتفك مباشرةً"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"يجب إزالة أي شيء يُخفي وجهك"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"يُرجى تنظيف الجزء العلوي من الشاشة، بما في ذلك الشريط الأسود."</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -705,7 +706,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"يتعذّر إنشاء نموذج الوجه. يُرجى إعادة المحاولة."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"تمّ رصد نظارة شمسية. يجب أن يكون وجهك ظاهرًا بالكامل."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"تمّ رصد قناع على الوجه. يجب أن يكون وجهك ظاهرًا بالكامل."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"تمّ رصد قناع على الوجه في حين يجب ظهور وجهك بالكامل"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"يتعذّر التحقُّق من الوجه. الجهاز غير مُتاح."</string>
@@ -714,8 +715,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"تمّ إلغاء عملية مصادقة الوجه."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"ألغى المستخدم ميزة \"فتح الجهاز بالتعرف على الوجه\"."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"تمّ إجراء محاولات كثيرة. أعِد المحاولة لاحقًا."</string>
-    <!-- no translation found for face_error_lockout_permanent (8533257333130473422) -->
-    <skip />
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"أجريت محاولات كثيرة جدًا. ميزة \"فتح الجهاز بالتعرف على الوجه\" غير متاحة."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"تم إجراء عدد كبير جدًا من المحاولات. أدخِل قفل الشاشة بدلاً من ذلك."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"يتعذّر التحقق من الوجه. حاول مرة أخرى."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"لم يسبق لك إعداد ميزة \"فتح الجهاز بالتعرف على الوجه\"."</string>
@@ -1260,7 +1260,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"بدء التطبيقات."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"جارٍ إعادة التشغيل."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة أثناء إعداد بصمتك."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"لإنهاء عملية الإعداد، أوقِف الشاشة."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"لإيقاف عملية الإعداد، أغلِق الشاشة."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"إيقاف"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"هل تريد مواصلة تأكيد بصمة إصبعك؟"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ضغطت على زر التشغيل، يؤدي هذا عادةً إلى إيقاف الشاشة.\n\nجرِّب النقر بخفة لتأكيد بصمة إصبعك."</string>
@@ -1396,7 +1396,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"مشاركة"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"رفض"</string>
     <string name="select_input_method" msgid="3971267998568587025">"اختيار أسلوب الإدخال"</string>
-    <string name="show_ime" msgid="6406112007347443383">"استمرار عرضها على الشاشة أثناء نشاط لوحة المفاتيح الفعلية"</string>
+    <string name="show_ime" msgid="6406112007347443383">"استمرار عرضها على الشاشة عندما تكون لوحة المفاتيح الخارجية متصلة"</string>
     <string name="hardware" msgid="1800597768237606953">"إظهار لوحة المفاتيح الافتراضية"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"إعداد <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"إعداد لوحات المفاتيح الخارجية"</string>
@@ -1706,7 +1706,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"قراءة محتوى الشاشة والتحكم به"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"يمكنها قراءة كل المحتوى على الشاشة وعرض المحتوى فوق تطبيقات أخرى."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"عرض الإجراءات وتنفيذها"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"يمكنها تتبّع تفاعلاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"قد يؤدي ذلك إلى السماح للميزة بتتبّع تفاعلاتك مع تطبيق أو جهاز استشعار والتفاعل مع التطبيقات نيابةً عنك."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"سماح"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"رفض"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"انقر على ميزة لبدء استخدامها:"</string>
@@ -2164,16 +2164,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"لا يمكن فتح هذا المحتوى باستخدام تطبيقات العمل."</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"لا يمكن مشاركة هذا المحتوى مع التطبيقات الشخصية."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"لا يمكن فتح هذا المحتوى باستخدام التطبيقات الشخصية."</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"تطبيقات العمل متوقفة مؤقتًا."</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"إلغاء الإيقاف المؤقت"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ما مِن تطبيقات عمل."</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ما مِن تطبيقات شخصية."</string>
-    <!-- no translation found for miniresolver_open_in_personal (6499100403307136696) -->
-    <skip />
-    <!-- no translation found for miniresolver_open_in_work (7138659785478630639) -->
-    <skip />
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"فتح تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في الملف الشخصي"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"فتح تطبيق \"<xliff:g id="APP">%s</xliff:g>\" في ملف العمل"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استخدام المتصفّح الشخصي"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استخدام متصفّح العمل"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏رقم التعريف الشخصي لإلغاء قفل شبكة شريحة SIM"</string>

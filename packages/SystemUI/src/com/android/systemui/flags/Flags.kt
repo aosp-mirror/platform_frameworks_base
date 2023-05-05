@@ -331,6 +331,11 @@ object Flags {
     // TODO(b/265892345): Tracking Bug
     val PLUG_IN_STATUS_BAR_CHIP = releasedFlag(265892345, "plug_in_status_bar_chip")
 
+    // TODO(b/280426085): Tracking Bug
+    @JvmField
+    val NEW_BLUETOOTH_REPOSITORY =
+        unreleasedFlag(612, "new_bluetooth_repository", teamfood = true)
+
     // 700 - dialer/calls
     // TODO(b/254512734): Tracking Bug
     val ONGOING_CALL_STATUS_BAR_CHIP = releasedFlag(700, "ongoing_call_status_bar_chip")
@@ -700,7 +705,13 @@ object Flags {
     val ADVANCED_VPN_ENABLED = releasedFlag(2800, name = "AdvancedVpn__enable_feature",
             namespace = "vpn")
 
+    // TODO(b/277201412): Tracking Bug
+    @JvmField
+    val SPLIT_SHADE_SUBPIXEL_OPTIMIZATION =
+            unreleasedFlag(2805, "split_shade_subpixel_optimization", teamfood = true)
+
     // TODO(b/278761837): Tracking Bug
     @JvmField
-    val USE_NEW_ACTIVITY_STARTER = releasedFlag(2801, name = "use_new_activity_starter")
+    val USE_NEW_ACTIVITY_STARTER = unreleasedFlag(2801, name = "use_new_activity_starter",
+            teamfood = true)
 }

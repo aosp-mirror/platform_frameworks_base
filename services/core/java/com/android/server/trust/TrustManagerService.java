@@ -53,6 +53,7 @@ import android.os.Bundle;
 import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -151,6 +152,8 @@ public class TrustManagerService extends SystemService {
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<>();
     private final Receiver mReceiver = new Receiver();
 
+    private final Handler mHandler;
+
     /* package */ final TrustArchive mArchive = new TrustArchive();
     private final Context mContext;
     private final LockPatternUtils mLockPatternUtils;
@@ -232,13 +235,40 @@ public class TrustManagerService extends SystemService {
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_SYSTEM;
 
+    /**
+     * A class for providing dependencies to {@link TrustManagerService} in both production and test
+     * cases.
+     */
+    protected static class Injector {
+        private final LockPatternUtils mLockPatternUtils;
+        private final Looper mLooper;
+
+        public Injector(LockPatternUtils lockPatternUtils, Looper looper) {
+            mLockPatternUtils = lockPatternUtils;
+            mLooper = looper;
+        }
+
+        LockPatternUtils getLockPatternUtils() {
+            return mLockPatternUtils;
+        }
+
+        Looper getLooper() {
+            return mLooper;
+        }
+    }
+
     public TrustManagerService(Context context) {
+        this(context, new Injector(new LockPatternUtils(context), Looper.myLooper()));
+    }
+
+    protected TrustManagerService(Context context, Injector injector) {
         super(context);
         mContext = context;
+        mHandler = createHandler(injector.getLooper());
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        mLockPatternUtils = new LockPatternUtils(context);
-        mStrongAuthTracker = new StrongAuthTracker(context);
+        mLockPatternUtils = injector.getLockPatternUtils();
+        mStrongAuthTracker = new StrongAuthTracker(context, injector.getLooper());
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mSettingsObserver = new SettingsObserver(mHandler);
     }
@@ -1436,6 +1466,23 @@ public class TrustManagerService extends SystemService {
         }
     }
 
+    private void dispatchOnEnabledTrustAgentsChanged(int userId) {
+        if (DEBUG) {
+            Log.i(TAG, "onEnabledTrustAgentsChanged(" + userId + ")");
+        }
+        for (int i = 0; i < mTrustListeners.size(); i++) {
+            try {
+                mTrustListeners.get(i).onEnabledTrustAgentsChanged(userId);
+            } catch (DeadObjectException e) {
+                Slog.d(TAG, "Removing dead TrustListener.");
+                mTrustListeners.remove(i);
+                i--;
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Exception while notifying TrustListener.", e);
+            }
+        }
+    }
+
     private void dispatchOnTrustManagedChanged(boolean managed, int userId) {
         if (DEBUG) {
             Log.i(TAG, "onTrustManagedChanged(" + managed + ", " + userId + ")");
@@ -1539,9 +1586,7 @@ public class TrustManagerService extends SystemService {
         @Override
         public void reportEnabledTrustAgentsChanged(int userId) throws RemoteException {
             enforceReportPermission();
-            // coalesce refresh messages.
-            mHandler.removeMessages(MSG_ENABLED_AGENTS_CHANGED);
-            mHandler.sendEmptyMessage(MSG_ENABLED_AGENTS_CHANGED);
+            mHandler.obtainMessage(MSG_ENABLED_AGENTS_CHANGED, userId, 0).sendToTarget();
         }
 
         @Override
@@ -1857,88 +1902,91 @@ public class TrustManagerService extends SystemService {
         }
     }
 
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MSG_REGISTER_LISTENER:
-                    addListener((ITrustListener) msg.obj);
-                    break;
-                case MSG_UNREGISTER_LISTENER:
-                    removeListener((ITrustListener) msg.obj);
-                    break;
-                case MSG_DISPATCH_UNLOCK_ATTEMPT:
-                    dispatchUnlockAttempt(msg.arg1 != 0, msg.arg2);
-                    break;
-                case MSG_USER_REQUESTED_UNLOCK:
-                    dispatchUserRequestedUnlock(msg.arg1, msg.arg2 != 0);
-                    break;
-                case MSG_USER_MAY_REQUEST_UNLOCK:
-                    dispatchUserMayRequestUnlock(msg.arg1);
-                    break;
-                case MSG_DISPATCH_UNLOCK_LOCKOUT:
-                    dispatchUnlockLockout(msg.arg1, msg.arg2);
-                    break;
-                case MSG_ENABLED_AGENTS_CHANGED:
-                    refreshAgentList(UserHandle.USER_ALL);
-                    // This is also called when the security mode of a user changes.
-                    refreshDeviceLockedForUser(UserHandle.USER_ALL);
-                    break;
-                case MSG_KEYGUARD_SHOWING_CHANGED:
-                    dispatchTrustableDowngrade();
-                    refreshDeviceLockedForUser(mCurrentUser);
-                    break;
-                case MSG_START_USER:
-                case MSG_CLEANUP_USER:
-                case MSG_UNLOCK_USER:
-                    refreshAgentList(msg.arg1);
-                    break;
-                case MSG_SWITCH_USER:
-                    mCurrentUser = msg.arg1;
-                    mSettingsObserver.updateContentObserver();
-                    refreshDeviceLockedForUser(UserHandle.USER_ALL);
-                    break;
-                case MSG_STOP_USER:
-                    setDeviceLockedForUser(msg.arg1, true);
-                    break;
-                case MSG_FLUSH_TRUST_USUALLY_MANAGED:
-                    SparseBooleanArray usuallyManaged;
-                    synchronized (mTrustUsuallyManagedForUser) {
-                        usuallyManaged = mTrustUsuallyManagedForUser.clone();
-                    }
-
-                    for (int i = 0; i < usuallyManaged.size(); i++) {
-                        int userId = usuallyManaged.keyAt(i);
-                        boolean value = usuallyManaged.valueAt(i);
-                        if (value != mLockPatternUtils.isTrustUsuallyManaged(userId)) {
-                            mLockPatternUtils.setTrustUsuallyManaged(value, userId);
+    private Handler createHandler(Looper looper) {
+        return new Handler(looper) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_REGISTER_LISTENER:
+                        addListener((ITrustListener) msg.obj);
+                        break;
+                    case MSG_UNREGISTER_LISTENER:
+                        removeListener((ITrustListener) msg.obj);
+                        break;
+                    case MSG_DISPATCH_UNLOCK_ATTEMPT:
+                        dispatchUnlockAttempt(msg.arg1 != 0, msg.arg2);
+                        break;
+                    case MSG_USER_REQUESTED_UNLOCK:
+                        dispatchUserRequestedUnlock(msg.arg1, msg.arg2 != 0);
+                        break;
+                    case MSG_USER_MAY_REQUEST_UNLOCK:
+                        dispatchUserMayRequestUnlock(msg.arg1);
+                        break;
+                    case MSG_DISPATCH_UNLOCK_LOCKOUT:
+                        dispatchUnlockLockout(msg.arg1, msg.arg2);
+                        break;
+                    case MSG_ENABLED_AGENTS_CHANGED:
+                        refreshAgentList(UserHandle.USER_ALL);
+                        // This is also called when the security mode of a user changes.
+                        refreshDeviceLockedForUser(UserHandle.USER_ALL);
+                        dispatchOnEnabledTrustAgentsChanged(msg.arg1);
+                        break;
+                    case MSG_KEYGUARD_SHOWING_CHANGED:
+                        dispatchTrustableDowngrade();
+                        refreshDeviceLockedForUser(mCurrentUser);
+                        break;
+                    case MSG_START_USER:
+                    case MSG_CLEANUP_USER:
+                    case MSG_UNLOCK_USER:
+                        refreshAgentList(msg.arg1);
+                        break;
+                    case MSG_SWITCH_USER:
+                        mCurrentUser = msg.arg1;
+                        mSettingsObserver.updateContentObserver();
+                        refreshDeviceLockedForUser(UserHandle.USER_ALL);
+                        break;
+                    case MSG_STOP_USER:
+                        setDeviceLockedForUser(msg.arg1, true);
+                        break;
+                    case MSG_FLUSH_TRUST_USUALLY_MANAGED:
+                        SparseBooleanArray usuallyManaged;
+                        synchronized (mTrustUsuallyManagedForUser) {
+                            usuallyManaged = mTrustUsuallyManagedForUser.clone();
                         }
-                    }
-                    break;
-                case MSG_REFRESH_DEVICE_LOCKED_FOR_USER:
-                    if (msg.arg2 == 1) {
-                        updateTrust(msg.arg1, 0 /* flags */, true /* isFromUnlock */, null);
-                    }
-                    final int unlockedUser = msg.getData().getInt(
-                            REFRESH_DEVICE_LOCKED_EXCEPT_USER, UserHandle.USER_NULL);
-                    refreshDeviceLockedForUser(msg.arg1, unlockedUser);
-                    break;
-                case MSG_SCHEDULE_TRUST_TIMEOUT:
-                    boolean shouldOverride = msg.arg1 == 1 ? true : false;
-                    TimeoutType timeoutType =
-                            msg.arg2 == 1 ? TimeoutType.TRUSTABLE : TimeoutType.TRUSTED;
-                    handleScheduleTrustTimeout(shouldOverride, timeoutType);
-                    break;
-                case MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH:
-                    TrustableTimeoutAlarmListener trustableAlarm =
-                            mTrustableTimeoutAlarmListenerForUser.get(msg.arg1);
-                    if (trustableAlarm != null && trustableAlarm.isQueued()) {
-                        refreshTrustableTimers(msg.arg1);
-                    }
-                    break;
+
+                        for (int i = 0; i < usuallyManaged.size(); i++) {
+                            int userId = usuallyManaged.keyAt(i);
+                            boolean value = usuallyManaged.valueAt(i);
+                            if (value != mLockPatternUtils.isTrustUsuallyManaged(userId)) {
+                                mLockPatternUtils.setTrustUsuallyManaged(value, userId);
+                            }
+                        }
+                        break;
+                    case MSG_REFRESH_DEVICE_LOCKED_FOR_USER:
+                        if (msg.arg2 == 1) {
+                            updateTrust(msg.arg1, 0 /* flags */, true /* isFromUnlock */, null);
+                        }
+                        final int unlockedUser = msg.getData().getInt(
+                                REFRESH_DEVICE_LOCKED_EXCEPT_USER, UserHandle.USER_NULL);
+                        refreshDeviceLockedForUser(msg.arg1, unlockedUser);
+                        break;
+                    case MSG_SCHEDULE_TRUST_TIMEOUT:
+                        boolean shouldOverride = msg.arg1 == 1 ? true : false;
+                        TimeoutType timeoutType =
+                                msg.arg2 == 1 ? TimeoutType.TRUSTABLE : TimeoutType.TRUSTED;
+                        handleScheduleTrustTimeout(shouldOverride, timeoutType);
+                        break;
+                    case MSG_REFRESH_TRUSTABLE_TIMERS_AFTER_AUTH:
+                        TrustableTimeoutAlarmListener trustableAlarm =
+                                mTrustableTimeoutAlarmListenerForUser.get(msg.arg1);
+                        if (trustableAlarm != null && trustableAlarm.isQueued()) {
+                            refreshTrustableTimers(msg.arg1);
+                        }
+                        break;
+                }
             }
-        }
-    };
+        };
+    }
 
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override
@@ -2039,8 +2087,8 @@ public class TrustManagerService extends SystemService {
 
         SparseBooleanArray mStartFromSuccessfulUnlock = new SparseBooleanArray();
 
-        public StrongAuthTracker(Context context) {
-            super(context);
+        StrongAuthTracker(Context context, Looper looper) {
+            super(context, looper);
         }
 
         @Override

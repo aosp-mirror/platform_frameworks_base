@@ -391,7 +391,7 @@
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destroy every activity as soon as the user leaves it"</string>
     <string name="app_process_limit_title" msgid="8361367869453043007">"Background process limit"</string>
     <string name="show_all_anrs" msgid="9160563836616468726">"Show background ANRs"</string>
-    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Display App Not Responding dialogue for background apps"</string>
+    <string name="show_all_anrs_summary" msgid="8562788834431971392">"Display application not responding dialogue for background apps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Show notification channel warnings"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Displays on-screen warning when an app posts a notification without a valid channel"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Force allow apps on external"</string>

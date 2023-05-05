@@ -49,7 +49,7 @@ internal interface AppListRepository {
     ): Flow<(app: ApplicationInfo) -> Boolean>
 
     /** Gets the system app package names. */
-    fun getSystemPackageNamesBlocking(userId: Int, showInstantApps: Boolean): Set<String>
+    fun getSystemPackageNamesBlocking(userId: Int): Set<String>
 }
 
 /**
@@ -58,12 +58,8 @@ internal interface AppListRepository {
 object AppListRepositoryUtil {
     /** Gets the system app package names. */
     @JvmStatic
-    fun getSystemPackageNames(
-        context: Context,
-        userId: Int,
-        showInstantApps: Boolean,
-    ): Set<String> =
-        AppListRepositoryImpl(context).getSystemPackageNamesBlocking(userId, showInstantApps)
+    fun getSystemPackageNames(context: Context, userId: Int): Set<String> =
+        AppListRepositoryImpl(context).getSystemPackageNamesBlocking(userId)
 }
 
 internal class AppListRepositoryImpl(private val context: Context) : AppListRepository {
@@ -140,12 +136,12 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
     ): Flow<(app: ApplicationInfo) -> Boolean> =
         userIdFlow.combine(showSystemFlow, ::showSystemPredicate)
 
-    override fun getSystemPackageNamesBlocking(userId: Int, showInstantApps: Boolean) =
-        runBlocking { getSystemPackageNames(userId, showInstantApps) }
+    override fun getSystemPackageNamesBlocking(userId: Int) =
+        runBlocking { getSystemPackageNames(userId) }
 
-    private suspend fun getSystemPackageNames(userId: Int, showInstantApps: Boolean): Set<String> =
+    private suspend fun getSystemPackageNames(userId: Int): Set<String> =
         coroutineScope {
-            val loadAppsDeferred = async { loadApps(userId, showInstantApps) }
+            val loadAppsDeferred = async { loadApps(userId) }
             val homeOrLauncherPackages = loadHomeOrLauncherPackages(userId)
             val showSystemPredicate =
                 { app: ApplicationInfo -> isSystemApp(app, homeOrLauncherPackages) }
@@ -184,10 +180,8 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
         }
     }
 
-    private fun isSystemApp(app: ApplicationInfo, homeOrLauncherPackages: Set<String>): Boolean {
-        return !app.isUpdatedSystemApp && app.isSystemApp &&
-            !(app.packageName in homeOrLauncherPackages)
-    }
+    private fun isSystemApp(app: ApplicationInfo, homeOrLauncherPackages: Set<String>): Boolean =
+        app.isSystemApp && !app.isUpdatedSystemApp && app.packageName !in homeOrLauncherPackages
 
     companion object {
         private fun ApplicationInfo.isInAppList(

@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> heeft dit screenshot waargenomen."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> en andere geopende apps hebben dit screenshot waargenomen."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Toevoegen aan notitie"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Schermopname"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Schermopname"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Schermopname verwerken"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Doorlopende melding voor een schermopname-sessie"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Opname starten?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Tijdens de opname kan het Android-systeem gevoelige informatie opnemen die zichtbaar is op je scherm of wordt afgespeeld op je apparaat, waaronder wachtwoorden, betalingsgegevens, foto\'s, berichten en audio."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Volledig scherm opnemen"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Eén app opnemen"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Als je opneemt, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Als je een app opneemt, heeft Android toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Opname starten"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Opname starten?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Als je opneemt, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Als je een app opneemt, heeft Android toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Opname starten"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio opnemen"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio van apparaat"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Geluid van je apparaat, zoals muziek, gesprekken en ringtones"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Microfoon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio van apparaat en microfoon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Starten"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Starten"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Scherm opnemen"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Scherm en audio opnemen"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Tikken op het scherm tonen"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Als je bij de volgende poging een onjuist patroon opgeeft, worden je werkprofiel en de bijbehorende gegevens verwijderd."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Als je bij de volgende poging een onjuiste pincode opgeeft, worden je werkprofiel en de bijbehorende gegevens verwijderd."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Als je bij de volgende poging een onjuist wachtwoord opgeeft, worden je werkprofiel en de bijbehorende gegevens verwijderd."</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Instellen"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Niet nu"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Dit is vereist om de beveiliging en prestaties te verbeteren"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Ontgrendelen met vingerafdruk weer instellen"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Ontgrendelen met vingerafdruk"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Ontgrendelen met vingerafdruk instellen"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Als je Ontgrendelen met vingerafdruk weer wilt instellen, worden je huidige vingerafdrukfoto\'s en -modellen verwijderd.\n\nNadat ze zijn verwijderd, moet je Ontgrendelen met vingerafdruk opnieuw instellen om je vingerafdruk te gebruiken voor telefoonontgrendeling of om te laten verifiëren dat jij het bent."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Als je Ontgrendelen met vingerafdruk weer wilt instellen, worden je huidige vingerafdrukfoto\'s en -model verwijderd.\n\nNadat ze zijn verwijderd, moet je Ontgrendelen met vingerafdruk opnieuw instellen om je vingerafdruk te gebruiken voor telefoonontgrendeling of om te laten verifiëren dat jij het bent."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Kan Ontgrendelen met vingerafdruk niet instellen. Ga naar Instellingen om het opnieuw te proberen."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Ontgrendelen via gezicht weer instellen"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Ontgrendelen via gezichtsherkenning"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Ontgrendelen via gezichtsherkenning instellen"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Als je Ontgrendelen via gezichtsherkenning weer wilt instellen, wordt je huidige gezichtsmodel verwijderd.\n\nJe moet deze functie opnieuw instellen om je gezicht te gebruiken voor telefoonontgrendeling."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Kan ontgrendelen via gezichtsherkenning niet instellen. Ga naar Instellingen om het opnieuw te proberen."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Raak de vingerafdruksensor aan"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Gezicht niet herkend. Gebruik je vingerafdruk."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Gebruiker verwijderen?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Alle apps en gegevens van deze gebruiker worden verwijderd."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Verwijderen"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"De service die deze functie levert, krijgt tijdens het opnemen of casten toegang tot alle informatie die op je scherm te zien is of op je apparaat wordt afgespeeld. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Beginnen met opnemen of casten?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Beginnen met opnemen of casten met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Toestaan dat <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> deelt of opneemt?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Volledig scherm"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Eén app"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Als je deelt, opneemt of cast, heeft <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Als je deelt, opneemt of cast, heeft <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Doorgaan"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"App delen of opnemen"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Deze app toestaan om te delen of op te nemen?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Als je deelt, opneemt of cast, heeft deze app toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Als je deelt, opneemt of cast, heeft deze app toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met wachtwoorden, betalingsgegevens, berichten en andere gevoelige informatie."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> krijgt toegang tot alle informatie die zichtbaar is op je scherm of die wordt afgespeeld vanaf je apparaat tijdens het opnemen of casten. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Opnemen of casten starten?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"De service die deze functie levert, krijgt tijdens het opnemen of casten toegang tot alle informatie die zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Dit omvat informatie zoals wachtwoorden, betalingsgegevens, foto\'s, berichten en audio die je afspeelt."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Volledig scherm"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Eén app"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"App delen of opnemen"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Opnemen of casten starten met <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Als je deelt, opneemt of cast, heeft <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Als je deelt, opneemt of cast, heeft <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Starten"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Casten starten?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Als je cast, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Als je een app cast, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Casten starten"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Delen starten?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Als je deelt, opneemt of cast, heeft Android toegang tot alles dat zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Als je deelt, opneemt of cast, heeft Android toegang tot alles dat wordt getoond of afgespeeld in die app. Wees daarom voorzichtig met bijvoorbeeld wachtwoorden, betalingsgegevens, berichten, foto\'s, en audio en video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Starten"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Geblokkeerd door je IT-beheerder"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Schermopname staat uit vanwege apparaatbeleid"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Alles wissen"</string>
@@ -472,7 +460,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Er is een certificeringsinstantie geïnstalleerd op dit apparaat. Je beveiligde netwerkverkeer kan worden bijgehouden of aangepast."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Je beheerder heeft de netwerkregistratie aangezet, waarmee het verkeer op je apparaat wordt gecontroleerd."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Je beheerder heeft netwerkregistratie aangezet. Hiermee wordt verkeer in je werkprofiel bijgehouden, maar niet in je persoonlijke profiel."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Dit apparaat heeft verbinding met internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Je netwerkactiviteit, waaronder e-mails en browsegegevens, is zichtbaar voor je IT-beheerder."</string>
+    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
+    <skip />
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Dit apparaat heeft verbinding met internet via <xliff:g id="VPN_APP_0">%1$s</xliff:g> en <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Je netwerkactiviteit, waaronder e-mails en browsegegevens, is zichtbaar voor je IT-beheerder."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Je werk-apps hebben verbinding met internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Je netwerkactiviteit in werk-apps, waaronder e-mails en browsegegevens, is zichtbaar voor je IT-beheerder en VPN-provider."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Je persoonlijke apps hebben verbinding met internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Je netwerkactiviteit, waaronder e-mails en browsegegevens, is zichtbaar voor je VPN-provider."</string>
@@ -913,8 +904,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"als favoriet verwijderen"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Verplaatsen naar positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Kies apparaatbediening voor snelle toegang"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Wijzigingen zijn niet opgeslagen"</string>
@@ -1134,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Er moet een camera-app zijn geïnstalleerd"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• De app is ingesteld"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Er is ten minste één apparaat beschikbaar"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Houd de sneltoets ingedrukt"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuleren"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Wissel nu van scherm"</string>

@@ -71,10 +71,9 @@ private const val MIN_DURATION_INACTIVE_TO_ACTIVE_CONSIDERED_AS_FLING = 400L
 private const val POP_ON_FLING_DELAY = 60L
 private const val POP_ON_FLING_VELOCITY = 2f
 private const val POP_ON_COMMITTED_VELOCITY = 3f
-private const val POP_ON_ACTIVE_MAX_VELOCITY = 2.5f
-private const val POP_ON_ACTIVE_MIN_VELOCITY = 4.5f
-private const val POP_ON_INACTIVE_MAX_VELOCITY = -1.05f
-private const val POP_ON_INACTIVE_MIN_VELOCITY = -1.5f
+private const val POP_ON_ENTRY_TO_ACTIVE_VELOCITY = 4.5f
+private const val POP_ON_INACTIVE_TO_ACTIVE_VELOCITY = 4.7f
+private const val POP_ON_INACTIVE_VELOCITY = -1.5f
 
 internal val VIBRATE_ACTIVATED_EFFECT =
         VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
@@ -916,11 +915,12 @@ class BackPanelController internal constructor(
                 mainHandler.postDelayed(10L) {
                     vibratorHelper.vibrate(VIBRATE_ACTIVATED_EFFECT)
                 }
-                val startingVelocity = convertVelocityToAnimationFactor(
-                    valueOnFastVelocity = POP_ON_ACTIVE_MAX_VELOCITY,
-                    valueOnSlowVelocity = POP_ON_ACTIVE_MIN_VELOCITY,
-                )
-                mView.popOffEdge(startingVelocity)
+                val popVelocity = if (previousState == GestureState.INACTIVE) {
+                    POP_ON_INACTIVE_TO_ACTIVE_VELOCITY
+                } else {
+                    POP_ON_ENTRY_TO_ACTIVE_VELOCITY
+                }
+                mView.popOffEdge(popVelocity)
             }
 
             GestureState.INACTIVE -> {
@@ -933,11 +933,7 @@ class BackPanelController internal constructor(
                 // so that gesture progress in this state is consistent regardless of entry
                 totalTouchDeltaInactive = params.deactivationTriggerThreshold
 
-                val startingVelocity = convertVelocityToAnimationFactor(
-                        valueOnFastVelocity = POP_ON_INACTIVE_MAX_VELOCITY,
-                        valueOnSlowVelocity = POP_ON_INACTIVE_MIN_VELOCITY
-                )
-                mView.popOffEdge(startingVelocity)
+                mView.popOffEdge(POP_ON_INACTIVE_VELOCITY)
 
                 vibratorHelper.vibrate(VIBRATE_DEACTIVATED_EFFECT)
                 updateRestingArrowDimens()

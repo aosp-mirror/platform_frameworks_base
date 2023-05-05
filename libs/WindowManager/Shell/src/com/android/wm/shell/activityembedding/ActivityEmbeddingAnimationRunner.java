@@ -250,7 +250,8 @@ class ActivityEmbeddingAnimationRunner {
                 SurfaceControl screenshot = getOrCreateScreenshot(change, change, startTransaction);
                 if (screenshot != null) {
                     final SnapshotAdapter snapshotAdapter = new SnapshotAdapter(
-                            createShowSnapshotForClosingAnimation(), change, screenshot);
+                            createShowSnapshotForClosingAnimation(), change, screenshot,
+                            TransitionUtil.getRootFor(change, info));
                     if (!isOpening) {
                         snapshotAdapter.overrideLayer(offsetLayer++);
                     }
@@ -338,7 +339,7 @@ class ActivityEmbeddingAnimationRunner {
             @NonNull AnimationProvider animationProvider, @NonNull Rect wholeAnimationBounds) {
         final Animation animation = animationProvider.get(info, change, wholeAnimationBounds);
         return new ActivityEmbeddingAnimationAdapter(animation, change, change.getLeash(),
-                wholeAnimationBounds);
+                wholeAnimationBounds, TransitionUtil.getRootFor(change, info));
     }
 
     @NonNull
@@ -387,6 +388,12 @@ class ActivityEmbeddingAnimationRunner {
             // size.
             parentBounds.union(boundsAnimationChange.getStartAbsBounds());
             parentBounds.union(boundsAnimationChange.getEndAbsBounds());
+            if (boundsAnimationChange != change) {
+                // Union the change starting bounds in case the activity is resized and reparented
+                // to a TaskFragment. In that case, the TaskFragment may not cover the activity's
+                // starting bounds.
+                parentBounds.union(change.getStartAbsBounds());
+            }
 
             // There are two animations in the array. The first one is for the start leash
             // (snapshot), and the second one is for the end leash (TaskFragment).
@@ -401,17 +408,18 @@ class ActivityEmbeddingAnimationRunner {
             // boundsAnimationChange.
             final SurfaceControl screenshotLeash = getOrCreateScreenshot(change,
                     boundsAnimationChange, startTransaction);
+            final TransitionInfo.Root root = TransitionUtil.getRootFor(change, info);
             if (screenshotLeash != null) {
                 // Adapter for the starting screenshot leash.
                 // The screenshot leash will be removed in SnapshotAdapter#onAnimationEnd
                 adapters.add(new ActivityEmbeddingAnimationAdapter.SnapshotAdapter(
-                        animations[0], change, screenshotLeash));
+                        animations[0], change, screenshotLeash, root));
             } else {
                 Log.e(TAG, "Failed to take screenshot for change=" + change);
             }
             // Adapter for the ending bounds changed leash.
             adapters.add(new ActivityEmbeddingAnimationAdapter.BoundsChangeAdapter(
-                    animations[1], boundsAnimationChange));
+                    animations[1], boundsAnimationChange, root));
         }
 
         if (parentBounds.isEmpty()) {
@@ -443,7 +451,8 @@ class ActivityEmbeddingAnimationRunner {
                 animation = mAnimationSpec.createChangeBoundsOpenAnimation(change, parentBounds);
                 shouldShouldBackgroundColor = false;
             }
-            adapters.add(new ActivityEmbeddingAnimationAdapter(animation, change));
+            adapters.add(new ActivityEmbeddingAnimationAdapter(animation, change,
+                    TransitionUtil.getRootFor(change, info)));
         }
 
         if (shouldShouldBackgroundColor && changeAnimation != null) {
@@ -534,8 +543,19 @@ class ActivityEmbeddingAnimationRunner {
             @NonNull SurfaceControl.Transaction startTransaction) {
         for (TransitionInfo.Change change : info.getChanges()) {
             final SurfaceControl leash = change.getLeash();
-            startTransaction.setPosition(leash,
-                    change.getEndRelOffset().x, change.getEndRelOffset().y);
+            if (change.getParent() != null) {
+                startTransaction.setPosition(leash,
+                        change.getEndRelOffset().x, change.getEndRelOffset().y);
+            } else {
+                // Change leash has been reparented to the root if its parent is not in the
+                // transition.
+                // Because it is reparented to the root, the actual offset should be its relative
+                // position to the root instead. See Transitions#setupAnimHierarchy.
+                final TransitionInfo.Root root = TransitionUtil.getRootFor(change, info);
+                startTransaction.setPosition(leash,
+                        change.getEndAbsBounds().left - root.getOffset().x,
+                        change.getEndAbsBounds().top - root.getOffset().y);
+            }
             startTransaction.setWindowCrop(leash,
                     change.getEndAbsBounds().width(), change.getEndAbsBounds().height());
             if (change.getMode() == TRANSIT_CLOSE) {

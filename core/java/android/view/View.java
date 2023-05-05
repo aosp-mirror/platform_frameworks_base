@@ -10380,11 +10380,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             return false;
         }
 
-        // Disable triggering autofill if the view is integrated with CredentialManager.
-        if (afm.shouldIgnoreCredentialViews() && isCredential()) {
-            return false;
-        }
-
         // Check whether view is not part of an activity. If it's not, return false.
         if (getAutofillViewId() <= LAST_APP_AUTOFILL_ID) {
             return false;

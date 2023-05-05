@@ -96,22 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"Aplikace <xliff:g id="APPNAME">%1$s</xliff:g> objevila tento snímek obrazovky."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> a ostatní otevřené aplikace objevily tento snímek obrazovky."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Přidat do poznámky"</string>
-    <string name="screenrecord_name" msgid="2596401223859996572">"Rekordér obrazovky"</string>
+    <string name="screenrecord_title" msgid="4257171601439507792">"Rekordér obrazovky"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Záznam obrazovky se zpracovává"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Trvalé oznámení o relaci nahrávání"</string>
-    <string name="screenrecord_start_label" msgid="1750350278888217473">"Spustit nahrávání?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Při nahrávání může systém Android zaznamenávat citlivé údaje, které jsou viditelné na obrazovce nebo které jsou přehrávány na zařízení. Týká se to hesel, údajů o platbě, fotek, zpráv a zvuků."</string>
-    <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Nahrát celou obrazovku"</string>
-    <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Nahrát samostatnou aplikaci"</string>
-    <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Během nahrávání má Android přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Dejte proto pozor na hesla, platební údaje, zprávy nebo jiné citlivé informace."</string>
-    <string name="screenrecord_warning_single_app" msgid="7760723997065948283">"Během nahrávání aplikace má Android přístup k veškerému obsahu, který je v této aplikaci zobrazen nebo přehráván. Dejte proto pozor na hesla, platební údaje, zprávy nebo jiné citlivé informace."</string>
-    <string name="screenrecord_start_recording" msgid="348286842544768740">"Spustit nahrávání"</string>
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Začít nahrávat?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Během nahrávání má Android přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Během nahrávání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Začít nahrávat"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrávat zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk zařízení"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk ze zařízení, například hudba, hovory a vyzvánění"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk zařízení a mikrofon"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Spustit"</string>
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Začít"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Nahrávání obrazovky"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Nahrávání obrazovky a zvuku"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Zobrazovat klepnutí na obrazovku"</string>
@@ -168,34 +165,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Pokud při příštím pokusu zadáte nesprávné gesto, váš pracovní profil a přidružená data budou smazána."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Pokud při příštím pokusu zadáte nesprávný PIN, váš pracovní profil a přidružená data budou smazána."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Pokud při příštím pokusu zadáte nesprávné heslo, váš pracovní profil a přidružená data budou smazána."</string>
-    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
-    <skip />
-    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
-    <skip />
-    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
-    <skip />
-    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
-    <skip />
-    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
-    <skip />
-    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
-    <skip />
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Nastavit"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Teď ne"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Je to vyžadováno ke zlepšení zabezpečení a výkonu"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Opětovné nastavení odemknutí otiskem prstu"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Odemknutí otiskem prstu"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Nastavení odemknutí otiskem prstu"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Aby bylo možné znovu nastavit odemknutí otiskem prstu, aktuální snímky a modely otisků prstů se smažou.\n\nPo smazání bude nutné funkci nastavit znovu, aby bylo možné odemykat telefon a ověřovat vaši totožnosti pomocí otisku prstu."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Aby bylo možné znovu nastavit odemknutí otiskem prstu, aktuální snímky a model otisků prstů se smažou.\n\nPo smazání bude nutné funkci nastavit znovu, aby bylo možné odemykat telefon a ověřovat vaši totožnosti pomocí otisku prstu."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Odemknutí otiskem prstu se nepodařilo nastavit. Pokud to chcete zkusit znovu, přejděte do Nastavení."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Nastavte odemknutí obličejem znovu"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Odemknutí obličejem"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Nastavit odemknutí obličejem"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Aby bylo možné znovu nastavit odemknutí obličejem, aktuální model obličeje se smaže.\n\nFunkci bude nutné nastavit znovu, aby telefon bylo možné odemykat obličejem."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Odemknutí obličejem se nepodařilo nastavit. Pokud to chcete zkusit znovu, přejděte do Nastavení."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dotkněte se snímače otisků prstů"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Obličej se nepodařilo rozpoznat. Použijte místo něj otisk prstu."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -263,7 +246,7 @@
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Naslouchátka"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Zapínání…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatické otáčení"</string>
-    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otočení obrazovky"</string>
+    <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otáčení obrazovky"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Poloha"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Spořič obrazovky"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"Přístup k fotoaparátu"</string>
@@ -410,20 +393,25 @@
     <string name="user_remove_user_title" msgid="9124124694835811874">"Odstranit uživatele?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Veškeré aplikace a data tohoto uživatele budou smazána."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Odstranit"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"Aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mít přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze za řízení při nahrávání nebo odesílání. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Služba, která tuto funkci poskytuje, bude mít při nahrávání nebo odesílání přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze zařízení. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
-    <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Začít nahrávat nebo odesílat?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Začít nahrávat nebo odesílat s aplikací <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
-    <string name="media_projection_permission_dialog_title" msgid="7130975432309482596">"Povolit aplikaci <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> sdílení nebo nahrávání?"</string>
-    <string name="media_projection_permission_dialog_option_entire_screen" msgid="392086473225692983">"Celá obrazovka"</string>
-    <string name="media_projection_permission_dialog_option_single_app" msgid="1591110238124910521">"Samostatná aplikace"</string>
-    <string name="media_projection_permission_dialog_warning_entire_screen" msgid="3989078820637452717">"Když sdílíte, nahráváte nebo odesíláte obsah, aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> má přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Dejte proto pozor na hesla, platební údaje, zprávy nebo jiné citlivé informace."</string>
-    <string name="media_projection_permission_dialog_warning_single_app" msgid="1659532781536753059">"Když sdílíte, nahráváte nebo odesíláte aplikaci, aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> má přístup k veškerému obsahu, který je v této aplikaci zobrazen nebo přehráván. Dejte proto pozor na hesla, platební údaje, zprávy nebo jiné citlivé informace."</string>
-    <string name="media_projection_permission_dialog_continue" msgid="1827799658916736006">"Pokračovat"</string>
-    <string name="media_projection_permission_app_selector_title" msgid="894251621057480704">"Sdílení nebo nahrání aplikace"</string>
-    <string name="media_projection_permission_dialog_system_service_title" msgid="6827129613741303726">"Povolit této aplikaci sdílet nebo nahrávat?"</string>
-    <string name="media_projection_permission_dialog_system_service_warning_entire_screen" msgid="8801616203805837575">"Když sdílíte, nahráváte nebo odesíláte obsah, aplikace má přístup ke všemu, co je viditelné na obrazovce nebo se přehrává v zařízení. Dejte proto pozor na hesla, platební údaje, zprávy nebo jiné citlivé informace."</string>
-    <string name="media_projection_permission_dialog_system_service_warning_single_app" msgid="543310680568419338">"Když sdílíte, nahráváte nebo odesíláte aplikaci, aplikace má přístup ke všemu, co je v této aplikaci zobrazeno nebo se přehrává. Dejte proto pozor na hesla, platební údaje, zprávy nebo jiné citlivé informace."</string>
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"Aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mít přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze za řízení při nahrávání nebo odesílání. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Začít nahrávat nebo odesílat?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Služba, která tuto funkci poskytuje, bude mít při nahrávání nebo odesílání přístup ke všem informacím, které jsou viditelné na obrazovce nebo které jsou přehrávány ze zařízení. Týká se to i hesel, údajů o platbě, fotek, zpráv a přehrávaných zvuků."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Celá obrazovka"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Jedna aplikace"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Sdílení nebo nahrání aplikace"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Začít nahrávat nebo odesílat pomocí aplikace <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Během sdílení, nahrávání nebo odesílání má <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Během sdílení, nahrávání nebo odesílání aplikace má <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Začít"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Začít odesílat?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Během odesílání má Android přístup ke všemu, co je viditelné na obrazovce nebo se přehrává v zařízení. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Během odesílání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Začít odesílat"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Začít sdílet?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Během sdílení, nahrávání nebo odesílání má Android přístup k veškerému obsahu, který je viditelný na obrazovce nebo se přehrává v zařízení. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Během sdílení, nahrávání nebo odesílání aplikace má Android přístup k veškerému obsahu, který je v dané aplikaci zobrazen nebo přehráván. Buďte proto opatrní s věcmi, jako jsou hesla, platební údaje, zprávy, fotografie, zvuk a video."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Začít"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Blokováno administrátorem IT"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"Záznam obrazovky je zakázán zásadami zařízení"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Smazat vše"</string>
@@ -472,7 +460,10 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V zařízení je nainstalována certifikační autorita. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz v zařízení."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz ve vašem pracovním profilu (ale ne v osobním)."</string>
-    <string name="monitoring_description_named_vpn" msgid="7502657784155456414">"Toto zařízení je připojeno k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí administrátor IT."</string>
+    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
+    <skip />
+    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
+    <skip />
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Toto zařízení je připojeno k internetu prostřednictvím aplikací <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí administrátor IT."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše pracovní aplikace jsou připojeny k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu v pracovních aplikacích (jako jsou e-maily a údaje o prohlížení) vidí administrátor IT a poskytovatel VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vaše osobní aplikace jsou připojeny k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí poskytovatel VPN."</string>
@@ -889,7 +880,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Klepnutím otevřete funkce přístupnosti. Tlačítko lze upravit nebo nahradit v Nastavení.\n\n"<annotation id="link">"Nastavení"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Přesunutím tlačítka k okraji ho dočasně skryjete"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Vrátit zpět"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Zkratka <xliff:g id="FEATURE_NAME">%s</xliff:g> byla odstraněna"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Zkratka pro <xliff:g id="FEATURE_NAME">%s</xliff:g> byla odstraněna"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Byla odstraněna # zkratka}few{Byly odstraněny # zkratky}many{Bylo odstraněno # zkratky}other{Bylo odstraněno # zkratek}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Přesunout vlevo nahoru"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Přesunout vpravo nahoru"</string>
@@ -913,8 +904,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odeberete z oblíbených"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Přesunout na pozici <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládací prvky"</string>
-    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
-    <skip />
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Vyberte ovládací prvky, které chcete mít po ruce"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ovládací prvky můžete uspořádat podržením a přetažením"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všechny ovládací prvky byly odstraněny"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Změny nebyly uloženy"</string>
@@ -1017,7 +1007,7 @@
     <string name="select_conversation_text" msgid="3376048251434956013">"Klepnutím na konverzaci ji přidáte na plochu"</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"Tady se zobrazí vaše nedávné konverzace"</string>
     <string name="priority_conversations" msgid="3967482288896653039">"Prioritní konverzace"</string>
-    <string name="recent_conversations" msgid="8531874684782574622">"Poslední konverzace"</string>
+    <string name="recent_conversations" msgid="8531874684782574622">"Nedávné konverzace"</string>
     <string name="days_timestamp" msgid="5821854736213214331">"Před <xliff:g id="DURATION">%1$s</xliff:g> dny"</string>
     <string name="one_week_timestamp" msgid="4925600765473875590">"Před týdnem"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"Před 2 týdny"</string>
@@ -1041,7 +1031,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah se brzy zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Zobrazit poslední zprávy, zmeškané hovory a aktualizace stavu"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Zobrazte si poslední zprávy, zmeškané hovory a aktualizace stavu"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Konverzace"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Pozastaveno funkcí Nerušit"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> posílá zprávu: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>
@@ -1134,6 +1124,10 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Je nainstalována aplikace pro fotoaparát"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikace je nastavena"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Je k dispozici alespoň jedno zařízení"</string>
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
+    <skip />
+    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
+    <skip />
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Podržte zkratku"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Zrušit"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Přepnout obrazovky"</string>

@@ -220,7 +220,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             mProviderSessionMetric.collectCandidateFrameworkException(mProviderException.getType());
         }
         mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
-        updateStatusAndInvokeCallback(toStatus(errorCode),
+        updateStatusAndInvokeCallback(Status.CANCELED,
                 /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 

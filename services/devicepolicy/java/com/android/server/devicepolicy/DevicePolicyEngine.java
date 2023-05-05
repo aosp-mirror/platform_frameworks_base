@@ -546,8 +546,7 @@ final class DevicePolicyEngine {
             if (hasLocalPolicyLocked(policyDefinition, userId)) {
                 resolvedValue = getLocalPolicyStateLocked(
                         policyDefinition, userId).getCurrentResolvedPolicy();
-            }
-            if (hasGlobalPolicyLocked(policyDefinition)) {
+            } else if (hasGlobalPolicyLocked(policyDefinition)) {
                 resolvedValue = getGlobalPolicyStateLocked(
                         policyDefinition).getCurrentResolvedPolicy();
             }

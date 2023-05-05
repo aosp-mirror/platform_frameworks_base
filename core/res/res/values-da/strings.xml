@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android-system"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Skift til personlig profil"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Skift til arbejdsprofil"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Skift til <xliff:g id="APP_NAME">%1$s</xliff:g> til privat brug"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Skift til <xliff:g id="APP_NAME">%1$s</xliff:g> til arbejdsbrug"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontakter"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"have adgang til dine kontakter"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Lokation"</string>
@@ -1090,7 +1092,7 @@
     <string name="enable_explore_by_touch_warning_title" msgid="5095399706284943314">"Vil du aktivere Udforsk ved berøring?"</string>
     <string name="enable_explore_by_touch_warning_message" product="tablet" msgid="1037295476738940824">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er tændt, kan du høre eller se beskrivelser af, hvad der er under din finger eller udføre bevægelser for at interagere med tabletten."</string>
     <string name="enable_explore_by_touch_warning_message" product="default" msgid="4312979647356179250">"<xliff:g id="ACCESSIBILITY_SERVICE_NAME">%1$s</xliff:g> ønsker at aktivere Udforsk ved berøring. Når Udforsk ved berøring er aktiveret, kan du høre eller se beskrivelser af, hvad der er under din finger, eller udføre bevægelser for at interagere med telefonen."</string>
-    <string name="oneMonthDurationPast" msgid="4538030857114635777">"for 1 måned siden"</string>
+    <string name="oneMonthDurationPast" msgid="4538030857114635777">"1 måned siden"</string>
     <string name="beforeOneMonthDurationPast" msgid="8315149541372065392">"Før for 1 måned siden"</string>
     <string name="last_num_days" msgid="2393660431490280537">"{count,plural, =1{Seneste dag}one{De seneste # dag}other{De seneste # dage}}"</string>
     <string name="last_month" msgid="1528906781083518683">"Seneste måned"</string>
@@ -1120,8 +1122,8 @@
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d."</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{For # minut siden}one{For # minut siden}other{For # minutter siden}}"</string>
-    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{For # time siden}one{For # time siden}other{For # timer siden}}"</string>
-    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{For # dag siden}one{For # dag siden}other{For # dage siden}}"</string>
+    <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# time siden}one{# time siden}other{# timer siden}}"</string>
+    <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{1 dag siden}one{1 dag siden}other{# dag siden}}"</string>
     <string name="duration_years_relative" msgid="8731202348869424370">"{count,plural, =1{For # år siden}one{For # år siden}other{For # år siden}}"</string>
     <string name="duration_minutes_relative_future" msgid="5259574171747708115">"{count,plural, =1{# minut}one{# minut}other{# minutter}}"</string>
     <string name="duration_hours_relative_future" msgid="6670440478481140565">"{count,plural, =1{# time}one{# time}other{# timer}}"</string>
@@ -2315,11 +2317,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Tillader, at en medfølgende app kan starte tjenester i forgrunden via tilladelser til tjenester i baggrunden."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"Mikrofonen er tilgængelig"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Mikrofonen er blokeret"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dobbeltskærm"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dobbeltskærm er aktiveret"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Dual Screen er aktiveret"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> bruger begge skærme til at vise indhold"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Enheden er for varm"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dobbeltskærm er ikke tilgængelig, fordi din telefon er for varm"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen er ikke tilgængelig, fordi din telefon er for varm"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen er ikke tilgængelig"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen er ikke tilgængelig, fordi Batterisparefunktion er aktiveret. Du kan deaktivere dette i Indstillinger."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Gå til Indstillinger"</string>

@@ -298,6 +298,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android ಸಿಸ್ಟಂ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"ವೈಯಕ್ತಿಕ ಪ್ರೊಫೈಲ್‌ಗೆ ಬದಲಾಯಿಸಿ"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್‌ಗೆ ಬದಲಿಸಿ"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"ವೈಯಕ್ತಿಕ <xliff:g id="APP_NAME">%1$s</xliff:g> ಗೆ ಬದಲಿಸಿ"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"ಕೆಲಸದ <xliff:g id="APP_NAME">%1$s</xliff:g> ಗೆ ಬದಲಿಸಿ"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"ಸಂಪರ್ಕಗಳು"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"ನಿಮ್ಮ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರವೇಶಿಸಲು"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"ಸ್ಥಳ"</string>
@@ -503,8 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"ವೈಬ್ರೇಟರ್‌ ನಿಯಂತ್ರಿಸಲು ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ವೈಬ್ರೇಟರ್ ಸ್ಥಿತಿಯನ್ನು ಪ್ರವೇಶಿಸಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ನೇರವಾಗಿ ಕರೆ ಮಾಡಿ"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"ನಿಮ್ಮ ಹಸ್ತಕ್ಷೇಪವಿಲ್ಲದೆಯೇ ಫೋನ್ ಸಂಖ್ಯೆಗಳಿಗೆ ಕರೆ ಮಾಡಲು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುತ್ತದೆ. ಇದು ಅನಿರೀಕ್ಷಿತ ಶುಲ್ಕಗಳು ಅಥವಾ ಕರೆಗಳಿಗೆ ಕಾರಣವಾಗಬಹುದು. ತುರ್ತು ಸಂಖ್ಯೆಗಳಿಗೆ ಕರೆ ಮಾಡಲು ಇದು ಆ್ಯಪ್‌ಗೆ ಅನುಮತಿಸುವುದಿಲ್ಲ ಎಂಬುದನ್ನು ಗಮನಿಸಿ. ದುರುದ್ದೇಶಪ್ರೇರಿತ ಆ್ಯಪ್‌ಗಳು ನಿಮ್ಮ ದೃಢೀಕರಣವಿಲ್ಲದೆಯೇ ಕರೆಗಳನ್ನು ಮಾಡುವ ಮೂಲಕ ಅಥವಾ ಒಳಬರುವ ಕರೆಗಳನ್ನು ಮತ್ತೊಂದು ಸಂಖ್ಯೆಗೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಫಾರ್ವರ್ಡ್ ಮಾಡಲು ಕಾರಣವಾಗುವ ವಾಹಕದ ಕೋಡ್‌ಗಳನ್ನು ಡಯಲ್ ಮಾಡುವ ಮೂಲಕ ನಿಮ್ಮ ಹಣ ವೆಚ್ಚವಾಗುವಂತೆ ಮಾಡಬಹುದು."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ಕರೆ ಸೇವೆಯನ್ನು ಪ್ರವೇಶಿಸಿ"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"ನಿಮ್ಮ ಮಧ್ಯಸ್ಥಿಕೆ ಇಲ್ಲದೆಯೇ ಕರೆಗಳನ್ನು ಮಾಡಲು IMS ಸೇವೆಯನ್ನು ಬಳಸಲು ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅನುಮತಿಸುತ್ತದೆ."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ಫೋನ್ ಸ್ಥಿತಿ ಮತ್ತು ಗುರುತಿಸುವಿಕೆಯನ್ನು ಓದಿ"</string>
@@ -693,7 +694,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ನೋಡಿ"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ನೋಡಿ"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ನೇರವಾಗಿ ನೋಡಿ"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"ನಿಮ್ಮ ಮುಖವನ್ನು ಮರೆಮಾಡುವ ಯಾವುದನ್ನಾದರೂ ತೆಗೆದುಹಾಕಿ."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"ಮುಖವನ್ನು ಮರೆ ಮಾಡುವ ವಸ್ತುಗಳನ್ನು ತೆಗೆದುಹಾಕಿ."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"ಬ್ಲ್ಯಾಕ್ ಬಾರ್ ಸೇರಿದಂತೆ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಮೇಲ್ಭಾಗವನ್ನು ತೆರವುಗೊಳಿಸಿ"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -701,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"ಫೇಸ್ ಮಾಡೆಲ್ ರಚಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಪುನಃ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"ಕಪ್ಪು ಕನ್ನಡಕ ಪತ್ತೆಯಾಗಿದೆ. ನಿಮ್ಮ ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ಮುಖವಾಡ ಪತ್ತೆಯಾಗಿದೆ. ನಿಮ್ಮ ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"ಮುಖವಾಡ ಪತ್ತೆಯಾಗಿದೆ. ಮುಖವು ಸಂಪೂರ್ಣವಾಗಿ ಗೋಚರಿಸಬೇಕು."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"ಮುಖ ದೃಢೀಕರಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಹಾರ್ಡ್‌ವೇರ್ ಲಭ್ಯವಿಲ್ಲ."</string>
@@ -1199,7 +1200,7 @@
     <string name="whichSendToApplicationNamed" msgid="3385686512014670003">"%1$s ಬಳಸಿಕೊಂಡು ಕಳುಹಿಸಿ"</string>
     <string name="whichSendToApplicationLabel" msgid="3543240188816513303">"ಕಳುಹಿಸು"</string>
     <string name="whichHomeApplication" msgid="8276350727038396616">"ಮುಖಪುಟ‌ ಅಪ್ಲಿಕೇಶನ್‌ ಆಯ್ಕೆಮಾಡಿ"</string>
-    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"ಮುಖಪುಟ‌ ಎಂಬಂತೆ %1$s ಅನ್ನು ಬಳಸಿ"</string>
+    <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"%1$s ಅನ್ನು ಹೋಮ್ ಆಗಿ ಬಳಸಿ"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"ಇದರ ಜೊತೆಗೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"%1$s ಜೊತೆ ಚಿತ್ರ ಕ್ಯಾಪ್ಚರ್ ಮಾಡಿ"</string>
@@ -1255,7 +1256,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಪ್ರಾರಂಭಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"ಬೂಟ್ ಪೂರ್ಣಗೊಳಿಸಲಾಗುತ್ತಿದೆ."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"ನೀವು ಪವರ್ ಬಟನ್ ಒತ್ತಿದ್ದೀರಿ — ಇದು ಸಾಮಾನ್ಯವಾಗಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.\n\nನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಹೊಂದಿಸುವಾಗ ಲಘುವಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ಸೆಟಪ್ ಪೂರ್ಣಗೊಳಿಸಲು, ಸ್ಕ್ರೀನ್‌ ಆಫ್ ಮಾಡಿ"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"ಸೆಟಪ್ ಅಂತ್ಯಗೊಳಿಸಲು, ಸ್ಕ್ರೀನ್‌ ಆಫ್ ಮಾಡಿ"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"ಆಫ್ ಮಾಡಿ"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಪರಿಶೀಲನೆ ಮುಂದುವರಿಸುವುದೇ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"ನೀವು ಪವರ್ ಬಟನ್ ಒತ್ತಿದ್ದೀರಿ — ಇದು ಸಾಮಾನ್ಯವಾಗಿ ಸ್ಕ್ರೀನ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸುತ್ತದೆ.\n\nನಿಮ್ಮ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಪರಿಶೀಲಿಸಲು ಲಘುವಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಲು ಪ್ರಯತ್ನಿಸಿ."</string>
@@ -2022,7 +2023,7 @@
     <string name="autofill_save_title_with_2types" msgid="3783270967447869241">"<xliff:g id="TYPE_0">%1$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_1">%2$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ನಲ್ಲಿ ಉಳಿಸುವುದೇ?"</string>
     <string name="autofill_save_title_with_3types" msgid="6598228952100102578">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_2">%3$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ನಲ್ಲಿ ಉಳಿಸುವುದೇ?"</string>
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡುವುದೇ?"</string>
-    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡುವುದೇ?"</string>
+    <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕೆ?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_1">%2$s</xliff:g> ಅನ್ನು "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡುವುದೇ?"</string>
     <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"ಈ ಮುಂದಿನ ಐಟಂಗಳನ್ನು "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ನಲ್ಲಿ ಅಪ್‌ಡೇಟ್ ಮಾಡುವುದೇ: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ಮತ್ತು <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"ಉಳಿಸಿ"</string>
@@ -2159,10 +2160,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳ ಈ ವಿಷಯವನ್ನು ತೆರೆಯಲಾಗುವುದಿಲ್ಲ"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳ ಮೂಲಕ ಈ ವಿಷಯವನ್ನು ಹಂಚಿಕೊಳ್ಳಲಾಗುವುದಿಲ್ಲ"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳ ಮೂಲಕ ಈ ವಿಷಯವನ್ನು ತೆರೆಯಲಾಗುವುದಿಲ್ಲ"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳನ್ನು ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ವಿರಾಮವನ್ನು ರದ್ದುಗೊಳಿಸಿ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ಯಾವುದೇ ಕೆಲಸಕ್ಕೆ ಸಂಬಂಧಿಸಿದ ಆ್ಯಪ್‌ಗಳಿಲ್ಲ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ಯಾವುದೇ ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳಿಲ್ಲ"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ವೈಯಕ್ತಿಕ <xliff:g id="APP">%s</xliff:g> ತೆರೆಯಿರಿ"</string>
@@ -2292,7 +2291,7 @@
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ಸೆನ್ಸರ್ ಗೌಪ್ಯತೆ"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"ಅಪ್ಲಿಕೇಶನ್‌ ಐಕಾನ್‌"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"ಅಪ್ಲಿಕೇಶನ್ ಬ್ರ್ಯಾಂಡಿಂಗ್ ಚಿತ್ರ"</string>
-    <string name="view_and_control_notification_title" msgid="4300765399209912240">"ಪ್ರವೇಶ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
+    <string name="view_and_control_notification_title" msgid="4300765399209912240">"ಆ್ಯಕ್ಸೆಸ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ"</string>
     <string name="view_and_control_notification_content" msgid="8003766498562604034">"<xliff:g id="SERVICE_NAME">%s</xliff:g> ನಿಮ್ಮ ಸ್ಕ್ರೀನ್ ಅನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಮತ್ತು ನಿಯಂತ್ರಿಸಬಹುದು. ಪರಿಶೀಲಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="ui_translation_accessibility_translated_text" msgid="3197547218178944544">"<xliff:g id="MESSAGE">%1$s</xliff:g> ಅನ್ನು ಅನುವಾದಿಸಲಾಗಿದೆ."</string>
     <string name="ui_translation_accessibility_translation_finished" msgid="3057830947610088465">"<xliff:g id="FROM_LANGUAGE">%1$s</xliff:g> ಭಾಷೆಯಿಂದ <xliff:g id="TO_LANGUAGE">%2$s</xliff:g> ಭಾಷೆಗೆ ಸಂದೇಶವನ್ನು ಅನುವಾದಿಸಲಾಗಿದೆ."</string>
@@ -2320,7 +2319,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"ಡ್ಯೂಯಲ್ ಸ್ಕ್ರೀನ್"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"ಡ್ಯೂಯಲ್ ಸ್ಕ್ರೀನ್ ಆನ್ ಆಗಿದೆ"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ವಿಷಯವನ್ನು ತೋರಿಸಲು <xliff:g id="APP_NAME">%1$s</xliff:g> ಎರಡೂ ಡಿಸ್‌ಪ್ಲೇಗಳನ್ನು ಬಳಸುತ್ತದೆ"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"ಕಂಟೆಂಟ್‌ ಅನ್ನು ತೋರಿಸಲು <xliff:g id="APP_NAME">%1$s</xliff:g> ಎರಡೂ ಡಿಸ್‌ಪ್ಲೇಗಳನ್ನು ಬಳಸುತ್ತಿದೆ"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"ಸಾಧನವು ತುಂಬಾ ಬಿಸಿಯಾಗಿದೆ"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"ನಿಮ್ಮ ಫೋನ್ ತುಂಬಾ ಬಿಸಿಯಾಗುವುದರಿಂದ ಡ್ಯೂಯಲ್ ಸ್ಕ್ರೀನ್ ಲಭ್ಯವಿಲ್ಲ"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen ಲಭ್ಯವಿಲ್ಲ"</string>

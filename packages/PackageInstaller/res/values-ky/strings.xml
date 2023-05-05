@@ -26,7 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"Колдонмо орнотулду."</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"Бул колдонмону орнотоюн деп жатасызбы?"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"Бул колдонмону жаңыртайын деп жатасызбы?"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Колдонмо <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> аркылуу жаңыртылсынбы?\n\nАдатта бул колдонмо <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> жөнөткөн жаңыртууларды алат. Башка булактан жаңыртуу менен келечекте телефонуңуз ар кайсы булактардан жаңыртылып калат. Колдонмонун функциялары өзгөрүшү мүмкүн."</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"Колдонмону <xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g> аркылуу жаңыртасызбы?\n\nАдатта бул колдонмонун жаңыртууларын <xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g> жөнөтөт. Эгер колдонмону башка булактан жаңыртсаңыз, эртеңки күнү телефонуңуз ар кайсы булактан жаңырып, колдонмонун функциялары өзгөрүшү мүмкүн."</string>
     <string name="install_failed" msgid="5777824004474125469">"Колдонмо орнотулган жок."</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"Топтомду орнотууга болбойт."</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"Башка топтом менен дал келбегендиктен колдонмо орнотулган жок."</string>

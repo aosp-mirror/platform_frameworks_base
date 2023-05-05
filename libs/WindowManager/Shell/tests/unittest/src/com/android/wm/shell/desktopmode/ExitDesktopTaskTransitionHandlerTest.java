@@ -31,6 +31,7 @@ import android.app.ActivityManager;
 import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Point;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.view.SurfaceControl;
@@ -75,6 +76,7 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
     @Mock
     ShellExecutor mExecutor;
 
+    private Point mPoint;
     private ExitDesktopTaskTransitionHandler mExitDesktopTaskTransitionHandler;
 
     @Before
@@ -90,6 +92,7 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
 
         mExitDesktopTaskTransitionHandler = new ExitDesktopTaskTransitionHandler(mTransitions,
                 mContext);
+        mPoint = new Point(0, 0);
     }
 
     @Test
@@ -100,7 +103,8 @@ public class ExitDesktopTaskTransitionHandlerTest extends ShellTestCase {
         doReturn(mToken).when(mTransitions)
                 .startTransition(transitionType, wct, mExitDesktopTaskTransitionHandler);
 
-        mExitDesktopTaskTransitionHandler.startTransition(transitionType, wct, null);
+        mExitDesktopTaskTransitionHandler.startTransition(transitionType, wct, mPoint,
+                null);
 
         TransitionInfo.Change change =
                 createChange(WindowManager.TRANSIT_CHANGE, taskId, WINDOWING_MODE_FULLSCREEN);

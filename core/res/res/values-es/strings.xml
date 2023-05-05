@@ -251,7 +251,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Informe de errores"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Finalizar sesión"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Captura de pantalla"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Informar error"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Informe de errores"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Se recopilará información sobre el estado actual de tu dispositivo y se enviará por correo electrónico. Pasarán unos minutos desde que empiece a generarse el informe de errores hasta que se envíe."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Informe interactivo"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Usa esta opción en la mayoría de los casos. Te permite realizar un seguimiento del progreso del informe, introducir más información sobre el problema y hacer capturas de pantalla. Es posible que se omitan algunas secciones menos utilizadas y que requieran más tiempo."</string>
@@ -299,6 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Cambiar al perfil personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Cambiar al perfil de trabajo"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Cambiar a <xliff:g id="APP_NAME">%1$s</xliff:g> personal"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Cambiar a <xliff:g id="APP_NAME">%1$s</xliff:g> de trabajo"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contactos"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"acceder a tus contactos"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ubicación"</string>
@@ -504,8 +506,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Permite que la aplicación controle la función de vibración."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Permite que la aplicación acceda al ajuste de vibración."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"llamar directamente a números de teléfono"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Permite que la aplicación llame a números de teléfono sin tu intervención, lo que puede dar lugar a llamadas o cargos inesperados. Ten en cuenta que esto no permite que la aplicación llame a números de emergencia. Las aplicaciones maliciosas pueden incurrir en gastos al hacer llamadas sin tu confirmación o marcar códigos de operador que desvían automáticamente las llamadas entrantes a otro número."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"acceder al servicio de llamadas IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Permite que la aplicación utilice el servicio IMS para realizar llamadas sin tu intervención."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"consultar la identidad y el estado del teléfono"</string>
@@ -694,7 +695,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Mira al teléfono de forma más directa"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Mira al teléfono de forma más directa"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Mira al teléfono de forma más directa"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retira cualquier objeto que te tape la cara."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Retira cualquier objeto que te tape la cara"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpia la parte superior de la pantalla, incluida la barra de color negro"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -1392,7 +1393,7 @@
     <string name="share_remote_bugreport_action" msgid="7630880678785123682">"COMPARTIR"</string>
     <string name="decline_remote_bugreport_action" msgid="4040894777519784346">"RECHAZAR"</string>
     <string name="select_input_method" msgid="3971267998568587025">"Selecciona un método de entrada"</string>
-    <string name="show_ime" msgid="6406112007347443383">"Mientras el teclado físico está activo"</string>
+    <string name="show_ime" msgid="6406112007347443383">"Mantenlo en pantalla mientras el teclado físico está activo"</string>
     <string name="hardware" msgid="1800597768237606953">"Mostrar teclado virtual"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"Configura <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"Configura teclados físicos"</string>
@@ -2160,10 +2161,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Este contenido no se puede abrir con aplicaciones de trabajo"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Este contenido no se puede compartir con aplicaciones personales"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Este contenido no se puede abrir con aplicaciones personales"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Las aplicaciones de trabajo están en pausa"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reactivar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ninguna aplicación de trabajo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ninguna aplicación personal"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Abrir <xliff:g id="APP">%s</xliff:g> en el perfil personal"</string>
@@ -2319,11 +2318,11 @@
     <string name="permdesc_startForegroundServicesFromBackground" msgid="4071826571656001537">"Permite que una aplicación complementaria inicie servicios en primer plano desde el segundo plano."</string>
     <string name="mic_access_on_toast" msgid="2666925317663845156">"El micrófono está disponible"</string>
     <string name="mic_access_off_toast" msgid="8111040892954242437">"El micrófono está bloqueado"</string>
-    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Cámara Dual"</string>
-    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La función Cámara Dual está activada"</string>
+    <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Dual Screen"</string>
+    <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"La función Dual Screen está activada"</string>
     <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"<xliff:g id="APP_NAME">%1$s</xliff:g> está usando ambas pantallas para mostrar contenido"</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"El dispositivo está demasiado caliente"</string>
-    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Cámara Dual no está disponible porque el teléfono se está calentando demasiado"</string>
+    <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Dual Screen no está disponible porque el teléfono se está calentando demasiado"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen no está disponible"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen no está disponible porque la función Ahorro de batería está activada. Puedes desactivarla en Ajustes."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ir a Ajustes"</string>

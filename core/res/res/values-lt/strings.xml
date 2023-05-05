@@ -300,6 +300,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"„Android“ sistema"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Perjungti į asmeninį profilį"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Perjungti į darbo profilį"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Perjungti į asmeninę programą „<xliff:g id="APP_NAME">%1$s</xliff:g>“"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Perjungti į darbo programą „<xliff:g id="APP_NAME">%1$s</xliff:g>“"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Kontaktai"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"pasiekti kontaktus"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Vietovė"</string>
@@ -505,8 +507,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Leidžiama programai valdyti vibravimą."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Programai leidžiama pasiekti vibratoriaus būseną."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"skambinti tiesiogiai telefono numeriais"</string>
-    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
-    <skip />
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Leidžiama programai skambinti telefonų numeriais be jūsų įsikišimo. Gali būti taikomi nenumatyti mokesčiai ar gaunami nenumatyti skambučiai. Atminkite, kad programai neleidžiama skambinti pagalbos numeriais. Naudojant kenkėjiškas programas gali būti taikomi mokesčiai, skambinant be jūsų patvirtinimo arba renkant operatorių kodus, kuriuos taikant gaunamieji skambučiai automatiškai peradresuojami kitu numeriu."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"pasiekti IMS skambučių paslaugą"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Programai leidžiama naudoti IMS paslaugą, kad būtų galima atlikti skambučius be jūsų įsikišimo."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"skaityti telefono būseną ir tapatybę"</string>
@@ -626,7 +627,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Autentifikuojant įvyko klaida"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Naudoti ekrano užraktą"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jei norite tęsti, įveskite ekrano užraktą"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tvirtai paspauskite jutiklį"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Stipriai paspauskite jutiklį"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"Nepavyko atpažinti kontrolinio kodo. Bandykite dar kartą."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nuvalykite kontrolinio kodo jutiklį ir bandykite dar kartą"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nuvalykite jutiklį ir bandykite dar kartą"</string>
@@ -646,7 +647,7 @@
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"Veidas autentifikuotas, paspauskite patvirtinimo mygtuką"</string>
     <string name="fingerprint_error_hw_not_available" msgid="4571700896929561202">"Piršto antspaudo aparatinė įranga nepasiekiama."</string>
     <string name="fingerprint_error_no_space" msgid="7285481581905967580">"Nepavyko nustatyti kontrolinio kodo"</string>
-    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Baigėsi kontrolinio kodo sąrankos skirtasis laikas. Bandykite dar kartą."</string>
+    <string name="fingerprint_error_timeout" msgid="7361192266621252164">"Baigėsi piršto atspaudo sąrankos skirtasis laikas. Bandykite dar kartą."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Piršto antspaudo operacija atšaukta."</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Piršto antspaudo operaciją atšaukė naudotojas."</string>
     <string name="fingerprint_error_lockout" msgid="6626753679019351368">"Per daug bandymų. Naudokite ekrano užraktą."</string>
@@ -679,7 +680,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Apsilankykite pas taisymo paslaugos teikėją."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Nepavyko sukurti veido modelio. Band. dar kartą."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Per šviesu. Išbandykite mažesnį apšvietimą."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Nepakanka apšvietimo"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Per tamsu"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Laikykite telefoną toliau"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Laikykite telefoną arčiau"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Laikykite telefoną aukščiau"</string>
@@ -2161,10 +2162,8 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Šio turinio negalima atidaryti naudojant darbo programas"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Šio turinio negalima bendrinti su asmeninėmis programomis"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Šio turinio negalima atidaryti naudojant asmenines programas"</string>
-    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
-    <skip />
-    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
-    <skip />
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"Darbo programos pristabdytos"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"Atšaukti pristabdymą"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nėra darbo programų"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nėra asmeninių programų"</string>
     <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Asmeninės programos „<xliff:g id="APP">%s</xliff:g>“ atidarymas"</string>

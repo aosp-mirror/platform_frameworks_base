@@ -19,8 +19,6 @@ package com.android.wm.shell.activityembedding;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
 
-import static com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationRunner.shouldUseSnapshotAnimationForClosingChange;
-
 import android.annotation.CallSuper;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -62,7 +60,7 @@ class ActivityEmbeddingAnimationAdapter {
     private final Rect mContentBounds = new Rect();
     /** Offset relative to the window parent surface for {@link #mContentBounds}. */
     @NonNull
-    private final Point mContentRelOffset = new Point();
+    final Point mContentRelOffset = new Point();
 
     @NonNull
     final Transformation mTransformation = new Transformation();
@@ -75,8 +73,8 @@ class ActivityEmbeddingAnimationAdapter {
     private int mOverrideLayer = LAYER_NO_OVERRIDE;
 
     ActivityEmbeddingAnimationAdapter(@NonNull Animation animation,
-            @NonNull TransitionInfo.Change change) {
-        this(animation, change, change.getLeash(), change.getEndAbsBounds());
+            @NonNull TransitionInfo.Change change, @NonNull TransitionInfo.Root root) {
+        this(animation, change, change.getLeash(), change.getEndAbsBounds(), root);
     }
 
     /**
@@ -87,32 +85,34 @@ class ActivityEmbeddingAnimationAdapter {
      */
     ActivityEmbeddingAnimationAdapter(@NonNull Animation animation,
             @NonNull TransitionInfo.Change change, @NonNull SurfaceControl leash,
-            @NonNull Rect wholeAnimationBounds) {
+            @NonNull Rect wholeAnimationBounds, @NonNull TransitionInfo.Root root) {
         mAnimation = animation;
         mChange = change;
         mLeash = leash;
         mWholeAnimationBounds.set(wholeAnimationBounds);
+
+        final Rect startBounds = change.getStartAbsBounds();
+        final Rect endBounds = change.getEndAbsBounds();
+        if (change.getParent() != null) {
+            mContentRelOffset.set(change.getEndRelOffset());
+        } else {
+            // Change leash has been reparented to the root if its parent is not in the transition.
+            // Because it is reparented to the root, the actual offset should be its relative
+            // position to the root instead. See Transitions#setupAnimHierarchy.
+            final Point rootOffset = root.getOffset();
+            mContentRelOffset.set(endBounds.left - rootOffset.x, endBounds.top - rootOffset.y);
+        }
+
         if (TransitionUtil.isClosingType(change.getMode())) {
             // When it is closing, we want to show the content at the start position in case the
             // window is resizing as well. For example, when the activities is changing from split
             // to stack, the bottom TaskFragment will be resized to fullscreen when hiding.
-            final Rect startBounds = change.getStartAbsBounds();
-            final Rect endBounds = change.getEndAbsBounds();
             mContentBounds.set(startBounds);
-            // Put the transition to the top left for snapshot animation.
-            if (shouldUseSnapshotAnimationForClosingChange(mChange)) {
-                // TODO(b/275034335): Fix an issue that black hole when closing the right container
-                //  in bounds change transition.
-                mContentRelOffset.set(0, 0);
-            } else {
-                mContentRelOffset.set(change.getEndRelOffset());
-                mContentRelOffset.offset(
+            mContentRelOffset.offset(
                         startBounds.left - endBounds.left,
                         startBounds.top - endBounds.top);
-            }
         } else {
             mContentBounds.set(change.getEndAbsBounds());
-            mContentRelOffset.set(change.getEndRelOffset());
         }
     }
 
@@ -192,8 +192,8 @@ class ActivityEmbeddingAnimationAdapter {
     static class SnapshotAdapter extends ActivityEmbeddingAnimationAdapter {
 
         SnapshotAdapter(@NonNull Animation animation, @NonNull TransitionInfo.Change change,
-                @NonNull SurfaceControl snapshotLeash) {
-            super(animation, change, snapshotLeash, change.getEndAbsBounds());
+                @NonNull SurfaceControl snapshotLeash, @NonNull TransitionInfo.Root root) {
+            super(animation, change, snapshotLeash, change.getEndAbsBounds(), root);
         }
 
         @Override
@@ -219,14 +219,14 @@ class ActivityEmbeddingAnimationAdapter {
      */
     static class BoundsChangeAdapter extends ActivityEmbeddingAnimationAdapter {
 
-        BoundsChangeAdapter(@NonNull Animation animation, @NonNull TransitionInfo.Change change) {
-            super(animation, change);
+        BoundsChangeAdapter(@NonNull Animation animation, @NonNull TransitionInfo.Change change,
+                @NonNull TransitionInfo.Root root) {
+            super(animation, change, root);
         }
 
         @Override
         void onAnimationUpdateInner(@NonNull SurfaceControl.Transaction t) {
-            final Point offset = mChange.getEndRelOffset();
-            mTransformation.getMatrix().postTranslate(offset.x, offset.y);
+            mTransformation.getMatrix().postTranslate(mContentRelOffset.x, mContentRelOffset.y);
             t.setMatrix(mLeash, mTransformation.getMatrix(), mMatrix);
             t.setAlpha(mLeash, mTransformation.getAlpha());
 

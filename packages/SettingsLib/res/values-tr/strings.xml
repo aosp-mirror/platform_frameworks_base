@@ -257,7 +257,7 @@
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Hata raporu almak için güç menüsünde bir düğme göster"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Uyanık kal"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Şarj edilirken ekran hiçbir zaman uykuya geçmez"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI araştırmayı etkinleştir"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI araştırma günlüğünü etkinleştir"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth paketlerini yakalayın. (Bu ayarı değiştirdikten sonra Bluetooth seçimini değiştirin)"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM kilit açma"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Önyükleyicinin kilidinin açılmasına izin ver"</string>
@@ -268,8 +268,8 @@
     <string name="mock_location_app_set" msgid="4706722469342913843">"Sahte konum uygulaması: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"Ağ işlemleri"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Kablosuz ekran sertifikası"</string>
-    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Kablosuz Ayrıntılı Günlük Kaydını etkinleştir"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Kablosuz ağ taramasını kısma"</string>
+    <string name="wifi_verbose_logging" msgid="1785910450009679371">"Kablosuz ayrıntılı günlük kaydını etkinleştir"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Kablosuz ağ taramasını sınırlandır"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Kablosuz kalıcı olmayan MAC rastgele hale getirme modu"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobil veri her zaman etkin"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Tethering donanım hızlandırıcısı"</string>
@@ -305,7 +305,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Bu mod etkinleştirildiğinde, bu cihaz MAC rastgele hale getirme işlevi açık olan bir ağa her bağlandığında cihazın MAC adresi değişebilir."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sayaçlı"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sayaçsız"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Günlük Kaydedici arabellek boyutları"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Günlük kaydedici arabellek boyutları"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Gün. arabel. başına Gün. Kayd. boyutunu seç"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Günlük kaydedici kalıcı depolama alanı silinsin mi?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Kalıcı günlük kaydediciyle artık izlemediğimizde, cihazınızda bulunan günlük kaydedici verilerini silmemiz gerekmektedir."</string>
@@ -676,8 +676,8 @@
     <string name="bt_le_audio_broadcast_dialog_sub_title" msgid="268234802198852753">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapar veya çıkışı değiştirirseniz mevcut anonsunuz duraklatılır"</string>
     <string name="bt_le_audio_broadcast_dialog_switch_app" msgid="5749813313369517812">"<xliff:g id="SWITCHAPP">%1$s</xliff:g> uygulamasında anons yapın"</string>
     <string name="bt_le_audio_broadcast_dialog_different_output" msgid="2638402023060391333">"Çıkışı değiştirme"</string>
-    <string name="back_navigation_animation" msgid="8105467568421689484">"Tahmine dayalı geri hareketi animasyonları"</string>
-    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Tahmine dayalı geri hareketi için sistem animasyonlarını etkinleştirin"</string>
+    <string name="back_navigation_animation" msgid="8105467568421689484">"Tahmin edilen geri gitme animasyonları"</string>
+    <string name="back_navigation_animation_summary" msgid="741292224121599456">"Tahmin edilen geri gitme için sistem animasyonlarını etkinleştirin"</string>
     <string name="back_navigation_animation_dialog" msgid="8696966520944625596">"Bu ayar, tahmine dayalı hareket animasyonu için sistem animasyonlarını etkinleştirir. Her uygulamanın manifest dosyasında enableOnBackInvokedCallback\'in doğru değerine ayarlanması gerekir."</string>
   <string-array name="udfps_accessibility_touch_hints">
     <item msgid="1737722959616802157">"Sola taşı"</item>

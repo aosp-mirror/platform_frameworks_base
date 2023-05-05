@@ -198,9 +198,9 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private UdfpsFpmEmptyView mFpmEmptyView;
     @Mock
-    private UdfpsKeyguardView mKeyguardView;
+    private UdfpsKeyguardViewLegacy mKeyguardView;
     private final UdfpsAnimationViewController mUdfpsKeyguardViewController =
-            mock(UdfpsKeyguardViewController.class);
+            mock(UdfpsKeyguardViewControllerLegacy.class);
     @Mock
     private SystemUIDialogManager mSystemUIDialogManager;
     @Mock
@@ -248,7 +248,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
 
         when(mLayoutInflater.inflate(R.layout.udfps_view, null, false))
                 .thenReturn(mUdfpsView);
-        when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view, null))
+        when(mLayoutInflater.inflate(R.layout.udfps_keyguard_view_legacy, null))
                 .thenReturn(mKeyguardView); // for showOverlay REASON_AUTH_FPM_KEYGUARD
         when(mLayoutInflater.inflate(R.layout.udfps_bp_view, null))
                 .thenReturn(mBpView);

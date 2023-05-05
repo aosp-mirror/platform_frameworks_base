@@ -196,25 +196,36 @@ public final class CredentialManagerService
             return;
         }
 
-        CredentialManagerServiceImpl serviceToBeRemoved = null;
+        List<CredentialManagerServiceImpl> servicesToBeRemoved = new ArrayList<>();
         for (CredentialManagerServiceImpl service : services) {
             if (service != null) {
                 CredentialProviderInfo credentialProviderInfo = service.getCredentialProviderInfo();
                 ComponentName componentName =
                         credentialProviderInfo.getServiceInfo().getComponentName();
                 if (packageName.equals(componentName.getPackageName())) {
-                    serviceToBeRemoved = service;
-                    removeServiceFromMultiModeSettings(componentName.flattenToString(), userId);
-                    break;
+                    servicesToBeRemoved.add(service);
                 }
             }
         }
-        if (serviceToBeRemoved != null) {
+
+        // Iterate over all the services to be removed, and remove them from the user configurable
+        // services cache, the system services cache as well as the setting key-value pair.
+        for (CredentialManagerServiceImpl serviceToBeRemoved : servicesToBeRemoved) {
             removeServiceFromCache(serviceToBeRemoved, userId);
+            removeServiceFromSystemServicesCache(serviceToBeRemoved, userId);
+            removeServiceFromMultiModeSettings(serviceToBeRemoved.getComponentName()
+                    .flattenToString(), userId);
             CredentialDescriptionRegistry.forUser(userId)
                     .evictProviderWithPackageName(serviceToBeRemoved.getServicePackageName());
         }
-        // TODO("Iterate over system services and remove if needed")
+    }
+
+    @GuardedBy("mLock")
+    private void removeServiceFromSystemServicesCache(
+            CredentialManagerServiceImpl serviceToBeRemoved, int userId) {
+        if (mSystemServicesCacheList.get(userId) != null) {
+            mSystemServicesCacheList.get(userId).remove(serviceToBeRemoved);
+        }
     }
 
     @GuardedBy("mLock")
@@ -748,7 +759,7 @@ public final class CredentialManagerService
                     if (serviceComponentName.equals(componentName)) {
                         if (!s.getServicePackageName().equals(callingPackage)) {
                             // The component name and the package name do not match.
-                            MetricUtilities.logApiCalledSimpleV1(
+                            MetricUtilities.logApiCalledSimpleV2(
                                     ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                     ApiStatus.FAILURE, callingUid);
                             Slog.w(
@@ -757,10 +768,9 @@ public final class CredentialManagerService
                                             + "not match package name.");
                             return false;
                         }
-                        MetricUtilities.logApiCalledSimpleV1(
+                        MetricUtilities.logApiCalledSimpleV2(
                                 ApiName.IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE,
                                 ApiStatus.SUCCESS, callingUid);
-                        // TODO(b/271135048) - Update asap to use the new logging types
                         return true;
                     }
                 }

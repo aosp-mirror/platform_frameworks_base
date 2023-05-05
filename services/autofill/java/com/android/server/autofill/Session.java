@@ -27,6 +27,7 @@ import static android.service.autofill.FillRequest.FLAG_MANUAL_REQUEST;
 import static android.service.autofill.FillRequest.FLAG_PASSWORD_INPUT_TYPE;
 import static android.service.autofill.FillRequest.FLAG_PCC_DETECTION;
 import static android.service.autofill.FillRequest.FLAG_RESET_FILL_DIALOG_STATE;
+import static android.service.autofill.FillRequest.FLAG_SCREEN_HAS_CREDMAN_FIELD;
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.INVALID_REQUEST_ID;
@@ -592,6 +593,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         /** Whether the fill dialog UI is disabled. */
         private boolean mFillDialogDisabled;
+
+        /** Whether current screen has credman field. */
+        private boolean mScreenHasCredmanField;
     }
 
     /**
@@ -3088,6 +3092,20 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         final SaveInfo saveInfo = response == null ? null : response.getSaveInfo();
 
         /*
+         * Don't show save if the session has credman field
+         *
+         * TODO: add a new enum NO_SAVE_UI_CREDMAN
+         */
+        if (mSessionFlags.mScreenHasCredmanField) {
+            if (sVerbose) {
+                Slog.v(TAG, "Call to Session#showSaveLocked() rejected - "
+                        + "there is credman field in screen");
+            }
+            return new SaveResult(/* logSaveShown= */ false, /* removeSession= */ true,
+                    Event.NO_SAVE_UI_REASON_NONE);
+        }
+
+        /*
          * The Save dialog is only shown if all conditions below are met:
          *
          * - saveInfo is not null.
@@ -3817,6 +3835,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             return;
         }
 
+        if ((flags & FLAG_SCREEN_HAS_CREDMAN_FIELD) != 0) {
+            mSessionFlags.mScreenHasCredmanField = true;
+        }
+
         switch(action) {
             case ACTION_START_SESSION:
                 // View is triggering autofill.
@@ -4293,7 +4315,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private boolean isFillDialogUiEnabled() {
         synchronized (mLock) {
-            return !mSessionFlags.mFillDialogDisabled;
+            return !mSessionFlags.mFillDialogDisabled && !mSessionFlags.mScreenHasCredmanField;
         }
     }
 

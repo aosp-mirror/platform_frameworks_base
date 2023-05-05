@@ -33,6 +33,7 @@ import android.util.SparseArrayMap;
 import android.util.SparseSetArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.modules.expresslog.Counter;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.notification.NotificationManagerInternal;
@@ -114,11 +115,39 @@ class JobNotificationCoordinator {
             @JobService.JobEndNotificationPolicy int jobEndNotificationPolicy) {
         validateNotification(packageName, callingUid, notification, jobEndNotificationPolicy);
         final JobStatus jobStatus = hostingContext.getRunningJobLocked();
+        if (jobStatus == null) {
+            Slog.wtfStack(TAG, "enqueueNotification called with no running job");
+            return;
+        }
         final NotificationDetails oldDetails = mNotificationDetails.get(hostingContext);
-        if (oldDetails != null && oldDetails.notificationId != notificationId) {
-            // App is switching notification IDs. Remove association with the old one.
-            removeNotificationAssociation(hostingContext, JobParameters.STOP_REASON_UNDEFINED,
-                    jobStatus);
+        if (oldDetails == null) {
+            if (jobStatus.startedAsUserInitiatedJob) {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_initial_setNotification_call_required",
+                        jobStatus.getUid());
+            } else {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_initial_setNotification_call_optional",
+                        jobStatus.getUid());
+            }
+        } else {
+            if (jobStatus.startedAsUserInitiatedJob) {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_subsequent_setNotification_call_required",
+                        jobStatus.getUid());
+            } else {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_subsequent_setNotification_call_optional",
+                        jobStatus.getUid());
+            }
+            if (oldDetails.notificationId != notificationId) {
+                // App is switching notification IDs. Remove association with the old one.
+                removeNotificationAssociation(hostingContext, JobParameters.STOP_REASON_UNDEFINED,
+                        jobStatus);
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_setNotification_changed_notification_ids",
+                        jobStatus.getUid());
+            }
         }
         final int userId = UserHandle.getUserId(callingUid);
         if (jobStatus != null && jobStatus.startedAsUserInitiatedJob) {

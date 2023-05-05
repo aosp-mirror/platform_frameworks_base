@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+  ~ Copyright (C) 2023 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+   -->
+
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="4539824758261855508">"Správca prihlasovacích údajov"</string>
@@ -33,10 +49,16 @@
     <string name="sign_ins" msgid="4710739369149469208">"prihlasovacie údaje"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"prihlasovacie údaje"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Uložiť <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> do"</string>
-    <string name="create_passkey_in_other_device_title" msgid="9195411122362461390">"Chcete vytvoriť prístupový kľúč v inom zariadení?"</string>
+    <!-- no translation found for create_passkey_in_other_device_title (2360053098931886245) -->
+    <skip />
+    <!-- no translation found for save_password_on_other_device_title (5829084591948321207) -->
+    <skip />
+    <!-- no translation found for save_sign_in_on_other_device_title (2827990118560134692) -->
+    <skip />
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Chcete pre všetky svoje prihlasovacie údaje použiť <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Tento správca hesiel poskytovateľa <xliff:g id="USERNAME">%1$s</xliff:g> uchová vaše heslá a prístupové kľúče, aby vám pomohol ľahšie sa prihlasovať"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Nastaviť ako predvolené"</string>
+    <string name="settings" msgid="6536394145760913145">"Nastavenia"</string>
     <string name="use_once" msgid="9027366575315399714">"Použiť raz"</string>
     <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Počet hesiel: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Počet prístupových kľúčov: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Počet hesiel: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
@@ -50,8 +72,8 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"Zavrieť"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Zavrieť"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Chcete pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> použiť uložený prístupový kľúč?"</string>
-    <string name="get_dialog_title_use_sign_in_for" msgid="5283099528915572980">"Chcete pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> použiť uložené prihlasovacie údaje?"</string>
-    <string name="get_dialog_title_choose_sign_in_for" msgid="1361715440877613701">"Vyberte uložené prihlasovacie údaje pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Chcete použiť svoje prihlásenie pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Vyberte prihlásenie pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Chcete pre aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g> vybrať možnosť?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Chcete použiť tieto informácie v aplikácii <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_use_saved_passkey_for" msgid="4618100798664888512">"Prihlásiť sa inak"</string>

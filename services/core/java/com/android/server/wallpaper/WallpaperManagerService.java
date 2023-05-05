@@ -2745,8 +2745,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
-     * Sets wallpaper dim amount for the calling UID. This only applies to FLAG_SYSTEM wallpaper as
-     * the lock screen does not have a wallpaper component, so we use mWallpaperMap.
+     * Sets wallpaper dim amount for the calling UID. This applies to all destinations (home, lock)
+     * with an active wallpaper engine.
      *
      * @param dimAmount Dim amount which would be blended with the system default dimming.
      */
@@ -2756,8 +2756,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
-     * Sets wallpaper dim amount for a given UID. This only applies to FLAG_SYSTEM wallpaper as the
-     * lock screen does not have a wallpaper component, so we use mWallpaperMap.
+     * Sets wallpaper dim amount for the calling UID. This applies to all destinations (home, lock)
+     * with an active wallpaper engine.
      *
      * @param uid Caller UID that wants to set the wallpaper dim amount
      * @param dimAmount Dim amount where 0f reverts any dimming applied by the caller (fully bright)
@@ -2786,26 +2786,55 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     lockWallpaper.mWallpaperDimAmount = maxDimAmount;
                 }
 
-                if (wallpaper.connection != null) {
-                    wallpaper.connection.forEachDisplayConnector(connector -> {
-                        if (connector.mEngine != null) {
-                            try {
-                                connector.mEngine.applyDimming(maxDimAmount);
-                            } catch (RemoteException e) {
-                                Slog.w(TAG,
-                                        "Can't apply dimming on wallpaper display connector", e);
-                            }
+                if (mIsLockscreenLiveWallpaperEnabled) {
+                    boolean changed = false;
+                    for (WallpaperData wp : getActiveWallpapers()) {
+                        if (wp != null && wp.connection != null) {
+                            wp.connection.forEachDisplayConnector(connector -> {
+                                if (connector.mEngine != null) {
+                                    try {
+                                        connector.mEngine.applyDimming(maxDimAmount);
+                                    } catch (RemoteException e) {
+                                        Slog.w(TAG,
+                                                "Can't apply dimming on wallpaper display "
+                                                        + "connector",
+                                                e);
+                                    }
+                                }
+                            });
+                            // Need to extract colors again to re-calculate dark hints after
+                            // applying dimming.
+                            wp.mIsColorExtractedFromDim = true;
+                            notifyWallpaperColorsChanged(wp, wp.mWhich);
+                            changed = true;
                         }
-                    });
-                    // Need to extract colors again to re-calculate dark hints after
-                    // applying dimming.
-                    wallpaper.mIsColorExtractedFromDim = true;
-                    notifyWallpaperColorsChanged(wallpaper, FLAG_SYSTEM);
-                    if (lockWallpaper != null) {
-                        lockWallpaper.mIsColorExtractedFromDim = true;
-                        notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
                     }
-                    saveSettingsLocked(wallpaper.userId);
+                    if (changed) {
+                        saveSettingsLocked(wallpaper.userId);
+                    }
+                } else {
+                    if (wallpaper.connection != null) {
+                        wallpaper.connection.forEachDisplayConnector(connector -> {
+                            if (connector.mEngine != null) {
+                                try {
+                                    connector.mEngine.applyDimming(maxDimAmount);
+                                } catch (RemoteException e) {
+                                    Slog.w(TAG,
+                                            "Can't apply dimming on wallpaper display connector",
+                                            e);
+                                }
+                            }
+                        });
+                        // Need to extract colors again to re-calculate dark hints after
+                        // applying dimming.
+                        wallpaper.mIsColorExtractedFromDim = true;
+                        notifyWallpaperColorsChanged(wallpaper, FLAG_SYSTEM);
+                        if (lockWallpaper != null) {
+                            lockWallpaper.mIsColorExtractedFromDim = true;
+                            notifyWallpaperColorsChanged(lockWallpaper, FLAG_LOCK);
+                        }
+                        saveSettingsLocked(wallpaper.userId);
+                    }
                 }
             }
         } finally {

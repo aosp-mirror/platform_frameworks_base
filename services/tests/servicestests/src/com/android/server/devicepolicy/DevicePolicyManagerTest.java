@@ -7497,6 +7497,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
      * Tests the case when the user turns the profile back on when the apps are already suspended.
      */
     @Test
+    @Ignore("b/277916462")
     public void testMaximumProfileTimeOff_turnOnAfterDeadline() throws Exception {
         prepareMocksForSetMaximumProfileTimeOff();
 

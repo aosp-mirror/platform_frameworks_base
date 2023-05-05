@@ -29,6 +29,7 @@ import android.appwidget.AppWidgetManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
@@ -99,6 +100,7 @@ public class AccessibilitySecurityPolicy {
 
     private final Context mContext;
     private final PackageManager mPackageManager;
+    private final PackageManagerInternal mPackageManagerInternal;
     private final UserManager mUserManager;
     private final AppOpsManager mAppOpsManager;
     private final AccessibilityUserManager mAccessibilityUserManager;
@@ -116,10 +118,12 @@ public class AccessibilitySecurityPolicy {
      */
     public AccessibilitySecurityPolicy(PolicyWarningUIController policyWarningUIController,
             @NonNull Context context,
-            @NonNull AccessibilityUserManager a11yUserManager) {
+            @NonNull AccessibilityUserManager a11yUserManager,
+            @NonNull PackageManagerInternal packageManagerInternal) {
         mContext = context;
         mAccessibilityUserManager = a11yUserManager;
         mPackageManager = mContext.getPackageManager();
+        mPackageManagerInternal = packageManagerInternal;
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mPolicyWarningUIController = policyWarningUIController;
@@ -515,10 +519,8 @@ public class AccessibilitySecurityPolicy {
         try {
             // Since we treat calls from a profile as if made by its parent, using
             // MATCH_ANY_USER to query the uid of the given package name.
-            return uid == mPackageManager.getPackageUidAsUser(
-                    packageName, PackageManager.MATCH_ANY_USER, UserHandle.getUserId(uid));
-        } catch (PackageManager.NameNotFoundException e) {
-            return false;
+            return mPackageManagerInternal.isSameApp(packageName, PackageManager.MATCH_ANY_USER,
+                    uid, UserHandle.getUserId(uid));
         } finally {
             Binder.restoreCallingIdentity(token);
         }

@@ -354,12 +354,12 @@
     <string name="pointer_location_summary" msgid="957120116989798464">"চলিত স্পৰ্শ-বিষয়ক তথ্যসহ স্ক্ৰীন অভাৰলে’"</string>
     <string name="show_touches" msgid="8437666942161289025">"টেপসমূহ দেখুৱাওক"</string>
     <string name="show_touches_summary" msgid="3692861665994502193">"টিপিলে দৃশ্যায়িত ফীডবেক দিয়ক"</string>
-    <string name="show_screen_updates" msgid="2078782895825535494">"পৃষ্ঠভাগৰ আপডেইট দেখুৱাওক"</string>
-    <string name="show_screen_updates_summary" msgid="2126932969682087406">"আপডেইট হওতে গোটেই ৱিণ্ড পৃষ্ঠসমূহ ফ্লাশ্ব কৰক"</string>
+    <string name="show_screen_updates" msgid="2078782895825535494">"পৃষ্ঠভাগৰ আপডে’ট দেখুৱাওক"</string>
+    <string name="show_screen_updates_summary" msgid="2126932969682087406">"আপডে’ট হওতে গোটেই ৱিণ্ড পৃষ্ঠসমূহ ফ্লাশ্ব কৰক"</string>
     <string name="show_hw_screen_updates" msgid="2021286231267747506">"ভিউৰ আপডে’ট দেখুৱাওক"</string>
     <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"অঁকাৰ সময়ত ৱিণ্ড\'ৰ ভিতৰত ফ্লাশ্ব দৰ্শন"</string>
     <string name="show_hw_layers_updates" msgid="5268370750002509767">"হাৰ্ডৱেৰৰ স্তৰৰ আপডে\'ট দেখুৱাওক"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"হাৰ্ডৱেৰ লেয়াৰ আপডেইট হওতে সিঁহতক সেউজীয়া ৰঙেৰে ফ্লাশ্ব কৰক"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"হাৰ্ডৱেৰ লেয়াৰ আপডে’ট হওতে সিঁহতক সেউজীয়া ৰঙেৰে ফ্লাশ্ব কৰক"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"GPU অভাৰড্ৰ ডিবাগ কৰক"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"HW অ’ভাৰলে অক্ষম কৰক"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"স্ক্ৰীন কম্প’জিট কৰাৰ বাবে সদায় জিপিইউ ব্যৱহাৰ কৰক"</string>
@@ -369,7 +369,7 @@
     <string name="usb_audio_disable_routing_summary" msgid="8768242894849534699">"স্বয়ংক্ৰিয়ভাৱে ইউএছবি ধ্বনিৰ আনুষংগিক আহিলাবিলাকলৈ ৰাউটিং কৰাটো অক্ষম কৰক"</string>
     <string name="debug_layout" msgid="1659216803043339741">"লেআউটৰ সময় দেখুৱাওক"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"ক্লিপ বাউণ্ড, মাৰ্জিন আদিসমূহ দেখুৱাওক"</string>
-    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"আৰটিএল চানেকিৰ দিশ বলেৰে সলনি কৰক"</string>
+    <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"সজ্জাৰ দিশ সোঁফালৰ পৰা বাওঁফাললৈ কৰক"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"আটাইবোৰ ভাষাৰ বাবে স্ক্ৰীনৰ চানেকিৰ দিশ RTLলৈ বলেৰে সলনি কৰক"</string>
     <string name="transparent_navigation_bar" msgid="1933192171384678484">"স্বচ্ছ নেভিগেশ্বন বাৰ"</string>
     <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"ডিফ’ল্ট হিচাপে নেভিগেশ্বন বাৰ পটভূমিৰ ৰং স্বচ্ছ কৰক"</string>

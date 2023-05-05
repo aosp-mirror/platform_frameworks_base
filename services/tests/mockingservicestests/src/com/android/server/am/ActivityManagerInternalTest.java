@@ -49,7 +49,8 @@ public class ActivityManagerInternalTest {
     private static final long TEST_PROC_STATE_SEQ1 = 1111;
     private static final long TEST_PROC_STATE_SEQ2 = 1112;
 
-    @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
+    @Rule public final ApplicationExitInfoTest.ServiceThreadRule
+            mServiceThreadRule = new ApplicationExitInfoTest.ServiceThreadRule();
 
     @Mock private ActivityManagerService.Injector mMockInjector;
 

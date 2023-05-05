@@ -17,6 +17,7 @@
 package com.android.wm.shell.taskview;
 
 import static android.view.WindowManager.TRANSIT_CHANGE;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -201,6 +202,13 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         startNextTransition();
     }
 
+    void closeTaskView(@NonNull WindowContainerTransaction wct,
+            @NonNull TaskViewTaskController taskView) {
+        updateVisibilityState(taskView, false /* visible */);
+        mPending.add(new PendingTransition(TRANSIT_CLOSE, wct, taskView, null /* cookie */));
+        startNextTransition();
+    }
+
     void setTaskViewVisible(TaskViewTaskController taskView, boolean visible) {
         if (mTaskViews.get(taskView) == null) return;
         if (mTaskViews.get(taskView).mVisible == visible) return;
@@ -297,6 +305,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
             if (TransitionUtil.isClosingType(chg.getMode())) {
                 final boolean isHide = chg.getMode() == TRANSIT_TO_BACK;
                 TaskViewTaskController tv = findTaskView(chg.getTaskInfo());
+                if (tv == null && !isHide) {
+                    // TaskView can be null when closing
+                    changesHandled++;
+                    continue;
+                }
                 if (tv == null) {
                     if (pending != null) {
                         Slog.w(TAG, "Found a non-TaskView task in a TaskView Transition. This "

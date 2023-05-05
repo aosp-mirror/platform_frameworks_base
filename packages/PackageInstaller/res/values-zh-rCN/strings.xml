@@ -26,7 +26,7 @@
     <string name="install_done" msgid="5987363587661783896">"已安装应用。"</string>
     <string name="install_confirm_question" msgid="7663733664476363311">"要安装此应用吗？"</string>
     <string name="install_confirm_question_update" msgid="3348888852318388584">"要更新此应用吗？"</string>
-    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"要通过<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>更新此应用？\n\n此应用通常通过<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>接收更新。如果通过其他来源更新，手机未来可能会收到任何来源的更新。应用功能可能会变化。"</string>
+    <string name="install_confirm_question_update_owner_reminder" msgid="3750986542284587290">"要通过<xliff:g id="NEW_UPDATE_OWNER">%1$s</xliff:g>更新此应用吗？\n\n此应用通常通过<xliff:g id="EXISTING_UPDATE_OWNER">%2$s</xliff:g>接收更新。如果通过其他来源更新，手机未来可能会收到任何来源的更新。应用功能可能会变化。"</string>
     <string name="install_failed" msgid="5777824004474125469">"未安装应用。"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"系统已禁止安装该软件包。"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"应用未安装：软件包与现有软件包存在冲突。"</string>
