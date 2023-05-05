@@ -51,4 +51,9 @@ public class FakeCastController extends BaseLeakChecker<Callback> implements Cas
     public void stopCasting(CastDevice device) {
 
     }
+
+    @Override
+    public boolean hasConnectedCastDevice() {
+        return false;
+    }
 }
