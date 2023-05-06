@@ -48,6 +48,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -144,6 +145,8 @@ public class DeviceIdleControllerTest {
     private SensorManager mSensorManager;
     @Mock
     private TelephonyManager mTelephonyManager;
+    @Mock
+    private Sensor mOffBodySensor;
 
     class InjectorForTest extends DeviceIdleController.Injector {
         ConnectivityManager connectivityManager;
@@ -2407,6 +2410,82 @@ public class DeviceIdleControllerTest {
         enterLightState(LIGHT_STATE_OVERRIDE);
         setEmergencyCallActive(true);
         verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+    }
+
+    @Test
+    public void testLowLatencyBodyDetection_NoBodySensor() {
+        mConstants.USE_BODY_SENSOR = true;
+        doReturn(null).when(mSensorManager).getDefaultSensor(
+                eq(Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT), anyBoolean());
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+        verify(mSensorManager, never())
+                .registerListener(any(), any(), anyInt());
+    }
+
+    @Test
+    public void testLowLatencyBodyDetection_NoBatterySaver_QuickDoze() {
+        mConstants.USE_BODY_SENSOR = true;
+        doReturn(mOffBodySensor)
+                .when(mSensorManager)
+                .getDefaultSensor(eq(Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT), anyBoolean());
+        PowerSaveState powerSaveState = new PowerSaveState.Builder().setBatterySaverEnabled(
+                false).build();
+        when(mPowerManagerInternal.getLowPowerState(anyInt()))
+                .thenReturn(powerSaveState);
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager)
+                .registerListener(listenerCaptor.capture(), eq(mOffBodySensor),
+                        eq(SensorManager.SENSOR_DELAY_NORMAL));
+        final SensorEventListener listener = listenerCaptor.getValue();
+        // Set the device as off body
+        float[] valsZero = {0.0f};
+        SensorEvent offbodyEvent = new SensorEvent(mOffBodySensor, 1, 1L, valsZero);
+        listener.onSensorChanged(offbodyEvent);
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+
+        // Set the device as on body
+        float[] valsNonZero = {1.0f};
+        SensorEvent onbodyEvent = new SensorEvent(mOffBodySensor, 1, 1L, valsNonZero);
+        listener.onSensorChanged(onbodyEvent);
+        assertFalse(mDeviceIdleController.isQuickDozeEnabled());
+        verifyStateConditions(STATE_ACTIVE);
+    }
+
+    @Test
+    public void testLowLatencyBodyDetection_WithBatterySaver_QuickDoze() {
+        mConstants.USE_BODY_SENSOR = true;
+        doReturn(mOffBodySensor)
+                .when(mSensorManager)
+                .getDefaultSensor(eq(Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT), anyBoolean());
+        PowerSaveState powerSaveState = new PowerSaveState.Builder().setBatterySaverEnabled(
+                true).build();
+        when(mPowerManagerInternal.getLowPowerState(anyInt()))
+                .thenReturn(powerSaveState);
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+
+        ArgumentCaptor<SensorEventListener> listenerCaptor =
+                ArgumentCaptor.forClass(SensorEventListener.class);
+        verify(mSensorManager)
+                .registerListener(listenerCaptor.capture(), eq(mOffBodySensor),
+                        eq(SensorManager.SENSOR_DELAY_NORMAL));
+        final SensorEventListener listener = listenerCaptor.getValue();
+        // Set the device as off body
+        float[] valsZero = {0.0f};
+        SensorEvent offbodyEvent = new SensorEvent(mOffBodySensor, 1, 1L, valsZero);
+        listener.onSensorChanged(offbodyEvent);
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+
+        // Set the device as on body. Quick doze should remain enabled because battery saver is on.
+        float[] valsNonZero = {1.0f};
+        SensorEvent onbodyEvent = new SensorEvent(mOffBodySensor, 1, 1L, valsNonZero);
+        listener.onSensorChanged(onbodyEvent);
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
     }
 
     private void enterDeepState(int state) {

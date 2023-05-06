@@ -363,6 +363,11 @@ public class DeviceIdleController extends SystemService
     private Location mLastGenericLocation;
     @GuardedBy("this")
     private Location mLastGpsLocation;
+    @GuardedBy("this")
+    private boolean mBatterySaverEnabled;
+    @GuardedBy("this")
+    private boolean mIsOffBody;
+    private Sensor mOffBodySensor;
 
     /** Time in the elapsed realtime timebase when this listener last received a motion event. */
     @GuardedBy("this")
@@ -421,6 +426,7 @@ public class DeviceIdleController extends SystemService
     private static final int ACTIVE_REASON_FORCED = 6;
     private static final int ACTIVE_REASON_ALARM = 7;
     private static final int ACTIVE_REASON_EMERGENCY_CALL = 8;
+    private static final int ACTIVE_REASON_ONBODY = 9;
 
     @VisibleForTesting
     static String stateToString(int state) {
@@ -817,6 +823,55 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    /**
+     * LowLatencyOffBodyListener monitors if a device is on body or off body.
+     */
+    @VisibleForTesting
+    final class LowLatencyOffBodyListener implements SensorEventListener {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            if (DEBUG) {
+                Slog.d(TAG, "LowLatencyOffBodyListener detects onSensorChanged event, values are: "
+                        + Arrays.toString(event.values));
+            }
+            if (event.values == null || event.values.length == 0) {
+                // The event returned should contain a single value to indicate off-body state.
+                // No value indicates something went wrong. Take no action and log an error.
+                Slog.e(TAG,
+                        "LowLatencyOffBodyListener detects onSensorChanged event but no event "
+                                + "value returns.");
+                return;
+            }
+            synchronized (DeviceIdleController.this) {
+                mIsOffBody = (event.values[0] == 0);
+                // Get into quick doze faster when the device is off body instead of taking
+                // traditional multi-stage approach.
+                updateQuickDozeFlagLocked();
+                if (!mIsOffBody && !mBatterySaverEnabled) {
+                    mActiveReason = ACTIVE_REASON_ONBODY;
+                    becomeActiveLocked("onbody", Process.myUid());
+                }
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+
+        public void registerLocked() {
+            mOffBodySensor =
+                    mSensorManager.getDefaultSensor(Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT, true);
+            if (mOffBodySensor == null) {
+                Slog.w(TAG, "Body sensor is NULL, unable to register mOffBodySensor.");
+                return;
+            }
+            mSensorManager.registerListener(this, mOffBodySensor,
+                    SensorManager.SENSOR_DELAY_NORMAL);
+        }
+    }
+
+    @VisibleForTesting
+    final LowLatencyOffBodyListener mLowLatencyOffBodyListener = new LowLatencyOffBodyListener();
+
     @VisibleForTesting
     final class MotionListener extends TriggerEventListener
             implements SensorEventListener {
@@ -978,6 +1033,7 @@ public class DeviceIdleController extends SystemService
          */
         private static final String KEY_WAIT_FOR_UNLOCK = "wait_for_unlock";
         private static final String KEY_USE_WINDOW_ALARMS = "use_window_alarms";
+        private static final String KEY_USE_BODY_SENSOR = "use_body_sensor";
 
         private long mDefaultFlexTimeShort =
                 !COMPRESS_TIME ? 60 * 1000L : 5 * 1000L;
@@ -1037,6 +1093,7 @@ public class DeviceIdleController extends SystemService
         private long mDefaultNotificationAllowlistDurationMs = 30 * 1000L;
         private boolean mDefaultWaitForUnlock = true;
         private boolean mDefaultUseWindowAlarms = true;
+        private boolean mDefaultUseBodySensor = false;
 
         /**
          * A somewhat short alarm window size that we will tolerate for various alarm timings.
@@ -1277,6 +1334,11 @@ public class DeviceIdleController extends SystemService
          */
         public boolean USE_WINDOW_ALARMS = mDefaultUseWindowAlarms;
 
+        /**
+         * Whether to use an on/off body signal to affect state transition policy.
+         */
+        public boolean USE_BODY_SENSOR = mDefaultUseBodySensor;
+
         private final boolean mSmallBatteryDevice;
 
         public Constants() {
@@ -1383,6 +1445,8 @@ public class DeviceIdleController extends SystemService
                     com.android.internal.R.bool.device_idle_wait_for_unlock);
             mDefaultUseWindowAlarms = res.getBoolean(
                     com.android.internal.R.bool.device_idle_use_window_alarms);
+            mDefaultUseBodySensor = res.getBoolean(
+                    com.android.internal.R.bool.device_idle_use_body_sensor);
 
             FLEX_TIME_SHORT = mDefaultFlexTimeShort;
             LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT = mDefaultLightIdleAfterInactiveTimeout;
@@ -1416,6 +1480,7 @@ public class DeviceIdleController extends SystemService
             NOTIFICATION_ALLOWLIST_DURATION_MS = mDefaultNotificationAllowlistDurationMs;
             WAIT_FOR_UNLOCK = mDefaultWaitForUnlock;
             USE_WINDOW_ALARMS = mDefaultUseWindowAlarms;
+            USE_BODY_SENSOR = mDefaultUseBodySensor;
         }
 
         private long getTimeout(long defTimeout, long compTimeout) {
@@ -1577,6 +1642,10 @@ public class DeviceIdleController extends SystemService
                             USE_WINDOW_ALARMS = properties.getBoolean(
                                     KEY_USE_WINDOW_ALARMS, mDefaultUseWindowAlarms);
                             break;
+                        case KEY_USE_BODY_SENSOR:
+                            USE_BODY_SENSOR = properties.getBoolean(
+                                    KEY_USE_BODY_SENSOR, mDefaultUseBodySensor);
+                            break;
                         default:
                             Slog.e(TAG, "Unknown configuration key: " + name);
                             break;
@@ -1713,6 +1782,9 @@ public class DeviceIdleController extends SystemService
 
             pw.print("    "); pw.print(KEY_USE_WINDOW_ALARMS); pw.print("=");
             pw.println(USE_WINDOW_ALARMS);
+
+            pw.print("    "); pw.print(KEY_USE_BODY_SENSOR); pw.print("=");
+            pw.println(USE_BODY_SENSOR);
         }
     }
 
@@ -2577,15 +2649,19 @@ public class DeviceIdleController extends SystemService
                         mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
 
+                if (mConstants.USE_BODY_SENSOR) {
+                    mLowLatencyOffBodyListener.registerLocked();
+                }
                 mLocalPowerManager.registerLowPowerModeObserver(ServiceType.QUICK_DOZE,
                         state -> {
                             synchronized (DeviceIdleController.this) {
-                                updateQuickDozeFlagLocked(state.batterySaverEnabled);
+                                mBatterySaverEnabled = state.batterySaverEnabled;
+                                updateQuickDozeFlagLocked();
                             }
                         });
-                updateQuickDozeFlagLocked(
-                        mLocalPowerManager.getLowPowerState(
-                                ServiceType.QUICK_DOZE).batterySaverEnabled);
+                mBatterySaverEnabled = mLocalPowerManager.getLowPowerState(
+                        ServiceType.QUICK_DOZE).batterySaverEnabled;
+                updateQuickDozeFlagLocked();
 
                 mLocalActivityTaskManager.registerScreenObserver(mScreenObserver);
 
@@ -3271,6 +3347,17 @@ public class DeviceIdleController extends SystemService
     boolean isQuickDozeEnabled() {
         synchronized (this) {
             return mQuickDozeActivated;
+        }
+    }
+
+    /** Calls to {@link #updateQuickDozeFlagLocked(boolean)} by considering appropriate signals. */
+    @GuardedBy("this")
+    private void updateQuickDozeFlagLocked() {
+        if (mConstants.USE_BODY_SENSOR) {
+            // Only disable the quick doze flag when the device is on body and battery saver is off.
+            updateQuickDozeFlagLocked(mIsOffBody || mBatterySaverEnabled);
+        } else {
+            updateQuickDozeFlagLocked(mBatterySaverEnabled);
         }
     }
 
