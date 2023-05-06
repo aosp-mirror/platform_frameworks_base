@@ -24,6 +24,7 @@ import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_RESOURCE_UPDATED;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESOURCE_TYPE;
@@ -329,6 +330,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         @ColorInt int backgroundColorForTransition = 0;
         final int wallpaperTransit = getWallpaperTransitType(info);
         boolean isDisplayRotationAnimationStarted = false;
+        final boolean isDreamTransition = isDreamTransition(info);
+
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change.hasAllFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY
@@ -424,7 +427,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // Don't animate anything that isn't independent.
             if (!TransitionInfo.isIndependent(change, info)) continue;
 
-            Animation a = loadAnimation(info, change, wallpaperTransit);
+            Animation a = loadAnimation(info, change, wallpaperTransit, isDreamTransition);
             if (a != null) {
                 if (isTask) {
                     final @TransitionType int type = info.getType();
@@ -519,6 +522,18 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         return true;
     }
 
+    private static boolean isDreamTransition(@NonNull TransitionInfo info) {
+        for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+            final TransitionInfo.Change change = info.getChanges().get(i);
+            if (change.getTaskInfo() != null
+                    && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_DREAM) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     @Override
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
@@ -572,7 +587,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
     @Nullable
     private Animation loadAnimation(@NonNull TransitionInfo info,
-            @NonNull TransitionInfo.Change change, int wallpaperTransit) {
+            @NonNull TransitionInfo.Change change, int wallpaperTransit,
+            boolean isDreamTransition) {
         Animation a;
 
         final int type = info.getType();
@@ -630,7 +646,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             // If there's a scene-transition, then jump-cut.
             return null;
         } else {
-            a = loadAttributeAnimation(info, change, wallpaperTransit, mTransitionAnimation);
+            a = loadAttributeAnimation(
+                    info, change, wallpaperTransit, mTransitionAnimation, isDreamTransition);
         }
 
         if (a != null) {
