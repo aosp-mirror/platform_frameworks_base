@@ -300,7 +300,8 @@ public class Bubble implements BubbleViewProvider {
                 getShortcutId(),
                 getIcon(),
                 getUser().getIdentifier(),
-                getPackageName());
+                getPackageName(),
+                getTitle());
     }
 
     @Override

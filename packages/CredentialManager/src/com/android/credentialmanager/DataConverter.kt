@@ -213,7 +213,7 @@ class GetFlowUtils {
                     }
                 }
             return com.android.credentialmanager.getflow.RequestDisplayInfo(
-                appName = originName
+                appName = originName?.ifEmpty { null }
                     ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                     ?: return null,
                 preferImmediatelyAvailableCredentials = preferImmediatelyAvailableCredentials,
@@ -286,7 +286,8 @@ class GetFlowUtils {
                             pendingIntent = credentialEntry.pendingIntent,
                             fillInIntent = it.frameworkExtrasIntent,
                             credentialType = CredentialType.UNKNOWN,
-                            credentialTypeDisplayName = credentialEntry.typeDisplayName.toString(),
+                            credentialTypeDisplayName =
+                            credentialEntry.typeDisplayName?.toString().orEmpty(),
                             userName = credentialEntry.title.toString(),
                             displayName = credentialEntry.subtitle?.toString(),
                             icon = credentialEntry.icon.loadDrawable(context),
@@ -461,7 +462,7 @@ class CreateFlowUtils {
             if (requestInfo == null) {
                 return null
             }
-            val appLabel = originName
+            val appLabel = originName?.ifEmpty { null }
                 ?: getAppLabel(context.packageManager, requestInfo.appPackageName)
                 ?: return null
             val createCredentialRequest = requestInfo.createCredentialRequest ?: return null

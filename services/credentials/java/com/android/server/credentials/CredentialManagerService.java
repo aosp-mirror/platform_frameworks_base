@@ -18,7 +18,6 @@ package com.android.server.credentials;
 
 import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS;
 import static android.Manifest.permission.CREDENTIAL_MANAGER_SET_ORIGIN;
-import static android.Manifest.permission.LAUNCH_CREDENTIAL_SELECTOR;
 import static android.content.Context.CREDENTIAL_SERVICE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -26,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.provider.Settings;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -46,7 +46,6 @@ import android.credentials.ISetEnabledProvidersCallback;
 import android.credentials.PrepareGetCredentialResponseInternal;
 import android.credentials.RegisterCredentialDescriptionRequest;
 import android.credentials.UnregisterCredentialDescriptionRequest;
-import android.credentials.ui.IntentFactory;
 import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.IBinder;
@@ -69,6 +68,7 @@ import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.SecureSettingsServiceNameResolver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -282,6 +282,21 @@ public final class CredentialManagerService
         }
     }
 
+    private static Set<String> getPrimaryProvidersForUserId(Context context, int userId) {
+        final int resolvedUserId = ActivityManager.handleIncomingUser(
+                Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, false,
+                "getPrimaryProvidersForUserId", null);
+        SecureSettingsServiceNameResolver resolver = new SecureSettingsServiceNameResolver(
+                context, Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                /* isMultipleMode= */ true);
+        String[] serviceNames = resolver.readServiceNameList(resolvedUserId);
+        if (serviceNames == null) {
+            return new HashSet<String>();
+        }
+        return new HashSet<String>(Arrays.asList(serviceNames));
+    }
+
     @GuardedBy("mLock")
     private List<CredentialManagerServiceImpl> getCredentialProviderServicesLocked(int userId) {
         List<CredentialManagerServiceImpl> concatenatedServices = new ArrayList<>();
@@ -468,7 +483,7 @@ public final class CredentialManagerService
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
-                            getEnabledProviders(),
+                            getEnabledProvidersForUser(userId),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);
@@ -523,7 +538,7 @@ public final class CredentialManagerService
                             getCredentialCallback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
-                            getEnabledProviders(),
+                            getEnabledProvidersForUser(userId),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan,
                             prepareGetCredentialCallback);
@@ -641,7 +656,8 @@ public final class CredentialManagerService
                             request,
                             callback,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
-                            getEnabledProviders(),
+                            getEnabledProvidersForUser(userId),
+                            getPrimaryProvidersForUserId(getContext(), userId),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);
@@ -689,7 +705,8 @@ public final class CredentialManagerService
 
         @Override
         public void setEnabledProviders(
-                List<String> providers, int userId, ISetEnabledProvidersCallback callback) {
+                List<String>  primaryProviders, List<String> providers, int userId,
+                ISetEnabledProvidersCallback callback) {
             if (!hasWriteSecureSettingsPermission()) {
                 try {
                     callback.onError(
@@ -710,17 +727,24 @@ public final class CredentialManagerService
                             "setEnabledProviders",
                             null);
 
-            String storedValue = String.join(":", providers);
-            if (!Settings.Secure.putStringForUser(
-                    getContext().getContentResolver(),
-                    Settings.Secure.CREDENTIAL_SERVICE,
-                    storedValue,
-                    userId)) {
-                Slog.e(TAG, "Failed to store setting containing enabled providers");
+            boolean writeEnabledStatus =
+                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                            Settings.Secure.CREDENTIAL_SERVICE,
+                            String.join(":", providers),
+                            userId);
+
+            boolean writePrimaryStatus =
+                    Settings.Secure.putStringForUser(getContext().getContentResolver(),
+                            Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                            String.join(":", primaryProviders),
+                            userId);
+
+            if (!writeEnabledStatus || !writePrimaryStatus) {
+                Slog.e(TAG, "Failed to store setting containing enabled or primary providers");
                 try {
                     callback.onError(
                             "failed_setting_store",
-                            "Failed to store setting containing enabled providers");
+                            "Failed to store setting containing enabled or primary providers");
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Issue with invoking error response: ", e);
                     return;
@@ -734,10 +758,6 @@ public final class CredentialManagerService
                 Slog.e(TAG, "Issue with invoking response: ", e);
                 // TODO: Propagate failure
             }
-
-            // Send an intent to the UI that we have new enabled providers.
-            getContext().sendBroadcast(IntentFactory.createProviderUpdateIntent(),
-                    LAUNCH_CREDENTIAL_SELECTOR);
         }
 
         @Override
@@ -785,7 +805,8 @@ public final class CredentialManagerService
             verifyGetProvidersPermission();
 
             return CredentialProviderInfoFactory.getCredentialProviderServices(
-                    mContext, userId, providerFilter, getEnabledProviders());
+                    mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
+                    getPrimaryProvidersForUserId(mContext, userId));
         }
 
         @Override
@@ -795,7 +816,8 @@ public final class CredentialManagerService
 
             final int userId = UserHandle.getCallingUserId();
             return CredentialProviderInfoFactory.getCredentialProviderServicesForTesting(
-                    mContext, userId, providerFilter, getEnabledProviders());
+                    mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
+                    getPrimaryProvidersForUserId(mContext, userId));
         }
 
         @Override
@@ -811,24 +833,26 @@ public final class CredentialManagerService
             }
         }
 
-        @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
-        // this.mLock
-        private Set<ComponentName> getEnabledProviders() {
+        private Set<ComponentName> getEnabledProvidersForUser(int userId) {
+            final int resolvedUserId = ActivityManager.handleIncomingUser(
+                Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, false,
+                "getEnabledProvidersForUser", null);
+
             Set<ComponentName> enabledProviders = new HashSet<>();
-            synchronized (mLock) {
-                runForUser(
-                        (service) -> {
-                            try {
-                                enabledProviders.add(
-                                        service.getCredentialProviderInfo()
-                                                .getServiceInfo().getComponentName());
-                            } catch (NullPointerException e) {
-                                // Safe check
-                                Slog.e(TAG, "Skipping provider as either the providerInfo"
-                                        + " or serviceInfo is null - weird");
-                            }
-                        });
+            String directValue = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(), Settings.Secure.CREDENTIAL_SERVICE, resolvedUserId);
+
+            if (!TextUtils.isEmpty(directValue)) {
+                String[] components = directValue.split(":");
+                for (String componentString : components) {
+                    ComponentName component = ComponentName.unflattenFromString(componentString);
+                    if (component != null) {
+                        enabledProviders.add(component);
+                    }
+                }
             }
+
             return enabledProviders;
         }
 
@@ -858,7 +882,7 @@ public final class CredentialManagerService
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, null),
-                            getEnabledProviders(),
+                            getEnabledProvidersForUser(userId),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);

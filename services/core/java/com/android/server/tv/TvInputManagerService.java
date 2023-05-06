@@ -2629,6 +2629,10 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionState).notifyAdBufferReady(buffer);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in notifyAdBuffer", e);
+                    } finally {
+                        if (buffer != null) {
+                            buffer.getSharedMemory().close();
+                        }
                     }
                 }
             } finally {
@@ -3891,10 +3895,13 @@ public final class TvInputManagerService extends SystemService {
                     return;
                 }
                 try {
-                    mSessionState.client.onAdBufferConsumed(
-                            buffer, mSessionState.seq);
+                    mSessionState.client.onAdBufferConsumed(buffer, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onAdBufferConsumed", e);
+                } finally {
+                    if (buffer != null) {
+                        buffer.getSharedMemory().close();
+                    }
                 }
             }
         }

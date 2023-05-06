@@ -480,6 +480,7 @@
   <java-symbol type="bool" name="config_multiuserDelayUserDataLocking" />
   <java-symbol type="bool" name="config_multiuserVisibleBackgroundUsers" />
   <java-symbol type="bool" name="config_multiuserVisibleBackgroundUsersOnDefaultDisplay" />
+  <java-symbol type="bool" name="config_enableAppCloningBuildingBlocks" />
   <java-symbol type="bool" name="config_enableTimeoutToDockUserWhenDocked" />
   <java-symbol type="integer" name="config_userTypePackageWhitelistMode"/>
   <java-symbol type="xml" name="config_user_types" />
@@ -1698,7 +1699,6 @@
   <java-symbol type="bool" name="config_carDockEnablesAccelerometer" />
   <java-symbol type="bool" name="config_customUserSwitchUi" />
   <java-symbol type="bool" name="config_deskDockEnablesAccelerometer" />
-  <java-symbol type="bool" name="config_deskRespectsNoSensorAndLockedWithoutAccelerometer" />
   <java-symbol type="bool" name="config_disableMenuKeyInLockScreen" />
   <java-symbol type="bool" name="config_enableCarDockHomeLaunch" />
   <java-symbol type="bool" name="config_enableLockBeforeUnlockScreen" />

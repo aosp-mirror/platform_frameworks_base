@@ -232,7 +232,8 @@ public class ConversionUtil {
                 recognitionEvent.captureAvailable, captureSession, recognitionEvent.captureDelayMs,
                 recognitionEvent.capturePreambleMs, recognitionEvent.triggerInData, audioFormat,
                 recognitionEvent.data,
-                recognitionEvent.recognitionStillActive, aidlEvent.halEventReceivedMillis);
+                recognitionEvent.recognitionStillActive, aidlEvent.halEventReceivedMillis,
+                aidlEvent.token);
     }
 
     public static SoundTrigger.RecognitionEvent aidl2apiPhraseRecognitionEvent(
@@ -254,7 +255,8 @@ public class ConversionUtil {
                 recognitionEvent.common.captureDelayMs,
                 recognitionEvent.common.capturePreambleMs, recognitionEvent.common.triggerInData,
                 audioFormat,
-                recognitionEvent.common.data, apiExtras, aidlEvent.halEventReceivedMillis);
+                recognitionEvent.common.data, apiExtras, aidlEvent.halEventReceivedMillis,
+                aidlEvent.token);
     }
 
     // In case of a null input returns a non-null valid output.

@@ -60,13 +60,16 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.Pools;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -179,6 +182,8 @@ import java.util.function.Supplier;
  */
 @SystemService(Context.APP_OPS_SERVICE)
 public class AppOpsManager {
+    private static final String LOG_TAG = "AppOpsManager";
+
     /**
      * This is a subtle behavior change to {@link #startWatchingMode}.
      *
@@ -7517,6 +7522,7 @@ public class AppOpsManager {
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(int code, int uid, @Mode int mode) {
+        logAnySeriousModeChanges(code, uid, null, mode);
         try {
             mService.setUidMode(code, uid, mode);
         } catch (RemoteException e) {
@@ -7537,6 +7543,7 @@ public class AppOpsManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(@NonNull String appOp, int uid, @Mode int mode) {
+        logAnySeriousModeChanges(strOpToOp(appOp), uid, null, mode);
         try {
             mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
         } catch (RemoteException e) {
@@ -7572,11 +7579,32 @@ public class AppOpsManager {
         }
     }
 
+    private void logAnySeriousModeChanges(int code, int uid, String packageName, @Mode int mode) {
+        // TODO (b/280869337): Remove this once we have the required data.
+        if (code != OP_RUN_ANY_IN_BACKGROUND || mode == MODE_ALLOWED) {
+            return;
+        }
+        final StringBuilder log = new StringBuilder("Attempt to change RUN_ANY_IN_BACKGROUND to ")
+                .append(modeToName(mode))
+                .append(" for uid: ")
+                .append(UserHandle.formatUid(uid))
+                .append(" package: ")
+                .append(packageName)
+                .append(" by: ")
+                .append(mContext.getOpPackageName());
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            Slog.wtfStack(LOG_TAG, log.toString());
+        } else {
+            Log.w(LOG_TAG, log.toString());
+        }
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(int code, int uid, String packageName, @Mode int mode) {
+        logAnySeriousModeChanges(code, uid, packageName, mode);
         try {
             mService.setMode(code, uid, packageName, mode);
         } catch (RemoteException e) {
@@ -7599,6 +7627,7 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(@NonNull String op, int uid, @Nullable String packageName,
             @Mode int mode) {
+        logAnySeriousModeChanges(strOpToOp(op), uid, packageName, mode);
         try {
             mService.setMode(strOpToOp(op), uid, packageName, mode);
         } catch (RemoteException e) {
