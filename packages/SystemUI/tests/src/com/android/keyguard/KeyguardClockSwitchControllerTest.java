@@ -134,6 +134,7 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
     private KeyguardClockSwitchController mController;
     private View mSliceView;
+    private LinearLayout mStatusArea;
     private FakeExecutor mExecutor;
 
     @Before
@@ -195,8 +196,8 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
 
         mSliceView = new View(getContext());
         when(mView.findViewById(R.id.keyguard_slice_view)).thenReturn(mSliceView);
-        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(
-                new LinearLayout(getContext()));
+        mStatusArea = new LinearLayout(getContext());
+        when(mView.findViewById(R.id.keyguard_status_area)).thenReturn(mStatusArea);
     }
 
     @Test
@@ -399,6 +400,15 @@ public class KeyguardClockSwitchControllerTest extends SysuiTestCase {
     public void testGetClock_nullClock_returnsNull() {
         when(mClockEventController.getClock()).thenReturn(null);
         assertNull(mController.getClock());
+    }
+
+    @Test
+    public void testSetAlpha_setClockAlphaForCLockFace() {
+        mController.onViewAttached();
+        mController.setAlpha(0.5f);
+        verify(mLargeClockView).setAlpha(0.5f);
+        verify(mSmallClockView).setAlpha(0.5f);
+        assertEquals(0.5f, mStatusArea.getAlpha(), 0.0f);
     }
 
     private void verifyAttachment(VerificationMode times) {
