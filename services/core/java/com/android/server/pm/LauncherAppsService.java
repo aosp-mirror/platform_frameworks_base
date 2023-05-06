@@ -1330,7 +1330,11 @@ public class LauncherAppsService extends SystemService {
         @Override
         public PendingIntent getActivityLaunchIntent(String callingPackage, ComponentName component,
                 UserHandle user) {
-            ensureShortcutPermission(callingPackage);
+            if (mContext.checkPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS,
+                    injectBinderCallingPid(), injectBinderCallingUid())
+                            != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException("Permission START_TASKS_FROM_RECENTS required");
+            }
             if (!canAccessProfile(user.getIdentifier(), "Cannot start activity")) {
                 throw new ActivityNotFoundException("Activity could not be found");
             }
