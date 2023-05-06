@@ -265,7 +265,7 @@ final class PolicyDefinition<V> {
                     //  never used, but might need some refactoring to not always assume a non-null
                     //  mechanism.
                     TRUE_MORE_RESTRICTIVE,
-                    POLICY_FLAG_LOCAL_ONLY_POLICY,
+                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
                     PolicyEnforcerCallbacks::setApplicationHidden,
                     new BooleanPolicySerializer());
 
@@ -290,7 +290,7 @@ final class PolicyDefinition<V> {
                     new AccountTypePolicyKey(
                             DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY),
                     TRUE_MORE_RESTRICTIVE,
-                    POLICY_FLAG_LOCAL_ONLY_POLICY,
+                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
                     // Nothing is enforced, we just need to store it
                     (Boolean value, Context context, Integer userId, PolicyKey policyKey) -> true,
                     new BooleanPolicySerializer());
@@ -311,7 +311,7 @@ final class PolicyDefinition<V> {
     static PolicyDefinition<Set<String>> PERMITTED_INPUT_METHODS = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY),
             new MostRecent<>(),
-            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
             (Set<String> value, Context context, Integer userId, PolicyKey policyKey) -> true,
             new StringSetPolicySerializer());
 
@@ -319,14 +319,14 @@ final class PolicyDefinition<V> {
     static PolicyDefinition<Boolean> SCREEN_CAPTURE_DISABLED = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY),
             TRUE_MORE_RESTRICTIVE,
-            /* flags= */ 0,
+            POLICY_FLAG_INHERITABLE,
             PolicyEnforcerCallbacks::setScreenCaptureDisabled,
             new BooleanPolicySerializer());
 
     static PolicyDefinition<Boolean> PERSONAL_APPS_SUSPENDED = new PolicyDefinition<>(
             new NoArgsPolicyKey(DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY),
             new MostRecent<>(),
-            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
             PolicyEnforcerCallbacks::setPersonalAppsSuspended,
             new BooleanPolicySerializer());
 
@@ -547,7 +547,7 @@ final class PolicyDefinition<V> {
             String restriction, int flags) {
         String identifier = DevicePolicyIdentifiers.getIdentifierForUserRestriction(restriction);
         UserRestrictionPolicyKey key = new UserRestrictionPolicyKey(identifier, restriction);
-        flags |= POLICY_FLAG_USER_RESTRICTION_POLICY;
+        flags |= (POLICY_FLAG_USER_RESTRICTION_POLICY | POLICY_FLAG_INHERITABLE);
         PolicyDefinition<Boolean> definition = new PolicyDefinition<>(
                 key,
                 TRUE_MORE_RESTRICTIVE,
