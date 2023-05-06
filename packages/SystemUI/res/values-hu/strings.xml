@@ -286,9 +286,9 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Indítás"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Leállítás"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Egykezes mód"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Feloldja az eszközmikrofon letiltását?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Feloldja az eszközkamera letiltását?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Feloldja az eszközkamera és -mikrofon letiltását?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Feloldja az eszköz mikrofonjának letiltását?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Feloldja az eszköz kamerájának letiltását?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Feloldja az eszköz kamerájának és mikrofonjának letiltását?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Ezzel feloldja a hozzáférés letiltását az összes olyan alkalmazás és szolgáltatás esetében, amelyek számára engedélyezte a mikrofon használatát."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Ezzel feloldja a hozzáférés letiltását az összes olyan alkalmazás és szolgáltatás esetében, amelyek számára engedélyezte a kamera használatát."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Ezzel feloldja a hozzáférés letiltását az összes olyan alkalmazás és szolgáltatás esetében, amelyek számára engedélyezte a kamera vagy a mikrofon használatát."</string>
@@ -778,7 +778,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Áthelyezés a következő pozícióba: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Vezérlők"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Válassza ki azokat a vezérlőelemeket, amelyhez hozzá szeretne férni a Gyorsbeállítások között"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tartsa lenyomva, és húzza a vezérlők átrendezéséhez"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"A vezérlőket húzással lehet átrendezni"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Minden vezérlő eltávolítva"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"A rendszer nem mentette a módosításokat"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Többi alkalmazás megtekintése"</string>
