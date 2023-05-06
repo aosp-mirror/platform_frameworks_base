@@ -395,7 +395,8 @@ public class PowerGroup {
 
     @VisibleForTesting
     int getDesiredScreenPolicyLocked(boolean quiescent, boolean dozeAfterScreenOff,
-            boolean bootCompleted, boolean screenBrightnessBoostInProgress) {
+            boolean bootCompleted, boolean screenBrightnessBoostInProgress,
+            boolean brightWhenDozing) {
         final int wakefulness = getWakefulnessLocked();
         final int wakeLockSummary = getWakeLockSummaryLocked();
         if (wakefulness == WAKEFULNESS_ASLEEP || quiescent) {
@@ -407,8 +408,12 @@ public class PowerGroup {
             if (dozeAfterScreenOff) {
                 return DisplayPowerRequest.POLICY_OFF;
             }
+            if (brightWhenDozing) {
+                return DisplayPowerRequest.POLICY_BRIGHT;
+            }
             // Fall through and preserve the current screen policy if not configured to
-            // doze after screen off.  This causes the screen off transition to be skipped.
+            // bright when dozing or doze after screen off.  This causes the screen off transition
+            // to be skipped.
         }
 
         if ((wakeLockSummary & WAKE_LOCK_SCREEN_BRIGHT) != 0
@@ -429,9 +434,10 @@ public class PowerGroup {
             boolean boostScreenBrightness, int dozeScreenState, float dozeScreenBrightness,
             boolean overrideDrawWakeLock, PowerSaveState powerSaverState, boolean quiescent,
             boolean dozeAfterScreenOff, boolean bootCompleted,
-            boolean screenBrightnessBoostInProgress, boolean waitForNegativeProximity) {
+            boolean screenBrightnessBoostInProgress, boolean waitForNegativeProximity,
+            boolean brightWhenDozing) {
         mDisplayPowerRequest.policy = getDesiredScreenPolicyLocked(quiescent, dozeAfterScreenOff,
-                bootCompleted, screenBrightnessBoostInProgress);
+                bootCompleted, screenBrightnessBoostInProgress, brightWhenDozing);
         mDisplayPowerRequest.screenBrightnessOverride = screenBrightnessOverride;
         mDisplayPowerRequest.useProximitySensor = useProximitySensor;
         mDisplayPowerRequest.boostScreenBrightness = boostScreenBrightness;
