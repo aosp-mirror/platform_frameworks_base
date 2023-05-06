@@ -56,6 +56,7 @@ public final class UserHandle implements Parcelable {
 
     /** @hide A user id to indicate the currently active user */
     @UnsupportedAppUsage
+    @TestApi
     public static final @UserIdInt int USER_CURRENT = -2;
 
     /** @hide A user handle to indicate the current user of the device */
