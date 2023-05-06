@@ -37,6 +37,8 @@ import android.view.View;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.Preconditions;
 
+import java.lang.reflect.Array;
+
 /**
  * The transformation method used by handwriting insert mode.
  * This transformation will insert a placeholder string to the original text at the given
@@ -309,26 +311,51 @@ public class InsertModeTransformationMethod implements TransformationMethod, Tex
                 return ArrayUtils.emptyArray(type);
             }
 
-            final T[] spansOriginal;
+            T[] spansOriginal = null;
             if (mSpannedOriginal != null) {
                 final int originalStart =
                         transformedToOriginal(start, OffsetMapping.MAP_STRATEGY_CURSOR);
                 final int originalEnd =
                         transformedToOriginal(end, OffsetMapping.MAP_STRATEGY_CURSOR);
+                // We can't simply call SpannedString.getSpans(originalStart, originalEnd) here.
+                // When start == end SpannedString.getSpans returns spans whose spanEnd == start.
+                // For example,
+                //   text: abcd  span: [1, 3)
+                // getSpan(3, 3) will return the span [1, 3) but getSpan(3, 4) returns no span.
+                //
+                // This creates some special cases when originalStart == originalEnd.
+                // For example:
+                //   original text: abcd    span1: [1, 3) span2: [3, 4) span3: [3, 3)
+                //   transformed text: abc\n\nd    span1: [1, 3) span2: [5, 6) span3: [3, 3)
+                // Case 1:
+                // When start = 3 and end = 4, transformedText#getSpan(3, 4) should return span3.
+                // However, because originalStart == originalEnd == 3, originalText#getSpan(3, 3)
+                // returns span1, span2 and span3.
+                //
+                // Case 2:
+                // When start == end == 4, transformedText#getSpan(4, 4) should return nothing.
+                // However, because originalStart == originalEnd == 3, originalText#getSpan(3, 3)
+                // return span1, span2 and span3.
+                //
+                // Case 3:
+                // When start == end == 5, transformedText#getSpan(5, 5) should return span2.
+                // However, because originalStart == originalEnd == 3, originalText#getSpan(3, 3)
+                // return span1,  span2 and span3.
+                //
+                // To handle the issue, we need to filter out the invalid spans.
                 spansOriginal = mSpannedOriginal.getSpans(originalStart, originalEnd, type);
-            } else {
-                spansOriginal = null;
+                spansOriginal = ArrayUtils.filter(spansOriginal,
+                        size -> (T[]) Array.newInstance(type, size),
+                        span -> intersect(getSpanStart(span), getSpanEnd(span), start, end));
             }
 
-            final T[] spansPlaceholder;
+            T[] spansPlaceholder = null;
             if (mSpannedPlaceholder != null
                     && intersect(start, end, mEnd, mEnd + mPlaceholder.length())) {
-                final int placeholderStart = Math.max(start - mEnd, 0);
-                final int placeholderEnd = Math.min(end - mEnd, mPlaceholder.length());
+                int placeholderStart = Math.max(start - mEnd, 0);
+                int placeholderEnd = Math.min(end - mEnd, mPlaceholder.length());
                 spansPlaceholder =
                         mSpannedPlaceholder.getSpans(placeholderStart, placeholderEnd, type);
-            } else {
-                spansPlaceholder = null;
             }
 
             // TODO: sort the spans based on their priority.
@@ -340,7 +367,10 @@ public class InsertModeTransformationMethod implements TransformationMethod, Tex
             if (mSpannedOriginal != null) {
                 final int index = mSpannedOriginal.getSpanStart(tag);
                 if (index >= 0) {
-                    if (index < mEnd) {
+                    // When originalSpanStart == originalSpanEnd == mEnd, the span should be
+                    // considered "before" the placeholder text. So we return the originalSpanStart.
+                    if (index < mEnd
+                            || (index == mEnd && mSpannedOriginal.getSpanEnd(tag) == index)) {
                         return index;
                     }
                     return index + mPlaceholder.length();
