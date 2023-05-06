@@ -4224,7 +4224,8 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS
     })
-    public List<UserInfo> getUsers() {
+    @TestApi
+    public @NonNull List<UserInfo> getUsers() {
         return getUsers(/*excludePartial= */ true, /* excludeDying= */ false,
                 /* excludePreCreated= */ true);
     }
@@ -4245,6 +4246,7 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS
     })
+    @TestApi
     public @NonNull List<UserInfo> getAliveUsers() {
         return getUsers(/*excludePartial= */ true, /* excludeDying= */ true,
                 /* excludePreCreated= */ true);
@@ -4271,8 +4273,7 @@ public class UserManager {
      * Returns information for all users on this device, based on the filtering parameters.
      *
      * @deprecated Pre-created users are deprecated and no longer supported.
-     *             Use {@link #getUsers()}, {@link #getUsers(boolean)}, or {@link #getAliveUsers()}
-     *             instead.
+     *             Use {@link #getUsers()}, or {@link #getAliveUsers()} instead.
      * @hide
      */
     @Deprecated
