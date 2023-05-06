@@ -1874,6 +1874,18 @@ public class UserManagerService extends IUserManager.Stub {
         return userTypeDetails.getBadgeNoBackground();
     }
 
+    @Override
+    public @DrawableRes int getUserStatusBarIconResId(@UserIdInt int userId) {
+        checkManageOrInteractPermissionIfCallerInOtherProfileGroup(userId,
+                "getUserStatusBarIconResId");
+        final UserTypeDetails userTypeDetails = getUserTypeDetailsNoChecks(userId);
+        if (userTypeDetails == null || !userTypeDetails.hasBadge()) {
+            Slog.w(LOG_TAG, "Requested status bar icon for non-badged user " + userId);
+            return Resources.ID_NULL;
+        }
+        return userTypeDetails.getStatusBarIcon();
+    }
+
     public boolean isProfile(@UserIdInt int userId) {
         checkQueryOrInteractPermissionIfCallerInOtherProfileGroup(userId, "isProfile");
         return isProfileUnchecked(userId);

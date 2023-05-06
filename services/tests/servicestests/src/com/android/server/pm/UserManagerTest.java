@@ -803,6 +803,8 @@ public final class UserManagerTest {
                 .isEqualTo(userTypeDetails.getBadgePlain());
         assertThat(mUserManager.getUserBadgeNoBackgroundResId(userId))
                 .isEqualTo(userTypeDetails.getBadgeNoBackground());
+        assertThat(mUserManager.getUserStatusBarIconResId(userId))
+                .isEqualTo(userTypeDetails.getStatusBarIcon());
 
         final int badgeIndex = userInfo.profileBadge;
         assertThat(mUserManager.getUserBadgeColor(userId)).isEqualTo(

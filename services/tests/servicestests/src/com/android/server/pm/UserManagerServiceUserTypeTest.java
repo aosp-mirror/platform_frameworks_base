@@ -106,6 +106,7 @@ public class UserManagerServiceUserTypeTest {
                 .setBadgeNoBackground(30)
                 .setLabel(31)
                 .setMaxAllowedPerParent(32)
+                .setStatusBarIcon(33)
                 .setDefaultRestrictions(restrictions)
                 .setDefaultSystemSettings(systemSettings)
                 .setDefaultSecureSettings(secureSettings)
@@ -122,6 +123,7 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(30, type.getBadgeNoBackground());
         assertEquals(31, type.getLabel());
         assertEquals(32, type.getMaxAllowedPerParent());
+        assertEquals(33, type.getStatusBarIcon());
 
         assertTrue(UserRestrictionsUtils.areEqual(restrictions, type.getDefaultRestrictions()));
         assertNotSame(restrictions, type.getDefaultRestrictions());
@@ -191,6 +193,7 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(Resources.ID_NULL, type.getIconBadge());
         assertEquals(Resources.ID_NULL, type.getBadgePlain());
         assertEquals(Resources.ID_NULL, type.getBadgeNoBackground());
+        assertEquals(Resources.ID_NULL, type.getStatusBarIcon());
         assertEquals(Resources.ID_NULL, type.getBadgeLabel(0));
         assertEquals(Resources.ID_NULL, type.getBadgeColor(0));
         assertEquals(Resources.ID_NULL, type.getLabel());
@@ -348,6 +351,8 @@ public class UserManagerServiceUserTypeTest {
         assertEquals(Resources.ID_NULL, aospType.getBadgePlain()); // No resId for 'garbage'
         assertEquals(com.android.internal.R.drawable.ic_corp_badge_no_background,
                 aospType.getBadgeNoBackground());
+        assertEquals(com.android.internal.R.drawable.ic_test_badge_experiment,
+                aospType.getStatusBarIcon());
         assertEquals(com.android.internal.R.string.managed_profile_label_badge,
                 aospType.getBadgeLabel(0));
         assertEquals(com.android.internal.R.string.managed_profile_label_badge_2,
