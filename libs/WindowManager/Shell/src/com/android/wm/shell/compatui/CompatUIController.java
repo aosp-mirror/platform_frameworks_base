@@ -47,6 +47,8 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.Transitions;
 
+import dagger.Lazy;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -54,8 +56,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import dagger.Lazy;
 
 /**
  * Controller to show/update compat UI components on Tasks based on whether the foreground
@@ -284,13 +284,18 @@ public class CompatUIController implements OnDisplaysChangedListener,
             ShellTaskOrganizer.TaskListener taskListener) {
         CompatUIWindowManager layout = mActiveCompatLayouts.get(taskInfo.taskId);
         if (layout != null) {
-            // UI already exists, update the UI layout.
-            if (!layout.updateCompatInfo(taskInfo, taskListener,
-                    showOnDisplay(layout.getDisplayId()))) {
-                // The layout is no longer eligible to be shown, remove from active layouts.
+            if (layout.needsToBeRecreated(taskInfo, taskListener)) {
                 mActiveCompatLayouts.remove(taskInfo.taskId);
+                layout.release();
+            } else {
+                // UI already exists, update the UI layout.
+                if (!layout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(layout.getDisplayId()))) {
+                    // The layout is no longer eligible to be shown, remove from active layouts.
+                    mActiveCompatLayouts.remove(taskInfo.taskId);
+                }
+                return;
             }
-            return;
         }
 
         // Create a new UI layout.
@@ -433,13 +438,18 @@ public class CompatUIController implements OnDisplaysChangedListener,
     private void createOrUpdateReachabilityEduLayout(TaskInfo taskInfo,
             ShellTaskOrganizer.TaskListener taskListener) {
         if (mActiveReachabilityEduLayout != null) {
-            // UI already exists, update the UI layout.
-            if (!mActiveReachabilityEduLayout.updateCompatInfo(taskInfo, taskListener,
-                    showOnDisplay(mActiveReachabilityEduLayout.getDisplayId()))) {
-                // The layout is no longer eligible to be shown, remove from active layouts.
+            if (mActiveReachabilityEduLayout.needsToBeRecreated(taskInfo, taskListener)) {
+                mActiveReachabilityEduLayout.release();
                 mActiveReachabilityEduLayout = null;
+            } else {
+                // UI already exists, update the UI layout.
+                if (!mActiveReachabilityEduLayout.updateCompatInfo(taskInfo, taskListener,
+                        showOnDisplay(mActiveReachabilityEduLayout.getDisplayId()))) {
+                    // The layout is no longer eligible to be shown, remove from active layouts.
+                    mActiveReachabilityEduLayout = null;
+                }
+                return;
             }
-            return;
         }
         // Create a new UI layout.
         final Context context = getOrCreateDisplayContext(taskInfo.displayId);

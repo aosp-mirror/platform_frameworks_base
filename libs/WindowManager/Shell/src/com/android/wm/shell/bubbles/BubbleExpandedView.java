@@ -215,9 +215,6 @@ public class BubbleExpandedView extends LinearLayout {
             ActivityOptions options = ActivityOptions.makeCustomAnimation(getContext(),
                     0 /* enterResId */, 0 /* exitResId */);
 
-            Rect launchBounds = new Rect();
-            mTaskView.getBoundsOnScreen(launchBounds);
-
             // TODO: I notice inconsistencies in lifecycle
             // Post to keep the lifecycle normal
             post(() -> {
@@ -226,6 +223,9 @@ public class BubbleExpandedView extends LinearLayout {
                             + getBubbleKey());
                 }
                 try {
+                    Rect launchBounds = new Rect();
+                    mTaskView.getBoundsOnScreen(launchBounds);
+
                     options.setTaskAlwaysOnTop(true);
                     options.setLaunchedFromBubble(true);
                     options.setPendingIntentBackgroundActivityStartMode(
@@ -479,7 +479,7 @@ public class BubbleExpandedView extends LinearLayout {
     void applyThemeAttrs() {
         final TypedArray ta = mContext.obtainStyledAttributes(new int[]{
                 android.R.attr.dialogCornerRadius,
-                android.R.attr.colorBackgroundFloating});
+                com.android.internal.R.attr.materialColorSurfaceBright});
         boolean supportsRoundedCorners = ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
                 mContext.getResources());
         mCornerRadius = supportsRoundedCorners ? ta.getDimensionPixelSize(0, 0) : 0;

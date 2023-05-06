@@ -37,11 +37,13 @@ import androidx.annotation.RequiresApi;
 import androidx.core.widget.CompoundButtonCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.media.LocalMediaManager.MediaDeviceState;
 import com.android.settingslib.media.MediaDevice;
 import com.android.systemui.R;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Adapter for media output dialog.
@@ -52,10 +54,18 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     private static final float DEVICE_DISCONNECTED_ALPHA = 0.5f;
     private static final float DEVICE_CONNECTED_ALPHA = 1f;
+    protected List<MediaItem> mMediaItemList = new CopyOnWriteArrayList<>();
 
     public MediaOutputAdapter(MediaOutputController controller) {
         super(controller);
         setHasStableIds(true);
+    }
+
+    @Override
+    public void updateItems() {
+        mMediaItemList.clear();
+        mMediaItemList.addAll(mController.getMediaItemList());
+        notifyDataSetChanged();
     }
 
     @Override
@@ -79,14 +89,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
         if (mController.isAdvancedLayoutSupported()) {
-            if (position >= mController.getMediaItemList().size()) {
+            if (position >= mMediaItemList.size()) {
                 if (DEBUG) {
                     Log.d(TAG, "Incorrect position: " + position + " list size: "
-                            + mController.getMediaItemList().size());
+                            + mMediaItemList.size());
                 }
                 return;
             }
-            MediaItem currentMediaItem = mController.getMediaItemList().get(position);
+            MediaItem currentMediaItem = mMediaItemList.get(position);
             switch (currentMediaItem.getMediaItemType()) {
                 case MediaItem.MediaItemType.TYPE_GROUP_DIVIDER:
                     ((MediaGroupDividerViewHolder) viewHolder).onBind(currentMediaItem.getTitle());
@@ -119,11 +129,11 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     @Override
     public long getItemId(int position) {
         if (mController.isAdvancedLayoutSupported()) {
-            if (position >= mController.getMediaItemList().size()) {
+            if (position >= mMediaItemList.size()) {
                 Log.d(TAG, "Incorrect position for item id: " + position);
                 return position;
             }
-            MediaItem currentMediaItem = mController.getMediaItemList().get(position);
+            MediaItem currentMediaItem = mMediaItemList.get(position);
             return currentMediaItem.getMediaDevice().isPresent()
                     ? currentMediaItem.getMediaDevice().get().getId().hashCode()
                     : position;
@@ -143,12 +153,12 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     @Override
     public int getItemViewType(int position) {
         if (mController.isAdvancedLayoutSupported()
-                && position >= mController.getMediaItemList().size()) {
+                && position >= mMediaItemList.size()) {
             Log.d(TAG, "Incorrect position for item type: " + position);
             return MediaItem.MediaItemType.TYPE_GROUP_DIVIDER;
         }
         return mController.isAdvancedLayoutSupported()
-                ? mController.getMediaItemList().get(position).getMediaItemType()
+                ? mMediaItemList.get(position).getMediaItemType()
                 : super.getItemViewType(position);
     }
 
@@ -156,7 +166,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     public int getItemCount() {
         // Add extra one for "pair new"
         return mController.isAdvancedLayoutSupported()
-                ? mController.getMediaItemList().size()
+                ? mMediaItemList.size()
                 : mController.getMediaDevices().size() + 1;
     }
 
@@ -482,6 +492,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         private void onItemClick(View view, MediaDevice device) {
+            if (mController.isCurrentOutputDeviceHasSessionOngoing()) {
+                showCustomEndSessionDialog(device);
+            } else {
+                transferOutput(device);
+            }
+        }
+
+        private void transferOutput(MediaDevice device) {
             if (mController.isAnyDeviceTransferring()) {
                 return;
             }
@@ -494,6 +512,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mController.connectDevice(device);
             device.setState(MediaDeviceState.STATE_CONNECTING);
             notifyDataSetChanged();
+        }
+
+        @VisibleForTesting
+        void showCustomEndSessionDialog(MediaDevice device) {
+            MediaSessionReleaseDialog mediaSessionReleaseDialog = new MediaSessionReleaseDialog(
+                    mContext, () -> transferOutput(device), mController.getColorButtonBackground(),
+                    mController.getColorItemContent());
+            mediaSessionReleaseDialog.show();
         }
 
         private void cancelMuteAwaitConnection() {

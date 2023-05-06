@@ -136,7 +136,6 @@ public class KeyguardStatusView extends GridLayout {
         Trace.endSection();
     }
 
-
     /**
      * Clock content will be clipped when goes beyond bounds,
      * so we setAlpha for all views except clock
@@ -145,6 +144,9 @@ public class KeyguardStatusView extends GridLayout {
         if (!excludeClock) {
             setAlpha(alpha);
             return;
+        }
+        if (alpha == 1 || alpha == 0) {
+            setAlpha(alpha);
         }
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);

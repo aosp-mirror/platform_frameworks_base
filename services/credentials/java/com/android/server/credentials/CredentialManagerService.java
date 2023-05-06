@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.provider.Settings;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -281,15 +282,18 @@ public final class CredentialManagerService
         }
     }
 
-    private Set<String> getPrimaryProvidersForUserId(int userId) {
+    private static Set<String> getPrimaryProvidersForUserId(Context context, int userId) {
         final int resolvedUserId = ActivityManager.handleIncomingUser(
                 Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false,
                 "getPrimaryProvidersForUserId", null);
         SecureSettingsServiceNameResolver resolver = new SecureSettingsServiceNameResolver(
-                mContext, Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
+                context, Settings.Secure.CREDENTIAL_SERVICE_PRIMARY,
                 /* isMultipleMode= */ true);
         String[] serviceNames = resolver.readServiceNameList(resolvedUserId);
+        if (serviceNames == null) {
+            return new HashSet<String>();
+        }
         return new HashSet<String>(Arrays.asList(serviceNames));
     }
 
@@ -479,7 +483,7 @@ public final class CredentialManagerService
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
-                            getEnabledProviders(),
+                            getEnabledProvidersForUser(userId),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);
@@ -534,7 +538,7 @@ public final class CredentialManagerService
                             getCredentialCallback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
-                            getEnabledProviders(),
+                            getEnabledProvidersForUser(userId),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan,
                             prepareGetCredentialCallback);
@@ -652,7 +656,8 @@ public final class CredentialManagerService
                             request,
                             callback,
                             constructCallingAppInfo(callingPackage, userId, request.getOrigin()),
-                            getEnabledProviders(),
+                            getEnabledProvidersForUser(userId),
+                            getPrimaryProvidersForUserId(getContext(), userId),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);
@@ -800,8 +805,8 @@ public final class CredentialManagerService
             verifyGetProvidersPermission();
 
             return CredentialProviderInfoFactory.getCredentialProviderServices(
-                    mContext, userId, providerFilter, getEnabledProviders(),
-                    getPrimaryProvidersForUserId(userId));
+                    mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
+                    getPrimaryProvidersForUserId(mContext, userId));
         }
 
         @Override
@@ -811,8 +816,8 @@ public final class CredentialManagerService
 
             final int userId = UserHandle.getCallingUserId();
             return CredentialProviderInfoFactory.getCredentialProviderServicesForTesting(
-                    mContext, userId, providerFilter, getEnabledProviders(),
-                    getPrimaryProvidersForUserId(userId));
+                    mContext, userId, providerFilter, getEnabledProvidersForUser(userId),
+                    getPrimaryProvidersForUserId(mContext, userId));
         }
 
         @Override
@@ -828,24 +833,26 @@ public final class CredentialManagerService
             }
         }
 
-        @SuppressWarnings("GuardedBy") // ErrorProne requires service.mLock which is the same
-        // this.mLock
-        private Set<ComponentName> getEnabledProviders() {
+        private Set<ComponentName> getEnabledProvidersForUser(int userId) {
+            final int resolvedUserId = ActivityManager.handleIncomingUser(
+                Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, false,
+                "getEnabledProvidersForUser", null);
+
             Set<ComponentName> enabledProviders = new HashSet<>();
-            synchronized (mLock) {
-                runForUser(
-                        (service) -> {
-                            try {
-                                enabledProviders.add(
-                                        service.getCredentialProviderInfo()
-                                                .getServiceInfo().getComponentName());
-                            } catch (NullPointerException e) {
-                                // Safe check
-                                Slog.e(TAG, "Skipping provider as either the providerInfo"
-                                        + " or serviceInfo is null - weird");
-                            }
-                        });
+            String directValue = Settings.Secure.getStringForUser(
+                mContext.getContentResolver(), Settings.Secure.CREDENTIAL_SERVICE, resolvedUserId);
+
+            if (!TextUtils.isEmpty(directValue)) {
+                String[] components = directValue.split(":");
+                for (String componentString : components) {
+                    ComponentName component = ComponentName.unflattenFromString(componentString);
+                    if (component != null) {
+                        enabledProviders.add(component);
+                    }
+                }
             }
+
             return enabledProviders;
         }
 
@@ -875,7 +882,7 @@ public final class CredentialManagerService
                             callback,
                             request,
                             constructCallingAppInfo(callingPackage, userId, null),
-                            getEnabledProviders(),
+                            getEnabledProvidersForUser(userId),
                             CancellationSignal.fromTransport(cancelTransport),
                             timestampBegan);
             addSessionLocked(userId, session);
