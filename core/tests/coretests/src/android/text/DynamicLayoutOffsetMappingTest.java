@@ -119,6 +119,86 @@ public class DynamicLayoutOffsetMappingTest {
         assertLineRange(layout, /* lineBreaks */ 0, 5, 6, 8);
     }
 
+    @Test
+    public void textWithOffsetMapping_blockBeforeTextChanged_deletion() {
+        final String text = "abcdef";
+        final SpannableStringBuilder spannable = new TestNoBeforeTextChangeSpannableString(text);
+        final CharSequence transformedText =
+                new TestOffsetMapping(spannable, 5, "\n\n");
+
+        final DynamicLayout layout = DynamicLayout.Builder.obtain(spannable, sTextPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setDisplayText(transformedText)
+                .build();
+
+        // delete "cd", original text becomes "abef"
+        spannable.delete(2, 4);
+        assertThat(transformedText.toString()).isEqualTo("abe\n\nf");
+        assertLineRange(layout, /* lineBreaks */ 0, 4, 5, 6);
+
+        // delete "abe", original text becomes "f"
+        spannable.delete(0, 3);
+        assertThat(transformedText.toString()).isEqualTo("\n\nf");
+        assertLineRange(layout, /* lineBreaks */ 0, 1, 2, 3);
+    }
+
+    @Test
+    public void textWithOffsetMapping_blockBeforeTextChanged_insertion() {
+        final String text = "abcdef";
+        final SpannableStringBuilder spannable = new TestNoBeforeTextChangeSpannableString(text);
+        final CharSequence transformedText = new TestOffsetMapping(spannable, 3, "\n\n");
+
+        final DynamicLayout layout = DynamicLayout.Builder.obtain(spannable, sTextPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setDisplayText(transformedText)
+                .build();
+
+        spannable.insert(3, "x");
+        assertThat(transformedText.toString()).isEqualTo("abcx\n\ndef");
+        assertLineRange(layout, /* lineBreaks */ 0, 5, 6, 9);
+
+        spannable.insert(5, "x");
+        assertThat(transformedText.toString()).isEqualTo("abcx\n\ndxef");
+        assertLineRange(layout, /* lineBreaks */ 0, 5, 6, 10);
+    }
+
+    @Test
+    public void textWithOffsetMapping_blockBeforeTextChanged_replace() {
+        final String text = "abcdef";
+        final SpannableStringBuilder spannable = new TestNoBeforeTextChangeSpannableString(text);
+        final CharSequence transformedText = new TestOffsetMapping(spannable, 3, "\n\n");
+
+        final DynamicLayout layout = DynamicLayout.Builder.obtain(spannable, sTextPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setDisplayText(transformedText)
+                .build();
+
+        spannable.replace(2, 4, "xx");
+        assertThat(transformedText.toString()).isEqualTo("abxx\n\nef");
+        assertLineRange(layout, /* lineBreaks */ 0, 5, 6, 8);
+    }
+
+    @Test
+    public void textWithOffsetMapping_onlyCallOnTextChanged_notCrash() {
+        String text = "abcdef";
+        SpannableStringBuilder spannable = new SpannableStringBuilder(text);
+        CharSequence transformedText = new TestOffsetMapping(spannable, 3, "\n\n");
+
+        DynamicLayout.Builder.obtain(spannable, sTextPaint, WIDTH)
+                .setAlignment(ALIGN_NORMAL)
+                .setIncludePad(false)
+                .setDisplayText(transformedText)
+                .build();
+
+        TextWatcher[] textWatcher = spannable.getSpans(0, spannable.length(), TextWatcher.class);
+        assertThat(textWatcher.length).isEqualTo(1);
+
+        textWatcher[0].onTextChanged(spannable, 0, 2, 2);
+    }
+
     private void assertLineRange(Layout layout, int... lineBreaks) {
         final int lineCount = lineBreaks.length - 1;
         assertThat(layout.getLineCount()).isEqualTo(lineCount);
@@ -126,6 +206,50 @@ public class DynamicLayoutOffsetMappingTest {
             assertThat(layout.getLineStart(line)).isEqualTo(lineBreaks[line]);
         }
         assertThat(layout.getLineEnd(lineCount - 1)).isEqualTo(lineBreaks[lineCount]);
+    }
+
+    /**
+     * A test SpannableStringBuilder that doesn't call beforeTextChanged. It's used to test
+     * DynamicLayout against some special cases where beforeTextChanged callback is not properly
+     * called.
+     */
+    private static class TestNoBeforeTextChangeSpannableString extends SpannableStringBuilder {
+
+        TestNoBeforeTextChangeSpannableString(CharSequence text) {
+            super(text);
+        }
+
+        @Override
+        public void setSpan(Object what, int start, int end, int flags) {
+            if (what instanceof TextWatcher) {
+                super.setSpan(new TestNoBeforeTextChangeWatcherWrapper((TextWatcher) what), start,
+                        end, flags);
+            } else {
+                super.setSpan(what, start, end, flags);
+            }
+        }
+    }
+
+    /** A TextWatcherWrapper that blocks beforeTextChanged callback. */
+    private static class TestNoBeforeTextChangeWatcherWrapper implements TextWatcher {
+        private final TextWatcher mTextWatcher;
+
+        TestNoBeforeTextChangeWatcherWrapper(TextWatcher textWatcher) {
+            mTextWatcher = textWatcher;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            mTextWatcher.onTextChanged(s, start, before, count);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            mTextWatcher.afterTextChanged(s);
+        }
     }
 
     /**
