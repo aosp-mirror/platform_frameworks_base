@@ -627,7 +627,7 @@
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"အကွက်ငယ်များ ပြန်စီစဉ်ရန် ဖိပြီးဆွဲပါ"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"ဖယ်ရှားရန် ဤနေရာသို့ဖိဆွဲပါ"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"အနည်းဆုံး <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> ကွက် ရှိရမည်"</string>
-    <string name="qs_edit" msgid="5583565172803472437">"တည်းဖြတ်ပါ"</string>
+    <string name="qs_edit" msgid="5583565172803472437">"တည်းဖြတ်ရန်"</string>
     <string name="tuner_time" msgid="2450785840990529997">"အချိန်"</string>
   <string-array name="clock_options">
     <item msgid="3986445361435142273">"နာရီ၊ မိနစ်နှင့် စက္ကန့်ကိုပြပါ"</item>
@@ -869,7 +869,7 @@
     <string name="one_week_timestamp" msgid="4925600765473875590">"ပြီးခဲ့သော 1 ပတ်"</string>
     <string name="two_weeks_timestamp" msgid="9111801081871962155">"ပြီးခဲ့သော 2 ပတ်"</string>
     <string name="over_one_week_timestamp" msgid="3770560704420807142">"ပြီးခဲ့သော 1 ပတ်ကျော်"</string>
-    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"ပြီးခဲ့သော 2 ပတ်ကျော်"</string>
+    <string name="over_two_weeks_timestamp" msgid="6300507859007874050">"ပြီးခဲ့သော ၂ ပတ်ကျော်က"</string>
     <string name="birthday_status" msgid="2596961629465396761">"မွေးနေ့"</string>
     <string name="birthday_status_content_description" msgid="682836371128282925">"<xliff:g id="NAME">%1$s</xliff:g> ၏ မွေးနေ့ ဖြစ်ပါသည်"</string>
     <string name="upcoming_birthday_status" msgid="2005452239256870351">"မကြာမီလာမည့် မွေးနေ့"</string>

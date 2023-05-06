@@ -440,8 +440,8 @@
     <string name="permdesc_writeCalendar" product="default" msgid="5416380074475634233">"Aquesta aplicació pot afegir, suprimir i canviar esdeveniments del calendari al telèfon. També pot enviar missatges que sembli que provenen dels propietaris del calendari o canviar esdeveniments sense notificar-los-ho."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="5162339812057983988">"accedir a ordres del proveïdor d\'ubicació addicionals"</string>
     <string name="permdesc_accessLocationExtraCommands" msgid="355369611979907967">"Permet que l\'aplicació accedeixi a ordres addicionals del proveïdor d\'ubicacions; per tant, és possible que l\'aplicació pugui interferir en el funcionament del GPS o d\'altres fonts d\'ubicacions."</string>
-    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"accedeix a la ubicació exacta només en primer pla"</string>
-    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aquesta aplicació pot obtenir la teva ubicació exacta a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació, i això pot fer que l\'ús de la bateria augmenti."</string>
+    <string name="permlab_accessFineLocation" msgid="6426318438195622966">"accedeix a la ubicació precisa només en primer pla"</string>
+    <string name="permdesc_accessFineLocation" msgid="6732174080240016335">"Aquesta aplicació pot obtenir la teva ubicació precisa a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació, i això pot fer que l\'ús de la bateria augmenti."</string>
     <string name="permlab_accessCoarseLocation" msgid="1561042925407799741">"accedeix a la ubicació aproximada només en primer pla"</string>
     <string name="permdesc_accessCoarseLocation" msgid="778521847873199160">"Aquesta aplicació pot obtenir la teva ubicació aproximada a través dels serveis d\'ubicació mentre s\'està utilitzant. Els serveis d\'ubicació del dispositiu han d\'estar activats perquè l\'aplicació pugui obtenir la ubicació."</string>
     <string name="permlab_accessBackgroundLocation" msgid="1721164702777366138">"accedir a la ubicació en segon pla"</string>
@@ -595,7 +595,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Prova una altra empremta digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Hi ha massa llum"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Prova d\'ajustar l\'empremta digital"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Canvia lleugerament la posició del dit en cada intent"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Canvia lleugerament la posició del dit cada vegada"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"L\'empremta digital no s\'ha reconegut"</string>
@@ -640,8 +640,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Massa fosc. Prova una il·luminació més brillant."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Allunya\'t del telèfon."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Apropa el telèfon."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Mou el telèfon més amunt."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Mou el telèfon més avall."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Apuja el telèfon."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Abaixa el telèfon."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Mou el telèfon cap a l\'esquerra."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Mou el telèfon cap a la dreta."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Mira més directament cap al dispositiu."</string>
@@ -653,7 +653,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"No giris tant el cap."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"No inclinis tant el cap."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"No giris tant el cap."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Treu qualsevol cosa que amagui la teva cara."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Aparta tot allò que et tapi la cara"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Neteja la part superior de la pantalla, inclosa la barra negra"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -2043,7 +2043,7 @@
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Vols permetre que <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> accedeixi a tots els registres del dispositiu?"</string>
     <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Permet l\'accés únic"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"No permetis"</string>
-    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Els registres del dispositiu inclouen informació sobre tot allò que passa al teu dispositiu. Les aplicacions poden utilitzar aquests registres per detectar i corregir problemes.\n\nÉs possible que alguns registres continguin informació sensible; per això només has de donar-hi accés a les aplicacions de confiança. \n\nEncara que no permetis que aquesta aplicació accedeixi a tots els registres del dispositiu, podrà accedir als seus propis registres. És possible que el fabricant del dispositiu també tingui accés a alguns registres o a informació del teu dispositiu. Més informació"</string>
+    <string name="log_access_confirmation_body" msgid="6581985716241928135">"Els registres del dispositiu inclouen informació sobre tot allò que passa al teu dispositiu. Les aplicacions poden utilitzar aquests registres per detectar i corregir problemes.\n\nCom que és possible que alguns registres continguin informació sensible, et recomanem que només hi permetis l\'accés a les aplicacions de confiança. \n\nEncara que no permetis que aquesta aplicació accedeixi a tots els registres del dispositiu, podrà accedir als seus propis registres. És possible que el fabricant del dispositiu també tingui accés a alguns registres o a informació del teu dispositiu. Més informació"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"No tornis a mostrar"</string>
     <string name="slices_permission_request" msgid="3677129866636153406">"<xliff:g id="APP_0">%1$s</xliff:g> vol mostrar porcions de l\'aplicació <xliff:g id="APP_2">%2$s</xliff:g>"</string>
     <string name="screenshot_edit" msgid="7408934887203689207">"Edita"</string>

@@ -310,7 +310,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"การใช้โหมดนี้จะบล็อกเสียงและการสั่นทั้งหมด ซึ่งรวมถึงเสียงปลุก เพลง วิดีโอ และเกม"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"แตะอีกครั้งเพื่อเปิด"</string>
     <string name="tap_again" msgid="1315420114387908655">"แตะอีกครั้ง"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"เลื่อนขึ้นเพื่อเปิด"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"ปัดขึ้นเพื่อเปิด"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"กดไอคอนปลดล็อกเพื่อเปิด"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"ปลดล็อกด้วยใบหน้าแล้ว กดไอคอนปลดล็อกเพื่อเปิด"</string>
   <string-array name="udfps_accessibility_touch_hints">
