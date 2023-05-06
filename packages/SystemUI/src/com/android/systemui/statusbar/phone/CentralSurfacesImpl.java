@@ -91,6 +91,7 @@ import android.view.Display;
 import android.view.IRemoteAnimationRunner;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
@@ -428,6 +429,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     public void togglePanel() {
         mCommandQueueCallbacks.togglePanel();
     }
+
     /**
      * The {@link StatusBarState} of the status bar.
      */
@@ -1988,6 +1990,11 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         } else {
             mShadeSurface.stopWaitingForExpandGesture(cancel, velocity);
         }
+    }
+
+    @Override
+    public void onStatusBarTrackpadEvent(MotionEvent event) {
+        mCentralSurfacesComponent.getNotificationPanelViewController().handleExternalTouch(event);
     }
 
     @Override

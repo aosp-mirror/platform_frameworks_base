@@ -200,8 +200,8 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         // TODO: change the method signature to use (boolean inputFocusTransferStarted)
         @Override
-        public void onStatusBarMotionEvent(MotionEvent event) {
-            verifyCallerAndClearCallingIdentity("onStatusBarMotionEvent", () -> {
+        public void onStatusBarTouchEvent(MotionEvent event) {
+            verifyCallerAndClearCallingIdentity("onStatusBarTouchEvent", () -> {
                 // TODO move this logic to message queue
                 mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces -> {
                     if (event.getActionMasked() == ACTION_DOWN) {
@@ -233,6 +233,13 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     });
                 });
             });
+        }
+
+        @Override
+        public void onStatusBarTrackpadEvent(MotionEvent event) {
+            verifyCallerAndClearCallingIdentityPostMain("onStatusBarTrackpadEvent", () ->
+                    mCentralSurfacesOptionalLazy.get().ifPresent(centralSurfaces ->
+                            centralSurfaces.onStatusBarTrackpadEvent(event)));
         }
 
         @Override
@@ -345,7 +352,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
         @Override
         public void expandNotificationPanel() {
-            verifyCallerAndClearCallingIdentity("expandNotificationPanel",
+            verifyCallerAndClearCallingIdentityPostMain("expandNotificationPanel",
                     () -> mCommandQueue.handleSystemKey(new KeyEvent(KeyEvent.ACTION_DOWN,
                             KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN)));
         }
