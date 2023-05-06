@@ -266,7 +266,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Seaded"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Abi"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Häälabi"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Lukustamine"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Lukusta"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Uus märguanne"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtuaalne klaviatuur"</string>

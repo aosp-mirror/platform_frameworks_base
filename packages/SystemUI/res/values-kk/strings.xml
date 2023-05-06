@@ -286,15 +286,15 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Бастау"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Тоқтату"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Бір қолмен басқару режимі"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Құрылғы микрофонының бөгеуі алынсын ба?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Құрылғы камерасының бөгеуі алынсын ба?"</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Құрылғы камерасы мен микрофонының бөгеуі алынсын ба?"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Құрылғы микрофонын блоктан шығару керек пе?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Құрылғы камерасын блоктан шығару керек пе?"</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Құрылғы камерасы мен микрофонын блоктан шығару керек пе?"</string>
     <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
     <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Камераңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Камераңызды немесе микрофоныңызды пайдалануға рұқсат берілген барлық қолданба мен қызметтің бөгеуі алынады."</string>
-    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон бөгелген"</string>
-    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера бөгелген"</string>
-    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон мен камера бөгелген"</string>
+    <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Микрофон блокталған"</string>
+    <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"Камера блокталған"</string>
+    <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Микрофон мен камера блокталған"</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_content" msgid="2138318880682877747">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын микрофонға жылжытыңыз, оның қалпы микрофонды пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_content" msgid="7216015168047965948">"Бөгеуді алу үшін құрылғыдағы құпиялық ауыстырғышын камераға жылжытыңыз, оның қалпы камераны пайдалануға мүмкіндік беруі тиіс. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_content" msgid="3960837827570483762">"Оның бөгеуін алу үшін құрылғыдағы құпиялық ауыстырғышын ашық қалыпқа жылжытып, пайдалану мүмкіндігін қамтамасыз етіңіз. Құрылғыдағы құпиялық ауыстырғышының орналасқан жерін құрылғы нұсқаулығынан қараңыз."</string>
@@ -688,7 +688,7 @@
     <string name="tuner_right" msgid="8247571132790812149">"Оң жақ"</string>
     <string name="tuner_menu" msgid="363690665924769420">"Mәзір"</string>
     <string name="tuner_app" msgid="6949280415826686972">"<xliff:g id="APP">%1$s</xliff:g> қолданбасы"</string>
-    <string name="notification_channel_alerts" msgid="3385787053375150046">"Ескертулер"</string>
+    <string name="notification_channel_alerts" msgid="3385787053375150046">"Хабарландырулар"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Батарея"</string>
     <string name="notification_channel_screenshot" msgid="7665814998932211997">"Скриншоттар"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Жалпы хабарлар"</string>

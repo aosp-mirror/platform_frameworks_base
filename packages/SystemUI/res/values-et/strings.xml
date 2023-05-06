@@ -185,7 +185,7 @@
     <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Töö lukustuskuva"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Sulgemine"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"täielik vaikus"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ainult alarmid"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ainult äratused"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Mitte segada."</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="8250942386687551283">"Bluetooth."</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="3819082137684078013">"Bluetooth on sees."</string>

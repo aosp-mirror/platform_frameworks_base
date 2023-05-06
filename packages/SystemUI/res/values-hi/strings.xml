@@ -289,9 +289,9 @@
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"क्या आपको डिवाइस का माइक्रोफ़ोन अनब्लॉक करना है?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"क्या आपको डिवाइस का कैमरा अनब्लॉक करना है?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"क्या आप डिवाइस का कैमरा और माइक्रोफ़ोन अनब्लॉक करना चाहते हैं?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ऐसा करने से, माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें माइक्रोफ़ोन का इस्तेमाल करने की अनुमति दी गई है."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ऐसा करने से, कैमरे का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें कैमरे का इस्तेमाल करने की अनुमति दी गई है."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ऐसा करने से, कैमरा या माइक्रोफ़ोन का ऐक्सेस उन सभी ऐप्लिकेशन और सेवाओं के लिए अनब्लॉक हो जाएगा जिन्हें ये इस्तेमाल करने की अनुमति है."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"ऐसा करने से, सभी ऐप्लिकेशन और सेवाओं के लिए माइक्रोफ़ोन का ऐक्सेस अनब्लॉक हो जाएगा और वे इसका इस्तेमाल कर पाएंगी."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"ऐसा करने से, सभी ऐप्लिकेशन और सेवाओं के लिए कैमरे का ऐक्सेस अनब्लॉक हो जाएगा और वे इसका इस्तेमाल कर पाएंगी."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"ऐसा करने से, सभी ऐप्लिकेशन और सेवाओं के लिए कैमरे या माइक्रोफ़ोन का ऐक्सेस अनब्लॉक हो जाएगा और वे इनका इस्तेमाल कर पाएंगी."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"माइक्रोफ़ोन को ब्लॉक किया गया है"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"कैमरे को ब्लॉक किया गया है"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"माइक्रोफ़ोन और कैमरे को ब्लॉक किया गया है"</string>
@@ -310,7 +310,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"इससे अलार्म, संगीत, वीडियो और गेम सहित सभी आवाज़ और कंपन (वाइब्रेशन) रोक दिए जाते हैं."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"खोलने के लिए फिर से टैप करें"</string>
     <string name="tap_again" msgid="1315420114387908655">"फिर से टैप करें"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"खोलने के लिए ऊपर स्वाइप करें"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"खोलने के लिए ऊपर की ओर स्वाइप करें"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"डिवाइस अनलॉक करने के लिए, अनलॉक आइकॉन को दबाएं"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"चेहरे से अनलॉक किया. डिवाइस अनलॉक करने के लिए, अनलॉक आइकॉन को दबाएं."</string>
   <string-array name="udfps_accessibility_touch_hints">
@@ -777,7 +777,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"पसंदीदा से हटाएं"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"इसे <xliff:g id="NUMBER">%d</xliff:g> नंबर पर ले जाएं"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"कंट्राेल"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"उन कंट्रोल को चुनें जिन्हें फटाफट सेटिंग से ऐक्सेस करना है"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"उन कंट्रोल को चुनें जिन्हें क्विक सेटिंग से ऐक्सेस करना है"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"कंट्रोल का क्रम बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सभी कंट्रोल हटा दिए गए"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदलाव सेव नहीं किए गए"</string>
