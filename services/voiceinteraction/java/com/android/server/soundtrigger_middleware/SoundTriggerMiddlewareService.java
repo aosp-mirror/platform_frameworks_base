@@ -34,6 +34,7 @@ import android.media.soundtrigger_middleware.ISoundTriggerInjection;
 import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
+import android.os.IBinder;
 import android.os.RemoteException;
 
 import com.android.server.SystemService;
@@ -104,17 +105,17 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
     public ISoundTriggerModule attachAsOriginator(int handle, Identity identity,
             ISoundTriggerCallback callback) {
         try (SafeCloseable ignored = establishIdentityDirect(Objects.requireNonNull(identity))) {
-            return new ModuleService(mDelegate.attach(handle, callback));
+            return new ModuleService(mDelegate.attach(handle, callback, /* isTrusted= */ false));
         }
     }
 
     @Override
     public ISoundTriggerModule attachAsMiddleman(int handle, Identity middlemanIdentity,
-            Identity originatorIdentity, ISoundTriggerCallback callback) {
+            Identity originatorIdentity, ISoundTriggerCallback callback, boolean isTrusted) {
         try (SafeCloseable ignored = establishIdentityIndirect(
                 Objects.requireNonNull(middlemanIdentity),
                 Objects.requireNonNull(originatorIdentity))) {
-            return new ModuleService(mDelegate.attach(handle, callback));
+            return new ModuleService(mDelegate.attach(handle, callback, isTrusted));
         }
     }
 
@@ -176,10 +177,10 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
         }
 
         @Override
-        public void startRecognition(int modelHandle, RecognitionConfig config)
+        public IBinder startRecognition(int modelHandle, RecognitionConfig config)
                 throws RemoteException {
             try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-                mDelegate.startRecognition(modelHandle, config);
+                return mDelegate.startRecognition(modelHandle, config);
             }
         }
 

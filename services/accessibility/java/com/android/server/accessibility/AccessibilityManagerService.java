@@ -5329,9 +5329,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             mA11yOverlayLayers.remove(displayId);
             return;
         }
-        SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
-        transaction.reparent(sc, parent);
-        transaction.apply();
-        transaction.close();
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.reparent(sc, parent).setTrustedOverlay(sc, true).apply();
+        t.close();
     }
 }

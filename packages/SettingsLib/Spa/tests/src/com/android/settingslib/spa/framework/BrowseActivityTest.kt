@@ -26,6 +26,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.LogEvent
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
 import com.android.settingslib.spa.framework.common.createSettingsPage
 import com.android.settingslib.spa.tests.testutils.SpaEnvironmentForTest
@@ -38,8 +39,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-const val WAIT_UNTIL_TIMEOUT = 1000L
-
 @RunWith(AndroidJUnit4::class)
 class BrowseActivityTest {
     @get:Rule
@@ -49,19 +48,26 @@ class BrowseActivityTest {
     private val spaLogger = SpaLoggerForTest()
 
     @Test
-    fun testBrowsePage() {
-        spaLogger.reset()
-        val spaEnvironment =
-            SpaEnvironmentForTest(context, listOf(SppHome.createSettingsPage()), logger = spaLogger)
+    fun browseContent_onNavigate_logPageEvent() {
+        val spaEnvironment = SpaEnvironmentForTest(
+            context = context,
+            rootPages = listOf(SppHome.createSettingsPage()),
+            logger = spaLogger,
+        )
         SpaEnvironmentFactory.reset(spaEnvironment)
-
         val sppRepository by spaEnvironment.pageProviderRepository
         val sppHome = sppRepository.getProviderOrNull("SppHome")!!
         val pageHome = sppHome.createSettingsPage()
         val sppLayer1 = sppRepository.getProviderOrNull("SppLayer1")!!
         val pageLayer1 = sppLayer1.createSettingsPage()
 
-        composeTestRule.setContent { BrowseContent(sppRepository) }
+        composeTestRule.setContent {
+            BrowseContent(
+                sppRepository = sppRepository,
+                isPageEnabled = SettingsPage::isEnabled,
+                initialIntent = null,
+            )
+        }
 
         composeTestRule.onNodeWithText(sppHome.getTitle(null)).assertIsDisplayed()
         spaLogger.verifyPageEvent(pageHome.id, 1, 0)
@@ -69,7 +75,7 @@ class BrowseActivityTest {
 
         // click to layer1 page
         composeTestRule.onNodeWithText("SppHome to Layer1").assertIsDisplayed().performClick()
-        waitUntil(WAIT_UNTIL_TIMEOUT) {
+        waitUntil {
             composeTestRule.onAllNodesWithText(sppLayer1.getTitle(null))
                 .fetchSemanticsNodes().size == 1
         }
@@ -78,18 +84,24 @@ class BrowseActivityTest {
     }
 
     @Test
-    fun testBrowseDisabledPage() {
-        spaLogger.reset()
+    fun browseContent_whenDisabled_noLogPageEvent() {
         val spaEnvironment = SpaEnvironmentForTest(
-            context, listOf(SppDisabled.createSettingsPage()), logger = spaLogger
+            context = context,
+            rootPages = listOf(SppDisabled.createSettingsPage()),
+            logger = spaLogger,
         )
         SpaEnvironmentFactory.reset(spaEnvironment)
-
         val sppRepository by spaEnvironment.pageProviderRepository
         val sppDisabled = sppRepository.getProviderOrNull("SppDisabled")!!
         val pageDisabled = sppDisabled.createSettingsPage()
 
-        composeTestRule.setContent { BrowseContent(sppRepository) }
+        composeTestRule.setContent {
+            BrowseContent(
+                sppRepository = sppRepository,
+                isPageEnabled = SettingsPage::isEnabled,
+                initialIntent = null,
+            )
+        }
 
         composeTestRule.onNodeWithText(sppDisabled.getTitle(null)).assertDoesNotExist()
         spaLogger.verifyPageEvent(pageDisabled.id, 0, 0)

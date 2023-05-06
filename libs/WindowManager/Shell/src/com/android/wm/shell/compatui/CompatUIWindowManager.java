@@ -22,7 +22,6 @@ import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
 import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.TaskInfo;
 import android.app.TaskInfo.CameraCompatControlState;
@@ -53,9 +52,6 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     private final Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnRestartButtonClicked;
 
-    @NonNull
-    private TaskInfo mTaskInfo;
-
     // Remember the last reported states in case visibility changes due to keyguard or IME updates.
     @VisibleForTesting
     boolean mHasSizeCompat;
@@ -77,7 +73,6 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
             CompatUIHintsState compatUIHintsState, CompatUIConfiguration compatUIConfiguration,
             Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> onRestartButtonClicked) {
         super(context, taskInfo, syncQueue, taskListener, displayLayout);
-        mTaskInfo = taskInfo;
         mCallback = callback;
         mHasSizeCompat = taskInfo.topActivityInSizeCompat;
         mCameraCompatControlState = taskInfo.cameraCompatControlState;
@@ -129,7 +124,6 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
     @Override
     public boolean updateCompatInfo(TaskInfo taskInfo, ShellTaskOrganizer.TaskListener taskListener,
             boolean canShow) {
-        mTaskInfo = taskInfo;
         final boolean prevHasSizeCompat = mHasSizeCompat;
         final int prevCameraCompatControlState = mCameraCompatControlState;
         mHasSizeCompat = taskInfo.topActivityInSizeCompat;
@@ -149,7 +143,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     /** Called when the restart button is clicked. */
     void onRestartButtonClicked() {
-        mOnRestartButtonClicked.accept(Pair.create(mTaskInfo, getTaskListener()));
+        mOnRestartButtonClicked.accept(Pair.create(getLastTaskInfo(), getTaskListener()));
     }
 
     /** Called when the camera treatment button is clicked. */

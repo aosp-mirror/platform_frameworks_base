@@ -65,6 +65,41 @@ class ShadeWindowLogger @Inject constructor(@ShadeWindowLog private val buffer: 
             { "Updating visibility, should be visible : $bool1" })
     }
 
+    fun logIsExpanded(
+        isExpanded: Boolean,
+        forceWindowCollapsed: Boolean,
+        isKeyguardShowingAndNotOccluded: Boolean,
+        panelVisible: Boolean,
+        keyguardFadingAway: Boolean,
+        bouncerShowing: Boolean,
+        headsUpNotificationShowing: Boolean,
+        scrimsVisibilityNotTransparent: Boolean,
+        backgroundBlurRadius: Boolean,
+        launchingActivityFromNotification: Boolean
+    ) {
+        buffer.log(
+            TAG,
+            DEBUG,
+            {
+                str1 = isExpanded.toString()
+                bool1 = forceWindowCollapsed
+                bool2 = isKeyguardShowingAndNotOccluded
+                bool3 = panelVisible
+                bool4 = keyguardFadingAway
+                int1 = if (bouncerShowing) 1 else 0
+                int2 = if (headsUpNotificationShowing) 1 else 0
+                long1 = if (scrimsVisibilityNotTransparent) 1 else 0
+                long2 = if (backgroundBlurRadius) 1 else 0
+                double1 = if (launchingActivityFromNotification) 1.0 else 0.0
+            },
+            { "Setting isExpanded to $str1: forceWindowCollapsed $bool1, " +
+                    "isKeyguardShowingAndNotOccluded $bool2, panelVisible $bool3, " +
+                    "keyguardFadingAway $bool4, bouncerShowing $int1," +
+                    "headsUpNotificationShowing $int2, scrimsVisibilityNotTransparent $long1," +
+                    "backgroundBlurRadius $long2, launchingActivityFromNotification $double1"}
+        )
+    }
+
     fun logShadeVisibleAndFocusable(visible: Boolean) {
         buffer.log(
             TAG,

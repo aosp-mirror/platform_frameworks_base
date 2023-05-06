@@ -78,6 +78,23 @@ public class SoundDoseHelper {
     /*package*/ static final String ACTION_CHECK_MUSIC_ACTIVE =
             "com.android.server.audio.action.CHECK_MUSIC_ACTIVE";
 
+    /**
+     * Property to force the index based safe volume warnings. Note that usually when the
+     * CSD warnings are active the safe volume warnings are deactivated. In combination with
+     * {@link SoundDoseHelper#SYSTEM_PROPERTY_SAFEMEDIA_CSD_FORCE} both approaches can be active
+     * at the same time.
+     */
+    private static final String SYSTEM_PROPERTY_SAFEMEDIA_FORCE = "audio.safemedia.force";
+    /** Property for bypassing the index based safe volume approach. */
+    private static final String SYSTEM_PROPERTY_SAFEMEDIA_BYPASS = "audio.safemedia.bypass";
+    /**
+     * Property to force the CSD warnings. Note that usually when the CSD warnings are active the
+     * safe volume warnings are deactivated. In combination with
+     * {@link SoundDoseHelper#SYSTEM_PROPERTY_SAFEMEDIA_FORCE} both approaches can be active
+     * at the same time.
+     */
+    private static final String SYSTEM_PROPERTY_SAFEMEDIA_CSD_FORCE = "audio.safemedia.csd.force";
+
     // mSafeMediaVolumeState indicates whether the media volume is limited over headphones.
     // It is SAFE_MEDIA_VOLUME_NOT_CONFIGURED at boot time until a network service is connected
     // or the configure time is elapsed. It is then set to SAFE_MEDIA_VOLUME_ACTIVE or
@@ -830,56 +847,64 @@ public class SoundDoseHelper {
     }
 
     private void onConfigureSafeMedia(boolean force, String caller) {
+        updateCsdEnabled(caller);
+
         synchronized (mSafeMediaVolumeStateLock) {
             int mcc = mContext.getResources().getConfiguration().mcc;
             if ((mMcc != mcc) || ((mMcc == 0) && force)) {
                 mSafeMediaVolumeIndex = mContext.getResources().getInteger(
                         com.android.internal.R.integer.config_safe_media_volume_index) * 10;
-
                 initSafeMediaVolumeIndex();
 
-                boolean safeMediaVolumeEnabled =
-                        SystemProperties.getBoolean("audio.safemedia.force", false)
-                                || mContext.getResources().getBoolean(
-                                com.android.internal.R.bool.config_safe_media_volume_enabled);
-                boolean safeMediaVolumeBypass =
-                        SystemProperties.getBoolean("audio.safemedia.bypass", false);
+                updateSafeMediaVolume_l(caller);
 
-                // The persisted state is either "disabled" or "active": this is the state applied
-                // next time we boot and cannot be "inactive"
-                int persistedState;
-                if (safeMediaVolumeEnabled && !safeMediaVolumeBypass) {
-                    persistedState = SAFE_MEDIA_VOLUME_ACTIVE;
-                    // The state can already be "inactive" here if the user has forced it before
-                    // the 30 seconds timeout for forced configuration. In this case we don't reset
-                    // it to "active".
-                    if (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_INACTIVE) {
-                        if (mMusicActiveMs == 0) {
-                            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
-                            enforceSafeMediaVolume(caller);
-                        } else {
-                            // We have existing playback time recorded, already confirmed.
-                            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_INACTIVE;
-                            mLastMusicActiveTimeMs = 0;
-                        }
-                    }
-                } else {
-                    persistedState = SAFE_MEDIA_VOLUME_DISABLED;
-                    mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
-                }
                 mMcc = mcc;
-                mAudioHandler.sendMessageAtTime(
-                        mAudioHandler.obtainMessage(MSG_PERSIST_SAFE_VOLUME_STATE,
-                                persistedState, /*arg2=*/0,
-                                /*obj=*/null), /*delay=*/0);
             }
-
-            updateCsdEnabled(caller);
         }
     }
 
+    @GuardedBy("mSafeMediaVolumeStateLock")
+    private void updateSafeMediaVolume_l(String caller) {
+        boolean safeMediaVolumeEnabled =
+                SystemProperties.getBoolean(SYSTEM_PROPERTY_SAFEMEDIA_FORCE, false)
+                        || (mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_safe_media_volume_enabled)
+                        && !mEnableCsd.get());
+        boolean safeMediaVolumeBypass =
+                SystemProperties.getBoolean(SYSTEM_PROPERTY_SAFEMEDIA_BYPASS, false);
+
+        // The persisted state is either "disabled" or "active": this is the state applied
+        // next time we boot and cannot be "inactive"
+        int persistedState;
+        if (safeMediaVolumeEnabled && !safeMediaVolumeBypass) {
+            persistedState = SAFE_MEDIA_VOLUME_ACTIVE;
+            // The state can already be "inactive" here if the user has forced it before
+            // the 30 seconds timeout for forced configuration. In this case we don't reset
+            // it to "active".
+            if (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_INACTIVE) {
+                if (mMusicActiveMs == 0) {
+                    mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
+                    enforceSafeMediaVolume(caller);
+                } else {
+                    // We have existing playback time recorded, already confirmed.
+                    mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_INACTIVE;
+                    mLastMusicActiveTimeMs = 0;
+                }
+            }
+        } else {
+            persistedState = SAFE_MEDIA_VOLUME_DISABLED;
+            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_DISABLED;
+        }
+
+        mAudioHandler.sendMessageAtTime(
+                mAudioHandler.obtainMessage(MSG_PERSIST_SAFE_VOLUME_STATE,
+                        persistedState, /*arg2=*/0,
+                        /*obj=*/null), /*delay=*/0);
+    }
+
     private void updateCsdEnabled(String caller) {
-        boolean newEnableCsd = SystemProperties.getBoolean("audio.safemedia.force", false);
+        boolean newEnableCsd = SystemProperties.getBoolean(SYSTEM_PROPERTY_SAFEMEDIA_CSD_FORCE,
+                false);
         if (!newEnableCsd) {
             final String featureFlagEnableCsdValue = DeviceConfig.getProperty(
                     DeviceConfig.NAMESPACE_MEDIA,
@@ -895,6 +920,10 @@ public class SoundDoseHelper {
         if (mEnableCsd.compareAndSet(!newEnableCsd, newEnableCsd)) {
             Log.i(TAG, caller + ": enable CSD " + newEnableCsd);
             initCsd();
+
+            synchronized (mSafeMediaVolumeStateLock) {
+                updateSafeMediaVolume_l(caller);
+            }
         }
     }
 

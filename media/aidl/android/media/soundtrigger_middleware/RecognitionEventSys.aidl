@@ -33,4 +33,9 @@ parcelable RecognitionEventSys {
      */
     // @ElapsedRealtimeLong
     long halEventReceivedMillis = -1;
+    /**
+     * Token relating this event to a particular recognition session, returned by
+     * {@link ISoundTriggerModule.startRecognition(int, RecognitionConfig}
+     */
+    IBinder token;
 }
