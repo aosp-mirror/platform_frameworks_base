@@ -2368,6 +2368,7 @@ package android.os {
     method public static boolean isApp(int);
     field public static final int MIN_SECONDARY_USER_ID = 10; // 0xa
     field public static final int USER_ALL = -1; // 0xffffffff
+    field public static final int USER_CURRENT = -2; // 0xfffffffe
     field public static final int USER_NULL = -10000; // 0xffffd8f0
     field public static final int USER_SYSTEM = 0; // 0x0
   }
