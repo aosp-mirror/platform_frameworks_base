@@ -20,6 +20,7 @@ package com.android.settingslib.spa.framework
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
@@ -40,6 +41,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.android.settingslib.spa.R
 import com.android.settingslib.spa.framework.common.LogCategory
 import com.android.settingslib.spa.framework.common.NullPageProvider
+import com.android.settingslib.spa.framework.common.SettingsPage
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
 import com.android.settingslib.spa.framework.common.SettingsPageProviderRepository
 import com.android.settingslib.spa.framework.common.SpaEnvironmentFactory
@@ -51,7 +53,7 @@ import com.android.settingslib.spa.framework.compose.composable
 import com.android.settingslib.spa.framework.compose.localNavController
 import com.android.settingslib.spa.framework.compose.rememberAnimatedNavController
 import com.android.settingslib.spa.framework.theme.SettingsTheme
-import com.android.settingslib.spa.framework.util.PageWithEvent
+import com.android.settingslib.spa.framework.util.PageLogger
 import com.android.settingslib.spa.framework.util.getDestination
 import com.android.settingslib.spa.framework.util.getEntryId
 import com.android.settingslib.spa.framework.util.getSessionName
@@ -87,25 +89,50 @@ open class BrowseActivity : ComponentActivity() {
         setContent {
             SettingsTheme {
                 val sppRepository by spaEnvironment.pageProviderRepository
-                BrowseContent(sppRepository, intent)
+                BrowseContent(
+                    sppRepository = sppRepository,
+                    isPageEnabled = ::isPageEnabled,
+                    initialIntent = intent,
+                )
             }
         }
     }
+
+    open fun isPageEnabled(page: SettingsPage) = page.isEnabled()
 }
 
 @VisibleForTesting
 @Composable
-fun BrowseContent(sppRepository: SettingsPageProviderRepository, initialIntent: Intent? = null) {
+internal fun BrowseContent(
+    sppRepository: SettingsPageProviderRepository,
+    isPageEnabled: (SettingsPage) -> Boolean,
+    initialIntent: Intent?,
+) {
     val navController = rememberAnimatedNavController()
     CompositionLocalProvider(navController.localNavController()) {
         val controller = LocalNavController.current as NavControllerWrapperImpl
-        controller.NavContent(sppRepository.getAllProviders())
+        controller.NavContent(sppRepository.getAllProviders()) { page ->
+            if (remember { isPageEnabled(page) }) {
+                LaunchedEffect(Unit) {
+                    Log.d(TAG, "Launching page ${page.sppName}")
+                }
+                page.PageLogger()
+                page.UiLayout()
+            } else {
+                LaunchedEffect(Unit) {
+                    controller.navigateBack()
+                }
+            }
+        }
         controller.InitialDestination(initialIntent, sppRepository.getDefaultStartPage())
     }
 }
 
 @Composable
-private fun NavControllerWrapperImpl.NavContent(allProvider: Collection<SettingsPageProvider>) {
+private fun NavControllerWrapperImpl.NavContent(
+    allProvider: Collection<SettingsPageProvider>,
+    content: @Composable (SettingsPage) -> Unit,
+) {
     AnimatedNavHost(
         navController = navController,
         startDestination = NullPageProvider.name,
@@ -139,7 +166,7 @@ private fun NavControllerWrapperImpl.NavContent(allProvider: Collection<Settings
                 },
             ) { navBackStackEntry ->
                 val page = remember { spp.createSettingsPage(navBackStackEntry.arguments) }
-                page.PageWithEvent()
+                content(page)
             }
         }
     }

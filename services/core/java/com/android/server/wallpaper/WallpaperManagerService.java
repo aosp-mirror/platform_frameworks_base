@@ -1617,6 +1617,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         public void onScreenTurningOn(int displayId) {
             notifyScreenTurningOn(displayId);
         }
+
+        @Override
+        public void onKeyguardGoingAway() {
+            notifyKeyguardGoingAway();
+        }
     }
 
     void initialize() {
@@ -2650,6 +2655,45 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         e.printStackTrace();
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Propagate a keyguard going away event to the wallpaper engine.
+     */
+    private void notifyKeyguardGoingAway() {
+        synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    data.connection.forEachDisplayConnector(displayConnector -> {
+                        if (displayConnector.mEngine != null) {
+                            try {
+                                displayConnector.mEngine.dispatchWallpaperCommand(
+                                        WallpaperManager.COMMAND_KEYGUARD_GOING_AWAY,
+                                        -1, -1, -1, new Bundle());
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to notify that the keyguard is going away", e);
+                            }
+                        }
+                    });
+                }
+                return;
+            }
+
+            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            if (data != null && data.connection != null) {
+                data.connection.forEachDisplayConnector(displayConnector -> {
+                    if (displayConnector.mEngine != null) {
+                        try {
+                            displayConnector.mEngine.dispatchWallpaperCommand(
+                                    WallpaperManager.COMMAND_KEYGUARD_GOING_AWAY,
+                                    -1, -1, -1, new Bundle());
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
             }
         }
     }

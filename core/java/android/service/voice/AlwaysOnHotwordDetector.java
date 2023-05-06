@@ -984,7 +984,8 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                         new KeyphraseRecognitionEvent(status, soundModelHandle, captureAvailable,
                                 captureSession, captureDelayMs, capturePreambleMs, triggerInData,
                                 captureFormat, data, keyphraseRecognitionExtras.toArray(
-                                new KeyphraseRecognitionExtra[0]), halEventReceivedMillis),
+                                new KeyphraseRecognitionExtra[0]), halEventReceivedMillis,
+                                new Binder()),
                         mInternalCallback);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();

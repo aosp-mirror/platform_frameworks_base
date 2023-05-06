@@ -81,6 +81,11 @@ public abstract class MediaOutputBaseAdapter extends
         mIsInitVolumeFirstTime = true;
     }
 
+    /**
+     * Refresh current dataset
+     */
+    public abstract void updateItems();
+
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
             int viewType) {

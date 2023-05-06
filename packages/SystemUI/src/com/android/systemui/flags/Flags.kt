@@ -206,11 +206,6 @@ object Flags {
                     "wallpaper_picker_ui_for_aiwp"
             )
 
-    /** Whether to inflate the bouncer view on a background thread. */
-    // TODO(b/273341787): Tracking Bug
-    @JvmField
-    val PREVENT_BYPASS_KEYGUARD = releasedFlag(230, "prevent_bypass_keyguard")
-
     /** Whether to use a new data source for intents to run on keyguard dismissal. */
     @JvmField
     val REFACTOR_KEYGUARD_DISMISS_INTENT = unreleasedFlag(231, "refactor_keyguard_dismiss_intent")
@@ -608,6 +603,9 @@ object Flags {
     @JvmField val CLIPBOARD_REMOTE_BEHAVIOR = releasedFlag(1701, "clipboard_remote_behavior")
     // TODO(b/278714186) Tracking Bug
     @JvmField val CLIPBOARD_IMAGE_TIMEOUT = unreleasedFlag(1702, "clipboard_image_timeout")
+    // TODO(b/279405451): Tracking Bug
+    @JvmField
+    val CLIPBOARD_SHARED_TRANSITIONS = unreleasedFlag(1703, "clipboard_shared_transitions")
 
     // 1800 - shade container
     // TODO(b/265944639): Tracking Bug

@@ -940,8 +940,6 @@ public class DisplayRotationTests {
     @Test
     public void testIgnoresDeskDockRotation_whenNoSensorAndLockedRespected() throws Exception {
         mBuilder.setDeskDockRotation(Surface.ROTATION_270).build();
-        when(mMockDisplayPolicy.isDeskDockRespectsNoSensorAndLockedWithoutAccelerometer())
-                .thenReturn(true);
         configureDisplayRotation(SCREEN_ORIENTATION_LANDSCAPE, false, false);
 
         when(mMockDisplayPolicy.getDockMode()).thenReturn(Intent.EXTRA_DOCK_STATE_DESK);

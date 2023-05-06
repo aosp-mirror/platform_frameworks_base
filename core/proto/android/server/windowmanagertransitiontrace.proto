@@ -23,7 +23,7 @@ import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 option java_multiple_files = true;
 
 /* Represents a file full of transition entries.
-   Encoded, it should start with 0x09 0x54 0x52 0x4E 0x54 0x52 0x41 0x43 0x45 (TRNTRACE), such
+   Encoded, it should start with 0x09 0x54 0x52 0x4E 0x54 0x52 0x41 0x43 0x45 (.TRNTRACE), such
    that it can be easily identified. */
 message TransitionTraceProto {
 
@@ -38,28 +38,24 @@ message TransitionTraceProto {
 
   // Must be the first field, set to value in MagicNumber
   required fixed64 magic_number = 1;
-  // Transitions that don't have a finish time are considered aborted
-  repeated Transition finished_transitions = 2;
-
-  // Additional debugging info only collected and dumped when explicitly requested to trace
-  repeated TransitionState transition_states = 3;
-  repeated TransitionInfo transition_info = 4;
+  repeated Transition transitions = 2;
 
   /* offset between real-time clock and elapsed time clock in nanoseconds.
    Calculated as: 1000000 * System.currentTimeMillis() - SystemClock.elapsedRealtimeNanos() */
-  optional fixed64 real_to_elapsed_time_offset_nanos = 5;
+  optional fixed64 real_to_elapsed_time_offset_nanos = 3;
 }
 
 message Transition {
-  optional int32 id = 1; // Not dumped in always on tracing
-  required uint64 start_transaction_id = 2;
-  required uint64 finish_transaction_id = 3;
-  required int64 create_time_ns = 4;
-  required int64 send_time_ns = 5;
-  optional int64 finish_time_ns = 6; // consider aborted if not provided
-  required int32 type = 7;
+  required int32 id = 1;
+  optional uint64 start_transaction_id = 2;
+  optional uint64 finish_transaction_id = 3;
+  optional int64 create_time_ns = 4;
+  optional int64 send_time_ns = 5;
+  optional int64 finish_time_ns = 6;
+  optional int32 type = 7;
   repeated Target targets = 8;
   optional int32 flags = 9;
+  optional int64 abort_time_ns = 10;
 }
 
 message Target {
@@ -67,41 +63,4 @@ message Target {
   required int32 layer_id = 2;
   optional int32 window_id = 3;  // Not dumped in always on tracing
   optional int32 flags = 4;
-}
-
-message TransitionState {
-  enum State {
-    COLLECTING = 0;
-    PENDING = -1;
-    STARTED = 1;
-    PLAYING = 2;
-    ABORT = 3;
-    FINISHED = 4;
-  }
-
-  required int64 time_ns = 1;
-  required int32 transition_id = 2;
-  required int32 transition_type = 3;
-  required State state = 4;
-  required int32 flags = 5;
-  repeated ChangeInfo change = 6;
-  repeated com.android.server.wm.IdentifierProto participants = 7;
-}
-
-message ChangeInfo {
-  required com.android.server.wm.IdentifierProto window_identifier = 1;
-  required int32 transit_mode = 2;
-  required bool has_changed = 3;
-  required int32 change_flags = 4;
-  required int32 windowing_mode = 5;
-}
-
-message TransitionInfo {
-  required int32 transition_id = 1;
-  repeated TransitionInfoChange change = 2;
-}
-
-message TransitionInfoChange {
-  required int32 layer_id = 1;
-  required int32 mode = 2;
 }
