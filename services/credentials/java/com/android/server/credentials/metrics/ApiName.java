@@ -18,11 +18,13 @@ package com.android.server.credentials.metrics;
 
 import static android.credentials.ui.RequestInfo.TYPE_CREATE;
 import static android.credentials.ui.RequestInfo.TYPE_GET;
+import static android.credentials.ui.RequestInfo.TYPE_GET_VIA_REGISTRY;
 import static android.credentials.ui.RequestInfo.TYPE_UNDEFINED;
 
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_CLEAR_CREDENTIAL;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_CREATE_CREDENTIAL;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_GET_CREDENTIAL;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_GET_CREDENTIAL_VIA_REGISTRY;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_IS_ENABLED_CREDENTIAL_PROVIDER_SERVICE;
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_UNKNOWN;
 
@@ -35,6 +37,8 @@ import java.util.Map;
 public enum ApiName {
     UNKNOWN(CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_UNKNOWN),
     GET_CREDENTIAL(CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_GET_CREDENTIAL),
+    GET_CREDENTIAL_VIA_REGISTRY(
+CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_GET_CREDENTIAL_VIA_REGISTRY),
     CREATE_CREDENTIAL(
             CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_CREATE_CREDENTIAL),
     CLEAR_CREDENTIAL(
@@ -52,6 +56,8 @@ CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_IS_ENABLED_CREDENT
                     CREATE_CREDENTIAL.mInnerMetricCode),
             new AbstractMap.SimpleEntry<>(TYPE_GET,
                     GET_CREDENTIAL.mInnerMetricCode),
+            new AbstractMap.SimpleEntry<>(TYPE_GET_VIA_REGISTRY,
+                    GET_CREDENTIAL_VIA_REGISTRY.mInnerMetricCode),
             new AbstractMap.SimpleEntry<>(TYPE_UNDEFINED,
                     CLEAR_CREDENTIAL.mInnerMetricCode)
     );
