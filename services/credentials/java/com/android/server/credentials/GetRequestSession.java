@@ -19,6 +19,7 @@ package com.android.server.credentials;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.CredentialOption;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.GetCredentialException;
 import android.credentials.GetCredentialRequest;
@@ -52,9 +53,20 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
             CancellationSignal cancellationSignal,
             long startedTimestamp) {
         super(context, sessionCallback, lock, userId, callingUid, request, callback,
-                RequestInfo.TYPE_GET, callingAppInfo, enabledProviders, cancellationSignal,
-                startedTimestamp);
+                getRequestInfoFromRequest(request), callingAppInfo, enabledProviders,
+                cancellationSignal, startedTimestamp);
         mRequestSessionMetric.collectGetFlowInitialMetricInfo(request);
+    }
+
+    private static String getRequestInfoFromRequest(GetCredentialRequest request) {
+        for (CredentialOption option : request.getCredentialOptions()) {
+            if (option.getCredentialRetrievalData().getStringArrayList(
+                    CredentialOption
+                            .SUPPORTED_ELEMENT_KEYS) != null) {
+                return RequestInfo.TYPE_GET_VIA_REGISTRY;
+            }
+        }
+        return RequestInfo.TYPE_GET;
     }
 
     /**
