@@ -44,7 +44,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
     private static final String TAG = "DynamicSystemService";
     private static final long MINIMUM_SD_MB = (30L << 10);
     private static final int GSID_ROUGH_TIMEOUT_MS = 8192;
-    private static final String PATH_DEFAULT = "/data/gsi/";
+    private static final String PATH_DEFAULT = "/data/gsi/dsu/";
     private Context mContext;
     private String mInstallPath, mDsuSlot;
     private volatile IGsiService mGsiService;
