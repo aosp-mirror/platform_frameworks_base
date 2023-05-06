@@ -39,6 +39,7 @@ import static android.view.KeyEvent.META_SHIFT_RIGHT_ON;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.server.policy.WindowManagerPolicy.ACTION_PASS_TO_USER;
 
 import static java.util.Collections.unmodifiableMap;
@@ -59,7 +60,7 @@ import java.util.Map;
 
 class ShortcutKeyTestBase {
     TestPhoneWindowManager mPhoneWindowManager;
-    final Context mContext = getInstrumentation().getTargetContext();
+    final Context mContext = spy(getInstrumentation().getTargetContext());
 
     /** Modifier key to meta state */
     private static final Map<Integer, Integer> MODIFIER;

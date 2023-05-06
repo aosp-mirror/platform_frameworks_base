@@ -48,6 +48,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockingDetails;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.withSettings;
@@ -171,12 +172,12 @@ class TestPhoneWindowManager {
         mHandlerThread = new HandlerThread("fake window manager");
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
-        mHandler.runWithScissors(()-> setUp(context),  0 /* timeout */);
+        mContext = mockingDetails(context).isSpy() ? context : spy(context);
+        mHandler.runWithScissors(this::setUp,  0 /* timeout */);
     }
 
-    private void setUp(Context context) {
+    private void setUp() {
         mPhoneWindowManager = spy(new PhoneWindowManager());
-        mContext = spy(context);
 
         // Use stubOnly() to reduce memory usage if it doesn't need verification.
         final MockSettings spyStubOnly = withSettings().stubOnly()
@@ -337,10 +338,6 @@ class TestPhoneWindowManager {
                 mPhoneWindowManager.mLongPressOnPowerAssistantTimeoutMs = 500;
                 break;
         }
-    }
-
-    void overrideShortPressOnStemPrimaryBehavior(int behavior) {
-        mPhoneWindowManager.mShortPressOnStemPrimaryBehavior = behavior;
     }
 
     void overrideCanStartDreaming(boolean canDream) {
