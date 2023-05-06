@@ -765,10 +765,6 @@ public class LauncherApps {
     @Nullable
     public PendingIntent getMainActivityLaunchIntent(@NonNull ComponentName component,
             @Nullable Bundle startActivityOptions, @NonNull UserHandle user) {
-        if (mContext.checkSelfPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.w(TAG, "Only allowed for recents.");
-        }
         logErrorForInvalidProfileAccess(user);
         if (DEBUG) {
             Log.i(TAG, "GetMainActivityLaunchIntent " + component + " " + user);
