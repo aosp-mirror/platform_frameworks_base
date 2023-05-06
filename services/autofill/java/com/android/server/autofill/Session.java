@@ -1629,6 +1629,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // TODO(b/266379948): Ideally wait for PCC request to finish for a while more
         // (say 100ms) before proceeding further on.
 
+        processResponseLockedForPcc(response, response.getClientState(), requestFlags);
+    }
+
+
+    @GuardedBy("mLock")
+    private void processResponseLockedForPcc(@NonNull FillResponse response,
+            @Nullable Bundle newClientState, int flags) {
         if (DBG) {
             Slog.d(TAG, "DBG: Initial response: " + response);
         }
@@ -1636,12 +1643,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             response = getEffectiveFillResponse(response);
             if (isEmptyResponse(response)) {
                 // Treat it as a null response.
-                processNullResponseLocked(requestId, requestFlags);
+                processNullResponseLocked(
+                        response != null ? response.getRequestId() : 0,
+                        flags);
+                return;
             }
             if (DBG) {
                 Slog.d(TAG, "DBG: Processed response: " + response);
             }
-            processResponseLocked(response, null, requestFlags);
+            processResponseLocked(response, newClientState, flags);
         }
     }
 
@@ -2574,7 +2584,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sDebug) Slog.d(TAG,  "Updating client state from auth dataset");
                     mClientState = newClientState;
                 }
-                final Dataset dataset = (Dataset) result;
+                Dataset dataset = (Dataset) result;
+                FillResponse temp = new FillResponse.Builder().addDataset(dataset).build();
+                temp = getEffectiveFillResponse(temp);
+                dataset = temp.getDatasets().get(0);
                 final Dataset oldDataset = authenticatedResponse.getDatasets().get(datasetIdx);
                 if (!isAuthResultDatasetEphemeral(oldDataset, data)) {
                     authenticatedResponse.getDatasets().set(datasetIdx, dataset);
@@ -4751,10 +4764,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         setViewStatesLocked(oldResponse, ViewState.STATE_INITIAL, true);
         // Move over the id
         newResponse.setRequestId(oldResponse.getRequestId());
-        // Replace the old response
-        mResponses.put(newResponse.getRequestId(), newResponse);
         // Now process the new response
-        processResponseLocked(newResponse, newClientState, 0);
+        processResponseLockedForPcc(newResponse, newClientState, 0);
     }
 
     @GuardedBy("mLock")
