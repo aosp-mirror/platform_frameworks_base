@@ -23,6 +23,8 @@ import android.util.SparseArray
 import androidx.core.util.forEach
 import androidx.core.util.keyIterator
 import androidx.core.util.valueIterator
+import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
+import com.android.wm.shell.util.KtProtoLog
 import java.util.concurrent.Executor
 import java.util.function.Consumer
 
@@ -140,6 +142,12 @@ class DesktopModeTaskRepository {
 
         val added = displayData.getOrCreate(displayId).activeTasks.add(taskId)
         if (added) {
+            KtProtoLog.d(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTaskRepo: add active task=%d displayId=%d",
+                taskId,
+                displayId
+            )
             activeTasksListeners.onEach { it.onActiveTasksChanged(displayId) }
         }
         return added
@@ -157,6 +165,9 @@ class DesktopModeTaskRepository {
                 activeTasksListeners.onEach { it.onActiveTasksChanged(displayId) }
                 result = true
             }
+        }
+        if (result) {
+            KtProtoLog.d(WM_SHELL_DESKTOP_MODE, "DesktopTaskRepo: remove active task=%d", taskId)
         }
         return result
     }
@@ -221,6 +232,17 @@ class DesktopModeTaskRepository {
             displayData[displayId]?.visibleTasks?.remove(taskId)
         }
         val newCount = getVisibleTaskCount(displayId)
+
+        if (prevCount != newCount) {
+            KtProtoLog.d(
+                WM_SHELL_DESKTOP_MODE,
+                "DesktopTaskRepo: update task visibility taskId=%d visible=%b displayId=%d",
+                taskId,
+                visible,
+                displayId
+            )
+        }
+
         // Check if count changed and if there was no tasks or this is the first task
         if (prevCount != newCount && (prevCount == 0 || newCount == 0)) {
             notifyVisibleTaskListeners(displayId, newCount > 0)
@@ -244,6 +266,11 @@ class DesktopModeTaskRepository {
      * Add (or move if it already exists) the task to the top of the ordered list.
      */
     fun addOrMoveFreeformTaskToTop(taskId: Int) {
+        KtProtoLog.d(
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopTaskRepo: add or move task to top taskId=%d",
+            taskId
+        )
         if (freeformTasksInZOrder.contains(taskId)) {
             freeformTasksInZOrder.remove(taskId)
         }
@@ -254,6 +281,11 @@ class DesktopModeTaskRepository {
      * Remove the task from the ordered list.
      */
     fun removeFreeformTask(taskId: Int) {
+        KtProtoLog.d(
+            WM_SHELL_DESKTOP_MODE,
+            "DesktopTaskRepo: remove freeform task from ordered list taskId=%d",
+            taskId
+        )
         freeformTasksInZOrder.remove(taskId)
     }
 

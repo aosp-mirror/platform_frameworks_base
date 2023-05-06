@@ -25,7 +25,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
-import android.provider.Settings;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageInfo;
@@ -727,10 +726,13 @@ public final class CredentialManagerService
                             "setEnabledProviders",
                             null);
 
+            Set<String> enableProvider = new HashSet<>(providers);
+            enableProvider.addAll(primaryProviders);
+
             boolean writeEnabledStatus =
                     Settings.Secure.putStringForUser(getContext().getContentResolver(),
                             Settings.Secure.CREDENTIAL_SERVICE,
-                            String.join(":", providers),
+                            String.join(":", enableProvider),
                             userId);
 
             boolean writePrimaryStatus =
