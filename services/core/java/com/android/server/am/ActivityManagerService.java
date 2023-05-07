@@ -53,6 +53,10 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_SYSTEM_INIT;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_UI_VISIBILITY;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BACKUP;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_INSTRUMENTATION;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_PERSISTENT;
+import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_SYSTEM;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
 import static android.content.pm.PackageManager.MATCH_ALL;
@@ -158,10 +162,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.ProcessList.ProcStartHandler;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_BACKUP;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_INSTRUMENTATION;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_PERSISTENT;
-import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_SYSTEM;
 import static com.android.server.net.NetworkPolicyManagerInternal.updateBlockedReasonsWithProcState;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.UserManagerInternal.USER_START_MODE_BACKGROUND;
@@ -17623,7 +17623,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final ProcessRecord r = mPidsSelfLocked.valueAt(i);
                     processMemoryStates.add(new ProcessMemoryState(
                             r.uid, r.getPid(), r.processName, r.mState.getCurAdj(),
-                            r.mServices.hasForegroundServices()));
+                            r.mServices.hasForegroundServices(),
+                            r.mProfile.getCurrentHostingComponentTypes(),
+                            r.mProfile.getHistoricalHostingComponentTypes()));
                 }
             }
             return processMemoryStates;
