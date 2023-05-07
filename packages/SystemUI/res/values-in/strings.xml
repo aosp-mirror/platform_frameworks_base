@@ -82,7 +82,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Edit"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"Mengedit screenshot"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"Bagikan screenshot"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Ambil lebih banyak"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"Ambil screenshot lagi"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Menutup screenshot"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"Pratinjau screenshot"</string>
     <string name="screenshot_top_boundary_pct" msgid="2520148599096479332">"Batas atas <xliff:g id="PERCENT">%1$d</xliff:g>%%"</string>
@@ -217,7 +217,7 @@
     <string name="quick_settings_bluetooth_secondary_label_battery_level" msgid="4182034939479344093">"Baterai <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%s</xliff:g>"</string>
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
-    <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Masukan"</string>
+    <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Input"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Alat Bantu Dengar"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Mengaktifkan…"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Putar Otomatis"</string>
@@ -888,7 +888,7 @@
     <string name="status_before_loading" msgid="1500477307859631381">"Konten akan segera muncul"</string>
     <string name="missed_call" msgid="4228016077700161689">"Panggilan tak terjawab"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Lihat pesan terbaru, panggilan tak terjawab, dan pembaruan status"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Lihat pesan terbaru, panggilan tak terjawab, dan status terkini"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Percakapan"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Dijeda oleh fitur Jangan Ganggu"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> mengirim pesan: <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

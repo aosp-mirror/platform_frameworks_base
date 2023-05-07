@@ -587,7 +587,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Autentifikuojant įvyko klaida"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Naudoti ekrano užraktą"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Jei norite tęsti, įveskite ekrano užraktą"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Tvirtai paspauskite jutiklį"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Stipriai paspauskite jutiklį"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Nepavyko apdoroti piršto antspaudo. Bandykite dar kartą."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Nuvalykite kontrolinio kodo jutiklį ir bandykite dar kartą"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Nuvalykite jutiklį ir bandykite dar kartą"</string>
