@@ -94,6 +94,7 @@ import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import junit.framework.Assert;
 
+import org.mockito.AdditionalMatchers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockSettings;
@@ -355,6 +356,20 @@ class TestPhoneWindowManager {
     void overrideIncallPowerBehavior(int behavior) {
         mPhoneWindowManager.mIncallPowerBehavior = behavior;
         setPhoneCallIsInProgress();
+    }
+
+    void prepareBrightnessDecrease(float currentBrightness) {
+        doReturn(0.0f).when(mPowerManager)
+                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+        doReturn(1.0f).when(mPowerManager)
+                .getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
+        doReturn(currentBrightness).when(mDisplayManager)
+                .getBrightness(0);
+    }
+
+    void verifyNewBrightness(float newBrightness) {
+        verify(mDisplayManager).setBrightness(Mockito.eq(0),
+                AdditionalMatchers.eq(newBrightness, 0.001f));
     }
 
     void setPhoneCallIsInProgress() {
