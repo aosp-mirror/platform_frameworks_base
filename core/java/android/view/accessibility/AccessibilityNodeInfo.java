@@ -23,6 +23,7 @@ import static java.util.Collections.EMPTY_LIST;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.Hide;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -4476,6 +4477,8 @@ public class AccessibilityNodeInfo implements Parcelable {
             parcel.writeInt(mCollectionInfo.getColumnCount());
             parcel.writeInt(mCollectionInfo.isHierarchical() ? 1 : 0);
             parcel.writeInt(mCollectionInfo.getSelectionMode());
+            parcel.writeInt(mCollectionInfo.getItemCount());
+            parcel.writeInt(mCollectionInfo.getImportantForAccessibilityItemCount());
         }
 
         if (isBitSet(nonDefaultFields, fieldIndex++)) {
@@ -4604,7 +4607,8 @@ public class AccessibilityNodeInfo implements Parcelable {
         CollectionInfo ci = other.mCollectionInfo;
         mCollectionInfo = (ci == null) ? null
                 : new CollectionInfo(ci.mRowCount, ci.mColumnCount,
-                                     ci.mHierarchical, ci.mSelectionMode);
+                        ci.mHierarchical, ci.mSelectionMode, ci.mItemCount,
+                        ci.mImportantForAccessibilityItemCount);
         CollectionItemInfo cii = other.mCollectionItemInfo;
         CollectionItemInfo.Builder builder = new CollectionItemInfo.Builder();
         mCollectionItemInfo = (cii == null)  ? null
@@ -4734,6 +4738,8 @@ public class AccessibilityNodeInfo implements Parcelable {
                         parcel.readInt(),
                         parcel.readInt(),
                         parcel.readInt() == 1,
+                        parcel.readInt(),
+                        parcel.readInt(),
                         parcel.readInt())
                 : null;
 
@@ -5926,10 +5932,20 @@ public class AccessibilityNodeInfo implements Parcelable {
         /** Selection mode where multiple items may be selected. */
         public static final int SELECTION_MODE_MULTIPLE = 2;
 
+        /**
+         * Constant to denote a missing collection count.
+         *
+         * This should be used for {@code mItemCount} and
+         * {@code mImportantForAccessibilityItemCount} when values for those fields are not known.
+         */
+        public static final int UNDEFINED = -1;
+
         private int mRowCount;
         private int mColumnCount;
         private boolean mHierarchical;
         private int mSelectionMode;
+        private int mItemCount;
+        private int mImportantForAccessibilityItemCount;
 
         /**
          * Instantiates a CollectionInfo that is a clone of another one.
@@ -5943,7 +5959,8 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static CollectionInfo obtain(CollectionInfo other) {
             return new CollectionInfo(other.mRowCount, other.mColumnCount, other.mHierarchical,
-                    other.mSelectionMode);
+                    other.mSelectionMode, other.mItemCount,
+                    other.mImportantForAccessibilityItemCount);
         }
 
         /**
@@ -6011,6 +6028,36 @@ public class AccessibilityNodeInfo implements Parcelable {
             mColumnCount = columnCount;
             mHierarchical = hierarchical;
             mSelectionMode = selectionMode;
+            mItemCount = UNDEFINED;
+            mImportantForAccessibilityItemCount = UNDEFINED;
+        }
+
+        /**
+         * Creates a new instance.
+         *
+         * @param rowCount The number of rows.
+         * @param columnCount The number of columns.
+         * @param hierarchical Whether the collection is hierarchical.
+         * @param selectionMode The collection's selection mode.
+         * @param itemCount The collection's item count, which includes items that are unimportant
+         *                  for accessibility. When ViewGroups map cleanly to both row and column
+         *                  semantics, clients should populate the row and column counts and
+         *                  optionally populate this field. In all other cases, clients should
+         *                  populate this field so that accessibility services can use it to relay
+         *                  the collection size to users. This should be set to {@code UNDEFINED} if
+         *                  the item count is not known.
+         * @param importantForAccessibilityItemCount The count of the collection's views considered
+         *                                           important for accessibility.
+         */
+        @Hide
+        public CollectionInfo(int rowCount, int columnCount, boolean hierarchical,
+                int selectionMode, int itemCount, int importantForAccessibilityItemCount) {
+            mRowCount = rowCount;
+            mColumnCount = columnCount;
+            mHierarchical = hierarchical;
+            mSelectionMode = selectionMode;
+            mItemCount = itemCount;
+            mImportantForAccessibilityItemCount = importantForAccessibilityItemCount;
         }
 
         /**
@@ -6055,6 +6102,25 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         /**
+         * Gets the number of items in the collection.
+         *
+         * @return The count of items, which may be {@code UNDEFINED} if the count is not known.
+         */
+        public int getItemCount() {
+            return mItemCount;
+        }
+
+        /**
+         * Gets the number of items in the collection considered important for accessibility.
+         *
+         * @return The count of items important for accessibility, which may be {@code UNDEFINED}
+         * if the count is not known.
+         */
+        public int getImportantForAccessibilityItemCount() {
+            return mImportantForAccessibilityItemCount;
+        }
+
+        /**
          * Previously would recycle this instance.
          *
          * @deprecated Object pooling has been discontinued. Calling this function now will have
@@ -6068,6 +6134,111 @@ public class AccessibilityNodeInfo implements Parcelable {
             mColumnCount = 0;
             mHierarchical = false;
             mSelectionMode = SELECTION_MODE_NONE;
+            mItemCount = UNDEFINED;
+            mImportantForAccessibilityItemCount = UNDEFINED;
+        }
+
+        /**
+         * The builder for CollectionInfo.
+         */
+
+        public static final class Builder {
+            private int mRowCount = 0;
+            private int mColumnCount = 0;
+            private boolean mHierarchical = false;
+            private int mSelectionMode;
+            private int mItemCount = UNDEFINED;
+            private int mImportantForAccessibilityItemCount = UNDEFINED;
+
+            /**
+             * Creates a new Builder.
+             */
+            public Builder() {
+            }
+
+            /**
+             * Sets the row count.
+             * @param rowCount The number of rows in the collection.
+             * @return This builder.
+             */
+            @NonNull
+            public CollectionInfo.Builder setRowCount(int rowCount) {
+                mRowCount = rowCount;
+                return this;
+            }
+
+            /**
+             * Sets the column count.
+             * @param columnCount The number of columns in the collection.
+             * @return This builder.
+             */
+            @NonNull
+            public CollectionInfo.Builder setColumnCount(int columnCount) {
+                mColumnCount = columnCount;
+                return this;
+            }
+            /**
+             * Sets whether the collection is hierarchical.
+             * @param hierarchical Whether the collection is hierarchical.
+             * @return This builder.
+             */
+            @NonNull
+            public CollectionInfo.Builder setHierarchical(boolean hierarchical) {
+                mHierarchical = hierarchical;
+                return this;
+            }
+
+            /**
+             * Sets the selection mode.
+             * @param selectionMode The selection mode.
+             * @return This builder.
+             */
+            @NonNull
+            public CollectionInfo.Builder setSelectionMode(int selectionMode) {
+                mSelectionMode = selectionMode;
+                return this;
+            }
+
+            /**
+             * Sets the number of items in the collection. Can be optionally set for ViewGroups with
+             * clear row and column semantics; should be set for all other clients.
+             *
+             * @param itemCount The number of items in the collection. This should be set to
+             *                  {@code UNDEFINED} if the item count is not known.
+             * @return This builder.
+             */
+            @NonNull
+            public CollectionInfo.Builder setItemCount(int itemCount) {
+                mItemCount = itemCount;
+                return this;
+            }
+
+            /**
+             * Sets the number of views considered important for accessibility.
+             * @param importantForAccessibilityItemCount The number of items important for
+             *                                            accessibility.
+             * @return This builder.
+             */
+            @NonNull
+            public CollectionInfo.Builder setImportantForAccessibilityItemCount(
+                    int importantForAccessibilityItemCount) {
+                mImportantForAccessibilityItemCount = importantForAccessibilityItemCount;
+                return this;
+            }
+
+            /**
+             * Creates a new {@link CollectionInfo} instance.
+             */
+            @NonNull
+            public CollectionInfo build() {
+                CollectionInfo collectionInfo = new CollectionInfo(mRowCount, mColumnCount,
+                        mHierarchical);
+                collectionInfo.mSelectionMode = mSelectionMode;
+                collectionInfo.mItemCount = mItemCount;
+                collectionInfo.mImportantForAccessibilityItemCount =
+                        mImportantForAccessibilityItemCount;
+                return collectionInfo;
+            }
         }
     }
 
