@@ -3096,18 +3096,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     int screenDisplayId = displayId < 0 ? DEFAULT_DISPLAY : displayId;
 
+                    float minLinearBrightness = mPowerManager.getBrightnessConstraint(
+                            PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM);
+                    float maxLinearBrightness = mPowerManager.getBrightnessConstraint(
+                            PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MAXIMUM);
                     float linearBrightness = mDisplayManager.getBrightness(screenDisplayId);
 
                     float gammaBrightness = BrightnessUtils.convertLinearToGamma(linearBrightness);
                     float adjustedGammaBrightness =
                             gammaBrightness + 1f / BRIGHTNESS_STEPS * direction;
-
+                    adjustedGammaBrightness = MathUtils.constrain(adjustedGammaBrightness, 0f,
+                            1f);
                     float adjustedLinearBrightness = BrightnessUtils.convertGammaToLinear(
                             adjustedGammaBrightness);
-
-                    adjustedLinearBrightness = MathUtils.constrain(adjustedLinearBrightness, 0f,
-                            1f);
-
+                    adjustedLinearBrightness = MathUtils.constrain(adjustedLinearBrightness,
+                            minLinearBrightness, maxLinearBrightness);
                     mDisplayManager.setBrightness(screenDisplayId, adjustedLinearBrightness);
 
                     startActivityAsUser(new Intent(Intent.ACTION_SHOW_BRIGHTNESS_DIALOG),
