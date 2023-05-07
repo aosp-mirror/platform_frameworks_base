@@ -102,7 +102,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.ClassLoaderFactory;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.XmlUtils;
-import com.android.modules.utils.build.UnboundedSdkLevel;
 
 import libcore.io.IoUtils;
 import libcore.util.EmptyArray;
@@ -2629,16 +2628,6 @@ public class PackageParser {
             return Build.VERSION_CODES.CUR_DEVELOPMENT;
         }
 
-        // STOPSHIP: hack for the pre-release SDK
-        if (platformSdkCodenames.length == 0) {
-            Slog.w(TAG, "Package requires development platform " + targetCode
-                    + ", returning current version " + Build.VERSION.SDK_INT);
-            return Build.VERSION.SDK_INT;
-        }
-        if (UnboundedSdkLevel.isAtMost(targetCode)) {
-            return Build.VERSION_CODES.CUR_DEVELOPMENT;
-        }
-
         // Otherwise, we're looking at an incompatible pre-release SDK.
         if (platformSdkCodenames.length > 0) {
             outError[0] = "Requires development platform " + targetCode
@@ -2707,16 +2696,6 @@ public class PackageParser {
         // If it's a pre-release SDK and the codename matches this platform, we
         // definitely meet the minimum SDK requirement.
         if (matchTargetCode(platformSdkCodenames, minCode)) {
-            return Build.VERSION_CODES.CUR_DEVELOPMENT;
-        }
-
-        // STOPSHIP: hack for the pre-release SDK
-        if (platformSdkCodenames.length == 0) {
-            Slog.w(TAG, "Package requires min development platform " + minCode
-                    + ", returning current version " + Build.VERSION.SDK_INT);
-            return Build.VERSION.SDK_INT;
-        }
-        if (UnboundedSdkLevel.isAtMost(minCode)) {
             return Build.VERSION_CODES.CUR_DEVELOPMENT;
         }
 
