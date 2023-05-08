@@ -35,6 +35,7 @@ import android.service.credentials.CallingAppInfo;
 import android.service.credentials.PermissionUtils;
 import android.util.Slog;
 
+import com.android.server.credentials.metrics.ProviderSessionMetric;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
@@ -131,9 +132,12 @@ public final class CreateRequestSession extends RequestSession<CreateCredentialR
             @Nullable CreateCredentialResponse response) {
         Slog.i(TAG, "Final credential received from: " + componentName.flattenToString());
         mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
-        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(mProviders.get(
-                componentName.flattenToString()).mProviderSessionMetric
-                .getCandidatePhasePerProviderMetric());
+        if (mProviders.get(componentName.flattenToString()) != null) {
+            ProviderSessionMetric providerSessionMetric =
+                    mProviders.get(componentName.flattenToString()).mProviderSessionMetric;
+            mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(providerSessionMetric
+                    .getCandidatePhasePerProviderMetric());
+        }
         if (response != null) {
             mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());
