@@ -635,7 +635,7 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     root->InsertChild(0, std::move(uses_sdk));
   }
 
-  if (options_.compile_sdk_version) {
+  if (!options_.no_compile_sdk_metadata && options_.compile_sdk_version) {
     xml::Attribute* attr = root->FindOrCreateAttribute(xml::kSchemaAndroid, "compileSdkVersion");
 
     // Make sure we un-compile the value if it was set to something else.
@@ -647,10 +647,9 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     // Make sure we un-compile the value if it was set to something else.
     attr->compiled_value = {};
     attr->value = options_.compile_sdk_version.value();
-
   }
 
-  if (options_.compile_sdk_version_codename) {
+  if (!options_.no_compile_sdk_metadata && options_.compile_sdk_version_codename) {
     xml::Attribute* attr =
         root->FindOrCreateAttribute(xml::kSchemaAndroid, "compileSdkVersionCodename");
 
