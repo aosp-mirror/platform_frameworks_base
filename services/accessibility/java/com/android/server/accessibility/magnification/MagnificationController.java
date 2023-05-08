@@ -23,7 +23,6 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
-import static android.view.accessibility.MagnificationAnimationCallback.STUB_ANIMATION_CALLBACK;
 
 import static com.android.server.accessibility.AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID;
 
@@ -48,10 +47,11 @@ import android.view.accessibility.MagnificationAnimationCallback;
 import com.android.internal.accessibility.util.AccessibilityStatsLogUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ConcurrentUtils;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
 import com.android.server.wm.WindowManagerInternal;
+
+import java.util.concurrent.Executor;
 
 /**
  * Handles all magnification controllers initialization, generic interactions,
@@ -101,6 +101,8 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     /** Whether the platform supports window magnification feature. */
     private final boolean mSupportWindowMagnification;
 
+    private final Executor mBackgroundExecutor;
+
     @GuardedBy("mLock")
     private final SparseIntArray mCurrentMagnificationModeArray = new SparseIntArray();
     @GuardedBy("mLock")
@@ -142,11 +144,13 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     }
 
     public MagnificationController(AccessibilityManagerService ams, Object lock,
-            Context context, MagnificationScaleProvider scaleProvider) {
+            Context context, MagnificationScaleProvider scaleProvider,
+            Executor backgroundExecutor) {
         mAms = ams;
         mLock = lock;
         mContext = context;
         mScaleProvider = scaleProvider;
+        mBackgroundExecutor = backgroundExecutor;
         LocalServices.getService(WindowManagerInternal.class)
                 .getAccessibilityController().setUiChangesForAccessibilityCallbacks(this);
         mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
@@ -154,15 +158,15 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
         mAlwaysOnMagnificationFeatureFlag = new AlwaysOnMagnificationFeatureFlag();
         mAlwaysOnMagnificationFeatureFlag.addOnChangedListener(
-                ConcurrentUtils.DIRECT_EXECUTOR, mAms::updateAlwaysOnMagnification);
+                mBackgroundExecutor, mAms::updateAlwaysOnMagnification);
     }
 
     @VisibleForTesting
     public MagnificationController(AccessibilityManagerService ams, Object lock,
             Context context, FullScreenMagnificationController fullScreenMagnificationController,
             WindowMagnificationManager windowMagnificationManager,
-            MagnificationScaleProvider scaleProvider) {
-        this(ams, lock, context, scaleProvider);
+            MagnificationScaleProvider scaleProvider, Executor backgroundExecutor) {
+        this(ams, lock, context, scaleProvider, backgroundExecutor);
         mFullScreenMagnificationController = fullScreenMagnificationController;
         mWindowMagnificationMgr = windowMagnificationManager;
     }
@@ -757,8 +761,14 @@ public class MagnificationController implements WindowMagnificationManager.Callb
     public FullScreenMagnificationController getFullScreenMagnificationController() {
         synchronized (mLock) {
             if (mFullScreenMagnificationController == null) {
-                mFullScreenMagnificationController = new FullScreenMagnificationController(mContext,
-                        mAms.getTraceManager(), mLock, this, mScaleProvider);
+                mFullScreenMagnificationController = new FullScreenMagnificationController(
+                        mContext,
+                        mAms.getTraceManager(),
+                        mLock,
+                        this,
+                        mScaleProvider,
+                        mBackgroundExecutor
+                );
             }
         }
         return mFullScreenMagnificationController;
