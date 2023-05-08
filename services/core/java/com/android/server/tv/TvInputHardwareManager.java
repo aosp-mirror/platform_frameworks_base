@@ -48,6 +48,7 @@ import android.media.tv.TvInputService.PriorityHintUseCaseType;
 import android.media.tv.TvStreamConfig;
 import android.media.tv.tunerresourcemanager.ResourceClientProfile;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -59,6 +60,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.view.Surface;
 
+import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.SystemService;
@@ -261,6 +263,17 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                 runnable.run();
                 connection.setOnFirstFrameCapturedLocked(null);
             }
+        }
+    }
+
+    @Override
+    public void onTvMessage(int deviceId, int type, Bundle data) {
+        synchronized (mLock) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = mHardwareInputIdMap.get(deviceId);
+            args.arg2 = data;
+            mHandler.obtainMessage(ListenerHandler.TV_MESSAGE_RECEIVED, type, 0, args)
+                    .sendToTarget();
         }
     }
 
@@ -1224,6 +1237,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         void onHdmiDeviceAdded(HdmiDeviceInfo device);
         void onHdmiDeviceRemoved(HdmiDeviceInfo device);
         void onHdmiDeviceUpdated(String inputId, HdmiDeviceInfo device);
+        void onTvMessage(String inputId, int type, Bundle data);
     }
 
     private class ListenerHandler extends Handler {
@@ -1234,6 +1248,7 @@ class TvInputHardwareManager implements TvInputHal.Callback {
         private static final int HDMI_DEVICE_REMOVED = 5;
         private static final int HDMI_DEVICE_UPDATED = 6;
         private static final int TVINPUT_INFO_ADDED = 7;
+        private static final int TV_MESSAGE_RECEIVED = 8;
 
         @Override
         public final void handleMessage(Message msg) {
@@ -1301,6 +1316,15 @@ class TvInputHardwareManager implements TvInputHal.Callback {
                             }
                         }
                     }
+                    break;
+                }
+                case TV_MESSAGE_RECEIVED: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    String inputId = (String) args.arg1;
+                    Bundle data = (Bundle) args.arg2;
+                    int type = msg.arg1;
+                    mListener.onTvMessage(inputId, type, data);
+                    args.recycle();
                     break;
                 }
                 default: {
