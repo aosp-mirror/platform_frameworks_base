@@ -493,11 +493,14 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                     .show(mTaskLeash);
             // Also reparent on finishTransaction since the finishTransaction will reparent back
             // to its "original" parent by default.
+            Rect boundsOnScreen = mTaskViewBase.getCurrentBoundsOnScreen();
             finishTransaction.reparent(mTaskLeash, mSurfaceControl)
-                    .setPosition(mTaskLeash, 0, 0);
-            mTaskViewTransitions.updateBoundsState(this, mTaskViewBase.getCurrentBoundsOnScreen());
+                    .setPosition(mTaskLeash, 0, 0)
+                    // TODO: maybe once b/280900002 is fixed this will be unnecessary
+                    .setWindowCrop(mTaskLeash, boundsOnScreen.width(), boundsOnScreen.height());
+            mTaskViewTransitions.updateBoundsState(this, boundsOnScreen);
             mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
-            wct.setBounds(mTaskToken, mTaskViewBase.getCurrentBoundsOnScreen());
+            wct.setBounds(mTaskToken, boundsOnScreen);
         } else {
             // The surface has already been destroyed before the task has appeared,
             // so go ahead and hide the task entirely
