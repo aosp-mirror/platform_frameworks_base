@@ -2896,6 +2896,8 @@ public class Notification implements Parcelable
                     }
                 }
             }
+
+            visitIconUri(visitor, extras.getParcelable(EXTRA_CONVERSATION_ICON));
         }
 
         if (isStyle(CallStyle.class) & extras != null) {
