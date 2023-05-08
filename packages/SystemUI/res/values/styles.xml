@@ -406,7 +406,7 @@
         <item name="android:buttonBarPositiveButtonStyle">@style/Widget.Dialog.Button</item>
         <item name="android:buttonBarNegativeButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
         <item name="android:buttonBarNeutralButtonStyle">@style/Widget.Dialog.Button.BorderButton</item>
-        <item name="android:colorBackground">?androidprv:attr/colorSurface</item>
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceBright</item>
         <item name="android:alertDialogStyle">@style/ScrollableAlertDialogStyle</item>
         <item name="android:buttonBarStyle">@style/ButtonBarStyle</item>
         <item name="android:buttonBarButtonStyle">@style/Widget.Dialog.Button.Large</item>
@@ -1055,7 +1055,7 @@
     </style>
 
     <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
         <item name="android:textSize">@dimen/dialog_title_text_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">32sp</item>
@@ -1064,7 +1064,7 @@
     </style>
 
     <style name="TextAppearance.Dialog.Body" parent="@android:style/TextAppearance.DeviceDefault.Medium">
-        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurfaceVariant</item>
         <item name="android:textSize">14sp</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">20sp</item>
@@ -1092,7 +1092,7 @@
     <style name="Widget.Dialog.Button">
         <item name="android:buttonCornerRadius">28dp</item>
         <item name="android:background">@drawable/qs_dialog_btn_filled</item>
-        <item name="android:textColor">?androidprv:attr/textColorOnAccent</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnPrimary</item>
         <item name="android:textSize">14sp</item>
         <item name="android:lineHeight">20sp</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamilyMedium</item>
@@ -1102,12 +1102,13 @@
 
     <style name="Widget.Dialog.Button.BorderButton">
         <item name="android:background">@drawable/qs_dialog_btn_outline</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnSurface</item>
     </style>
 
     <style name="Widget.Dialog.Button.Large">
         <item name="android:background">@drawable/qs_dialog_btn_filled_large</item>
         <item name="android:minHeight">56dp</item>
+        <item name="android:textColor">?androidprv:attr/materialColorOnPrimaryFixed</item>
     </style>
 
     <style name="MainSwitch.Settingslib" parent="@android:style/Theme.DeviceDefault">
