@@ -2623,6 +2623,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
+     * @return true if the FP sensor is non-UDFPS and the device can be unlocked using fingerprint
+     * at this moment.
+     */
+    public boolean isFingerprintAllowedInBouncer() {
+        return !isUdfpsSupported() && isUnlockingWithFingerprintAllowed();
+    }
+
+    /**
      * @return true if there's at least one sfps enrollment for the current user.
      */
     public boolean isSfpsEnrolled() {
