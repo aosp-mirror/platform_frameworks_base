@@ -118,7 +118,10 @@ class GenericGestureDetectorTest : SysuiTestCase() {
         assertThat(oldCallbackNotified).isFalse()
     }
 
-    inner class TestGestureDetector : GenericGestureDetector("fakeTag", displayTracker) {
+    inner class TestGestureDetector : GenericGestureDetector(
+            "fakeTag",
+            displayTracker.defaultDisplayId
+    ) {
         var isGestureListening = false
 
         override fun onInputEvent(ev: InputEvent) {
