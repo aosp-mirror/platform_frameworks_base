@@ -48,6 +48,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -65,6 +66,10 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
             5 * DateUtils.SECOND_IN_MILLIS;
 
     private final ComponentName mComponentName;
+
+    private AtomicBoolean mOngoingRequest = new AtomicBoolean(false);
+
+    @Nullable private ProviderCallbacks mCallback;
 
     /**
      * Callbacks to be invoked when the provider remote service responds with a
@@ -94,10 +99,33 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         mComponentName = componentName;
     }
 
+    public void setCallback(ProviderCallbacks callback) {
+        mCallback = callback;
+    }
+
     /** Unbinds automatically after this amount of time. */
     @Override
     protected long getAutoDisconnectTimeoutMs() {
         return TIMEOUT_IDLE_SERVICE_CONNECTION_MILLIS;
+    }
+
+    @Override
+    public void onBindingDied(ComponentName name) {
+        super.onBindingDied(name);
+
+        Slog.w(TAG, "binding died for: " + name);
+    }
+
+    @Override
+    public void binderDied() {
+        super.binderDied();
+        Slog.w(TAG, "binderDied");
+
+        if (mCallback != null) {
+            mOngoingRequest.set(false);
+            mCallback.onProviderServiceDied(this);
+        }
+
     }
 
     /** Return the componentName of the service to be connected. */
@@ -116,11 +144,14 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
      * provider service.
      *
      * @param request  the request to be sent to the provider
-     * @param callback the callback to be used to send back the provider response to the
-     *                 {@link ProviderGetSession} class that maintains provider state
      */
-    public void onBeginGetCredential(@NonNull BeginGetCredentialRequest request,
-            ProviderCallbacks<BeginGetCredentialResponse> callback) {
+    public void onBeginGetCredential(@NonNull BeginGetCredentialRequest request) {
+        if (mCallback == null) {
+            Slog.w(TAG, "Callback is not set");
+            return;
+        }
+        mOngoingRequest.set(true);
+
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
         AtomicReference<CompletableFuture<BeginGetCredentialResponse>> futureRef =
                 new AtomicReference<>();
@@ -154,7 +185,9 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                                     dispatchCancellationSignal(cancellation);
                                 } else {
                                     cancellationSink.set(cancellation);
-                                    callback.onProviderCancellable(cancellation);
+                                    if (mCallback != null) {
+                                        mCallback.onProviderCancellable(cancellation);
+                                    }
                                 }
                             }
                         });
@@ -166,7 +199,7 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         futureRef.set(connectThenExecute);
 
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
-                handleExecutionResponse(result, error, cancellationSink, callback)));
+                handleExecutionResponse(result, error, cancellationSink)));
     }
 
     /**
@@ -174,11 +207,14 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
      * provider service.
      *
      * @param request  the request to be sent to the provider
-     * @param callback the callback to be used to send back the provider response to the
-     *                 {@link ProviderCreateSession} class that maintains provider state
      */
-    public void onBeginCreateCredential(@NonNull BeginCreateCredentialRequest request,
-            ProviderCallbacks<BeginCreateCredentialResponse> callback) {
+    public void onBeginCreateCredential(@NonNull BeginCreateCredentialRequest request) {
+        if (mCallback == null) {
+            Slog.w(TAG, "Callback is not set");
+            return;
+        }
+        mOngoingRequest.set(true);
+
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
         AtomicReference<CompletableFuture<BeginCreateCredentialResponse>> futureRef =
                 new AtomicReference<>();
@@ -212,7 +248,9 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                                             dispatchCancellationSignal(cancellation);
                                         } else {
                                             cancellationSink.set(cancellation);
-                                            callback.onProviderCancellable(cancellation);
+                                            if (mCallback != null) {
+                                                mCallback.onProviderCancellable(cancellation);
+                                            }
                                         }
                                     }
                                 });
@@ -224,7 +262,7 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         futureRef.set(connectThenExecute);
 
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
-                handleExecutionResponse(result, error, cancellationSink, callback)));
+                handleExecutionResponse(result, error, cancellationSink)));
     }
 
     /**
@@ -232,11 +270,14 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
      * provider service.
      *
      * @param request  the request to be sent to the provider
-     * @param callback the callback to be used to send back the provider response to the
-     *                 {@link ProviderClearSession} class that maintains provider state
      */
-    public void onClearCredentialState(@NonNull ClearCredentialStateRequest request,
-            ProviderCallbacks<Void> callback) {
+    public void onClearCredentialState(@NonNull ClearCredentialStateRequest request) {
+        if (mCallback == null) {
+            Slog.w(TAG, "Callback is not set");
+            return;
+        }
+        mOngoingRequest.set(true);
+
         AtomicReference<ICancellationSignal> cancellationSink = new AtomicReference<>();
         AtomicReference<CompletableFuture<Void>> futureRef = new AtomicReference<>();
 
@@ -269,7 +310,9 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
                                             dispatchCancellationSignal(cancellation);
                                         } else {
                                             cancellationSink.set(cancellation);
-                                            callback.onProviderCancellable(cancellation);
+                                            if (mCallback != null) {
+                                                mCallback.onProviderCancellable(cancellation);
+                                            }
                                         }
                                     }
                                 });
@@ -281,40 +324,58 @@ public class RemoteCredentialService extends ServiceConnector.Impl<ICredentialPr
         futureRef.set(connectThenExecute);
 
         connectThenExecute.whenComplete((result, error) -> Handler.getMain().post(() ->
-                handleExecutionResponse(result, error, cancellationSink, callback)));
+                handleExecutionResponse(result, error, cancellationSink)));
     }
 
     private <T> void handleExecutionResponse(T result,
             Throwable error,
-            AtomicReference<ICancellationSignal> cancellationSink,
-            ProviderCallbacks<T> callback) {
+            AtomicReference<ICancellationSignal> cancellationSink) {
         if (error == null) {
-            callback.onProviderResponseSuccess(result);
+            if (mCallback != null) {
+                mCallback.onProviderResponseSuccess(result);
+            }
         } else {
             if (error instanceof TimeoutException) {
                 Slog.i(TAG, "Remote provider response timed tuo for: " + mComponentName);
+                if (!mOngoingRequest.get()) {
+                    return;
+                }
                 dispatchCancellationSignal(cancellationSink.get());
-                callback.onProviderResponseFailure(
-                        CredentialProviderErrors.ERROR_TIMEOUT,
-                        null);
+                if (mCallback != null) {
+                    mOngoingRequest.set(false);
+                    mCallback.onProviderResponseFailure(
+                            CredentialProviderErrors.ERROR_TIMEOUT, null);
+                }
             } else if (error instanceof CancellationException) {
                 Slog.i(TAG, "Cancellation exception for remote provider: " + mComponentName);
+                if (!mOngoingRequest.get()) {
+                    return;
+                }
                 dispatchCancellationSignal(cancellationSink.get());
-                callback.onProviderResponseFailure(
-                        CredentialProviderErrors.ERROR_TASK_CANCELED,
-                        null);
+                if (mCallback != null) {
+                    mOngoingRequest.set(false);
+                    mCallback.onProviderResponseFailure(
+                            CredentialProviderErrors.ERROR_TASK_CANCELED,
+                            null);
+                }
             } else if (error instanceof GetCredentialException) {
-                callback.onProviderResponseFailure(
-                        CredentialProviderErrors.ERROR_PROVIDER_FAILURE,
-                        (GetCredentialException) error);
+                if (mCallback != null) {
+                    mCallback.onProviderResponseFailure(
+                            CredentialProviderErrors.ERROR_PROVIDER_FAILURE,
+                            (GetCredentialException) error);
+                }
             } else if (error instanceof CreateCredentialException) {
-                callback.onProviderResponseFailure(
-                        CredentialProviderErrors.ERROR_PROVIDER_FAILURE,
-                        (CreateCredentialException) error);
+                if (mCallback != null) {
+                    mCallback.onProviderResponseFailure(
+                            CredentialProviderErrors.ERROR_PROVIDER_FAILURE,
+                            (CreateCredentialException) error);
+                }
             } else {
-                callback.onProviderResponseFailure(
-                        CredentialProviderErrors.ERROR_UNKNOWN,
-                        (Exception) error);
+                if (mCallback != null) {
+                    mCallback.onProviderResponseFailure(
+                            CredentialProviderErrors.ERROR_UNKNOWN,
+                            (Exception) error);
+                }
             }
         }
     }
