@@ -3772,6 +3772,16 @@ public final class ViewRootImpl implements ViewParent,
             createSyncIfNeeded();
             notifyDrawStarted(isInWMSRequestedSync());
             mDrewOnceForSync = true;
+
+            // If the active SSG is also requesting to sync a buffer, the following needs to happen
+            // 1. Ensure we keep track of the number of active syncs to know when to disable RT
+            //    RT animations that conflict with syncing a buffer.
+            // 2. Add a safeguard SSG to prevent multiple SSG that sync buffers from being submitted
+            //    out of order.
+            if (mActiveSurfaceSyncGroup != null && mSyncBuffer) {
+                updateSyncInProgressCount(mActiveSurfaceSyncGroup);
+                safeguardOverlappingSyncs(mActiveSurfaceSyncGroup);
+            }
         }
 
         if (!isViewVisible) {
@@ -3836,14 +3846,11 @@ public final class ViewRootImpl implements ViewParent,
             mWmsRequestSyncGroupState = WMS_SYNC_MERGED;
             reportDrawFinished(t, seqId);
         });
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW,
-                "create WMS Sync group=" + mWmsRequestSyncGroup.getName());
         if (DEBUG_BLAST) {
             Log.d(mTag, "Setup new sync=" + mWmsRequestSyncGroup.getName());
         }
 
         mWmsRequestSyncGroup.add(this, null /* runnable */);
-        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
     private void notifyContentCaptureEvents() {
@@ -4504,6 +4511,9 @@ public final class ViewRootImpl implements ViewParent,
             Log.d(mTag, "reportDrawFinished");
         }
 
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.instant(Trace.TRACE_TAG_VIEW, "reportDrawFinished " + mTag + " seqId=" + seqId);
+        }
         try {
             mWindowSession.finishDrawing(mWindow, t, seqId);
         } catch (RemoteException e) {
@@ -11387,7 +11397,7 @@ public final class ViewRootImpl implements ViewParent,
      * ensure the latter SSG always waits for the former SSG's transaction to get to SF.
      */
     private void safeguardOverlappingSyncs(SurfaceSyncGroup activeSurfaceSyncGroup) {
-        SurfaceSyncGroup safeguardSsg = new SurfaceSyncGroup("VRI-Safeguard");
+        SurfaceSyncGroup safeguardSsg = new SurfaceSyncGroup("Safeguard-" + mTag);
         // Always disable timeout on the safeguard sync
         safeguardSsg.toggleTimeout(false /* enable */);
         synchronized (mPreviousSyncSafeguardLock) {
@@ -11446,8 +11456,6 @@ public final class ViewRootImpl implements ViewParent,
                     mHandler.post(runnable);
                 }
             });
-            safeguardOverlappingSyncs(mActiveSurfaceSyncGroup);
-            updateSyncInProgressCount(mActiveSurfaceSyncGroup);
             newSyncGroup = true;
         }
 
