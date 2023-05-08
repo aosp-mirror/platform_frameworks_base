@@ -22,6 +22,7 @@
 #include <GrBackendSurface.h>
 #include <GrDirectContext.h>
 #include <GrTypes.h>
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <android/sync.h>
 #include <ui/FatVector.h>
 #include <vk/GrVkExtensions.h>
@@ -593,7 +594,8 @@ nsecs_t VulkanManager::finishFrame(SkSurface* surface) {
                 // retrieve VkImage used as render target
                 VkImage image = VK_NULL_HANDLE;
                 GrBackendRenderTarget backendRenderTarget =
-                        surface->getBackendRenderTarget(SkSurface::kFlushRead_BackendHandleAccess);
+                        SkSurfaces::GetBackendRenderTarget(
+                            surface, SkSurfaces::BackendHandleAccess::kFlushRead);
                 if (backendRenderTarget.isValid()) {
                     GrVkImageInfo info;
                     if (backendRenderTarget.getVkImageInfo(&info)) {
