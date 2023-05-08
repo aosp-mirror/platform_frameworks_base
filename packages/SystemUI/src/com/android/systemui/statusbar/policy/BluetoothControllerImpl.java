@@ -38,7 +38,11 @@ import com.android.systemui.bluetooth.BluetoothLogger;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.flags.FeatureFlags;
+import com.android.systemui.flags.Flags;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.statusbar.policy.bluetooth.BluetoothRepository;
+import com.android.systemui.statusbar.policy.bluetooth.ConnectionStatusModel;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -50,14 +54,20 @@ import java.util.concurrent.Executor;
 import javax.inject.Inject;
 
 /**
+ * Controller for information about bluetooth connections.
+ *
+ * Note: Right now, this class and {@link BluetoothRepository} co-exist. Any new code should go in
+ * {@link BluetoothRepository}, but external clients should query this file for now.
  */
 @SysUISingleton
 public class BluetoothControllerImpl implements BluetoothController, BluetoothCallback,
         CachedBluetoothDevice.Callback, LocalBluetoothProfileManager.ServiceListener {
     private static final String TAG = "BluetoothController";
 
+    private final FeatureFlags mFeatureFlags;
     private final DumpManager mDumpManager;
     private final BluetoothLogger mLogger;
+    private final BluetoothRepository mBluetoothRepository;
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final UserManager mUserManager;
     private final int mCurrentUser;
@@ -79,14 +89,18 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     @Inject
     public BluetoothControllerImpl(
             Context context,
+            FeatureFlags featureFlags,
             UserTracker userTracker,
             DumpManager dumpManager,
             BluetoothLogger logger,
+            BluetoothRepository bluetoothRepository,
             @Main Looper mainLooper,
             @Nullable LocalBluetoothManager localBluetoothManager,
             @Nullable BluetoothAdapter bluetoothAdapter) {
+        mFeatureFlags = featureFlags;
         mDumpManager = dumpManager;
         mLogger = logger;
+        mBluetoothRepository = bluetoothRepository;
         mLocalBluetoothManager = localBluetoothManager;
         mHandler = new H(mainLooper);
         if (mLocalBluetoothManager != null) {
@@ -229,6 +243,16 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
     }
 
     private void updateConnected() {
+        if (mFeatureFlags.isEnabled(Flags.NEW_BLUETOOTH_REPOSITORY)) {
+            mBluetoothRepository.fetchConnectionStatusInBackground(
+                    getDevices(), this::onConnectionStatusFetched);
+        } else {
+            updateConnectedOld();
+        }
+    }
+
+    /** Used only if {@link Flags.NEW_BLUETOOTH_REPOSITORY} is *not* enabled. */
+    private void updateConnectedOld() {
         // Make sure our connection state is up to date.
         int state = mLocalBluetoothManager.getBluetoothAdapter().getConnectionState();
         List<CachedBluetoothDevice> newList = new ArrayList<>();
@@ -249,6 +273,12 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
             // connected.
             state = BluetoothAdapter.STATE_DISCONNECTED;
         }
+        onConnectionStatusFetched(new ConnectionStatusModel(state, newList));
+    }
+
+    private void onConnectionStatusFetched(ConnectionStatusModel status) {
+        List<CachedBluetoothDevice> newList = status.getConnectedDevices();
+        int state = status.getMaxConnectionState();
         synchronized (mConnectedDevices) {
             mConnectedDevices.clear();
             mConnectedDevices.addAll(newList);

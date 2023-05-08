@@ -53,6 +53,7 @@ data class UiState(
     // launched immediately, and canceling it will cancel the whole UI flow.
     val isAutoSelectFlow: Boolean = false,
     val cancelRequestState: CancelUiRequestState?,
+    val isInitialRender: Boolean,
 )
 
 data class CancelUiRequestState(
@@ -82,6 +83,10 @@ class CredentialSelectorViewModel(
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
 
+    fun onInitialRenderComplete() {
+        uiState = uiState.copy(isInitialRender = false)
+    }
+
     fun onCancellationUiRequested(appDisplayName: String?) {
         uiState = uiState.copy(cancelRequestState = CancelUiRequestState(appDisplayName))
     }
@@ -96,7 +101,7 @@ class CredentialSelectorViewModel(
 
     fun onNewCredentialManagerRepo(credManRepo: CredentialManagerRepo) {
         this.credManRepo = credManRepo
-        uiState = credManRepo.initState()
+        uiState = credManRepo.initState().copy(isInitialRender = false)
 
         if (this.credManRepo.requestInfo?.token != credManRepo.requestInfo?.token) {
             this.uiMetrics.resetInstanceId()
@@ -114,7 +119,12 @@ class CredentialSelectorViewModel(
             uiState = uiState.copy(providerActivityState = ProviderActivityState.PENDING)
             val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
                 .setFillInIntent(entry.fillInIntent).build()
-            launcher.launch(intentSenderRequest)
+            try {
+                launcher.launch(intentSenderRequest)
+            } catch (e: Exception) {
+                Log.w(Constants.LOG_TAG, "Failed to launch provider UI: $e")
+                onInternalError()
+            }
         } else {
             Log.d(Constants.LOG_TAG, "No provider UI to launch")
             onInternalError()
