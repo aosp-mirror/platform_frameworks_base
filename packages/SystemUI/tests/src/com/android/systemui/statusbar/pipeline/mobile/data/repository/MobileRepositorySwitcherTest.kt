@@ -26,6 +26,7 @@ import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.DemoMobileConnectionsRepository
@@ -131,6 +132,7 @@ class MobileRepositorySwitcherTest : SysuiTestCase() {
                 context,
                 IMMEDIATE,
                 scope,
+                FakeAirplaneModeRepository(),
                 wifiRepository,
                 mock(),
             )
