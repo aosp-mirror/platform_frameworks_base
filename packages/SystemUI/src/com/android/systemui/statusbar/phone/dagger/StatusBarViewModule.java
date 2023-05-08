@@ -53,6 +53,7 @@ import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragmentLogger;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
@@ -158,6 +159,7 @@ public abstract class StatusBarViewModule {
             StatusBarIconController statusBarIconController,
             StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
             CollapsedStatusBarViewModel collapsedStatusBarViewModel,
+            CollapsedStatusBarViewBinder collapsedStatusBarViewBinder,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
             ShadeViewController shadeViewController,
@@ -182,6 +184,7 @@ public abstract class StatusBarViewModule {
                 statusBarIconController,
                 darkIconManagerFactory,
                 collapsedStatusBarViewModel,
+                collapsedStatusBarViewBinder,
                 statusBarHideIconsForBouncerManager,
                 keyguardStateController,
                 shadeViewController,
