@@ -203,18 +203,26 @@ public class MagnificationController implements WindowMagnificationManager.Callb
 
     private void updateMagnificationUIControls(int displayId, int mode) {
         final boolean isActivated = isActivated(displayId, mode);
-        final boolean showUIControls;
+        final boolean showModeSwitchButton;
+        final boolean enableSettingsPanel;
         synchronized (mLock) {
-            showUIControls = isActivated && mMagnificationCapabilities
-                    == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
+            showModeSwitchButton = isActivated
+                    && mMagnificationCapabilities == ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
+            enableSettingsPanel = isActivated
+                    && (mMagnificationCapabilities == ACCESSIBILITY_MAGNIFICATION_MODE_ALL
+                    || mMagnificationCapabilities == ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
         }
-        if (showUIControls) {
-            // we only need to show magnification button, the settings panel showing should be
-            // triggered only on sysui side.
+
+        if (showModeSwitchButton) {
             getWindowMagnificationMgr().showMagnificationButton(displayId, mode);
         } else {
-            getWindowMagnificationMgr().removeMagnificationSettingsPanel(displayId);
             getWindowMagnificationMgr().removeMagnificationButton(displayId);
+        }
+
+        if (!enableSettingsPanel) {
+            // Whether the settings panel needs to be shown is controlled in system UI.
+            // Here, we only guarantee that the settings panel is closed when it is not needed.
+            getWindowMagnificationMgr().removeMagnificationSettingsPanel(displayId);
         }
     }
 
