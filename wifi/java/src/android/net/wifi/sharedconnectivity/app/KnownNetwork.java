@@ -275,7 +275,12 @@ public final class KnownNetwork implements Parcelable {
         dest.writeInt(mNetworkSource);
         dest.writeString(mSsid);
         dest.writeArraySet(mSecurityTypes);
-        mNetworkProviderInfo.writeToParcel(dest, flags);
+        if (mNetworkProviderInfo != null) {
+            dest.writeBoolean(true);
+            mNetworkProviderInfo.writeToParcel(dest, flags);
+        } else {
+            dest.writeBoolean(false);
+        }
         dest.writeBundle(mExtras);
     }
 
@@ -286,9 +291,15 @@ public final class KnownNetwork implements Parcelable {
      */
     @NonNull
     public static KnownNetwork readFromParcel(@NonNull Parcel in) {
-        return new KnownNetwork(in.readInt(), in.readString(),
-                (ArraySet<Integer>) in.readArraySet(null),
-                NetworkProviderInfo.readFromParcel(in), in.readBundle());
+        int networkSource = in.readInt();
+        String mSsid = in.readString();
+        ArraySet<Integer> securityTypes = (ArraySet<Integer>) in.readArraySet(null);
+        if (in.readBoolean()) {
+            return new KnownNetwork(networkSource, mSsid, securityTypes,
+                    NetworkProviderInfo.readFromParcel(in), in.readBundle());
+        }
+        return new KnownNetwork(networkSource, mSsid, securityTypes, null,
+                in.readBundle());
     }
 
     @NonNull
