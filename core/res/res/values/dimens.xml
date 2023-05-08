@@ -892,6 +892,9 @@
     <!-- The max height of an icon in the Autofill fill dialog. -->
     <dimen name="autofill_dialog_icon_max_height">56dp</dimen>
 
+    <!-- The max width of the Autofill fill dialog. -->
+    <dimen name="autofill_dialog_max_width">640dp</dimen>
+
     <!-- Size of a slice shortcut view -->
     <dimen name="slice_shortcut_size">56dp</dimen>
     <!-- Size of action icons in a slice -->

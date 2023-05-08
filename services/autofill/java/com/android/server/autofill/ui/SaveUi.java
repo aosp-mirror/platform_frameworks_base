@@ -48,6 +48,7 @@ import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -361,7 +362,14 @@ final class SaveUi {
         window.setGravity(Gravity.BOTTOM | Gravity.CENTER);
         window.setCloseOnTouchOutside(true);
         final WindowManager.LayoutParams params = window.getAttributes();
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        window.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        final int screenWidth = displayMetrics.widthPixels;
+        final int maxWidth =
+                context.getResources().getDimensionPixelSize(R.dimen.autofill_dialog_max_width);
+        params.width = Math.min(screenWidth, maxWidth);
+
         params.accessibilityTitle = context.getString(R.string.autofill_save_accessibility_title);
         params.windowAnimations = R.style.AutofillSaveAnimation;
         params.setTrustedOverlay();
