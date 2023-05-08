@@ -27,7 +27,9 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerProto;
 import android.app.IUidObserver;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -43,6 +45,8 @@ import com.android.server.am.ActivityManagerServiceDumpProcessesProto.UidObserve
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.UUID;
 
 public class UidObserverController {
     /** If a UID observer takes more than this long, send a WTF. */
@@ -79,19 +83,60 @@ public class UidObserverController {
         mValidateUids = new ActiveUids(null /* service */, false /* postChangesToAtm */);
     }
 
-    void register(@NonNull IUidObserver observer, int which, int cutpoint,
-            @NonNull String callingPackage, int callingUid) {
+    IBinder register(@NonNull IUidObserver observer, int which, int cutpoint,
+            @NonNull String callingPackage, int callingUid, @Nullable int[] uids) {
+        IBinder token = new Binder("UidObserver-" + callingPackage + "-"
+                + UUID.randomUUID().toString());
+
         synchronized (mLock) {
             mUidObservers.register(observer, new UidObserverRegistration(callingUid,
                     callingPackage, which, cutpoint,
                     ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL, callingUid)
-                    == PackageManager.PERMISSION_GRANTED));
+                    == PackageManager.PERMISSION_GRANTED, uids, token));
         }
+
+        return token;
     }
 
     void unregister(@NonNull IUidObserver observer) {
         synchronized (mLock) {
             mUidObservers.unregister(observer);
+        }
+    }
+
+    void addUidToObserver(@NonNull IBinder observerToken, int uid) {
+        synchronized (mLock) {
+            int i = mUidObservers.beginBroadcast();
+            while (i-- > 0) {
+                var reg = (UidObserverRegistration) mUidObservers.getBroadcastCookie(i);
+                if (reg.getToken().equals(observerToken)) {
+                    reg.addUid(uid);
+                    break;
+                }
+
+                if (i == 0) {
+                    Slog.e(TAG_UID_OBSERVERS, "Unable to find UidObserver by token");
+                }
+            }
+            mUidObservers.finishBroadcast();
+        }
+    }
+
+    void removeUidFromObserver(@NonNull IBinder observerToken, int uid) {
+        synchronized (mLock) {
+            int i = mUidObservers.beginBroadcast();
+            while (i-- > 0) {
+                var reg = (UidObserverRegistration) mUidObservers.getBroadcastCookie(i);
+                if (reg.getToken().equals(observerToken)) {
+                    reg.removeUid(uid);
+                    break;
+                }
+
+                if (i == 0) {
+                    Slog.e(TAG_UID_OBSERVERS, "Unable to find UidObserver by token");
+                }
+            }
+            mUidObservers.finishBroadcast();
         }
     }
 
@@ -257,6 +302,10 @@ public class UidObserverController {
                 final ChangeRecord item = mActiveUidChanges[j];
                 final long start = SystemClock.uptimeMillis();
                 final int change = item.change;
+                // Is the observer watching this uid?
+                if (!reg.isWatchingUid(item.uid)) {
+                    continue;
+                }
                 // Does the user have permission? Don't send a non user UID change otherwise
                 if (UserHandle.getUserId(item.uid) != UserHandle.getUserId(reg.mUid)
                         && !reg.mCanInteractAcrossUsers) {
@@ -450,6 +499,8 @@ public class UidObserverController {
         private final int mWhich;
         private final int mCutpoint;
         private final boolean mCanInteractAcrossUsers;
+        private final IBinder mToken;
+        private int[] mUids;
 
         /**
          * Total # of callback calls that took more than {@link #SLOW_UID_OBSERVER_THRESHOLD_MS}.
@@ -481,14 +532,92 @@ public class UidObserverController {
         };
 
         UidObserverRegistration(int uid, @NonNull String pkg, int which, int cutpoint,
-                boolean canInteractAcrossUsers) {
+                boolean canInteractAcrossUsers, @Nullable int[] uids, @NonNull IBinder token) {
             this.mUid = uid;
             this.mPkg = pkg;
             this.mWhich = which;
             this.mCutpoint = cutpoint;
             this.mCanInteractAcrossUsers = canInteractAcrossUsers;
+
+            if (uids != null) {
+                this.mUids = uids.clone();
+                Arrays.sort(this.mUids);
+            } else {
+                this.mUids = null;
+            }
+
+            this.mToken = token;
+
             mLastProcStates = cutpoint >= ActivityManager.MIN_PROCESS_STATE
                     ? new SparseIntArray() : null;
+        }
+
+        boolean isWatchingUid(int uid) {
+            if (mUids == null) {
+                return true;
+            }
+
+            return Arrays.binarySearch(mUids, uid) != -1;
+        }
+
+        void addUid(int uid) {
+            if (mUids == null) {
+                return;
+            }
+
+            int[] temp = mUids;
+            mUids = new int[temp.length + 1];
+            boolean inserted = false;
+            for (int i = 0; i < temp.length; i++) {
+                if (!inserted) {
+                    if (temp[i] < uid) {
+                        mUids[i] = temp[i];
+                    } else if (temp[i] == uid) {
+                        // Duplicate uid, no-op and fallback to the previous array
+                        mUids = temp;
+                        return;
+                    } else {
+                        mUids[i] = uid;
+                        mUids[i + 1] = temp[i];
+                        inserted = true;
+                    }
+                } else {
+                    mUids[i + 1] = temp[i];
+                }
+            }
+
+            if (!inserted) {
+                mUids[temp.length] = uid;
+            }
+        }
+
+        void removeUid(int uid) {
+            if (mUids == null || mUids.length == 0) {
+                return;
+            }
+
+            int[] temp = mUids;
+            mUids = new int[temp.length - 1];
+            boolean removed = false;
+            for (int i = 0; i < temp.length; i++) {
+                if (!removed) {
+                    if (temp[i] == uid) {
+                        removed = true;
+                    } else if (i == temp.length - 1) {
+                        // Uid not found, no-op and fallback to the previous array
+                        mUids = temp;
+                        return;
+                    } else {
+                        mUids[i] = temp[i];
+                    }
+                } else {
+                    mUids[i - 1] = temp[i];
+                }
+            }
+        }
+
+        IBinder getToken() {
+            return mToken;
         }
 
         void dump(@NonNull PrintWriter pw, @NonNull IUidObserver observer) {
