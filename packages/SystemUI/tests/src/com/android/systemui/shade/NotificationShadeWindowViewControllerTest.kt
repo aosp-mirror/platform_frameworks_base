@@ -21,6 +21,7 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.MotionEvent
 import android.view.ViewGroup
 import androidx.test.filters.SmallTest
+import com.android.keyguard.KeyguardMessageAreaController
 import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.LockIconViewController
 import com.android.keyguard.dagger.KeyguardBouncerComponent
@@ -29,14 +30,20 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollectorFake
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dock.DockManager
+import com.android.systemui.dump.logcatLogBuffer
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
+import com.android.systemui.keyguard.bouncer.data.factory.BouncerMessageFactory
+import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageInteractor
+import com.android.systemui.keyguard.bouncer.domain.interactor.CountDownTimerUtil
+import com.android.systemui.keyguard.data.repository.FakeBouncerMessageRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
+import com.android.systemui.log.BouncerLogger
 import com.android.systemui.multishade.data.remoteproxy.MultiShadeInputProxy
 import com.android.systemui.multishade.data.repository.MultiShadeRepository
 import com.android.systemui.multishade.domain.interactor.MultiShadeInteractor
@@ -54,6 +61,7 @@ import com.android.systemui.statusbar.phone.PhoneStatusBarViewController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import com.android.systemui.statusbar.window.StatusBarWindowStateController
 import com.android.systemui.unfold.UnfoldTransitionProgressProvider
+import com.android.systemui.user.data.repository.FakeUserRepository
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -104,7 +112,8 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
     @Mock lateinit var keyguardBouncerComponent: KeyguardBouncerComponent
     @Mock lateinit var keyguardSecurityContainerController: KeyguardSecurityContainerController
     @Mock
-    private lateinit var unfoldTransitionProgressProvider: Optional<UnfoldTransitionProgressProvider>
+    private lateinit var unfoldTransitionProgressProvider:
+            Optional<UnfoldTransitionProgressProvider>
     @Mock lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock
     lateinit var primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel
@@ -134,6 +143,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
         featureFlags.set(Flags.TRACKPAD_GESTURE_FEATURES, false)
         featureFlags.set(Flags.DUAL_SHADE, false)
         featureFlags.set(Flags.SPLIT_SHADE_SUBPIXEL_OPTIMIZATION, true)
+        featureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
 
         val inputProxy = MultiShadeInputProxy()
         testScope = TestScope()
@@ -170,6 +180,7 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                 pulsingGestureListener,
                 keyguardBouncerViewModel,
                 keyguardBouncerComponentFactory,
+                mock(KeyguardMessageAreaController.Factory::class.java),
                 keyguardTransitionInteractor,
                 primaryBouncerToGoneTransitionViewModel,
                 featureFlags,
@@ -189,6 +200,10 @@ class NotificationShadeWindowViewControllerTest : SysuiTestCase() {
                         shadeController = shadeController,
                     )
                 },
+                BouncerMessageInteractor(FakeBouncerMessageRepository(),
+                        mock(BouncerMessageFactory::class.java),
+                        FakeUserRepository(), CountDownTimerUtil(), featureFlags),
+                BouncerLogger(logcatLogBuffer("BouncerLog"))
             )
         underTest.setupExpandedStatusBar()
 

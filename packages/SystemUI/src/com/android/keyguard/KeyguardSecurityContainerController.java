@@ -74,6 +74,7 @@ import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.ActivityStarter;
@@ -116,6 +117,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     private final Optional<SideFpsController> mSideFpsController;
     private final FalsingA11yDelegate mFalsingA11yDelegate;
     private final KeyguardFaceAuthInteractor mKeyguardFaceAuthInteractor;
+    private final BouncerMessageInteractor mBouncerMessageInteractor;
     private int mTranslationY;
     // Whether the volume keys should be handled by keyguard. If true, then
     // they will be handled here for specific media types such as music, otherwise
@@ -178,6 +180,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
 
         @Override
         public void onUserInput() {
+            mBouncerMessageInteractor.onPrimaryBouncerUserInput();
             mKeyguardFaceAuthInteractor.onPrimaryBouncerUserInput();
             mUpdateMonitor.cancelFaceAuth();
         }
@@ -207,7 +210,15 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
 
         @Override
+        public void onAttemptLockoutStart(long seconds) {
+            mBouncerMessageInteractor.onPrimaryAuthLockedOut(seconds);
+        }
+
+        @Override
         public void reportUnlockAttempt(int userId, boolean success, int timeoutMs) {
+            if (timeoutMs == 0 && !success) {
+                mBouncerMessageInteractor.onPrimaryAuthIncorrectAttempt();
+            }
             int bouncerSide = SysUiStatsLog.KEYGUARD_BOUNCER_PASSWORD_ENTERED__SIDE__DEFAULT;
             if (mView.isSidedSecurityMode()) {
                 bouncerSide = mView.isSecurityLeftAligned()
@@ -392,7 +403,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             TelephonyManager telephonyManager,
             ViewMediatorCallback viewMediatorCallback,
             AudioManager audioManager,
-            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor
+            KeyguardFaceAuthInteractor keyguardFaceAuthInteractor,
+            BouncerMessageInteractor bouncerMessageInteractor
     ) {
         super(view);
         mLockPatternUtils = lockPatternUtils;
@@ -418,6 +430,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         mViewMediatorCallback = viewMediatorCallback;
         mAudioManager = audioManager;
         mKeyguardFaceAuthInteractor = keyguardFaceAuthInteractor;
+        mBouncerMessageInteractor = bouncerMessageInteractor;
     }
 
     @Override
@@ -438,6 +451,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         // Update ViewMediator with the current input method requirements
         mViewMediatorCallback.setNeedsInput(needsInput());
         mView.setOnKeyListener(mOnKeyListener);
+
         showPrimarySecurityScreen(false);
     }
 
