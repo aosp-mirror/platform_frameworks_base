@@ -58,6 +58,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardSecurityView;
 import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
@@ -98,6 +99,8 @@ import com.android.systemui.util.time.FakeSystemClock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -141,6 +144,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock AuthController mAuthController;
     private @Mock ShadeExpansionStateManager mShadeExpansionStateManager;
     private @Mock ShadeWindowLogger mShadeWindowLogger;
+    private @Captor ArgumentCaptor<KeyguardUpdateMonitorCallback>
+            mKeyguardUpdateMonitorCallbackCaptor;
     private DeviceConfigProxy mDeviceConfig = new DeviceConfigProxyFake();
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
 
@@ -176,6 +181,24 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         DejankUtils.setImmediate(true);
 
         createAndStartViewMediator();
+    }
+
+    @Test
+    public void onLockdown_showKeyguard_evenIfKeyguardIsNotEnabledExternally() {
+        // GIVEN keyguard is not enabled and isn't showing
+        mViewMediator.onSystemReady();
+        mViewMediator.setKeyguardEnabled(false);
+        TestableLooper.get(this).processAllMessages();
+        captureKeyguardUpdateMonitorCallback();
+        assertFalse(mViewMediator.isShowingAndNotOccluded());
+
+        // WHEN lockdown occurs
+        when(mLockPatternUtils.isUserInLockdown(anyInt())).thenReturn(true);
+        mKeyguardUpdateMonitorCallbackCaptor.getValue().onStrongAuthStateChanged(0);
+
+        // THEN keyguard is shown
+        TestableLooper.get(this).processAllMessages();
+        assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
 
     @Test
@@ -601,5 +624,9 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         mViewMediator.start();
 
         mViewMediator.registerCentralSurfaces(mCentralSurfaces, null, null, null, null, null);
+    }
+
+    private void captureKeyguardUpdateMonitorCallback() {
+        verify(mUpdateMonitor).registerCallback(mKeyguardUpdateMonitorCallbackCaptor.capture());
     }
 }
