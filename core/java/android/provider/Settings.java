@@ -3054,9 +3054,7 @@ public final class Settings {
 
         public void destroy() {
             try {
-                // If this process is the system server process, mArray is the same object as
-                // the memory int array kept inside SettingsProvider, so skipping the close()
-                if (!Settings.isInSystemServer() && !mArray.isClosed()) {
+                if (!mArray.isClosed()) {
                     mArray.close();
                 }
             } catch (IOException e) {
@@ -3236,8 +3234,9 @@ public final class Settings {
         @UnsupportedAppUsage
         public String getStringForUser(ContentResolver cr, String name, final int userHandle) {
             final boolean isSelf = (userHandle == UserHandle.myUserId());
+            final boolean useCache = isSelf && !isInSystemServer();
             boolean needsGenerationTracker = false;
-            if (isSelf) {
+            if (useCache) {
                 synchronized (NameValueCache.this) {
                     final GenerationTracker generationTracker = mGenerationTrackers.get(name);
                     if (generationTracker != null) {
@@ -3383,9 +3382,12 @@ public final class Settings {
                                 }
                             }
                         } else {
-                            if (LOCAL_LOGV) Log.i(TAG, "call-query of user " + userHandle
-                                    + " by " + UserHandle.myUserId()
-                                    + " so not updating cache");
+                            if (DEBUG || LOCAL_LOGV) {
+                                Log.i(TAG, "call-query of user " + userHandle
+                                        + " by " + UserHandle.myUserId()
+                                        + (isInSystemServer() ? " in system_server" : "")
+                                        + " so not updating cache");
+                            }
                         }
                         return value;
                     }
