@@ -19,6 +19,7 @@ package android.view.autofill;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -486,8 +487,11 @@ public final class AutofillClientController implements AutofillManager.AutofillC
     public void autofillClientAuthenticate(int authenticationId, IntentSender intent,
             Intent fillInIntent, boolean authenticateInline) {
         try {
+            ActivityOptions activityOptions = ActivityOptions.makeBasic()
+                    .setPendingIntentBackgroundActivityStartMode(
+                        ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
             mActivity.startIntentSenderForResult(intent, AUTO_FILL_AUTH_WHO_PREFIX,
-                    authenticationId, fillInIntent, 0, 0, null);
+                    authenticationId, fillInIntent, 0, 0, activityOptions.toBundle());
         } catch (IntentSender.SendIntentException e) {
             Log.e(TAG, "authenticate() failed for intent:" + intent, e);
         }
