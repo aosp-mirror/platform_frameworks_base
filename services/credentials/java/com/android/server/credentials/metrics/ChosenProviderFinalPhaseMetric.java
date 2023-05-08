@@ -66,6 +66,8 @@ public class ChosenProviderFinalPhaseMetric {
     private int mChosenProviderStatus = -1;
     // Indicates if an exception was thrown by this provider, false by default
     private boolean mHasException = false;
+    // Indicates a framework only exception that occurs in the final phase of the flow
+    private String mFrameworkException = "";
 
     // Stores the response credential information, as well as the response entry information which
     // by default, contains empty info
@@ -271,5 +273,15 @@ public class ChosenProviderFinalPhaseMetric {
 
     public ResponseCollective getResponseCollective() {
         return mResponseCollective;
+    }
+
+    /* -------------- Framework Exception ---------------- */
+
+    public void setFrameworkException(String frameworkException) {
+        mFrameworkException = frameworkException;
+    }
+
+    public String getFrameworkException() {
+        return mFrameworkException;
     }
 }
