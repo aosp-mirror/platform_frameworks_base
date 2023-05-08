@@ -1609,6 +1609,12 @@
       with Near Field Communication (NFC) tags, cards, and readers.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_nfcTransactionEvent">Secure Element transaction event</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_nfcTransactionEvent">Allows the app to receive information about
+      transactions happening on a Secure Element.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_disableKeyguard">disable your screen lock</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_disableKeyguard">Allows the app to disable the
