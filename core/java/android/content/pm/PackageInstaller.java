@@ -981,6 +981,15 @@ public class PackageInstaller {
      *
      * The result is returned by a callback because some constraints might take a long time
      * to evaluate.
+     *
+     * @param packageNames a list of package names to check the constraints for installation
+     * @param constraints the constraints for installation.
+     * @param executor the {@link Executor} on which to invoke the callback
+     * @param callback called when the {@link InstallConstraintsResult} is ready
+     *
+     * @throws SecurityException if the given packages' installer of record doesn't match the
+     *             caller's own package name or the installerPackageName set by the caller doesn't
+     *             match the caller's own package name.
      */
     public void checkInstallConstraints(@NonNull List<String> packageNames,
             @NonNull InstallConstraints constraints,
@@ -1008,6 +1017,8 @@ public class PackageInstaller {
      * Note: the device idle constraint might take a long time to evaluate. The system will
      * ensure the constraint is evaluated completely before handling timeout.
      *
+     * @param packageNames a list of package names to check the constraints for installation
+     * @param constraints the constraints for installation.
      * @param callback Called when the constraints are satisfied or after timeout.
      *                 Intents sent to this callback contain:
      *                 {@link Intent#EXTRA_PACKAGES} for the input package names,
@@ -1017,6 +1028,9 @@ public class PackageInstaller {
      *                      satisfied. Valid range is from 0 to one week. {@code 0} means the
      *                      callback will be invoked immediately no matter constraints are
      *                      satisfied or not.
+     * @throws SecurityException if the given packages' installer of record doesn't match the
+     *             caller's own package name or the installerPackageName set by the caller doesn't
+     *             match the caller's own package name.
      */
     public void waitForInstallConstraints(@NonNull List<String> packageNames,
             @NonNull InstallConstraints constraints,
@@ -1039,6 +1053,7 @@ public class PackageInstaller {
      * may be performed on the session. In the case of timeout, you may commit the
      * session again using this method or {@link Session#commit(IntentSender)} for retries.
      *
+     * @param sessionId the session ID to commit when all constraints are satisfied.
      * @param statusReceiver Called when the state of the session changes. Intents
      *                       sent to this receiver contain {@link #EXTRA_STATUS}.
      *                       Refer to the individual status codes on how to handle them.
