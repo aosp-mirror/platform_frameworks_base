@@ -2328,6 +2328,8 @@
          <p>Protection level: normal
     -->
     <permission android:name="android.permission.NFC_TRANSACTION_EVENT"
+        android:description="@string/permdesc_nfcTransactionEvent"
+        android:label="@string/permlab_nfcTransactionEvent"
       android:protectionLevel="normal" />
 
     <!-- Allows applications to receive NFC preferred payment service information.
