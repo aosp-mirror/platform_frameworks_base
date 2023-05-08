@@ -3990,6 +3990,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
             // Otherwise this is the "root" of a synced subtree, so continue on to preparation.
         }
+        if (oldParent != null && newParent != null && !shouldUpdateSyncOnReparent()) {
+            return;
+        }
 
         // This container's situation has changed so we need to restart its sync.
         // We cannot reset the sync without a chance of a deadlock since it will request a new
@@ -4002,6 +4005,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mSyncMethodOverride = BLASTSyncEngine.METHOD_UNDEFINED;
         }
         prepareSync();
+    }
+
+    /** Returns {@code true} if {@link #mSyncState} needs to be updated when reparenting. */
+    protected boolean shouldUpdateSyncOnReparent() {
+        return true;
     }
 
     void registerWindowContainerListener(WindowContainerListener listener) {
