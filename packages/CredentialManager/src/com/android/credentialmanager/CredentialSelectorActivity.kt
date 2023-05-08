@@ -62,7 +62,8 @@ class CredentialSelectorActivity : ComponentActivity() {
                 return
             }
             val userConfigRepo = UserConfigRepo(this)
-            val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
+            val credManRepo = CredentialManagerRepo(
+                this, intent, userConfigRepo, isNewActivity = true)
 
             val backPressedCallback = object : OnBackPressedCallback(
                 true // default to enabled
@@ -103,7 +104,8 @@ class CredentialSelectorActivity : ComponentActivity() {
                 }
             } else {
                 val userConfigRepo = UserConfigRepo(this)
-                val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
+                val credManRepo = CredentialManagerRepo(
+                    this, intent, userConfigRepo, isNewActivity = false)
                 viewModel.onNewCredentialManagerRepo(credManRepo)
             }
         } catch (e: Exception) {
