@@ -119,7 +119,12 @@ class CredentialSelectorViewModel(
             uiState = uiState.copy(providerActivityState = ProviderActivityState.PENDING)
             val intentSenderRequest = IntentSenderRequest.Builder(entry.pendingIntent)
                 .setFillInIntent(entry.fillInIntent).build()
-            launcher.launch(intentSenderRequest)
+            try {
+                launcher.launch(intentSenderRequest)
+            } catch (e: Exception) {
+                Log.w(Constants.LOG_TAG, "Failed to launch provider UI: $e")
+                onInternalError()
+            }
         } else {
             Log.d(Constants.LOG_TAG, "No provider UI to launch")
             onInternalError()
