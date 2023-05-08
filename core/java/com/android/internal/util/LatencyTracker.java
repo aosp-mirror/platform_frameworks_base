@@ -305,10 +305,17 @@ public class LatencyTracker {
     private final SparseArray<ActionProperties> mActionPropertiesMap = new SparseArray<>();
     @GuardedBy("mLock")
     private boolean mEnabled;
+    private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
+            this::updateProperties;
 
     // Wrapping this in a holder class achieves lazy loading behavior
     private static final class SLatencyTrackerHolder {
-        private static final LatencyTracker sLatencyTracker = new LatencyTracker();
+        private static final LatencyTracker sLatencyTracker;
+
+        static {
+            sLatencyTracker = new LatencyTracker();
+            sLatencyTracker.startListeningForLatencyTrackerConfigChanges();
+        }
     }
 
     public static LatencyTracker getInstance(Context context) {
@@ -319,31 +326,16 @@ public class LatencyTracker {
      * Constructor for LatencyTracker
      *
      * <p>This constructor is only visible for test classes to inject their own consumer callbacks
+     *
+     * @param startListeningForPropertyChanges If set, constructor will register for device config
+     *                      property updates prior to returning. If not set,
+     *                      {@link #startListeningForLatencyTrackerConfigChanges} must be called
+     *                      to start listening.
      */
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     @VisibleForTesting
     public LatencyTracker() {
         mEnabled = DEFAULT_ENABLED;
-
-        final Context context = ActivityThread.currentApplication();
-        if (context != null
-                && context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) == PERMISSION_GRANTED) {
-            // Post initialization to the background in case we're running on the main thread.
-            BackgroundThread.getHandler().post(() -> this.updateProperties(
-                    DeviceConfig.getProperties(NAMESPACE_LATENCY_TRACKER)));
-            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_LATENCY_TRACKER,
-                    BackgroundThread.getExecutor(), this::updateProperties);
-        } else {
-            if (DEBUG) {
-                if (context == null) {
-                    Log.d(TAG, "No application for " + ActivityThread.currentActivityThread());
-                } else {
-                    Log.d(TAG, "Initialized the LatencyTracker."
-                            + " (No READ_DEVICE_CONFIG permission to change configs)"
-                            + " enabled=" + mEnabled + ", package=" + context.getPackageName());
-                }
-            }
-        }
     }
 
     private void updateProperties(DeviceConfig.Properties properties) {
@@ -363,6 +355,54 @@ public class LatencyTracker {
             }
             onDeviceConfigPropertiesUpdated(mActionPropertiesMap);
         }
+    }
+
+    /**
+     * Test method to start listening to {@link DeviceConfig} properties changes.
+     *
+     * <p>During testing, a {@link LatencyTracker} it is desired to stop and start listening for
+     * config updates.
+     *
+     * <p>This is not used for production usages of this class outside of testing as we are
+     * using a single static object.
+     */
+    @VisibleForTesting
+    public void startListeningForLatencyTrackerConfigChanges() {
+        final Context context = ActivityThread.currentApplication();
+        if (context != null
+                && context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) == PERMISSION_GRANTED) {
+            // Post initialization to the background in case we're running on the main thread.
+            BackgroundThread.getHandler().post(() -> this.updateProperties(
+                    DeviceConfig.getProperties(NAMESPACE_LATENCY_TRACKER)));
+            DeviceConfig.addOnPropertiesChangedListener(NAMESPACE_LATENCY_TRACKER,
+                    BackgroundThread.getExecutor(), mOnPropertiesChangedListener);
+        } else {
+            if (DEBUG) {
+                if (context == null) {
+                    Log.d(TAG, "No application for " + ActivityThread.currentActivityThread());
+                } else {
+                    synchronized (mLock) {
+                        Log.d(TAG, "Initialized the LatencyTracker."
+                                + " (No READ_DEVICE_CONFIG permission to change configs)"
+                                + " enabled=" + mEnabled + ", package=" + context.getPackageName());
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Test method to stop listening to {@link DeviceConfig} properties changes.
+     *
+     * <p>During testing, a {@link LatencyTracker} it is desired to stop and start listening for
+     * config updates.
+     *
+     * <p>This is not used for production usages of this class outside of testing as we are
+     * using a single static object.
+     */
+    @VisibleForTesting
+    public void stopListeningForLatencyTrackerConfigChanges() {
+        DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
     }
 
     /**
