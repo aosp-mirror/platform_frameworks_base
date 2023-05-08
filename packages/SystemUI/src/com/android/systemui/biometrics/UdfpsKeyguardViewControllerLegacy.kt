@@ -290,7 +290,8 @@ constructor(
         qsExpansion = keyguardViewManager.qsExpansion
         keyguardViewManager.addCallback(statusBarKeyguardViewManagerCallback)
         configurationController.addCallback(configurationListener)
-        shadeExpansionStateManager.addExpansionListener(shadeExpansionListener)
+        val currentState = shadeExpansionStateManager.addExpansionListener(shadeExpansionListener)
+        shadeExpansionListener.onPanelExpansionChanged(currentState)
         updateScaleFactor()
         view.updatePadding()
         updateAlpha()

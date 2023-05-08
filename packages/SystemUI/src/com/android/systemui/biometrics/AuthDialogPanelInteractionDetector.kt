@@ -21,7 +21,7 @@ constructor(
     fun enable(onPanelInteraction: Runnable) {
         if (action == null) {
             action = Action(onPanelInteraction)
-            shadeExpansionStateManager.addShadeExpansionListener(this::onPanelExpansionChanged)
+            shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
         } else {
             Log.e(TAG, "Already enabled")
         }
