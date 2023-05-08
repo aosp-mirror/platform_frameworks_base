@@ -18,7 +18,6 @@ package com.android.systemui.util.leak;
 
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
-import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -29,6 +28,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Debug;
 import android.os.SystemProperties;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.core.content.FileProvider;
@@ -68,7 +68,7 @@ public class LeakReporter {
 
     @Inject
     public LeakReporter(Context context, UserTracker userTracker, LeakDetector leakDetector,
-            @Nullable @Named(LEAK_REPORT_EMAIL_NAME) String leakReportEmail) {
+            @Named(LEAK_REPORT_EMAIL_NAME) String leakReportEmail) {
         mContext = context;
         mUserTracker = userTracker;
         mLeakDetector = leakDetector;
@@ -150,9 +150,8 @@ public class LeakReporter {
         intent.setClipData(clipData);
         intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, attachments);
 
-        String leakReportEmail = mLeakReportEmail;
-        if (leakReportEmail != null) {
-            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { leakReportEmail });
+        if (!TextUtils.isEmpty(mLeakReportEmail)) {
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[] { mLeakReportEmail });
         }
 
         return intent;
