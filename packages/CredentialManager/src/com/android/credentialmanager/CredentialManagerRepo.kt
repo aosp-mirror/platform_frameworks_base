@@ -49,6 +49,7 @@ class CredentialManagerRepo(
     private val context: Context,
     intent: Intent,
     userConfigRepo: UserConfigRepo,
+    isNewActivity: Boolean,
 ) {
     val requestInfo: RequestInfo?
     private val providerEnabledList: List<ProviderData>
@@ -125,7 +126,8 @@ class CredentialManagerRepo(
                         isPasskeyFirstUse = isPasskeyFirstUse,
                     )!!,
                     getCredentialUiState = null,
-                    cancelRequestState = cancelUiRequestState
+                    cancelRequestState = cancelUiRequestState,
+                    isInitialRender = isNewActivity,
                 )
             }
             RequestInfo.TYPE_GET -> {
@@ -140,7 +142,8 @@ class CredentialManagerRepo(
                     if (autoSelectEntry == null) ProviderActivityState.NOT_APPLICABLE
                     else ProviderActivityState.READY_TO_LAUNCH,
                     isAutoSelectFlow = autoSelectEntry != null,
-                    cancelRequestState = cancelUiRequestState
+                    cancelRequestState = cancelUiRequestState,
+                    isInitialRender = isNewActivity,
                 )
             }
             else -> {
@@ -149,6 +152,7 @@ class CredentialManagerRepo(
                         createCredentialUiState = null,
                         getCredentialUiState = null,
                         cancelRequestState = cancelUiRequestState,
+                        isInitialRender = isNewActivity,
                     )
                 } else {
                     throw IllegalStateException("Unrecognized request type: ${requestInfo?.type}")
