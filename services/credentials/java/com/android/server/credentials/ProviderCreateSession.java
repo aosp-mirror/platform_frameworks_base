@@ -248,7 +248,8 @@ public final class ProviderCreateSession extends ProviderSession<
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
             startCandidateMetrics();
-            mRemoteCredentialService.onBeginCreateCredential(mProviderRequest, this);
+            mRemoteCredentialService.setCallback(this);
+            mRemoteCredentialService.onBeginCreateCredential(mProviderRequest);
         }
     }
 
