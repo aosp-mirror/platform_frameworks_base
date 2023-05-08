@@ -311,7 +311,7 @@ public class TransitionUtil {
 
     private static RemoteAnimationTarget getDividerTarget(TransitionInfo.Change change,
             SurfaceControl leash) {
-        return new RemoteAnimationTarget(-1 /* taskId */, -1 /* mode */,
+        return new RemoteAnimationTarget(-1 /* taskId */, newModeToLegacyMode(change.getMode()),
                 leash, false /* isTranslucent */, null /* clipRect */,
                 null /* contentInsets */, Integer.MAX_VALUE /* prefixOrderIndex */,
                 new android.graphics.Point(0, 0) /* position */, change.getStartAbsBounds(),
