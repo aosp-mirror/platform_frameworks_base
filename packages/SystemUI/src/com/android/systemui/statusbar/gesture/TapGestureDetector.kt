@@ -32,7 +32,10 @@ import javax.inject.Inject
 class TapGestureDetector @Inject constructor(
     private val context: Context,
     displayTracker: DisplayTracker
-) : GenericGestureDetector(TapGestureDetector::class.simpleName!!, displayTracker) {
+) : GenericGestureDetector(
+        TapGestureDetector::class.simpleName!!,
+        displayTracker.defaultDisplayId
+) {
 
     private val gestureListener = object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
