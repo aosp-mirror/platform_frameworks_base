@@ -190,7 +190,6 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         }
     }
 
-    @VisibleForTesting
     public enum BiometricUiEvent implements UiEventLogger.UiEventEnum {
 
         @UiEvent(doc = "A biometric event of type fingerprint succeeded.")
@@ -221,7 +220,10 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
         BIOMETRIC_IRIS_ERROR(404),
 
         @UiEvent(doc = "Bouncer was shown as a result of consecutive failed UDFPS attempts.")
-        BIOMETRIC_BOUNCER_SHOWN(916);
+        BIOMETRIC_BOUNCER_SHOWN(916),
+
+        @UiEvent(doc = "Screen started waking up with the given PowerManager wake reason.")
+        STARTED_WAKING_UP(1378);
 
         private final int mId;
 
