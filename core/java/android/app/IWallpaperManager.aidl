@@ -259,6 +259,14 @@ interface IWallpaperManager {
     boolean lockScreenWallpaperExists();
 
     /**
+     * Return true if there is a static wallpaper on the specified screen. With which=FLAG_LOCK,
+     * always return false if the lock screen doesn't run its own wallpaper engine.
+     *
+     * @hide
+     */
+    boolean isStaticWallpaper(int which);
+
+    /**
      * Temporary method for project b/197814683.
      * Return true if the lockscreen wallpaper always uses a WallpaperService, not a static image.
      * @hide
