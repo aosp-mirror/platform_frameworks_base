@@ -63,6 +63,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1550,6 +1551,9 @@ public final class Parcel {
             }
         } catch (ArithmeticException e) {
             Log.e(TAG, "ArithmeticException occurred while multiplying dimensions " + e);
+            BadParcelableException badParcelableException = new BadParcelableException("Estimated "
+                    + "array length is too large. Array Dimensions:" + Arrays.toString(dimensions));
+            SneakyThrow.sneakyThrow(badParcelableException);
         }
         ensureWithinMemoryLimit(typeSize, totalObjects);
     }
@@ -1561,12 +1565,18 @@ public final class Parcel {
         } catch (ArithmeticException e) {
             Log.e(TAG, "ArithmeticException occurred while multiplying values " + typeSize
                     + " and "  + length + " Exception: " + e);
+            BadParcelableException badParcelableException = new BadParcelableException("Estimated "
+                    + "allocation size is too large. typeSize: " + typeSize + " length: " + length);
+            SneakyThrow.sneakyThrow(badParcelableException);
         }
 
         boolean isInBinderTransaction = Binder.isDirectlyHandlingTransaction();
         if (isInBinderTransaction && (estimatedAllocationSize > ARRAY_ALLOCATION_LIMIT)) {
             Log.e(TAG, "Trying to Allocate " + estimatedAllocationSize
                     + " memory, In Binder Transaction : " + isInBinderTransaction);
+            BadParcelableException e = new BadParcelableException("Allocation of size "
+                    + estimatedAllocationSize + " is above allowed limit of 1MB");
+            SneakyThrow.sneakyThrow(e);
         }
     }
 
