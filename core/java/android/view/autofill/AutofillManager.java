@@ -1480,6 +1480,13 @@ public final class AutofillManager {
         }
 
         synchronized (mLock) {
+            if (mAllTrackedViews.contains(id)) {
+                // The id is tracked and will not trigger pre-fill request again.
+                return;
+            }
+
+            // Add the id as tracked to avoid triggering fill request again and again.
+            mAllTrackedViews.add(id);
             if (mTrackedViews != null) {
                 // To support the fill dialog can show for the autofillable Views in
                 // different pages but in the same Activity. We need to reset the
@@ -4135,11 +4142,6 @@ public final class AutofillManager {
         }
 
         void checkViewState(AutofillId id) {
-            if (mAllTrackedViews.contains(id)) {
-                return;
-            }
-            // Add the id as tracked to avoid triggering fill request again and again.
-            mAllTrackedViews.add(id);
             if (mHasNewTrackedView) {
                 return;
             }
