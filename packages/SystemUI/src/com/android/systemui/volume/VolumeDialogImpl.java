@@ -823,6 +823,7 @@ public class VolumeDialogImpl implements VolumeDialog, Dumpable,
     public void dump(PrintWriter writer, String[] unusedArgs) {
         writer.println(VolumeDialogImpl.class.getSimpleName() + " state:");
         writer.print("  mShowing: "); writer.println(mShowing);
+        writer.print("  mIsAnimatingDismiss: "); writer.println(mIsAnimatingDismiss);
         writer.print("  mActiveStream: "); writer.println(mActiveStream);
         writer.print("  mDynamic: "); writer.println(mDynamic);
         writer.print("  mAutomute: "); writer.println(mAutomute);
