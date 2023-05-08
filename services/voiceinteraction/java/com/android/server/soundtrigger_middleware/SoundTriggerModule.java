@@ -168,9 +168,18 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
      * Attached to the HAL service via factory.
      */
     private void attachToHal() {
-        mHalService = new SoundTriggerHalEnforcer(
-                new SoundTriggerHalWatchdog(
-                    new SoundTriggerDuplicateModelHandler(mHalFactory.create())));
+        mHalService = null;
+        while (mHalService == null) {
+            try {
+                mHalService = new SoundTriggerHalEnforcer(
+                        new SoundTriggerHalWatchdog(
+                            new SoundTriggerDuplicateModelHandler(mHalFactory.create())));
+            } catch (RuntimeException e) {
+                if (!(e.getCause() instanceof RemoteException)) {
+                    throw e;
+                }
+            }
+        }
         mHalService.linkToDeath(this);
         mHalService.registerCallback(this);
         mProperties = mHalService.getProperties();
