@@ -339,7 +339,24 @@ public class TileServices extends IQSService.Stub {
             verifyCaller(customTile);
             return customTile.getQsTile();
         }
+        Log.e(TAG, "Tile for token " + token + "not found. "
+                + "Tiles in map: " + availableTileComponents());
         return null;
+    }
+
+    private String availableTileComponents() {
+        StringBuilder sb = new StringBuilder("[");
+        synchronized (mServices) {
+            mTokenMap.forEach((iBinder, customTile) ->
+                    sb.append(iBinder.toString())
+                    .append(":")
+                    .append(customTile.getComponent().flattenToShortString())
+                    .append(":")
+                    .append(customTile.getUser())
+                    .append(","));
+        }
+        sb.append("]");
+        return sb.toString();
     }
 
     @Override
