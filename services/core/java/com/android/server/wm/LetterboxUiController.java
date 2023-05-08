@@ -832,13 +832,14 @@ final class LetterboxUiController {
 
             // Get the bounds of the "space-to-fill". The transformed bounds have the highest
             // priority because the activity is launched in a rotated environment. In multi-window
-            // mode, the task-level represents this. In fullscreen-mode, the task container does
+            // mode, the taskFragment-level represents this for both split-screen
+            // and activity-embedding. In fullscreen-mode, the task container does
             // (since the orientation letterbox is also applied to the task).
             final Rect transformedBounds = mActivityRecord.getFixedRotationTransformDisplayBounds();
             final Rect spaceToFill = transformedBounds != null
                     ? transformedBounds
                     : mActivityRecord.inMultiWindowMode()
-                            ? mActivityRecord.getTask().getBounds()
+                            ? mActivityRecord.getTaskFragment().getBounds()
                             : mActivityRecord.getRootTask().getParent().getBounds();
             // In case of translucent activities an option is to use the WindowState#getFrame() of
             // the first opaque activity beneath. In some cases (e.g. an opaque activity is using
