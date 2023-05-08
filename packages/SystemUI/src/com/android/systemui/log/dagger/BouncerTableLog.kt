@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 The Android Open Source Project
+ * Copyright (C) 2022 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package com.android.systemui.log.dagger
 
+import java.lang.annotation.Documented
+import java.lang.annotation.Retention
+import java.lang.annotation.RetentionPolicy
 import javax.inject.Qualifier
 
-/** A [com.android.systemui.log.LogBuffer] for bouncer and its child views. */
-@Qualifier @MustBeDocumented @Retention(AnnotationRetention.RUNTIME) annotation class BouncerLog()
+/** Logger for the primary and alternative bouncers. */
+@Qualifier @Documented @Retention(RetentionPolicy.RUNTIME) annotation class BouncerTableLog

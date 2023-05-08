@@ -47,9 +47,6 @@ data class AuthenticationFlags(val userId: Int, val flag: Int) {
             LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_TRUSTAGENT_EXPIRED
         )
 
-    val primaryAuthRequiredAfterLockout =
-        containsFlag(flag, LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT)
-
     val primaryAuthRequiredForUnattendedUpdate =
         containsFlag(
             flag,

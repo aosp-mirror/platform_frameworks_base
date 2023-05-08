@@ -16,6 +16,8 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import com.android.systemui.keyguard.bouncer.data.repository.BouncerMessageRepository
+import com.android.systemui.keyguard.bouncer.data.repository.BouncerMessageRepositoryImpl
 import dagger.Binds
 import dagger.Module
 
@@ -45,6 +47,9 @@ interface KeyguardRepositoryModule {
 
     @Binds
     fun keyguardBouncerRepository(impl: KeyguardBouncerRepositoryImpl): KeyguardBouncerRepository
+
+    @Binds
+    fun bouncerMessageRepository(impl: BouncerMessageRepositoryImpl): BouncerMessageRepository
 
     @Binds fun trustRepository(impl: TrustRepositoryImpl): TrustRepository
 }
