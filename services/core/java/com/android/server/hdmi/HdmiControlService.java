@@ -108,6 +108,7 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import com.android.server.hdmi.HdmiCecController.AllocateAddressCallback;
 import com.android.server.hdmi.HdmiCecLocalDevice.ActiveSource;
 import com.android.server.hdmi.HdmiCecLocalDevice.PendingActionClearedCallback;
+import com.android.server.hdmi.HdmiCecLocalDevice.StandbyCompletedCallback;
 
 import libcore.util.EmptyArray;
 
@@ -3719,7 +3720,8 @@ public class HdmiControlService extends SystemService {
         return mMenuLanguage;
     }
 
-    private void disableCecLocalDevices(PendingActionClearedCallback callback) {
+    @VisibleForTesting
+    protected void disableCecLocalDevices(PendingActionClearedCallback callback) {
         if (mCecController != null) {
             for (HdmiCecLocalDevice device : mHdmiCecNetwork.getLocalDeviceList()) {
                 device.disableDevice(mStandbyMessageReceived, callback);
@@ -3747,21 +3749,33 @@ public class HdmiControlService extends SystemService {
      * cleared during standby. In this case, it does not execute the standby flow.
      */
     @ServiceThreadOnly
-    private void onPendingActionsCleared(int standbyAction) {
+    @VisibleForTesting
+    protected void onPendingActionsCleared(int standbyAction) {
         assertRunOnServiceThread();
         Slog.v(TAG, "onPendingActionsCleared");
+        int localDevicesCount = getAllCecLocalDevices().size();
+        final int[] countStandbyCompletedDevices = new int[1];
+        StandbyCompletedCallback callback = new StandbyCompletedCallback() {
+            @Override
+            public void onStandbyCompleted() {
+                if (localDevicesCount < ++countStandbyCompletedDevices[0]) {
+                    return;
+                }
+
+                if (isAudioSystemDevice() || !isPowerStandby()) {
+                    return;
+                }
+                mCecController.enableSystemCecControl(false);
+                mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
+            }
+        };
 
         if (mPowerStatusController.isPowerStatusTransientToStandby()) {
             mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_STANDBY);
             for (HdmiCecLocalDevice device : mHdmiCecNetwork.getLocalDeviceList()) {
-                device.onStandby(mStandbyMessageReceived, standbyAction);
-            }
-            if (!isAudioSystemDevice()) {
-                mCecController.enableSystemCecControl(false);
-                mMhlController.setOption(OPTION_MHL_SERVICE_CONTROL, DISABLED);
+                device.onStandby(mStandbyMessageReceived, standbyAction, callback);
             }
         }
-
         // Always reset this flag to set up for the next standby
         mStandbyMessageReceived = false;
     }

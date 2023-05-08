@@ -21,6 +21,7 @@ import static android.hardware.hdmi.DeviceFeatures.FEATURE_SUPPORTED;
 import static com.android.server.hdmi.Constants.ALWAYS_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
 import static com.android.server.hdmi.Constants.PROPERTY_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
 import static com.android.server.hdmi.Constants.USE_LAST_STATE_SYSTEM_AUDIO_CONTROL_ON_POWER_ON;
+import static com.android.server.hdmi.HdmiControlService.SendMessageCallback;
 
 import android.annotation.Nullable;
 import android.content.ActivityNotFoundException;
@@ -243,7 +244,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     @Override
     @ServiceThreadOnly
-    protected void onStandby(boolean initiatedByCec, int standbyAction) {
+    protected void onStandby(boolean initiatedByCec, int standbyAction,
+            StandbyCompletedCallback callback) {
         assertRunOnServiceThread();
         // Invalidate the internal active source record when goes to standby
         // This set will also update mIsActiveSource
@@ -256,7 +258,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                     Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL,
                     isSystemAudioActivated() ? "true" : "false");
         }
-        terminateSystemAudioMode();
+        terminateSystemAudioMode(callback);
     }
 
     @Override
@@ -1092,9 +1094,16 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     protected void terminateSystemAudioMode() {
+        terminateSystemAudioMode(null);
+    }
+
+    // Since this method is not just called during the standby process, the callback should be
+    // generalized in the future.
+    protected void terminateSystemAudioMode(StandbyCompletedCallback callback) {
         // remove pending initiation actions
         removeAction(SystemAudioInitiationActionFromAvr.class);
         if (!isSystemAudioActivated()) {
+            invokeStandbyCompletedCallback(callback);
             return;
         }
 
@@ -1102,7 +1111,13 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             // send <Set System Audio Mode> [“Off”]
             mService.sendCecCommand(
                     HdmiCecMessageBuilder.buildSetSystemAudioMode(
-                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_BROADCAST, false));
+                            getDeviceInfo().getLogicalAddress(), Constants.ADDR_BROADCAST, false),
+                    new SendMessageCallback() {
+                        @Override
+                        public void onSendCompleted(int error) {
+                            invokeStandbyCompletedCallback(callback);
+                        }
+                    });
         }
     }
 

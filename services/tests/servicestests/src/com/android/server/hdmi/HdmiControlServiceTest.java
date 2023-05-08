@@ -190,12 +190,59 @@ public class HdmiControlServiceTest {
         doReturn(true).when(mHdmiControlServiceSpy).isStandbyMessageReceived();
 
         mHdmiControlServiceSpy.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+
         assertTrue(mPlaybackDeviceSpy.isStandby());
         assertTrue(mAudioSystemDeviceSpy.isStandby());
         assertTrue(mPlaybackDeviceSpy.isDisabled());
         assertTrue(mAudioSystemDeviceSpy.isDisabled());
     }
 
+    @Test
+    public void playbackOnlyDevice_onStandbyCompleted_disableCecController() {
+        mLocalDevices.remove(mAudioSystemDeviceSpy);
+        mHdmiControlServiceSpy.clearCecLocalDevices();
+        mHdmiControlServiceSpy.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
+        mTestLooper.dispatchAll();
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+
+        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+        mHdmiControlServiceSpy.disableCecLocalDevices(
+                new HdmiCecLocalDevice.PendingActionClearedCallback() {
+                    @Override
+                    public void onCleared(HdmiCecLocalDevice device) {
+                        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+                        mHdmiControlServiceSpy.onPendingActionsCleared(
+                                HdmiControlService.STANDBY_SCREEN_OFF);
+                    }
+                });
+        mTestLooper.dispatchAll();
+
+        verify(mPlaybackDeviceSpy, times(1)).invokeStandbyCompletedCallback(any());
+        assertFalse(mNativeWrapper.getIsCecControlEnabled());
+    }
+
+
+    @Test
+    public void playbackAndAudioDevice_onStandbyCompleted_doNotDisableCecController() {
+        mLocalDeviceTypes.add(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
+        mHdmiControlServiceSpy.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY);
+
+        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+        mHdmiControlServiceSpy.disableCecLocalDevices(
+                new HdmiCecLocalDevice.PendingActionClearedCallback() {
+                    @Override
+                    public void onCleared(HdmiCecLocalDevice device) {
+                        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+                        mHdmiControlServiceSpy.onPendingActionsCleared(
+                                HdmiControlService.STANDBY_SCREEN_OFF);
+                    }
+                });
+        mTestLooper.dispatchAll();
+
+        verify(mPlaybackDeviceSpy, times(1)).invokeStandbyCompletedCallback(any());
+        verify(mAudioSystemDeviceSpy, times(1)).invokeStandbyCompletedCallback(any());
+        assertTrue(mNativeWrapper.getIsCecControlEnabled());
+    }
     @Test
     public void initialPowerStatus_normalBoot_isTransientToStandby() {
         assertThat(mHdmiControlServiceSpy.getInitialPowerStatus()).isEqualTo(
@@ -1423,8 +1470,10 @@ public class HdmiControlServiceTest {
         }
 
         @Override
-        protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        protected void onStandby(boolean initiatedByCec, int standbyAction,
+                StandbyCompletedCallback callback) {
             mIsStandby = true;
+            invokeStandbyCompletedCallback(callback);
         }
 
         protected boolean isStandby() {
@@ -1476,8 +1525,10 @@ public class HdmiControlServiceTest {
         }
 
         @Override
-        protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        protected void onStandby(boolean initiatedByCec, int standbyAction,
+                StandbyCompletedCallback callback) {
             mIsStandby = true;
+            invokeStandbyCompletedCallback(callback);
         }
 
         protected boolean isStandby() {

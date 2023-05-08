@@ -175,6 +175,14 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
             };
 
     /**
+     * A callback interface used by local devices use to indicate that they have finished their part
+     * of the standby process.
+     */
+    interface StandbyCompletedCallback {
+        void onStandbyCompleted();
+    }
+
+    /**
      * A callback interface to get notified when all pending action is cleared. It can be called
      * when timeout happened.
      */
@@ -1260,8 +1268,14 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
      *     messages like &lt;Standby&gt;
      * @param standbyAction Intent action that drives the standby process, either {@link
      *     HdmiControlService#STANDBY_SCREEN_OFF} or {@link HdmiControlService#STANDBY_SHUTDOWN}
+     * @param callback callback invoked after the standby process for the local device is completed.
      */
-    protected void onStandby(boolean initiatedByCec, int standbyAction) {}
+    protected void onStandby(boolean initiatedByCec, int standbyAction,
+            StandbyCompletedCallback callback) {}
+
+    protected void onStandby(boolean initiatedByCec, int standbyAction) {
+        onStandby(initiatedByCec, standbyAction, null);
+    }
 
     /**
      * Called when the initialization of local devices is complete.
@@ -1420,6 +1434,16 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
         } catch (RemoteException e) {
             Slog.e(TAG, "Invoking callback failed:" + e);
         }
+    }
+
+    @ServiceThreadOnly
+    @VisibleForTesting
+    public void invokeStandbyCompletedCallback(StandbyCompletedCallback callback) {
+        assertRunOnServiceThread();
+        if (callback == null) {
+            return;
+        }
+        callback.onStandbyCompleted();
     }
 
     void sendUserControlPressedAndReleased(int targetAddress, int cecKeycode) {

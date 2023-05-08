@@ -61,6 +61,7 @@ final class FakeNativeWrapper implements NativeWrapper {
     private HdmiPortInfo[] mHdmiPortInfo = null;
     private HdmiCecController.HdmiCecCallback mCallback = null;
     private int mCecVersion = HdmiControlManager.HDMI_CEC_VERSION_2_0;
+    private boolean mIsCecControlEnabled = true;
 
     @Override
     public String nativeInit() {
@@ -128,7 +129,9 @@ final class FakeNativeWrapper implements NativeWrapper {
     public void enableCec(boolean enabled) {}
 
     @Override
-    public void enableSystemCecControl(boolean enabled) {}
+    public void enableSystemCecControl(boolean enabled) {
+        mIsCecControlEnabled = enabled;
+    }
 
     @Override
     public void nativeSetLanguage(String language) {}
@@ -152,6 +155,10 @@ final class FakeNativeWrapper implements NativeWrapper {
 
     public void setPortConnectionStatus(int port, boolean connected) {
         mPortConnectionStatus.put(port, connected);
+    }
+
+    public boolean getIsCecControlEnabled() {
+        return mIsCecControlEnabled;
     }
 
     public void setCecVersion(@HdmiControlManager.HdmiCecVersion int cecVersion) {
