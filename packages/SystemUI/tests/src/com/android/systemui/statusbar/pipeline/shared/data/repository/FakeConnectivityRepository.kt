@@ -30,6 +30,8 @@ class FakeConnectivityRepository : ConnectivityRepository {
     override val defaultConnections: StateFlow<DefaultConnectionModel> =
         MutableStateFlow(DefaultConnectionModel())
 
+    override val vcnSubId: MutableStateFlow<Int?> = MutableStateFlow(null)
+
     fun setForceHiddenIcons(hiddenIcons: Set<ConnectivitySlot>) {
         _forceHiddenIcons.value = hiddenIcons
     }
