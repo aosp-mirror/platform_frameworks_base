@@ -22,16 +22,20 @@ import android.view.ViewGroup
 import android.window.OnBackAnimationCallback
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.keyguard.KeyguardMessageAreaController
 import com.android.keyguard.KeyguardSecurityContainerController
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardSecurityView
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.dagger.KeyguardBouncerComponent
+import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.keyguard.bouncer.domain.interactor.BouncerMessageInteractor
 import com.android.systemui.keyguard.data.BouncerViewDelegate
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBouncerViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransitionViewModel
 import com.android.systemui.lifecycle.repeatWhenAttached
+import com.android.systemui.log.BouncerLogger
 import com.android.systemui.plugins.ActivityStarter
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.filter
@@ -44,7 +48,11 @@ object KeyguardBouncerViewBinder {
         view: ViewGroup,
         viewModel: KeyguardBouncerViewModel,
         primaryBouncerToGoneTransitionViewModel: PrimaryBouncerToGoneTransitionViewModel,
-        componentFactory: KeyguardBouncerComponent.Factory
+        componentFactory: KeyguardBouncerComponent.Factory,
+        messageAreaControllerFactory: KeyguardMessageAreaController.Factory,
+        bouncerMessageInteractor: BouncerMessageInteractor,
+        bouncerLogger: BouncerLogger,
+        featureFlags: FeatureFlags,
     ) {
         // Builds the KeyguardSecurityContainerController from bouncer view group.
         val securityContainerController: KeyguardSecurityContainerController =
@@ -125,8 +133,16 @@ object KeyguardBouncerViewBinder {
                                     securityContainerController.onResume(
                                         KeyguardSecurityView.SCREEN_ON
                                     )
+                                    bouncerLogger.bindingBouncerMessageView()
+                                    it.bindMessageView(
+                                        bouncerMessageInteractor,
+                                        messageAreaControllerFactory,
+                                        bouncerLogger,
+                                        featureFlags
+                                    )
                                 }
                             } else {
+                                bouncerMessageInteractor.onBouncerBeingHidden()
                                 securityContainerController.onBouncerVisibilityChanged(
                                     /* isVisible= */ false
                                 )
