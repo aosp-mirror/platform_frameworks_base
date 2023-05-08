@@ -470,6 +470,7 @@ public class PipTransition extends PipTransitionController {
             @NonNull Transitions.TransitionFinishCallback finishCallback,
             @NonNull TaskInfo taskInfo, @Nullable TransitionInfo.Change pipTaskChange) {
         TransitionInfo.Change pipChange = pipTaskChange;
+        SurfaceControl activitySc = null;
         if (mCurrentPipTaskToken == null) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: There is no existing PiP Task for TRANSIT_EXIT_PIP", TAG);
@@ -482,6 +483,7 @@ public class PipTransition extends PipTransitionController {
                 if (mCurrentPipTaskToken.equals(change.getLastParent())) {
                     // Find the activity that is exiting PiP.
                     pipChange = change;
+                    activitySc = change.getLeash();
                     break;
                 }
             }
@@ -498,17 +500,36 @@ public class PipTransition extends PipTransitionController {
         // case it may not be in the screen coordinate.
         // Reparent the pip leash to the root with max layer so that we can animate it outside of
         // parent crop, and make sure it is not covered by other windows.
-        final SurfaceControl pipLeash = pipChange.getLeash();
-        final int rootIdx = TransitionUtil.rootIndexFor(pipChange, info);
-        startTransaction.reparent(pipLeash, info.getRoot(rootIdx).getLeash());
+        final TransitionInfo.Root root = TransitionUtil.getRootFor(pipChange, info);
+        final SurfaceControl pipLeash;
+        if (activitySc != null) {
+            // Use a local leash to animate activity in case the activity has letterbox which may
+            // be broken by PiP animation, e.g. always end at 0,0 in parent and unable to include
+            // letterbox area in crop bounds.
+            final SurfaceControl activitySurface = pipChange.getLeash();
+            pipLeash = new SurfaceControl.Builder()
+                    .setName(activitySc + "_pip-leash")
+                    .setContainerLayer()
+                    .setHidden(false)
+                    .setParent(root.getLeash())
+                    .build();
+            startTransaction.reparent(activitySurface, pipLeash);
+            // Put the activity at local position with offset in case it is letterboxed.
+            final Point activityOffset = pipChange.getEndRelOffset();
+            startTransaction.setPosition(activitySc, activityOffset.x, activityOffset.y);
+        } else {
+            pipLeash = pipChange.getLeash();
+            startTransaction.reparent(pipLeash, root.getLeash());
+        }
         startTransaction.setLayer(pipLeash, Integer.MAX_VALUE);
         // Note: because of this, the bounds to animate should be translated to the root coordinate.
-        final Point offset = info.getRoot(rootIdx).getOffset();
+        final Point offset = root.getOffset();
         final Rect currentBounds = mPipBoundsState.getBounds();
         currentBounds.offset(-offset.x, -offset.y);
         startTransaction.setPosition(pipLeash, currentBounds.left, currentBounds.top);
 
         final WindowContainerToken pipTaskToken = pipChange.getContainer();
+        final boolean useLocalLeash = activitySc != null;
         final boolean toFullscreen = pipChange.getEndAbsBounds().equals(
                 mPipBoundsState.getDisplayBounds());
         mFinishCallback = (wct, wctCB) -> {
@@ -517,6 +538,14 @@ public class PipTransition extends PipTransitionController {
                 wct = wct != null ? wct : new WindowContainerTransaction();
                 wct.setBounds(pipTaskToken, null);
                 mPipOrganizer.applyWindowingModeChangeOnExit(wct, TRANSITION_DIRECTION_LEAVE_PIP);
+            }
+            if (useLocalLeash) {
+                if (mPipAnimationController.isAnimating()) {
+                    mPipAnimationController.getCurrentAnimator().end();
+                }
+                // Make sure the animator don't use the released leash, e.g. mergeAnimation.
+                mPipAnimationController.resetAnimatorState();
+                finishTransaction.remove(pipLeash);
             }
             finishCallback.onTransitionFinished(wct, wctCB);
         };
@@ -545,7 +574,8 @@ public class PipTransition extends PipTransitionController {
         // Set the initial frame as scaling the end to the start.
         final Rect destinationBounds = new Rect(pipChange.getEndAbsBounds());
         destinationBounds.offset(-offset.x, -offset.y);
-        startTransaction.setWindowCrop(pipLeash, destinationBounds);
+        startTransaction.setWindowCrop(pipLeash, destinationBounds.width(),
+                destinationBounds.height());
         mSurfaceTransactionHelper.scale(startTransaction, pipLeash, destinationBounds,
                 currentBounds);
         startTransaction.apply();
