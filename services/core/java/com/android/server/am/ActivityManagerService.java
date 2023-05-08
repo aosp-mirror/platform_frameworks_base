@@ -7513,12 +7513,70 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "registerUidObserver");
         }
         mUidObserverController.register(observer, which, cutpoint, callingPackage,
-                Binder.getCallingUid());
+                Binder.getCallingUid(), /*uids*/null);
+    }
+
+    /**
+     * Registers a UidObserver with a uid filter.
+     *
+     * @param observer The UidObserver implementation to register.
+     * @param which    A bitmask of events to observe. See ActivityManager.UID_OBSERVER_*.
+     * @param cutpoint The cutpoint for onUidStateChanged events. When the state crosses this
+     *                 threshold in either direction, onUidStateChanged will be called.
+     * @param callingPackage The name of the calling package.
+     * @param uids     A list of uids to watch. If all uids are to be watched, use
+     *                 registerUidObserver instead.
+     * @throws RemoteException
+     * @return Returns A binder token identifying the UidObserver registration.
+     */
+    @Override
+    public IBinder registerUidObserverForUids(IUidObserver observer, int which, int cutpoint,
+            String callingPackage, int[] uids) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "registerUidObserver");
+        }
+        return mUidObserverController.register(observer, which, cutpoint, callingPackage,
+                Binder.getCallingUid(), uids);
     }
 
     @Override
     public void unregisterUidObserver(IUidObserver observer) {
         mUidObserverController.unregister(observer);
+    }
+
+    /**
+     * Adds a uid to the list of uids that a UidObserver will receive updates about.
+     *
+     * @param observerToken  The binder token identifying the UidObserver registration.
+     * @param callingPackage The name of the calling package.
+     * @param uid            The uid to watch.
+     * @throws RemoteException
+     */
+    @Override
+    public void addUidToObserver(IBinder observerToken, String callingPackage, int uid) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "registerUidObserver");
+        }
+        mUidObserverController.addUidToObserver(observerToken, uid);
+    }
+
+    /**
+     * Removes a uid from the list of uids that a UidObserver will receive updates about.
+     *
+     * @param observerToken  The binder token identifying the UidObserver registration.
+     * @param callingPackage The name of the calling package.
+     * @param uid            The uid to stop watching.
+     * @throws RemoteException
+     */
+    @Override
+    public void removeUidFromObserver(IBinder observerToken, String callingPackage, int uid) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "registerUidObserver");
+        }
+        mUidObserverController.removeUidFromObserver(observerToken, uid);
     }
 
     @Override
@@ -18615,7 +18673,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int which, int cutpoint, @NonNull String callingPackage) {
             mNetworkPolicyUidObserver = observer;
             mUidObserverController.register(observer, which, cutpoint, callingPackage,
-                    Binder.getCallingUid());
+                    Binder.getCallingUid(), /*uids*/null);
         }
 
         @Override
