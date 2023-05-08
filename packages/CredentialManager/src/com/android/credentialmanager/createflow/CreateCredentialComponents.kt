@@ -164,7 +164,9 @@ fun CreateCredentialScreen(
                 }
             }
         },
-        onDismiss = viewModel::onUserCancel
+        onDismiss = viewModel::onUserCancel,
+        isInitialRender = viewModel.uiState.isInitialRender,
+        onInitialRenderComplete = viewModel::onInitialRenderComplete,
     )
 }
 
