@@ -1116,6 +1116,8 @@ public class VoiceInteractionService extends Service {
                     pw.println();
                 });
             }
+            pw.println("Available Model Enrollment Applications:");
+            pw.println("  " + mKeyphraseEnrollmentInfo);
         }
     }
 }
