@@ -20,10 +20,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,9 +36,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun ModalBottomSheet(
     sheetContent: @Composable ColumnScope.() -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    isInitialRender: Boolean,
+    onInitialRenderComplete: () -> Unit,
 ) {
-    var isInitialRender by remember { mutableStateOf(true) }
     val scope = rememberCoroutineScope()
     val state = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -64,7 +61,7 @@ fun ModalBottomSheet(
     LaunchedEffect(state.currentValue) {
         if (state.currentValue == ModalBottomSheetValue.Hidden) {
             if (isInitialRender) {
-                isInitialRender = false
+                onInitialRenderComplete()
                 scope.launch { state.show() }
             } else {
                 onDismiss()
