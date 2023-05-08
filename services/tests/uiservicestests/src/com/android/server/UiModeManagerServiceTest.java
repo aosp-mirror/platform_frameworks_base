@@ -73,7 +73,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.PermissionEnforcer;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
@@ -158,7 +157,7 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
         mPermissionEnforcer.grant(Manifest.permission.MODIFY_DAY_NIGHT_MODE);
         mPermissionEnforcer.grant(Manifest.permission.READ_PROJECTION_STATE);
         doReturn(mPermissionEnforcer).when(mContext).getSystemService(
-                eq(PermissionEnforcer.class));
+                eq(Context.PERMISSION_ENFORCER_SERVICE));
         doAnswer(inv -> {
             mTwilightListener = (TwilightListener) inv.getArgument(0);
             return null;
