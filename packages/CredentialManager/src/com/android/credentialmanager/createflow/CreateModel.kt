@@ -72,7 +72,7 @@ class CreateOptionInfo(
     val passwordCount: Int?,
     val passkeyCount: Int?,
     val totalCredentialCount: Int?,
-    val lastUsedTime: Instant?,
+    val lastUsedTime: Instant,
     val footerDescription: String?,
 ) : BaseEntry(
     providerId,
