@@ -18,15 +18,19 @@ package com.android.keyguard.logging
 
 import androidx.annotation.IntDef
 import com.android.keyguard.CarrierTextManager.CarrierTextCallbackInfo
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.dagger.CarrierTextManagerLog
 import javax.inject.Inject
 
 /** Logger adapter for [CarrierTextManager] to add detailed messages in a [LogBuffer] */
-@SysUISingleton
 class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val buffer: LogBuffer) {
+    /**
+     * To help disambiguate carrier text manager instances, set a location string here which will
+     * propagate to [logUpdate] and [logUpdateCarrierTextForReason]
+     */
+    var location: String? = null
+
     /**
      * This method and the methods below trace the execution of CarrierTextManager.updateCarrierText
      */
@@ -35,7 +39,7 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
             TAG,
             LogLevel.VERBOSE,
             { int1 = numSubs },
-            { "updateCarrierText: numSubs=$int1" },
+            { "updateCarrierText: location=${location ?: "(unknown)"} numSubs=$int1" },
         )
     }
 
@@ -99,7 +103,10 @@ class CarrierTextManagerLogger @Inject constructor(@CarrierTextManagerLog val bu
             TAG,
             LogLevel.DEBUG,
             { int1 = reason },
-            { "refreshing carrier info for reason: ${reason.reasonMessage()}" }
+            {
+                "refreshing carrier info for reason: ${reason.reasonMessage()}" +
+                    " location=${location ?: "(unknown)"}"
+            }
         )
     }
 

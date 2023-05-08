@@ -78,6 +78,7 @@
         android:textColor="?attr/wallpaperTextColorSecondary"
         android:singleLine="true"
         systemui:showMissingSim="true"
-        systemui:showAirplaneMode="true" />
+        systemui:showAirplaneMode="true"
+        systemui:debugLocation="Keyguard" />
 
 </com.android.systemui.statusbar.phone.KeyguardStatusBarView>

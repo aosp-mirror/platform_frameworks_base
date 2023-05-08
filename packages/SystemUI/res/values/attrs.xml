@@ -146,6 +146,7 @@
         <attr name="allCaps" format="boolean" />
         <attr name="showMissingSim" format="boolean" />
         <attr name="showAirplaneMode" format="boolean" />
+        <attr name="debugLocation" format="string" />
     </declare-styleable>
 
     <declare-styleable name="IlluminationDrawable">
