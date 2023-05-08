@@ -1583,7 +1583,6 @@ public final class Parcel {
     @Nullable
     public final boolean[] createBooleanArray() {
         int N = readInt();
-        // Assuming size of 4 byte for boolean.
         ensureWithinMemoryLimit(SIZE_BOOLEAN, N);
         // >>2 as a fast divide-by-4 works in the create*Array() functions
         // because dataAvail() will never return a negative number.  4 is
@@ -1627,7 +1626,6 @@ public final class Parcel {
     @Nullable
     public short[] createShortArray() {
         int n = readInt();
-        // Assuming size of 2 byte for short.
         ensureWithinMemoryLimit(SIZE_SHORT, n);
         if (n >= 0 && n <= (dataAvail() >> 2)) {
             short[] val = new short[n];
@@ -1667,7 +1665,6 @@ public final class Parcel {
     @Nullable
     public final char[] createCharArray() {
         int N = readInt();
-        // Assuming size of 2 byte for char.
         ensureWithinMemoryLimit(SIZE_CHAR, N);
         if (N >= 0 && N <= (dataAvail() >> 2)) {
             char[] val = new char[N];
@@ -1706,7 +1703,6 @@ public final class Parcel {
     @Nullable
     public final int[] createIntArray() {
         int N = readInt();
-        // Assuming size of 4 byte for int.
         ensureWithinMemoryLimit(SIZE_INT, N);
         if (N >= 0 && N <= (dataAvail() >> 2)) {
             int[] val = new int[N];
@@ -1745,7 +1741,6 @@ public final class Parcel {
     @Nullable
     public final long[] createLongArray() {
         int N = readInt();
-        // Assuming size of 8 byte for long.
         ensureWithinMemoryLimit(SIZE_LONG, N);
         // >>3 because stored longs are 64 bits
         if (N >= 0 && N <= (dataAvail() >> 3)) {
@@ -1785,7 +1780,6 @@ public final class Parcel {
     @Nullable
     public final float[] createFloatArray() {
         int N = readInt();
-        // Assuming size of 4 byte for float.
         ensureWithinMemoryLimit(SIZE_FLOAT, N);
         // >>2 because stored floats are 4 bytes
         if (N >= 0 && N <= (dataAvail() >> 2)) {
@@ -1825,7 +1819,6 @@ public final class Parcel {
     @Nullable
     public final double[] createDoubleArray() {
         int N = readInt();
-        // Assuming size of 8 byte for double.
         ensureWithinMemoryLimit(SIZE_DOUBLE, N);
         // >>3 because stored doubles are 8 bytes
         if (N >= 0 && N <= (dataAvail() >> 3)) {
