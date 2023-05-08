@@ -155,7 +155,8 @@ constructor(
         combine(
                 unfilteredSubscriptions,
                 mobileConnectionsRepo.activeMobileDataSubscriptionId,
-            ) { unfilteredSubs, activeId ->
+                connectivityRepository.vcnSubId,
+            ) { unfilteredSubs, activeId, vcnSubId ->
                 // Based on the old logic,
                 if (unfilteredSubs.size != 2) {
                     return@combine unfilteredSubs
@@ -182,7 +183,13 @@ constructor(
                     // return the non-opportunistic info
                     return@combine if (info1.isOpportunistic) listOf(info2) else listOf(info1)
                 } else {
-                    return@combine if (info1.subscriptionId == activeId) {
+                    // It's possible for the subId of the VCN to disagree with the active subId in
+                    // cases where the system has tried to switch but found no connection. In these
+                    // scenarios, VCN will always have the subId that we want to use, so use that
+                    // value instead of the activeId reported by telephony
+                    val subIdToKeep = vcnSubId ?: activeId
+
+                    return@combine if (info1.subscriptionId == subIdToKeep) {
                         listOf(info1)
                     } else {
                         listOf(info2)
