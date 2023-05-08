@@ -60,6 +60,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * System service for managing {@link AmbientContextEvent}s.
@@ -595,7 +596,7 @@ public class AmbientContextManagerService extends
 
             synchronized (mLock) {
                 for (ClientRequest cr : mExistingClientRequests) {
-                    if (cr.getPackageName().equals(callingPackage)) {
+                    if ((cr != null) && cr.getPackageName().equals(callingPackage)) {
                         AmbientContextManagerPerUserService service =
                                 getAmbientContextManagerPerUserServiceForEventTypes(
                                         UserHandle.getCallingUserId(),
