@@ -27,6 +27,7 @@ import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepositor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.WakefulnessState
+import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlin.time.Duration
@@ -60,7 +61,7 @@ constructor(
                         keyguardInteractor.wakefulnessModel,
                         keyguardTransitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isKeyguardOccluded,
-                        ::toTriple
+                        ::Triple
                     ),
                     ::toQuad
                 )
@@ -100,7 +101,7 @@ constructor(
                         keyguardInteractor.wakefulnessModel,
                         keyguardTransitionInteractor.startedKeyguardTransitionStep,
                         keyguardInteractor.isAodAvailable,
-                        ::toTriple
+                        ::Triple
                     ),
                     ::toQuad
                 )
