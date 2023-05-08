@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.connectivity;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+
 import static junit.framework.Assert.assertEquals;
 
 import static org.junit.Assert.assertTrue;
@@ -25,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.vcn.VcnTransportInfo;
@@ -42,6 +46,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import java.util.Collections;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -269,6 +275,83 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         }
     }
 
+    /** Test for b/225902574. */
+    @Test
+    public void vcnOnlyOnUnderlyingNetwork() {
+        setWifiEnabled(true);
+
+        // Set up a carrier merged network...
+        WifiInfo underlyingCarrierMergedInfo = Mockito.mock(WifiInfo.class);
+        when(underlyingCarrierMergedInfo.isCarrierMerged()).thenReturn(true);
+        when(underlyingCarrierMergedInfo.isPrimary()).thenReturn(true);
+        int zeroLevel = 0;
+        when(underlyingCarrierMergedInfo.getRssi()).thenReturn(calculateRssiForLevel(zeroLevel));
+
+        NetworkCapabilities underlyingNetworkCapabilities = Mockito.mock(NetworkCapabilities.class);
+        when(underlyingNetworkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
+                .thenReturn(true);
+        when(underlyingNetworkCapabilities.getTransportInfo())
+                .thenReturn(underlyingCarrierMergedInfo);
+
+        Network underlyingNetwork = Mockito.mock(Network.class);
+        when(mMockCm.getNetworkCapabilities(underlyingNetwork))
+                .thenReturn(underlyingNetworkCapabilities);
+
+        NetworkCapabilities.Builder mainCapabilitiesBuilder = new NetworkCapabilities.Builder();
+        mainCapabilitiesBuilder.addTransportType(TRANSPORT_CELLULAR);
+        mainCapabilitiesBuilder.setTransportInfo(null);
+        // And make the carrier merged network the underlying network, *not* the main network.
+        mainCapabilitiesBuilder.setUnderlyingNetworks(Collections.singletonList(underlyingNetwork));
+
+        Network primaryNetwork = Mockito.mock(Network.class);
+        int primaryNetworkId = 1;
+        when(primaryNetwork.getNetId()).thenReturn(primaryNetworkId);
+
+        // WHEN this primary network with underlying carrier merged information is sent
+        setConnectivityViaDefaultAndNormalCallbackInWifiTracker(
+                primaryNetwork, mainCapabilitiesBuilder.build());
+
+        // THEN we see the mobile data indicators for carrier merged
+        verifyLastMobileDataIndicatorsForVcn(
+                /* visible= */ true,
+                /* level= */ zeroLevel,
+                TelephonyIcons.ICON_CWF,
+                /* inet= */ false);
+
+        // For each level...
+        for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
+            int rssi = calculateRssiForLevel(testLevel);
+            when(underlyingCarrierMergedInfo.getRssi()).thenReturn(rssi);
+            // WHEN the new level is sent to the callbacks
+            setConnectivityViaDefaultAndNormalCallbackInWifiTracker(
+                    primaryNetwork, mainCapabilitiesBuilder.build());
+
+            // WHEN the network is validated
+            mainCapabilitiesBuilder.addCapability(NET_CAPABILITY_VALIDATED);
+            setConnectivityViaCallbackInNetworkController(
+                    primaryNetwork, mainCapabilitiesBuilder.build());
+
+            // THEN we see the mobile data indicators with inet=true (no exclamation mark)
+            verifyLastMobileDataIndicatorsForVcn(
+                    /* visible= */ true,
+                    testLevel,
+                    TelephonyIcons.ICON_CWF,
+                    /* inet= */ true);
+
+            // WHEN the network is not validated
+            mainCapabilitiesBuilder.removeCapability(NET_CAPABILITY_VALIDATED);
+            setConnectivityViaCallbackInNetworkController(
+                    primaryNetwork, mainCapabilitiesBuilder.build());
+
+            // THEN we see the mobile data indicators with inet=false (exclamation mark)
+            verifyLastMobileDataIndicatorsForVcn(
+                    /* visible= */ true,
+                    testLevel,
+                    TelephonyIcons.ICON_CWF,
+                    /* inet= */ false);
+        }
+    }
+
     @Test
     public void testDisableWiFiWithVcnWithUnderlyingWifi() {
         String testSsid = "Test VCN SSID";
@@ -290,11 +373,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     }
 
     protected void setWifiLevel(int level) {
-        float amountPerLevel = (MAX_RSSI - MIN_RSSI) / (WifiIcons.WIFI_LEVEL_COUNT - 1);
-        int rssi = (int) (MIN_RSSI + level * amountPerLevel);
-        // Put RSSI in the middle of the range.
-        rssi += amountPerLevel / 2;
-        when(mWifiInfo.getRssi()).thenReturn(rssi);
+        when(mWifiInfo.getRssi()).thenReturn(calculateRssiForLevel(level));
         setConnectivityViaCallbackInWifiTracker(
                 NetworkCapabilities.TRANSPORT_WIFI, false, true, mWifiInfo);
     }
@@ -312,17 +391,21 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     }
 
     protected void setWifiLevelForVcn(int level) {
-        float amountPerLevel = (MAX_RSSI - MIN_RSSI) / (WifiIcons.WIFI_LEVEL_COUNT - 1);
-        int rssi = (int) (MIN_RSSI + level * amountPerLevel);
-        // Put RSSI in the middle of the range.
-        rssi += amountPerLevel / 2;
         when(mVcnTransportInfo.getWifiInfo()).thenReturn(mWifiInfo);
         when(mVcnTransportInfo.makeCopy(anyLong())).thenReturn(mVcnTransportInfo);
-        when(mWifiInfo.getRssi()).thenReturn(rssi);
+        when(mWifiInfo.getRssi()).thenReturn(calculateRssiForLevel(level));
         when(mWifiInfo.isCarrierMerged()).thenReturn(true);
         when(mWifiInfo.getSubscriptionId()).thenReturn(1);
         setConnectivityViaCallbackInWifiTrackerForVcn(
                 NetworkCapabilities.TRANSPORT_CELLULAR, false, true, mVcnTransportInfo);
+    }
+
+    private int calculateRssiForLevel(int level) {
+        float amountPerLevel = (MAX_RSSI - MIN_RSSI) / (WifiIcons.WIFI_LEVEL_COUNT - 1);
+        int rssi = (int) (MIN_RSSI + level * amountPerLevel);
+        // Put RSSI in the middle of the range.
+        rssi += amountPerLevel / 2;
+        return rssi;
     }
 
     protected void setWifiStateForVcn(boolean connected, String ssid) {

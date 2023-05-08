@@ -22,7 +22,6 @@ import android.os.Looper
 import android.view.Choreographer
 import android.view.InputEvent
 import android.view.MotionEvent
-import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.InputChannelCompat
 import com.android.systemui.shared.system.InputMonitorCompat
 
@@ -39,7 +38,7 @@ import com.android.systemui.shared.system.InputMonitorCompat
  */
 abstract class GenericGestureDetector(
     private val tag: String,
-    private val displayTracker: DisplayTracker
+    private val displayId: Int,
 ) {
     /**
      * Active callbacks, each associated with a tag. Gestures will only be monitored if
@@ -87,7 +86,7 @@ abstract class GenericGestureDetector(
     internal open fun startGestureListening() {
         stopGestureListening()
 
-        inputMonitor = InputMonitorCompat(tag, displayTracker.defaultDisplayId).also {
+        inputMonitor = InputMonitorCompat(tag, displayId).also {
             inputReceiver = it.getInputReceiver(
                 Looper.getMainLooper(),
                 Choreographer.getInstance(),

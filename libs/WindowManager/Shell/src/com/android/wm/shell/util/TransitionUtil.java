@@ -68,6 +68,12 @@ public class TransitionUtil {
         return type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK;
     }
 
+    /** Returns {@code true} if the transition is opening or closing mode. */
+    public static boolean isOpenOrCloseMode(@TransitionInfo.TransitionMode int mode) {
+        return mode == TRANSIT_OPEN || mode == TRANSIT_CLOSE
+                || mode == TRANSIT_TO_FRONT || mode == TRANSIT_TO_BACK;
+    }
+
     /** Returns {@code true} if the transition has a display change. */
     public static boolean hasDisplayChange(@NonNull TransitionInfo info) {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
@@ -311,7 +317,7 @@ public class TransitionUtil {
 
     private static RemoteAnimationTarget getDividerTarget(TransitionInfo.Change change,
             SurfaceControl leash) {
-        return new RemoteAnimationTarget(-1 /* taskId */, -1 /* mode */,
+        return new RemoteAnimationTarget(-1 /* taskId */, newModeToLegacyMode(change.getMode()),
                 leash, false /* isTranslucent */, null /* clipRect */,
                 null /* contentInsets */, Integer.MAX_VALUE /* prefixOrderIndex */,
                 new android.graphics.Point(0, 0) /* position */, change.getStartAbsBounds(),
