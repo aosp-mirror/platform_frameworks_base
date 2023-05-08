@@ -359,8 +359,7 @@ public class VirtualDeviceManagerServiceTest {
         mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mContext.getSystemService(WindowManager.class), threadVerifier);
-        mSensorController =
-                new SensorController(new Object(), VIRTUAL_DEVICE_ID_1, mVirtualSensorCallback);
+        mSensorController = new SensorController(VIRTUAL_DEVICE_ID_1, mVirtualSensorCallback);
         mCameraAccessController =
                 new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
 

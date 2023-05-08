@@ -53,19 +53,18 @@ public class SensorController {
 
     private static AtomicInteger sNextDirectChannelHandle = new AtomicInteger(1);
 
-    private final Object mLock;
+    private final Object mLock = new Object();
     private final int mVirtualDeviceId;
     @GuardedBy("mLock")
-    private final Map<IBinder, SensorDescriptor> mSensorDescriptors = new ArrayMap<>();
+    private final ArrayMap<IBinder, SensorDescriptor> mSensorDescriptors = new ArrayMap<>();
 
     @NonNull
     private final SensorManagerInternal.RuntimeSensorCallback mRuntimeSensorCallback;
     private final SensorManagerInternal mSensorManagerInternal;
     private final VirtualDeviceManagerInternal mVdmInternal;
 
-    public SensorController(@NonNull Object lock, int virtualDeviceId,
+    public SensorController(int virtualDeviceId,
             @Nullable IVirtualSensorCallback virtualSensorCallback) {
-        mLock = lock;
         mVirtualDeviceId = virtualDeviceId;
         mRuntimeSensorCallback = new RuntimeSensorCallbackWrapper(virtualSensorCallback);
         mSensorManagerInternal = LocalServices.getService(SensorManagerInternal.class);
@@ -185,7 +184,7 @@ public class SensorController {
     @VisibleForTesting
     Map<IBinder, SensorDescriptor> getSensorDescriptors() {
         synchronized (mLock) {
-            return mSensorDescriptors;
+            return new ArrayMap<>(mSensorDescriptors);
         }
     }
 
