@@ -53,6 +53,7 @@ data class UiState(
     // launched immediately, and canceling it will cancel the whole UI flow.
     val isAutoSelectFlow: Boolean = false,
     val cancelRequestState: CancelUiRequestState?,
+    val isInitialRender: Boolean,
 )
 
 data class CancelUiRequestState(
@@ -82,6 +83,10 @@ class CredentialSelectorViewModel(
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
 
+    fun onInitialRenderComplete() {
+        uiState = uiState.copy(isInitialRender = false)
+    }
+
     fun onCancellationUiRequested(appDisplayName: String?) {
         uiState = uiState.copy(cancelRequestState = CancelUiRequestState(appDisplayName))
     }
@@ -96,7 +101,7 @@ class CredentialSelectorViewModel(
 
     fun onNewCredentialManagerRepo(credManRepo: CredentialManagerRepo) {
         this.credManRepo = credManRepo
-        uiState = credManRepo.initState()
+        uiState = credManRepo.initState().copy(isInitialRender = false)
 
         if (this.credManRepo.requestInfo?.token != credManRepo.requestInfo?.token) {
             this.uiMetrics.resetInstanceId()
