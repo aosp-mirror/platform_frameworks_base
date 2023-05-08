@@ -160,7 +160,7 @@ abstract class StatusBarPipelineModule {
         @SysUISingleton
         @SharedConnectivityInputLog
         fun provideSharedConnectivityTableLogBuffer(factory: LogBufferFactory): LogBuffer {
-            return factory.create("SharedConnectivityInputLog", 30)
+            return factory.create("SharedConnectivityInputLog", 60)
         }
 
         @Provides
