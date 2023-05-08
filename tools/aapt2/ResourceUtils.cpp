@@ -619,7 +619,7 @@ uint32_t AndroidTypeToAttributeTypeMask(uint16_t type) {
 }
 
 std::unique_ptr<Item> TryParseItemForAttribute(
-    StringPiece value, uint32_t type_mask,
+    android::IDiagnostics* diag, StringPiece value, uint32_t type_mask,
     const std::function<bool(const ResourceName&)>& on_create_reference) {
   using android::ResTable_map;
 
@@ -685,6 +685,12 @@ std::unique_ptr<Item> TryParseItemForAttribute(
             // same string is smaller than 1, otherwise return as raw string.
             if (fabs(f - d) < 1) {
               return std::move(floating_point);
+            } else {
+              if (diag->IsVerbose()) {
+                diag->Note(android::DiagMessage()
+                           << "precision lost greater than 1 while parsing float " << value
+                           << ", return a raw string");
+              }
             }
           }
         } else {
@@ -701,12 +707,12 @@ std::unique_ptr<Item> TryParseItemForAttribute(
  * allows.
  */
 std::unique_ptr<Item> TryParseItemForAttribute(
-    StringPiece str, const Attribute* attr,
+    android::IDiagnostics* diag, StringPiece str, const Attribute* attr,
     const std::function<bool(const ResourceName&)>& on_create_reference) {
   using android::ResTable_map;
 
   const uint32_t type_mask = attr->type_mask;
-  auto value = TryParseItemForAttribute(str, type_mask, on_create_reference);
+  auto value = TryParseItemForAttribute(diag, str, type_mask, on_create_reference);
   if (value) {
     return value;
   }

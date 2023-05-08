@@ -217,34 +217,43 @@ TEST(ResourceUtilsTest, EmptyIsBinaryPrimitive) {
 }
 
 TEST(ResourceUtilsTest, ItemsWithWhitespaceAreParsedCorrectly) {
-  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(" 12\n   ", ResTable_map::TYPE_INTEGER),
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(context->GetDiagnostics(), " 12\n   ",
+                                                      ResTable_map::TYPE_INTEGER),
               Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_INT_DEC, 12u))));
-  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(" true\n   ", ResTable_map::TYPE_BOOLEAN),
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(context->GetDiagnostics(), " true\n   ",
+                                                      ResTable_map::TYPE_BOOLEAN),
               Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_INT_BOOLEAN, 0xffffffffu))));
 
   const float expected_float = 12.0f;
   const uint32_t expected_float_flattened = *(uint32_t*)&expected_float;
-  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(" 12.0\n   ", ResTable_map::TYPE_FLOAT),
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(context->GetDiagnostics(), " 12.0\n   ",
+                                                      ResTable_map::TYPE_FLOAT),
               Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, expected_float_flattened))));
 }
 
 TEST(ResourceUtilsTest, FloatAndBigIntegerParsedCorrectly) {
+  std::unique_ptr<IAaptContext> context = test::ContextBuilder().Build();
   const float expected_float = 0.125f;
   const uint32_t expected_float_flattened = *(uint32_t*)&expected_float;
-  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute("0.125", ResTable_map::TYPE_FLOAT),
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(context->GetDiagnostics(), "0.125",
+                                                      ResTable_map::TYPE_FLOAT),
               Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, expected_float_flattened))));
 
   const float special_float = 1.0f;
   const uint32_t special_float_flattened = *(uint32_t*)&special_float;
-  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute("1.0", ResTable_map::TYPE_FLOAT),
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(context->GetDiagnostics(), "1.0",
+                                                      ResTable_map::TYPE_FLOAT),
               Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, special_float_flattened))));
 
-  EXPECT_EQ(ResourceUtils::TryParseItemForAttribute("1099511627776", ResTable_map::TYPE_INTEGER),
+  EXPECT_EQ(ResourceUtils::TryParseItemForAttribute(context->GetDiagnostics(), "1099511627776",
+                                                    ResTable_map::TYPE_INTEGER),
             std::unique_ptr<Item>(nullptr));
 
   const float big_float = 1099511627776.0f;
   const uint32_t big_flattened = *(uint32_t*)&big_float;
-  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute("1099511627776", ResTable_map::TYPE_FLOAT),
+  EXPECT_THAT(ResourceUtils::TryParseItemForAttribute(context->GetDiagnostics(), "1099511627776",
+                                                      ResTable_map::TYPE_FLOAT),
               Pointee(ValueEq(BinaryPrimitive(Res_value::TYPE_FLOAT, big_flattened))));
 }
 

@@ -101,6 +101,7 @@ class OptimizeContext : public IAaptContext {
 
   void SetVerbose(bool val) {
     verbose_ = val;
+    diagnostics_.SetVerbose(val);
   }
 
   void SetMinSdkVersion(int sdk_version) {

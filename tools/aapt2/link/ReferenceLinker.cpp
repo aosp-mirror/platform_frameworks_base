@@ -164,8 +164,8 @@ std::unique_ptr<Item> ReferenceLinkerTransformer::TransformItem(const Reference*
 std::unique_ptr<Item> ReferenceLinkerTransformer::ParseValueWithAttribute(
     std::unique_ptr<Item> value, const Attribute* attr) {
   if (RawString* raw_string = ValueCast<RawString>(value.get())) {
-    std::unique_ptr<Item> transformed =
-        ResourceUtils::TryParseItemForAttribute(*raw_string->value, attr);
+    std::unique_ptr<Item> transformed = ResourceUtils::TryParseItemForAttribute(
+        context_->GetDiagnostics(), *raw_string->value, attr);
 
     // If we could not parse as any specific type, try a basic STRING.
     if (!transformed && (attr->type_mask & android::ResTable_map::TYPE_STRING)) {
