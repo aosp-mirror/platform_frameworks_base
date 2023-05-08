@@ -59,6 +59,8 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.logging.InstanceId;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardSecurityView;
@@ -75,6 +77,7 @@ import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FakeFeatureFlags;
 import com.android.systemui.flags.Flags;
+import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.NotificationShadeWindowControllerImpl;
@@ -84,6 +87,7 @@ import com.android.systemui.shade.ShadeWindowLogger;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
+import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -154,6 +158,8 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private FalsingCollectorFake mFalsingCollector;
 
     private @Mock CentralSurfaces mCentralSurfaces;
+    private @Mock UiEventLogger mUiEventLogger;
+    private @Mock SessionTracker mSessionTracker;
 
     /** Most recent value passed to {@link KeyguardStateController#notifyKeyguardGoingAway}. */
     private boolean mKeyguardGoingAway = false;
@@ -656,9 +662,26 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
         assertTrue(mViewMediator.isShowingAndNotOccluded());
     }
 
+    @Test
+    public void testOnStartedWakingUp_logsUiEvent() {
+        final InstanceId instanceId = InstanceId.fakeInstanceId(8);
+        when(mSessionTracker.getSessionId((anyInt()))).thenReturn(instanceId);
+        mViewMediator.onStartedWakingUp(PowerManager.WAKE_REASON_LIFT, false);
+
+        verify(mUiEventLogger).logWithInstanceIdAndPosition(
+                eq(BiometricUnlockController.BiometricUiEvent.STARTED_WAKING_UP),
+                anyInt(),
+                any(),
+                eq(instanceId),
+                eq(PowerManager.WAKE_REASON_LIFT)
+        );
+    }
+
     private void createAndStartViewMediator() {
         mViewMediator = new KeyguardViewMediator(
                 mContext,
+                mUiEventLogger,
+                mSessionTracker,
                 mUserTracker,
                 mFalsingCollector,
                 mLockPatternUtils,

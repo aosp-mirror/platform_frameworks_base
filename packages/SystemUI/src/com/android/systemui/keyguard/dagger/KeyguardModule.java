@@ -22,6 +22,7 @@ import android.content.Context;
 import android.os.PowerManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardDisplayManager;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -51,6 +52,7 @@ import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionMo
 import com.android.systemui.keyguard.domain.quickaffordance.KeyguardQuickAffordanceModule;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLogger;
 import com.android.systemui.keyguard.shared.quickaffordance.KeyguardQuickAffordancesMetricsLoggerImpl;
+import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
@@ -64,11 +66,11 @@ import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
 
-import java.util.concurrent.Executor;
-
 import dagger.Lazy;
 import dagger.Module;
 import dagger.Provides;
+
+import java.util.concurrent.Executor;
 
 /**
  * Dagger Module providing keyguard.
@@ -94,6 +96,8 @@ public class KeyguardModule {
     @SysUISingleton
     public static KeyguardViewMediator newKeyguardViewMediator(
             Context context,
+            UiEventLogger uiEventLogger,
+            SessionTracker sessionTracker,
             UserTracker userTracker,
             FalsingCollector falsingCollector,
             LockPatternUtils lockPatternUtils,
@@ -126,6 +130,8 @@ public class KeyguardModule {
             FeatureFlags featureFlags) {
         return new KeyguardViewMediator(
                 context,
+                uiEventLogger,
+                sessionTracker,
                 userTracker,
                 falsingCollector,
                 lockPatternUtils,
