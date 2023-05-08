@@ -24,6 +24,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import android.app.ActivityOptions;
 import android.app.PendingIntent;
@@ -33,6 +37,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Looper;
@@ -58,6 +64,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.function.Consumer;
 
 /**
  * Tests for RemoteViews.
@@ -692,5 +699,62 @@ public class RemoteViewsTest {
             mSharedViewNames = sharedViewNames;
             return null;
         }
+    }
+
+    @Test
+    public void visitUris() {
+        RemoteViews views = new RemoteViews(mPackage, R.layout.remote_views_test);
+
+        final Uri imageUri = Uri.parse("content://media/image");
+        final Icon icon1 = Icon.createWithContentUri("content://media/icon1");
+        final Icon icon2 = Icon.createWithContentUri("content://media/icon2");
+        final Icon icon3 = Icon.createWithContentUri("content://media/icon3");
+        final Icon icon4 = Icon.createWithContentUri("content://media/icon4");
+        views.setImageViewUri(R.id.image, imageUri);
+        views.setTextViewCompoundDrawables(R.id.text, icon1, icon2, icon3, icon4);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        views.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(imageUri));
+        verify(visitor, times(1)).accept(eq(icon1.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4.getUri()));
+    }
+
+    @Test
+    public void visitUris_separateOrientation() {
+        final RemoteViews landscape = new RemoteViews(mPackage, R.layout.remote_views_test);
+        final Uri imageUriL = Uri.parse("content://landscape/image");
+        final Icon icon1L = Icon.createWithContentUri("content://landscape/icon1");
+        final Icon icon2L = Icon.createWithContentUri("content://landscape/icon2");
+        final Icon icon3L = Icon.createWithContentUri("content://landscape/icon3");
+        final Icon icon4L = Icon.createWithContentUri("content://landscape/icon4");
+        landscape.setImageViewUri(R.id.image, imageUriL);
+        landscape.setTextViewCompoundDrawables(R.id.text, icon1L, icon2L, icon3L, icon4L);
+
+        final RemoteViews portrait = new RemoteViews(mPackage, 33);
+        final Uri imageUriP = Uri.parse("content://portrait/image");
+        final Icon icon1P = Icon.createWithContentUri("content://portrait/icon1");
+        final Icon icon2P = Icon.createWithContentUri("content://portrait/icon2");
+        final Icon icon3P = Icon.createWithContentUri("content://portrait/icon3");
+        final Icon icon4P = Icon.createWithContentUri("content://portrait/icon4");
+        portrait.setImageViewUri(R.id.image, imageUriP);
+        portrait.setTextViewCompoundDrawables(R.id.text, icon1P, icon2P, icon3P, icon4P);
+
+        RemoteViews views = new RemoteViews(landscape, portrait);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        views.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(imageUriL));
+        verify(visitor, times(1)).accept(eq(icon1L.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2L.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3L.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4L.getUri()));
+        verify(visitor, times(1)).accept(eq(imageUriP));
+        verify(visitor, times(1)).accept(eq(icon1P.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2P.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3P.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4P.getUri()));
     }
 }
