@@ -326,6 +326,8 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.power.WearPowerService";
     private static final String HEALTH_SERVICE_CLASS =
             "com.android.clockwork.healthservices.HealthService";
+    private static final String SYSTEM_STATE_DISPLAY_SERVICE_CLASS =
+            "com.android.clockwork.systemstatedisplay.SystemStateDisplayService";
     private static final String WEAR_SIDEKICK_SERVICE_CLASS =
             "com.google.android.clockwork.sidekick.SidekickService";
     private static final String WEAR_DISPLAYOFFLOAD_SERVICE_CLASS =
@@ -2589,6 +2591,10 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartHealthService");
             mSystemServiceManager.startService(HEALTH_SERVICE_CLASS);
+            t.traceEnd();
+
+            t.traceBegin("StartSystemStateDisplayService");
+            mSystemServiceManager.startService(SYSTEM_STATE_DISPLAY_SERVICE_CLASS);
             t.traceEnd();
 
             t.traceBegin("StartWearConnectivityService");
