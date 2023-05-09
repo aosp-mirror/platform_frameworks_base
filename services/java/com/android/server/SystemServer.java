@@ -735,7 +735,7 @@ public final class SystemServer implements Dumpable {
                     final String name = args[1];
                     final Dumpable dumpable = mDumpables.get(name);
                     if (dumpable == null) {
-                        pw.printf("No dummpable named %s\n", name);
+                        pw.printf("No dumpable named %s\n", name);
                         return;
                     }
 
@@ -2644,7 +2644,11 @@ public final class SystemServer implements Dumpable {
 
         // AdServicesManagerService (PP API service)
         t.traceBegin("StartAdServicesManagerService");
-        mSystemServiceManager.startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
+        SystemService adServices = mSystemServiceManager
+                .startService(AD_SERVICES_MANAGER_SERVICE_CLASS);
+        if (adServices instanceof Dumpable) {
+            mDumper.addDumpable((Dumpable) adServices);
+        }
         t.traceEnd();
 
         // OnDevicePersonalizationSystemService
