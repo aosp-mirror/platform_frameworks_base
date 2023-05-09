@@ -102,7 +102,8 @@ public abstract class SysuiTestCase {
                 mock(Executor.class),
                 mock(DumpManager.class),
                 mock(BroadcastDispatcherLogger.class),
-                mock(UserTracker.class));
+                mock(UserTracker.class),
+                shouldFailOnLeakedReceiver());
 
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);
@@ -139,6 +140,10 @@ public abstract class SysuiTestCase {
         // TODO(b/219008720): Remove this.
         mDependency.injectMockDependency(SystemUIDialogManager.class);
         mDependency.injectTestDependency(DialogLaunchAnimator.class, fakeDialogLaunchAnimator());
+    }
+
+    protected boolean shouldFailOnLeakedReceiver() {
+        return false;
     }
 
     @After
