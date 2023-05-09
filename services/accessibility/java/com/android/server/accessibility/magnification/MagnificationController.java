@@ -470,12 +470,14 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             disableFullScreenMagnificationIfNeeded(displayId);
         } else {
             long duration;
+            float scale;
             synchronized (mLock) {
                 setCurrentMagnificationModeAndSwitchDelegate(displayId,
                         ACCESSIBILITY_MAGNIFICATION_MODE_NONE);
                 duration = SystemClock.uptimeMillis() - mWindowModeEnabledTimeArray.get(displayId);
+                scale = mWindowMagnificationMgr.getLastActivatedScale(displayId);
             }
-            logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW, duration);
+            logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW, duration, scale);
         }
         updateMagnificationUIControls(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
     }
@@ -567,13 +569,16 @@ public class MagnificationController implements WindowMagnificationManager.Callb
             disableWindowMagnificationIfNeeded(displayId);
         } else {
             long duration;
+            float scale;
             synchronized (mLock) {
                 setCurrentMagnificationModeAndSwitchDelegate(displayId,
                         ACCESSIBILITY_MAGNIFICATION_MODE_NONE);
                 duration = SystemClock.uptimeMillis()
                         - mFullScreenModeEnabledTimeArray.get(displayId);
+                scale = mFullScreenMagnificationController.getLastActivatedScale(displayId);
             }
-            logMagnificationUsageState(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN, duration);
+            logMagnificationUsageState(
+                    ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN, duration, scale);
         }
         updateMagnificationUIControls(displayId, ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
     }
@@ -612,10 +617,11 @@ public class MagnificationController implements WindowMagnificationManager.Callb
      *
      * @param mode The activated magnification mode.
      * @param duration The duration in milliseconds during the magnification is activated.
+     * @param scale The last magnification scale for the activation
      */
     @VisibleForTesting
-    public void logMagnificationUsageState(int mode, long duration) {
-        AccessibilityStatsLogUtils.logMagnificationUsageState(mode, duration);
+    public void logMagnificationUsageState(int mode, long duration, float scale) {
+        AccessibilityStatsLogUtils.logMagnificationUsageState(mode, duration, scale);
     }
 
     /**
