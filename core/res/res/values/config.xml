@@ -1824,6 +1824,16 @@
          specified -->
     <string name="default_wallpaper_component" translatable="false">@null</string>
 
+    <!-- CMF colors to default wallpaper component map, the component with color matching the device
+         color will be the cmf default wallpapers. The default wallpaper will be default wallpaper
+         component if not specified.
+
+         E.g. for SLV color, and com.android.example/com.android.example.SlVDefaultWallpaper
+         <item>SLV,com.android.example/com.android.example.SlVDefaultWallpaper</item> -->
+    <string-array name="cmf_default_wallpaper_component" translatable="false">
+        <!-- Add packages here -->
+    </string-array>
+
     <!-- By default a product has no distinct default lock wallpaper -->
     <item name="default_lock_wallpaper" type="drawable">@null</item>
 
