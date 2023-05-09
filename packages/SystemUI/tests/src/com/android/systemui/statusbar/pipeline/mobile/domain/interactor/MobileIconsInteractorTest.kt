@@ -272,6 +272,52 @@ class MobileIconsInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun filteredSubscriptions_vcnSubId_agreesWithActiveSubId_usesActiveAkaVcnSub() =
+        testScope.runTest {
+            val (sub1, sub3) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_1_ID, SUB_3_ID),
+                    opportunistic = Pair(true, true),
+                    grouped = true,
+                )
+            connectionsRepository.setSubscriptions(listOf(sub1, sub3))
+            connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
+            connectivityRepository.vcnSubId.value = SUB_3_ID
+            whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
+                .thenReturn(false)
+
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(listOf(sub3))
+
+            job.cancel()
+        }
+
+    @Test
+    fun filteredSubscriptions_vcnSubId_disagreesWithActiveSubId_usesVcnSub() =
+        testScope.runTest {
+            val (sub1, sub3) =
+                createSubscriptionPair(
+                    subscriptionIds = Pair(SUB_1_ID, SUB_3_ID),
+                    opportunistic = Pair(true, true),
+                    grouped = true,
+                )
+            connectionsRepository.setSubscriptions(listOf(sub1, sub3))
+            connectionsRepository.setActiveMobileDataSubscriptionId(SUB_3_ID)
+            connectivityRepository.vcnSubId.value = SUB_1_ID
+            whenever(carrierConfigTracker.alwaysShowPrimarySignalBarInOpportunisticNetworkDefault)
+                .thenReturn(false)
+
+            var latest: List<SubscriptionModel>? = null
+            val job = underTest.filteredSubscriptions.onEach { latest = it }.launchIn(this)
+
+            assertThat(latest).isEqualTo(listOf(sub1))
+
+            job.cancel()
+        }
+
+    @Test
     fun activeDataConnection_turnedOn() =
         testScope.runTest {
             CONNECTION_1.setDataEnabled(true)
