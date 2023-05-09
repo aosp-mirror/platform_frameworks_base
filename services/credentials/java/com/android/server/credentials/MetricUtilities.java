@@ -48,12 +48,15 @@ public class MetricUtilities {
     public static final String DEFAULT_STRING = "";
     public static final int[] DEFAULT_REPEATED_INT_32 = new int[0];
     public static final String[] DEFAULT_REPEATED_STR = new String[0];
+    public static final boolean[] DEFAULT_REPEATED_BOOL = new boolean[0];
     // Used for single count metric emits, such as singular amounts of various types
     public static final int UNIT = 1;
     // Used for zero count metric emits, such as zero amounts of various types
     public static final int ZERO = 0;
     // The number of characters at the end of the string to use as a key
-    public static final int DELTA_CUT = 20;
+    public static final int DELTA_RESPONSES_CUT = 20;
+    // The cut for exception strings from the end - used to keep metrics small
+    public static final int DELTA_EXCEPTION_CUT = 30;
 
     /**
      * This retrieves the uid of any package name, given a context and a component name for the
@@ -165,8 +168,10 @@ public class MetricUtilities {
                     finalPhaseMetric.getResponseCollective().getUniqueResponseStrings(),
                     /* per_classtype_counts */
                     finalPhaseMetric.getResponseCollective().getUniqueResponseCounts(),
-                    /* framework_exception_unique_classtypes */
-                    DEFAULT_STRING
+                    /* framework_exception_unique_classtype */
+                    finalPhaseMetric.getFrameworkException(),
+                    /* primary_indicated */
+                    false
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during final provider uid emit: " + e);
@@ -268,7 +273,9 @@ public class MetricUtilities {
                     /* per_classtype_counts */
                     initialPhaseMetric.getUniqueRequestCounts(),
                     /* api_name */
-                    initialPhaseMetric.getApiName()
+                    initialPhaseMetric.getApiName(),
+                    /* primary_candidates_indicated */
+                    DEFAULT_REPEATED_BOOL
             );
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during candidate provider uid metric emit: " + e);
