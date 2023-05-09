@@ -21,6 +21,7 @@ import android.media.soundtrigger.RecognitionEvent;
  * Wrapper to android.media.soundtrigger.RecognitionEvent providing additional fields used by the
  * framework.
  */
+@JavaDerive(equals = true, toString = true)
 parcelable RecognitionEventSys {
 
     RecognitionEvent recognitionEvent;
