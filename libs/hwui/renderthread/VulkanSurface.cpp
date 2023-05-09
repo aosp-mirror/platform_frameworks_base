@@ -368,6 +368,14 @@ void VulkanSurface::releaseBuffers() {
     }
 }
 
+void VulkanSurface::invalidateBuffers() {
+    for (uint32_t i = 0; i < mWindowInfo.bufferCount; i++) {
+        VulkanSurface::NativeBufferInfo& bufferInfo = mNativeBuffers[i];
+        bufferInfo.hasValidContents = false;
+        bufferInfo.lastPresentedCount = 0;
+    }
+}
+
 VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
     // Set the mCurrentBufferInfo to invalid in case of error and only reset it to the correct
     // value at the end of the function if everything dequeued correctly.
@@ -400,6 +408,10 @@ VulkanSurface::NativeBufferInfo* VulkanSurface::dequeueNativeBuffer() {
             // new NativeBufferInfo storage will be populated lazily as we dequeue each new buffer.
             mWindowInfo.actualSize = actualSize;
             releaseBuffers();
+        } else {
+            // A change in transform means we need to repaint the entire buffer area as the damage
+            // rects have just moved about.
+            invalidateBuffers();
         }
 
         if (transformHint != mWindowInfo.transform) {
