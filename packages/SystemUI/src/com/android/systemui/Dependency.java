@@ -320,7 +320,6 @@ public class Dependency {
     @Inject @Main Lazy<Looper> mMainLooper;
     @Inject @Main Lazy<Handler> mMainHandler;
     @Inject @Named(TIME_TICK_HANDLER_NAME) Lazy<Handler> mTimeTickHandler;
-    @Nullable
     @Inject @Named(LEAK_REPORT_EMAIL_NAME) Lazy<String> mLeakReportEmail;
     @Inject @Main Lazy<Executor> mMainExecutor;
     @Inject @Background Lazy<Executor> mBackgroundExecutor;
