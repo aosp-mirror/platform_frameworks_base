@@ -467,13 +467,13 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             case MODE_DISMISS_BOUNCER:
                 Trace.beginSection("MODE_DISMISS_BOUNCER");
                 mKeyguardViewController.notifyKeyguardAuthenticated(
-                        false /* strongAuth */);
+                        false /* primaryAuth */);
                 Trace.endSection();
                 break;
             case MODE_UNLOCK_COLLAPSING:
                 Trace.beginSection("MODE_UNLOCK_COLLAPSING");
                 mKeyguardViewController.notifyKeyguardAuthenticated(
-                        false /* strongAuth */);
+                        false /* primaryAuth */);
                 Trace.endSection();
                 break;
             case MODE_SHOW_BOUNCER:

@@ -78,7 +78,6 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -733,7 +732,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         @Override
-        public void keyguardDone(boolean strongAuth, int targetUserId) {
+        public void keyguardDone(boolean primaryAuth, int targetUserId) {
             if (targetUserId != KeyguardUpdateMonitor.getCurrentUser()) {
                 return;
             }
@@ -754,7 +753,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         @Override
-        public void keyguardDonePending(boolean strongAuth, int targetUserId) {
+        public void keyguardDonePending(boolean primaryAuth, int targetUserId) {
             Trace.beginSection("KeyguardViewMediator.mViewMediatorCallback#keyguardDonePending");
             if (DEBUG) Log.d(TAG, "keyguardDonePending");
             if (targetUserId != KeyguardUpdateMonitor.getCurrentUser()) {
@@ -2194,16 +2193,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
     };
 
-    private void keyguardDone() {
-        Trace.beginSection("KeyguardViewMediator#keyguardDone");
-        if (DEBUG) Log.d(TAG, "keyguardDone()");
-        userActivity();
-        EventLog.writeEvent(70000, 2);
-        Message msg = mHandler.obtainMessage(KEYGUARD_DONE);
-        mHandler.sendMessage(msg);
-        Trace.endSection();
-    }
-
     /**
      * This handler will be associated with the policy thread, which will also
      * be the UI thread of the keyguard.  Since the apis of the policy, and therefore
@@ -3082,7 +3071,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         Trace.beginSection("KeyguardViewMediator#onWakeAndUnlocking");
         mWakeAndUnlocking = true;
 
-        keyguardDone();
+        mKeyguardViewControllerLazy.get().notifyKeyguardAuthenticated(/* primaryAuth */ false);
+        userActivity();
         Trace.endSection();
     }
 

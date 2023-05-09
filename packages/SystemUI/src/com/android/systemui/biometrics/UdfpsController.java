@@ -466,7 +466,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (!mOnFingerDown) {
             playStartHaptic();
         }
-        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
+        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* primaryAuth */);
         mAttemptedToDismissKeyguard = true;
     }
 
