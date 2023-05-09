@@ -17,7 +17,6 @@
 package com.android.credentialmanager
 
 import android.app.slice.Slice
-import android.app.slice.SliceItem
 import android.content.ComponentName
 import android.content.Context
 import android.content.pm.PackageManager
@@ -336,12 +335,8 @@ class GetFlowUtils {
                 val structuredAuthEntry =
                     AuthenticationAction.fromSlice(entry.slice) ?: return@forEach
 
-                // TODO: replace with official jetpack code.
-                val titleItem: SliceItem? = entry.slice.items.firstOrNull {
-                    it.hasHint(
-                        "androidx.credentials.provider.authenticationAction.SLICE_HINT_TITLE")
-                }
-                val title: String = titleItem?.text?.toString() ?: providerDisplayName
+                val title: String =
+                    structuredAuthEntry.title.toString().ifEmpty { providerDisplayName }
 
                 result.add(AuthenticationEntryInfo(
                     providerId = providerId,
