@@ -313,7 +313,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Test
     fun quickAffordance_bottomStartAffordanceHiddenWhileDozing() =
         testScope.runTest {
-            repository.setDozing(true)
+            repository.setIsDozing(true)
             homeControls.setState(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     icon = ICON,
@@ -348,7 +348,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     fun quickAffordanceAlwaysVisible_evenWhenLockScreenNotShowingAndDozing() =
         testScope.runTest {
             repository.setKeyguardShowing(false)
-            repository.setDozing(true)
+            repository.setIsDozing(true)
             val configKey = BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS
             homeControls.setState(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
@@ -623,7 +623,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
         testScope.runTest {
             featureFlags.set(Flags.CUSTOMIZABLE_LOCK_SCREEN_QUICK_AFFORDANCES, true)
             dockManager.setIsDocked(false)
-            val firstUseLongPress by collectLastValue (underTest.useLongPress())
+            val firstUseLongPress by collectLastValue(underTest.useLongPress())
             runCurrent()
 
             assertThat(firstUseLongPress).isTrue()

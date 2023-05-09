@@ -75,7 +75,6 @@ class UdfpsKeyguardViewLegacyControllerWithCoroutinesTest :
         MockitoAnnotations.initMocks(this)
         keyguardBouncerRepository =
             KeyguardBouncerRepositoryImpl(
-                mock(com.android.keyguard.ViewMediatorCallback::class.java),
                 FakeSystemClock(),
                 testScope.backgroundScope,
                 bouncerLogger,

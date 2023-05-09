@@ -24,7 +24,6 @@ import com.android.systemui.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
-import com.android.systemui.keyguard.shared.model.WakeSleepReason
 import com.android.systemui.statusbar.CircleReveal
 import com.android.systemui.statusbar.LiftReveal
 import com.android.systemui.statusbar.LightRevealEffect
@@ -43,7 +42,7 @@ val DEFAULT_REVEAL_EFFECT = LiftReveal
 
 /**
  * Encapsulates state relevant to the light reveal scrim, the view used to reveal/hide screen
- * contents during transitions between AOD and lockscreen/unlocked.
+ * contents during transitions between DOZE or AOD and lockscreen/unlocked.
  */
 interface LightRevealScrimRepository {
 
@@ -64,12 +63,19 @@ constructor(
 ) : LightRevealScrimRepository {
 
     /** The reveal effect used if the device was locked/unlocked via the power button. */
-    private val powerButtonReveal =
-        PowerButtonReveal(
-            context.resources
-                .getDimensionPixelSize(R.dimen.physical_power_button_center_screen_location_y)
-                .toFloat()
+    private val powerButtonRevealEffect: Flow<LightRevealEffect?> =
+        flowOf(
+            PowerButtonReveal(
+                context.resources
+                    .getDimensionPixelSize(R.dimen.physical_power_button_center_screen_location_y)
+                    .toFloat()
+            )
         )
+
+    private val tapRevealEffect: Flow<LightRevealEffect?> =
+        keyguardRepository.lastDozeTapToWakePosition.map {
+            it?.let { constructCircleRevealFromPoint(it) }
+        }
 
     /**
      * Reveal effect to use for a fingerprint unlock. This is reconstructed if the fingerprint
@@ -102,18 +108,11 @@ constructor(
 
     /** The reveal effect we'll use for the next non-biometric unlock (tap, power button, etc). */
     private val nonBiometricRevealEffect: Flow<LightRevealEffect?> =
-        keyguardRepository.wakefulness.map { wakefulnessModel ->
-            val wakingUpFromPowerButton =
-                wakefulnessModel.isWakingUpOrAwake &&
-                    wakefulnessModel.lastWakeReason == WakeSleepReason.POWER_BUTTON
-            val sleepingFromPowerButton =
-                !wakefulnessModel.isWakingUpOrAwake &&
-                    wakefulnessModel.lastSleepReason == WakeSleepReason.POWER_BUTTON
-
-            if (wakingUpFromPowerButton || sleepingFromPowerButton) {
-                powerButtonReveal
-            } else {
-                LiftReveal
+        keyguardRepository.wakefulness.flatMapLatest { wakefulnessModel ->
+            when {
+                wakefulnessModel.isTransitioningFromPowerButton() -> powerButtonRevealEffect
+                wakefulnessModel.isAwakeFromTap() -> tapRevealEffect
+                else -> flowOf(LiftReveal)
             }
         }
 
