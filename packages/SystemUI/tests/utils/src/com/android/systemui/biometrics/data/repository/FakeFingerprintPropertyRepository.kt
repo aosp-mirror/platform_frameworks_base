@@ -39,20 +39,21 @@ class FakeFingerprintPropertyRepository : FingerprintPropertyRepository {
         MutableStateFlow(FingerprintSensorType.UNKNOWN)
     override val sensorType: StateFlow<FingerprintSensorType> = _sensorType.asStateFlow()
 
-    private val _sensorLocation: MutableStateFlow<SensorLocationInternal> =
-        MutableStateFlow(SensorLocationInternal.DEFAULT)
-    override val sensorLocation = _sensorLocation.asStateFlow()
+    private val _sensorLocations: MutableStateFlow<Map<String, SensorLocationInternal>> =
+        MutableStateFlow(mapOf("" to SensorLocationInternal.DEFAULT))
+    override val sensorLocations: StateFlow<Map<String, SensorLocationInternal>> =
+        _sensorLocations.asStateFlow()
 
     fun setProperties(
         sensorId: Int,
         strength: SensorStrength,
         sensorType: FingerprintSensorType,
-        sensorLocation: SensorLocationInternal
+        sensorLocations: Map<String, SensorLocationInternal>
     ) {
         _sensorId.value = sensorId
         _strength.value = strength
         _sensorType.value = sensorType
-        _sensorLocation.value = sensorLocation
+        _sensorLocations.value = sensorLocations
         _isInitialized.value = true
     }
 }
