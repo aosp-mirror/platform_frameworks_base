@@ -4167,6 +4167,40 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
+     * Get the x coordinate of the location where the pointer should be dispatched.
+     *
+     * This is required because a mouse event, such as from a touchpad, may contain multiple
+     * pointers that should all be dispatched to the cursor position.
+     * @hide
+     */
+    public float getXDispatchLocation(int pointerIndex) {
+        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            final float xCursorPosition = getXCursorPosition();
+            if (xCursorPosition != INVALID_CURSOR_POSITION) {
+                return xCursorPosition;
+            }
+        }
+        return getX(pointerIndex);
+    }
+
+    /**
+     * Get the y coordinate of the location where the pointer should be dispatched.
+     *
+     * This is required because a mouse event, such as from a touchpad, may contain multiple
+     * pointers that should all be dispatched to the cursor position.
+     * @hide
+     */
+    public float getYDispatchLocation(int pointerIndex) {
+        if (isFromSource(InputDevice.SOURCE_MOUSE)) {
+            final float yCursorPosition = getYCursorPosition();
+            if (yCursorPosition != INVALID_CURSOR_POSITION) {
+                return yCursorPosition;
+            }
+        }
+        return getY(pointerIndex);
+    }
+
+    /**
      * Transfer object for pointer coordinates.
      *
      * Objects of this type can be used to specify the pointer coordinates when
