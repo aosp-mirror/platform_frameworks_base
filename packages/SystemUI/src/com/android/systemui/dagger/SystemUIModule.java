@@ -34,6 +34,7 @@ import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.biometrics.AlternateUdfpsTouchProvider;
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider;
+import com.android.systemui.biometrics.FingerprintReEnrollNotification;
 import com.android.systemui.biometrics.UdfpsDisplayModeProvider;
 import com.android.systemui.biometrics.dagger.BiometricsModule;
 import com.android.systemui.biometrics.dagger.UdfpsModule;
@@ -288,6 +289,9 @@ public abstract class SystemUIModule {
 
     @BindsOptionalOf
     abstract SystemStatusAnimationScheduler optionalSystemStatusAnimationScheduler();
+
+    @BindsOptionalOf
+    abstract FingerprintReEnrollNotification optionalFingerprintReEnrollNotification();
 
     @SysUISingleton
     @Binds
