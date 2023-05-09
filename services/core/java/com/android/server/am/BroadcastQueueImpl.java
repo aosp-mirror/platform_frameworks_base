@@ -1793,6 +1793,23 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         return mDispatcher.isBeyondBarrier(barrierTime);
     }
 
+    public boolean isDispatchedLocked(Intent intent) {
+        if (isIdleLocked()) return true;
+
+        for (int i = 0; i < mParallelBroadcasts.size(); i++) {
+            if (intent.filterEquals(mParallelBroadcasts.get(i).intent)) {
+                return false;
+            }
+        }
+
+        final BroadcastRecord pending = getPendingBroadcastLocked();
+        if ((pending != null) && intent.filterEquals(pending.intent)) {
+            return false;
+        }
+
+        return mDispatcher.isDispatched(intent);
+    }
+
     public void waitForIdle(PrintWriter pw) {
         waitFor(() -> isIdleLocked(), pw, "idle");
     }
@@ -1800,6 +1817,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     public void waitForBarrier(PrintWriter pw) {
         final long barrierTime = SystemClock.uptimeMillis();
         waitFor(() -> isBeyondBarrierLocked(barrierTime), pw, "barrier");
+    }
+
+    public void waitForDispatched(Intent intent, PrintWriter pw) {
+        waitFor(() -> isDispatchedLocked(intent), pw, "dispatch");
     }
 
     private void waitFor(BooleanSupplier condition, PrintWriter pw, String conditionName) {

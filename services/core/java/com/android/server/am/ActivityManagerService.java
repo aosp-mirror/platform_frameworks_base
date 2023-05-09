@@ -18964,6 +18964,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         pw.flush();
     }
 
+    void waitForBroadcastDispatch(@NonNull PrintWriter pw, @NonNull Intent intent) {
+        enforceCallingPermission(permission.DUMP, "waitForBroadcastDispatch");
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.waitForDispatched(intent, pw);
+        }
+    }
+
     void setIgnoreDeliveryGroupPolicy(@NonNull String broadcastAction) {
         Objects.requireNonNull(broadcastAction);
         enforceCallingPermission(permission.DUMP, "waitForBroadcastBarrier()");
