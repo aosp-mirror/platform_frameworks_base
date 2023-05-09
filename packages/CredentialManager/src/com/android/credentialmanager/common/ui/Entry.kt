@@ -255,7 +255,7 @@ fun ActionEntry(
             Column(modifier = Modifier.wrapContentSize()
                 .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)) {
                 SmallTitleText(entryHeadlineText)
-                if (entrySecondLineText != null) {
+                if (entrySecondLineText != null && entrySecondLineText.isNotEmpty()) {
                     BodySmallText(entrySecondLineText)
                 }
             }
