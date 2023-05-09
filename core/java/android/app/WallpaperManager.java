@@ -2912,19 +2912,60 @@ public class WallpaperManager {
             }
         }
 
-        // Check if the package exists
-        if (cn != null) {
-            try {
-                final PackageManager packageManager = context.getPackageManager();
-                packageManager.getPackageInfo(cn.getPackageName(),
-                        PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
-            } catch (PackageManager.NameNotFoundException e) {
-                cn = null;
-            }
+        if (!isComponentExist(context, cn)) {
+            cn = null;
         }
 
         return cn;
+    }
+
+    /**
+     * Return {@link ComponentName} of the CMF default wallpaper, or
+     * {@link #getDefaultWallpaperComponent(Context)} if none is defined.
+     *
+     * @hide
+     */
+    public static ComponentName getCmfDefaultWallpaperComponent(Context context) {
+        ComponentName cn = null;
+        String[] cmfWallpaperMap = context.getResources().getStringArray(
+                com.android.internal.R.array.cmf_default_wallpaper_component);
+        if (cmfWallpaperMap == null || cmfWallpaperMap.length == 0) {
+            Log.d(TAG, "No CMF wallpaper config");
+            return getDefaultWallpaperComponent(context);
+        }
+
+        for (String entry : cmfWallpaperMap) {
+            String[] cmfWallpaper;
+            if (!TextUtils.isEmpty(entry)) {
+                cmfWallpaper = entry.split(",");
+                if (cmfWallpaper != null && cmfWallpaper.length == 2 && VALUE_CMF_COLOR.equals(
+                        cmfWallpaper[0]) && !TextUtils.isEmpty(cmfWallpaper[1])) {
+                    cn = ComponentName.unflattenFromString(cmfWallpaper[1]);
+                    break;
+                }
+            }
+        }
+
+        if (!isComponentExist(context, cn)) {
+            cn = null;
+        }
+
+        return cn;
+    }
+
+    private static boolean isComponentExist(Context context, ComponentName cn) {
+        if (cn == null) {
+            return false;
+        }
+        try {
+            final PackageManager packageManager = context.getPackageManager();
+            packageManager.getPackageInfo(cn.getPackageName(),
+                    PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
     /**
