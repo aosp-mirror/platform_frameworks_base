@@ -21,10 +21,11 @@ import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPhase;
+import static com.android.server.credentials.MetricUtilities.logApiCalledNoUidFinal;
 
+import android.annotation.NonNull;
 import android.credentials.GetCredentialRequest;
 import android.credentials.ui.UserSelectionDialogResult;
-import android.os.IBinder;
 import android.util.Slog;
 
 import com.android.server.credentials.ProviderSession;
@@ -48,13 +49,24 @@ public class RequestSessionMetric {
     // As emits occur in sequential order, increment this counter and utilize
     protected int mSequenceCounter = 0;
 
-    protected final InitialPhaseMetric mInitialPhaseMetric = new InitialPhaseMetric();
+    protected final InitialPhaseMetric mInitialPhaseMetric;
     protected final ChosenProviderFinalPhaseMetric
-            mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric();
+            mChosenProviderFinalPhaseMetric;
     // TODO(b/271135048) - Replace this with a new atom per each browsing emit (V4)
     protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric = new ArrayList<>();
+    // Specific aggregate candidate provider metric for the provider this session handles
+    @NonNull
+    protected final CandidateAggregateMetric mCandidateAggregateMetric;
+    // Since track two is shared, this allows provider sessions to capture a metric-specific
+    // session token for the flow where the provider is known
+    private final int mSessionIdTrackTwo;
 
-    public RequestSessionMetric() {
+    public RequestSessionMetric(int sessionIdTrackOne, int sessionIdTrackTwo) {
+        mSessionIdTrackTwo = sessionIdTrackTwo;
+        mInitialPhaseMetric = new InitialPhaseMetric(sessionIdTrackOne);
+        mCandidateAggregateMetric = new CandidateAggregateMetric(sessionIdTrackOne);
+        mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric(
+                sessionIdTrackOne, sessionIdTrackTwo);
     }
 
     /**
@@ -76,18 +88,25 @@ public class RequestSessionMetric {
     }
 
     /**
+     * @return the aggregate candidate phase metrics associated with the request session
+     */
+    public CandidateAggregateMetric getCandidateAggregateMetric() {
+        return mCandidateAggregateMetric;
+    }
+
+    /**
      * Upon starting the service, this fills the initial phase metric properly.
      *
      * @param timestampStarted the timestamp the service begins at
-     * @param mRequestId       the IBinder used to retrieve a unique id
      * @param mCallingUid      the calling process's uid
      * @param metricCode       typically pulled from {@link ApiName}
+     * @param callingAppFlowUniqueInt the unique integer used as the session id for the calling app
+     *                                known flow
      */
-    public void collectInitialPhaseMetricInfo(long timestampStarted, IBinder mRequestId,
+    public void collectInitialPhaseMetricInfo(long timestampStarted,
             int mCallingUid, int metricCode) {
         try {
             mInitialPhaseMetric.setCredentialServiceStartedTimeNanoseconds(timestampStarted);
-            mInitialPhaseMetric.setSessionId(mRequestId.hashCode());
             mInitialPhaseMetric.setCallerUid(mCallingUid);
             mInitialPhaseMetric.setApiName(metricCode);
         } catch (Exception e) {
@@ -206,7 +225,6 @@ public class RequestSessionMetric {
             CandidatePhaseMetric selectedProviderPhaseMetric) {
         try {
             CandidateBrowsingPhaseMetric browsingPhaseMetric = new CandidateBrowsingPhaseMetric();
-            browsingPhaseMetric.setSessionId(mInitialPhaseMetric.getSessionId());
             browsingPhaseMetric.setEntryEnum(
                     EntryEnum.getMetricCodeFromString(selection.getEntryKey()));
             browsingPhaseMetric.setProviderUid(selectedProviderPhaseMetric.getCandidateUid());
@@ -274,7 +292,6 @@ public class RequestSessionMetric {
      */
     public void collectChosenMetricViaCandidateTransfer(CandidatePhaseMetric candidatePhaseMetric) {
         try {
-            mChosenProviderFinalPhaseMetric.setSessionId(candidatePhaseMetric.getSessionId());
             mChosenProviderFinalPhaseMetric.setChosenUid(candidatePhaseMetric.getCandidateUid());
 
             mChosenProviderFinalPhaseMetric.setQueryPhaseLatencyMicroseconds(
@@ -332,6 +349,20 @@ public class RequestSessionMetric {
     }
 
     /**
+     * Handles aggregate candidate phase metric emits in the RequestSession context, after the
+     * candidate phase completes.
+     *
+     * @param providers a map with known providers and their held metric objects
+     */
+    public void logCandidateAggregateMetrics(Map<String, ProviderSession> providers) {
+        try {
+            mCandidateAggregateMetric.collectAverages(providers);
+        } catch (Exception e) {
+            Slog.i(TAG, "Unexpected error during aggregate candidate logging " + e);
+        }
+    }
+
+    /**
      * Handles the final logging for RequestSession context for the final phase.
      *
      * @param apiStatus the final status of the api being called
@@ -341,9 +372,15 @@ public class RequestSessionMetric {
             logApiCalledFinalPhase(mChosenProviderFinalPhaseMetric, mCandidateBrowsingPhaseMetric,
                     apiStatus,
                     ++mSequenceCounter);
+            logApiCalledNoUidFinal(mChosenProviderFinalPhaseMetric, mCandidateBrowsingPhaseMetric,
+                    apiStatus,
+                    ++mSequenceCounter);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during final metric emit: " + e);
         }
     }
 
+    public int getSessionIdTrackTwo() {
+        return mSessionIdTrackTwo;
+    }
 }
