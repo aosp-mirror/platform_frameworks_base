@@ -26,7 +26,6 @@ import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCall
 import com.android.systemui.common.shared.model.Position
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.doze.DozeHost
 import com.android.systemui.doze.DozeMachine
 import com.android.systemui.doze.DozeTransitionCallback
 import com.android.systemui.doze.DozeTransitionListener
@@ -105,7 +104,7 @@ interface KeyguardRepository {
      * returns `false`. In order to account for that, observers should also use the
      * [linearDozeAmount] flow to check if it's greater than `0`
      */
-    val isDozing: Flow<Boolean>
+    val isDozing: StateFlow<Boolean>
 
     /**
      * Observable for whether the device is dreaming.
@@ -132,6 +131,8 @@ interface KeyguardRepository {
 
     /** Doze state information, as it transitions */
     val dozeTransitionModel: Flow<DozeTransitionModel>
+
+    val lastDozeTapToWakePosition: StateFlow<Point?>
 
     /** Observable for the [StatusBarState] */
     val statusBarState: Flow<StatusBarState>
@@ -181,6 +182,10 @@ interface KeyguardRepository {
 
     /** Sets whether quick settings or quick-quick settings is visible. */
     fun setQuickSettingsVisible(isVisible: Boolean)
+
+    fun setLastDozeTapToWakePosition(position: Point)
+
+    fun setIsDozing(isDozing: Boolean)
 }
 
 /** Encapsulates application state for the keyguard. */
@@ -189,7 +194,6 @@ class KeyguardRepositoryImpl
 @Inject
 constructor(
     statusBarStateController: StatusBarStateController,
-    dozeHost: DozeHost,
     wakefulnessLifecycle: WakefulnessLifecycle,
     biometricUnlockController: BiometricUnlockController,
     private val keyguardStateController: KeyguardStateController,
@@ -333,24 +337,19 @@ constructor(
         awaitClose { keyguardStateController.removeCallback(callback) }
     }
 
-    override val isDozing: Flow<Boolean> =
-        conflatedCallbackFlow {
-                val callback =
-                    object : DozeHost.Callback {
-                        override fun onDozingChanged(isDozing: Boolean) {
-                            trySendWithFailureLogging(isDozing, TAG, "updated isDozing")
-                        }
-                    }
-                dozeHost.addCallback(callback)
-                trySendWithFailureLogging(
-                    statusBarStateController.isDozing,
-                    TAG,
-                    "initial isDozing",
-                )
+    private val _isDozing = MutableStateFlow(statusBarStateController.isDozing)
+    override val isDozing: StateFlow<Boolean> = _isDozing.asStateFlow()
 
-                awaitClose { dozeHost.removeCallback(callback) }
-            }
-            .distinctUntilChanged()
+    override fun setIsDozing(isDozing: Boolean) {
+        _isDozing.value = isDozing
+    }
+
+    private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)
+    override val lastDozeTapToWakePosition = _lastDozeTapToWakePosition.asStateFlow()
+
+    override fun setLastDozeTapToWakePosition(position: Point) {
+        _lastDozeTapToWakePosition.value = position
+    }
 
     override val isDreamingWithOverlay: Flow<Boolean> =
         conflatedCallbackFlow {
