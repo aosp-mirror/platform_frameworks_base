@@ -193,11 +193,11 @@ public final class ProviderCreateSession extends ProviderSession<
         mProviderResponseDataHandler.addResponseContent(response.getCreateEntries(),
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
             updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         }
