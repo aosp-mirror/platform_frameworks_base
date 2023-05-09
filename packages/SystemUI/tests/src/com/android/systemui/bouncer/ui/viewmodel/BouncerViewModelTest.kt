@@ -18,14 +18,9 @@ package com.android.systemui.bouncer.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.repository.AuthenticationRepositoryImpl
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.bouncer.data.repo.BouncerRepository
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.data.repository.fakeSceneContainerRepository
-import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.SceneTestUtils
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
@@ -40,33 +35,17 @@ import org.junit.runners.JUnit4
 class BouncerViewModelTest : SysuiTestCase() {
 
     private val testScope = TestScope()
-    private val sceneInteractor =
-        SceneInteractor(
-            repository = fakeSceneContainerRepository(),
-        )
-    private val mAuthenticationInteractor =
-        AuthenticationInteractor(
-            applicationScope = testScope.backgroundScope,
-            repository = AuthenticationRepositoryImpl(),
+    private val utils = SceneTestUtils(this, testScope)
+    private val authenticationInteractor =
+        utils.authenticationInteractor(
+            repository = utils.authenticationRepository(),
         )
     private val underTest =
-        BouncerViewModel(
-            applicationContext = context,
-            applicationScope = testScope.backgroundScope,
-            interactorFactory =
-                object : BouncerInteractor.Factory {
-                    override fun create(containerName: String): BouncerInteractor {
-                        return BouncerInteractor(
-                            applicationScope = testScope.backgroundScope,
-                            applicationContext = context,
-                            repository = BouncerRepository(),
-                            authenticationInteractor = mAuthenticationInteractor,
-                            sceneInteractor = sceneInteractor,
-                            containerName = CONTAINER_NAME,
-                        )
-                    }
-                },
-            containerName = CONTAINER_NAME,
+        utils.bouncerViewModel(
+            utils.bouncerInteractor(
+                authenticationInteractor = authenticationInteractor,
+                sceneInteractor = utils.sceneInteractor(),
+            )
         )
 
     @Test
@@ -75,7 +54,7 @@ class BouncerViewModelTest : SysuiTestCase() {
             val authMethodViewModel: AuthMethodBouncerViewModel? by
                 collectLastValue(underTest.authMethod)
             authMethodsToTest().forEach { authMethod ->
-                mAuthenticationInteractor.setAuthenticationMethod(authMethod)
+                authenticationInteractor.setAuthenticationMethod(authMethod)
 
                 if (authMethod.isSecure) {
                     assertThat(authMethodViewModel).isNotNull()
@@ -93,13 +72,13 @@ class BouncerViewModelTest : SysuiTestCase() {
                 collectLastValue(underTest.authMethod)
             // First pass, populate our "seen" map:
             authMethodsToTest().forEach { authMethod ->
-                mAuthenticationInteractor.setAuthenticationMethod(authMethod)
+                authenticationInteractor.setAuthenticationMethod(authMethod)
                 authMethodViewModel?.let { seen[authMethod] = it }
             }
 
             // Second pass, assert same instances are reused:
             authMethodsToTest().forEach { authMethod ->
-                mAuthenticationInteractor.setAuthenticationMethod(authMethod)
+                authenticationInteractor.setAuthenticationMethod(authMethod)
                 authMethodViewModel?.let { assertThat(it).isSameInstanceAs(seen[authMethod]) }
             }
         }
@@ -120,9 +99,5 @@ class BouncerViewModelTest : SysuiTestCase() {
                 listOf(AuthenticationMethodModel.Pattern.PatternCoordinate(1, 1))
             ),
         )
-    }
-
-    companion object {
-        private const val CONTAINER_NAME = "container1"
     }
 }

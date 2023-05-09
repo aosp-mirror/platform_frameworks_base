@@ -19,14 +19,9 @@ package com.android.systemui.bouncer.ui.viewmodel
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.authentication.data.repository.AuthenticationRepositoryImpl
-import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
-import com.android.systemui.bouncer.data.repo.BouncerRepository
-import com.android.systemui.bouncer.domain.interactor.BouncerInteractor
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.scene.data.repository.fakeSceneContainerRepository
-import com.android.systemui.scene.domain.interactor.SceneInteractor
+import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.shared.model.SceneKey
 import com.android.systemui.scene.shared.model.SceneModel
 import com.google.common.truth.Truth.assertThat
@@ -44,35 +39,20 @@ import org.junit.runners.JUnit4
 class PasswordBouncerViewModelTest : SysuiTestCase() {
 
     private val testScope = TestScope()
-    private val sceneInteractor =
-        SceneInteractor(
-            repository = fakeSceneContainerRepository(),
+    private val utils = SceneTestUtils(this, testScope)
+    private val authenticationInteractor =
+        utils.authenticationInteractor(
+            repository = utils.authenticationRepository(),
         )
-    private val mAuthenticationInteractor =
-        AuthenticationInteractor(
-            applicationScope = testScope.backgroundScope,
-            repository = AuthenticationRepositoryImpl(),
-        )
+    private val sceneInteractor = utils.sceneInteractor()
     private val bouncerInteractor =
-        BouncerInteractor(
-            applicationScope = testScope.backgroundScope,
-            applicationContext = context,
-            repository = BouncerRepository(),
-            authenticationInteractor = mAuthenticationInteractor,
+        utils.bouncerInteractor(
+            authenticationInteractor = authenticationInteractor,
             sceneInteractor = sceneInteractor,
-            containerName = CONTAINER_NAME,
         )
     private val bouncerViewModel =
-        BouncerViewModel(
-            applicationContext = context,
-            applicationScope = testScope.backgroundScope,
-            interactorFactory =
-                object : BouncerInteractor.Factory {
-                    override fun create(containerName: String): BouncerInteractor {
-                        return bouncerInteractor
-                    }
-                },
-            containerName = CONTAINER_NAME,
+        utils.bouncerViewModel(
+            bouncerInteractor = bouncerInteractor,
         )
     private val underTest =
         PasswordBouncerViewModel(
@@ -88,14 +68,14 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onShown() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(mAuthenticationInteractor.isUnlocked)
+            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            mAuthenticationInteractor.setAuthenticationMethod(
+            authenticationInteractor.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            mAuthenticationInteractor.lockDevice()
+            authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -111,14 +91,14 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onPasswordInputChanged() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(mAuthenticationInteractor.isUnlocked)
+            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            mAuthenticationInteractor.setAuthenticationMethod(
+            authenticationInteractor.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            mAuthenticationInteractor.lockDevice()
+            authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -135,12 +115,12 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onAuthenticateKeyPressed_whenCorrect() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(mAuthenticationInteractor.isUnlocked)
+            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
-            mAuthenticationInteractor.setAuthenticationMethod(
+            authenticationInteractor.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            mAuthenticationInteractor.lockDevice()
+            authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -156,14 +136,14 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onAuthenticateKeyPressed_whenWrong() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(mAuthenticationInteractor.isUnlocked)
+            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            mAuthenticationInteractor.setAuthenticationMethod(
+            authenticationInteractor.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            mAuthenticationInteractor.lockDevice()
+            authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
@@ -181,14 +161,14 @@ class PasswordBouncerViewModelTest : SysuiTestCase() {
     @Test
     fun onAuthenticateKeyPressed_correctAfterWrong() =
         testScope.runTest {
-            val isUnlocked by collectLastValue(mAuthenticationInteractor.isUnlocked)
+            val isUnlocked by collectLastValue(authenticationInteractor.isUnlocked)
             val currentScene by collectLastValue(sceneInteractor.currentScene(CONTAINER_NAME))
             val message by collectLastValue(bouncerViewModel.message)
             val password by collectLastValue(underTest.password)
-            mAuthenticationInteractor.setAuthenticationMethod(
+            authenticationInteractor.setAuthenticationMethod(
                 AuthenticationMethodModel.Password("password")
             )
-            mAuthenticationInteractor.lockDevice()
+            authenticationInteractor.lockDevice()
             sceneInteractor.setCurrentScene(CONTAINER_NAME, SceneModel(SceneKey.Bouncer))
             assertThat(isUnlocked).isFalse()
             assertThat(currentScene).isEqualTo(SceneModel(SceneKey.Bouncer))
