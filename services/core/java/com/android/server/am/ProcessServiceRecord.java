@@ -16,8 +16,8 @@
 
 package com.android.server.am;
 
-import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
-import static android.app.ProcessMemoryState.HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE;
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_BOUND_SERVICE;
+import static com.android.server.am.ProcessProfileRecord.HOSTING_COMPONENT_TYPE_FOREGROUND_SERVICE;
 
 import android.app.ActivityManager;
 import android.content.Context;
