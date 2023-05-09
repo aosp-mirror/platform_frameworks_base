@@ -1880,7 +1880,10 @@ public class Intent implements Parcelable, Cloneable {
      * @see #EXTRA_PACKAGE_NAME
      *
      * @hide
+     * @deprecated Use {@link android.provider.Settings#ACTION_APP_PERMISSIONS_SETTINGS}
+     * instead.
      */
+    @Deprecated
     @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_APP_PERMISSIONS =

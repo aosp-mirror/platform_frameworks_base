@@ -5519,6 +5519,12 @@
     <permission android:name="android.permission.GRANT_RUNTIME_PERMISSIONS"
         android:protectionLevel="signature|installer|verifier" />
 
+    <!-- @SystemApi Allows an application to launch the settings page which manages various
+         permissions.
+         @hide -->
+    <permission android:name="android.permission.LAUNCH_PERMISSION_SETTINGS"
+                android:protectionLevel="signature|privileged" />
+
     <!-- @SystemApi Allows an app that has this permission and the permissions to install packages
          to request certain runtime permissions to be granted at installation.
          @hide -->

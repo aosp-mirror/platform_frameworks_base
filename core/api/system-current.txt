@@ -157,6 +157,7 @@ package android {
     field public static final String KILL_ALL_BACKGROUND_PROCESSES = "android.permission.KILL_ALL_BACKGROUND_PROCESSES";
     field public static final String KILL_UID = "android.permission.KILL_UID";
     field public static final String LAUNCH_DEVICE_MANAGER_SETUP = "android.permission.LAUNCH_DEVICE_MANAGER_SETUP";
+    field public static final String LAUNCH_PERMISSION_SETTINGS = "android.permission.LAUNCH_PERMISSION_SETTINGS";
     field public static final String LOCAL_MAC_ADDRESS = "android.permission.LOCAL_MAC_ADDRESS";
     field public static final String LOCATION_BYPASS = "android.permission.LOCATION_BYPASS";
     field public static final String LOCK_DEVICE = "android.permission.LOCK_DEVICE";
@@ -3514,7 +3515,7 @@ package android.content {
     field @Deprecated public static final String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
     field public static final String ACTION_LOAD_DATA = "android.intent.action.LOAD_DATA";
     field @RequiresPermission(android.Manifest.permission.GRANT_RUNTIME_PERMISSIONS) public static final String ACTION_MANAGE_APP_PERMISSION = "android.intent.action.MANAGE_APP_PERMISSION";
-    field public static final String ACTION_MANAGE_APP_PERMISSIONS = "android.intent.action.MANAGE_APP_PERMISSIONS";
+    field @Deprecated public static final String ACTION_MANAGE_APP_PERMISSIONS = "android.intent.action.MANAGE_APP_PERMISSIONS";
     field @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public static final String ACTION_MANAGE_DEFAULT_APP = "android.intent.action.MANAGE_DEFAULT_APP";
     field public static final String ACTION_MANAGE_PERMISSIONS = "android.intent.action.MANAGE_PERMISSIONS";
     field public static final String ACTION_MANAGE_PERMISSION_APPS = "android.intent.action.MANAGE_PERMISSION_APPS";
@@ -11589,6 +11590,7 @@ package android.provider {
     method @Deprecated public static boolean checkAndNoteWriteSettingsOperation(@NonNull android.content.Context, int, @NonNull String, boolean);
     method public static boolean checkAndNoteWriteSettingsOperation(@NonNull android.content.Context, int, @NonNull String, @Nullable String, boolean);
     field public static final String ACTION_ACCESSIBILITY_DETAILS_SETTINGS = "android.settings.ACCESSIBILITY_DETAILS_SETTINGS";
+    field @RequiresPermission(android.Manifest.permission.LAUNCH_PERMISSION_SETTINGS) public static final String ACTION_APP_PERMISSIONS_SETTINGS = "android.settings.APP_PERMISSIONS_SETTINGS";
     field public static final String ACTION_BEDTIME_SETTINGS = "android.settings.BEDTIME_SETTINGS";
     field public static final String ACTION_BUGREPORT_HANDLER_SETTINGS = "android.settings.BUGREPORT_HANDLER_SETTINGS";
     field public static final String ACTION_ENTERPRISE_PRIVACY_SETTINGS = "android.settings.ENTERPRISE_PRIVACY_SETTINGS";

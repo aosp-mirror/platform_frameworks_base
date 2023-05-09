@@ -2628,6 +2628,26 @@ public final class Settings {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_BEDTIME_SETTINGS = "android.settings.BEDTIME_SETTINGS";
 
+    /**
+     * Activity action: Launch UI to manage the permissions of an app.
+     * <p>
+     * Input: {@link android.content.Intent#EXTRA_PACKAGE_NAME} specifies the package whose
+     * permissions will be managed by the launched UI.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @see android.content.Intent#EXTRA_PACKAGE_NAME
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.LAUNCH_PERMISSION_SETTINGS)
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_PERMISSIONS_SETTINGS =
+            "android.settings.APP_PERMISSIONS_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
