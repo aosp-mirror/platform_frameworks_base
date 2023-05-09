@@ -239,7 +239,8 @@ class CredentialSelectorViewModel(
             getCredentialUiState = uiState.getCredentialUiState?.copy(
                 currentScreenState = GetScreenState.ALL_SIGN_IN_OPTIONS,
                 isNoAccount = isNoAccount,
-            )
+            ),
+            isInitialRender = true,
         )
     }
 
