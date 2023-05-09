@@ -31,7 +31,8 @@ class BubbleInfoTest : ShellTestCase() {
 
     @Test
     fun bubbleInfo() {
-        val bubbleInfo = BubbleInfo("key", 0, "shortcut id", null, 6, "com.some.package", "title")
+        val bubbleInfo =
+            BubbleInfo("key", 0, "shortcut id", null, 6, "com.some.package", "title", true)
         val parcel = Parcel.obtain()
         bubbleInfo.writeToParcel(parcel, PARCELABLE_WRITE_RETURN_VALUE)
         parcel.setDataPosition(0)
@@ -45,5 +46,7 @@ class BubbleInfoTest : ShellTestCase() {
         assertThat(bubbleInfo.userId).isEqualTo(bubbleInfoFromParcel.userId)
         assertThat(bubbleInfo.packageName).isEqualTo(bubbleInfoFromParcel.packageName)
         assertThat(bubbleInfo.title).isEqualTo(bubbleInfoFromParcel.title)
+        assertThat(bubbleInfo.isImportantConversation)
+            .isEqualTo(bubbleInfoFromParcel.isImportantConversation)
     }
 }
