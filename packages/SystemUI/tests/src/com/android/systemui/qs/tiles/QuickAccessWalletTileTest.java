@@ -93,6 +93,8 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     private static final String CARD_DESCRIPTION = "•••• 1234";
     private static final Icon CARD_IMAGE =
             Icon.createWithBitmap(Bitmap.createBitmap(70, 50, Bitmap.Config.ARGB_8888));
+    private static final int PRIMARY_USER_ID = 0;
+    private static final int SECONDARY_USER_ID = 10;
 
     private final Drawable mTileIcon = mContext.getDrawable(R.drawable.ic_qs_wallet);
     private final Intent mWalletIntent = new Intent(QuickAccessWalletService.ACTION_VIEW_WALLET)
@@ -120,6 +122,8 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
     private SecureSettings mSecureSettings;
     @Mock
     private QuickAccessWalletController mController;
+    @Mock
+    private Icon mCardImage;
     @Captor
     ArgumentCaptor<QuickAccessWalletClient.OnWalletCardsRetrievedCallback> mCallbackCaptor;
 
@@ -142,6 +146,8 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked()).thenReturn(true);
         when(mController.getWalletClient()).thenReturn(mQuickAccessWalletClient);
+        when(mCardImage.getType()).thenReturn(Icon.TYPE_URI);
+        when(mCardImage.loadDrawableAsUser(any(), eq(SECONDARY_USER_ID))).thenReturn(null);
 
         mTile = new QuickAccessWalletTile(
                 mHost,
@@ -379,6 +385,28 @@ public class QuickAccessWalletTileTest extends SysuiTestCase {
         setUpWalletCard(/* hasCard= */ true);
 
         assertNotNull(mTile.getState().sideViewCustomDrawable);
+    }
+
+    @Test
+    public void testQueryCards_notCurrentUser_hasCards_noSideViewDrawable() {
+        when(mKeyguardStateController.isUnlocked()).thenReturn(true);
+
+        PendingIntent pendingIntent =
+                PendingIntent.getActivity(mContext, 0, mWalletIntent, PendingIntent.FLAG_IMMUTABLE);
+        WalletCard walletCard =
+                new WalletCard.Builder(
+                    CARD_ID, mCardImage, CARD_DESCRIPTION, pendingIntent).build();
+        GetWalletCardsResponse response =
+                new GetWalletCardsResponse(Collections.singletonList(walletCard), 0);
+
+        mTile.handleSetListening(true);
+
+        verify(mController).queryWalletCards(mCallbackCaptor.capture());
+
+        mCallbackCaptor.getValue().onWalletCardsRetrieved(response);
+        mTestableLooper.processAllMessages();
+
+        assertNull(mTile.getState().sideViewCustomDrawable);
     }
 
     @Test
