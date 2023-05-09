@@ -8600,6 +8600,8 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     private void setUserUnlocked(int userHandle, boolean unlocked) {
         when(getServices().userManager.isUserUnlocked(eq(userHandle))).thenReturn(unlocked);
+        when(getServices().userManagerInternal.isUserUnlockingOrUnlocked(eq(userHandle)))
+                .thenReturn(unlocked);
     }
 
     private void prepareMocksForSetMaximumProfileTimeOff() throws Exception {
