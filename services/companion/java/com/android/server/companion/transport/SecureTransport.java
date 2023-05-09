@@ -51,18 +51,18 @@ class SecureTransport extends Transport implements SecureChannel.Callback {
     }
 
     @Override
-    public void start() {
+    void start() {
         mSecureChannel.start();
     }
 
     @Override
-    public void stop() {
+    void stop() {
         mSecureChannel.stop();
         mShouldProcessRequests = false;
     }
 
     @Override
-    public void close() {
+    void close() {
         mSecureChannel.close();
         mShouldProcessRequests = false;
     }
