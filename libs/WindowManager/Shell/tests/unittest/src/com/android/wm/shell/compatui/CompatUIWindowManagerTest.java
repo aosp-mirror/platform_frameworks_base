@@ -28,7 +28,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -363,14 +362,14 @@ public class CompatUIWindowManagerTest extends ShellTestCase {
         mWindowManager.updateVisibility(/* canShow= */ false);
 
         verify(mWindowManager, never()).createLayout(anyBoolean());
-        verify(mLayout, atLeastOnce()).setVisibility(View.GONE);
+        verify(mLayout).setVisibility(View.GONE);
 
         // Show button.
         doReturn(View.GONE).when(mLayout).getVisibility();
         mWindowManager.updateVisibility(/* canShow= */ true);
 
         verify(mWindowManager, never()).createLayout(anyBoolean());
-        verify(mLayout, atLeastOnce()).setVisibility(View.VISIBLE);
+        verify(mLayout).setVisibility(View.VISIBLE);
     }
 
     @Test
