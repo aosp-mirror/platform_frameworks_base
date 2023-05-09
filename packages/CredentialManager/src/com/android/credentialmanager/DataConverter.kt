@@ -201,7 +201,8 @@ class GetFlowUtils {
                     ComponentName::class.java
                 )
             val preferTopBrandingContent: TopBrandingContent? =
-                if (preferUiBrandingComponentName == null) null
+                if (!requestInfo.hasPermissionToOverrideDefault() ||
+                    preferUiBrandingComponentName == null) null
                 else {
                     val (displayName, icon) = getServiceLabelAndIcon(
                         context.packageManager, preferUiBrandingComponentName.flattenToString())
