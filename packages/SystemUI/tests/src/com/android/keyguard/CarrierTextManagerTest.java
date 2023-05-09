@@ -47,6 +47,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
 
+import com.android.keyguard.logging.CarrierTextManagerLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
@@ -96,6 +97,8 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
+    private CarrierTextManagerLogger mLogger;
+    @Mock
     private PackageManager mPackageManager;
     @Mock
     private TelephonyManager mTelephonyManager;
@@ -144,7 +147,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         mCarrierTextManager = new CarrierTextManager.Builder(
                 mContext, mContext.getResources(), mWifiRepository,
                 mTelephonyManager, mTelephonyListenerManager, mWakefulnessLifecycle, mMainExecutor,
-                mBgExecutor, mKeyguardUpdateMonitor)
+                mBgExecutor, mKeyguardUpdateMonitor, mLogger)
                 .setShowAirplaneMode(true)
                 .setShowMissingSim(true)
                 .build();
