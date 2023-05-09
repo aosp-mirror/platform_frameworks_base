@@ -43,10 +43,6 @@ public:
     bool removeFrom(const char* filename);
     bool removeFrom(int fd);
 
-    const char* getFileName() const {
-        return mFileName;
-    }
-
     const String8 getPackageName() const {
         return mPackageName;
     }
@@ -126,8 +122,6 @@ private:
 
     /* The encryption salt. */
     unsigned char mSalt[8];
-
-    const char* mFileName;
 
     size_t mFooterStart;
 
