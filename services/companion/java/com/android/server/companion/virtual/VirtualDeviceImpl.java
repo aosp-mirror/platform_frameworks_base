@@ -42,7 +42,6 @@ import android.companion.virtual.VirtualDeviceParams;
 import android.companion.virtual.audio.IAudioConfigChangedCallback;
 import android.companion.virtual.audio.IAudioRoutingCallback;
 import android.companion.virtual.sensor.VirtualSensor;
-import android.companion.virtual.sensor.VirtualSensorConfig;
 import android.companion.virtual.sensor.VirtualSensorEvent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -94,7 +93,6 @@ import com.android.server.companion.virtual.audio.VirtualAudioController;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -157,11 +155,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @GuardedBy("mVirtualDeviceLock")
     @Nullable
     private LocaleList mLocaleList = null;
-    // This device's sensors, keyed by sensor handle.
-    @GuardedBy("mVirtualDeviceLock")
-    private SparseArray<VirtualSensor> mVirtualSensors = new SparseArray<>();
-    @GuardedBy("mVirtualDeviceLock")
-    private List<VirtualSensor> mVirtualSensorList = null;
 
     private ActivityListener createListenerAdapter() {
         return new ActivityListener() {
@@ -218,7 +211,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 ownerUid,
                 deviceId,
                 /* inputController= */ null,
-                /* sensorController= */ null,
                 cameraAccessController,
                 pendingTrampolineCallback,
                 activityListener,
@@ -237,7 +229,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             int ownerUid,
             int deviceId,
             InputController inputController,
-            SensorController sensorController,
             CameraAccessController cameraAccessController,
             PendingTrampolineCallback pendingTrampolineCallback,
             IVirtualDeviceActivityListener activityListener,
@@ -266,15 +257,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         } else {
             mInputController = inputController;
         }
-        if (sensorController == null) {
-            mSensorController = new SensorController(mDeviceId, mParams.getVirtualSensorCallback());
-        } else {
-            mSensorController = sensorController;
-        }
-        final List<VirtualSensorConfig> virtualSensorConfigs = mParams.getVirtualSensorConfigs();
-        for (int i = 0; i < virtualSensorConfigs.size(); ++i) {
-            createVirtualSensor(virtualSensorConfigs.get(i));
-        }
+        mSensorController = new SensorController(this, mDeviceId,
+                mParams.getVirtualSensorCallback(), mParams.getVirtualSensorConfigs());
         mCameraAccessController = cameraAccessController;
         mCameraAccessController.startObservingIfNeeded();
         try {
@@ -282,6 +266,11 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @VisibleForTesting
+    SensorController getSensorControllerForTest() {
+        return mSensorController;
     }
 
     /**
@@ -426,8 +415,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     virtualDisplaysToBeReleased[i] = mVirtualDisplays.valueAt(i);
                 }
                 mVirtualDisplays.clear();
-                mVirtualSensorList = null;
-                mVirtualSensors.clear();
             }
             // Destroy the display outside locked section.
             for (VirtualDisplayWrapper virtualDisplayWrapper : virtualDisplaysToBeReleased) {
@@ -723,43 +710,17 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
     }
 
-    private void createVirtualSensor(@NonNull VirtualSensorConfig config) {
-        final IBinder sensorToken =
-                new Binder("android.hardware.sensor.VirtualSensor:" + config.getName());
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            int handle = mSensorController.createSensor(sensorToken, config);
-            VirtualSensor sensor = new VirtualSensor(handle, config.getType(), config.getName(),
-                    this, sensorToken);
-            synchronized (mVirtualDeviceLock) {
-                mVirtualSensors.put(handle, sensor);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     @Override // Binder call
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     @Nullable
     public List<VirtualSensor> getVirtualSensorList() {
         super.getVirtualSensorList_enforcePermission();
-        synchronized (mVirtualDeviceLock) {
-            if (mVirtualSensorList == null) {
-                mVirtualSensorList = new ArrayList<>();
-                for (int i = 0; i < mVirtualSensors.size(); ++i) {
-                    mVirtualSensorList.add(mVirtualSensors.valueAt(i));
-                }
-                mVirtualSensorList = Collections.unmodifiableList(mVirtualSensorList);
-            }
-            return mVirtualSensorList;
-        }
+        return mSensorController.getSensorList();
     }
 
+    @Nullable
     VirtualSensor getVirtualSensorByHandle(int handle) {
-        synchronized (mVirtualDeviceLock) {
-            return mVirtualSensors.get(handle);
-        }
+        return mSensorController.getSensorByHandle(handle);
     }
 
     @Override // Binder call

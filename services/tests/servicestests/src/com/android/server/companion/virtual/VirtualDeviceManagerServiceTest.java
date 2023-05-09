@@ -359,7 +359,6 @@ public class VirtualDeviceManagerServiceTest {
         mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mContext.getSystemService(WindowManager.class), threadVerifier);
-        mSensorController = new SensorController(VIRTUAL_DEVICE_ID_1, mVirtualSensorCallback);
         mCameraAccessController =
                 new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
 
@@ -370,6 +369,7 @@ public class VirtualDeviceManagerServiceTest {
         mLocalService = mVdms.getLocalServiceInstance();
         mVdm = mVdms.new VirtualDeviceManagerImpl();
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1);
+        mSensorController = mDeviceImpl.getSensorControllerForTest();
     }
 
     @After
@@ -1722,7 +1722,7 @@ public class VirtualDeviceManagerServiceTest {
             VirtualDeviceParams params) {
         VirtualDeviceImpl virtualDeviceImpl = new VirtualDeviceImpl(mContext,
                 mAssociationInfo, mVdms, new Binder(), ownerUid, virtualDeviceId,
-                mInputController, mSensorController, mCameraAccessController
+                mInputController, mCameraAccessController
                 /* onDeviceCloseListener= */ /*deviceId -> mVdms.removeVirtualDevice(deviceId)*/,
                 mPendingTrampolineCallback, mActivityListener, mSoundEffectListener,
                 mRunningAppsChangedCallback, params, new DisplayManagerGlobal(mIDisplayManager));
