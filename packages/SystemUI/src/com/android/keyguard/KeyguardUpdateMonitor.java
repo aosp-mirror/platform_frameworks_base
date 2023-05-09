@@ -1231,7 +1231,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
      */
     private void handleFaceAcquired(int acquireInfo) {
         Assert.isMainThread();
-        mLogger.logFaceAcquired(acquireInfo);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
@@ -1284,7 +1283,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             return;
         }
         Assert.isMainThread();
-        mLogger.logFaceAuthHelpMsg(msgId, helpString);
         for (int i = 0; i < mCallbacks.size(); i++) {
             KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
             if (cb != null) {
