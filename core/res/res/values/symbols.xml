@@ -1576,6 +1576,7 @@
   <java-symbol type="id" name="open_cross_profile" />
   <java-symbol type="string" name="miniresolver_open_in_personal" />
   <java-symbol type="string" name="miniresolver_open_in_work" />
+  <java-symbol type="string" name="miniresolver_open_work" />
   <java-symbol type="string" name="miniresolver_use_personal_browser" />
   <java-symbol type="string" name="miniresolver_use_work_browser" />
   <java-symbol type="id" name="button_open" />
