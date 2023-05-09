@@ -149,11 +149,13 @@ public final class AccessibilityStatsLogUtils {
      *
      * @param mode The activated magnification mode.
      * @param duration The duration in milliseconds during the magnification is activated.
+     * @param scale The last magnification scale for the activation
      */
-    public static void logMagnificationUsageState(int mode, long duration) {
+    public static void logMagnificationUsageState(int mode, long duration, float scale) {
         FrameworkStatsLog.write(FrameworkStatsLog.MAGNIFICATION_USAGE_REPORTED,
                 convertToLoggingMagnificationMode(mode),
-                duration);
+                duration,
+                convertToLoggingMagnificationScale(scale));
     }
 
     /**
@@ -253,5 +255,9 @@ public final class AccessibilityStatsLogUtils {
             default:
                 return MAGNIFICATION_USAGE_REPORTED__ACTIVATED_MODE__MAGNIFICATION_UNKNOWN_MODE;
         }
+    }
+
+    private static int convertToLoggingMagnificationScale(float scale) {
+        return (int) (scale * 100);
     }
 }
