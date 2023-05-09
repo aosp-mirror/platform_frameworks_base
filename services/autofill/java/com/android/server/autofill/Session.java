@@ -1726,6 +1726,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     }
                 }
             }
+            if (ids.isEmpty()) return saveInfo;
             AutofillId[] autofillIds = new AutofillId[ids.size()];
             ids.toArray(autofillIds);
             return SaveInfo.copy(saveInfo, autofillIds);
