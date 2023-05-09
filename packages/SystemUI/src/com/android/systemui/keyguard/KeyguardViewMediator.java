@@ -3098,7 +3098,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         Trace.beginSection("KeyguardViewMediator#onWakeAndUnlocking");
         mWakeAndUnlocking = true;
 
-        mKeyguardViewControllerLazy.get().notifyKeyguardAuthenticated(/* strongAuth */ false);
+        keyguardDone();
         Trace.endSection();
     }
 
