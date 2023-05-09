@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.pipeline.wifi.data.repository
 import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.demomode.DemoMode
 import com.android.systemui.demomode.DemoModeController
@@ -55,7 +54,6 @@ import kotlinx.coroutines.flow.stateIn
  */
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
 @OptIn(ExperimentalCoroutinesApi::class)
-@SysUISingleton
 class WifiRepositorySwitcher
 @Inject
 constructor(
