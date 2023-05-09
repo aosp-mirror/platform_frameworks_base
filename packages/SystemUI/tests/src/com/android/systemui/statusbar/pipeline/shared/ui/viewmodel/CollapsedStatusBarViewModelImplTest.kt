@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -175,5 +176,140 @@ class CollapsedStatusBarViewModelImplTest : SysuiTestCase() {
             assertThat(underTest.isTransitioningFromLockscreenToOccluded.value).isFalse()
 
             job.cancel()
+        }
+
+    @Test
+    fun transitionFromLockscreenToDreamStartedEvent_started_emitted() =
+        testScope.runTest {
+            val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.DREAMING,
+                    value = 0f,
+                    TransitionState.STARTED,
+                )
+            )
+
+            assertThat(emissions.size).isEqualTo(1)
+        }
+
+    @Test
+    fun transitionFromLockscreenToDreamStartedEvent_startedMultiple_emittedMultiple() =
+        testScope.runTest {
+            val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.DREAMING,
+                    value = 0f,
+                    TransitionState.STARTED,
+                )
+            )
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.DREAMING,
+                    value = 0f,
+                    TransitionState.STARTED,
+                )
+            )
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.DREAMING,
+                    value = 0f,
+                    TransitionState.STARTED,
+                )
+            )
+
+            assertThat(emissions.size).isEqualTo(3)
+        }
+
+    @Test
+    fun transitionFromLockscreenToDreamStartedEvent_startedThenRunning_emittedOnlyOne() =
+        testScope.runTest {
+            val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.DREAMING,
+                    value = 0f,
+                    TransitionState.STARTED,
+                )
+            )
+            assertThat(emissions.size).isEqualTo(1)
+
+            // WHEN the transition progresses through its animation by going through the RUNNING
+            // step with increasing fractions
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.DREAMING,
+                    value = .1f,
+                    TransitionState.RUNNING,
+                )
+            )
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.DREAMING,
+                    value = .2f,
+                    TransitionState.RUNNING,
+                )
+            )
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.DREAMING,
+                    value = .3f,
+                    TransitionState.RUNNING,
+                )
+            )
+
+            // THEN the flow does not emit since the flow should only emit when the transition
+            // starts
+            assertThat(emissions.size).isEqualTo(1)
+        }
+
+    @Test
+    fun transitionFromLockscreenToDreamStartedEvent_irrelevantTransition_notEmitted() =
+        testScope.runTest {
+            val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.OCCLUDED,
+                    value = 0f,
+                    TransitionState.STARTED,
+                )
+            )
+
+            assertThat(emissions).isEmpty()
+        }
+
+    @Test
+    fun transitionFromLockscreenToDreamStartedEvent_irrelevantTransitionState_notEmitted() =
+        testScope.runTest {
+            val emissions by collectValues(underTest.transitionFromLockscreenToDreamStartedEvent)
+
+            keyguardTransitionRepository.sendTransitionStep(
+                TransitionStep(
+                    KeyguardState.LOCKSCREEN,
+                    KeyguardState.DREAMING,
+                    value = 1.0f,
+                    TransitionState.FINISHED,
+                )
+            )
+
+            assertThat(emissions).isEmpty()
         }
 }

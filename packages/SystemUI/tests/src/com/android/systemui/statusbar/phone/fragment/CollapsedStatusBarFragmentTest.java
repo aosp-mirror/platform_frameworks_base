@@ -74,6 +74,7 @@ import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarLocationPublisher;
 import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentComponent;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeCollapsedStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
@@ -129,6 +130,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
     @Mock
     private StatusBarIconController.DarkIconManager mIconManager;
     private FakeCollapsedStatusBarViewModel mCollapsedStatusBarViewModel;
+    private FakeCollapsedStatusBarViewBinder mCollapsedStatusBarViewBinder;
     @Mock
     private StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     @Mock
@@ -612,6 +614,55 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
         assertEquals(View.VISIBLE, getClockView().getVisibility());
     }
 
+    @Test
+    public void testStatusBarIcons_hiddenThroughoutLockscreenToDreamTransition() {
+        final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN a transition to dream has started
+        mCollapsedStatusBarViewBinder.getListener().onTransitionFromLockscreenToDreamStarted();
+        when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN status icons should be invisible or gone, but certainly not VISIBLE.
+        assertNotEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertNotEquals(View.VISIBLE, getClockView().getVisibility());
+
+        // WHEN the transition has finished and dream is displaying
+        mockLockscreenToDreamTransitionFinished();
+        // (This approximates "dream is displaying")
+        when(mStatusBarHideIconsForBouncerManager.getShouldHideStatusBarIconsForBouncer())
+                .thenReturn(true);
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN the views still aren't visible because dream is hiding them
+        assertNotEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertNotEquals(View.VISIBLE, getClockView().getVisibility());
+
+        // WHEN dream has ended
+        when(mStatusBarHideIconsForBouncerManager.getShouldHideStatusBarIconsForBouncer())
+                .thenReturn(false);
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN the views can be visible again
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+    }
+
+    @Test
+    public void testStatusBarIcons_lockscreenToDreamTransitionButNotDreaming_iconsVisible() {
+        final CollapsedStatusBarFragment fragment = resumeAndGetFragment();
+
+        // WHEN a transition to dream has started but we're *not* dreaming
+        mCollapsedStatusBarViewBinder.getListener().onTransitionFromLockscreenToDreamStarted();
+        when(mKeyguardUpdateMonitor.isDreaming()).thenReturn(false);
+        fragment.disable(DEFAULT_DISPLAY, 0, 0, false);
+
+        // THEN the views are still visible
+        assertEquals(View.VISIBLE, getEndSideContentView().getVisibility());
+        assertEquals(View.VISIBLE, getClockView().getVisibility());
+    }
+
     @Override
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         MockitoAnnotations.initMocks(this);
@@ -631,6 +682,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
 
         mShadeExpansionStateManager = new ShadeExpansionStateManager();
         mCollapsedStatusBarViewModel = new FakeCollapsedStatusBarViewModel();
+        mCollapsedStatusBarViewBinder = new FakeCollapsedStatusBarViewBinder();
 
         setUpNotificationIconAreaController();
         return new CollapsedStatusBarFragment(
@@ -644,6 +696,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mStatusBarIconController,
                 mIconManagerFactory,
                 mCollapsedStatusBarViewModel,
+                mCollapsedStatusBarViewBinder,
                 mStatusBarHideIconsForBouncerManager,
                 mKeyguardStateController,
                 mShadeViewController,
@@ -713,6 +766,12 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
      * with its launch animation finished.
      */
     private void mockSecureCameraLaunchFinished() {
+        for (StatusBarWindowStateListener listener : mStatusBarWindowStateListeners) {
+            listener.onStatusBarWindowStateChanged(StatusBarManager.WINDOW_STATE_HIDDEN);
+        }
+    }
+
+    private void mockLockscreenToDreamTransitionFinished() {
         for (StatusBarWindowStateListener listener : mStatusBarWindowStateListeners) {
             listener.onStatusBarWindowStateChanged(StatusBarManager.WINDOW_STATE_HIDDEN);
         }
