@@ -35,6 +35,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.qs.external.TileLifecycleManager.TileChangeListener;
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.List;
 import java.util.Objects;
@@ -75,12 +76,12 @@ public class TileServiceManager {
 
     TileServiceManager(TileServices tileServices, Handler handler, ComponentName component,
             BroadcastDispatcher broadcastDispatcher, UserTracker userTracker,
-            CustomTileAddedRepository customTileAddedRepository) {
+            CustomTileAddedRepository customTileAddedRepository, DelayableExecutor executor) {
         this(tileServices, handler, userTracker, customTileAddedRepository,
                 new TileLifecycleManager(handler, tileServices.getContext(), tileServices,
-                new PackageManagerAdapter(tileServices.getContext()), broadcastDispatcher,
-                new Intent(TileService.ACTION_QS_TILE).setComponent(component),
-                userTracker.getUserHandle()));
+                        new PackageManagerAdapter(tileServices.getContext()), broadcastDispatcher,
+                        new Intent(TileService.ACTION_QS_TILE).setComponent(component),
+                        userTracker.getUserHandle(), executor));
     }
 
     @VisibleForTesting
@@ -203,7 +204,7 @@ public class TileServiceManager {
         mBound = true;
         mJustBound = true;
         mHandler.postDelayed(mJustBoundOver, MIN_BIND_TIME);
-        mStateManager.setBindService(true);
+        mStateManager.executeSetBindService(true);
     }
 
     private void unbindService() {
@@ -213,7 +214,7 @@ public class TileServiceManager {
         }
         mBound = false;
         mJustBound = false;
-        mStateManager.setBindService(false);
+        mStateManager.executeSetBindService(false);
     }
 
     public void calculateBindPriority(long currentTime) {
