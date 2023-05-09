@@ -685,8 +685,9 @@ public class RemoteViews implements Parcelable, Filter {
             return false;
         }
 
+        /** See {@link RemoteViews#visitUris(Consumer)}. **/
         public void visitUris(@NonNull Consumer<Uri> visitor) {
-            // Nothing to visit by default
+            // Nothing to visit by default.
         }
     }
 
@@ -761,9 +762,11 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Note all {@link Uri} that are referenced internally, with the expectation
-     * that Uri permission grants will need to be issued to ensure the recipient
-     * of this object is able to render its contents.
+     * Note all {@link Uri} that are referenced internally, with the expectation that Uri permission
+     * grants will need to be issued to ensure the recipient of this object is able to render its
+     * contents.
+     * See b/281044385 for more context and examples about what happens when this isn't done
+     * correctly.
      *
      * @hide
      */
@@ -1088,6 +1091,13 @@ public class RemoteViews implements Parcelable, Filter {
         public String getUniqueKey() {
             return (SET_REMOTE_ADAPTER_TAG + "_" + mViewId);
         }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            for (RemoteViews remoteViews : mList) {
+                remoteViews.visitUris(visitor);
+            }
+        }
     }
 
     /**
@@ -1289,6 +1299,12 @@ public class RemoteViews implements Parcelable, Filter {
         public String getUniqueKey() {
             return (SET_REMOTE_ADAPTER_TAG + "_" + mViewId);
         }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            RemoteCollectionItems items = getCollectionItemsFromFuture(mItemsFuture);
+            items.visitUris(visitor);
+        }
     }
 
     private class SetRemoteViewsAdapterIntent extends Action {
@@ -1358,6 +1374,13 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_REMOTE_VIEW_ADAPTER_INTENT_TAG;
+        }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            // TODO(b/281044385): Maybe visit intent URIs. This may require adding a dedicated
+            //  visitUris method in the Intent class, since it can contain other intents. Otherwise,
+            //  the basic thing to do here would be just visitor.accept(intent.getData()).
         }
     }
 
@@ -1434,6 +1457,11 @@ public class RemoteViews implements Parcelable, Filter {
         public int getActionTag() {
             return SET_ON_CLICK_RESPONSE_TAG;
         }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            // TODO(b/281044385): Maybe visit intent URIs in the RemoteResponse.
+        }
     }
 
     /**
@@ -1503,6 +1531,11 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public int getActionTag() {
             return SET_ON_CHECKED_CHANGE_RESPONSE_TAG;
+        }
+
+        @Override
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
+            // TODO(b/281044385): Maybe visit intent URIs in the RemoteResponse.
         }
     }
 
@@ -2063,6 +2096,7 @@ public class RemoteViews implements Parcelable, Filter {
                     final Icon icon = (Icon) getParameterValue(null);
                     if (icon != null) visitIconUri(icon, visitor);
                     break;
+                // TODO(b/281044385): Should we do anything about type BUNDLE?
             }
         }
     }
@@ -2812,7 +2846,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public final void visitUris(@NonNull Consumer<Uri> visitor) {
+        public void visitUris(@NonNull Consumer<Uri> visitor) {
             mNestedViews.visitUris(visitor);
         }
     }
@@ -7260,6 +7294,15 @@ public class RemoteViews implements Parcelable, Filter {
                         mViews.toArray(new RemoteViews[0]),
                         mHasStableIds,
                         Math.max(mViewTypeCount, 1));
+            }
+        }
+
+        /**
+         * See {@link RemoteViews#visitUris(Consumer)}.
+         */
+        private void visitUris(@NonNull Consumer<Uri> visitor) {
+            for (RemoteViews view : mViews) {
+                view.visitUris(visitor);
             }
         }
     }
