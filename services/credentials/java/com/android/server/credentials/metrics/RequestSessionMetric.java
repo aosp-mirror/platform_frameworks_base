@@ -16,7 +16,8 @@
 
 package com.android.server.credentials.metrics;
 
-import static com.android.server.credentials.MetricUtilities.DELTA_CUT;
+import static com.android.server.credentials.MetricUtilities.DELTA_EXCEPTION_CUT;
+import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPhase;
@@ -168,11 +169,9 @@ public class RequestSessionMetric {
         Map<String, Integer> uniqueRequestCounts = new LinkedHashMap<>();
         try {
             request.getCredentialOptions().forEach(option -> {
-                String optionKey = generateMetricKey(option.getType(), DELTA_CUT);
-                if (!uniqueRequestCounts.containsKey(optionKey)) {
-                    uniqueRequestCounts.put(optionKey, 0);
-                }
-                uniqueRequestCounts.put(optionKey, uniqueRequestCounts.get(optionKey) + 1);
+                String optionKey = generateMetricKey(option.getType(), DELTA_RESPONSES_CUT);
+                uniqueRequestCounts.put(optionKey, uniqueRequestCounts.getOrDefault(optionKey,
+                        0) + 1);
             });
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during get request metric logging: " + e);
@@ -218,7 +217,7 @@ public class RequestSessionMetric {
     }
 
     /**
-     * Updates the final phase metric with the designated bit
+     * Updates the final phase metric with the designated bit.
      *
      * @param exceptionBitFinalPhase represents if the final phase provider had an exception
      */
@@ -227,6 +226,21 @@ public class RequestSessionMetric {
             mChosenProviderFinalPhaseMetric.setHasException(exceptionBitFinalPhase);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error setting final exception metric: " + e);
+        }
+    }
+
+    /**
+     * This allows collecting the framework exception string for the final phase metric.
+     * NOTE that this exception will be cut for space optimizations.
+     *
+     * @param exception the framework exception that is being recorded
+     */
+    public void collectFrameworkException(String exception) {
+        try {
+            mChosenProviderFinalPhaseMetric.setFrameworkException(
+                    generateMetricKey(exception, DELTA_EXCEPTION_CUT));
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
@@ -284,7 +298,7 @@ public class RequestSessionMetric {
      * In the final phase, this helps log use cases that were either pure failures or user
      * canceled. It's expected that {@link #collectFinalPhaseProviderMetricStatus(boolean,
      * ProviderStatusForMetrics) collectFinalPhaseProviderMetricStatus} is called prior to this.
-     * Otherwise, the logging will miss required bits
+     * Otherwise, the logging will miss required bits.
      *
      * @param isUserCanceledError a boolean indicating if the error was due to user cancelling
      */
