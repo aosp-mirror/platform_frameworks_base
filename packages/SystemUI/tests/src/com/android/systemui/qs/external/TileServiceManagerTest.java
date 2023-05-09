@@ -187,7 +187,7 @@ public class TileServiceManagerTest extends SysuiTestCase {
         mTileServiceManager.setBindAllowed(true);
 
         ArgumentCaptor<Boolean> captor = ArgumentCaptor.forClass(Boolean.class);
-        verify(mTileLifecycle, times(1)).setBindService(captor.capture());
+        verify(mTileLifecycle, times(1)).executeSetBindService(captor.capture());
         assertTrue((boolean) captor.getValue());
 
         mTileServiceManager.setBindRequested(false);
@@ -198,7 +198,7 @@ public class TileServiceManagerTest extends SysuiTestCase {
 
         mTileServiceManager.setBindAllowed(false);
         captor = ArgumentCaptor.forClass(Boolean.class);
-        verify(mTileLifecycle, times(2)).setBindService(captor.capture());
+        verify(mTileLifecycle, times(2)).executeSetBindService(captor.capture());
         assertFalse((boolean) captor.getValue());
     }
 }
