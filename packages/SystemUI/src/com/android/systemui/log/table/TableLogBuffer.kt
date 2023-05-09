@@ -16,6 +16,7 @@
 
 package com.android.systemui.log.table
 
+import android.icu.text.SimpleDateFormat
 import android.os.Trace
 import com.android.systemui.Dumpable
 import com.android.systemui.common.buffer.RingBuffer
@@ -24,7 +25,6 @@ import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
-import java.text.SimpleDateFormat
 import java.util.Locale
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
