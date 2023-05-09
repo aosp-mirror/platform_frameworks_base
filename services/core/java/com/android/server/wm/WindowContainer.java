@@ -1416,6 +1416,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void onAppTransitionDone() {
+        if (mSurfaceFreezer.hasLeash()) {
+            mSurfaceFreezer.unfreeze(getSyncTransaction());
+        }
         for (int i = mChildren.size() - 1; i >= 0; --i) {
             final WindowContainer wc = mChildren.get(i);
             wc.onAppTransitionDone();
