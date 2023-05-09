@@ -26,6 +26,7 @@ import static com.android.server.am.ForegroundServiceTypeLoggerModule.FGS_STATE_
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -41,7 +42,6 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.AdditionalMatchers;
 
 /**
  * Test class for {@link ForegroundServiceTypeLoggerModule}.
@@ -61,10 +61,10 @@ public class FgsLoggerTest {
         mFgsLogger = spy(logger);
         doNothing().when(mFgsLogger)
                 .logFgsApiEvent(any(ServiceRecord.class),
-                        anyInt(), anyInt(), any(int[].class), any(long[].class));
+                        anyInt(), anyInt(), anyInt(), anyLong());
         doNothing().when(mFgsLogger)
                 .logFgsApiEventWithNoFgs(anyInt(),
-                        anyInt(), any(int[].class), any(long[].class));
+                        anyInt(), anyInt(), anyLong());
     }
 
     @Test
@@ -73,10 +73,10 @@ public class FgsLoggerTest {
         record.foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
         mFgsLogger.logForegroundServiceStart(1, 1, record);
         mFgsLogger.logForegroundServiceApiEventBegin(1, 1, 1, "aPackageHasNoName");
-        int[] expectedTypes = {1};
+        int expectedTypes = 1;
         verify(mFgsLogger).logFgsApiEvent(any(ServiceRecord.class),
                 eq(FGS_STATE_CHANGED_API_CALL), eq(FGS_API_BEGIN_WITH_FGS),
-                AdditionalMatchers.aryEq(expectedTypes), any(long[].class));
+                eq(expectedTypes), anyLong());
         reset(mFgsLogger);
         mFgsLogger.logForegroundServiceApiEventEnd(1, 1, 1);
 
@@ -85,7 +85,7 @@ public class FgsLoggerTest {
         mFgsLogger.logForegroundServiceStop(1, record);
         verify(mFgsLogger).logFgsApiEvent(any(ServiceRecord.class),
                 eq(FGS_STATE_CHANGED_API_CALL), eq(FGS_API_END_WITH_FGS),
-                AdditionalMatchers.aryEq(expectedTypes), any(long[].class));
+                eq(expectedTypes), anyLong());
     }
 
     @Test
@@ -97,10 +97,10 @@ public class FgsLoggerTest {
         resetAndVerifyZeroInteractions();
 
         mFgsLogger.logForegroundServiceStart(1, 1, record);
-        int[] expectedTypes = {1};
+        int expectedTypes = 1;
         verify(mFgsLogger).logFgsApiEvent(any(ServiceRecord.class),
                 eq(FGS_STATE_CHANGED_API_CALL), eq(FGS_API_BEGIN_WITH_FGS),
-                AdditionalMatchers.aryEq(expectedTypes), any(long[].class));
+                eq(expectedTypes), anyLong());
         reset(mFgsLogger);
         mFgsLogger.logForegroundServiceApiEventEnd(1, 1, 1);
 
@@ -109,7 +109,7 @@ public class FgsLoggerTest {
         mFgsLogger.logForegroundServiceStop(1, record);
         verify(mFgsLogger).logFgsApiEvent(any(ServiceRecord.class),
                 eq(FGS_STATE_CHANGED_API_CALL), eq(FGS_API_END_WITH_FGS),
-                AdditionalMatchers.aryEq(expectedTypes), any(long[].class));
+                eq(expectedTypes), anyLong());
     }
 
     @Test
@@ -122,12 +122,12 @@ public class FgsLoggerTest {
 
         resetAndVerifyZeroInteractions();
 
-        int[] expectedTypes = {1};
+        int expectedTypes = 1;
 
         mFgsLogger.logForegroundServiceStart(1, 1, record);
         verify(mFgsLogger).logFgsApiEvent(any(ServiceRecord.class),
                 eq(FGS_STATE_CHANGED_API_CALL), eq(FGS_API_BEGIN_WITH_FGS),
-                AdditionalMatchers.aryEq(expectedTypes), any(long[].class));
+                eq(expectedTypes), anyLong());
         reset(mFgsLogger);
         mFgsLogger.logForegroundServiceStop(1, record);
 
@@ -135,7 +135,7 @@ public class FgsLoggerTest {
 
         mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
         verify(mFgsLogger).logFgsApiEventWithNoFgs(eq(1), eq(FGS_API_END_WITHOUT_FGS),
-                AdditionalMatchers.aryEq(expectedTypes), any(long[].class));
+                eq(expectedTypes), anyLong());
     }
 
     @Test
@@ -176,15 +176,15 @@ public class FgsLoggerTest {
         // now we should see exactly one call logged
         // and this should be the very first call
         // we also try to verify the time as being the very first call
-        int[] expectedTypes = {1};
-        long[] expectedTimestamp = {timeStamp};
+        int expectedTypes = 1;
+        long expectedTimestamp = timeStamp;
 
         verify(mFgsLogger, times(1))
                 .logFgsApiEvent(any(ServiceRecord.class),
                         eq(FGS_STATE_CHANGED_API_CALL),
                         eq(FGS_API_BEGIN_WITH_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
         reset(mFgsLogger);
         // now we do multiple stops
         // only the last one should be logged
@@ -201,11 +201,11 @@ public class FgsLoggerTest {
         mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
         timeStamp = mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA,
                 1, 1);
-        expectedTimestamp[0] = timeStamp;
+        expectedTimestamp = timeStamp;
         verify(mFgsLogger, times(1))
                 .logFgsApiEventWithNoFgs(eq(1), eq(FGS_API_END_WITHOUT_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
     }
 
     @Test
@@ -239,15 +239,15 @@ public class FgsLoggerTest {
         // now we should see exactly one call logged
         // and this should be the very first call
         // we also try to verify the time as being the very first call
-        int[] expectedTypes = {1};
-        long[] expectedTimestamp = {timeStamp};
+        int expectedTypes = 1;
+        long expectedTimestamp = timeStamp;
 
         verify(mFgsLogger, times(1))
                 .logFgsApiEvent(any(ServiceRecord.class),
                         eq(FGS_STATE_CHANGED_API_CALL),
                         eq(FGS_API_BEGIN_WITH_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
         reset(mFgsLogger);
         // now we do multiple stops
         // only the last one should be logged
@@ -269,11 +269,11 @@ public class FgsLoggerTest {
                 1, 1);
         mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
         mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
-        expectedTimestamp[0] = timeStamp;
+        expectedTimestamp = timeStamp;
         verify(mFgsLogger, times(1))
                 .logFgsApiEventWithNoFgs(eq(1), eq(FGS_API_END_WITHOUT_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
     }
 
     @Test
@@ -304,15 +304,15 @@ public class FgsLoggerTest {
         // now we should see exactly one call logged
         // and this should be the very first call
         // we also try to verify the time as being the very first call
-        int[] expectedTypes = {1};
-        long[] expectedTimestamp = {timeStamp};
+        int expectedTypes = 1;
+        long expectedTimestamp = timeStamp;
 
         verify(mFgsLogger, times(1))
                 .logFgsApiEvent(any(ServiceRecord.class),
                         eq(FGS_STATE_CHANGED_API_CALL),
                         eq(FGS_API_BEGIN_WITH_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
         reset(mFgsLogger);
         mFgsLogger.logForegroundServiceApiEventBegin(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1,
                 "aPackageHasNoName");
@@ -338,11 +338,11 @@ public class FgsLoggerTest {
                 1, 1);
         mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
         mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
-        expectedTimestamp[0] = timeStamp;
+        expectedTimestamp = timeStamp;
         verify(mFgsLogger, times(1))
                 .logFgsApiEventWithNoFgs(eq(1), eq(FGS_API_END_WITHOUT_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
     }
 
     @Test
@@ -375,15 +375,15 @@ public class FgsLoggerTest {
         // now we should see exactly one call logged
         // and this should be the very first call
         // we also try to verify the time as being the very first call
-        int[] expectedTypes = {1};
-        long[] expectedTimestamp = {timeStamp};
+        int expectedTypes = 1;
+        long expectedTimestamp = timeStamp;
 
         verify(mFgsLogger, times(1))
                 .logFgsApiEvent(any(ServiceRecord.class),
                         eq(FGS_STATE_CHANGED_API_CALL),
                         eq(FGS_API_BEGIN_WITH_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
         reset(mFgsLogger);
         mFgsLogger.logForegroundServiceApiEventBegin(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1,
                 "aPackageHasNoName");
@@ -410,16 +410,16 @@ public class FgsLoggerTest {
         timeStamp = mFgsLogger.logForegroundServiceApiEventEnd(1, 1, 1);
         mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
         mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1);
-        expectedTimestamp[0] = timeStamp;
+        expectedTimestamp = timeStamp;
         verify(mFgsLogger, times(1))
                 .logFgsApiEventWithNoFgs(eq(1), eq(FGS_API_END_WITHOUT_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
     }
 
     @Test
     public void testMultipleUid() throws InterruptedException {
-        int[] expectedTypes = {1};
+        int expectedTypes = 1;
         ServiceRecord record = ServiceRecord.newEmptyInstanceForTest(null);
         record.foregroundServiceType = ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
         ActivityManagerService ams = mock(ActivityManagerService.class);
@@ -477,7 +477,7 @@ public class FgsLoggerTest {
                 .logFgsApiEvent(any(ServiceRecord.class),
                         eq(FGS_STATE_CHANGED_API_CALL),
                         eq(FGS_API_BEGIN_WITH_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes), any(long[].class));
+                        eq(expectedTypes), anyLong());
         reset(mFgsLogger);
         mFgsLogger.logForegroundServiceApiEventBegin(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1,
                 "aPackageHasNoName");
@@ -511,16 +511,16 @@ public class FgsLoggerTest {
         mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA, 2, 1);
         timeStamp2 = mFgsLogger.logForegroundServiceApiEventEnd(FOREGROUND_SERVICE_API_TYPE_CAMERA,
                 2, 1);
-        long[] expectedTimestamp = {timeStamp};
-        long[] expectedTimestamp2 = {timeStamp2};
+        long expectedTimestamp = timeStamp;
+        long expectedTimestamp2 = timeStamp2;
         verify(mFgsLogger, times(1))
                 .logFgsApiEventWithNoFgs(eq(1), eq(FGS_API_END_WITHOUT_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
         verify(mFgsLogger, times(1))
                 .logFgsApiEventWithNoFgs(eq(2), eq(FGS_API_END_WITHOUT_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp2));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp2));
     }
 
     @Test
@@ -551,15 +551,15 @@ public class FgsLoggerTest {
         // now we should see exactly one call logged
         // and this should be the very first call
         // we also try to verify the time as being the very first call
-        int[] expectedTypes = {1};
-        long[] expectedTimestamp = {timeStamp};
+        int expectedTypes = 1;
+        long expectedTimestamp = timeStamp;
 
         verify(mFgsLogger, times(1))
                 .logFgsApiEvent(any(ServiceRecord.class),
                         eq(FGS_STATE_CHANGED_API_CALL),
                         eq(FGS_API_BEGIN_WITH_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
         reset(mFgsLogger);
         mFgsLogger.logForegroundServiceApiEventBegin(FOREGROUND_SERVICE_API_TYPE_CAMERA, 1, 1,
                 "aPackageHasNoName");
@@ -590,13 +590,13 @@ public class FgsLoggerTest {
         // now we do multiple stops
         // only the last one should be logged
         mFgsLogger.logForegroundServiceStop(1, record);
-        expectedTimestamp[0] = timeStamp;
+        expectedTimestamp = timeStamp;
         verify(mFgsLogger, times(1))
                 .logFgsApiEvent(any(ServiceRecord.class),
                         eq(FGS_STATE_CHANGED_API_CALL),
                         eq(FGS_API_END_WITH_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
     }
 
     @Test
@@ -610,16 +610,25 @@ public class FgsLoggerTest {
         long timestamp2 = mFgsLogger.logForegroundServiceApiEventBegin(
                 FOREGROUND_SERVICE_API_TYPE_MICROPHONE,
                 1, 1, "aPackageHasNoName");
-        int[] expectedTypes = {1, FOREGROUND_SERVICE_API_TYPE_MICROPHONE};
-        long[] expectedTimestamp = {timestamp1, timestamp2};
+        int expectedTypes = 1;
+        int expectedType2 = FOREGROUND_SERVICE_API_TYPE_MICROPHONE;
+        long expectedTimestamp = timestamp1;
+        long expectedTimestamp2 = timestamp2;
         mFgsLogger.logForegroundServiceStart(1, 1, record);
 
         verify(mFgsLogger, times(1))
                 .logFgsApiEvent(any(ServiceRecord.class),
                         eq(FGS_STATE_CHANGED_API_CALL),
                         eq(FGS_API_BEGIN_WITH_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
+
+        verify(mFgsLogger, times(1))
+                .logFgsApiEvent(any(ServiceRecord.class),
+                        eq(FGS_STATE_CHANGED_API_CALL),
+                        eq(FGS_API_BEGIN_WITH_FGS),
+                        eq(expectedType2),
+                        eq(expectedTimestamp2));
 
         reset(mFgsLogger);
         resetAndVerifyZeroInteractions();
@@ -632,28 +641,34 @@ public class FgsLoggerTest {
 
         mFgsLogger.logForegroundServiceStop(1, record);
 
-        expectedTimestamp[0] = timestamp1;
-        expectedTimestamp[1] = timestamp2;
+        expectedTimestamp = timestamp1;
+        expectedTimestamp2 = timestamp2;
 
         verify(mFgsLogger, times(1))
                 .logFgsApiEvent(any(ServiceRecord.class),
                         eq(FGS_STATE_CHANGED_API_CALL),
                         eq(FGS_API_END_WITH_FGS),
-                        AdditionalMatchers.aryEq(expectedTypes),
-                        AdditionalMatchers.aryEq(expectedTimestamp));
+                        eq(expectedTypes),
+                        eq(expectedTimestamp));
+        verify(mFgsLogger, times(1))
+                .logFgsApiEvent(any(ServiceRecord.class),
+                        eq(FGS_STATE_CHANGED_API_CALL),
+                        eq(FGS_API_END_WITH_FGS),
+                        eq(expectedType2),
+                        eq(expectedTimestamp2));
 
     }
 
     private void resetAndVerifyZeroInteractions() {
         doNothing().when(mFgsLogger)
                 .logFgsApiEvent(any(ServiceRecord.class),
-                        anyInt(), anyInt(), any(int[].class), any(long[].class));
+                        anyInt(), anyInt(), anyInt(), anyLong());
         doNothing().when(mFgsLogger)
-                .logFgsApiEventWithNoFgs(anyInt(), anyInt(), any(int[].class), any(long[].class));
+                .logFgsApiEventWithNoFgs(anyInt(), anyInt(), anyInt(), anyLong());
         verify(mFgsLogger, times(0))
                 .logFgsApiEvent(any(ServiceRecord.class),
-                        anyInt(), anyInt(), any(int[].class), any(long[].class));
+                        anyInt(), anyInt(), anyInt(), anyLong());
         verify(mFgsLogger, times(0))
-                .logFgsApiEventWithNoFgs(anyInt(), anyInt(), any(int[].class), any(long[].class));
+                .logFgsApiEventWithNoFgs(anyInt(), anyInt(), anyInt(), anyLong());
     }
 }
