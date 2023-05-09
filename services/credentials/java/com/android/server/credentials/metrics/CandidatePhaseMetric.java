@@ -53,6 +53,7 @@ public class CandidatePhaseMetric {
     private int mProviderQueryStatus = -1;
     // Indicates if an exception was thrown by this provider, false by default
     private boolean mHasException = false;
+    // Indicates the framework only exception belonging to this provider
     private String mFrameworkException = "";
 
     // Stores the response credential information, as well as the response entry information which
