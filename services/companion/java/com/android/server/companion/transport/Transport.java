@@ -47,7 +47,6 @@ public abstract class Transport {
     protected static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
-    public static final int MESSAGE_REQUEST_PLATFORM_INFO = 0x63807073; // ?PFI
     public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 0x63678883; // ?CXS
     public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
 
@@ -113,17 +112,17 @@ public abstract class Transport {
     /**
      * Start listening to messages.
      */
-    public abstract void start();
+    abstract void start();
 
     /**
      * Soft stop listening to the incoming data without closing the streams.
      */
-    public abstract void stop();
+    abstract void stop();
 
     /**
      * Stop listening to the incoming data and close the streams.
      */
-    public abstract void close();
+    abstract void close();
 
     protected abstract void sendMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException;
@@ -181,11 +180,6 @@ public abstract class Transport {
         switch (message) {
             case MESSAGE_REQUEST_PING: {
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, data);
-                break;
-            }
-            case MESSAGE_REQUEST_PLATFORM_INFO: {
-                callback(message, data);
-                // DO NOT SEND A RESPONSE!
                 break;
             }
             case MESSAGE_REQUEST_CONTEXT_SYNC: {
