@@ -8742,6 +8742,7 @@ public class DevicePolicyManager {
      */
     @RequiresPermission(anyOf = {SET_TIME, QUERY_ADMIN_POLICY}, conditional = true)
     public boolean getAutoTimeEnabled(@Nullable ComponentName admin) {
+        throwIfParentInstance("getAutoTimeEnabled");
         if (mService != null) {
             try {
                 return mService.getAutoTimeEnabled(admin, mContext.getPackageName());
