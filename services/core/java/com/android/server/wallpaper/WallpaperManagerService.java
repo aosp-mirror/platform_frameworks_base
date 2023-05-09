@@ -181,6 +181,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private final Object mLock = new Object();
     /** True to enable a second engine for lock screen wallpaper when different from system wp. */
     private final boolean mIsLockscreenLiveWallpaperEnabled;
+    /** True to support different crops for different display dimensions */
+    private final boolean mIsMultiCropEnabled;
     /** Tracks wallpaper being migrated from system+lock to lock when setting static wp. */
     WallpaperDestinationChangeHandler mPendingMigrationViaStatic;
 
@@ -1600,6 +1602,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         mIsLockscreenLiveWallpaperEnabled =
                 SystemProperties.getBoolean("persist.wm.debug.lockscreen_live_wallpaper", false);
+        mIsMultiCropEnabled =
+                SystemProperties.getBoolean("persist.wm.debug.wallpaper_multi_crop", false);
         LocalServices.addService(WallpaperManagerInternal.class, new LocalService());
     }
 
@@ -3722,6 +3726,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     @Override
     public boolean isLockscreenLiveWallpaperEnabled() {
         return mIsLockscreenLiveWallpaperEnabled;
+    }
+
+    @Override
+    public boolean isMultiCropEnabled() {
+        return mIsMultiCropEnabled;
     }
 
     private void onDisplayReadyInternal(int displayId) {

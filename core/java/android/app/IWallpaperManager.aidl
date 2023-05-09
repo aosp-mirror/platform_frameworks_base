@@ -272,4 +272,11 @@ interface IWallpaperManager {
      * @hide
      */
      boolean isLockscreenLiveWallpaperEnabled();
+
+    /**
+     * Temporary method for project b/270726737.
+     * Return true if the wallpaper supports different crops for different display dimensions.
+     * @hide
+     */
+     boolean isMultiCropEnabled();
 }
