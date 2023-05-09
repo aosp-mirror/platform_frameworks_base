@@ -105,6 +105,13 @@ public class RecyclerViewCaptureHelper implements ScrollCaptureViewHelper<ViewGr
         }
 
         if (recyclerView.requestChildRectangleOnScreen(anchor, input, true)) {
+            if (anchor.getParent() == null) {
+                // BUG(b/239050369): Check if the tracked anchor view is still attached.
+                Log.w(TAG, "Bug: anchor view " + anchor + " is detached after scrolling");
+                resultConsumer.accept(result); // empty result
+                return;
+            }
+
             int scrolled = prevAnchorTop - anchor.getTop(); // inverse of movement
             mScrollDelta += scrolled; // view.top-- is equivalent to parent.scrollY++
             result.scrollDelta = mScrollDelta;
