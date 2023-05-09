@@ -1158,7 +1158,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             mSessionFlags.mAugmentedAutofillOnly = true;
             mFillRequestEventLogger.maybeSetRequestId(AUGMENTED_AUTOFILL_REQUEST_ID);
-            mFillRequestEventLogger.maybeSetIsAugmented(mSessionFlags.mAugmentedAutofillOnly);
+            mFillRequestEventLogger.maybeSetIsAugmented(true);
             mFillRequestEventLogger.logAndEndEvent();
             triggerAugmentedAutofillLocked(flags);
             return;
@@ -4812,6 +4812,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mFillRequestEventLogger.maybeSetAppPackageUid(uid);
         mFillRequestEventLogger.maybeSetFlags(mFlags);
         mFillRequestEventLogger.maybeSetRequestId(AUGMENTED_AUTOFILL_REQUEST_ID);
+        mFillRequestEventLogger.maybeSetIsAugmented(true);
         mFillRequestEventLogger.logAndEndEvent();
 
         final ViewState viewState = mViewStates.get(mCurrentViewId);
