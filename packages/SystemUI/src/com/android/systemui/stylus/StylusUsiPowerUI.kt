@@ -94,12 +94,17 @@ constructor(
                 return@refreshNotification
             }
 
+            // Only hide notification in two cases: battery has been recharged above the
+            // threshold, or user has dismissed or clicked notification ("suppression").
+            if (suppressed || !batteryBelowThreshold) {
+                hideNotification()
+            }
+
             if (!batteryBelowThreshold) {
                 // Reset suppression when stylus battery is recharged, so that the next time
                 // it reaches a low battery, the notification will show again.
                 suppressed = false
             }
-            hideNotification()
         }
     }
 
