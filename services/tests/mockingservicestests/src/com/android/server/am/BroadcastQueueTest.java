@@ -25,12 +25,15 @@ import static com.android.server.am.BroadcastProcessQueue.reasonToString;
 import static com.android.server.am.BroadcastRecord.deliveryStateToString;
 import static com.android.server.am.BroadcastRecord.isReceiverEquals;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -2131,5 +2134,76 @@ public class BroadcastQueueTest {
         mUidObserver.onUidCachedChanged(getUidForPackage(PACKAGE_GREEN), false);
         waitForIdle();
         verifyScheduleRegisteredReceiver(times(1), receiverGreenApp, airplane);
+    }
+
+    @Test
+    public void testBroadcastDelivery_uidForeground() throws Exception {
+        // Legacy stack doesn't support prioritization to foreground app.
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        mUidObserver.onUidStateChanged(receiverGreenApp.info.uid,
+                ActivityManager.PROCESS_STATE_TOP, 0, ActivityManager.PROCESS_CAPABILITY_NONE);
+
+        final Intent airplane = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+
+        final BroadcastFilter receiverBlue = makeRegisteredReceiver(receiverBlueApp);
+        final BroadcastFilter receiverGreen = makeRegisteredReceiver(receiverGreenApp);
+        final BroadcastRecord airplaneRecord = makeBroadcastRecord(airplane, callerApp,
+                List.of(receiverBlue));
+        final BroadcastRecord timeTickRecord = makeBroadcastRecord(timeTick, callerApp,
+                List.of(receiverBlue, receiverGreen));
+
+        enqueueBroadcast(airplaneRecord);
+        enqueueBroadcast(timeTickRecord);
+
+        waitForIdle();
+        // Verify that broadcasts to receiverGreenApp gets scheduled first.
+        assertThat(getReceiverScheduledTime(timeTickRecord, receiverGreen))
+                .isLessThan(getReceiverScheduledTime(airplaneRecord, receiverBlue));
+        assertThat(getReceiverScheduledTime(timeTickRecord, receiverGreen))
+                .isLessThan(getReceiverScheduledTime(timeTickRecord, receiverBlue));
+    }
+
+    @Test
+    public void testPrioritizedBroadcastDelivery_uidForeground() throws Exception {
+        // Legacy stack doesn't support prioritization to foreground app.
+        Assume.assumeTrue(mImpl == Impl.MODERN);
+
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverBlueApp = makeActiveProcessRecord(PACKAGE_BLUE);
+        final ProcessRecord receiverGreenApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        mUidObserver.onUidStateChanged(receiverGreenApp.info.uid,
+                ActivityManager.PROCESS_STATE_TOP, 0, ActivityManager.PROCESS_CAPABILITY_NONE);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+
+        final BroadcastFilter receiverBlue = makeRegisteredReceiver(receiverBlueApp, 10);
+        final BroadcastFilter receiverGreen = makeRegisteredReceiver(receiverGreenApp, 5);
+        final BroadcastRecord prioritizedRecord = makeBroadcastRecord(timeTick, callerApp,
+                List.of(receiverBlue, receiverGreen));
+
+        enqueueBroadcast(prioritizedRecord);
+
+        waitForIdle();
+        // Verify that uid foreground-ness does not impact that delivery of prioritized broadcast.
+        // That is, broadcast to receiverBlueApp gets scheduled before the one to receiverGreenApp.
+        assertThat(getReceiverScheduledTime(prioritizedRecord, receiverGreen))
+                .isGreaterThan(getReceiverScheduledTime(prioritizedRecord, receiverBlue));
+    }
+
+    private long getReceiverScheduledTime(@NonNull BroadcastRecord r, @NonNull Object receiver) {
+        for (int i = 0; i < r.receivers.size(); ++i) {
+            if (isReceiverEquals(receiver, r.receivers.get(i))) {
+                return r.scheduledTime[i];
+            }
+        }
+        fail(receiver + "not found in " + r);
+        return -1;
     }
 }
