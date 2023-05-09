@@ -212,6 +212,17 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             new AtomicReference<>();
 
     /**
+     * Map from UID to its last known "foreground" state. A UID is considered to be in
+     * "foreground" state when it's procState is {@link ActivityManager#PROCESS_STATE_TOP}.
+     * <p>
+     * We manually maintain this data structure since the lifecycle of
+     * {@link ProcessRecord} and {@link BroadcastProcessQueue} can be
+     * mismatched.
+     */
+    @GuardedBy("mService")
+    private final SparseBooleanArray mUidForeground = new SparseBooleanArray();
+
+    /**
      * Map from UID to its last known "cached" state.
      * <p>
      * We manually maintain this data structure since the lifecycle of
@@ -1284,9 +1295,22 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 return UserHandle.getUserId(q.uid) == userId;
             };
             broadcastPredicate = BROADCAST_PREDICATE_ANY;
+
+            cleanupUserStateLocked(mUidCached, userId);
+            cleanupUserStateLocked(mUidForeground, userId);
         }
         return forEachMatchingBroadcast(queuePredicate, broadcastPredicate,
                 mBroadcastConsumerSkip, true);
+    }
+
+    @GuardedBy("mService")
+    private void cleanupUserStateLocked(@NonNull SparseBooleanArray uidState, int userId) {
+        for (int i = uidState.size() - 1; i >= 0; --i) {
+            final int uid = uidState.keyAt(i);
+            if (UserHandle.getUserId(uid) == userId) {
+                uidState.removeAt(i);
+            }
+        }
     }
 
     private static final Predicate<BroadcastProcessQueue> QUEUE_PREDICATE_ANY =
@@ -1404,6 +1428,19 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         mService.registerUidObserver(new UidObserver() {
             @Override
+            public void onUidStateChanged(int uid, int procState, long procStateSeq,
+                    int capability) {
+                synchronized (mService) {
+                    if (procState == ActivityManager.PROCESS_STATE_TOP) {
+                        mUidForeground.put(uid, true);
+                    } else {
+                        mUidForeground.delete(uid);
+                    }
+                    refreshProcessQueuesLocked(uid);
+                }
+            }
+
+            @Override
             public void onUidCachedChanged(int uid, boolean cached) {
                 synchronized (mService) {
                     if (cached) {
@@ -1411,18 +1448,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     } else {
                         mUidCached.delete(uid);
                     }
-
-                    BroadcastProcessQueue leaf = mProcessQueues.get(uid);
-                    while (leaf != null) {
-                        // Update internal state by refreshing values previously
-                        // read from any known running process
-                        setQueueProcess(leaf, leaf.app);
-                        leaf = leaf.processNameNext;
-                    }
-                    enqueueUpdateRunningList();
+                    refreshProcessQueuesLocked(uid);
                 }
             }
-        }, ActivityManager.UID_OBSERVER_CACHED, 0, "android");
+        }, ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_CACHED,
+                ActivityManager.PROCESS_STATE_TOP, "android");
 
         // Kick off periodic health checks
         mLocalHandler.sendEmptyMessage(MSG_CHECK_HEALTH);
@@ -1611,8 +1641,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // warm via this operation, we're going to immediately promote it to
             // be running, and any side effect of this operation will then apply
             // after it's finished and is returned to the runnable list.
-            queue.setProcessAndUidCached(
+            queue.setProcessAndUidState(
                     mService.getProcessRecordLocked(queue.processName, queue.uid),
+                    mUidForeground.get(queue.uid, false),
                     mUidCached.get(queue.uid, false));
         }
     }
@@ -1624,9 +1655,26 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     private void setQueueProcess(@NonNull BroadcastProcessQueue queue,
             @Nullable ProcessRecord app) {
-        if (queue.setProcessAndUidCached(app, mUidCached.get(queue.uid, false))) {
+        if (queue.setProcessAndUidState(app, mUidForeground.get(queue.uid, false),
+                mUidCached.get(queue.uid, false))) {
             updateRunnableList(queue);
         }
+    }
+
+    /**
+     * Refresh the process queues with the latest process state so that runnableAt
+     * can be updated.
+     */
+    @GuardedBy("mService")
+    private void refreshProcessQueuesLocked(int uid) {
+        BroadcastProcessQueue leaf = mProcessQueues.get(uid);
+        while (leaf != null) {
+            // Update internal state by refreshing values previously
+            // read from any known running process
+            setQueueProcess(leaf, leaf.app);
+            leaf = leaf.processNameNext;
+        }
+        enqueueUpdateRunningList();
     }
 
     /**
@@ -1950,7 +1998,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
 
         ipw.println("Cached UIDs:");
         ipw.increaseIndent();
-        ipw.println(mUidCached.toString());
+        ipw.println(mUidCached);
+        ipw.decreaseIndent();
+        ipw.println();
+
+        ipw.println("Foreground UIDs:");
+        ipw.increaseIndent();
+        ipw.println(mUidForeground);
         ipw.decreaseIndent();
         ipw.println();
 
