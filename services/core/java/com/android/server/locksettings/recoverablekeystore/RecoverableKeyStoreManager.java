@@ -128,18 +128,14 @@ public class RecoverableKeyStoreManager {
     public static synchronized RecoverableKeyStoreManager
             getInstance(Context context) {
         if (mInstance == null) {
-            RecoverableKeyStoreDb db;
+            RecoverableKeyStoreDb db = RecoverableKeyStoreDb.newInstance(context);
             RemoteLockscreenValidationSessionStorage lockscreenCheckSessions;
             if (FeatureFlagUtils.isEnabled(context,
                     FeatureFlagUtils.SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API)) {
-                // TODO(b/254335492): Remove flag check when feature is launched.
-                db = RecoverableKeyStoreDb.newInstance(context, 7);
                 lockscreenCheckSessions = new RemoteLockscreenValidationSessionStorage();
             } else {
-                db = RecoverableKeyStoreDb.newInstance(context);
                 lockscreenCheckSessions = null;
             }
-
             PlatformKeyManager platformKeyManager;
             ApplicationKeyStorage applicationKeyStorage;
             try {
