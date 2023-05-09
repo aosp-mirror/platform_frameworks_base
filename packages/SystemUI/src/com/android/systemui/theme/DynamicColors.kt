@@ -56,18 +56,6 @@ class DynamicColors {
                 Pair.create("on_error", MDC.onError()),
                 Pair.create("error_container", MDC.errorContainer()),
                 Pair.create("on_error_container", MDC.onErrorContainer()),
-                Pair.create("primary_fixed", MDC.primaryFixed()),
-                Pair.create("primary_fixed_dim", MDC.primaryFixedDim()),
-                Pair.create("on_primary_fixed", MDC.onPrimaryFixed()),
-                Pair.create("on_primary_fixed_variant", MDC.onPrimaryFixedVariant()),
-                Pair.create("secondary_fixed", MDC.secondaryFixed()),
-                Pair.create("secondary_fixed_dim", MDC.secondaryFixedDim()),
-                Pair.create("on_secondary_fixed", MDC.onSecondaryFixed()),
-                Pair.create("on_secondary_fixed_variant", MDC.onSecondaryFixedVariant()),
-                Pair.create("tertiary_fixed", MDC.tertiaryFixed()),
-                Pair.create("tertiary_fixed_dim", MDC.tertiaryFixedDim()),
-                Pair.create("on_tertiary_fixed", MDC.onTertiaryFixed()),
-                Pair.create("on_tertiary_fixed_variant", MDC.onTertiaryFixedVariant()),
                 Pair.create("control_activated", MDC.controlActivated()),
                 Pair.create("control_normal", MDC.controlNormal()),
                 Pair.create("control_highlight", MDC.controlHighlight()),
@@ -92,7 +80,24 @@ class DynamicColors {
                 Pair.create(
                     "palette_key_color_neutral_variant",
                     MDC.neutralVariantPaletteKeyColor()
-                )
+                ),
+            )
+
+        @JvmField
+        val FIXED_COLORS_MAPPED: List<Pair<String, DynamicColor>> =
+            arrayListOf(
+                Pair.create("primary_fixed", MDC.primaryFixed()),
+                Pair.create("primary_fixed_dim", MDC.primaryFixedDim()),
+                Pair.create("on_primary_fixed", MDC.onPrimaryFixed()),
+                Pair.create("on_primary_fixed_variant", MDC.onPrimaryFixedVariant()),
+                Pair.create("secondary_fixed", MDC.secondaryFixed()),
+                Pair.create("secondary_fixed_dim", MDC.secondaryFixedDim()),
+                Pair.create("on_secondary_fixed", MDC.onSecondaryFixed()),
+                Pair.create("on_secondary_fixed_variant", MDC.onSecondaryFixedVariant()),
+                Pair.create("tertiary_fixed", MDC.tertiaryFixed()),
+                Pair.create("tertiary_fixed_dim", MDC.tertiaryFixedDim()),
+                Pair.create("on_tertiary_fixed", MDC.onTertiaryFixed()),
+                Pair.create("on_tertiary_fixed_variant", MDC.onTertiaryFixedVariant()),
             )
     }
 }
