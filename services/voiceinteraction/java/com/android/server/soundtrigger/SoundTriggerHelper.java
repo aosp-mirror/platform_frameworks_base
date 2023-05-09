@@ -789,13 +789,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
         ModelData model = getModelDataForLocked(event.soundModelHandle);
-        if (!Objects.equals(event.getToken(), model.getToken())) {
-            // Stale event, do nothing
-            return;
-        }
         if (model == null || !model.isGenericModel()) {
             Slog.w(TAG, "Generic recognition event: Model does not exist for handle: "
                     + event.soundModelHandle);
+            return;
+        }
+        if (!Objects.equals(event.getToken(), model.getToken())) {
+            // Stale event, do nothing
             return;
         }
 
@@ -875,11 +875,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         Slog.w(TAG, "Recognition aborted");
         MetricsLogger.count(mContext, "sth_recognition_aborted", 1);
         ModelData modelData = getModelDataForLocked(event.soundModelHandle);
-        if (!Objects.equals(event.getToken(), modelData.getToken())) {
-            // Stale event, do nothing
-            return;
-        }
         if (modelData != null && modelData.isModelStarted()) {
+            if (!Objects.equals(event.getToken(), modelData.getToken())) {
+                // Stale event, do nothing
+                return;
+            }
             modelData.setStopped();
             try {
                 IRecognitionStatusCallback callback = modelData.getCallback();
@@ -916,16 +916,15 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         MetricsLogger.count(mContext, "sth_keyphrase_recognition_event", 1);
         int keyphraseId = getKeyphraseIdFromEvent(event);
         ModelData modelData = getKeyphraseModelDataLocked(keyphraseId);
-        if (!Objects.equals(event.getToken(), modelData.getToken())) {
-            // Stale event, do nothing
-            return;
-        }
 
         if (modelData == null || !modelData.isKeyphraseModel()) {
             Slog.e(TAG, "Keyphase model data does not exist for ID:" + keyphraseId);
             return;
         }
-
+        if (!Objects.equals(event.getToken(), modelData.getToken())) {
+            // Stale event, do nothing
+            return;
+        }
         if (modelData.getCallback() == null) {
             Slog.w(TAG, "Received onRecognition event without callback for keyphrase model.");
             return;
