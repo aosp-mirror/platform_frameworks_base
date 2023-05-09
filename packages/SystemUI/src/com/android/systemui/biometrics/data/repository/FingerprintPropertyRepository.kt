@@ -57,13 +57,8 @@ interface FingerprintPropertyRepository {
     /** The types of fingerprint sensor (rear, ultrasonic, optical, etc.). */
     val sensorType: StateFlow<FingerprintSensorType>
 
-    /** The primary sensor location relative to the default display. */
-    val sensorLocation: StateFlow<SensorLocationInternal>
-
-    // TODO(b/251476085): don't implement until we need it, but expose alternative locations as
-    // a map of display id -> location or similar.
     /** The sensor location relative to each physical display. */
-    // val sensorLocations<Map<String, SensorLocationInternal>>
+    val sensorLocations: StateFlow<Map<String, SensorLocationInternal>>
 }
 
 @SysUISingleton
@@ -104,15 +99,19 @@ constructor(
         MutableStateFlow(FingerprintSensorType.UNKNOWN)
     override val sensorType = _sensorType.asStateFlow()
 
-    private val _sensorLocation: MutableStateFlow<SensorLocationInternal> =
-        MutableStateFlow(SensorLocationInternal.DEFAULT)
-    override val sensorLocation = _sensorLocation.asStateFlow()
+    private val _sensorLocations: MutableStateFlow<Map<String, SensorLocationInternal>> =
+        MutableStateFlow(mapOf("" to SensorLocationInternal.DEFAULT))
+    override val sensorLocations: StateFlow<Map<String, SensorLocationInternal>> =
+        _sensorLocations.asStateFlow()
 
     private fun setProperties(prop: FingerprintSensorPropertiesInternal) {
         _sensorId.value = prop.sensorId
         _strength.value = sensorStrengthIntToObject(prop.sensorStrength)
         _sensorType.value = sensorTypeIntToObject(prop.sensorType)
-        _sensorLocation.value = prop.location
+        _sensorLocations.value =
+            prop.allLocations.associateBy { sensorLocationInternal ->
+                sensorLocationInternal.displayId
+            }
     }
 
     companion object {
