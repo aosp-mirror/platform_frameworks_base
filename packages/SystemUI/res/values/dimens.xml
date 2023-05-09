@@ -1642,7 +1642,6 @@
     <dimen name="dream_overlay_bottom_affordance_width">64dp</dimen>
     <dimen name="dream_overlay_bottom_affordance_radius">32dp</dimen>
     <dimen name="dream_overlay_bottom_affordance_padding">14dp</dimen>
-    <dimen name="dream_overlay_bottom_affordance_elevation">4dp</dimen>
     <dimen name="dream_overlay_complication_clock_time_text_size">86dp</dimen>
     <dimen name="dream_overlay_complication_clock_subtitle_text_size">24sp</dimen>
     <dimen name="dream_overlay_complication_preview_text_size">36sp</dimen>
