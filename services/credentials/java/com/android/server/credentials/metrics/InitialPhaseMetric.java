@@ -32,8 +32,8 @@ public class InitialPhaseMetric {
     private int mApiName = ApiName.UNKNOWN.getMetricCode();
     // The caller uid of the calling application, default to -1
     private int mCallerUid = -1;
-    // The session id to unite multiple atom emits, default to -1
-    private int mSessionId = -1;
+    // The session id to unite multiple atom emits
+    private final int mSessionIdCaller;
 
     // Raw timestamps in nanoseconds, *the only* one logged as such (i.e. 64 bits) since it is a
     // reference point.
@@ -50,7 +50,8 @@ public class InitialPhaseMetric {
     private Map<String, Integer> mRequestCounts = new LinkedHashMap<>();
 
 
-    public InitialPhaseMetric() {
+    public InitialPhaseMetric(int sessionIdTrackOne) {
+        mSessionIdCaller = sessionIdTrackOne;
     }
 
     /* ---------- Latencies ---------- */
@@ -105,12 +106,8 @@ public class InitialPhaseMetric {
 
     /* ------ SessionId ------ */
 
-    public void setSessionId(int sessionId) {
-        mSessionId = sessionId;
-    }
-
-    public int getSessionId() {
-        return mSessionId;
+    public int getSessionIdCaller() {
+        return mSessionIdCaller;
     }
 
     /* ------ Count Request Class Types ------ */
