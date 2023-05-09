@@ -323,9 +323,7 @@ public class DozeTriggers implements DozeMachine.Part {
                     return;
                 }
                 if (isDoubleTap || isTap) {
-                    if (screenX != -1 && screenY != -1) {
-                        mDozeHost.onSlpiTap(screenX, screenY);
-                    }
+                    mDozeHost.onSlpiTap(screenX, screenY);
                     gentleWakeUp(pulseReason);
                 } else if (isPickup) {
                     if (shouldDropPickupEvent())  {

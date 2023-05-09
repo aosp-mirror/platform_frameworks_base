@@ -54,7 +54,10 @@ class FakeKeyguardRepository : KeyguardRepository {
     override val isKeyguardOccluded: Flow<Boolean> = _isKeyguardOccluded
 
     private val _isDozing = MutableStateFlow(false)
-    override val isDozing: Flow<Boolean> = _isDozing
+    override val isDozing: StateFlow<Boolean> = _isDozing
+
+    private val _lastDozeTapToWakePosition = MutableStateFlow<Point?>(null)
+    override val lastDozeTapToWakePosition = _lastDozeTapToWakePosition.asStateFlow()
 
     private val _isAodAvailable = MutableStateFlow(false)
     override val isAodAvailable: Flow<Boolean> = _isAodAvailable
@@ -76,12 +79,7 @@ class FakeKeyguardRepository : KeyguardRepository {
 
     private val _wakefulnessModel =
         MutableStateFlow(
-            WakefulnessModel(
-                WakefulnessState.ASLEEP,
-                false,
-                WakeSleepReason.OTHER,
-                WakeSleepReason.OTHER
-            )
+            WakefulnessModel(WakefulnessState.ASLEEP, WakeSleepReason.OTHER, WakeSleepReason.OTHER)
         )
     override val wakefulness: Flow<WakefulnessModel> = _wakefulnessModel
 
@@ -137,8 +135,12 @@ class FakeKeyguardRepository : KeyguardRepository {
         _isKeyguardOccluded.value = isOccluded
     }
 
-    fun setDozing(isDozing: Boolean) {
+    override fun setIsDozing(isDozing: Boolean) {
         _isDozing.value = isDozing
+    }
+
+    override fun setLastDozeTapToWakePosition(position: Point) {
+        _lastDozeTapToWakePosition.value = position
     }
 
     fun setAodAvailable(isAodAvailable: Boolean) {
