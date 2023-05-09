@@ -20,6 +20,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -87,6 +88,9 @@ public class ViewGroupTest {
         viewGroup.dispatchTouchEvent(event);
         verify(viewB).dispatchTouchEvent(event);
 
+        viewGroup.onResolvePointerIcon(event, 0 /* pointerIndex */);
+        verify(viewB).onResolvePointerIcon(event, 0);
+
         event = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
                 MotionEvent.ACTION_POINTER_DOWN | (1 << MotionEvent.ACTION_POINTER_INDEX_SHIFT),
                 2 /* pointerCount */, properties, coords, 0 /* metaState */, 0 /* buttonState */,
@@ -95,7 +99,11 @@ public class ViewGroupTest {
         viewGroup.dispatchTouchEvent(event);
         verify(viewB).dispatchTouchEvent(event);
 
+        viewGroup.onResolvePointerIcon(event, 1 /* pointerIndex */);
+        verify(viewB).onResolvePointerIcon(event, 1);
+
         verify(viewA, never()).dispatchTouchEvent(any());
+        verify(viewA, never()).onResolvePointerIcon(any(), anyInt());
     }
 
     /**
