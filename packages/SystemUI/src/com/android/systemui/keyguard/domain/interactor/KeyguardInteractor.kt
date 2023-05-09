@@ -33,7 +33,6 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel.Companion.isDoz
 import com.android.systemui.keyguard.shared.model.DozeTransitionModel
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.WakefulnessModel
-import com.android.systemui.keyguard.shared.model.WakefulnessModel.Companion.isWakingOrStartingToWake
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
@@ -108,18 +107,12 @@ constructor(
      */
     val isAbleToDream: Flow<Boolean> =
         merge(isDreaming, isDreamingWithOverlay)
-            .combine(
-                dozeTransitionModel,
-                { isDreaming, dozeTransitionModel ->
-                    isDreaming && isDozeOff(dozeTransitionModel.to)
-                }
-            )
-            .sample(
-                wakefulnessModel,
-                { isAbleToDream, wakefulnessModel ->
-                    isAbleToDream && isWakingOrStartingToWake(wakefulnessModel)
-                }
-            )
+            .combine(dozeTransitionModel) { isDreaming, dozeTransitionModel ->
+                isDreaming && isDozeOff(dozeTransitionModel.to)
+            }
+            .sample(wakefulnessModel) { isAbleToDream, wakefulnessModel ->
+                isAbleToDream && wakefulnessModel.isStartingToWake()
+            }
             .flatMapLatest { isAbleToDream ->
                 flow {
                     delay(50)

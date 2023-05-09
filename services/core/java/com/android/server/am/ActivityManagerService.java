@@ -3761,6 +3761,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void forceStopPackage(final String packageName, int userId) {
+        forceStopPackage(packageName, userId, /*flags=*/ 0);
+    }
+
+    @Override
+    public void forceStopPackageEvenWhenStopping(final String packageName, int userId) {
+        forceStopPackage(packageName, userId, ActivityManager.FLAG_OR_STOPPED);
+    }
+
+    private void forceStopPackage(final String packageName, int userId, int userRunningFlags) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: forceStopPackage() from pid="
@@ -3776,7 +3785,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
-            synchronized(this) {
+            synchronized (this) {
                 int[] users = userId == UserHandle.USER_ALL
                         ? mUserController.getUsers() : new int[] { userId };
                 for (int user : users) {
@@ -3804,7 +3813,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         Slog.w(TAG, "Failed trying to unstop package "
                                 + packageName + ": " + e);
                     }
-                    if (mUserController.isUserRunning(user, 0)) {
+                    if (mUserController.isUserRunning(user, userRunningFlags)) {
                         forceStopPackageLocked(packageName, pkgUid, "from pid " + callingPid);
                         finishForceStopPackageLocked(packageName, pkgUid);
                     }
@@ -18962,6 +18971,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         pw.println("Gave up waiting for application barriers!");
         pw.flush();
+    }
+
+    void waitForBroadcastDispatch(@NonNull PrintWriter pw, @NonNull Intent intent) {
+        enforceCallingPermission(permission.DUMP, "waitForBroadcastDispatch");
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.waitForDispatched(intent, pw);
+        }
     }
 
     void setIgnoreDeliveryGroupPolicy(@NonNull String broadcastAction) {

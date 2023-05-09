@@ -149,6 +149,7 @@ fun GetCredentialScreen(
             },
             onDismiss = viewModel::onUserCancel,
             isInitialRender = viewModel.uiState.isInitialRender,
+            isAutoSelectFlow = viewModel.uiState.isAutoSelectFlow,
             onInitialRenderComplete = viewModel::onInitialRenderComplete,
         )
     }
@@ -560,7 +561,12 @@ fun AuthenticationEntryRow(
     enforceOneLine: Boolean = false,
 ) {
     Entry(
-        onClick = { onEntrySelected(authenticationEntryInfo) },
+        onClick = if (authenticationEntryInfo.isUnlockedAndEmpty) {
+            {}
+        } // No-op
+        else {
+            { onEntrySelected(authenticationEntryInfo) }
+        },
         iconImageBitmap = authenticationEntryInfo.icon.toBitmap().asImageBitmap(),
         entryHeadlineText = authenticationEntryInfo.title,
         entrySecondLineText = stringResource(

@@ -514,6 +514,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             } catch (RemoteException e) {
                 // if this fails we don't really care; the setting app may just
                 // have crashed and that sort of thing is a fact of life.
+                Slog.w(TAG, "onWallpaperChanged threw an exception", e);
             }
         }
     }
@@ -524,7 +525,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             try {
                 cb.onWallpaperChanged();
             } catch (RemoteException e) {
-                // Oh well it went away; no big deal
+                Slog.w(TAG, "Failed to notify keyguard callback about wallpaper changes", e);
             }
         }
     }
@@ -620,6 +621,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             } catch (RemoteException e) {
                 // Callback is gone, it's not necessary to unregister it since
                 // RemoteCallbackList#getBroadcastItem will take care of it.
+                Slog.w(TAG, "onWallpaperColorsChanged() threw an exception", e);
             }
         }
 
@@ -628,7 +630,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             try {
                 keyguardListener.onWallpaperColorsChanged(wallpaperColors, which, userId);
             } catch (RemoteException e) {
-                // Oh well it went away; no big deal
+                Slog.w(TAG, "keyguardListener.onWallpaperColorsChanged threw an exception", e);
             }
         }
     }
@@ -965,7 +967,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     connection.mService.detach(mToken);
                 }
             } catch (RemoteException e) {
-                Slog.w(TAG, "connection.mService.destroy() threw a RemoteException");
+                Slog.w(TAG, "connection.mService.destroy() threw a RemoteException", e);
             }
             mEngine = null;
         }
@@ -1117,7 +1119,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     try {
                         cb.onColorsChanged(area, colors);
                     } catch (RemoteException e) {
-                        e.printStackTrace();
+                        Slog.w(TAG, "Failed to notify local color callbacks", e);
                     }
                 };
                 synchronized (mLock) {
@@ -1316,7 +1318,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     try {
                         mReply.sendResult(null);
                     } catch (RemoteException e) {
-                        Slog.d(TAG, "failed to send callback!", e);
+                        Slog.d(TAG, "Failed to send callback!", e);
                     } finally {
                         Binder.restoreCallingIdentity(ident);
                     }
@@ -1583,7 +1585,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         mShuttingDown = false;
         mImageWallpaper = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.image_wallpaper_component));
-        mDefaultWallpaperComponent = WallpaperManager.getDefaultWallpaperComponent(context);
+        mDefaultWallpaperComponent = WallpaperManager.getCmfDefaultWallpaperComponent(context);
         mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
         mIPackageManager = AppGlobals.getPackageManager();
@@ -1909,7 +1911,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 try {
                     si = mIPackageManager.getServiceInfo(cname,
                             PackageManager.MATCH_DIRECT_BOOT_UNAWARE, wallpaper.userId);
-                } catch (RemoteException ignored) {
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failure starting previous wallpaper; clearing", e);
                 }
 
                 if (mIsLockscreenLiveWallpaperEnabled) {
@@ -1918,7 +1921,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
 
                 if (si == null) {
-                    Slog.w(TAG, "Failure starting previous wallpaper; clearing");
                     clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, reply);
                 } else {
                     Slog.w(TAG, "Wallpaper isn't direct boot aware; using fallback until unlocked");
@@ -1942,8 +1944,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             WallpaperData wallpaper, IRemoteCallback reply, ServiceInfo serviceInfo) {
 
         if (serviceInfo == null) {
-            Slog.w(TAG, "Failure starting previous wallpaper; clearing");
-
             if (wallpaper.mWhich == (FLAG_LOCK | FLAG_SYSTEM)) {
                 clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, null);
                 clearWallpaperLocked(false, FLAG_LOCK, wallpaper.userId, reply);
@@ -2042,7 +2042,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         try {
                             cb.onWallpaperChanged();
                         } catch (RemoteException e) {
-                            // Oh well it went away; no big deal
+                            Slog.w(TAG, "Failed to notify keyguard after wallpaper clear", e);
                         }
                     }
                     saveSettingsLocked(userId);
@@ -2074,6 +2074,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 try {
                     reply.sendResult(null);
                 } catch (RemoteException e1) {
+                    Slog.w(TAG, "Failed to notify callback after wallpaper clear", e1);
                 }
             }
         } finally {
@@ -2168,6 +2169,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         try {
                             engine.setDesiredSize(width, height);
                         } catch (RemoteException e) {
+                            Slog.w(TAG, "Failed to set desired size", e);
                         }
                         notifyCallbacksLocked(wallpaper);
                     } else if (wallpaper.connection.mService != null && connector != null) {
@@ -2263,6 +2265,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                         try {
                             engine.setDisplayPadding(padding);
                         } catch (RemoteException e) {
+                            Slog.w(TAG, "Failed to set display padding", e);
                         }
                         notifyCallbacksLocked(wallpaper);
                     } else if (wallpaper.connection.mService != null && connector != null) {
@@ -2498,7 +2501,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             try {
                 engine.setInAmbientMode(inAmbientMode, animationDuration);
             } catch (RemoteException e) {
-                // Cannot talk to wallpaper engine.
+                Slog.w(TAG, "Failed to set ambient mode", e);
             }
         }
     }
@@ -2532,7 +2535,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                     displayConnector.mEngine.dispatchWallpaperCommand(
                                             WallpaperManager.COMMAND_WAKING_UP, x, y, -1, extras);
                                 } catch (RemoteException e) {
-                                    e.printStackTrace();
+                                    Slog.w(TAG, "Failed to dispatch COMMAND_WAKING_UP", e);
                                 }
                             }
                         });
@@ -2571,7 +2574,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                             WallpaperManager.COMMAND_GOING_TO_SLEEP, x, y, -1,
                                             extras);
                                 } catch (RemoteException e) {
-                                    e.printStackTrace();
+                                    Slog.w(TAG, "Failed to dispatch COMMAND_GOING_TO_SLEEP", e);
                                 }
                             }
                         });
@@ -2611,7 +2614,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     try {
                         engine.onScreenTurnedOn();
                     } catch (RemoteException e) {
-                        e.printStackTrace();
+                        Slog.w(TAG, "Failed to notify that the screen turned on", e);
                     }
                 }
             }
@@ -2652,7 +2655,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     try {
                         engine.onScreenTurningOn();
                     } catch (RemoteException e) {
-                        e.printStackTrace();
+                        Slog.w(TAG, "Failed to notify that the screen is turning on", e);
                     }
                 }
             }
@@ -2690,7 +2693,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                     WallpaperManager.COMMAND_KEYGUARD_GOING_AWAY,
                                     -1, -1, -1, new Bundle());
                         } catch (RemoteException e) {
-                            e.printStackTrace();
+                            Slog.w(TAG, "Failed to notify that the keyguard is going away", e);
                         }
                     }
                 });
@@ -2853,10 +2856,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                     try {
                                         connector.mEngine.applyDimming(maxDimAmount);
                                     } catch (RemoteException e) {
-                                        Slog.w(TAG,
-                                                "Can't apply dimming on wallpaper display "
-                                                        + "connector",
-                                                e);
+                                        Slog.w(TAG, "Can't apply dimming on wallpaper display "
+                                                        + "connector", e);
                                     }
                                 }
                             });
@@ -3573,6 +3574,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 try {
                     wallpaper.connection.mReply.sendResult(null);
                 } catch (RemoteException e) {
+                    Slog.w(TAG, "Error sending reply to wallpaper before disconnect", e);
                 }
                 wallpaper.connection.mReply = null;
             }
@@ -3640,6 +3642,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
                 // The RemoteCallbackList will take care of removing
                 // the dead object for us.
+                Slog.w(TAG, "Failed to notify callbacks about wallpaper changes", e);
             }
         }
         wallpaper.callbacks.finishBroadcast();

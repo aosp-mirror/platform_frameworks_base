@@ -2887,8 +2887,9 @@ public class Notification implements Parcelable
                 visitor.accept(person.getIconUri());
             }
 
-            final RemoteInputHistoryItem[] history = (RemoteInputHistoryItem[])
-                    extras.getParcelableArray(Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS);
+            final RemoteInputHistoryItem[] history = extras.getParcelableArray(
+                    Notification.EXTRA_REMOTE_INPUT_HISTORY_ITEMS,
+                    RemoteInputHistoryItem.class);
             if (history != null) {
                 for (int i = 0; i < history.length; i++) {
                     RemoteInputHistoryItem item = history[i];
@@ -2900,7 +2901,8 @@ public class Notification implements Parcelable
         }
 
         if (isStyle(MessagingStyle.class) && extras != null) {
-            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES,
+                    Parcelable.class);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(messages)) {
@@ -2913,7 +2915,8 @@ public class Notification implements Parcelable
                 }
             }
 
-            final Parcelable[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
+            final Parcelable[] historic = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES,
+                    Parcelable.class);
             if (!ArrayUtils.isEmpty(historic)) {
                 for (MessagingStyle.Message message : MessagingStyle.Message
                         .getMessagesFromBundleArray(historic)) {
@@ -2925,14 +2928,16 @@ public class Notification implements Parcelable
                     }
                 }
             }
+
+            visitIconUri(visitor, extras.getParcelable(EXTRA_CONVERSATION_ICON, Icon.class));
         }
 
         if (isStyle(CallStyle.class) & extras != null) {
-            Person callPerson = extras.getParcelable(EXTRA_CALL_PERSON);
+            Person callPerson = extras.getParcelable(EXTRA_CALL_PERSON, Person.class);
             if (callPerson != null) {
                 visitor.accept(callPerson.getIconUri());
             }
-            visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON));
+            visitIconUri(visitor, extras.getParcelable(EXTRA_VERIFICATION_ICON, Icon.class));
         }
 
         if (mBubbleMetadata != null) {
@@ -3407,7 +3412,7 @@ public class Notification implements Parcelable
      * separate object, replace it with the field's version to avoid holding duplicate copies.
      */
     private void fixDuplicateExtra(@Nullable Parcelable original, @NonNull String extraName) {
-        if (original != null && extras.getParcelable(extraName) != null) {
+        if (original != null && extras.getParcelable(extraName, Parcelable.class) != null) {
             extras.putParcelable(extraName, original);
         }
     }
@@ -7084,7 +7089,8 @@ public class Notification implements Parcelable
      */
     public boolean hasImage() {
         if (isStyle(MessagingStyle.class) && extras != null) {
-            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            final Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES,
+                    Parcelable.class);
             if (!ArrayUtils.isEmpty(messages)) {
                 for (MessagingStyle.Message m : MessagingStyle.Message
                         .getMessagesFromBundleArray(messages)) {
@@ -8286,15 +8292,18 @@ public class Notification implements Parcelable
         protected void restoreFromExtras(Bundle extras) {
             super.restoreFromExtras(extras);
 
-            mUser = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
-            if (mUser == null) {
+            Person user = extras.getParcelable(EXTRA_MESSAGING_PERSON, Person.class);
+            if (user == null) {
                 CharSequence displayName = extras.getCharSequence(EXTRA_SELF_DISPLAY_NAME);
                 mUser = new Person.Builder().setName(displayName).build();
+            } else {
+                mUser = user;
             }
             mConversationTitle = extras.getCharSequence(EXTRA_CONVERSATION_TITLE);
-            Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES);
+            Parcelable[] messages = extras.getParcelableArray(EXTRA_MESSAGES, Parcelable.class);
             mMessages = Message.getMessagesFromBundleArray(messages);
-            Parcelable[] histMessages = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES);
+            Parcelable[] histMessages = extras.getParcelableArray(EXTRA_HISTORIC_MESSAGES,
+                    Parcelable.class);
             mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
             mIsGroupConversation = extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION);
             mUnreadMessageCount = extras.getInt(EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
@@ -11962,7 +11971,8 @@ public class Notification implements Parcelable
                 if (b == null) {
                     return null;
                 }
-                Parcelable[] parcelableMessages = b.getParcelableArray(KEY_MESSAGES);
+                Parcelable[] parcelableMessages = b.getParcelableArray(KEY_MESSAGES,
+                        Parcelable.class);
                 String[] messages = null;
                 if (parcelableMessages != null) {
                     String[] tmp = new String[parcelableMessages.length];
@@ -12299,7 +12309,7 @@ public class Notification implements Parcelable
     @Nullable
     private static <T extends Parcelable> T[] getParcelableArrayFromBundle(
             Bundle bundle, String key, Class<T> itemClass) {
-        final Parcelable[] array = bundle.getParcelableArray(key);
+        final Parcelable[] array = bundle.getParcelableArray(key, Parcelable.class);
         final Class<?> arrayClass = Array.newInstance(itemClass, 0).getClass();
         if (arrayClass.isInstance(array) || array == null) {
             return (T[]) array;

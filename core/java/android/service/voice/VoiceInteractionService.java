@@ -389,7 +389,7 @@ public class VoiceInteractionService extends Service {
         // It's still guaranteed to have been stopped.
         // This helps with cases where the voice interaction implementation is changed
         // by the user.
-        safelyShutdownAllHotwordDetectors();
+        safelyShutdownAllHotwordDetectors(true);
     }
 
     /**
@@ -715,7 +715,7 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             if (!CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
                 // Allow only one concurrent recognition via the APIs.
-                safelyShutdownAllHotwordDetectors();
+                safelyShutdownAllHotwordDetectors(false);
             } else {
                 for (HotwordDetector detector : mActiveDetectors) {
                     if (detector.isUsingSandboxedDetectionService()
@@ -878,7 +878,7 @@ public class VoiceInteractionService extends Service {
         synchronized (mLock) {
             if (!CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
                 // Allow only one concurrent recognition via the APIs.
-                safelyShutdownAllHotwordDetectors();
+                safelyShutdownAllHotwordDetectors(false);
             } else {
                 for (HotwordDetector detector : mActiveDetectors) {
                     if (!detector.isUsingSandboxedDetectionService()) {
@@ -1062,11 +1062,14 @@ public class VoiceInteractionService extends Service {
         return mKeyphraseEnrollmentInfo.getKeyphraseMetadata(keyphrase, locale) != null;
     }
 
-    private void safelyShutdownAllHotwordDetectors() {
+    private void safelyShutdownAllHotwordDetectors(boolean shouldShutDownVisualQueryDetector) {
         synchronized (mLock) {
             mActiveDetectors.forEach(detector -> {
                 try {
-                    detector.destroy();
+                    if (detector != mActiveVisualQueryDetector.getInitializationDelegate()
+                            || shouldShutDownVisualQueryDetector) {
+                        detector.destroy();
+                    }
                 } catch (Exception ex) {
                     Log.i(TAG, "exception destroying HotwordDetector", ex);
                 }
@@ -1116,6 +1119,8 @@ public class VoiceInteractionService extends Service {
                     pw.println();
                 });
             }
+            pw.println("Available Model Enrollment Applications:");
+            pw.println("  " + mKeyphraseEnrollmentInfo);
         }
     }
 }

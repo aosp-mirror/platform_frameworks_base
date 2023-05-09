@@ -447,6 +447,7 @@ import android.util.AtomicFile;
 import android.util.DebugUtils;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -1214,7 +1215,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_STOPPED, userHandle);
                 if (isManagedProfile(userHandle)) {
                     Slogf.d(LOG_TAG, "Managed profile was stopped");
-                    updatePersonalAppsSuspension(userHandle, false /* unlocked */);
+                    updatePersonalAppsSuspension(userHandle);
                 }
             } else if (Intent.ACTION_USER_SWITCHED.equals(action)) {
                 sendDeviceOwnerUserCommand(DeviceAdminReceiver.ACTION_USER_SWITCHED, userHandle);
@@ -1224,8 +1225,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
                 if (isManagedProfile(userHandle)) {
                     Slogf.d(LOG_TAG, "Managed profile became unlocked");
-                    final boolean suspended =
-                            updatePersonalAppsSuspension(userHandle, true /* unlocked */);
+                    final boolean suspended = updatePersonalAppsSuspension(userHandle);
                     triggerPolicyComplianceCheckIfNeeded(userHandle, suspended);
                 }
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE.equals(action)) {
@@ -1252,13 +1252,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
                 final int userId = getManagedUserId(getMainUserId());
                 if (userId >= 0) {
-                    updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
+                    updatePersonalAppsSuspension(userId);
                 }
             } else if (ACTION_PROFILE_OFF_DEADLINE.equals(action)) {
                 Slogf.i(LOG_TAG, "Profile off deadline alarm was triggered");
                 final int userId = getManagedUserId(getMainUserId());
                 if (userId >= 0) {
-                    updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked(userId));
+                    updatePersonalAppsSuspension(userId);
                 } else {
                     Slogf.wtf(LOG_TAG, "Got deadline alarm for nonexistent profile");
                 }
@@ -1268,9 +1268,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             } else if (ACTION_MANAGED_PROFILE_UNAVAILABLE.equals(action)) {
                 notifyIfManagedSubscriptionsAreUnavailable(
                         UserHandle.of(userHandle), /* managedProfileAvailable= */ false);
+                updatePersonalAppsSuspension(userHandle);
             } else if (ACTION_MANAGED_PROFILE_AVAILABLE.equals(action)) {
                 notifyIfManagedSubscriptionsAreUnavailable(
                         UserHandle.of(userHandle), /* managedProfileAvailable= */ true);
+                final boolean suspended = updatePersonalAppsSuspension(userHandle);
+                triggerPolicyComplianceCheckIfNeeded(userHandle, suspended);
             } else if (LOGIN_ACCOUNTS_CHANGED_ACTION.equals(action)) {
                 calculateHasIncompatibleAccounts();
             }
@@ -3433,7 +3436,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final int profileUserHandle = getManagedUserId(userHandle);
         if (profileUserHandle >= 0) {
             // Given that the parent user has just started, profile should be locked.
-            updatePersonalAppsSuspension(profileUserHandle, false /* unlocked */);
+            updatePersonalAppsSuspension(profileUserHandle);
         } else {
             suspendPersonalAppsInternal(userHandle, profileUserHandle, false);
         }
@@ -3611,10 +3614,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (isProfileOwnerOfOrganizationOwnedDevice(userId)
                 && getManagedSubscriptionsPolicy().getPolicyType()
                 == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
-            String defaultDialerPackageName = getOemDefaultDialerPackage();
-            String defaultSmsPackageName = getOemDefaultSmsPackage();
-            updateDialerAndSmsManagedShortcutsOverrideCache(defaultDialerPackageName,
-                    defaultSmsPackageName);
+            updateDialerAndSmsManagedShortcutsOverrideCache();
         }
 
         startOwnerService(userId, "start-user");
@@ -10728,15 +10728,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return UserHandle.USER_NULL;
     }
 
-    private @UserIdInt int getManagedProfileUserId() {
-        for (UserInfo ui : mUserManagerInternal.getUserInfos()) {
-            if (ui.isManagedProfile()) {
-                return ui.id;
-            }
-        }
-        return UserHandle.USER_NULL;
-    }
-
     /**
      * This API is cached: invalidate with invalidateBinderCaches().
      */
@@ -11599,6 +11590,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (getLockObject()) {
             final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
                     getProfileOwnerOrDeviceOwnerLocked(caller.getUserId()), parent);
+
+            if (isManagedProfile(userId)) {
+                mInjector.binderWithCleanCallingIdentity(
+                        () -> updateDialerAndSmsManagedShortcutsOverrideCache());
+            }
+
             if (!Objects.equals(activeAdmin.mSmsPackage, packageName)) {
                 activeAdmin.mSmsPackage = packageName;
                 saveSettingsLocked(caller.getUserId());
@@ -11644,6 +11641,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
         // Only save the package when the setting the role succeeded without exception.
         synchronized (getLockObject()) {
+            if (isManagedProfile(callerUserId)) {
+                mInjector.binderWithCleanCallingIdentity(
+                        () -> updateDialerAndSmsManagedShortcutsOverrideCache());
+            }
+
             final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(callerUserId);
             if (!Objects.equals(admin.mDialerPackage, packageName)) {
                 admin.mDialerPackage = packageName;
@@ -12079,7 +12081,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(
-                isDeviceOwner(caller) || isProfileOwner(caller));
+                isDefaultDeviceOwner(caller) || isProfileOwner(caller));
 
         if (packageList != null) {
             for (String pkg : packageList) {
@@ -13364,8 +13366,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 PolicyDefinition<Boolean> policyDefinition =
                         PolicyDefinition.getPolicyDefinitionForUserRestriction(key);
                 if (enabledFromThisOwner) {
-                    setLocalUserRestrictionInternal(
-                            admin, key, /* enabled= */ true, affectedUserId);
+                    // TODO: Remove this special case - replace with breaking change to require
+                    //  setGlobally to disable ADB
+                    if (key.equals(UserManager.DISALLOW_DEBUGGING_FEATURES) && parent) {
+                        setGlobalUserRestrictionInternal(admin, key, /* enabled= */ true);
+                    } else {
+                        setLocalUserRestrictionInternal(
+                                admin, key, /* enabled= */ true, affectedUserId);
+                    }
                 } else {
                     // Remove any local and global policy that was set by the admin
                     if (!policyDefinition.isLocalOnlyPolicy()) {
@@ -15154,7 +15162,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                     DevicePolicyEventLogger
                             .createEvent(DevicePolicyEnums.SET_LOCKTASK_MODE_ENABLED)
-                            .setAdmin(admin.info.getPackageName())
+                            .setAdmin(admin.info == null ? null : admin.info.getPackageName())
                             .setBoolean(isEnabled)
                             .setStrings(pkg)
                             .write();
@@ -20787,7 +20795,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         mInjector.binderWithCleanCallingIdentity(() -> updatePersonalAppsSuspension(
-                callingUserId, mUserManager.isUserUnlocked(callingUserId)));
+                callingUserId));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PERSONAL_APPS_SUSPENDED)
@@ -20821,16 +20829,19 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     /**
      * Checks whether personal apps should be suspended according to the policy and applies the
      * change if needed.
-     *
-     * @param unlocked whether the profile is currently running unlocked.
      */
-    private boolean updatePersonalAppsSuspension(int profileUserId, boolean unlocked) {
+    private boolean updatePersonalAppsSuspension(int profileUserId) {
         final boolean shouldSuspend;
         synchronized (getLockObject()) {
             final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(profileUserId);
             if (profileOwner != null) {
-                final int notificationState =
-                        updateProfileOffDeadlineLocked(profileUserId, profileOwner, unlocked);
+                // Profile is considered "off" when it is either not running or is running locked
+                // or is in quiet mode, i.e. when the admin cannot sync policies or show UI.
+                boolean profileUserOff =
+                        !mUserManagerInternal.isUserUnlockingOrUnlocked(profileUserId)
+                        || mUserManager.isQuietModeEnabled(UserHandle.of(profileUserId));
+                final int notificationState = updateProfileOffDeadlineLocked(
+                        profileUserId, profileOwner, profileUserOff);
                 final boolean suspendedExplicitly = profileOwner.mSuspendPersonalApps;
                 final boolean suspendedByTimeout = profileOwner.mProfileOffDeadline == -1;
                 Slogf.d(LOG_TAG,
@@ -20855,16 +20866,16 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      * @return notification state
      */
     private int updateProfileOffDeadlineLocked(
-            int profileUserId, ActiveAdmin profileOwner, boolean unlocked) {
+            int profileUserId, ActiveAdmin profileOwner, boolean off) {
         final long now = mInjector.systemCurrentTimeMillis();
         if (profileOwner.mProfileOffDeadline != 0 && now > profileOwner.mProfileOffDeadline) {
-            Slogf.i(LOG_TAG, "Profile off deadline has been reached, unlocked: " + unlocked);
+            Slogf.i(LOG_TAG, "Profile off deadline has been reached, off: " + off);
             if (profileOwner.mProfileOffDeadline != -1) {
                 // Move the deadline far to the past so that it cannot be rolled back by TZ change.
                 profileOwner.mProfileOffDeadline = -1;
                 saveSettingsLocked(profileUserId);
             }
-            return unlocked ? PROFILE_OFF_NOTIFICATION_NONE : PROFILE_OFF_NOTIFICATION_SUSPENDED;
+            return off ? PROFILE_OFF_NOTIFICATION_SUSPENDED : PROFILE_OFF_NOTIFICATION_NONE;
         }
         boolean shouldSaveSettings = false;
         if (profileOwner.mSuspendPersonalApps) {
@@ -20881,7 +20892,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             profileOwner.mProfileOffDeadline = 0;
             shouldSaveSettings = true;
         } else if (profileOwner.mProfileOffDeadline == 0
-                && (profileOwner.mProfileMaximumTimeOffMillis != 0 && !unlocked)) {
+                && (profileOwner.mProfileMaximumTimeOffMillis != 0 && off)) {
             // There profile is locked and there is a policy, but the deadline is not set -> set the
             // deadline.
             Slogf.i(LOG_TAG, "Profile off deadline is set.");
@@ -20895,7 +20906,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         final long alarmTime;
         final int notificationState;
-        if (unlocked || profileOwner.mProfileOffDeadline == 0) {
+        if (!off || profileOwner.mProfileOffDeadline == 0) {
             alarmTime = 0;
             notificationState = PROFILE_OFF_NOTIFICATION_NONE;
         } else if (profileOwner.mProfileOffDeadline - now < MANAGED_PROFILE_OFF_WARNING_PERIOD) {
@@ -21169,7 +21180,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         mInjector.binderWithCleanCallingIdentity(
-                () -> updatePersonalAppsSuspension(userId, mUserManager.isUserUnlocked()));
+                () -> updatePersonalAppsSuspension(userId));
 
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_MANAGED_PROFILE_MAXIMUM_TIME_OFF)
@@ -21814,10 +21825,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final AccountManager accountManager = mContext.createContextAsUser(
                         UserHandle.of(sourceUserId), /* flags= */ 0)
                 .getSystemService(AccountManager.class);
-        final AccountManagerFuture<Bundle> bundle = accountManager.removeAccount(account,
-                null, null /* callback */, null /* handler */);
         try {
-            final Bundle result = bundle.getResult();
+            final Bundle result = accountManager.removeAccount(account,
+                    null, null /* callback */, null /* handler */).getResult(60, TimeUnit.SECONDS);
             if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, /* default */ false)) {
                 Slogf.i(LOG_TAG, "Account removed from the primary user.");
             } else {
@@ -22718,7 +22728,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         private void handleFinancedDeviceKioskRoleChange() {
-            if (!isPermissionCheckFlagEnabled()) {
+            if (!isPolicyEngineForFinanceFlagEnabled()) {
                 return;
             }
             Slog.i(LOG_TAG, "Handling action " + ACTION_DEVICE_FINANCING_STATE_CHANGED);
@@ -23934,8 +23944,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slogf.w(LOG_TAG, "Couldn't install sms app, sms app package is null");
             }
 
-            updateDialerAndSmsManagedShortcutsOverrideCache(defaultDialerPackageName,
-                    defaultSmsPackageName);
+            updateDialerAndSmsManagedShortcutsOverrideCache();
         } catch (RemoteException re) {
             // shouldn't happen
             Slogf.wtf(LOG_TAG, "Failed to install dialer/sms app", re);
@@ -23951,17 +23960,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return mContext.getString(R.string.config_defaultSms);
     }
 
-    private void updateDialerAndSmsManagedShortcutsOverrideCache(
-            String defaultDialerPackageName, String defaultSmsPackageName) {
+    private void updateDialerAndSmsManagedShortcutsOverrideCache() {
         ArrayMap<String, String> shortcutOverrides = new ArrayMap<>();
+        int managedUserId = getManagedUserId();
+        List<String> dialerRoleHolders = mRoleManager.getRoleHoldersAsUser(RoleManager.ROLE_DIALER,
+                UserHandle.of(managedUserId));
+        List<String> smsRoleHolders = mRoleManager.getRoleHoldersAsUser(RoleManager.ROLE_SMS,
+                UserHandle.of(managedUserId));
 
-        if (defaultDialerPackageName != null) {
-            shortcutOverrides.put(defaultDialerPackageName, defaultDialerPackageName);
+        String dialerPackageToOverride = getOemDefaultDialerPackage();
+        String smsPackageToOverride = getOemDefaultSmsPackage();
+
+        // To get the default app, we can get all the role holders and get the first element.
+        if (dialerPackageToOverride != null) {
+            shortcutOverrides.put(dialerPackageToOverride,
+                    dialerRoleHolders.isEmpty() ? dialerPackageToOverride
+                            : dialerRoleHolders.get(0));
+        }
+        if (smsPackageToOverride != null) {
+            shortcutOverrides.put(smsPackageToOverride,
+                    smsRoleHolders.isEmpty() ? smsPackageToOverride : smsRoleHolders.get(0));
         }
 
-        if (defaultSmsPackageName != null) {
-            shortcutOverrides.put(defaultSmsPackageName, defaultSmsPackageName);
-        }
         mPolicyCache.setLauncherShortcutOverrides(shortcutOverrides);
     }
 

@@ -133,7 +133,7 @@ import java.util.concurrent.ConcurrentMap;
  *             revoked="false"
  *             last_time_connected="1634641160229"
  *             time_approved="1634389553216"
- *             system_data_sync_flags="-1"/>
+ *             system_data_sync_flags="0"/>
  *
  *         <association
  *             id="3"
@@ -145,7 +145,7 @@ import java.util.concurrent.ConcurrentMap;
  *             revoked="false"
  *             last_time_connected="1634641160229"
  *             time_approved="1634641160229"
- *             system_data_sync_flags="-1"/>
+ *             system_data_sync_flags="1"/>
  *     </associations>
  *
  *     <previously-used-ids>
@@ -432,7 +432,7 @@ final class PersistentDataStore {
         out.add(new AssociationInfo(associationId, userId, appPackage,
                 MacAddress.fromString(deviceAddress), null, profile, null,
                 /* managedByCompanionApp */ false, notify, /* revoked */ false, timeApproved,
-                Long.MAX_VALUE, /* systemDataSyncFlags */ -1));
+                Long.MAX_VALUE, /* systemDataSyncFlags */ 0));
     }
 
     private static void readAssociationsV1(@NonNull TypedXmlPullParser parser,
@@ -466,7 +466,7 @@ final class PersistentDataStore {
         final long lastTimeConnected = readLongAttribute(
                 parser, XML_ATTR_LAST_TIME_CONNECTED, Long.MAX_VALUE);
         final int systemDataSyncFlags = readIntAttribute(parser,
-                XML_ATTR_SYSTEM_DATA_SYNC_FLAGS, -1);
+                XML_ATTR_SYSTEM_DATA_SYNC_FLAGS, 0);
 
         final AssociationInfo associationInfo = createAssociationInfoNoThrow(associationId, userId,
                 appPackage, macAddress, displayName, profile, selfManaged, notify, revoked,

@@ -21,7 +21,6 @@ import android.app.TaskInfo;
 import android.app.TaskInfo.CameraCompatControlState;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -110,14 +109,6 @@ class CompatUILayout extends LinearLayout {
         // Need to relayout after changes like hiding / showing a hint since they affect size.
         // Doing this directly in setSizeCompatHintVisibility can result in flaky animation.
         mWindowManager.relayout();
-    }
-
-    @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            mWindowManager.relayout();
-        }
-        return super.onInterceptTouchEvent(ev);
     }
 
     @Override

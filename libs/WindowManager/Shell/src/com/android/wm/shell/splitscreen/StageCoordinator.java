@@ -377,6 +377,13 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         return STAGE_TYPE_UNDEFINED;
     }
 
+    boolean isRootOrStageRoot(int taskId) {
+        if (mRootTaskInfo != null && mRootTaskInfo.taskId == taskId) {
+            return true;
+        }
+        return mMainStage.isRootTaskId(taskId) || mSideStage.isRootTaskId(taskId);
+    }
+
     boolean moveToStage(ActivityManager.RunningTaskInfo task, @SplitPosition int stagePosition,
             WindowContainerTransaction wct) {
         prepareEnterSplitScreen(wct, task, stagePosition);

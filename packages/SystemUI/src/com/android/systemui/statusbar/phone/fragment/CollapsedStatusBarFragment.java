@@ -14,8 +14,6 @@
 
 package com.android.systemui.statusbar.phone.fragment;
 
-
-
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.IDLE;
 import static com.android.systemui.statusbar.events.SystemStatusAnimationSchedulerKt.SHOWING_PERSISTENT_DOT;
 
@@ -69,6 +67,7 @@ import com.android.systemui.statusbar.phone.fragment.dagger.StatusBarFragmentCom
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController;
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallListener;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder;
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowStateController;
@@ -131,6 +130,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final StatusBarIconController mStatusBarIconController;
     private final CarrierConfigTracker mCarrierConfigTracker;
     private final CollapsedStatusBarViewModel mCollapsedStatusBarViewModel;
+    private final CollapsedStatusBarViewBinder mCollapsedStatusBarViewBinder;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final StatusBarIconController.DarkIconManager.Factory mDarkIconManagerFactory;
     private final SecureSettings mSecureSettings;
@@ -183,11 +183,21 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private boolean mWaitingForWindowStateChangeAfterCameraLaunch = false;
 
     /**
+     * True when a transition from lockscreen to dream has started, but haven't yet received a
+     * status bar window state change afterward.
+     *
+     * Similar to [mWaitingForWindowStateChangeAfterCameraLaunch].
+     */
+    private boolean mTransitionFromLockscreenToDreamStarted = false;
+
+    /**
      * Listener that updates {@link #mWaitingForWindowStateChangeAfterCameraLaunch} when it receives
      * a new status bar window state.
      */
-    private final StatusBarWindowStateListener mStatusBarWindowStateListener = state ->
-            mWaitingForWindowStateChangeAfterCameraLaunch = false;
+    private final StatusBarWindowStateListener mStatusBarWindowStateListener = state -> {
+        mWaitingForWindowStateChangeAfterCameraLaunch = false;
+        mTransitionFromLockscreenToDreamStarted = false;
+    };
 
     @SuppressLint("ValidFragment")
     public CollapsedStatusBarFragment(
@@ -201,6 +211,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             StatusBarIconController statusBarIconController,
             StatusBarIconController.DarkIconManager.Factory darkIconManagerFactory,
             CollapsedStatusBarViewModel collapsedStatusBarViewModel,
+            CollapsedStatusBarViewBinder collapsedStatusBarViewBinder,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
             ShadeViewController shadeViewController,
@@ -224,6 +235,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mFeatureFlags = featureFlags;
         mStatusBarIconController = statusBarIconController;
         mCollapsedStatusBarViewModel = collapsedStatusBarViewModel;
+        mCollapsedStatusBarViewBinder = collapsedStatusBarViewBinder;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mDarkIconManagerFactory = darkIconManagerFactory;
         mKeyguardStateController = keyguardStateController;
@@ -296,8 +308,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCarrierConfigTracker.addCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
 
-        CollapsedStatusBarViewBinder.bind(
-                mStatusBar, mCollapsedStatusBarViewModel, this::updateStatusBarVisibilities);
+        mCollapsedStatusBarViewBinder.bind(
+                mStatusBar, mCollapsedStatusBarViewModel, mStatusBarVisibilityChangeListener);
     }
 
     @Override
@@ -411,6 +423,19 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         return mStatusBarFragmentComponent;
     }
 
+    private StatusBarVisibilityChangeListener mStatusBarVisibilityChangeListener =
+            new StatusBarVisibilityChangeListener() {
+        @Override
+        public void onStatusBarVisibilityMaybeChanged() {
+            updateStatusBarVisibilities(/* animate= */ true);
+        }
+
+        @Override
+        public void onTransitionFromLockscreenToDreamStarted() {
+            mTransitionFromLockscreenToDreamStarted = true;
+        }
+    };
+
     @Override
     public void disable(int displayId, int state1, int state2, boolean animate) {
         if (displayId != getContext().getDisplayId()) {
@@ -421,10 +446,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mLastSystemVisibility =
                 StatusBarVisibilityModel.createModelFromFlags(state1, state2);
         updateStatusBarVisibilities(animate);
-    }
-
-    private void updateStatusBarVisibilities() {
-        updateStatusBarVisibilities(/* animate= */ true);
     }
 
     private void updateStatusBarVisibilities(boolean animate) {
@@ -543,6 +564,18 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                         mKeyguardStateController.isOccluded();
 
         if (hideIconsForSecureCamera) {
+            return true;
+        }
+
+        // Similar to [hideIconsForSecureCamera]: When dream is launched over lockscreen, the icons
+        // are momentarily visible because the dream animation has finished, but SysUI has not been
+        // informed that the dream is full-screen. For extra safety, we double-check that we're
+        // still dreaming.
+        final boolean hideIconsForDream =
+                mTransitionFromLockscreenToDreamStarted
+                        && mKeyguardUpdateMonitor.isDreaming()
+                        && mKeyguardStateController.isOccluded();
+        if (hideIconsForDream) {
             return true;
         }
 

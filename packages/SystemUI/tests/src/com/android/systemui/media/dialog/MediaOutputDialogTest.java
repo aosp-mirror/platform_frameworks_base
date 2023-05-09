@@ -39,6 +39,7 @@ import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.MediumTest;
 
 import com.android.internal.logging.UiEventLogger;
@@ -64,6 +65,7 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @MediumTest
 @RunWith(AndroidTestingRunner.class)
@@ -89,7 +91,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private final UiEventLogger mUiEventLogger = mock(UiEventLogger.class);
     private final DialogLaunchAnimator mDialogLaunchAnimator = mock(DialogLaunchAnimator.class);
     private final MediaMetadata mMediaMetadata = mock(MediaMetadata.class);
-    private final MediaDescription  mMediaDescription = mock(MediaDescription.class);
+    private final MediaDescription mMediaDescription = mock(MediaDescription.class);
     private final NearbyMediaDevicesManager mNearbyMediaDevicesManager = mock(
             NearbyMediaDevicesManager.class);
     private final AudioManager mAudioManager = mock(AudioManager.class);
@@ -101,6 +103,11 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     private MediaOutputDialog mMediaOutputDialog;
     private MediaOutputController mMediaOutputController;
     private final List<String> mFeatures = new ArrayList<>();
+
+    @Override
+    protected boolean shouldFailOnLeakedReceiver() {
+        return true;
+    }
 
     @Before
     public void setUp() {
@@ -120,8 +127,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
                 Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
-        mMediaOutputDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
-                mMediaOutputController, mUiEventLogger);
+        mMediaOutputDialog = makeTestDialog(mMediaOutputController);
         mMediaOutputDialog.show();
 
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice);
@@ -130,7 +136,7 @@ public class MediaOutputDialogTest extends SysuiTestCase {
 
     @After
     public void tearDown() {
-        mMediaOutputDialog.dismissDialog();
+        mMediaOutputDialog.dismiss();
     }
 
     @Test
@@ -311,11 +317,9 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         MediaOutputController mockMediaOutputController = mock(MediaOutputController.class);
         when(mockMediaOutputController.isBroadcastSupported()).thenReturn(false);
 
-        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
-                mockMediaOutputController, mUiEventLogger);
-        testDialog.show();
-
-        assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
+        withTestDialog(mockMediaOutputController, testDialog -> {
+            assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
+        });
     }
 
     @Test
@@ -328,11 +332,9 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         when(mockMediaOutputController.isBluetoothLeDevice(any())).thenReturn(true);
         when(mockMediaOutputController.isPlaying()).thenReturn(true);
         when(mockMediaOutputController.isBluetoothLeBroadcastEnabled()).thenReturn(false);
-        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
-                mockMediaOutputController, mUiEventLogger);
-        testDialog.show();
-
-        assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
+        withTestDialog(mockMediaOutputController, testDialog -> {
+            assertThat(testDialog.getStopButtonText().toString()).isEqualTo(stopText);
+        });
     }
 
     @Test
@@ -341,11 +343,9 @@ public class MediaOutputDialogTest extends SysuiTestCase {
         when(mockMediaOutputController.isBroadcastSupported()).thenReturn(false);
         when(mockMediaOutputController.getCurrentConnectedMediaDevice()).thenReturn(null);
         when(mockMediaOutputController.isPlaying()).thenReturn(false);
-        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
-                mockMediaOutputController, mUiEventLogger);
-        testDialog.show();
-
-        testDialog.onStopButtonClick();
+        withTestDialog(mockMediaOutputController, testDialog -> {
+            testDialog.onStopButtonClick();
+        });
 
         verify(mockMediaOutputController).releaseSession();
     }
@@ -354,13 +354,22 @@ public class MediaOutputDialogTest extends SysuiTestCase {
     // Check the visibility metric logging by creating a new MediaOutput dialog,
     // and verify if the calling times increases.
     public void onCreate_ShouldLogVisibility() {
-        MediaOutputDialog testDialog = new MediaOutputDialog(mContext, false, mBroadcastSender,
-                mMediaOutputController, mUiEventLogger);
-        testDialog.show();
-
-        testDialog.dismissDialog();
+        withTestDialog(mMediaOutputController, testDialog -> {});
 
         verify(mUiEventLogger, times(2))
                 .log(MediaOutputDialog.MediaOutputEvent.MEDIA_OUTPUT_DIALOG_SHOW);
+    }
+
+    @NonNull
+    private MediaOutputDialog makeTestDialog(MediaOutputController controller) {
+        return new MediaOutputDialog(mContext, false, mBroadcastSender,
+                controller, mUiEventLogger);
+    }
+
+    private void withTestDialog(MediaOutputController controller, Consumer<MediaOutputDialog> c) {
+        MediaOutputDialog testDialog = makeTestDialog(controller);
+        testDialog.show();
+        c.accept(testDialog);
+        testDialog.dismiss();
     }
 }

@@ -34,7 +34,6 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
     private static final String TAG = "RecoverableKeyStoreDbHp";
 
     // v6 - added user id serial number.
-    static final int DATABASE_VERSION = 6;
     // v7 - added bad guess counter for remote LSKF check;
     static final int DATABASE_VERSION_7 = 7;
     private static final String DATABASE_NAME = "recoverablekeystore.db";
@@ -118,23 +117,14 @@ class RecoverableKeyStoreDbHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, getDbVersion(context));
     }
 
-    RecoverableKeyStoreDbHelper(Context context, int version) {
-        super(context, DATABASE_NAME, null, version);
-    }
-
     private static int getDbVersion(Context context) {
-        // TODO(b/254335492): Update to version 7 and clean up code.
-        return DATABASE_VERSION;
+        return DATABASE_VERSION_7;
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_KEYS_ENTRY);
-        if (db.getVersion() == 6) { // always false
-            db.execSQL(SQL_CREATE_USER_METADATA_ENTRY);
-        } else {
-            db.execSQL(SQL_CREATE_USER_METADATA_ENTRY_FOR_V7);
-        }
+        db.execSQL(SQL_CREATE_USER_METADATA_ENTRY_FOR_V7);
         db.execSQL(SQL_CREATE_RECOVERY_SERVICE_METADATA_ENTRY);
         db.execSQL(SQL_CREATE_ROOT_OF_TRUST_ENTRY);
     }

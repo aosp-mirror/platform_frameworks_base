@@ -336,6 +336,7 @@ interface IActivityManager {
     boolean registerForegroundServiceObserver(in IForegroundServiceObserver callback);
     @UnsupportedAppUsage
     void forceStopPackage(in String packageName, int userId);
+    void forceStopPackageEvenWhenStopping(in String packageName, int userId);
     boolean killPids(in int[] pids, in String reason, boolean secure);
     @UnsupportedAppUsage
     List<ActivityManager.RunningServiceInfo> getServices(int maxNum, int flags);
