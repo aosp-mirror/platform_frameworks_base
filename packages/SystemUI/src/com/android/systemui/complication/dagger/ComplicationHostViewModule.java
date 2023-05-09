@@ -36,11 +36,20 @@ import javax.inject.Named;
 @Module
 public abstract class ComplicationHostViewModule {
     public static final String SCOPED_COMPLICATIONS_LAYOUT = "scoped_complications_layout";
-    public static final String COMPLICATION_MARGIN_DEFAULT = "complication_margin_default";
+    public static final String COMPLICATION_DIRECTIONAL_SPACING_DEFAULT =
+            "complication_directional_spacing_default";
     public static final String COMPLICATIONS_FADE_OUT_DURATION = "complications_fade_out_duration";
     public static final String COMPLICATIONS_FADE_IN_DURATION = "complications_fade_in_duration";
     public static final String COMPLICATIONS_RESTORE_TIMEOUT = "complication_restore_timeout";
     public static final String COMPLICATIONS_FADE_OUT_DELAY = "complication_fade_out_delay";
+    public static final String COMPLICATION_MARGIN_POSITION_START =
+            "complication_margin_position_start";
+    public static final String COMPLICATION_MARGIN_POSITION_TOP =
+            "complication_margin_position_top";
+    public static final String COMPLICATION_MARGIN_POSITION_END =
+            "complication_margin_position_end";
+    public static final String COMPLICATION_MARGIN_POSITION_BOTTOM =
+            "complication_margin_position_bottom";
 
     /**
      * Generates a {@link ConstraintLayout}, which can host
@@ -58,9 +67,33 @@ public abstract class ComplicationHostViewModule {
     }
 
     @Provides
-    @Named(COMPLICATION_MARGIN_DEFAULT)
+    @Named(COMPLICATION_DIRECTIONAL_SPACING_DEFAULT)
     static int providesComplicationPadding(@Main Resources resources) {
         return resources.getDimensionPixelSize(R.dimen.dream_overlay_complication_margin);
+    }
+
+    @Provides
+    @Named(COMPLICATION_MARGIN_POSITION_START)
+    static int providesComplicationMarginPositionStart(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.dream_overlay_container_padding_start);
+    }
+
+    @Provides
+    @Named(COMPLICATION_MARGIN_POSITION_TOP)
+    static int providesComplicationMarginPositionTop(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.dream_overlay_container_padding_top);
+    }
+
+    @Provides
+    @Named(COMPLICATION_MARGIN_POSITION_END)
+    static int providesComplicationMarginPositionEnd(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.dream_overlay_container_padding_end);
+    }
+
+    @Provides
+    @Named(COMPLICATION_MARGIN_POSITION_BOTTOM)
+    static int providesComplicationMarginPositionBottom(@Main Resources resources) {
+        return resources.getDimensionPixelSize(R.dimen.dream_overlay_container_padding_bottom);
     }
 
     /**
