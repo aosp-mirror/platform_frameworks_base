@@ -23,7 +23,6 @@ import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_DEFAULT;
-import static android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_DENIED;
 import static android.content.pm.PackageInstaller.SessionParams.PERMISSION_STATE_GRANTED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
@@ -3656,25 +3655,6 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
         for (String permission : pkg.getRequestedPermissions()) {
             Integer permissionState = permissionStates.get(permission);
-
-            if (Objects.equals(permission, Manifest.permission.USE_FULL_SCREEN_INTENT)
-                    && permissionState == null) {
-                final PackageStateInternal ps;
-                final long token = Binder.clearCallingIdentity();
-                try {
-                    ps = mPackageManagerInt.getPackageStateInternal(pkg.getPackageName());
-                } finally {
-                    Binder.restoreCallingIdentity(token);
-                }
-                final String[] useFullScreenIntentPackageNames =
-                        mContext.getResources().getStringArray(
-                                com.android.internal.R.array.config_useFullScreenIntentPackages);
-                final boolean canUseFullScreenIntent = (ps != null && ps.isSystem())
-                        || ArrayUtils.contains(useFullScreenIntentPackageNames,
-                                pkg.getPackageName());
-                permissionState = canUseFullScreenIntent ? PERMISSION_STATE_GRANTED
-                        : PERMISSION_STATE_DENIED;
-            }
 
             if (permissionState == null || permissionState == PERMISSION_STATE_DEFAULT) {
                 continue;
