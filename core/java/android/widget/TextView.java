@@ -6228,7 +6228,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void setLineHeightPx(@Px @FloatRange(from = 0) float lineHeight) {
-        Preconditions.checkArgumentNonnegative((int) lineHeight);
+        Preconditions.checkArgumentNonNegative(lineHeight,
+                "Expecting non-negative lineHeight while the input is " + lineHeight);
 
         final int fontHeight = getPaint().getFontMetricsInt(null);
         // Make sure we don't setLineSpacing if it's not needed to avoid unnecessary redraw.
