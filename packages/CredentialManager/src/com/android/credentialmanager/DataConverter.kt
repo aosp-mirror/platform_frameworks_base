@@ -661,7 +661,7 @@ class CreateFlowUtils {
                     passwordCount = createEntry.getPasswordCredentialCount(),
                     passkeyCount = createEntry.getPublicKeyCredentialCount(),
                     totalCredentialCount = createEntry.getTotalCredentialCount(),
-                    lastUsedTime = createEntry.lastUsedTime,
+                    lastUsedTime = createEntry.lastUsedTime ?: Instant.MIN,
                     footerDescription = createEntry.description?.toString()
                 ))
             }
