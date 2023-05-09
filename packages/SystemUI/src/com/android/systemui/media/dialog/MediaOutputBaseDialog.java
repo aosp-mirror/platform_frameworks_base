@@ -266,10 +266,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             dismiss();
         });
         mAppButton.setOnClickListener(mMediaOutputController::tryToLaunchMediaApplication);
-        if (mMediaOutputController.isAdvancedLayoutSupported()) {
-            mMediaMetadataSectionLayout.setOnClickListener(
-                    mMediaOutputController::tryToLaunchMediaApplication);
-        }
+        mMediaMetadataSectionLayout.setOnClickListener(
+                mMediaOutputController::tryToLaunchMediaApplication);
     }
 
     @Override
