@@ -15,13 +15,14 @@
  */
 package com.android.systemui.statusbar.connectivity;
 
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_IN;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_INOUT;
 import static android.net.wifi.WifiManager.TrafficStateCallback.DATA_ACTIVITY_OUT;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.NetworkCapabilities;
 import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.text.Html;
@@ -37,6 +38,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 
 import java.io.PrintWriter;
+import java.util.BitSet;
 
 /** */
 public class WifiSignalController extends SignalController<WifiState, IconGroup> {
@@ -56,8 +58,12 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
             WifiManager wifiManager,
             WifiStatusTrackerFactory trackerFactory,
             @Background Handler bgHandler) {
-        super("WifiSignalController", context, NetworkCapabilities.TRANSPORT_WIFI,
-                callbackHandler, networkController);
+        super(
+                "WifiSignalController",
+                context,
+                TRANSPORT_WIFI,
+                callbackHandler,
+                networkController);
         mBgHandler = bgHandler;
         mWifiManager = wifiManager;
         mWifiTracker = trackerFactory.createTracker(this::handleStatusUpdated, bgHandler);
@@ -160,7 +166,10 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
         // The WiFi signal level returned by WifiManager#calculateSignalLevel start from 0, so
         // WifiManager#getMaxSignalLevel + 1 represents the total level buckets count.
         int totalLevel = mWifiManager.getMaxSignalLevel() + 1;
-        boolean noInternet = mCurrentState.inetCondition == 0;
+        // A carrier merged connection could come from a WIFI *or* CELLULAR transport, so we can't
+        // use [mCurrentState.inetCondition], which only checks the WIFI status. Instead, check if
+        // the default connection is validated at all.
+        boolean noInternet = !mCurrentState.isDefaultConnectionValidated;
         if (mCurrentState.connected) {
             return SignalDrawable.getState(level, totalLevel, noInternet);
         } else if (mCurrentState.enabled) {
@@ -234,6 +243,18 @@ public class WifiSignalController extends SignalController<WifiState, IconGroup>
     boolean isCarrierMergedWifi(int subId) {
         return mCurrentState.isDefault
                 && mCurrentState.isCarrierMerged && (mCurrentState.subId == subId);
+    }
+
+    @Override
+    void updateConnectivity(BitSet connectedTransports, BitSet validatedTransports) {
+        mCurrentState.inetCondition = validatedTransports.get(mTransportType) ? 1 : 0;
+        // Because a carrier merged connection can come from either a CELLULAR *or* WIFI transport,
+        // we need to also store if either transport is validated to correctly display the carrier
+        // merged case.
+        mCurrentState.isDefaultConnectionValidated =
+                validatedTransports.get(TRANSPORT_CELLULAR)
+                        || validatedTransports.get(TRANSPORT_WIFI);
+        notifyListenersIfNecessary();
     }
 
     @VisibleForTesting
