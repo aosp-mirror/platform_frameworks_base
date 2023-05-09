@@ -75,12 +75,12 @@ import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 import com.android.systemui.statusbar.tv.notifications.TvNotificationHandler;
 import com.android.systemui.volume.dagger.VolumeModule;
 
-import javax.inject.Named;
-
 import dagger.Binds;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.IntoSet;
+
+import javax.inject.Named;
 
 /**
  * A TV specific version of {@link ReferenceSystemUIModule}.
