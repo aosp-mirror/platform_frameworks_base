@@ -25,5 +25,4 @@
     android:scaleType="fitCenter"
     android:tint="?android:attr/textColorPrimary"
     android:src="@drawable/controls_icon"
-    android:elevation="@dimen/dream_overlay_bottom_affordance_elevation"
     android:contentDescription="@string/quick_controls_title" />
