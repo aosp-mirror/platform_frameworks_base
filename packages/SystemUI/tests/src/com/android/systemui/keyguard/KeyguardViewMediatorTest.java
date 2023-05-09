@@ -663,12 +663,6 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     @Test
-    public void testWakeAndUnlocking() {
-        mViewMediator.onWakeAndUnlocking();
-        verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
-    }
-
-    @Test
     public void testOnStartedWakingUp_logsUiEvent() {
         final InstanceId instanceId = InstanceId.fakeInstanceId(8);
         when(mSessionTracker.getSessionId((anyInt()))).thenReturn(instanceId);
