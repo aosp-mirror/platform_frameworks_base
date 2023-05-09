@@ -143,7 +143,7 @@ public:
     bool makeCurrent();
     void prepareTree(TreeInfo& info, int64_t* uiFrameInfo, int64_t syncQueued, RenderNode* target);
     // Returns the DequeueBufferDuration.
-    void draw();
+    void draw(bool solelyTextureViewUpdates);
     void destroy();
 
     // IFrameCallback, Choreographer-driven frame callback entry point
