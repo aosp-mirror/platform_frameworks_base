@@ -25,6 +25,8 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.MediaRoute2ProviderService.REASON_NETWORK_ERROR;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
+import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -1003,6 +1005,37 @@ public class InfoMediaManagerTest {
         mInfoMediaManager.addMediaDevice(route2Info);
 
         assertThat(mInfoMediaManager.mMediaDevices.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void addMediaDevice_deviceIncludedInSelectedDevices_shouldSetAsCurrentConnected() {
+        final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
+        final CachedBluetoothDeviceManager cachedBluetoothDeviceManager =
+                mock(CachedBluetoothDeviceManager.class);
+        final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo);
+
+        when(mRouterManager.getRoutingSessions(TEST_PACKAGE_NAME)).thenReturn(routingSessionInfos);
+        when(sessionInfo.getSelectedRoutes()).thenReturn(ImmutableList.of(TEST_ID));
+        when(route2Info.getType()).thenReturn(TYPE_BLUETOOTH_A2DP);
+        when(route2Info.getAddress()).thenReturn("00:00:00:00:00:00");
+        when(route2Info.getId()).thenReturn(TEST_ID);
+        when(mLocalBluetoothManager.getCachedDeviceManager())
+                .thenReturn(cachedBluetoothDeviceManager);
+        when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class)))
+                .thenReturn(cachedDevice);
+        mInfoMediaManager.mRouterManager = mRouterManager;
+
+        mInfoMediaManager.mMediaDevices.clear();
+        mInfoMediaManager.addMediaDevice(route2Info);
+
+        MediaDevice device = mInfoMediaManager.mMediaDevices.get(0);
+
+        assertThat(device instanceof BluetoothMediaDevice).isTrue();
+        assertThat(device.getState()).isEqualTo(STATE_SELECTED);
+        assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(device);
     }
 
     @Test
