@@ -557,7 +557,7 @@ public class UidObserverController {
                 return true;
             }
 
-            return Arrays.binarySearch(mUids, uid) != -1;
+            return Arrays.binarySearch(mUids, uid) >= 0;
         }
 
         void addUid(int uid) {
