@@ -760,6 +760,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) return true;
+        if (mSplitScreenController.isPresent()
+                && mSplitScreenController.get().isTaskRootOrStageRoot(taskInfo.taskId)) {
+            return false;
+        }
         return DesktopModeStatus.isProto2Enabled()
                 && taskInfo.getActivityType() == ACTIVITY_TYPE_STANDARD
                 && mDisplayController.getDisplayContext(taskInfo.displayId)
