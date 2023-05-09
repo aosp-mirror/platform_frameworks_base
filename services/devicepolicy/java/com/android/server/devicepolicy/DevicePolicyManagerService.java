@@ -15156,6 +15156,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             for (ActiveAdmin admin : policy.mAdminList) {
                 final boolean ownsDevice = isDeviceOwner(admin.info.getComponent(), userHandle);
                 final boolean ownsProfile = isProfileOwner(admin.info.getComponent(), userHandle);
+                // TODO(b/281738975): Should we be logging this for all admins?
                 if (ownsDevice || ownsProfile) {
                     if (isEnabled) {
                         sendAdminCommandLocked(admin, DeviceAdminReceiver.ACTION_LOCK_TASK_ENTERING,
@@ -15171,6 +15172,20 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             .write();
                 }
             }
+        }
+        // TODO(b/281738975): Should we be logging this for all admins?
+        for(EnforcingAdmin admin : mDevicePolicyEngine.getLocalPoliciesSetByAdmins(
+                PolicyDefinition.LOCK_TASK, userHandle).keySet()) {
+            if (admin.hasAuthority(EnforcingAdmin.DPC_AUTHORITY)) {
+                // already handled above
+                continue;
+            }
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.SET_LOCKTASK_MODE_ENABLED)
+                    .setAdmin(admin.getPackageName())
+                    .setBoolean(isEnabled)
+                    .setStrings(pkg)
+                    .write();
         }
     }
 
