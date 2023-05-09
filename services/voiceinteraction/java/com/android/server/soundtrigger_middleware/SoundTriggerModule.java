@@ -487,10 +487,11 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     if (mRecognitionToken == null) {
                         return;
                     }
+                    event.token = mRecognitionToken;
                     if (!event.recognitionEvent.recognitionStillActive) {
                         setState(ModelState.LOADED);
+                        mRecognitionToken = null;
                     }
-                    event.token = mRecognitionToken;
                     callback = mCallback;
                 }
                 // The callback must be invoked outside of the lock.
@@ -512,10 +513,11 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     if (mRecognitionToken == null) {
                         return;
                     }
+                    event.token = mRecognitionToken;
                     if (!event.phraseRecognitionEvent.common.recognitionStillActive) {
                         setState(ModelState.LOADED);
+                        mRecognitionToken = null;
                     }
-                    event.token = mRecognitionToken;
                     callback = mCallback;
                 }
                 // The callback must be invoked outside of the lock.
