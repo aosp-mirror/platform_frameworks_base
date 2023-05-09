@@ -21813,10 +21813,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final AccountManager accountManager = mContext.createContextAsUser(
                         UserHandle.of(sourceUserId), /* flags= */ 0)
                 .getSystemService(AccountManager.class);
-        final AccountManagerFuture<Bundle> bundle = accountManager.removeAccount(account,
-                null, null /* callback */, null /* handler */);
         try {
-            final Bundle result = bundle.getResult();
+            final Bundle result = accountManager.removeAccount(account,
+                    null, null /* callback */, null /* handler */).getResult(60, TimeUnit.SECONDS);
             if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, /* default */ false)) {
                 Slogf.i(LOG_TAG, "Account removed from the primary user.");
             } else {
