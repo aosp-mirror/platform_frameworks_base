@@ -21,6 +21,8 @@ import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
+import androidx.annotation.Nullable;
+
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 
@@ -42,24 +44,24 @@ class FluidResizeTaskPositioner implements DragPositioningCallback {
     private final Rect mRepositionTaskBounds = new Rect();
     // If a task move (not resize) finishes in this region, the positioner will not attempt to
     // finalize the bounds there using WCT#setBounds
-    private final Rect mDisallowedAreaForEndBounds = new Rect();
+    private final Rect mDisallowedAreaForEndBounds;
     private boolean mHasDragResized;
     private int mCtrlType;
 
     FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
-            DisplayController displayController, Rect disallowedAreaForEndBounds) {
+            DisplayController displayController, @Nullable Rect disallowedAreaForEndBounds) {
         this(taskOrganizer, windowDecoration, displayController, disallowedAreaForEndBounds,
                 dragStartListener -> {}, SurfaceControl.Transaction::new);
     }
 
     FluidResizeTaskPositioner(ShellTaskOrganizer taskOrganizer, WindowDecoration windowDecoration,
-            DisplayController displayController, Rect disallowedAreaForEndBounds,
+            DisplayController displayController, @Nullable Rect disallowedAreaForEndBounds,
             DragPositioningCallbackUtility.DragStartListener dragStartListener,
             Supplier<SurfaceControl.Transaction> supplier) {
         mTaskOrganizer = taskOrganizer;
         mWindowDecoration = windowDecoration;
         mDisplayController = displayController;
-        mDisallowedAreaForEndBounds.set(disallowedAreaForEndBounds);
+        mDisallowedAreaForEndBounds = new Rect(disallowedAreaForEndBounds);
         mDragStartListener = dragStartListener;
         mTransactionSupplier = supplier;
     }
