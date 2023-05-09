@@ -71,7 +71,7 @@ public abstract class ProviderSession<T, R>
     @NonNull
     protected Boolean mProviderResponseSet = false;
     @NonNull
-    protected final ProviderSessionMetric mProviderSessionMetric = new ProviderSessionMetric();
+    protected final ProviderSessionMetric mProviderSessionMetric;
     @NonNull
     private int mProviderSessionUid;
 
@@ -114,6 +114,13 @@ public abstract class ProviderSession<T, R>
     }
 
     /**
+     * Gives access to the objects metric collectors.
+     */
+    public ProviderSessionMetric getProviderSessionMetric() {
+        return this.mProviderSessionMetric;
+    }
+
+    /**
      * Interface to be implemented by any class that wishes to get a callback when a particular
      * provider session's status changes. Typically, implemented by the {@link RequestSession}
      * class.
@@ -147,6 +154,8 @@ public abstract class ProviderSession<T, R>
         mComponentName = componentName;
         mRemoteCredentialService = remoteCredentialService;
         mProviderSessionUid = MetricUtilities.getPackageUid(mContext, mComponentName);
+        mProviderSessionMetric = new ProviderSessionMetric(
+                ((RequestSession) mCallbacks).mRequestSessionMetric.getSessionIdTrackTwo());
     }
 
     /** Provider status at various states of the provider session. */
@@ -206,7 +215,8 @@ public abstract class ProviderSession<T, R>
             CredentialsSource source) {
         setStatus(status);
         mProviderSessionMetric.collectCandidateMetricUpdate(isTerminatingStatus(status),
-                isCompletionStatus(status), mProviderSessionUid);
+                isCompletionStatus(status), mProviderSessionUid,
+                source == CredentialsSource.AUTH_ENTRY);
         mCallbacks.onProviderStatusChanged(status, mComponentName, source);
     }
     /** Common method that transfers metrics from the init phase to candidates */
