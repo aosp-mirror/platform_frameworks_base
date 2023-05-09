@@ -373,16 +373,6 @@ public class LogModule {
     }
 
     /**
-     * Provides a {@link LogBuffer} for use by {@link com.android.keyguard.KeyguardUpdateMonitor}.
-     */
-    @Provides
-    @SysUISingleton
-    @CarrierTextManagerLog
-    public static LogBuffer provideCarrierTextManagerLog(LogBufferFactory factory) {
-        return factory.create("CarrierTextManagerLog", 100);
-    }
-
-    /**
      * Provides a {@link LogBuffer} for use by {@link com.android.systemui.ScreenDecorations}.
      */
     @Provides
