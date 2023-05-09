@@ -423,12 +423,6 @@ object Flags {
     // TODO(b/265045965): Tracking Bug
     val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
 
-    @JvmField
-    // TODO(b/271428141): Tracking Bug
-    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = releasedFlag(
-        1004,
-        "enable_low_light_clock_undocked")
-
     // TODO(b/273509374): Tracking Bug
     @JvmField
     val ALWAYS_SHOW_HOME_CONTROLS_ON_DREAMS = releasedFlag(1006,
