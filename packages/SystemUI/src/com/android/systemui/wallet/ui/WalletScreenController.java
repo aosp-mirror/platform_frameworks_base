@@ -338,7 +338,12 @@ public class WalletScreenController implements
          */
         QAWalletCardViewInfo(Context context, WalletCard walletCard) {
             mWalletCard = walletCard;
-            mCardDrawable = mWalletCard.getCardImage().loadDrawable(context);
+            Icon cardImageIcon = mWalletCard.getCardImage();
+            if (cardImageIcon.getType() == Icon.TYPE_URI) {
+                mCardDrawable = null;
+            } else {
+                mCardDrawable = mWalletCard.getCardImage().loadDrawable(context);
+            }
             Icon icon = mWalletCard.getCardIcon();
             mIconDrawable = icon == null ? null : icon.loadDrawable(context);
         }
