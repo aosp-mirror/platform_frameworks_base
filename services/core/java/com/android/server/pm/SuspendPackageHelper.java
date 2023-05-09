@@ -697,8 +697,6 @@ public final class SuspendPackageHelper {
             Computer snapshot, int userId, boolean suspend) {
         final Set<String> toSuspend = packagesToSuspendInQuietMode(snapshot, userId);
         if (!suspend) {
-            // Note: this method is called from DPMS constructor to suspend apps on upgrade, but
-            // it won't enter here because 'suspend' will equal 'true'.
             final DevicePolicyManagerInternal dpm =
                     LocalServices.getService(DevicePolicyManagerInternal.class);
             if (dpm != null) {
