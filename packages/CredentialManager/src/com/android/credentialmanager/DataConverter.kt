@@ -62,7 +62,6 @@ import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
 import java.time.Instant
 
-// TODO: remove all !! checks
 fun getAppLabel(
     pm: PackageManager,
     appPackageName: String
@@ -88,7 +87,7 @@ private fun getServiceLabelAndIcon(
     val component = ComponentName.unflattenFromString(providerFlattenedComponentName)
     if (component == null) {
         // Test data has only package name not component name.
-        // TODO: remove once test data is removed
+        // For test data usage only.
         try {
             val pkgInfo = pm.getPackageInfo(
                 providerFlattenedComponentName,
@@ -303,7 +302,6 @@ class GetFlowUtils {
                     )
                 }
             }
-            // TODO: handle empty list due to parsing error.
             return result
         }
 
@@ -392,7 +390,6 @@ class GetFlowUtils {
                     subTitle = actionEntryUi.subtitle?.toString(),
                 ))
             }
-            // TODO: handle empty list
             return result
         }
     }
