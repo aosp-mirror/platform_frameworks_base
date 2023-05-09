@@ -618,6 +618,7 @@ public class BackupManagerServiceTest {
 
     @Test
     public void testDumpForOneUser_callerDoesNotHaveInteractAcrossUsersFullPermission_ignored() {
+        createBackupManagerServiceAndUnlockSystemUser();
         mService.setBackupServiceActive(NON_SYSTEM_USER, true);
         simulateUserUnlocked(NON_SYSTEM_USER);
 
@@ -637,6 +638,7 @@ public class BackupManagerServiceTest {
     @Test
     public void
             testDumpForOneUser_callerHasInteractAcrossUsersFullPermission_dumpsOnlySpecifiedUser() {
+        createBackupManagerServiceAndUnlockSystemUser();
         mService.setBackupServiceActive(NON_SYSTEM_USER, true);
         simulateUserUnlocked(NON_SYSTEM_USER);
 
@@ -648,6 +650,7 @@ public class BackupManagerServiceTest {
 
     @Test
     public void testDumpForAllUsers_callerHasInteractAcrossUsersFullPermission_dumpsAllUsers() {
+        createBackupManagerServiceAndUnlockSystemUser();
         mService.setBackupServiceActive(NON_SYSTEM_USER, true);
         simulateUserUnlocked(NON_SYSTEM_USER);
 
