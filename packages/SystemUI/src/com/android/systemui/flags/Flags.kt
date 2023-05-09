@@ -207,7 +207,7 @@ object Flags {
     // TODO(b/267722622): Tracking Bug
     @JvmField
     val WALLPAPER_PICKER_UI_FOR_AIWP =
-            releasedFlag(
+            unreleasedFlag(
                     229,
                     "wallpaper_picker_ui_for_aiwp"
             )
