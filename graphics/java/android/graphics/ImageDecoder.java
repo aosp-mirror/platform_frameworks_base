@@ -627,11 +627,19 @@ public final class ImageDecoder implements AutoCloseable {
      */
     public static class ImageInfo {
         private final Size mSize;
-        private ImageDecoder mDecoder;
+        private final boolean mIsAnimated;
+        private final String mMimeType;
+        private final ColorSpace mColorSpace;
 
-        private ImageInfo(@NonNull ImageDecoder decoder) {
-            mSize = new Size(decoder.mWidth, decoder.mHeight);
-            mDecoder = decoder;
+        private ImageInfo(
+                @NonNull Size size,
+                boolean isAnimated,
+                @NonNull String mimeType,
+                @Nullable ColorSpace colorSpace) {
+            mSize = size;
+            mIsAnimated = isAnimated;
+            mMimeType = mimeType;
+            mColorSpace = colorSpace;
         }
 
         /**
@@ -647,7 +655,7 @@ public final class ImageDecoder implements AutoCloseable {
          */
         @NonNull
         public String getMimeType() {
-            return mDecoder.getMimeType();
+            return mMimeType;
         }
 
         /**
@@ -657,7 +665,7 @@ public final class ImageDecoder implements AutoCloseable {
          * return an {@link AnimatedImageDrawable}.</p>
          */
         public boolean isAnimated() {
-            return mDecoder.mAnimated;
+            return mIsAnimated;
         }
 
         /**
@@ -669,7 +677,7 @@ public final class ImageDecoder implements AutoCloseable {
          */
         @Nullable
         public ColorSpace getColorSpace() {
-            return mDecoder.getColorSpace();
+            return mColorSpace;
         }
     };
 
@@ -1798,12 +1806,39 @@ public final class ImageDecoder implements AutoCloseable {
     private void callHeaderDecoded(@Nullable OnHeaderDecodedListener listener,
             @NonNull Source src) {
         if (listener != null) {
-            ImageInfo info = new ImageInfo(this);
-            try {
-                listener.onHeaderDecoded(this, info, src);
-            } finally {
-                info.mDecoder = null;
-            }
+            ImageInfo info =
+                    new ImageInfo(
+                            new Size(mWidth, mHeight), mAnimated, getMimeType(), getColorSpace());
+            listener.onHeaderDecoded(this, info, src);
+        }
+    }
+
+    /**
+     * Return {@link ImageInfo} from a {@code Source}.
+     *
+     * <p>Returns the same {@link ImageInfo} object that a usual decoding process would return as
+     * part of {@link OnHeaderDecodedListener}.
+     *
+     * @param src representing the encoded image.
+     * @return ImageInfo describing the image.
+     * @throws IOException if {@code src} is not found, is an unsupported format, or cannot be
+     *     decoded for any reason.
+     * @hide
+     */
+    @WorkerThread
+    @NonNull
+    public static ImageInfo decodeHeader(@NonNull Source src) throws IOException {
+        Trace.traceBegin(Trace.TRACE_TAG_RESOURCES, "ImageDecoder#decodeHeader");
+        try (ImageDecoder decoder = src.createImageDecoder(true /*preferAnimation*/)) {
+            // We don't want to leak decoder so resolve all properties immediately.
+            return new ImageInfo(
+                    new Size(decoder.mWidth, decoder.mHeight),
+                    decoder.mAnimated,
+                    decoder.getMimeType(),
+                    decoder.getColorSpace());
+        } finally {
+            // Close the ImageDecoder#decodeHeader trace.
+            Trace.traceEnd(Trace.TRACE_TAG_RESOURCES);
         }
     }
 
