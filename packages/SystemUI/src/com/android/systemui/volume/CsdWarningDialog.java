@@ -50,7 +50,6 @@ import dagger.assisted.AssistedInject;
  * <ul>
  *     <li>{@link AudioManager#CSD_WARNING_DOSE_REACHED_1X}</li>
  *     <li>{@link AudioManager#CSD_WARNING_DOSE_REPEATED_5X}</li>
- *     <li>{@link AudioManager#CSD_WARNING_ACCUMULATION_START}</li>
  *     <li>{@link AudioManager#CSD_WARNING_MOMENTARY_EXPOSURE}</li>
  * </ul>
  * Rather than basing volume safety messages on a fixed volume index, the CSD feature derives its
@@ -123,9 +122,9 @@ public class CsdWarningDialog extends SystemUIDialog
         setShowForAllUsers(true);
         setMessage(mContext.getString(getStringForWarning(csdWarning)));
         setButton(DialogInterface.BUTTON_POSITIVE,
-                mContext.getString(com.android.internal.R.string.yes), this);
+                mContext.getString(R.string.csd_button_keep_listening), this);
         setButton(DialogInterface.BUTTON_NEGATIVE,
-                mContext.getString(com.android.internal.R.string.no), this);
+                mContext.getString(R.string.csd_button_lower_volume), this);
         setOnDismissListener(this);
 
         final IntentFilter filter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
@@ -138,7 +137,7 @@ public class CsdWarningDialog extends SystemUIDialog
                     // unlike on the 5x dose repeat, level is only reduced to RS1 when the warning
                     // is not acknowledged quickly enough
                     mAudioManager.lowerVolumeToRs1();
-                    sendNotification();
+                    sendNotification(/*for5XCsd=*/false);
                 }
             };
         } else {
@@ -150,6 +149,16 @@ public class CsdWarningDialog extends SystemUIDialog
         if (mOnCleanup != null) {
             mOnCleanup.run();
         }
+    }
+
+    @Override
+    public void show() {
+        if (mCsdWarning == AudioManager.CSD_WARNING_DOSE_REPEATED_5X) {
+            // only show a notification in case we reached 500% of dose
+            show5XNotification();
+            return;
+        }
+        super.show();
     }
 
     // NOT overriding onKeyDown as we're not allowing a dismissal on any key other than
@@ -177,8 +186,8 @@ public class CsdWarningDialog extends SystemUIDialog
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        if (which == DialogInterface.BUTTON_POSITIVE) {
-            Log.d(TAG, "OK pressed for CSD warning " + mCsdWarning);
+        if (which == DialogInterface.BUTTON_NEGATIVE) {
+            Log.d(TAG, "Lower volume pressed for CSD warning " + mCsdWarning);
             dismiss();
 
         }
@@ -235,27 +244,34 @@ public class CsdWarningDialog extends SystemUIDialog
         switch (csdWarning) {
             case AudioManager.CSD_WARNING_DOSE_REACHED_1X:
                 return com.android.internal.R.string.csd_dose_reached_warning;
-            case AudioManager.CSD_WARNING_DOSE_REPEATED_5X:
-                return com.android.internal.R.string.csd_dose_repeat_warning;
             case AudioManager.CSD_WARNING_MOMENTARY_EXPOSURE:
                 return com.android.internal.R.string.csd_momentary_exposure_warning;
-            case AudioManager.CSD_WARNING_ACCUMULATION_START:
-                return com.android.internal.R.string.csd_entering_RS2_warning;
         }
         Log.e(TAG, "Invalid CSD warning event " + csdWarning, new Exception());
         return com.android.internal.R.string.csd_dose_reached_warning;
     }
 
+    /** When 5X CSD is reached we lower the volume and show a notification. **/
+    private void show5XNotification() {
+        if (mCsdWarning != AudioManager.CSD_WARNING_DOSE_REPEATED_5X) {
+            Log.w(TAG, "Notification dose repeat 5x is not shown for " + mCsdWarning);
+            return;
+        }
+
+        mAudioManager.lowerVolumeToRs1();
+        sendNotification(/*for5XCsd=*/true);
+    }
 
     /**
      * In case user did not respond to the dialog, they still need to know volume was lowered.
      */
-    private void sendNotification() {
+    private void sendNotification(boolean for5XCsd) {
         Intent intent = new Intent(Settings.ACTION_SOUND_SETTINGS);
         PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, intent,
                 FLAG_IMMUTABLE);
 
-        String text = mContext.getString(R.string.csd_system_lowered_text);
+        String text = for5XCsd ? mContext.getString(R.string.csd_500_system_lowered_text)
+                : mContext.getString(R.string.csd_system_lowered_text);
         String title = mContext.getString(R.string.csd_lowered_title);
 
         Notification.Builder builder =

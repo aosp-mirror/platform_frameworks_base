@@ -4602,24 +4602,13 @@
 
     <!-- Message shown in dialog when user goes over a multiple of 100% of the safe weekly dose -->
     <string name="csd_dose_reached_warning" product="default">
-        "Warning,\nYou have exceeded the amount of loud sound signals one can safely listen to in a week over headphones.\n\nGoing over this limit will permanently damage your hearing."
-    </string>
-
-    <!-- Message shown in dialog when user goes over 500% of the safe weekly dose and volume is
-    automatically lowered -->
-    <string name="csd_dose_repeat_warning" product="default">
-        "Warning,\nYou have exceeded 5 times the amount of loud sound signals one can safely listen to in a week over headphones.\n\nVolume has been lowered to protect your hearing."
-    </string>
-
-    <!-- Message shown in dialog when user's dose enters RS2 -->
-    <string name="csd_entering_RS2_warning" product="default">
-        "The level at which you are listening to media can result in hearing damage when sustained over long periods of time.\n\nContinuing to play at this level for long periods of time could damage your hearing."
+        "Keep listening at a high volume?\n\nHeadphone volume has been high for longer than recommended, which can damage your hearing"
     </string>
 
     <!-- Message shown in dialog when user is momentarily listening to unsafely loud content
     over headphones -->
     <string name="csd_momentary_exposure_warning" product="default">
-        "Warning,\nYou are currently listening to loud content played at an unsafe level.\n\nContinuing to listen this loud will permanently damage your hearing."
+        "Loud sound detected\n\nHeadphone volume has been higher than recommended, which can damage your hearing"
     </string>
 
     <!-- Dialog title for dialog shown when the accessibility shortcut is activated, and we want

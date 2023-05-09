@@ -10586,7 +10586,7 @@ public class AudioService extends IAudioService.Stub
                 new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).build(), true);
         final int nativeDeviceType;
         final AudioDeviceAttributes ada;
-        if (devices.isEmpty()) {
+        if (!devices.isEmpty()) {
             ada = devices.get(0);
             nativeDeviceType = ada.getInternalType();
         } else {
