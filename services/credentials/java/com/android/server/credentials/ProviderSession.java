@@ -209,7 +209,6 @@ public abstract class ProviderSession<T, R>
                 isCompletionStatus(status), mProviderSessionUid);
         mCallbacks.onProviderStatusChanged(status, mComponentName, source);
     }
-
     /** Common method that transfers metrics from the init phase to candidates */
     protected void startCandidateMetrics() {
         mProviderSessionMetric.collectCandidateMetricSetupViaInitialMetric(
