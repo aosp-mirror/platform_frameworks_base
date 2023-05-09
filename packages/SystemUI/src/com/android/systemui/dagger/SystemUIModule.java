@@ -53,6 +53,8 @@ import com.android.systemui.flags.FlagsModule;
 import com.android.systemui.keyboard.KeyboardModule;
 import com.android.systemui.keyguard.data.BouncerViewModule;
 import com.android.systemui.log.dagger.LogModule;
+import com.android.systemui.log.dagger.MonitorLog;
+import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.mediaprojection.appselector.MediaProjectionModule;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.motiontool.MotionToolModule;
@@ -247,8 +249,8 @@ public abstract class SystemUIModule {
     @Provides
     @SystemUser
     static Monitor provideSystemUserMonitor(@Main Executor executor,
-            SystemProcessCondition systemProcessCondition) {
-        return new Monitor(executor, Collections.singleton(systemProcessCondition));
+            SystemProcessCondition systemProcessCondition, @MonitorLog TableLogBuffer logBuffer) {
+        return new Monitor(executor, Collections.singleton(systemProcessCondition), logBuffer);
     }
 
     @BindsOptionalOf
