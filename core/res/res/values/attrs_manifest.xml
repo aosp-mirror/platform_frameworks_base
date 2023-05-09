@@ -1618,7 +1618,8 @@
             {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above, starting a foreground
             service with this type will require permission
             {@link android.Manifest.permission#FOREGROUND_SERVICE_PHONE_CALL} and
-            {@link android.Manifest.permission#MANAGE_OWN_CALLS}.
+            {@link android.Manifest.permission#MANAGE_OWN_CALLS} or holding the default
+            {@link android.app.role.RoleManager#ROLE_DIALER dialer role}.
         -->
         <flag name="phoneCall" value="0x04" />
         <!-- GPS, map, navigation location update.

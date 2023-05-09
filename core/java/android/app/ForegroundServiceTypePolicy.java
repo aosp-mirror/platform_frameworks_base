@@ -43,6 +43,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.compat.CompatChanges;
+import android.app.role.RoleManager;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
@@ -58,6 +59,7 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.permission.PermissionCheckerManager;
 import android.provider.DeviceConfig;
 import android.text.TextUtils;
@@ -74,6 +76,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -333,7 +336,8 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.FOREGROUND_SERVICE_PHONE_CALL)
             }, true),
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
-                new RegularPermission(Manifest.permission.MANAGE_OWN_CALLS)
+                new RegularPermission(Manifest.permission.MANAGE_OWN_CALLS),
+                new RolePermission(RoleManager.ROLE_DIALER)
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_PHONE_CALL /* permissionEnforcementFlag */,
             true /* permissionEnforcementFlagDefaultValue */
@@ -1118,6 +1122,29 @@ public abstract class ForegroundServiceTypePolicy {
             final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
             final int mode = appOpsManager.unsafeCheckOpRawNoThrow(mOpCode, callerUid, packageName);
             return (mode == MODE_ALLOWED || (allowWhileInUse && mode == MODE_FOREGROUND))
+                    ? PERMISSION_GRANTED : PERMISSION_DENIED;
+        }
+    }
+
+    /**
+     * This represents a particular role an app needs to hold for a specific service type.
+     */
+    static class RolePermission extends ForegroundServiceTypePermission {
+        final String mRole;
+
+        RolePermission(@NonNull String role) {
+            super(role);
+            mRole = role;
+        }
+
+        @Override
+        @PackageManager.PermissionResult
+        public int checkPermission(@NonNull Context context, int callerUid, int callerPid,
+                String packageName, boolean allowWhileInUse) {
+            final RoleManager rm = context.getSystemService(RoleManager.class);
+            final List<String> holders = rm.getRoleHoldersAsUser(mRole,
+                    UserHandle.getUserHandleForUid(callerUid));
+            return holders != null && holders.contains(packageName)
                     ? PERMISSION_GRANTED : PERMISSION_DENIED;
         }
     }
