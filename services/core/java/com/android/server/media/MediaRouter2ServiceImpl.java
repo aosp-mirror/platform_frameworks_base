@@ -910,7 +910,7 @@ class MediaRouter2ServiceImpl {
             if (!TextUtils.equals(manager.mLastSessionCreationRequest.mRoute.getId(),
                     route.getId())) {
                 // When media router has no permission
-                if (!routerRecord.mHasModifyAudioRoutingPermission
+                if (!routerRecord.hasSystemRoutingPermission()
                         && manager.mLastSessionCreationRequest.mRoute.isSystemRoute()
                         && route.isSystemRoute()) {
                     route = manager.mLastSessionCreationRequest.mRoute;
@@ -924,9 +924,16 @@ class MediaRouter2ServiceImpl {
             }
             manager.mLastSessionCreationRequest = null;
         } else {
-            if (route.isSystemRoute() && !routerRecord.mHasModifyAudioRoutingPermission
-                    && !TextUtils.equals(route.getId(),
-                    routerRecord.mUserRecord.mHandler.mSystemProvider.getDefaultRoute().getId())) {
+            if (route.isSystemRoute()
+                    && !routerRecord.hasSystemRoutingPermission()
+                    && !TextUtils.equals(
+                            route.getId(),
+                            routerRecord
+                                    .mUserRecord
+                                    .mHandler
+                                    .mSystemProvider
+                                    .getDefaultRoute()
+                                    .getId())) {
                 Slog.w(TAG, "MODIFY_AUDIO_ROUTING permission is required to transfer to"
                         + route);
                 routerRecord.mUserRecord.mHandler.notifySessionCreationFailedToRouter(
@@ -1002,7 +1009,8 @@ class MediaRouter2ServiceImpl {
 
         String defaultRouteId =
                 routerRecord.mUserRecord.mHandler.mSystemProvider.getDefaultRoute().getId();
-        if (route.isSystemRoute() && !routerRecord.mHasModifyAudioRoutingPermission
+        if (route.isSystemRoute()
+                && !routerRecord.hasSystemRoutingPermission()
                 && !TextUtils.equals(route.getId(), defaultRouteId)) {
             routerRecord.mUserRecord.mHandler.sendMessage(
                     obtainMessage(UserHandler::notifySessionCreationFailedToRouter,
@@ -1522,6 +1530,14 @@ class MediaRouter2ServiceImpl {
             mRouterId = mNextRouterOrManagerId.getAndIncrement();
         }
 
+        /**
+         * Returns whether the corresponding router has permission to query and control system
+         * routes.
+         */
+        public boolean hasSystemRoutingPermission() {
+            return mHasModifyAudioRoutingPermission;
+        }
+
         public void dispose() {
             mRouter.asBinder().unlinkToDeath(this, 0);
         }
@@ -1542,11 +1558,39 @@ class MediaRouter2ServiceImpl {
             pw.println(indent + "mPid=" + mPid);
             pw.println(indent + "mHasConfigureWifiDisplayPermission="
                     + mHasConfigureWifiDisplayPermission);
-            pw.println(indent + "mHasModifyAudioRoutingPermission="
-                    + mHasModifyAudioRoutingPermission);
+            pw.println(indent + "hasSystemRoutingPermission=" + hasSystemRoutingPermission());
             pw.println(indent + "mRouterId=" + mRouterId);
 
             mDiscoveryPreference.dump(pw, indent);
+        }
+
+        /**
+         * Sends the corresponding router an {@link
+         * android.media.MediaRouter2.RouteCallback#onRoutesUpdated update} for the given {@code
+         * routes}.
+         *
+         * <p>Only the routes that are visible to the router are sent as part of the update.
+         */
+        public void notifyRoutesUpdated(List<MediaRoute2Info> routes) {
+            try {
+                mRouter.notifyRoutesUpdated(getVisibleRoutes(routes));
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify routes updated. Router probably died.", ex);
+            }
+        }
+
+        /**
+         * Returns a filtered copy of {@code routes} that contains only the routes that are {@link
+         * MediaRoute2Info#isVisibleTo visible} to the router corresponding to this record.
+         */
+        private List<MediaRoute2Info> getVisibleRoutes(@NonNull List<MediaRoute2Info> routes) {
+            List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
+            for (MediaRoute2Info route : routes) {
+                if (route.isVisibleTo(mPackageName)) {
+                    filteredRoutes.add(route);
+                }
+            }
+            return filteredRoutes;
         }
     }
 
@@ -1970,7 +2014,7 @@ class MediaRouter2ServiceImpl {
                 @NonNull RouterRecord routerRecord, @NonNull ManagerRecord managerRecord,
                 @NonNull RoutingSessionInfo oldSession, @NonNull MediaRoute2Info route) {
             try {
-                if (route.isSystemRoute() && !routerRecord.mHasModifyAudioRoutingPermission) {
+                if (route.isSystemRoute() && !routerRecord.hasSystemRoutingPermission()) {
                     // The router lacks permission to modify system routing, so we hide system
                     // route info from them.
                     route = mSystemProvider.getDefaultRoute();
@@ -2189,7 +2233,7 @@ class MediaRouter2ServiceImpl {
 
             mSessionToRouterMap.put(sessionInfo.getId(), matchingRequest.mRouterRecord);
             if (sessionInfo.isSystemSession()
-                    && !matchingRequest.mRouterRecord.mHasModifyAudioRoutingPermission) {
+                    && !matchingRequest.mRouterRecord.hasSystemRoutingPermission()) {
                 // The router lacks permission to modify system routing, so we hide system routing
                 // session info from them.
                 sessionInfo = mSystemProvider.getDefaultSessionInfo();
@@ -2323,24 +2367,6 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private List<IMediaRouter2> getRouters(boolean hasModifyAudioRoutingPermission) {
-            final List<IMediaRouter2> routers = new ArrayList<>();
-            MediaRouter2ServiceImpl service = mServiceRef.get();
-            if (service == null) {
-                return routers;
-            }
-            synchronized (service.mLock) {
-                for (RouterRecord routerRecord : mUserRecord.mRouterRecords) {
-                    if (hasModifyAudioRoutingPermission
-                            == routerRecord.mHasModifyAudioRoutingPermission) {
-                        routers.add(routerRecord.mRouter);
-                    }
-                    routers.add(routerRecord.mRouter);
-                }
-            }
-            return routers;
-        }
-
         private List<IMediaRouter2Manager> getManagers() {
             final List<IMediaRouter2Manager> managers = new ArrayList<>();
             MediaRouter2ServiceImpl service = mServiceRef.get();
@@ -2374,7 +2400,7 @@ class MediaRouter2ServiceImpl {
             synchronized (service.mLock) {
                 for (RouterRecord routerRecord : mUserRecord.mRouterRecords) {
                     if (hasModifyAudioRoutingPermission
-                            == routerRecord.mHasModifyAudioRoutingPermission) {
+                            == routerRecord.hasSystemRoutingPermission()) {
                         routerRecords.add(routerRecord);
                     }
                 }
@@ -2407,7 +2433,7 @@ class MediaRouter2ServiceImpl {
             }
 
             RoutingSessionInfo currentSystemSessionInfo;
-            if (routerRecord.mHasModifyAudioRoutingPermission) {
+            if (routerRecord.hasSystemRoutingPermission()) {
                 if (systemProviderInfo != null) {
                     currentRoutes.addAll(systemProviderInfo.getRoutes());
                 } else {
@@ -2436,33 +2462,8 @@ class MediaRouter2ServiceImpl {
                 @NonNull List<RouterRecord> routerRecords,
                 @NonNull List<MediaRoute2Info> routes) {
             for (RouterRecord routerRecord : routerRecords) {
-                List<MediaRoute2Info> filteredRoutes = getFilteredRoutesForPackageName(routes,
-                        routerRecord.mPackageName);
-                try {
-                    routerRecord.mRouter.notifyRoutesUpdated(filteredRoutes);
-                } catch (RemoteException ex) {
-                    Slog.w(TAG, "Failed to notify routes updated. Router probably died.", ex);
-                }
+                routerRecord.notifyRoutesUpdated(routes);
             }
-        }
-
-        /**
-         * Filters list of routes to return only public routes or routes provided by the same
-         * package name or routes containing this package name in its allow list.
-         *
-         * @param routes initial list of routes to be filtered.
-         * @param packageName router's package name to filter routes for it.
-         * @return only the routes that this package name is allowed to see.
-         */
-        private static List<MediaRoute2Info> getFilteredRoutesForPackageName(
-                @NonNull List<MediaRoute2Info> routes, @NonNull String packageName) {
-            List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
-            for (MediaRoute2Info route : routes) {
-                if (route.isVisibleTo(packageName)) {
-                    filteredRoutes.add(route);
-                }
-            }
-            return filteredRoutes;
         }
 
         private void notifySessionInfoChangedToRouters(
