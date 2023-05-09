@@ -563,4 +563,75 @@ public class AudioServiceEvents {
             return new StringBuilder("FIXME invalid event type:").append(mEventType).toString();
         }
     }
+
+    /**
+     * Class to log stream type mute/unmute events
+     */
+    static final class StreamMuteEvent extends EventLogger.Event {
+        final int mStreamType;
+        final boolean mMuted;
+        final String mSource;
+
+        StreamMuteEvent(int streamType, boolean muted, String source) {
+            mStreamType = streamType;
+            mMuted = muted;
+            mSource = source;
+        }
+
+        @Override
+        public String eventToString() {
+            final String streamName =
+                    (mStreamType <= AudioSystem.getNumStreamTypes() && mStreamType >= 0)
+                    ? AudioSystem.STREAM_NAMES[mStreamType]
+                    : ("stream " + mStreamType);
+            return new StringBuilder(streamName)
+                    .append(mMuted ? " muting by " : " unmuting by ")
+                    .append(mSource)
+                    .toString();
+        }
+    }
+
+    /**
+     * Class to log unmute errors that contradict the ringer/zen mode muted streams
+     */
+    static final class StreamUnmuteErrorEvent extends EventLogger.Event {
+        final int mStreamType;
+        final int mRingerZenMutedStreams;
+
+        StreamUnmuteErrorEvent(int streamType, int ringerZenMutedStreams) {
+            mStreamType = streamType;
+            mRingerZenMutedStreams = ringerZenMutedStreams;
+        }
+
+        @Override
+        public String eventToString() {
+            final String streamName =
+                    (mStreamType <= AudioSystem.getNumStreamTypes() && mStreamType >= 0)
+                            ? AudioSystem.STREAM_NAMES[mStreamType]
+                            : ("stream " + mStreamType);
+            return new StringBuilder("Error trying to unmute ")
+                    .append(streamName)
+                    .append(" despite muted streams 0x")
+                    .append(Integer.toHexString(mRingerZenMutedStreams))
+                    .toString();
+        }
+    }
+
+    static final class RingerZenMutedStreamsEvent extends EventLogger.Event {
+        final int mRingerZenMutedStreams;
+        final String mSource;
+
+        RingerZenMutedStreamsEvent(int ringerZenMutedStreams, String source) {
+            mRingerZenMutedStreams = ringerZenMutedStreams;
+            mSource = source;
+        }
+
+        @Override
+        public String eventToString() {
+            return new StringBuilder("RingerZenMutedStreams 0x")
+                    .append(Integer.toHexString(mRingerZenMutedStreams))
+                    .append(" from ").append(mSource)
+                    .toString();
+        }
+    }
 }
