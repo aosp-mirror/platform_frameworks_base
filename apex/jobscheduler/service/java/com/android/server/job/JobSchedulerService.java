@@ -4124,6 +4124,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (namespace.isEmpty()) {
                     throw new IllegalArgumentException("namespace cannot be empty");
                 }
+                if (namespace.length() > 1000) {
+                    throw new IllegalArgumentException(
+                            "namespace cannot be more than 1000 characters");
+                }
                 namespace = namespace.intern();
             }
             return namespace;
