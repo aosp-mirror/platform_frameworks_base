@@ -104,6 +104,7 @@ import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.parsing.PackageParser2;
+import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.utils.RequestThrottle;
 
 import libcore.io.IoUtils;
@@ -1308,6 +1309,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         }
     }
 
+    private boolean isValidForInstallConstraints(PackageStateInternal ps,
+            String installerPackageName) {
+        return TextUtils.equals(ps.getInstallSource().mInstallerPackageName, installerPackageName)
+                || TextUtils.equals(ps.getInstallSource().mUpdateOwnerPackageName,
+                installerPackageName);
+    }
+
     private CompletableFuture<InstallConstraintsResult> checkInstallConstraintsInternal(
             String installerPackageName, List<String> packageNames,
             InstallConstraints constraints, long timeoutMillis) {
@@ -1319,8 +1327,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)) {
             for (var packageName : packageNames) {
                 var ps = snapshot.getPackageStateInternal(packageName);
-                if (ps == null || !TextUtils.equals(
-                        ps.getInstallSource().mInstallerPackageName, installerPackageName)) {
+                if (ps == null || !isValidForInstallConstraints(ps, installerPackageName)) {
                     throw new SecurityException("Caller has no access to package " + packageName);
                 }
             }
