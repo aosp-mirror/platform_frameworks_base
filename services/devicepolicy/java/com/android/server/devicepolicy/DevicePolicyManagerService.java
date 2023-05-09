@@ -447,6 +447,7 @@ import android.util.AtomicFile;
 import android.util.DebugUtils;
 import android.util.IndentingPrintWriter;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -12084,7 +12085,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
         Preconditions.checkCallAuthorization(
-                isDeviceOwner(caller) || isProfileOwner(caller));
+                isDefaultDeviceOwner(caller) || isProfileOwner(caller));
 
         if (packageList != null) {
             for (String pkg : packageList) {
@@ -13369,8 +13370,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 PolicyDefinition<Boolean> policyDefinition =
                         PolicyDefinition.getPolicyDefinitionForUserRestriction(key);
                 if (enabledFromThisOwner) {
-                    setLocalUserRestrictionInternal(
-                            admin, key, /* enabled= */ true, affectedUserId);
+                    // TODO: Remove this special case - replace with breaking change to require
+                    //  setGlobally to disable ADB
+                    if (key.equals(UserManager.DISALLOW_DEBUGGING_FEATURES) && parent) {
+                        setGlobalUserRestrictionInternal(admin, key, /* enabled= */ true);
+                    } else {
+                        setLocalUserRestrictionInternal(
+                                admin, key, /* enabled= */ true, affectedUserId);
+                    }
                 } else {
                     // Remove any local and global policy that was set by the admin
                     if (!policyDefinition.isLocalOnlyPolicy()) {
@@ -15159,7 +15166,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     }
                     DevicePolicyEventLogger
                             .createEvent(DevicePolicyEnums.SET_LOCKTASK_MODE_ENABLED)
-                            .setAdmin(admin.info.getPackageName())
+                            .setAdmin(admin.info == null ? null : admin.info.getPackageName())
                             .setBoolean(isEnabled)
                             .setStrings(pkg)
                             .write();
@@ -22730,7 +22737,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         private void handleFinancedDeviceKioskRoleChange() {
-            if (!isPermissionCheckFlagEnabled()) {
+            if (!isPolicyEngineForFinanceFlagEnabled()) {
                 return;
             }
             Slog.i(LOG_TAG, "Handling action " + ACTION_DEVICE_FINANCING_STATE_CHANGED);
