@@ -4433,6 +4433,21 @@ public class ActivityManager {
     }
 
     /**
+     * Similar to {@link #forceStopPackageAsUser(String, int)} but will also stop the package even
+     * when the user is in the stopping state.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.FORCE_STOP_PACKAGES)
+    public void forceStopPackageAsUserEvenWhenStopping(String packageName, @UserIdInt int userId) {
+        try {
+            getService().forceStopPackageEvenWhenStopping(packageName, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Sets the current locales of the device. Calling app must have the permission
      * {@code android.permission.CHANGE_CONFIGURATION} and
      * {@code android.permission.WRITE_SETTINGS}.
