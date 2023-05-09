@@ -22,7 +22,4 @@
     <!-- Whether safe headphone volume is enabled or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">false</bool>
 
-    <!-- Whether safe headphone sound dosage warning is enabled or not (country specific). -->
-    <bool name="config_safe_sound_dosage_enabled">false</bool>
-
 </resources>

@@ -2957,8 +2957,13 @@
     <!-- Whether safe headphone volume is enabled or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
 
-    <!-- Whether safe headphone sound dosage warning is enabled or not (country specific). -->
-    <bool name="config_safe_sound_dosage_enabled">true</bool>
+    <!-- Whether safe headphone sound dosage warning is enabled or not
+         (country specific). This value should only be overlaid to true
+         when a vendor supports offload and has the HAL sound dose
+         interfaces implemented. Otherwise, this can lead to a compliance
+         issue with the safe hearing standards EN50332-3 and IEC62368-1.
+    -->
+    <bool name="config_safe_sound_dosage_enabled">false</bool>
 
     <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
     <bool name="config_safe_media_disable_on_volume_up">true</bool>
