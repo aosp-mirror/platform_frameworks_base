@@ -336,8 +336,6 @@ public final class SystemServer implements Dumpable {
             "com.android.clockwork.display.WearDisplayService";
     private static final String WEAR_TIME_SERVICE_CLASS =
             "com.android.clockwork.time.WearTimeService";
-    private static final String WEAR_GLOBAL_ACTIONS_SERVICE_CLASS =
-            "com.android.clockwork.globalactions.GlobalActionsService";
     private static final String WEAR_SETTINGS_SERVICE_CLASS =
             "com.android.clockwork.settings.WearSettingsService";
     private static final String ACCOUNT_SERVICE_CLASS =
@@ -1887,9 +1885,7 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("StartStatusBarManagerService");
             try {
                 statusBar = new StatusBarManagerService(context);
-                if (!isWatch) {
-                    statusBar.publishGlobalActionsProvider();
-                }
+                statusBar.publishGlobalActionsProvider();
                 ServiceManager.addService(Context.STATUS_BAR_SERVICE, statusBar, false,
                         DUMP_FLAG_PRIORITY_NORMAL | DUMP_FLAG_PROTO);
             } catch (Throwable e) {
@@ -2607,10 +2603,6 @@ public final class SystemServer implements Dumpable {
 
             t.traceBegin("StartWearTimeService");
             mSystemServiceManager.startService(WEAR_TIME_SERVICE_CLASS);
-            t.traceEnd();
-
-            t.traceBegin("StartWearGlobalActionsService");
-            mSystemServiceManager.startService(WEAR_GLOBAL_ACTIONS_SERVICE_CLASS);
             t.traceEnd();
 
             t.traceBegin("StartWearSettingsService");
