@@ -237,6 +237,14 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    /**
+     * Return true if this receiver should be assumed to have been delivered.
+     */
+    boolean isAssumedDelivered(int index) {
+        return (receivers.get(index) instanceof BroadcastFilter) && !ordered
+                && (resultTo == null);
+    }
+
     ProcessRecord curApp;       // hosting application of current receiver.
     ComponentName curComponent; // the receiver class that is currently running.
     ActivityInfo curReceiver;   // the manifest receiver that is currently running.
