@@ -1316,6 +1316,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         final var snapshot = mPm.snapshotComputer();
         final int callingUid = Binder.getCallingUid();
+        final var callingPackageName = snapshot.getNameForUid(callingUid);
+        if (!TextUtils.equals(callingPackageName, installerPackageName)) {
+            throw new SecurityException("The installerPackageName set by the caller doesn't match "
+                    + "the caller's own package name.");
+        }
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)) {
             for (var packageName : packageNames) {
                 var ps = snapshot.getPackageStateInternal(packageName);
