@@ -251,9 +251,10 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final LongCounter[] ZERO_LONG_COUNTER_ARRAY =
             new LongCounter[]{ZERO_LONG_COUNTER};
 
-    private final KernelWakelockReader mKernelWakelockReader = new KernelWakelockReader();
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
 
+    @VisibleForTesting
+    protected KernelWakelockReader mKernelWakelockReader;
     @VisibleForTesting
     protected KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader;
     @VisibleForTesting
@@ -1763,6 +1764,7 @@ public class BatteryStatsImpl extends BatteryStats {
         mCpuUidFreqTimeReader = new KernelCpuUidFreqTimeReader(true, clock);
         mCpuUidActiveTimeReader = new KernelCpuUidActiveTimeReader(true, clock);
         mCpuUidClusterTimeReader = new KernelCpuUidClusterTimeReader(true, clock);
+        mKernelWakelockReader = new KernelWakelockReader();
     }
 
     /**
@@ -2675,19 +2677,18 @@ public class BatteryStatsImpl extends BatteryStats {
          * The reported count from /proc/wakelocks when unplug() was last
          * called.
          */
-        int mUnpluggedReportedCount;
+        int mBaseReportedCount;
 
         /**
          * The most recent reported total_time from /proc/wakelocks.
          */
         long mCurrentReportedTotalTimeUs;
 
-
         /**
          * The reported total_time from /proc/wakelocks when unplug() was last
          * called.
          */
-        long mUnpluggedReportedTotalTimeUs;
+        long mBaseReportedTotalTimeUs;
 
         /**
          * Whether we are currently in a discharge cycle.
@@ -2708,9 +2709,9 @@ public class BatteryStatsImpl extends BatteryStats {
         public SamplingTimer(Clock clock, TimeBase timeBase, Parcel in) {
             super(clock, 0, timeBase, in);
             mCurrentReportedCount = in.readInt();
-            mUnpluggedReportedCount = in.readInt();
+            mBaseReportedCount = in.readInt();
             mCurrentReportedTotalTimeUs = in.readLong();
-            mUnpluggedReportedTotalTimeUs = in.readLong();
+            mBaseReportedTotalTimeUs = in.readLong();
             mTrackingReportedValues = in.readInt() == 1;
             mTimeBaseRunning = timeBase.isRunning();
         }
@@ -2736,8 +2737,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public void endSample(long elapsedRealtimeUs) {
             mTotalTimeUs = computeRunTimeLocked(0 /* unused by us */, elapsedRealtimeUs);
             mCount = computeCurrentCountLocked();
-            mUnpluggedReportedTotalTimeUs = mCurrentReportedTotalTimeUs = 0;
-            mUnpluggedReportedCount = mCurrentReportedCount = 0;
+            mBaseReportedTotalTimeUs = mCurrentReportedTotalTimeUs = 0;
+            mBaseReportedCount = mCurrentReportedCount = 0;
             mTrackingReportedValues = false;
         }
 
@@ -2762,10 +2763,21 @@ public class BatteryStatsImpl extends BatteryStats {
          * @param count total number of times the event being sampled occurred.
          */
         public void update(long totalTimeUs, int count, long elapsedRealtimeUs) {
+            update(totalTimeUs, 0, count, elapsedRealtimeUs);
+        }
+
+        /**
+         * Updates the current recorded values. See {@link #update(long, int, long)}
+         *
+         * @param activeTimeUs Time that the currently active wake lock has been held.
+         */
+        public void update(long totalTimeUs, long activeTimeUs, int count,
+                long elapsedRealtimeUs) {
             if (mTimeBaseRunning && !mTrackingReportedValues) {
-                // Updating the reported value for the first time.
-                mUnpluggedReportedTotalTimeUs = totalTimeUs;
-                mUnpluggedReportedCount = count;
+                // Updating the reported value for the first time. If the wake lock is currently
+                // active, mark the time it was acquired as the base timestamp.
+                mBaseReportedTotalTimeUs = totalTimeUs - activeTimeUs;
+                mBaseReportedCount = activeTimeUs == 0 ? count : count - 1;
             }
 
             mTrackingReportedValues = true;
@@ -2800,8 +2812,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public void onTimeStarted(long elapsedRealtimeUs, long baseUptimeUs, long baseRealtimeUs) {
             super.onTimeStarted(elapsedRealtimeUs, baseUptimeUs, baseRealtimeUs);
             if (mTrackingReportedValues) {
-                mUnpluggedReportedTotalTimeUs = mCurrentReportedTotalTimeUs;
-                mUnpluggedReportedCount = mCurrentReportedCount;
+                mBaseReportedTotalTimeUs = mCurrentReportedTotalTimeUs;
+                mBaseReportedCount = mCurrentReportedCount;
             }
             mTimeBaseRunning = true;
         }
@@ -2816,30 +2828,30 @@ public class BatteryStatsImpl extends BatteryStats {
         public void logState(Printer pw, String prefix) {
             super.logState(pw, prefix);
             pw.println(prefix + "mCurrentReportedCount=" + mCurrentReportedCount
-                    + " mUnpluggedReportedCount=" + mUnpluggedReportedCount
+                    + " mBaseReportedCount=" + mBaseReportedCount
                     + " mCurrentReportedTotalTime=" + mCurrentReportedTotalTimeUs
-                    + " mUnpluggedReportedTotalTime=" + mUnpluggedReportedTotalTimeUs);
+                    + " mBaseReportedTotalTimeUs=" + mBaseReportedTotalTimeUs);
         }
 
         @Override
         protected long computeRunTimeLocked(long curBatteryRealtime, long elapsedRealtimeUs) {
             return mTotalTimeUs + (mTimeBaseRunning && mTrackingReportedValues
-                    ? mCurrentReportedTotalTimeUs - mUnpluggedReportedTotalTimeUs : 0);
+                    ? mCurrentReportedTotalTimeUs - mBaseReportedTotalTimeUs : 0);
         }
 
         @Override
         protected int computeCurrentCountLocked() {
             return mCount + (mTimeBaseRunning && mTrackingReportedValues
-                    ? mCurrentReportedCount - mUnpluggedReportedCount : 0);
+                    ? mCurrentReportedCount - mBaseReportedCount : 0);
         }
 
         @Override
         public void writeToParcel(Parcel out, long elapsedRealtimeUs) {
             super.writeToParcel(out, elapsedRealtimeUs);
             out.writeInt(mCurrentReportedCount);
-            out.writeInt(mUnpluggedReportedCount);
+            out.writeInt(mBaseReportedCount);
             out.writeLong(mCurrentReportedTotalTimeUs);
-            out.writeLong(mUnpluggedReportedTotalTimeUs);
+            out.writeLong(mBaseReportedTotalTimeUs);
             out.writeInt(mTrackingReportedValues ? 1 : 0);
         }
 
@@ -2847,8 +2859,8 @@ public class BatteryStatsImpl extends BatteryStats {
         public boolean reset(boolean detachIfReset, long elapsedRealtimeUs) {
             super.reset(detachIfReset, elapsedRealtimeUs);
             mTrackingReportedValues = false;
-            mUnpluggedReportedTotalTimeUs = 0;
-            mUnpluggedReportedCount = 0;
+            mBaseReportedTotalTimeUs = 0;
+            mBaseReportedCount = 0;
             return true;
         }
     }
@@ -13398,6 +13410,10 @@ public class BatteryStatsImpl extends BatteryStats {
      * Read and distribute kernel wake lock use across apps.
      */
     public void updateKernelWakelocksLocked(long elapsedRealtimeUs) {
+        if (mKernelWakelockReader == null) {
+            return;
+        }
+
         final KernelWakelockStats wakelockStats = mKernelWakelockReader.readKernelWakelockStats(
                 mTmpWakelockStats);
         if (wakelockStats == null) {
@@ -13416,8 +13432,8 @@ public class BatteryStatsImpl extends BatteryStats {
                 mKernelWakelockStats.put(name, kwlt);
             }
 
-            kwlt.update(kws.mTotalTime, kws.mCount, elapsedRealtimeUs);
-            kwlt.setUpdateVersion(kws.mVersion);
+            kwlt.update(kws.totalTimeUs, kws.activeTimeUs, kws.count, elapsedRealtimeUs);
+            kwlt.setUpdateVersion(kws.version);
         }
 
         int numWakelocksSetStale = 0;
@@ -13471,7 +13487,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 Slog.d(TAG, String.format("Added entry %d and updated timer to: "
                         + "mUnpluggedReportedTotalTimeUs %d size %d", bandwidthEntries.keyAt(i),
                         mKernelMemoryStats.get(
-                                bandwidthEntries.keyAt(i)).mUnpluggedReportedTotalTimeUs,
+                                bandwidthEntries.keyAt(i)).mBaseReportedTotalTimeUs,
                         mKernelMemoryStats.size()));
             }
         }

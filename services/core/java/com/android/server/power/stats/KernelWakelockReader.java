@@ -42,30 +42,31 @@ public class KernelWakelockReader {
     private static final String sWakeupSourceFile = "/d/wakeup_sources";
     private static final String sSysClassWakeupDir = "/sys/class/wakeup";
 
-    private static final int[] PROC_WAKELOCKS_FORMAT = new int[] {
-        Process.PROC_TAB_TERM|Process.PROC_OUT_STRING|                // 0: name
-                              Process.PROC_QUOTES,
-        Process.PROC_TAB_TERM|Process.PROC_OUT_LONG,                  // 1: count
-        Process.PROC_TAB_TERM,
-        Process.PROC_TAB_TERM,
-        Process.PROC_TAB_TERM,
-        Process.PROC_TAB_TERM|Process.PROC_OUT_LONG,                  // 5: totalTime
+    private static final int[] PROC_WAKELOCKS_FORMAT = new int[]{
+            Process.PROC_TAB_TERM | Process.PROC_OUT_STRING                 // 0: name
+                    | Process.PROC_QUOTES,
+            Process.PROC_TAB_TERM | Process.PROC_OUT_LONG,                  // 1: count
+            Process.PROC_TAB_TERM,
+            Process.PROC_TAB_TERM | Process.PROC_OUT_LONG,                  // 3: activeSince
+            Process.PROC_TAB_TERM,
+            Process.PROC_TAB_TERM | Process.PROC_OUT_LONG,                  // 5: totalTime
     };
 
-    private static final int[] WAKEUP_SOURCES_FORMAT = new int[] {
-        Process.PROC_TAB_TERM|Process.PROC_OUT_STRING,                // 0: name
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE|
-                              Process.PROC_OUT_LONG,                  // 1: count
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE,
-        Process.PROC_TAB_TERM|Process.PROC_COMBINE
-                             |Process.PROC_OUT_LONG,                  // 6: totalTime
+    private static final int[] WAKEUP_SOURCES_FORMAT = new int[]{
+            Process.PROC_TAB_TERM | Process.PROC_OUT_STRING,                // 0: name
+            Process.PROC_TAB_TERM | Process.PROC_COMBINE
+                    | Process.PROC_OUT_LONG,                                // 1: count
+            Process.PROC_TAB_TERM | Process.PROC_COMBINE,
+            Process.PROC_TAB_TERM | Process.PROC_COMBINE,
+            Process.PROC_TAB_TERM | Process.PROC_COMBINE,
+            Process.PROC_TAB_TERM | Process.PROC_COMBINE
+                    | Process.PROC_OUT_LONG,                                // 5: activeSince
+            Process.PROC_TAB_TERM | Process.PROC_COMBINE
+                    | Process.PROC_OUT_LONG,                                // 6: totalTime
     };
 
     private final String[] mProcWakelocksName = new String[3];
-    private final long[] mProcWakelocksData = new long[3];
+    private final long[] mProcWakelocksData = new long[4];
     private ISuspendControlServiceInternal mSuspendControlService = null;
     private byte[] mKernelWakelockBuffer = new byte[32 * 1024];
 
@@ -74,7 +75,7 @@ public class KernelWakelockReader {
      * @param staleStats Existing object to update.
      * @return the updated data.
      */
-    public final KernelWakelockStats readKernelWakelockStats(KernelWakelockStats staleStats) {
+    public KernelWakelockStats readKernelWakelockStats(KernelWakelockStats staleStats) {
         boolean useSystemSuspend = (new File(sSysClassWakeupDir)).exists();
 
         if (useSystemSuspend) {
@@ -180,14 +181,16 @@ public class KernelWakelockReader {
      */
     private KernelWakelockStats getWakelockStatsFromSystemSuspend(
             final KernelWakelockStats staleStats) {
-        WakeLockInfo[] wlStats = null;
-        try {
-            mSuspendControlService = waitForSuspendControlService();
-        } catch (ServiceNotFoundException e) {
-            Slog.wtf(TAG, "Required service suspend_control not available", e);
-            return null;
+        if (mSuspendControlService == null) {
+            try {
+                mSuspendControlService = waitForSuspendControlService();
+            } catch (ServiceNotFoundException e) {
+                Slog.wtf(TAG, "Required service suspend_control not available", e);
+                return null;
+            }
         }
 
+        WakeLockInfo[] wlStats;
         try {
             wlStats = mSuspendControlService.getWakeLockStats();
             updateWakelockStats(wlStats, staleStats);
@@ -210,13 +213,16 @@ public class KernelWakelockReader {
         for (WakeLockInfo info : wlStats) {
             if (!staleStats.containsKey(info.name)) {
                 staleStats.put(info.name, new KernelWakelockStats.Entry((int) info.activeCount,
-                        info.totalTime * 1000 /* ms to us */, sKernelWakelockUpdateVersion));
+                        info.totalTime * 1000 /* ms to us */,
+                        info.isActive ? info.activeTime * 1000 : 0,
+                        sKernelWakelockUpdateVersion));
             } else {
                 KernelWakelockStats.Entry kwlStats = staleStats.get(info.name);
-                kwlStats.mCount = (int) info.activeCount;
+                kwlStats.count = (int) info.activeCount;
                 // Convert milliseconds to microseconds
-                kwlStats.mTotalTime = info.totalTime * 1000;
-                kwlStats.mVersion = sKernelWakelockUpdateVersion;
+                kwlStats.totalTimeUs = info.totalTime * 1000;
+                kwlStats.activeTimeUs = info.isActive ? info.activeTime * 1000 : 0;
+                kwlStats.version = sKernelWakelockUpdateVersion;
             }
         }
 
@@ -232,6 +238,7 @@ public class KernelWakelockReader {
         String name;
         int count;
         long totalTime;
+        long activeTime;
         int startIndex;
         int endIndex;
 
@@ -268,26 +275,30 @@ public class KernelWakelockReader {
                 count = (int) wlData[1];
 
                 if (wakeup_sources) {
-                        // convert milliseconds to microseconds
-                        totalTime = wlData[2] * 1000;
+                    // convert milliseconds to microseconds
+                    activeTime = wlData[2] * 1000;
+                    totalTime = wlData[3] * 1000;
                 } else {
-                        // convert nanoseconds to microseconds with rounding.
-                        totalTime = (wlData[2] + 500) / 1000;
+                    // convert nanoseconds to microseconds with rounding.
+                    activeTime = (wlData[2] + 500) / 1000;
+                    totalTime = (wlData[3] + 500) / 1000;
                 }
 
                 if (parsed && name.length() > 0) {
                     if (!staleStats.containsKey(name)) {
                         staleStats.put(name, new KernelWakelockStats.Entry(count, totalTime,
-                                sKernelWakelockUpdateVersion));
+                                activeTime, sKernelWakelockUpdateVersion));
                     } else {
                         KernelWakelockStats.Entry kwlStats = staleStats.get(name);
-                        if (kwlStats.mVersion == sKernelWakelockUpdateVersion) {
-                            kwlStats.mCount += count;
-                            kwlStats.mTotalTime += totalTime;
+                        if (kwlStats.version == sKernelWakelockUpdateVersion) {
+                            kwlStats.count += count;
+                            kwlStats.totalTimeUs += totalTime;
+                            kwlStats.activeTimeUs = activeTime;
                         } else {
-                            kwlStats.mCount = count;
-                            kwlStats.mTotalTime = totalTime;
-                            kwlStats.mVersion = sKernelWakelockUpdateVersion;
+                            kwlStats.count = count;
+                            kwlStats.totalTimeUs = totalTime;
+                            kwlStats.activeTimeUs = activeTime;
+                            kwlStats.version = sKernelWakelockUpdateVersion;
                         }
                     }
                 } else if (!parsed) {
@@ -326,7 +337,7 @@ public class KernelWakelockReader {
     public KernelWakelockStats removeOldStats(final KernelWakelockStats staleStats) {
         Iterator<KernelWakelockStats.Entry> itr = staleStats.values().iterator();
         while (itr.hasNext()) {
-            if (itr.next().mVersion != sKernelWakelockUpdateVersion) {
+            if (itr.next().version != sKernelWakelockUpdateVersion) {
                 itr.remove();
             }
         }

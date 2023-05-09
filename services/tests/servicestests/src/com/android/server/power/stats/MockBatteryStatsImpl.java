@@ -74,6 +74,7 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
         mCpuUidFreqTimeReader = mock(KernelCpuUidFreqTimeReader.class);
         when(mCpuUidFreqTimeReader.readFreqs(any())).thenReturn(new long[]{100, 200});
+        mKernelWakelockReader = null;
     }
 
     public void initMeasuredEnergyStats(String[] customBucketNames) {
@@ -170,6 +171,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
 
     public MockBatteryStatsImpl setKernelCpuSpeedReaders(KernelCpuSpeedReader[] readers) {
         mKernelCpuSpeedReaders = readers;
+        return this;
+    }
+
+    public MockBatteryStatsImpl setKernelWakelockReader(KernelWakelockReader reader) {
+        mKernelWakelockReader = reader;
         return this;
     }
 

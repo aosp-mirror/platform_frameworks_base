@@ -43,8 +43,13 @@ public class KernelWakelockReaderTest extends TestCase {
         }
 
         public ProcFileBuilder addLine(String name, int count, long timeMillis) {
+            return addLine(name, count, timeMillis, 0);
+        }
+
+        public ProcFileBuilder addLine(String name, int count, long timeMillis, long activeTimeMs) {
             ensureHeader();
-            mStringBuilder.append(name).append("\t").append(count).append("\t0\t0\t0\t0\t")
+            mStringBuilder.append(name).append("\t").append(count).append("\t0\t0\t0\t")
+                    .append(activeTimeMs).append("\t")
                     .append(timeMillis).append("\t0\t0\t0\n");
             return this;
         }
@@ -66,10 +71,19 @@ public class KernelWakelockReaderTest extends TestCase {
      * @return the created WakeLockInfo object.
      */
     private WakeLockInfo createWakeLockInfo(String name, int activeCount, long totalTime) {
+        return createWakeLockInfo(name, activeCount, totalTime, 0);
+    }
+
+    private WakeLockInfo createWakeLockInfo(String name, int activeCount, long totalTime,
+            long activeTimeMs) {
         WakeLockInfo info = new WakeLockInfo();
         info.name = name;
         info.activeCount = activeCount;
         info.totalTime = totalTime;
+        info.activeTime = activeTimeMs;
+        if (activeTimeMs != 0) {
+            info.isActive = true;
+        }
         return info;
     }
 
@@ -118,7 +132,7 @@ public class KernelWakelockReaderTest extends TestCase {
     @SmallTest
     public void testOneWakelock() throws Exception {
         byte[] buffer = new ProcFileBuilder()
-                .addLine("Wakelock", 34, 123) // Milliseconds
+                .addLine("Wakelock", 34, 123, 456) // Milliseconds
                 .getBytes();
 
         KernelWakelockStats staleStats = mReader.parseProcWakelocks(buffer, buffer.length, true,
@@ -129,8 +143,9 @@ public class KernelWakelockReaderTest extends TestCase {
         assertTrue(staleStats.containsKey("Wakelock"));
 
         KernelWakelockStats.Entry entry = staleStats.get("Wakelock");
-        assertEquals(34, entry.mCount);
-        assertEquals(123 * 1000, entry.mTotalTime); // Microseconds
+        assertEquals(34, entry.count);
+        assertEquals(123 * 1000, entry.totalTimeUs); // Microseconds
+        assertEquals(456 * 1000, entry.activeTimeUs); // Microseconds
     }
 
     @SmallTest
@@ -163,8 +178,8 @@ public class KernelWakelockReaderTest extends TestCase {
         assertTrue(staleStats.containsKey("Wakelock"));
 
         KernelWakelockStats.Entry entry = staleStats.get("Wakelock");
-        assertEquals(2, entry.mCount);
-        assertEquals(20 * 1000, entry.mTotalTime); // Microseconds
+        assertEquals(2, entry.count);
+        assertEquals(20 * 1000, entry.totalTimeUs); // Microseconds
     }
 
     @SmallTest
@@ -203,7 +218,7 @@ public class KernelWakelockReaderTest extends TestCase {
     @SmallTest
     public void testOneWakeLockInfo() {
         WakeLockInfo[] wlStats = new WakeLockInfo[1];
-        wlStats[0] = createWakeLockInfo("WakeLock", 20, 1000);   // Milliseconds
+        wlStats[0] = createWakeLockInfo("WakeLock", 20, 1000, 500);   // Milliseconds
 
         KernelWakelockStats staleStats = mReader.updateWakelockStats(wlStats,
                 new KernelWakelockStats());
@@ -213,8 +228,9 @@ public class KernelWakelockReaderTest extends TestCase {
         assertTrue(staleStats.containsKey("WakeLock"));
 
         KernelWakelockStats.Entry entry = staleStats.get("WakeLock");
-        assertEquals(20, entry.mCount);
-        assertEquals(1000 * 1000, entry.mTotalTime);   // Microseconds
+        assertEquals(20, entry.count);
+        assertEquals(1000 * 1000, entry.totalTimeUs);   // Microseconds
+        assertEquals(500 * 1000, entry.activeTimeUs);   // Microseconds
     }
 
     @SmallTest
@@ -232,12 +248,12 @@ public class KernelWakelockReaderTest extends TestCase {
         assertTrue(staleStats.containsKey("WakeLock2"));
 
         KernelWakelockStats.Entry entry1 = staleStats.get("WakeLock1");
-        assertEquals(10, entry1.mCount);
-        assertEquals(1000 * 1000, entry1.mTotalTime); // Microseconds
+        assertEquals(10, entry1.count);
+        assertEquals(1000 * 1000, entry1.totalTimeUs); // Microseconds
 
         KernelWakelockStats.Entry entry2 = staleStats.get("WakeLock2");
-        assertEquals(20, entry2.mCount);
-        assertEquals(2000 * 1000, entry2.mTotalTime); // Microseconds
+        assertEquals(20, entry2.count);
+        assertEquals(2000 * 1000, entry2.totalTimeUs); // Microseconds
     }
 
     @SmallTest
@@ -253,8 +269,8 @@ public class KernelWakelockReaderTest extends TestCase {
 
         assertTrue(staleStats.containsKey("WakeLock1"));
         KernelWakelockStats.Entry entry = staleStats.get("WakeLock1");
-        assertEquals(10, entry.mCount);
-        assertEquals(1000 * 1000, entry.mTotalTime);  // Microseconds
+        assertEquals(10, entry.count);
+        assertEquals(1000 * 1000, entry.totalTimeUs);  // Microseconds
 
         wlStats[0] = createWakeLockInfo("WakeLock2", 20, 2000); // Milliseconds
 
@@ -265,8 +281,8 @@ public class KernelWakelockReaderTest extends TestCase {
         assertFalse(staleStats.containsKey("WakeLock1"));
         assertTrue(staleStats.containsKey("WakeLock2"));
         entry = staleStats.get("WakeLock2");
-        assertEquals(20, entry.mCount);
-        assertEquals(2000 * 1000, entry.mTotalTime); // Micro seconds
+        assertEquals(20, entry.count);
+        assertEquals(2000 * 1000, entry.totalTimeUs); // Micro seconds
     }
 
 // -------------------- Aggregate  Wakelock Stats Tests --------------------
@@ -298,8 +314,8 @@ public class KernelWakelockReaderTest extends TestCase {
         assertTrue(staleStats.containsKey("Wakelock"));
 
         KernelWakelockStats.Entry entry = staleStats.get("Wakelock");
-        assertEquals(34, entry.mCount);
-        assertEquals(1000 * 123, entry.mTotalTime);  // Microseconds
+        assertEquals(34, entry.count);
+        assertEquals(1000 * 123, entry.totalTimeUs);  // Microseconds
     }
 
     @SmallTest
@@ -317,8 +333,8 @@ public class KernelWakelockReaderTest extends TestCase {
         assertTrue(staleStats.containsKey("WakeLock"));
 
         KernelWakelockStats.Entry entry = staleStats.get("WakeLock");
-        assertEquals(10, entry.mCount);
-        assertEquals(1000 * 1000, entry.mTotalTime);  // Microseconds
+        assertEquals(10, entry.count);
+        assertEquals(1000 * 1000, entry.totalTimeUs);  // Microseconds
     }
 
     @SmallTest
@@ -337,13 +353,13 @@ public class KernelWakelockReaderTest extends TestCase {
 
         assertTrue(staleStats.containsKey("WakeLock1"));
         KernelWakelockStats.Entry entry1 = staleStats.get("WakeLock1");
-        assertEquals(34, entry1.mCount);
-        assertEquals(123 * 1000, entry1.mTotalTime);  // Microseconds
+        assertEquals(34, entry1.count);
+        assertEquals(123 * 1000, entry1.totalTimeUs);  // Microseconds
 
         assertTrue(staleStats.containsKey("WakeLock2"));
         KernelWakelockStats.Entry entry2 = staleStats.get("WakeLock2");
-        assertEquals(10, entry2.mCount);
-        assertEquals(1000 * 1000, entry2.mTotalTime);  // Microseconds
+        assertEquals(10, entry2.count);
+        assertEquals(1000 * 1000, entry2.totalTimeUs);  // Microseconds
     }
 
     @SmallTest
@@ -368,20 +384,20 @@ public class KernelWakelockReaderTest extends TestCase {
         assertTrue(staleStats.containsKey("WakeLock4"));
 
         KernelWakelockStats.Entry entry1 = staleStats.get("WakeLock1");
-        assertEquals(34, entry1.mCount);
-        assertEquals(123 * 1000, entry1.mTotalTime); // Microseconds
+        assertEquals(34, entry1.count);
+        assertEquals(123 * 1000, entry1.totalTimeUs); // Microseconds
 
         KernelWakelockStats.Entry entry2 = staleStats.get("WakeLock2");
-        assertEquals(46, entry2.mCount);
-        assertEquals(345 * 1000, entry2.mTotalTime); // Microseconds
+        assertEquals(46, entry2.count);
+        assertEquals(345 * 1000, entry2.totalTimeUs); // Microseconds
 
         KernelWakelockStats.Entry entry3 = staleStats.get("WakeLock3");
-        assertEquals(10, entry3.mCount);
-        assertEquals(1000 * 1000, entry3.mTotalTime); // Microseconds
+        assertEquals(10, entry3.count);
+        assertEquals(1000 * 1000, entry3.totalTimeUs); // Microseconds
 
         KernelWakelockStats.Entry entry4 = staleStats.get("WakeLock4");
-        assertEquals(20, entry4.mCount);
-        assertEquals(2000 * 1000, entry4.mTotalTime); // Microseconds
+        assertEquals(20, entry4.count);
+        assertEquals(2000 * 1000, entry4.totalTimeUs); // Microseconds
 
         buffer = new ProcFileBuilder()
                 .addLine("WakeLock1", 45, 789)  // Milliseconds
@@ -401,11 +417,11 @@ public class KernelWakelockReaderTest extends TestCase {
         assertFalse(staleStats.containsKey("WakeLock3"));
 
         entry1 = staleStats.get("WakeLock1");
-        assertEquals(45 + 56, entry1.mCount);
-        assertEquals((789 + 123) * 1000, entry1.mTotalTime);  // Microseconds
+        assertEquals(45 + 56, entry1.count);
+        assertEquals((789 + 123) * 1000, entry1.totalTimeUs);  // Microseconds
 
         entry2 = staleStats.get("WakeLock4");
-        assertEquals(40, entry2.mCount);
-        assertEquals(4000 * 1000, entry4.mTotalTime); // Microseconds
+        assertEquals(40, entry2.count);
+        assertEquals(4000 * 1000, entry4.totalTimeUs); // Microseconds
     }
 }
