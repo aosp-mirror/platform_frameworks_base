@@ -24,6 +24,7 @@ import static com.android.wallpaperbackup.WallpaperBackupAgent.LOCK_WALLPAPER_ST
 import static com.android.wallpaperbackup.WallpaperBackupAgent.SYSTEM_WALLPAPER_STAGE;
 import static com.android.wallpaperbackup.WallpaperBackupAgent.WALLPAPER_INFO_STAGE;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_INELIGIBLE;
+import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_METADATA;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_NO_WALLPAPER;
 import static com.android.wallpaperbackup.WallpaperEventLogger.ERROR_QUOTA_EXCEEDED;
 import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_IMG_LOCK;
@@ -34,6 +35,8 @@ import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_LIVE_SY
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -55,12 +58,14 @@ import android.os.FileUtils;
 import android.os.ParcelFileDescriptor;
 import android.os.UserHandle;
 import android.service.wallpaper.WallpaperService;
+import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.content.PackageMonitor;
+import com.android.modules.utils.TypedXmlSerializer;
 import com.android.wallpaperbackup.utils.ContextWithServiceOverrides;
 
 import org.junit.After;
@@ -592,6 +597,123 @@ public class WallpaperBackupAgentTest {
         assertThat(result.getSuccessCount()).isEqualTo(1);
     }
 
+    @Test
+    public void testOnRestore_systemWallpaperImgSuccess_logsSuccess() throws Exception {
+        mockStagedWallpaperFile(WALLPAPER_INFO_STAGE);
+        mockStagedWallpaperFile(SYSTEM_WALLPAPER_STAGE);
+        mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
+                BackupAnnotations.OperationType.RESTORE);
+
+        mWallpaperBackupAgent.onRestoreFinished();
+
+        DataTypeResult result = getLoggingResult(WALLPAPER_IMG_SYSTEM,
+                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testOnRestore_lockWallpaperImgSuccess_logsSuccess() throws Exception {
+        mockStagedWallpaperFile(WALLPAPER_INFO_STAGE);
+        mockStagedWallpaperFile(LOCK_WALLPAPER_STAGE);
+        mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
+                BackupAnnotations.OperationType.RESTORE);
+
+        mWallpaperBackupAgent.onRestoreFinished();
+
+        DataTypeResult result = getLoggingResult(WALLPAPER_IMG_LOCK,
+                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void testOnRestore_systemWallpaperImgMissingAndNoLive_logsFailure() throws Exception {
+        mockStagedWallpaperFile(WALLPAPER_INFO_STAGE);
+        mockStagedWallpaperFile(LOCK_WALLPAPER_STAGE);
+        mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
+                BackupAnnotations.OperationType.RESTORE);
+
+        mWallpaperBackupAgent.onRestoreFinished();
+
+        DataTypeResult result = getLoggingResult(WALLPAPER_IMG_SYSTEM,
+                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(ERROR_NO_WALLPAPER);
+
+    }
+
+    @Test
+    public void testOnRestore_lockWallpaperImgMissingAndNoLive_logsFailure() throws Exception {
+        mockStagedWallpaperFile(WALLPAPER_INFO_STAGE);
+        mockStagedWallpaperFile(SYSTEM_WALLPAPER_STAGE);
+        mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
+                BackupAnnotations.OperationType.RESTORE);
+
+        mWallpaperBackupAgent.onRestoreFinished();
+
+        DataTypeResult result = getLoggingResult(WALLPAPER_IMG_LOCK,
+                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(ERROR_NO_WALLPAPER);
+    }
+
+    @Test
+    public void testOnRestore_wallpaperInfoMissing_logsFailure() throws Exception {
+        mockStagedWallpaperFile(SYSTEM_WALLPAPER_STAGE);
+        mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
+                BackupAnnotations.OperationType.RESTORE);
+
+        mWallpaperBackupAgent.onRestoreFinished();
+
+        DataTypeResult result = getLoggingResult(WALLPAPER_IMG_SYSTEM,
+                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(ERROR_NO_METADATA);
+    }
+
+    @Test
+    public void testOnRestore_imgMissingButWallpaperInfoHasLive_doesNotLogImg() throws Exception {
+        mockRestoredLiveWallpaperFile();
+        mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
+                BackupAnnotations.OperationType.RESTORE);
+
+        mWallpaperBackupAgent.onRestoreFinished();
+
+        DataTypeResult system = getLoggingResult(WALLPAPER_IMG_SYSTEM,
+                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+        DataTypeResult lock = getLoggingResult(WALLPAPER_IMG_LOCK,
+                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+        assertThat(system).isNull();
+        assertThat(lock).isNull();
+    }
+
+    @Test
+    public void testOnRestore_throwsException_logsErrors() throws Exception {
+        when(mWallpaperManager.setStream(any(), any(), anyBoolean(), anyInt())).thenThrow(
+                new RuntimeException());
+        mockStagedWallpaperFile(SYSTEM_WALLPAPER_STAGE);
+        mockStagedWallpaperFile(WALLPAPER_INFO_STAGE);
+        mWallpaperBackupAgent.onCreate(USER_HANDLE, BackupAnnotations.BackupDestination.CLOUD,
+                BackupAnnotations.OperationType.RESTORE);
+
+        mWallpaperBackupAgent.onRestoreFinished();
+
+        DataTypeResult system = getLoggingResult(WALLPAPER_IMG_SYSTEM,
+                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+        DataTypeResult lock = getLoggingResult(WALLPAPER_IMG_LOCK,
+                mWallpaperBackupAgent.getBackupRestoreEventLogger().getLoggingResults());
+        assertThat(system).isNotNull();
+        assertThat(system.getFailCount()).isEqualTo(1);
+        assertThat(system.getErrors()).containsKey(RuntimeException.class.getName());
+        assertThat(lock).isNotNull();
+        assertThat(lock.getFailCount()).isEqualTo(1);
+        assertThat(lock.getErrors()).containsKey(RuntimeException.class.getName());
+    }
+
     private void mockCurrentWallpaperIds(int systemWallpaperId, int lockWallpaperId) {
         when(mWallpaperManager.getWallpaperId(eq(FLAG_SYSTEM))).thenReturn(systemWallpaperId);
         when(mWallpaperManager.getWallpaperId(eq(FLAG_LOCK))).thenReturn(lockWallpaperId);
@@ -634,6 +756,27 @@ public class WallpaperBackupAgentTest {
         when(mWallpaperManager.getWallpaperFile(eq(FLAG_LOCK), /* cropped = */
                 eq(false))).thenReturn(
                 ParcelFileDescriptor.open(fakeLockWallpaperFile, MODE_READ_ONLY));
+    }
+
+    private void mockStagedWallpaperFile(String location) throws Exception {
+        File wallpaperFile = new File(mContext.getFilesDir(), location);
+        wallpaperFile.createNewFile();
+    }
+
+    private void mockRestoredLiveWallpaperFile() throws Exception {
+        File wallpaperFile = new File(mContext.getFilesDir(), WALLPAPER_INFO_STAGE);
+        wallpaperFile.createNewFile();
+        FileOutputStream fstream = new FileOutputStream(wallpaperFile, false);
+        TypedXmlSerializer out = Xml.resolveSerializer(fstream);
+        out.startDocument(null, true);
+        out.startTag(null, "wp");
+        out.attribute(null, "component",
+                getFakeWallpaperInfo().getComponent().flattenToShortString());
+        out.endTag(null, "wp");
+        out.endDocument();
+        fstream.flush();
+        FileUtils.sync(fstream);
+        fstream.close();
     }
 
     private WallpaperInfo getFakeWallpaperInfo() throws Exception {
