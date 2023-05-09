@@ -236,7 +236,11 @@ constructor(
 
     override fun postStartActivityDismissingKeyguard(intent: Intent, delay: Int) {
         postOnUiThread(delay) {
-            activityStarterInternal.startActivityDismissingKeyguard(intent = intent)
+            activityStarterInternal.startActivityDismissingKeyguard(
+                intent = intent,
+                onlyProvisioned = true,
+                dismissShade = true,
+            )
         }
     }
 
@@ -248,6 +252,8 @@ constructor(
         postOnUiThread(delay) {
             activityStarterInternal.startActivityDismissingKeyguard(
                 intent = intent,
+                onlyProvisioned = true,
+                dismissShade = true,
                 animationController = animationController,
             )
         }
@@ -262,6 +268,8 @@ constructor(
         postOnUiThread(delay) {
             activityStarterInternal.startActivityDismissingKeyguard(
                 intent = intent,
+                onlyProvisioned = true,
+                dismissShade = true,
                 animationController = animationController,
                 customMessage = customMessage,
             )
