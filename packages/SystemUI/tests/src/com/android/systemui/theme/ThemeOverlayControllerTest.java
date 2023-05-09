@@ -16,6 +16,8 @@
 
 package com.android.systemui.theme;
 
+import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
+
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_ACCENT_COLOR;
 import static com.android.systemui.theme.ThemeOverlayApplier.OVERLAY_CATEGORY_SYSTEM_PALETTE;
@@ -29,6 +31,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -925,5 +928,39 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
         mWakefulnessLifecycleObserver.getValue().onFinishedGoingToSleep();
         verify(mThemeOverlayApplier, never()).applyCurrentUserOverlays(any(), any(), anyInt(),
                 any());
+    }
+
+    @Test
+    public void createDynamicOverlay_addsAllDynamicColors() {
+        // Trigger new wallpaper colors to generate an overlay
+        WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),
+                Color.valueOf(Color.BLUE), null);
+        mColorsListener.getValue().onColorsChanged(mainColors, WallpaperManager.FLAG_SYSTEM,
+                USER_SYSTEM);
+        ArgumentCaptor<FabricatedOverlay[]> themeOverlays =
+                ArgumentCaptor.forClass(FabricatedOverlay[].class);
+
+        verify(mThemeOverlayApplier)
+                .applyCurrentUserOverlays(any(), themeOverlays.capture(), anyInt(), any());
+
+        FabricatedOverlay[] overlays = themeOverlays.getValue();
+        FabricatedOverlay accents = overlays[0];
+        FabricatedOverlay neutrals = overlays[1];
+        FabricatedOverlay dynamic = overlays[2];
+
+        final int colorsPerPalette = 12;
+
+        // Color resources were added for all 3 accent palettes
+        verify(accents, times(colorsPerPalette * 3))
+                .setResourceValue(any(String.class), eq(TYPE_INT_COLOR_ARGB8), anyInt(), eq(null));
+        // Color resources were added for all 2 neutral palettes
+        verify(neutrals, times(colorsPerPalette * 2))
+                .setResourceValue(any(String.class), eq(TYPE_INT_COLOR_ARGB8), anyInt(), eq(null));
+        // All dynamic colors were added twice: light and dark them
+        // All fixed colors were added once
+        verify(dynamic, times(
+                DynamicColors.ALL_DYNAMIC_COLORS_MAPPED.size() * 2
+                        + DynamicColors.FIXED_COLORS_MAPPED.size())
+        ).setResourceValue(any(String.class), eq(TYPE_INT_COLOR_ARGB8), anyInt(), eq(null));
     }
 }
