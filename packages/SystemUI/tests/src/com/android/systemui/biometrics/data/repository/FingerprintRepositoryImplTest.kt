@@ -102,6 +102,12 @@ class FingerprintRepositoryImplTest : SysuiTestCase() {
                                 540 /* sensorLocationX */,
                                 1636 /* sensorLocationY */,
                                 130 /* sensorRadius */
+                            ),
+                            SensorLocationInternal(
+                                "display_id_1" /* displayId */,
+                                100 /* sensorLocationX */,
+                                300 /* sensorLocationY */,
+                                20 /* sensorRadius */
                             )
                         )
                     )
@@ -112,7 +118,17 @@ class FingerprintRepositoryImplTest : SysuiTestCase() {
             assertThat(repository.sensorId.value).isEqualTo(1)
             assertThat(repository.strength.value).isEqualTo(SensorStrength.STRONG)
             assertThat(repository.sensorType.value).isEqualTo(FingerprintSensorType.REAR)
-            with(repository.sensorLocation.value) {
+
+            assertThat(repository.sensorLocations.value.size).isEqualTo(2)
+            assertThat(repository.sensorLocations.value).containsKey("display_id_1")
+            with(repository.sensorLocations.value["display_id_1"]!!) {
+                assertThat(displayId).isEqualTo("display_id_1")
+                assertThat(sensorLocationX).isEqualTo(100)
+                assertThat(sensorLocationY).isEqualTo(300)
+                assertThat(sensorRadius).isEqualTo(20)
+            }
+            assertThat(repository.sensorLocations.value).containsKey("")
+            with(repository.sensorLocations.value[""]!!) {
                 assertThat(displayId).isEqualTo("")
                 assertThat(sensorLocationX).isEqualTo(540)
                 assertThat(sensorLocationY).isEqualTo(1636)
