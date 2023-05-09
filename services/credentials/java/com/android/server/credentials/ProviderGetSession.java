@@ -433,6 +433,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         BeginGetCredentialResponse response = PendingIntentResultHandler
                 .extractResponseContent(providerPendingIntentResponse
                         .getResultData());
+        mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/true);
         if (response != null && !mProviderResponseDataHandler.isEmptyResponse(response)) {
             addToInitialRemoteResponse(response, /*isInitialResponse=*/ false);
             // Additional content received is in the form of new response content.
@@ -470,12 +471,12 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         addToInitialRemoteResponse(response, /*isInitialResponse=*/true);
         // Log the data.
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            mProviderSessionMetric.collectCandidateEntryMetrics(response);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
             updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
             return;
         }
-        mProviderSessionMetric.collectCandidateEntryMetrics(response);
+        mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
         updateStatusAndInvokeCallback(Status.CREDENTIALS_RECEIVED,
                 /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
