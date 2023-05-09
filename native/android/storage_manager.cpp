@@ -86,7 +86,7 @@ protected:
             return nullptr;
         }
 
-        String16 fileName(obbFile->getFileName());
+        String16 fileName(canonicalPath);
         String16 packageName(obbFile->getPackageName());
         size_t length;
         const unsigned char* salt = obbFile->getSalt(&length);
