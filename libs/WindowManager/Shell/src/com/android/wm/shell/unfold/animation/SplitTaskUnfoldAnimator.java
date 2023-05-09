@@ -292,6 +292,11 @@ public class SplitTaskUnfoldAnimator implements UnfoldTaskAnimator,
                 .setCornerRadius(context.mLeash, 0.0F);
     }
 
+    @Override
+    public void onSplitVisibilityChanged(boolean visible) {
+        mUnfoldBackgroundController.onSplitVisibilityChanged(visible);
+    }
+
     private class AnimationContext {
         final SurfaceControl mLeash;
 
