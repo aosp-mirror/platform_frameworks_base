@@ -1072,6 +1072,10 @@ public class FullScreenMagnificationController implements
         }
     }
 
+    protected float getLastActivatedScale(int displayId) {
+        return getScale(displayId);
+    }
+
     /**
      * Returns the X offset of the magnification viewport. If an animation
      * is in progress, this reflects the end state of the animation.
