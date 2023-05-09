@@ -26,6 +26,7 @@ import static com.android.server.wm.BLASTSyncEngine.METHOD_NONE;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_NONE;
+import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
 import static com.android.server.wm.WindowState.BLAST_TIMEOUT_DURATION;
 
 import static org.junit.Assert.assertEquals;
@@ -38,7 +39,9 @@ import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.spy;
 
 import android.platform.test.annotations.Presubmit;
+import android.util.MergedConfiguration;
 import android.view.SurfaceControl;
+import android.window.ClientWindowFrames;
 
 import androidx.test.filters.SmallTest;
 
@@ -306,6 +309,19 @@ public class SyncEngineTests extends WindowTestsBase {
         assertEquals(SYNC_STATE_NONE, parentWC.mSyncState);
         assertEquals(SYNC_STATE_NONE, topChildWC.mSyncState);
         assertEquals(SYNC_STATE_NONE, botChildWC.mSyncState);
+
+        // If the appearance of window won't change after reparenting, its sync state can be kept.
+        final WindowState w = createWindow(null, TYPE_BASE_APPLICATION, "win");
+        parentWC.onRequestedOverrideConfigurationChanged(w.getConfiguration());
+        w.reparent(botChildWC, POSITION_TOP);
+        parentWC.prepareSync();
+        // Assume the window has drawn with the latest configuration.
+        w.fillClientWindowFramesAndConfiguration(new ClientWindowFrames(),
+                new MergedConfiguration(), true /* useLatestConfig */, true /* relayoutVisible */);
+        assertTrue(w.onSyncFinishedDrawing());
+        assertEquals(SYNC_STATE_READY, w.mSyncState);
+        w.reparent(topChildWC, POSITION_TOP);
+        assertEquals(SYNC_STATE_READY, w.mSyncState);
     }
 
     @Test
