@@ -21,6 +21,7 @@ import android.media.soundtrigger.PhraseRecognitionEvent;
  * Wrapper to android.media.soundtrigger.RecognitionEvent providing additional fields used by the
  * framework.
  */
+@JavaDerive(equals = true, toString = true)
 parcelable PhraseRecognitionEventSys {
 
     PhraseRecognitionEvent phraseRecognitionEvent;
