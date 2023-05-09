@@ -2565,9 +2565,9 @@ public class PackageInstaller {
          * Sets the state of permissions for the package at installation.
          * <p/>
          * Granting any runtime permissions require the
-         * {@link android.Manifest.permission#INSTALL_GRANT_RUNTIME_PERMISSIONS} permission to be
-         * held by the caller. Revoking runtime permissions is not allowed, even during app update
-         * sessions.
+         * {@link android.Manifest.permission#INSTALL_GRANT_RUNTIME_PERMISSIONS
+         * INSTALL_GRANT_RUNTIME_PERMISSIONS} permission to be held by the caller. Revoking runtime
+         * permissions is not allowed, even during app update sessions.
          * <p/>
          * Holders without the permission are allowed to change the following special permissions:
          * <p/>
