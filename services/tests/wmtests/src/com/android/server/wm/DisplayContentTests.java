@@ -53,6 +53,8 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -2825,6 +2827,26 @@ public class DisplayContentTests extends WindowTestsBase {
         // The returned keep-clear areas contain the areas from all visible windows
         assertEquals(new ArraySet(Arrays.asList(rect1, rect2)),
                 mDisplayContent.getKeepClearAreas());
+    }
+
+    @Test
+    public void testMayImeShowOnLaunchingActivity_negativeWhenSoftInputModeHidden() {
+        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, app, "appWin");
+        createWindow(null, TYPE_APPLICATION_STARTING, app, "startingWin");
+        app.mStartingData = mock(SnapshotStartingData.class);
+        // Assume the app has shown IME before and warm launching with a snapshot window.
+        doReturn(true).when(app.mStartingData).hasImeSurface();
+
+        // Expect true when this IME focusable activity will show IME during launching.
+        assertTrue(WindowManager.LayoutParams.mayUseInputMethod(appWin.mAttrs.flags));
+        assertTrue(mDisplayContent.mayImeShowOnLaunchingActivity(app));
+
+        // Not expect IME will be shown during launching if the app's softInputMode is hidden.
+        appWin.mAttrs.softInputMode = SOFT_INPUT_STATE_ALWAYS_HIDDEN;
+        assertFalse(mDisplayContent.mayImeShowOnLaunchingActivity(app));
+        appWin.mAttrs.softInputMode = SOFT_INPUT_STATE_HIDDEN;
+        assertFalse(mDisplayContent.mayImeShowOnLaunchingActivity(app));
     }
 
     private void removeRootTaskTests(Runnable runnable) {
