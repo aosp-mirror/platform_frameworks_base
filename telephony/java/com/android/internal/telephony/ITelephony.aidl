@@ -3037,4 +3037,11 @@ interface ITelephony {
      * @return {@code true} if the timeout duration is set successfully, {@code false} otherwise.
      */
     boolean setSatelliteDeviceAlignedTimeoutDuration(long timeoutMillis);
+
+    /**
+     * Test method to confirm the file contents are not altered.
+     */
+     @JavaPassthrough(annotation="@android.annotation.RequiresPermission("
+                 + "android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)")
+     List<String> getShaIdFromAllowList(String pkgName, int carrierId);
 }
