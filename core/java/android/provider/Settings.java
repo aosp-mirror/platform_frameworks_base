@@ -5453,6 +5453,14 @@ public final class Settings {
         public static final String SHOW_TOUCHES = "show_touches";
 
         /**
+         * Show key presses and other events dispatched to focused windows on the screen.
+         * 0 = no
+         * 1 = yes
+         * @hide
+         */
+        public static final String SHOW_KEY_PRESSES = "show_key_presses";
+
+        /**
          * Log raw orientation data from
          * {@link com.android.server.policy.WindowOrientationListener} for use with the
          * orientationplot.py tool.
@@ -5842,6 +5850,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(NOTIFICATION_LIGHT_PULSE);
             PRIVATE_SETTINGS.add(POINTER_LOCATION);
             PRIVATE_SETTINGS.add(SHOW_TOUCHES);
+            PRIVATE_SETTINGS.add(SHOW_KEY_PRESSES);
             PRIVATE_SETTINGS.add(WINDOW_ORIENTATION_LISTENER_LOG);
             PRIVATE_SETTINGS.add(POWER_SOUNDS_ENABLED);
             PRIVATE_SETTINGS.add(DOCK_SOUNDS_ENABLED);
