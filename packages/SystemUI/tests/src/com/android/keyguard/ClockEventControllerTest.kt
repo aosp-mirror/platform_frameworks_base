@@ -136,7 +136,7 @@ class ClockEventControllerTest : SysuiTestCase() {
         runBlocking(IMMEDIATE) {
             underTest.registerListeners(parentView)
 
-            repository.setDozing(true)
+            repository.setIsDozing(true)
             repository.setDozeAmount(1f)
         }
     }
