@@ -337,6 +337,11 @@ public class SplitScreenController implements DragAndDropPolicy.Starter,
         return isTaskInSplitScreen(taskId) && isSplitScreenVisible();
     }
 
+    /** Check whether the task is the single-top root or the root of one of the stages. */
+    public boolean isTaskRootOrStageRoot(int taskId) {
+        return mStageCoordinator.isRootOrStageRoot(taskId);
+    }
+
     public @SplitPosition int getSplitPosition(int taskId) {
         return mStageCoordinator.getSplitPosition(taskId);
     }
