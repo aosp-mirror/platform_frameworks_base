@@ -714,6 +714,7 @@ public final class SurfaceSyncGroup {
                     public void onTransactionReady(Transaction t) {
                         synchronized (mLock) {
                             if (t != null) {
+                                t.sanitize(Binder.getCallingPid(), Binder.getCallingUid());
                                 // When an older parent sync group is added due to a child syncGroup
                                 // getting added to multiple groups, we need to maintain merge order
                                 // so the older parentSyncGroup transactions are overwritten by
