@@ -204,14 +204,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
                 : taskStableBounds.right - taskBounds.left - mLayout.getMeasuredWidth();
         final int positionY = taskStableBounds.bottom - taskBounds.top
                 - mLayout.getMeasuredHeight();
-        // To secure a proper visualisation, we hide the layout while updating the position of
-        // the {@link SurfaceControl} it belongs.
-        final int oldVisibility = mLayout.getVisibility();
-        if (oldVisibility == View.VISIBLE) {
-            mLayout.setVisibility(View.GONE);
-        }
         updateSurfacePosition(positionX, positionY);
-        mLayout.setVisibility(oldVisibility);
     }
 
     private void updateVisibilityOfViews() {
