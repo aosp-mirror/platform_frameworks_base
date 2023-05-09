@@ -57,14 +57,15 @@ open class ControlsActivity @Inject constructor(
     private val keyguardStateController: KeyguardStateController
 ) : ComponentActivity() {
 
+    private val lastConfiguration = Configuration()
+
     private lateinit var parent: ViewGroup
     private lateinit var broadcastReceiver: BroadcastReceiver
     private var mExitToDream: Boolean = false
-    private lateinit var lastConfiguration: Configuration
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        lastConfiguration = resources.configuration
+        lastConfiguration.setTo(resources.configuration)
         if (featureFlags.isEnabled(Flags.USE_APP_PANELS)) {
             window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
         }
@@ -105,7 +106,7 @@ open class ControlsActivity @Inject constructor(
         if (lastConfiguration.diff(newConfig) and interestingFlags != 0 ) {
             uiController.onSizeChange()
         }
-        lastConfiguration = newConfig
+        lastConfiguration.setTo(newConfig)
     }
 
     override fun onStart() {

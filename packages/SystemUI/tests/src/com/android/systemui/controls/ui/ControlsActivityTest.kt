@@ -34,6 +34,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -106,6 +107,18 @@ class ControlsActivityTest : SysuiTestCase() {
         activityRule.runOnUiThread { activityRule.activity.onConfigurationChanged(newConfig) }
 
         verify(uiController).onSizeChange()
+    }
+
+    @Test
+    fun testConfigurationChangeSupportsInPlaceChange() {
+        val config = Configuration(activityRule.activity.resources.configuration)
+
+        config.orientation = switchOrientation(config.orientation)
+        activityRule.runOnUiThread { activityRule.activity.onConfigurationChanged(config) }
+        config.orientation = switchOrientation(config.orientation)
+        activityRule.runOnUiThread { activityRule.activity.onConfigurationChanged(config) }
+
+        verify(uiController, times(2)).onSizeChange()
     }
 
     private fun switchOrientation(orientation: Int): Int {
