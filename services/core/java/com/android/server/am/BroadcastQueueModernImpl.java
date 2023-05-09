@@ -1151,6 +1151,11 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
      */
     @GuardedBy("mService")
     private void demoteFromRunningLocked(@NonNull BroadcastProcessQueue queue) {
+        if (!queue.isActive()) {
+            logw("Ignoring demoteFromRunning; no active broadcast for " + queue);
+            return;
+        }
+
         final int cookie = traceBegin("demoteFromRunning");
         // We've drained running broadcasts; maybe move back to runnable
         queue.makeActiveIdle();
