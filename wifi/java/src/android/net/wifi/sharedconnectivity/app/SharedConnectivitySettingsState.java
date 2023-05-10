@@ -161,7 +161,7 @@ public final class SharedConnectivitySettingsState implements Parcelable {
 
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
-        mInstantTetherSettingsPendingIntent.writeToParcel(dest, 0);
+        PendingIntent.writePendingIntentOrNullToParcel(mInstantTetherSettingsPendingIntent, dest);
         dest.writeBoolean(mInstantTetherEnabled);
         dest.writeBundle(mExtras);
     }
@@ -173,7 +173,7 @@ public final class SharedConnectivitySettingsState implements Parcelable {
      */
     @NonNull
     public static SharedConnectivitySettingsState readFromParcel(@NonNull Parcel in) {
-        PendingIntent pendingIntent = PendingIntent.CREATOR.createFromParcel(in);
+        PendingIntent pendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(in);
         boolean instantTetherEnabled = in.readBoolean();
         Bundle extras = in.readBundle();
         return new SharedConnectivitySettingsState(instantTetherEnabled, pendingIntent, extras);

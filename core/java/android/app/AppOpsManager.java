@@ -7089,6 +7089,26 @@ public class AppOpsManager {
      */
     public interface OnOpChangedListener {
         public void onOpChanged(String op, String packageName);
+
+        /**
+         * Implementations can override this method to add handling logic for AppOp changes.
+         *
+         * Normally, listeners to AppOp changes work in the same User Space as the App whose Op
+         * has changed. However, in some case listeners can have a single instance responsible for
+         * multiple users. (For ex single Media Provider instance in user 0 is responsible for both
+         * cloned and user 0 spaces). For handling such cases correctly, listeners need to be
+         * passed userId in addition to PackageName and Op.
+
+         * The default impl is to fallback onto {@link #onOpChanged(String, String)
+         *
+         * @param op The Op that changed.
+         * @param packageName Package of the app whose Op changed.
+         * @param userId User Space of the app whose Op changed.
+         * @hide
+         */
+        default void onOpChanged(@NonNull String op, @NonNull String packageName,  int userId) {
+            onOpChanged(op, packageName);
+        }
     }
 
     /**
@@ -7785,7 +7805,9 @@ public class AppOpsManager {
                             ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName);
                         }
                         if (sAppOpInfos[op].name != null) {
-                            callback.onOpChanged(sAppOpInfos[op].name, packageName);
+
+                            callback.onOpChanged(sAppOpInfos[op].name, packageName,
+                                    UserHandle.getUserId(uid));
                         }
                     }
                 };

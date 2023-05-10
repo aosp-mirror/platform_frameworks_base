@@ -324,12 +324,12 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                         synchronized (mLock) {
                             if (stateStatus == SESSION_STATE_INACTIVE) {
                                 // If the last reported session status was VISIBLE
-                                // then the INVISIBLE state should be dispatched before INACTIVE
+                                // then the ACTIVE state should be dispatched before INACTIVE
                                 // due to not having a good mechanism to know when
                                 // the content is no longer visible before it's fully removed
                                 if (getLastReportedRearDisplayPresentationStatus()
                                         == SESSION_STATE_CONTENT_VISIBLE) {
-                                    consumer.accept(SESSION_STATE_CONTENT_INVISIBLE);
+                                    consumer.accept(SESSION_STATE_ACTIVE);
                                 }
                                 mRearDisplayPresentationController = null;
                             }

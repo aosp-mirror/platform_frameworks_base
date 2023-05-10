@@ -55,7 +55,6 @@ class CredentialManagerRepo(
     val requestInfo: RequestInfo?
     private val providerEnabledList: List<ProviderData>
     private val providerDisabledList: List<DisabledProviderData>?
-    // TODO: require non-null.
     val resultReceiver: ResultReceiver?
 
     var initialUiState: UiState
