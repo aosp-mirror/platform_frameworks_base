@@ -520,4 +520,28 @@ public class TaskViewTest extends ShellTestCase {
         verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController), eq(false));
         verify(mTaskViewTransitions, never()).updateBoundsState(eq(mTaskViewTaskController), any());
     }
+
+    @Test
+    public void testRemoveTaskView_noTask() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskView.removeTask();
+        verify(mTaskViewTransitions, never()).closeTaskView(any(), any());
+    }
+
+    @Test
+    public void testRemoveTaskView() {
+        assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
+
+        mTaskView.surfaceCreated(mock(SurfaceHolder.class));
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
+                new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
+                mLeash, wct);
+
+        verify(mViewListener).onTaskCreated(eq(mTaskInfo.taskId), any());
+
+        mTaskView.removeTask();
+        verify(mTaskViewTransitions).closeTaskView(any(), eq(mTaskViewTaskController));
+    }
 }
