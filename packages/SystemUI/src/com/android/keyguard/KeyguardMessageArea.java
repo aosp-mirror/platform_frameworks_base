@@ -45,6 +45,7 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     private int mTopMargin;
     protected boolean mAnimate;
     private final int mStyleResId;
+    private boolean mIsDisabled = false;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -128,6 +129,10 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     }
 
     void update() {
+        if (mIsDisabled) {
+            setVisibility(GONE);
+            return;
+        }
         CharSequence status = mMessage;
         setVisibility(TextUtils.isEmpty(status) || (!mIsVisible) ? INVISIBLE : VISIBLE);
         setText(status);
@@ -146,4 +151,17 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
 
     /** Set the text color */
     protected abstract void updateTextColor();
+
+    /**
+     * Mark this view with {@link android.view.View#GONE} visibility to remove this from the layout
+     * of the view. Any calls to {@link #setIsVisible(boolean)} after this will be a no-op.
+     */
+    public void disable() {
+        mIsDisabled = true;
+        update();
+    }
+
+    public boolean isDisabled() {
+        return mIsDisabled;
+    }
 }
