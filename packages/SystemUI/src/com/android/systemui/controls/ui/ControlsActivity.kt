@@ -71,7 +71,7 @@ open class ControlsActivity @Inject constructor(
 
         setContentView(R.layout.controls_fullscreen)
 
-        lifecycle.addObserver(
+        getLifecycle().addObserver(
             ControlsAnimations.observerForAnimations(
                 requireViewById(R.id.control_detail_root),
                 window,

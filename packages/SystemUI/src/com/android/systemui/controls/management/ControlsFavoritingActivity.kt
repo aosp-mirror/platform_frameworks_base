@@ -268,7 +268,7 @@ open class ControlsFavoritingActivity @Inject constructor(
     private fun bindViews() {
         setContentView(R.layout.controls_management)
 
-        lifecycle.addObserver(
+        getLifecycle().addObserver(
             ControlsAnimations.observerForAnimations(
                 requireViewById<ViewGroup>(R.id.controls_management_root),
                 window,
