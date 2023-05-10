@@ -47,6 +47,7 @@ import android.app.IActivityManager;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
 import android.app.backup.BackupAgent;
+import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupAnnotations.BackupDestination;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupManagerMonitor;
@@ -3070,7 +3071,8 @@ public class UserBackupManagerService {
                     /* caller */ "BMS.reportDelayedRestoreResult");
 
             IBackupManagerMonitor monitor = transportClient.getBackupManagerMonitor();
-            BackupManagerMonitorUtils.sendAgentLoggingResults(monitor, packageInfo, results);
+            BackupManagerMonitorUtils.sendAgentLoggingResults(monitor, packageInfo, results,
+                    BackupAnnotations.OperationType.RESTORE);
         } catch (NameNotFoundException | TransportNotAvailableException
                 | TransportNotRegisteredException | RemoteException e) {
             Slog.w(TAG, "Failed to send delayed restore logs: " + e);
