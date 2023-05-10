@@ -813,7 +813,7 @@ public class BackupManagerService extends IBackupManager.Stub {
         }
         UserBackupManagerService userBackupManagerService =
                 getServiceForUserIfCallerHasPermission(
-                        userId, "hasBackupPassword()");
+                        UserHandle.USER_SYSTEM, "hasBackupPassword()");
 
         return userBackupManagerService != null && userBackupManagerService.hasBackupPassword();
     }

@@ -33,7 +33,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 import static org.testng.Assert.expectThrows;
 
@@ -118,10 +117,6 @@ public class BackupManagerServiceRoboTest {
         mUserTwoId = mUserOneId + 1;
         mShadowUserManager.addUser(mUserOneId, "mUserOneId", 0);
         mShadowUserManager.addUser(mUserTwoId, "mUserTwoId", 0);
-
-        when(mUserSystemService.getUserId()).thenReturn(UserHandle.USER_SYSTEM);
-        when(mUserOneService.getUserId()).thenReturn(mUserOneId);
-        when(mUserTwoService.getUserId()).thenReturn(mUserTwoId);
 
         mShadowContext.grantPermissions(BACKUP);
         mShadowContext.grantPermissions(INTERACT_ACROSS_USERS_FULL);
@@ -1474,9 +1469,9 @@ public class BackupManagerServiceRoboTest {
         File testFile = createTestFile();
         FileDescriptor fileDescriptor = new FileDescriptor();
         PrintWriter printWriter = new PrintWriter(testFile);
+        String[] args = {"1", "2"};
         ShadowBinder.setCallingUserHandle(UserHandle.of(UserHandle.USER_SYSTEM));
 
-        String[] args = {"--user", "0"};
         backupManagerService.dump(fileDescriptor, printWriter, args);
 
         verify(mUserSystemService).dump(fileDescriptor, printWriter, args);
@@ -1490,8 +1485,8 @@ public class BackupManagerServiceRoboTest {
         File testFile = createTestFile();
         FileDescriptor fileDescriptor = new FileDescriptor();
         PrintWriter printWriter = new PrintWriter(testFile);
+        String[] args = {"1", "2"};
 
-        String[] args = {"--user", "10"};
         backupManagerService.dump(fileDescriptor, printWriter, args);
 
         verify(mUserOneService, never()).dump(fileDescriptor, printWriter, args);
