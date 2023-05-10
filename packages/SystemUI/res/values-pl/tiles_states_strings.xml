@@ -134,7 +134,7 @@
   <string-array name="tile_states_reduce_brightness">
     <item msgid="1839836132729571766">"Niedostępny"</item>
     <item msgid="4572245614982283078">"Wyłączone"</item>
-    <item msgid="6536448410252185664">"Włączony"</item>
+    <item msgid="6536448410252185664">"Włączone"</item>
   </string-array>
   <string-array name="tile_states_cameratoggle">
     <item msgid="6680671247180519913">"Niedostępny"</item>
