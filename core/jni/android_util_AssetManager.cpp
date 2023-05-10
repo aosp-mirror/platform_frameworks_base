@@ -1127,20 +1127,28 @@ static jintArray NativeAttributeResolutionStack(JNIEnv* env, jclass /*clazz*/, j
   }
 
   auto style_stack = assetmanager->GetBagResIdStack(xml_style_res);
+  if (!style_stack.ok()) {
+    jniThrowIOException(env, EBADMSG);
+    return nullptr;
+  }
   auto def_style_stack = assetmanager->GetBagResIdStack(def_style_resid);
+  if (!def_style_stack.ok()) {
+    jniThrowIOException(env, EBADMSG);
+    return nullptr;
+  }
 
-  jintArray array = env->NewIntArray(style_stack.size() + def_style_stack.size());
+  jintArray array = env->NewIntArray(style_stack.value()->size() + def_style_stack.value()->size());
   if (env->ExceptionCheck()) {
     return nullptr;
   }
 
-  for (uint32_t i = 0; i < style_stack.size(); i++) {
-    jint attr_resid = style_stack[i];
+  for (uint32_t i = 0; i < style_stack.value()->size(); i++) {
+    jint attr_resid = (*style_stack.value())[i];
     env->SetIntArrayRegion(array, i, 1, &attr_resid);
   }
-  for (uint32_t i = 0; i < def_style_stack.size(); i++) {
-    jint attr_resid = def_style_stack[i];
-    env->SetIntArrayRegion(array, style_stack.size() + i, 1, &attr_resid);
+  for (uint32_t i = 0; i < def_style_stack.value()->size(); i++) {
+    jint attr_resid = (*def_style_stack.value())[i];
+    env->SetIntArrayRegion(array, style_stack.value()->size() + i, 1, &attr_resid);
   }
   return array;
 }

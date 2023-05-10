@@ -243,9 +243,14 @@ class AssetManager2 {
     friend AssetManager2;
     friend Theme;
     SelectedValue() = default;
-    SelectedValue(const ResolvedBag* bag, const ResolvedBag::Entry& entry) :
-        cookie(entry.cookie), data(entry.value.data), type(entry.value.dataType),
-        flags(bag->type_spec_flags), resid(0U), config({}) {};
+    SelectedValue(const ResolvedBag* bag, const ResolvedBag::Entry& entry)
+        : cookie(entry.cookie),
+          data(entry.value.data),
+          type(entry.value.dataType),
+          flags(bag->type_spec_flags),
+          resid(0U),
+          config() {
+    }
 
     // The cookie representing the ApkAssets in which the value resides.
     ApkAssetsCookie cookie = kInvalidCookie;
@@ -327,7 +332,8 @@ class AssetManager2 {
   // resource data failed.
   base::expected<uint32_t, NullOrIOError> GetResourceTypeSpecFlags(uint32_t resid) const;
 
-  const std::vector<uint32_t> GetBagResIdStack(uint32_t resid) const;
+  base::expected<const std::vector<uint32_t>*, NullOrIOError> GetBagResIdStack(
+      uint32_t resid) const;
 
   // Resets the resource resolution structures in preparation for the next resource retrieval.
   void ResetResourceResolution() const;
