@@ -1363,7 +1363,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Режим USB-модема включен"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Режим MIDI включен"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB-устройство подключено"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Нажмите, чтобы показать дополнительные параметры."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Нажмите, чтобы посмотреть дополнительные параметры"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Подключенное устройство заряжается. Нажмите, чтобы увидеть другие настройки."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Обнаружено аналоговое аудиоустройство"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Подсоединенное устройство несовместимо с этим телефоном. Нажмите, чтобы узнать подробности."</string>

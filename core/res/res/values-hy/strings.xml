@@ -300,7 +300,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Բացել աշխատանքային պրոֆիլը"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Կոնտակտներ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"օգտագործել ձեր կոնտակտները"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղորոշում"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղադրություն"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"տեղորոշել այս սարքը"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Օրացույց"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"օգտագործել օրացույցը"</string>
@@ -597,7 +597,7 @@
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Շատ լուսավոր է"</string>
     <string name="fingerprint_acquired_power_press" msgid="3107864151278434961">"Հայտնաբերվել է սնուցման կոճակի սեղմում"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Փորձեք փոխել մատի դիրքը"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ամեն անգամ թեթևա­­կի փոխեք մատի դիրքը"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Թեթևակի փոխեք մատի դիրքն ամեն անգամ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Մատնահետքը չի ճանաչվել"</string>
@@ -656,7 +656,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"Նայեք ուղիղ էկրանին"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"Նայեք ուղիղ էկրանին"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"Նայեք ուղիղ էկրանին"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Հեռացրեք այն ամենը, ինչը թաքցնում է ձեր երեսը:"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Հեռացրեք այն ամենը, ինչը փակում է ձեր դեմքը։"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Մաքրեք էկրանի վերևի մասը, ներառյալ սև գոտին"</string>
     <!-- no translation found for face_acquired_dark_glasses_detected (5643703296620631986) -->
     <skip />
@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Չհաջողվեց ստեղծել ձեր դեմքի մոդելը։ Նորից փորձեք։"</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Հանեք ակնոցը։ Ձեր դեմքը պետք է ամբողջովին տեսանելի լինի։"</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Դեմքի մի մասը ծածկված է։ Ձեր դեմքը պետք է ամբող­ջովին տեսանելի լինի։"</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Դեմքը մասամբ ծածկված է։ Պետք է լրիվ տեսանելի լինի։"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Չհաջողվեց հաստատել դեմքը։ Սարքն անհասանելի է:"</string>

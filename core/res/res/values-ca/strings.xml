@@ -1362,7 +1362,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"S\'ha activat la compartició de xarxa per USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"S\'ha activat el mode MIDI per USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"S\'ha connectat un accessori USB"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Toca per veure més opcions."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Toca per veure més opcions"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"S\'està carregant el dispositiu connectat. Toca per veure més opcions."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"S\'ha detectat un accessori d\'àudio analògic"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositiu connectat no és compatible amb aquest telèfon. Toca per obtenir més informació."</string>

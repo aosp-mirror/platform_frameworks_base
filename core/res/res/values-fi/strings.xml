@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Kasvomallia ei voi luoda. Yritä uudelleen."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Tummat lasit havaittu. Kasvojen täytyy näkyä kokonaan."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Kasvot peittävä asia havaittu. Kasvojen täytyy näkyä kokonaan."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Jokin peittää kasvot. Kasvojen täytyy näkyä kokonaan."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Kasvoja ei voi vahvistaa. Laitteisto ei käytettäv."</string>

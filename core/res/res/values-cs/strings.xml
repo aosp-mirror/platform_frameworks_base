@@ -1363,7 +1363,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Byl zapnut tethering přes USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Byl zapnut režim MIDI přes USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Je připojeno příslušenství USB"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte další možnosti."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte další možnosti"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Nabíjení připojeného zařízení. Klepnutím zobrazíte další možnosti."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bylo zjištěno analogové zvukové příslušenství"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Připojené zařízení není s tímto telefonem kompatibilní. Klepnutím zobrazíte další informace."</string>

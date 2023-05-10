@@ -1362,7 +1362,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Se activó la conexión mediante dispositivo móvil por USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Se activó el modo MIDI mediante USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accesorio USB conectado"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Presiona para ver más opciones."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Presiona para ver más opciones"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Cargando el dispositivo conectado. Presiona para ver más opciones."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Se detectó un accesorio de audio analógico"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositivo adjunto no es compatible con este teléfono. Presiona para obtener más información."</string>
@@ -1615,7 +1615,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Dispositivo"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Altavoces del conector"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Altavoces de la estación de carga"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Auriculares"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>

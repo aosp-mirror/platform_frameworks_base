@@ -1254,7 +1254,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Lancement des applications…"</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Finalisation de la mise à jour."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Vous avez appuyé sur le bouton Marche/Arrêt, ce qui éteint généralement l\'écran.\n\nEssayez d\'appuyer doucement pendant la configuration de votre empreinte digitale."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Éteindre l\'écran pour achever la config."</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Éteignez l\'écran pour achever la configuration."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Éteindre"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuer de valider votre empreinte ?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Vous avez appuyé sur le bouton Marche/Arrêt, ce qui éteint généralement l\'écran.\n\nPour valider votre empreinte digitale, appuyez plus doucement."</string>
@@ -1362,7 +1362,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Partage de connexion via USB activé"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB activé"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accessoire USB connecté"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Appuyez ici pour plus d\'options."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Appuyez pour plus d\'options."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Recharge de l\'appareil connecté. Appuyez ici pour plus d\'options."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Accessoire audio analogique détecté"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"L\'appareil connecté n\'est pas compatible avec ce téléphone. Appuyez ici pour en savoir plus."</string>

@@ -1253,8 +1253,8 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando aplicacións."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Está finalizando o arranque"</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Premiches o botón de acendido, o que adoita facer que se apague a pantalla.\n\nProba a dar un toque suave namentres configuras a impresión dixital."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Apaga a pantalla e acaba a configuración"</string>
-    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Desactivar"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Para rematar, apaga a pantalla"</string>
+    <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Apagar"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Queres seguir verificando a impresión?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Premiches o botón de acendido, o que adoita facer que se apague a pantalla.\n\nProba a dar un toque suave para verificar a impresión dixital."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"Desactivar pantalla"</string>
