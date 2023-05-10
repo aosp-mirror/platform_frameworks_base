@@ -191,6 +191,12 @@ public class Transitions implements RemoteCallable<Transitions>,
      */
     private static final int SYNC_ALLOWANCE_MS = 120;
 
+    /**
+     * Keyguard gets a more generous timeout to finish its animations, because we are always holding
+     * a sleep token during occlude/unocclude transitions and we want them to finish playing cleanly
+     */
+    private static final int SYNC_ALLOWANCE_KEYGUARD_MS = 2000;
+
     /** For testing only. Disables the force-finish timeout on sync. */
     private boolean mDisableForceSync = false;
 
@@ -669,7 +675,7 @@ public class Transitions implements RemoteCallable<Transitions>,
                 // Sleep starts a process of forcing all prior transitions to finish immediately
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                         "Start finish-for-sync track %d", i);
-                finishForSync(i, null /* forceFinish */);
+                finishForSync(active, i, null /* forceFinish */);
             }
             if (hadPreceding) {
                 return false;
@@ -1017,6 +1023,9 @@ public class Transitions implements RemoteCallable<Transitions>,
         for (int i = 0; i < mPendingTransitions.size(); ++i) {
             if (mPendingTransitions.get(i).mToken == token) return true;
         }
+        for (int i = 0; i < mReadyDuringSync.size(); ++i) {
+            if (mReadyDuringSync.get(i).mToken == token) return true;
+        }
         for (int t = 0; t < mTracks.size(); ++t) {
             final Track tr = mTracks.get(t);
             for (int i = 0; i < tr.mReadyTransitions.size(); ++i) {
@@ -1103,10 +1112,17 @@ public class Transitions implements RemoteCallable<Transitions>,
      *
      * This is then repeated until there are no more pending sleep transitions.
      *
+     * @param reason The SLEEP transition that triggered this round of finishes. We will continue
+     *               looping round finishing transitions as long as this is still waiting.
      * @param forceFinish When non-null, this is the transition that we last sent the SLEEP merge
      *                    signal to -- so it will be force-finished if it's still running.
      */
-    private void finishForSync(int trackIdx, @Nullable ActiveTransition forceFinish) {
+    private void finishForSync(ActiveTransition reason,
+            int trackIdx, @Nullable ActiveTransition forceFinish) {
+        if (!isTransitionKnown(reason.mToken)) {
+            Log.d(TAG, "finishForSleep: already played sync transition " + reason);
+            return;
+        }
         final Track track = mTracks.get(trackIdx);
         if (forceFinish != null) {
             final Track trk = mTracks.get(forceFinish.getTrack());
@@ -1150,8 +1166,11 @@ public class Transitions implements RemoteCallable<Transitions>,
             if (track.mActiveTransition == playing) {
                 if (!mDisableForceSync) {
                     // Give it a short amount of time to process it before forcing.
-                    mMainExecutor.executeDelayed(() -> finishForSync(trackIdx, playing),
-                            SYNC_ALLOWANCE_MS);
+                    final int tolerance = KeyguardTransitionHandler.handles(playing.mInfo)
+                            ? SYNC_ALLOWANCE_KEYGUARD_MS
+                            : SYNC_ALLOWANCE_MS;
+                    mMainExecutor.executeDelayed(
+                            () -> finishForSync(reason, trackIdx, playing), tolerance);
                 }
                 break;
             }
