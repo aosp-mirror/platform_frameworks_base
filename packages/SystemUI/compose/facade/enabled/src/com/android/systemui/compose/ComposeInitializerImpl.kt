@@ -19,6 +19,7 @@ package com.android.systemui.compose
 import android.view.View
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
+import androidx.lifecycle.Lifecycle
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import com.android.compose.animation.ViewTreeSavedStateRegistryOwner
@@ -53,7 +54,8 @@ internal object ComposeInitializerImpl : ComposeInitializer {
 
                 override val savedStateRegistry = savedStateRegistryController.savedStateRegistry
 
-                override val lifecycle = lifecycleOwner.lifecycle
+                override val lifecycle: Lifecycle
+                    get() = lifecycleOwner.lifecycle
             }
 
         // We must call [ViewLifecycleOwner.onCreate] after creating the [SavedStateRegistryOwner]
