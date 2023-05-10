@@ -478,7 +478,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"Доступність"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Дзвінок"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вібросигнал"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"без звуку"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Без звуку"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Торкніться, щоб увімкнути звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Торкніться, щоб налаштувати вібросигнал. Спеціальні можливості може бути вимкнено."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Торкніться, щоб вимкнути звук. Спеціальні можливості може бути вимкнено."</string>
