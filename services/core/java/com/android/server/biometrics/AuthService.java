@@ -342,10 +342,9 @@ public class AuthService extends SystemService {
         public void registerEnabledOnKeyguardCallback(
                 IBiometricEnabledOnKeyguardCallback callback) throws RemoteException {
             checkInternalPermission();
-            final int callingUserId = UserHandle.getCallingUserId();
             final long identity = Binder.clearCallingIdentity();
             try {
-                mBiometricService.registerEnabledOnKeyguardCallback(callback, callingUserId);
+                mBiometricService.registerEnabledOnKeyguardCallback(callback);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
