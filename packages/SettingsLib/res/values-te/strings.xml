@@ -115,7 +115,8 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD ఆడియో: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD ఆడియో"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"వినికిడి మద్దతు ఉపకరణాలు"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"Le ఆడియో"</string>
+    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
+    <skip />
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"వినికిడి మద్దతు ఉపకరణాలకు కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"LE ఆడియోకు కనెక్ట్ చేయబడింది"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"మీడియా ఆడియోకు కనెక్ట్ చేయబడింది"</string>
@@ -621,7 +622,7 @@
     <string name="guest_reset_button" msgid="2515069346223503479">"గెస్ట్ సెషన్‌ను రీసెట్ చేయండి"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"గెస్ట్ మోడ్ నుండి వైదొలగండి"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"వైదొలగినప్పుడు యాక్టివిటీ అంతా తొలగించబడుతుంది"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"మీ నిష్క్రమణలో, యాక్టివిటీని సేవ్ చేయవచ్చు లేదా తొలగించవచ్చు"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"మీరు వైదొలగేటప్పుడు, యాక్టివిటీని సేవ్ చేయవచ్చు లేదా తొలగించవచ్చు"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"సెషన్ యాక్టివిటీని తొలగించడానికి ఇప్పుడే రీసెట్ చేయండి లేదా మీరు నిష్క్రమించేటప్పుడు యాక్టివిటీని సేవ్ చేయవచ్చు లేదా తొలగించవచ్చు"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ఒక ఫోటో తీయండి"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ఇమేజ్‌ను ఎంచుకోండి"</string>
