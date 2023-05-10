@@ -597,8 +597,8 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"तुमच्या बोटाची स्थिती प्रत्येक वेळी थोडीशी बदला"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिंट ओळखले नाही"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखले नाही"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"फिंगरप्रिंट ओळखली नाही"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"फिंगरप्रिंट ओळखली नाही"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"फिंगरप्रिंट ऑथेंटिकेट केली आहे"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"चेहरा ऑथेंटिकेशन केलेला आहे"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"चेहरा ऑथेंटिकेशन केलेला आहे, कृपया कंफर्म प्रेस करा"</string>
@@ -1606,7 +1606,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"टॅबलेट"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"टीव्ही"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"फोन"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"स्पीकर डॉक करा"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"डॉक स्पीकर"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"हेडफोन"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
