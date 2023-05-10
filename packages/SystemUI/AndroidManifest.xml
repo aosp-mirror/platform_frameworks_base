@@ -716,8 +716,11 @@
             android:exported="true" />
 
         <!-- started from Telecomm(CallsManager) -->
+        <!-- Sets an empty label to avoid an announcement from TalkBack,
+             the dialog contents are sufficient and will still be read by TalkBack -->
         <activity
             android:name=".telephony.ui.activity.SwitchToManagedProfileForCallActivity"
+            android:label=" "
             android:excludeFromRecents="true"
             android:exported="true"
             android:finishOnCloseSystemDialogs="true"
