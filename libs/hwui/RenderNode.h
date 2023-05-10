@@ -221,6 +221,8 @@ public:
 
     int64_t uniqueId() const { return mUniqueId; }
 
+    void setIsTextureView() { mIsTextureView = true; }
+
     void markDrawStart(SkCanvas& canvas);
     void markDrawEnd(SkCanvas& canvas);
 
@@ -289,6 +291,8 @@ private:
 
     bool mHasHolePunches;
     StretchMask mStretchMask;
+
+    bool mIsTextureView = false;
 
     // METHODS & FIELDS ONLY USED BY THE SKIA RENDERER
 public:
