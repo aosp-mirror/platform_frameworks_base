@@ -266,8 +266,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController = inputController;
         }
         if (sensorController == null) {
-            mSensorController = new SensorController(
-                    mVirtualDeviceLock, mDeviceId, mParams.getVirtualSensorCallback());
+            mSensorController = new SensorController(mDeviceId, mParams.getVirtualSensorCallback());
         } else {
             mSensorController = sensorController;
         }
