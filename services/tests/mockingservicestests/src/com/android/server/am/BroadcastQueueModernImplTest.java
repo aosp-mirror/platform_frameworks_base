@@ -769,7 +769,7 @@ public final class BroadcastQueueModernImplTest {
 
         BroadcastProcessQueue queue = new BroadcastProcessQueue(mConstants,
                 PACKAGE_GREEN, getUidForPackage(PACKAGE_GREEN));
-        queue.setPrioritizeEarliest(true);
+        queue.addPrioritizeEarliestRequest();
         long timeCounter = 100;
 
         enqueueOrReplaceBroadcast(queue,
@@ -814,6 +814,28 @@ public final class BroadcastQueueModernImplTest {
         queue.makeActiveNextPending();
         assertEquals(AppWidgetManager.ACTION_APPWIDGET_UPDATE,
                 queue.getActive().intent.getAction());
+
+
+        queue.removePrioritizeEarliestRequest();
+
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_BOOT_COMPLETED)
+                        .addFlags(Intent.FLAG_RECEIVER_OFFLOAD)), 0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_TIMEZONE_CHANGED)),
+                0, timeCounter++);
+        enqueueOrReplaceBroadcast(queue,
+                makeBroadcastRecord(new Intent(Intent.ACTION_LOCALE_CHANGED)
+                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND)), 0, timeCounter++);
+
+        // Once the request to prioritize earliest is removed, we should expect broadcasts
+        // to be dispatched in the order of foreground, normal and then offload.
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_LOCALE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_TIMEZONE_CHANGED, queue.getActive().intent.getAction());
+        queue.makeActiveNextPending();
+        assertEquals(Intent.ACTION_BOOT_COMPLETED, queue.getActive().intent.getAction());
     }
 
     /**

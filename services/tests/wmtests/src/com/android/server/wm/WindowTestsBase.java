@@ -197,6 +197,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     private static boolean sOverridesCheckedTestDisplay;
 
+    private boolean mOriginalPerDisplayFocusEnabled;
+
     @BeforeClass
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
@@ -208,6 +210,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mSupervisor = mAtm.mTaskSupervisor;
         mRootWindowContainer = mAtm.mRootWindowContainer;
         mWm = mSystemServicesTestRule.getWindowManagerService();
+        mOriginalPerDisplayFocusEnabled = mWm.mPerDisplayFocusEnabled;
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
 
         mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
@@ -279,6 +282,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         if (mUseFakeSettingsProvider) {
             FakeSettingsProvider.clearSettingsProvider();
         }
+        mWm.mPerDisplayFocusEnabled = mOriginalPerDisplayFocusEnabled;
     }
 
     /**

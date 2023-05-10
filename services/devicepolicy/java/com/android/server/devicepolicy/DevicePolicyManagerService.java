@@ -3611,10 +3611,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         if (isProfileOwnerOfOrganizationOwnedDevice(userId)
                 && getManagedSubscriptionsPolicy().getPolicyType()
                 == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
-            String defaultDialerPackageName = getOemDefaultDialerPackage();
-            String defaultSmsPackageName = getOemDefaultSmsPackage();
-            updateDialerAndSmsManagedShortcutsOverrideCache(defaultDialerPackageName,
-                    defaultSmsPackageName);
+            updateDialerAndSmsManagedShortcutsOverrideCache();
         }
 
         startOwnerService(userId, "start-user");
@@ -10728,15 +10725,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return UserHandle.USER_NULL;
     }
 
-    private @UserIdInt int getManagedProfileUserId() {
-        for (UserInfo ui : mUserManagerInternal.getUserInfos()) {
-            if (ui.isManagedProfile()) {
-                return ui.id;
-            }
-        }
-        return UserHandle.USER_NULL;
-    }
-
     /**
      * This API is cached: invalidate with invalidateBinderCaches().
      */
@@ -11599,6 +11587,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         synchronized (getLockObject()) {
             final ActiveAdmin activeAdmin = getParentOfAdminIfRequired(
                     getProfileOwnerOrDeviceOwnerLocked(caller.getUserId()), parent);
+
+            if (isManagedProfile(userId)) {
+                mInjector.binderWithCleanCallingIdentity(
+                        () -> updateDialerAndSmsManagedShortcutsOverrideCache());
+            }
+
             if (!Objects.equals(activeAdmin.mSmsPackage, packageName)) {
                 activeAdmin.mSmsPackage = packageName;
                 saveSettingsLocked(caller.getUserId());
@@ -11644,6 +11638,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         });
         // Only save the package when the setting the role succeeded without exception.
         synchronized (getLockObject()) {
+            if (isManagedProfile(callerUserId)) {
+                mInjector.binderWithCleanCallingIdentity(
+                        () -> updateDialerAndSmsManagedShortcutsOverrideCache());
+            }
+
             final ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(callerUserId);
             if (!Objects.equals(admin.mDialerPackage, packageName)) {
                 admin.mDialerPackage = packageName;
@@ -21814,10 +21813,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         final AccountManager accountManager = mContext.createContextAsUser(
                         UserHandle.of(sourceUserId), /* flags= */ 0)
                 .getSystemService(AccountManager.class);
-        final AccountManagerFuture<Bundle> bundle = accountManager.removeAccount(account,
-                null, null /* callback */, null /* handler */);
         try {
-            final Bundle result = bundle.getResult();
+            final Bundle result = accountManager.removeAccount(account,
+                    null, null /* callback */, null /* handler */).getResult(60, TimeUnit.SECONDS);
             if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, /* default */ false)) {
                 Slogf.i(LOG_TAG, "Account removed from the primary user.");
             } else {
@@ -23934,8 +23932,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 Slogf.w(LOG_TAG, "Couldn't install sms app, sms app package is null");
             }
 
-            updateDialerAndSmsManagedShortcutsOverrideCache(defaultDialerPackageName,
-                    defaultSmsPackageName);
+            updateDialerAndSmsManagedShortcutsOverrideCache();
         } catch (RemoteException re) {
             // shouldn't happen
             Slogf.wtf(LOG_TAG, "Failed to install dialer/sms app", re);
@@ -23951,17 +23948,28 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return mContext.getString(R.string.config_defaultSms);
     }
 
-    private void updateDialerAndSmsManagedShortcutsOverrideCache(
-            String defaultDialerPackageName, String defaultSmsPackageName) {
+    private void updateDialerAndSmsManagedShortcutsOverrideCache() {
         ArrayMap<String, String> shortcutOverrides = new ArrayMap<>();
+        int managedUserId = getManagedUserId();
+        List<String> dialerRoleHolders = mRoleManager.getRoleHoldersAsUser(RoleManager.ROLE_DIALER,
+                UserHandle.of(managedUserId));
+        List<String> smsRoleHolders = mRoleManager.getRoleHoldersAsUser(RoleManager.ROLE_SMS,
+                UserHandle.of(managedUserId));
 
-        if (defaultDialerPackageName != null) {
-            shortcutOverrides.put(defaultDialerPackageName, defaultDialerPackageName);
+        String dialerPackageToOverride = getOemDefaultDialerPackage();
+        String smsPackageToOverride = getOemDefaultSmsPackage();
+
+        // To get the default app, we can get all the role holders and get the first element.
+        if (dialerPackageToOverride != null) {
+            shortcutOverrides.put(dialerPackageToOverride,
+                    dialerRoleHolders.isEmpty() ? dialerPackageToOverride
+                            : dialerRoleHolders.get(0));
+        }
+        if (smsPackageToOverride != null) {
+            shortcutOverrides.put(smsPackageToOverride,
+                    smsRoleHolders.isEmpty() ? smsPackageToOverride : smsRoleHolders.get(0));
         }
 
-        if (defaultSmsPackageName != null) {
-            shortcutOverrides.put(defaultSmsPackageName, defaultSmsPackageName);
-        }
         mPolicyCache.setLauncherShortcutOverrides(shortcutOverrides);
     }
 

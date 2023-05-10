@@ -99,6 +99,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.app.ISoundTriggerSession;
+import com.android.internal.util.DumpUtils;
 import com.android.server.SoundTriggerInternal;
 import com.android.server.SystemService;
 import com.android.server.soundtrigger.SoundTriggerEvent.ServiceEvent;
@@ -424,6 +425,7 @@ public class SoundTriggerService extends SystemService {
 
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
             // Event loggers
             pw.println("##Service-Wide logs:");
             mServiceEventLogger.dump(pw, /* indent = */ "  ");

@@ -487,6 +487,7 @@ class CreateFlowUtils {
                     createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                     appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                     userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
+                    isAutoSelectRequest = createCredentialRequestJetpack.isAutoSelectAllowed,
                 )
                 is CreatePublicKeyCredentialRequest -> {
                     newRequestDisplayInfoFromPasskeyJson(
@@ -497,6 +498,7 @@ class CreateFlowUtils {
                         createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                         appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                         userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
+                        isAutoSelectRequest = createCredentialRequestJetpack.isAutoSelectAllowed,
                     )
                 }
                 is CreateCustomCredentialRequest -> {
@@ -515,6 +517,7 @@ class CreateFlowUtils {
                         createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                         appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                         userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
+                        isAutoSelectRequest = createCredentialRequestJetpack.isAutoSelectAllowed,
                     )
                 }
                 else -> null
@@ -602,7 +605,7 @@ class CreateFlowUtils {
             )
         }
 
-        private fun toCreateScreenState(
+        fun toCreateScreenState(
             createOptionSize: Int,
             isOnPasskeyIntroStateAlready: Boolean,
             requestDisplayInfo: RequestDisplayInfo,
@@ -661,8 +664,14 @@ class CreateFlowUtils {
                     passwordCount = createEntry.getPasswordCredentialCount(),
                     passkeyCount = createEntry.getPublicKeyCredentialCount(),
                     totalCredentialCount = createEntry.getTotalCredentialCount(),
-                    lastUsedTime = createEntry.lastUsedTime,
-                    footerDescription = createEntry.description?.toString()
+                    lastUsedTime = createEntry.lastUsedTime ?: Instant.MIN,
+                    footerDescription = createEntry.description?.toString(),
+                    // TODO(b/281065680): replace with official library constant once available
+                    allowAutoSelect =
+                    it.slice.items.firstOrNull {
+                        it.hasHint("androidx.credentials.provider.createEntry.SLICE_HINT_AUTO_" +
+                            "SELECT_ALLOWED")
+                    }?.text == "true",
                 ))
             }
             return result.sortedWith(
@@ -694,6 +703,7 @@ class CreateFlowUtils {
             preferImmediatelyAvailableCredentials: Boolean,
             appPreferredDefaultProviderId: String?,
             userSetDefaultProviderIds: Set<String>,
+            isAutoSelectRequest: Boolean
         ): RequestDisplayInfo? {
             val json = JSONObject(requestJson)
             var passkeyUsername = ""
@@ -716,6 +726,7 @@ class CreateFlowUtils {
                 preferImmediatelyAvailableCredentials,
                 appPreferredDefaultProviderId,
                 userSetDefaultProviderIds,
+                isAutoSelectRequest,
             )
         }
     }

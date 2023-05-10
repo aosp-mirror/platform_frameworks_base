@@ -39,14 +39,16 @@ fun ModalBottomSheet(
     onDismiss: () -> Unit,
     isInitialRender: Boolean,
     onInitialRenderComplete: () -> Unit,
+    isAutoSelectFlow: Boolean,
 ) {
     val scope = rememberCoroutineScope()
     val state = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
+        initialValue = if (isAutoSelectFlow) ModalBottomSheetValue.Expanded
+        else ModalBottomSheetValue.Hidden,
         skipHalfExpanded = true
     )
     val sysUiController = rememberSystemUiController()
-    if (state.targetValue == ModalBottomSheetValue.Hidden) {
+    if (state.targetValue == ModalBottomSheetValue.Hidden || isAutoSelectFlow) {
         setTransparentSystemBarsColor(sysUiController)
     } else {
         setBottomSheetSystemBarsColor(sysUiController)

@@ -39,6 +39,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository;
@@ -47,6 +48,7 @@ import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -79,6 +81,7 @@ public class TileServices extends IQSService.Stub {
     private final StatusBarIconController mStatusBarIconController;
     private final PanelInteractor mPanelInteractor;
     private final CustomTileAddedRepository mCustomTileAddedRepository;
+    private final DelayableExecutor mBackgroundExecutor;
 
     private int mMaxBound = DEFAULT_MAX_BOUND;
 
@@ -92,7 +95,8 @@ public class TileServices extends IQSService.Stub {
             CommandQueue commandQueue,
             StatusBarIconController statusBarIconController,
             PanelInteractor panelInteractor,
-            CustomTileAddedRepository customTileAddedRepository) {
+            CustomTileAddedRepository customTileAddedRepository,
+            @Background DelayableExecutor backgroundExecutor) {
         mHost = host;
         mKeyguardStateController = keyguardStateController;
         mContext = mHost.getContext();
@@ -105,6 +109,7 @@ public class TileServices extends IQSService.Stub {
         mCommandQueue.addCallback(mRequestListeningCallback);
         mPanelInteractor = panelInteractor;
         mCustomTileAddedRepository = customTileAddedRepository;
+        mBackgroundExecutor = backgroundExecutor;
     }
 
     public Context getContext() {
@@ -132,7 +137,7 @@ public class TileServices extends IQSService.Stub {
     protected TileServiceManager onCreateTileService(ComponentName component,
             BroadcastDispatcher broadcastDispatcher) {
         return new TileServiceManager(this, mHandlerProvider.get(), component,
-                broadcastDispatcher, mUserTracker, mCustomTileAddedRepository);
+                broadcastDispatcher, mUserTracker, mCustomTileAddedRepository, mBackgroundExecutor);
     }
 
     public void freeService(CustomTile tile, TileServiceManager service) {

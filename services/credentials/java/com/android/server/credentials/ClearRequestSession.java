@@ -19,6 +19,7 @@ package com.android.server.credentials;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.credentials.ClearCredentialStateException;
 import android.credentials.ClearCredentialStateRequest;
 import android.credentials.CredentialProviderInfo;
 import android.credentials.IClearCredentialStateCallback;
@@ -28,6 +29,8 @@ import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
 import android.util.Slog;
+
+import com.android.server.credentials.metrics.ProviderSessionMetric;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -92,9 +95,12 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     public void onFinalResponseReceived(
             ComponentName componentName,
             Void response) {
-        mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(
-                mProviders.get(componentName.flattenToString()).mProviderSessionMetric
-                        .getCandidatePhasePerProviderMetric());
+        if (mProviders.get(componentName.flattenToString()) != null) {
+            ProviderSessionMetric providerSessionMetric =
+                    mProviders.get(componentName.flattenToString()).mProviderSessionMetric;
+            mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(providerSessionMetric
+                    .getCandidatePhasePerProviderMetric());
+        }
         respondToClientWithResponseAndFinish(null);
     }
 
@@ -141,8 +147,9 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
                 return;
             }
         }
-        // TODO: Replace with properly defined error type
-        respondToClientWithErrorAndFinish("UNKNOWN", "All providers failed");
+        String exception = ClearCredentialStateException.TYPE_UNKNOWN;
+        mRequestSessionMetric.collectFrameworkException(exception);
+        respondToClientWithErrorAndFinish(exception, "All providers failed");
     }
 
     @Override
