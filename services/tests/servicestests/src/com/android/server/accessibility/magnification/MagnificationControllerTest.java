@@ -64,6 +64,7 @@ import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
@@ -199,7 +200,8 @@ public class MagnificationControllerTest {
                 new Object(),
                 mScreenMagnificationInfoChangedCallbackDelegate,
                 mScaleProvider,
-                () -> null
+                () -> null,
+                ConcurrentUtils.DIRECT_EXECUTOR
         ));
         mScreenMagnificationController.register(TEST_DISPLAY);
 
@@ -209,7 +211,8 @@ public class MagnificationControllerTest {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
 
         mMagnificationController = spy(new MagnificationController(mService, globalLock, mContext,
-                mScreenMagnificationController, mWindowMagnificationManager, mScaleProvider));
+                mScreenMagnificationController, mWindowMagnificationManager, mScaleProvider,
+                ConcurrentUtils.DIRECT_EXECUTOR));
         mMagnificationController.setMagnificationCapabilities(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
 
