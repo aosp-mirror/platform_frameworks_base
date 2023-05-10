@@ -1612,7 +1612,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 newParent.setResumedActivity(this, "onParentChanged");
                 mImeInsetsFrozenUntilStartInput = false;
             }
-            mLetterboxUiController.onActivityParentChanged(newParent);
+            mLetterboxUiController.updateInheritedLetterbox();
         }
 
         if (rootTask != null && rootTask.topRunningActivity() == this) {
