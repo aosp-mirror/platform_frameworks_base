@@ -38,6 +38,7 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
+import com.android.server.credentials.metrics.ProviderSessionMetric;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 import com.android.server.credentials.metrics.RequestSessionMetric;
 
@@ -199,10 +200,20 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             Slog.w(TAG, "providerSession not found in onUiSelection. This is strange.");
             return;
         }
+        ProviderSessionMetric providerSessionMetric = providerSession.mProviderSessionMetric;
+        int initialAuthMetricsProvider = providerSessionMetric.getBrowsedAuthenticationMetric()
+                .size();
         mRequestSessionMetric.collectMetricPerBrowsingSelect(selection,
                 providerSession.mProviderSessionMetric.getCandidatePhasePerProviderMetric());
         providerSession.onUiEntrySelected(selection.getEntryKey(),
                 selection.getEntrySubkey(), selection.getPendingIntentProviderResponse());
+        int numAuthPerProvider = providerSessionMetric.getBrowsedAuthenticationMetric().size();
+        boolean authMetricLogged = (numAuthPerProvider - initialAuthMetricsProvider) == 1;
+        if (authMetricLogged) {
+            mRequestSessionMetric.logAuthEntry(
+                    providerSession.mProviderSessionMetric.getBrowsedAuthenticationMetric()
+                            .get(numAuthPerProvider - 1));
+        }
     }
 
     protected void finishSession(boolean propagateCancellation) {
