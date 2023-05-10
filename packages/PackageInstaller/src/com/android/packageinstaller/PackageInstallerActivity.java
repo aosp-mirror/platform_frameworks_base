@@ -26,7 +26,6 @@ import android.app.AlertDialog;
 import android.app.AppOpsManager;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.app.admin.DevicePolicyManager;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -56,7 +55,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.StringRes;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -123,13 +121,11 @@ public class PackageInstallerActivity extends AlertActivity {
 
     // Dialog identifiers used in showDialog
     private static final int DLG_BASE = 0;
-    private static final int DLG_PACKAGE_ERROR = DLG_BASE + 2;
-    private static final int DLG_OUT_OF_SPACE = DLG_BASE + 3;
-    private static final int DLG_INSTALL_ERROR = DLG_BASE + 4;
-    private static final int DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER = DLG_BASE + 5;
-    private static final int DLG_ANONYMOUS_SOURCE = DLG_BASE + 6;
-    private static final int DLG_EXTERNAL_SOURCE_BLOCKED = DLG_BASE + 7;
-    private static final int DLG_INSTALL_APPS_RESTRICTED_FOR_USER = DLG_BASE + 8;
+    private static final int DLG_PACKAGE_ERROR = DLG_BASE + 1;
+    private static final int DLG_OUT_OF_SPACE = DLG_BASE + 2;
+    private static final int DLG_INSTALL_ERROR = DLG_BASE + 3;
+    private static final int DLG_ANONYMOUS_SOURCE = DLG_BASE + 4;
+    private static final int DLG_EXTERNAL_SOURCE_BLOCKED = DLG_BASE + 5;
 
     // If unknown sources are temporary allowed
     private boolean mAllowUnknownSources;
@@ -218,19 +214,13 @@ public class PackageInstallerActivity extends AlertActivity {
         if (mLocalLOGV) Log.i(TAG, "createDialog(" + id + ")");
         switch (id) {
             case DLG_PACKAGE_ERROR:
-                return SimpleErrorDialog.newInstance(R.string.Parse_error_dlg_text);
+                return PackageUtil.SimpleErrorDialog.newInstance(R.string.Parse_error_dlg_text);
             case DLG_OUT_OF_SPACE:
                 return OutOfSpaceDialog.newInstance(
                         mPm.getApplicationLabel(mPkgInfo.applicationInfo));
             case DLG_INSTALL_ERROR:
                 return InstallErrorDialog.newInstance(
                         mPm.getApplicationLabel(mPkgInfo.applicationInfo));
-            case DLG_INSTALL_APPS_RESTRICTED_FOR_USER:
-                return SimpleErrorDialog.newInstance(
-                        R.string.install_apps_user_restriction_dlg_text);
-            case DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER:
-                return SimpleErrorDialog.newInstance(
-                        R.string.unknown_apps_user_restriction_dlg_text);
             case DLG_EXTERNAL_SOURCE_BLOCKED:
                 return ExternalSourcesBlockedDialog.newInstance(mOriginatingPackage);
             case DLG_ANONYMOUS_SOURCE:
@@ -524,67 +514,15 @@ public class PackageInstallerActivity extends AlertActivity {
     }
 
     /**
-     * Check if it is allowed to install the package and initiate install if allowed. If not allowed
-     * show the appropriate dialog.
+     * Check if it is allowed to install the package and initiate install if allowed.
      */
     private void checkIfAllowedAndInitiateInstall() {
-        // Check for install apps user restriction first.
-        final int installAppsRestrictionSource = mUserManager.getUserRestrictionSource(
-                UserManager.DISALLOW_INSTALL_APPS, Process.myUserHandle());
-        if ((installAppsRestrictionSource & UserManager.RESTRICTION_SOURCE_SYSTEM) != 0) {
-            if (mLocalLOGV) Log.i(TAG, "install not allowed: " + UserManager.DISALLOW_INSTALL_APPS);
-            showDialogInner(DLG_INSTALL_APPS_RESTRICTED_FOR_USER);
-            return;
-        } else if (installAppsRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
-            if (mLocalLOGV) {
-                Log.i(TAG, "install not allowed by admin; showing "
-                        + Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
-            }
-            startActivity(new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS));
-            finish();
-            return;
-        }
-
         if (mAllowUnknownSources || !isInstallRequestFromUnknownSource(getIntent())) {
             if (mLocalLOGV) Log.i(TAG, "install allowed");
             initiateInstall();
         } else {
-            // Check for unknown sources restrictions.
-            final int unknownSourcesRestrictionSource = mUserManager.getUserRestrictionSource(
-                    UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, Process.myUserHandle());
-            final int unknownSourcesGlobalRestrictionSource = mUserManager.getUserRestrictionSource(
-                    UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY, Process.myUserHandle());
-            final int systemRestriction = UserManager.RESTRICTION_SOURCE_SYSTEM
-                    & (unknownSourcesRestrictionSource | unknownSourcesGlobalRestrictionSource);
-            if (systemRestriction != 0) {
-                if (mLocalLOGV) Log.i(TAG, "Showing DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER");
-                showDialogInner(DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER);
-            } else if (unknownSourcesRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
-                startAdminSupportDetailsActivity(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES);
-            } else if (unknownSourcesGlobalRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
-                startAdminSupportDetailsActivity(
-                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY);
-            } else {
-                handleUnknownSources();
-            }
+            handleUnknownSources();
         }
-    }
-
-    private void startAdminSupportDetailsActivity(String restriction) {
-        if (mLocalLOGV) Log.i(TAG, "startAdminSupportDetailsActivity(): " + restriction);
-
-        // If the given restriction is set by an admin, display information about the
-        // admin enforcing the restriction for the affected user.
-        final DevicePolicyManager dpm = getSystemService(DevicePolicyManager.class);
-        final Intent showAdminSupportDetailsIntent = dpm.createAdminSupportIntent(restriction);
-        if (showAdminSupportDetailsIntent != null) {
-            if (mLocalLOGV) Log.i(TAG, "starting " + showAdminSupportDetailsIntent);
-            startActivity(showAdminSupportDetailsIntent);
-        } else {
-            if (mLocalLOGV) Log.w(TAG, "not intent for " + restriction);
-        }
-
-        finish();
     }
 
     private void handleUnknownSources() {
@@ -759,38 +697,6 @@ public class PackageInstallerActivity extends AlertActivity {
         if (mLocalLOGV) Log.i(TAG, "downloaded app uri=" + mPackageURI);
         startActivity(newIntent);
         finish();
-    }
-
-    /**
-     * A simple error dialog showing a message
-     */
-    public static class SimpleErrorDialog extends DialogFragment {
-        private static final String MESSAGE_KEY =
-                SimpleErrorDialog.class.getName() + "MESSAGE_KEY";
-
-        static SimpleErrorDialog newInstance(@StringRes int message) {
-            SimpleErrorDialog dialog = new SimpleErrorDialog();
-
-            Bundle args = new Bundle();
-            args.putInt(MESSAGE_KEY, message);
-            dialog.setArguments(args);
-
-            return dialog;
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            return new AlertDialog.Builder(getActivity())
-                    .setMessage(getArguments().getInt(MESSAGE_KEY))
-                    .setPositiveButton(R.string.ok, (dialog, which) -> getActivity().finish())
-                    .create();
-        }
-
-        @Override
-        public void onCancel(DialogInterface dialog) {
-            getActivity().setResult(Activity.RESULT_CANCELED);
-            getActivity().finish();
-        }
     }
 
     /**
