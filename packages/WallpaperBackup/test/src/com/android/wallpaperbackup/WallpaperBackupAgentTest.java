@@ -47,6 +47,8 @@ import static org.mockito.Mockito.when;
 import android.app.WallpaperInfo;
 import android.app.WallpaperManager;
 import android.app.backup.BackupAnnotations;
+import android.app.backup.BackupManager;
+import android.app.backup.BackupRestoreEventLogger;
 import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.app.backup.FullBackupDataOutput;
 import android.content.ComponentName;
@@ -101,6 +103,8 @@ public class WallpaperBackupAgentTest {
     private WallpaperManager mWallpaperManager;
     @Mock
     private Context mMockContext;
+    @Mock
+    private BackupManager mBackupManager;
 
     @Rule
     public TemporaryFolder mTemporaryFolder = new TemporaryFolder();
@@ -712,6 +716,80 @@ public class WallpaperBackupAgentTest {
         assertThat(lock).isNotNull();
         assertThat(lock.getFailCount()).isEqualTo(1);
         assertThat(lock.getErrors()).containsKey(RuntimeException.class.getName());
+    }
+
+    @Test
+    public void testUpdateWallpaperComponent_delayedRestore_logsSuccess() throws Exception {
+        mWallpaperBackupAgent.mIsDeviceInRestore = true;
+        when(mWallpaperManager.setWallpaperComponent(any())).thenReturn(true);
+        BackupRestoreEventLogger logger = new BackupRestoreEventLogger(
+                BackupAnnotations.OperationType.RESTORE);
+        when(mBackupManager.getDelayedRestoreLogger()).thenReturn(logger);
+        mWallpaperBackupAgent.setBackupManagerForTesting(mBackupManager);
+
+        mWallpaperBackupAgent.updateWallpaperComponent(mWallpaperComponent,
+                /* applyToLock */ true);
+        // Imitate wallpaper component installation.
+        mWallpaperBackupAgent.mWallpaperPackageMonitor.onPackageAdded(TEST_WALLPAPER_PACKAGE,
+                /* uid */0);
+
+        DataTypeResult system = getLoggingResult(WALLPAPER_LIVE_SYSTEM, logger.getLoggingResults());
+        DataTypeResult lock = getLoggingResult(WALLPAPER_LIVE_LOCK, logger.getLoggingResults());
+        assertThat(system).isNotNull();
+        assertThat(system.getSuccessCount()).isEqualTo(1);
+        assertThat(lock).isNotNull();
+        assertThat(lock.getSuccessCount()).isEqualTo(1);
+    }
+
+
+    @Test
+    public void testUpdateWallpaperComponent_delayedRestoreFails_logsFailure() throws Exception {
+        mWallpaperBackupAgent.mIsDeviceInRestore = true;
+        when(mWallpaperManager.setWallpaperComponent(any())).thenReturn(false);
+        BackupRestoreEventLogger logger = new BackupRestoreEventLogger(
+                BackupAnnotations.OperationType.RESTORE);
+        when(mBackupManager.getDelayedRestoreLogger()).thenReturn(logger);
+        mWallpaperBackupAgent.setBackupManagerForTesting(mBackupManager);
+
+        mWallpaperBackupAgent.updateWallpaperComponent(mWallpaperComponent,
+                /* applyToLock */ true);
+        // Imitate wallpaper component installation.
+        mWallpaperBackupAgent.mWallpaperPackageMonitor.onPackageAdded(TEST_WALLPAPER_PACKAGE,
+                /* uid */0);
+
+        DataTypeResult system = getLoggingResult(WALLPAPER_LIVE_SYSTEM, logger.getLoggingResults());
+        assertThat(system).isNotNull();
+        assertThat(system.getFailCount()).isEqualTo(1);
+        assertThat(system.getErrors()).containsKey(
+                WallpaperEventLogger.ERROR_SET_COMPONENT_EXCEPTION);
+    }
+
+    @Test
+    public void testUpdateWallpaperComponent_delayedRestore_packageNotInstalled_logsFailure()
+            throws Exception {
+        mWallpaperBackupAgent.mIsDeviceInRestore = false;
+        BackupRestoreEventLogger logger = new BackupRestoreEventLogger(
+                BackupAnnotations.OperationType.RESTORE);
+        when(mBackupManager.getDelayedRestoreLogger()).thenReturn(logger);
+        mWallpaperBackupAgent.setBackupManagerForTesting(mBackupManager);
+
+        mWallpaperBackupAgent.updateWallpaperComponent(mWallpaperComponent,
+                /* applyToLock */ true);
+
+        // Imitate wallpaper component installation.
+        mWallpaperBackupAgent.mWallpaperPackageMonitor.onPackageAdded(TEST_WALLPAPER_PACKAGE,
+                /* uid */0);
+
+        DataTypeResult system = getLoggingResult(WALLPAPER_LIVE_SYSTEM, logger.getLoggingResults());
+        DataTypeResult lock = getLoggingResult(WALLPAPER_LIVE_LOCK, logger.getLoggingResults());
+        assertThat(system).isNotNull();
+        assertThat(system.getFailCount()).isEqualTo(1);
+        assertThat(system.getErrors()).containsKey(
+                WallpaperEventLogger.ERROR_LIVE_PACKAGE_NOT_INSTALLED);
+        assertThat(lock).isNotNull();
+        assertThat(lock.getFailCount()).isEqualTo(1);
+        assertThat(lock.getErrors()).containsKey(
+                WallpaperEventLogger.ERROR_LIVE_PACKAGE_NOT_INSTALLED);
     }
 
     private void mockCurrentWallpaperIds(int systemWallpaperId, int lockWallpaperId) {
