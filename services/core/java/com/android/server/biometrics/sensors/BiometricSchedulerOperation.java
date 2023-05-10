@@ -267,11 +267,15 @@ public class BiometricSchedulerOperation {
 
     /** Flags this operation as canceled, if possible, but does not cancel it until started. */
     public boolean markCanceling() {
-        if (mState == STATE_WAITING_IN_QUEUE) {
+        if (mState == STATE_WAITING_IN_QUEUE && isInterruptable()) {
             mState = STATE_WAITING_IN_QUEUE_CANCELING;
             return true;
         }
         return false;
+    }
+
+    @VisibleForTesting void markCancelingForWatchdog() {
+        mState = STATE_WAITING_IN_QUEUE_CANCELING;
     }
 
     /**
