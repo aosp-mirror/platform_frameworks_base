@@ -1952,7 +1952,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"เปิด <xliff:g id="APP_NAME_0">%1$s</xliff:g> ไม่ได้ในขณะนี้ แอปนี้จัดการโดย <xliff:g id="APP_NAME_1">%2$s</xliff:g>"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"ดูข้อมูลเพิ่มเติม"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"ยกเลิกการหยุดแอปชั่วคราว"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"ยกเลิกการหยุดแอปงานใช่ไหม"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"ยกเลิกการหยุดแอปงานชั่วคราวไหม"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"ยกเลิกการหยุดชั่วคราว"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"ฉุกเฉิน"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"แอปไม่พร้อมใช้งาน"</string>
@@ -2164,8 +2164,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ยกเลิกการหยุดชั่วคราว"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ไม่มีแอปงาน"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ไม่มีแอปส่วนตัว"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"เปิด <xliff:g id="APP">%s</xliff:g> ในโปรไฟล์ส่วนตัว"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"เปิด <xliff:g id="APP">%s</xliff:g> ในโปรไฟล์งาน"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ใช้เบราว์เซอร์ส่วนตัว"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ใช้เบราว์เซอร์งาน"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ปลดล็อกเครือข่ายที่ใช้กับ SIM"</string>
