@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"Credential Manager"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Annuleren"</string>
     <string name="string_continue" msgid="1346732695941131882">"Doorgaan"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"Meer opties"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Op een andere manier opslaan"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Meer informatie"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Wachtwoord tonen"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Wachtwoord verbergen"</string>
@@ -49,12 +49,9 @@
     <string name="sign_ins" msgid="4710739369149469208">"inloggegevens"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"inloggegevens"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> opslaan in"</string>
-    <!-- no translation found for create_passkey_in_other_device_title (2360053098931886245) -->
-    <skip />
-    <!-- no translation found for save_password_on_other_device_title (5829084591948321207) -->
-    <skip />
-    <!-- no translation found for save_sign_in_on_other_device_title (2827990118560134692) -->
-    <skip />
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Toegangssleutel maken op een ander apparaat?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Wachtwoord opslaan op een ander apparaat?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Login opslaan op een ander apparaat?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> elke keer gebruiken als je inlogt?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"Deze wachtwoordmanager voor <xliff:g id="USERNAME">%1$s</xliff:g> slaat je wachtwoorden en toegangssleutels op zodat je makkelijk kunt inloggen"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Instellen als standaard"</string>
@@ -72,7 +69,12 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"Sluiten"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Sluiten"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Je opgeslagen toegangssleutel gebruiken voor <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Je opgeslagen wachtwoord voor <xliff:g id="APP_NAME">%1$s</xliff:g> gebruiken?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Je login voor <xliff:g id="APP_NAME">%1$s</xliff:g> gebruiken?"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Inlogopties voor <xliff:g id="APP_NAME">%1$s</xliff:g> ontgrendelen?"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Opgeslagen toegangssleutel kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Opgeslagen wachtwoord kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Opgeslagen login kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Kies een login voor <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Een optie kiezen voor <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Deze informatie gebruiken in <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
