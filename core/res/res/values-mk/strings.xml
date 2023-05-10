@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволува апликацијата да добие информации за претпочитаната услуга за плаќање преку NFC, како регистрирани помагала и дестинација на маршрутата."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контролирај комуникација на блиско поле"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозволува апликацијата да комуницира со ознаки, картички и читачи за Комуникација при непосредна близина (NFC)."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"оневозможи заклучување на екран"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Овозможува апликацијата да го оневозможи заклучувањето и каква било безбедност поврзана со лозинка. На пример, телефонот го оневозможува заклучувањето при прием на телефонски повик, а потоа повторно го овозможува заклучувањето кога повикот ќе заврши."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"побарува сложеност за заклучувањето на екранот"</string>
@@ -1619,7 +1623,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Таблет"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевизор"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Приклучи звучници"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Звучници на док"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Надворешен уред"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Слушалки"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Прекини ја паузата"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Нема работни апликации"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Нема лични апликации"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Отворање лична <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Отворање работна <xliff:g id="APP">%s</xliff:g>"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Користи личен прелистувач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Користи работен прелистувач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN за отклучување на мрежата на SIM-картичката"</string>

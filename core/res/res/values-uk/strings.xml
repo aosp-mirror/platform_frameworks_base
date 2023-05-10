@@ -592,6 +592,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дозволяє додатку отримувати доступ до інформації потрібного платіжного NFC-сервісу (наприклад, пов\'язаних ідентифікаторів чи даних про маршрутизацію трансакцій)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"контрол. Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дозволяє програмі обмінюватися даними з тегами, картками та читачами екрана Near Field Communication (NFC)."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"вимикати блокування екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дозволяє програмі вимикати блокування клавіатури та будь-який пов’язаний паролем захист. Наприклад: телефон вимикає блокування клавіатури під час отримання вхідного дзвінка, після закінчення якого блокування клавіатури відновлюється."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запитувати рівень складності блокування екрана"</string>
@@ -2166,8 +2170,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Увімкнути знову"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Немає робочих додатків"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Немає особистих додатків"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Відкрити особистий додаток <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Відкрити робочий додаток <xliff:g id="APP">%s</xliff:g>"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Використати особистий веб-переглядач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Використати робочий веб-переглядач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код розблокування мережі SIM-карти"</string>

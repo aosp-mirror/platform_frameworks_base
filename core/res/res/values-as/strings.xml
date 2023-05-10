@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"এপ্‌টোক অগ্ৰাধিকাৰ দিয়া nfc পৰিশোধ সেৱাৰ পঞ্জীকৃত সহায়কসমূহ আৰু পৰিশোধ কৰিব লগা লক্ষ্যস্থান দৰে তথ্য পাবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়েৰ ফিল্ড কমিউনিকেশ্বন নিয়ন্ত্ৰণ কৰক"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"এপ্‌টোক নিয়েৰ ফিল্ড কমিউনিকেশ্বন (NFC) টেগ, কাৰ্ড আৰু ৰিডাৰসমূহৰ সৈতে যোগাযোগ কৰিবলৈ অনুমতি দিয়ে।"</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"আপোনাৰ স্ক্ৰীন লক অক্ষম কৰক"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"এপ্‌টোক কী ল\'ক আৰু জড়িত হোৱা যিকোনো পাছৱৰ্ডৰ সুৰক্ষা অক্ষম কৰিব দিয়ে৷ উদাহৰণস্বৰূপে, কোনো অন্তৰ্গামী ফ\'ন কল উঠোৱাৰ সময়ত ফ\'নটোৱে কী-লকটো অক্ষম কৰে, তাৰ পাছত কল শেষ হ\'লেই কী লকটো পুনৰ সক্ষম কৰে৷"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"স্ক্ৰীন লকৰ জটিলতাৰ অনুৰোধ"</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"আনপজ কৰক"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"কোনো কৰ্মস্থানৰ এপ্‌ নাই"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"কোনো ব্যক্তিগত এপ্‌ নাই"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ব্যক্তিগত <xliff:g id="APP">%s</xliff:g> খোলক"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"কৰ্মস্থানৰ <xliff:g id="APP">%s</xliff:g> খোলক"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ব্যক্তিগত ব্ৰাউজাৰ ব্যৱহাৰ কৰক"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"কৰ্মস্থানৰ ব্ৰাউজাৰ ব্যৱহাৰ কৰক"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ছিম নেটৱৰ্ক আনলক কৰা পিন"</string>

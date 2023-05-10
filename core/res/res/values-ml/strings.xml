@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"റൂട്ട് ലക്ഷ്യസ്ഥാനം, രജിസ്‌റ്റർ ചെയ്തിരിക്കുന്ന സഹായങ്ങൾ എന്നിവ പോലുള്ള, തിരഞ്ഞെടുത്ത NFC പേയ്‌മെന്റ് സേവനത്തെ സംബന്ധിച്ച വിവരങ്ങൾ ലഭിക്കാൻ ആപ്പിനെ അനുവദിക്കുന്നു."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"സമീപ ഫീൽഡുമായുള്ള ആശയവിനിമയം നിയന്ത്രിക്കുക"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"നിയർ ഫീൽഡ് കമ്മ്യൂണിക്കേഷൻ (NFC) ടാഗുകളുമായും കാർഡുകളുമായും റീഡറുകളുമായുള്ള ആശയവിനിമയത്തിന് അപ്ലിക്കേഷനുകളെ അനുവദിക്കുന്നു."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"നിങ്ങളുടെ സ്‌ക്രീൻ ലോക്ക് പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"കീലോക്കും ഏതെങ്കിലും അനുബന്ധ പാസ്‌വേഡ് സുരക്ഷയും പ്രവർത്തനരഹിതമാക്കാൻ അപ്ലിക്കേഷനെ അനുവദിക്കുന്നു. ഉദാഹരണത്തിന്, ഒരു ഇൻകമിംഗ് കോൾ സ്വീകരിക്കുമ്പോൾ ഫോൺ കീലോക്ക് പ്രവർത്തനരഹിതമാക്കുന്നു, കോൾ അവസാനിക്കുമ്പോൾ കീലോക്ക് വീണ്ടും പ്രവർത്തനക്ഷമമാകുന്നു."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"സ്‌ക്രീൻ ലോക്ക് സങ്കീർണ്ണത അഭ്യർത്ഥിക്കുക"</string>
@@ -1365,7 +1369,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"USB വഴിയുള്ള MIDI ഓണാക്കി"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"ഉപകരണം വെബ്‌ക്യാം ആയി കണക്റ്റ് ചെയ്തു"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"USB ആക്‌സസറി കണക്റ്റ് ചെയ്തു"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പുചെയ്യുക."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പ് ചെയ്യുക."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"കണക്‌റ്റ് ചെയ്‌ത ഉപകരണം ചാർജ് ചെയ്യുന്നു. കൂടുതൽ ഓപ്ഷനുകൾക്ക് ടാപ്പ് ചെയ്യുക."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"അനലോഗ് ഓഡിയോ ആക്‌സസറി കണ്ടെത്തി"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"അറ്റാച്ചുചെയ്‌ത ഉപകരണം ഈ ഫോണിന് അനുയോജ്യമല്ല. കൂടുതലറിയാൻ ടാപ്പുചെയ്യുക."</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"താൽക്കാലികമായി നിർത്തിയത് മാറ്റുക"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ഔദ്യോഗിക ആപ്പുകൾ ഇല്ല"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"വ്യക്തിപര ആപ്പുകൾ ഇല്ല"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"<xliff:g id="APP">%s</xliff:g> എന്ന വ്യക്തിപര ആപ്പ് തുറക്കുക"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"<xliff:g id="APP">%s</xliff:g> എന്ന ഔദ്യോഗിക ആപ്പ് തുറക്കുക"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"വ്യക്തിപരമായ ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ഔദ്യോഗിക ബ്രൗസർ ഉപയോഗിക്കുക"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"സിം നെറ്റ്‌വർക്ക് അൺലോക്ക് ചെയ്യാനുള്ള പിൻ"</string>

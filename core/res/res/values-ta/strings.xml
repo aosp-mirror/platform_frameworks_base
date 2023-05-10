@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"பதிவுசெய்யப்பட்ட கருவிகள், சேருமிடத்திற்கான வழி போன்ற விருப்பமான NFC பேமெண்ட் சேவை தொடர்பான தகவல்களைப் பெற ஆப்ஸை அனுமதிக்கிறது."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"குறுகிய இடைவெளி தகவல்பரிமாற்றத்தைக் கட்டுப்படுத்துதல்"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"குறுகிய இடைவெளி தகவல்பரிமாற்றம் (NFC), குறிகள், கார்டுகள் மற்றும் ரீடர்கள் ஆகியவற்றுடன் தொடர்புகொள்ள, ஆப்ஸை அனுமதிக்கிறது."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"உங்கள் திரைப் பூட்டை முடக்குதல்"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"விசைப்பூட்டையும், தொடர்புடைய கடவுச்சொல் பாதுகாப்பையும் முடக்கப் ஆப்ஸை அனுமதிக்கிறது. எடுத்துக்காட்டாக, உள்வரும் மொபைல் அழைப்பைப் பெறும்போது மொபைல் விசைப்பூட்டை முடக்குகிறது, பிறகு அழைப்பு முடிந்தவுடன் விசைப்பூட்டை மீண்டும் இயக்குகிறது."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"திரைப் பூட்டு தொடர்பான சிக்கலைத் தீர்க்க அனுமதி கோருதல்"</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"மீண்டும் இயக்கு"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"பணி ஆப்ஸ் எதுவுமில்லை"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"தனிப்பட்ட ஆப்ஸ் எதுவுமில்லை"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"தனிப்பட்ட கணக்கில் <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறங்கள்"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"பணிக் கணக்கில் <xliff:g id="APP">%s</xliff:g> ஆப்ஸைத் திறங்கள்"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"தனிப்பட்ட உலாவியைப் பயன்படுத்து"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"பணி உலாவியைப் பயன்படுத்து"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"சிம் நெட்வொர்க் அன்லாக் பின்"</string>
