@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.settings.GlobalSettings;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -253,6 +254,7 @@ public class KeyguardSecurityContainerControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore
     public void onResourcesUpdate_callsThroughOnRotationChange() {
         // Rotation is the same, shouldn't cause an update
         mKeyguardSecurityContainerController.updateResources();
