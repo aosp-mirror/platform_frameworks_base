@@ -32,7 +32,6 @@ import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.DeviceConfig;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyFrameworkInitializer;
 import android.telephony.TelephonyManager;
@@ -262,9 +261,6 @@ public final class TelephonyUtils {
      */
     public static void showSwitchToManagedProfileDialogIfAppropriate(Context context,
             int subId, int callingUid, String callingPackage) {
-        if (!isSwitchToManagedProfileDialogFlagEnabled()) {
-            return;
-        }
         final long token = Binder.clearCallingIdentity();
         try {
             UserHandle callingUserHandle = UserHandle.getUserHandleForUid(callingUid);
@@ -300,11 +296,6 @@ public final class TelephonyUtils {
         } finally {
             Binder.restoreCallingIdentity(token);
         }
-    }
-
-    public static boolean isSwitchToManagedProfileDialogFlagEnabled() {
-        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER,
-                "enable_switch_to_managed_profile_dialog", false);
     }
 
     private static boolean isUidForeground(Context context, int uid) {
