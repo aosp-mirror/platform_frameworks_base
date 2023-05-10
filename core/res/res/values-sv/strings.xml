@@ -702,7 +702,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Ansiktsmodellen kunde inte skapas. Försök igen."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"Mörka glasögon identifierades. Hela ansiktet måste synas."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något som täcker ansiktet identifierades. Hela ansiktet måste synas."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Något täcker ansiktet. Hela ansiktet måste synas."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Ansiktsverifiering går ej. Otillgänglig maskinvara."</string>
@@ -2164,8 +2164,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Återuppta"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Inga jobbappar"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Inga privata appar"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Öppna <xliff:g id="APP">%s</xliff:g> med privat profil"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Öppna <xliff:g id="APP">%s</xliff:g> med jobbprofil"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Använd privat webbläsare"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Använd jobbwebbläsare"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkod för upplåsning av nätverk för SIM-kort"</string>

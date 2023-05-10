@@ -1367,7 +1367,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Byl zapnut režim MIDI přes USB"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Zařízení připojeno jako webkamera"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Je připojeno příslušenství USB"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte další možnosti."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte další možnosti"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Nabíjení připojeného zařízení. Klepnutím zobrazíte další možnosti."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bylo zjištěno analogové zvukové příslušenství"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Připojené zařízení není s tímto telefonem kompatibilní. Klepnutím zobrazíte další informace."</string>
@@ -2166,8 +2166,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Zrušit pozastavení"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Žádné pracovní aplikace"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Žádné osobní aplikace"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Otevřít osobní aplikaci <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Otevřít pracovní aplikaci <xliff:g id="APP">%s</xliff:g>"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Použít osobní prohlížeč"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Použít pracovní prohlížeč"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Kód PIN odblokování sítě pro SIM kartu"</string>
