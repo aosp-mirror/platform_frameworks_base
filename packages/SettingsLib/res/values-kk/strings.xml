@@ -587,7 +587,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Шектелген профайл жасақтауға дейін қолданбалар мен жеке деректерді қорғау үшін экран бекітпесін тағайындау қажет."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Бекітпе тағайындау"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Пайдаланушыны ауыстыру: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Жаңа пайдаланушы профилі жасалуда…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Жаңа пайдаланушы профилі жасалып жатыр…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Жаңа қонақ профилі жасалып жатыр…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Жаңа пайдаланушы жасалмады."</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Жаңа қонақ профилі жасалмады."</string>
@@ -607,7 +607,7 @@
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Ағымдағы қонақ сеансындағы барлық қолданба мен дерек жойылады."</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Шығу"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Қонақ әрекетін сақтау керек пе?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ағымдағы сеанстағы әрекетті сақтай не барлық қолданба мен деректі жоя аласыз."</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ағымдағы сеанс тарихын сақтауға не барлық қолданба мен деректі жоюға болады."</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Жою"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Сақтау"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Қонақ режимінен шығу"</string>
@@ -653,7 +653,7 @@
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Дерекқор бір баған."</string>
     <string name="accessibility_data_two_bars" msgid="9202641507241802499">"Дерекқор екі баған."</string>
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Дерекқор үш баған."</string>
-    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Дерекқор сигналы толы."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Дерек сигналы толы."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Ethernet ажыратылған."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Қоңырау шалу мүмкін емес."</string>

@@ -606,7 +606,7 @@
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Želite li izaći iz načina rada za goste?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Time će se izbrisati aplikacije i podaci iz trenutačne gostujuće sesije."</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Izlaz"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Spremiti aktivnosti gosta?"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Želite li spremiti aktivnosti gosta?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Možete spremiti aktivnosti iz ove sesije ili izbrisati sve aplikacije i podatke"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Izbriši"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Spremi"</string>
@@ -614,7 +614,7 @@
     <string name="guest_reset_button" msgid="2515069346223503479">"Poništi gostujuću sesiju"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Izlaz iz gostujuće sesije"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Sve će se aktivnosti izbrisati na izlasku"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Svoje aktivnosti možete spremiti ili izbrisati na izlasku."</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Svoje aktivnosti možete spremiti ili izbrisati na izlasku"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Poništite da odmah izbrišete aktivnost sesije. Inače je možete spremiti ili izbrisati na izlasku."</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Fotografiraj"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Odaberi sliku"</string>

@@ -606,15 +606,15 @@
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"要退出访客模式吗？"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"此操作会删除当前访客会话中的所有应用和数据"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"退出"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"要保存访客活动记录吗？"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"您可以保存当前会话中的活动记录，也可以删除所有应用和数据"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"要保存访客活动吗？"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"您可以保存当前会话中的活动，也可以删除所有应用和数据"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"删除"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"保存"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"退出访客模式"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"重置访客会话"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"退出访客模式"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"退出时所有活动都将被删除"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"您可以在退出时保存或删除您的活动记录"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"您可以在退出时保存或删除您的活动"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"请立即重置以删除会话活动记录；或者，您也可以在退出时保存或删除活动记录"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍摄照片"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"选择图片"</string>

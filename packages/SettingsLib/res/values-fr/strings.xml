@@ -537,7 +537,7 @@
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Jamais"</string>
-    <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Prioritaires uniquement"</string>
+    <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Prioritaire uniquement"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
     <string name="zen_alarm_warning_indef" msgid="4146527909616457163">"Vous n\'entendrez pas votre prochaine alarme <xliff:g id="WHEN">%1$s</xliff:g>, sauf si vous désactivez cette option avant"</string>
     <string name="zen_alarm_warning" msgid="245729928048586280">"Vous n\'entendrez pas votre prochaine alarme <xliff:g id="WHEN">%1$s</xliff:g>"</string>

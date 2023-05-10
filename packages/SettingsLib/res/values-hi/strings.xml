@@ -587,7 +587,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"इससे पहले कि आप कोई प्रतिबंधित प्रोफ़ाइल बनाएं, आपको अपने ऐप्लिकेशन  और व्यक्तिगत डेटा की सुरक्षा करने के लिए एक स्क्रीन लॉक सेट करना होगा."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लॉक सेट करें"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"<xliff:g id="USER_NAME">%s</xliff:g> पर जाएं"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"नया उपयोगकर्ता बनाया जा रहा है…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"नए उपयोगकर्ता को जोड़ा जा रहा है…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"नया मेहमान खाता बनाया जा रहा है…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"नया उपयोगकर्ता जोड़ा नहीं जा सका"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"नया मेहमान खाता नहीं बनाया जा सका"</string>
