@@ -32310,7 +32310,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the mode for determining whether this view is a credential.
+     * Sets whether this view is a credential for Credential Manager purposes.
      *
      * <p>See {@link #isCredential()}.
      *
