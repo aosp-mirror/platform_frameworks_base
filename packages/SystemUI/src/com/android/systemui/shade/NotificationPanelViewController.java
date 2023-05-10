@@ -2109,6 +2109,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                     ? QUICK_SETTINGS : (
                     mKeyguardStateController.canDismissLockScreen() ? UNLOCK : BOUNCER_UNLOCK);
             if (!isFalseTouch(x, y, interactionType)) {
+                mShadeLog.logFlingExpands(vel, vectorVel, interactionType,
+                        this.mFlingAnimationUtils.getMinVelocityPxPerSecond(),
+                        mExpandedFraction > 0.5f, mAllowExpandForSmallExpansion);
                 if (Math.abs(vectorVel) < this.mFlingAnimationUtils.getMinVelocityPxPerSecond()) {
                     expands = shouldExpandWhenNotFlinging();
                 } else {
