@@ -253,7 +253,7 @@ public class Bmgr {
 
         try {
             boolean enable = Boolean.parseBoolean(arg);
-            mBmgr.setAutoRestoreForUser(userId, enable);
+            mBmgr.setAutoRestore(enable);
             System.out.println(
                     "Auto restore is now "
                             + (enable ? "enabled" : "disabled")
