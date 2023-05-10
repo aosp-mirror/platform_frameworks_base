@@ -61,7 +61,7 @@
     <string name="kg_wrong_pin" msgid="4160978845968732624">"ಪಿನ್‌ ತಪ್ಪಾಗಿದೆ"</string>
     <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"ಪಿನ್ ತಪ್ಪಾಗಿದೆ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
     <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"ಅಥವಾ ಫಿಂಗರ್‌ಪ್ರಿಂಟ್‌ನೊಂದಿಗೆ ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
-    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"ಫಿಂಗರ್ ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ ಅನ್ನು ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"ಮುಖವನ್ನು ಗುರುತಿಸಲಾಗಿಲ್ಲ"</string>
     <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಪಿನ್ ಅನ್ನು ನಮೂದಿಸಿ"</string>
     <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ಪಾಸ್‌ವರ್ಡ್ ಅನ್ನು ನಮೂದಿಸಿ"</string>
