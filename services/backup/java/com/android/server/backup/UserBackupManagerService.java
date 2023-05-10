@@ -2797,6 +2797,11 @@ public class UserBackupManagerService {
             boolean includeSystem, boolean compress, boolean doKeyValue, String[] pkgList) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbBackup");
 
+        final int callingUserHandle = UserHandle.getCallingUserId();
+        if (callingUserHandle != UserHandle.USER_SYSTEM) {
+            throw new IllegalStateException("Backup supported only for the device owner");
+        }
+
         // Validate
         if (!doAllApps) {
             if (!includeShared) {
@@ -2967,6 +2972,11 @@ public class UserBackupManagerService {
     public void adbRestore(ParcelFileDescriptor fd) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbRestore");
 
+        final int callingUserHandle = UserHandle.getCallingUserId();
+        if (callingUserHandle != UserHandle.USER_SYSTEM) {
+            throw new IllegalStateException("Restore supported only for the device owner");
+        }
+
         final long oldId = Binder.clearCallingIdentity();
 
         try {
@@ -3075,7 +3085,7 @@ public class UserBackupManagerService {
                     "com.android.backupconfirm.BackupRestoreConfirmation");
             confIntent.putExtra(FullBackup.CONF_TOKEN_INTENT_EXTRA, token);
             confIntent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            mContext.startActivityAsUser(confIntent, UserHandle.of(mUserId));
+            mContext.startActivityAsUser(confIntent, UserHandle.SYSTEM);
         } catch (ActivityNotFoundException e) {
             return false;
         }
