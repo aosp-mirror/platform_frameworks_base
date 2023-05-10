@@ -79,7 +79,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Bong bóng"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Quản lý"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Đã đóng bong bóng."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Nhấn để khởi động lại ứng dụng này để xem tốt hơn."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Nhấn để khởi động lại ứng dụng để có trải nghiệm xem tốt hơn."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Có vấn đề với máy ảnh?\nHãy nhấn để sửa lỗi"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Bạn chưa khắc phục vấn đề?\nHãy nhấn để hủy bỏ"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Không có vấn đề với máy ảnh? Hãy nhấn để đóng."</string>
