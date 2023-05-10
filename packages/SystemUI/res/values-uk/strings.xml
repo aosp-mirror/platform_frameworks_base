@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На цьому пристрої встановлено центр сертифікації. Захищений мережевий трафік може відстежуватися або змінюватися."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ваш адміністратор увімкнув журнал мережі, щоб відстежувати трафік на вашому пристрої."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Ваш адміністратор увімкнув журнал мережі, щоб відстежувати трафік вашого робочого профілю (не особистого)."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Цей пристрій підключено до Інтернету через додаток <xliff:g id="VPN_APP">%1$s</xliff:g>. Постачальник VPN бачить ваші дії в мережі, зокрема електронні листи й дані веб-перегляду."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Цей пристрій підключено до Інтернету через додаток <xliff:g id="VPN_APP">%1$s</xliff:g>. Системний адміністратор бачить ваші дії в мережі, зокрема електронні листи й дані веб-перегляду."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Цей пристрій підключено до Інтернету через <xliff:g id="VPN_APP_0">%1$s</xliff:g> і <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Системний адміністратор бачить ваші дії в мережі, зокрема електронні листи й дані веб-перегляду."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Ваші робочі додатки підключено до Інтернету через <xliff:g id="VPN_APP">%1$s</xliff:g>. Системний адміністратор і постачальник послуг VPN бачать ваші дії в мережі в робочих додатках, зокрема електронні листи й дані веб-перегляду."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Ваші особисті додатки підключено до Інтернету через <xliff:g id="VPN_APP">%1$s</xliff:g>. Постачальник послуг VPN бачить ваші дії в мережі, зокрема електронні листи й дані веб-перегляду."</string>
@@ -509,7 +507,7 @@
     <string name="stream_accessibility" msgid="3873610336741987152">"Доступність"</string>
     <string name="volume_ringer_status_normal" msgid="1339039682222461143">"Дзвінок"</string>
     <string name="volume_ringer_status_vibrate" msgid="6970078708957857825">"Вібросигнал"</string>
-    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"без звуку"</string>
+    <string name="volume_ringer_status_silent" msgid="3691324657849880883">"Без звуку"</string>
     <string name="volume_stream_content_description_unmute" msgid="7729576371406792977">"%1$s. Торкніться, щоб увімкнути звук."</string>
     <string name="volume_stream_content_description_vibrate" msgid="4858111994183089761">"%1$s. Торкніться, щоб налаштувати вібросигнал. Спеціальні можливості може бути вимкнено."</string>
     <string name="volume_stream_content_description_mute" msgid="4079046784917920984">"%1$s. Торкніться, щоб вимкнути звук. Спеціальні можливості може бути вимкнено."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Колонки й екрани"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Пропоновані пристрої"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як працює трансляція"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляція"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Люди поблизу, які мають сумісні пристрої з Bluetooth, можуть слухати медіаконтент, який ви транслюєте."</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Встановлено додаток для камери"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Додаток налаштовано"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Принаймні один пристрій доступний"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Виберіть стандартний додаток для нотаток, щоб створювати їх за допомогою ярлика"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Вибрати додаток"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Натисніть і утримуйте ярлик"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасувати"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Використовувати інший екран"</string>
