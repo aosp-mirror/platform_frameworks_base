@@ -483,7 +483,10 @@ class CreateFlowUtils {
                     createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                     appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                     userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
-                    isAutoSelectRequest = createCredentialRequestJetpack.isAutoSelectAllowed,
+                    // The jetpack library requires a fix to parse this value correctly for
+                    // the password type. For now, directly parse it ourselves.
+                    isAutoSelectRequest = createCredentialRequest.credentialData.getBoolean(
+                        Constants.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS, false),
                 )
                 is CreatePublicKeyCredentialRequest -> {
                     newRequestDisplayInfoFromPasskeyJson(
@@ -494,7 +497,10 @@ class CreateFlowUtils {
                         createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                         appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                         userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
-                        isAutoSelectRequest = createCredentialRequestJetpack.isAutoSelectAllowed,
+                        // The jetpack library requires a fix to parse this value correctly for
+                        // the passkey type. For now, directly parse it ourselves.
+                        isAutoSelectRequest = createCredentialRequest.credentialData.getBoolean(
+                            Constants.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS, false),
                     )
                 }
                 is CreateCustomCredentialRequest -> {
