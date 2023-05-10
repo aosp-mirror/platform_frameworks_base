@@ -79,6 +79,11 @@ object Flags {
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
 
+    // TODO(b/260335638): Tracking Bug
+    @JvmField
+    val NOTIFICATION_INLINE_REPLY_ANIMATION =
+        unreleasedFlag(174148361, "notification_inline_reply_animation")
+
     /** Makes sure notification panel is updated before the user switch is complete. */
     // TODO(b/278873737): Tracking Bug
     @JvmField
