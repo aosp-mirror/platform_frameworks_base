@@ -206,6 +206,7 @@ public class TextureView extends View {
      */
     public TextureView(@NonNull Context context) {
         super(context);
+        mRenderNode.setIsTextureView();
     }
 
     /**
@@ -216,6 +217,7 @@ public class TextureView extends View {
      */
     public TextureView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        mRenderNode.setIsTextureView();
     }
 
     /**
@@ -229,6 +231,7 @@ public class TextureView extends View {
      */
     public TextureView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        mRenderNode.setIsTextureView();
     }
 
     /**
@@ -247,6 +250,7 @@ public class TextureView extends View {
     public TextureView(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        mRenderNode.setIsTextureView();
     }
 
     /**
