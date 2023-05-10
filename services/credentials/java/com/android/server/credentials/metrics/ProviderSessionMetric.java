@@ -28,6 +28,7 @@ import android.util.Slog;
 import com.android.server.credentials.MetricUtilities;
 import com.android.server.credentials.metrics.shared.ResponseCollective;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,13 +48,17 @@ public class ProviderSessionMetric {
     protected final CandidatePhaseMetric mCandidatePhasePerProviderMetric;
 
     // IFF there was an authentication entry clicked, this stores all required information for
-    // that event. This is for the 'get' flow.
+    // that event. This is for the 'get' flow. Notice these flows may be repetitive.
+    // Thus each provider stores a list of authentication metrics. The time between emits
+    // of these metrics should exceed 10 ms (given human reaction time is ~ 100's of ms), so emits
+    // will never collide. However, for aggregation, this will store information accordingly.
     @NonNull
-    protected final BrowsedAuthenticationMetric mBrowsedAuthenticationMetric;
+    protected final List<BrowsedAuthenticationMetric> mBrowsedAuthenticationMetric =
+            new ArrayList<>();
 
     public ProviderSessionMetric(int sessionIdTrackTwo) {
         mCandidatePhasePerProviderMetric = new CandidatePhaseMetric(sessionIdTrackTwo);
-        mBrowsedAuthenticationMetric = new BrowsedAuthenticationMetric(sessionIdTrackTwo);
+        mBrowsedAuthenticationMetric.add(new BrowsedAuthenticationMetric(sessionIdTrackTwo));
     }
 
     /**
@@ -63,6 +68,12 @@ public class ProviderSessionMetric {
         return mCandidatePhasePerProviderMetric;
     }
 
+    /**
+     * Retrieves the authentication clicked metric information.
+     */
+    public List<BrowsedAuthenticationMetric> getBrowsedAuthenticationMetric() {
+        return mBrowsedAuthenticationMetric;
+    }
 
     /**
      * This collects for ProviderSessions, with respect to the candidate providers, whether
@@ -71,7 +82,30 @@ public class ProviderSessionMetric {
      * @param hasException indicates if the candidate provider associated with an exception
      */
     public void collectCandidateExceptionStatus(boolean hasException) {
-        mCandidatePhasePerProviderMetric.setHasException(hasException);
+        try {
+            mCandidatePhasePerProviderMetric.setHasException(hasException);
+        } catch (Exception e) {
+            Slog.i(TAG, "Error while setting candidate metric exception " + e);
+        }
+    }
+
+    /**
+     * This collects for ProviderSessions, with respect to the authentication entry provider,
+     * if an exception occurred in the authentication entry click. It's expected that these
+     * collections always occur after at least 1 authentication metric has been collected
+     * for the provider associated with this metric encapsulation.
+     *
+     * @param hasException indicates if the candidate provider from an authentication entry
+     *                     associated with an exception
+     */
+    public void collectAuthenticationExceptionStatus(boolean hasException) {
+        try {
+            var mostRecentAuthenticationMetric = mBrowsedAuthenticationMetric
+                    .get(mBrowsedAuthenticationMetric.size() - 1);
+            mostRecentAuthenticationMetric.setHasException(hasException);
+        } catch (Exception e) {
+            Slog.i(TAG, "Error while setting authentication metric exception " + e);
+        }
     }
 
     /**
@@ -91,6 +125,21 @@ public class ProviderSessionMetric {
         // TODO(b/271135048) - Mimic typical candidate update, but with authentication metric
         // Collect the final timestamps (and start timestamp), status, exceptions and the provider
         // uid. This occurs typically *after* the collection is complete.
+        var mostRecentAuthenticationMetric = mBrowsedAuthenticationMetric
+                .get(mBrowsedAuthenticationMetric.size() - 1);
+        mostRecentAuthenticationMetric.setProviderUid(providerSessionUid);
+        // TODO(immediately) - add timestamps (no longer needed!!) but also update below values!
+        if (isFailureStatus) {
+            mostRecentAuthenticationMetric.setQueryReturned(false);
+            mostRecentAuthenticationMetric.setProviderStatus(
+                    ProviderStatusForMetrics.QUERY_FAILURE
+                            .getMetricCode());
+        } else if (isCompletionStatus) {
+            mostRecentAuthenticationMetric.setQueryReturned(true);
+            mostRecentAuthenticationMetric.setProviderStatus(
+                    ProviderStatusForMetrics.QUERY_SUCCESS
+                            .getMetricCode());
+        }
     }
 
     /**
@@ -197,6 +246,17 @@ public class ProviderSessionMetric {
         mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
     }
 
+    /**
+     * This sets up an authentication metric collector to the flow. This must be called before
+     * any logical edits are done in a new authentication entry metric collection.
+     */
+    public void createAuthenticationBrowsingMetric() {
+        BrowsedAuthenticationMetric browsedAuthenticationMetric =
+                new BrowsedAuthenticationMetric(mCandidatePhasePerProviderMetric
+                        .getSessionIdProvider());
+        mBrowsedAuthenticationMetric.add(browsedAuthenticationMetric);
+    }
+
     private void beginCreateCredentialResponseCollectionCandidateEntryMetrics(
             BeginCreateCredentialResponse response) {
         Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
@@ -240,7 +300,10 @@ public class ProviderSessionMetric {
         if (!isAuthEntry) {
             mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
         } else {
-            // TODO(b/immediately) - Add the auth entry get logic
+            // The most recent auth entry must be created already
+            var browsedAuthenticationMetric =
+                    mBrowsedAuthenticationMetric.get(mBrowsedAuthenticationMetric.size() - 1);
+            browsedAuthenticationMetric.setAuthEntryCollective(responseCollective);
         }
     }
 }
