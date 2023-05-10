@@ -110,17 +110,15 @@ public class FingerprintServiceTest {
     private final FingerprintSensorPropertiesInternal mSensorPropsDefault =
             new FingerprintSensorPropertiesInternal(ID_DEFAULT, STRENGTH_STRONG,
                     2 /* maxEnrollmentsPerUser */,
-                    List.of() /* componentInfo */,
+                    List.of(),
                     TYPE_REAR,
                     false /* resetLockoutRequiresHardwareAuthToken */);
     private final FingerprintSensorPropertiesInternal mSensorPropsVirtual =
             new FingerprintSensorPropertiesInternal(ID_VIRTUAL, STRENGTH_STRONG,
                     2 /* maxEnrollmentsPerUser */,
-                    List.of() /* componentInfo */,
+                    List.of(),
                     TYPE_UDFPS_OPTICAL,
                     false /* resetLockoutRequiresHardwareAuthToken */);
-    @Captor
-    private ArgumentCaptor<FingerprintSensorPropertiesInternal> mPropsCaptor;
     private FingerprintService mService;
 
     @Before
@@ -168,8 +166,7 @@ public class FingerprintServiceTest {
         mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
         waitForRegistration();
 
-        verify(mIBiometricService).registerAuthenticator(anyInt(), mPropsCaptor.capture(), any());
-        assertThat(mPropsCaptor.getAllValues()).containsExactly(mSensorPropsDefault);
+        verify(mIBiometricService).registerAuthenticator(eq(ID_DEFAULT), anyInt(), anyInt(), any());
     }
 
     @Test
@@ -181,8 +178,7 @@ public class FingerprintServiceTest {
         mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
         waitForRegistration();
 
-        verify(mIBiometricService).registerAuthenticator(anyInt(), mPropsCaptor.capture(), any());
-        assertThat(mPropsCaptor.getAllValues()).containsExactly(mSensorPropsVirtual);
+        verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
     }
 
     @Test
@@ -192,8 +188,7 @@ public class FingerprintServiceTest {
         mService.mServiceWrapper.registerAuthenticators(HIDL_AUTHENTICATORS);
         waitForRegistration();
 
-        verify(mIBiometricService).registerAuthenticator(anyInt(), mPropsCaptor.capture(), any());
-        assertThat(mPropsCaptor.getAllValues()).containsExactly(mSensorPropsVirtual);
+        verify(mIBiometricService).registerAuthenticator(eq(ID_VIRTUAL), anyInt(), anyInt(), any());
     }
 
     private void waitForRegistration() throws Exception {
