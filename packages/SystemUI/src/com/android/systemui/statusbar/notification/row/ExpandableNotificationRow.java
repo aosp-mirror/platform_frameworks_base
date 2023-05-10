@@ -271,6 +271,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnFeedbackClickListener;
     private Path mExpandingClipPath;
+    private boolean mIsInlineReplyAnimationFlagEnabled = false;
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -3054,6 +3055,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return showingLayout != null && showingLayout.requireRowToHaveOverlappingRendering();
     }
 
+    public void setInlineReplyAnimationFlagEnabled(boolean isEnabled) {
+        mIsInlineReplyAnimationFlagEnabled = isEnabled;
+    }
+
     @Override
     public void setActualHeight(int height, boolean notifyListeners) {
         boolean changed = height != getActualHeight();
@@ -3073,7 +3078,11 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         int contentHeight = Math.max(getMinHeight(), height);
         for (NotificationContentView l : mLayouts) {
-            l.setContentHeight(height);
+            if (mIsInlineReplyAnimationFlagEnabled) {
+                l.setContentHeight(height);
+            } else {
+                l.setContentHeight(contentHeight);
+            }
         }
         if (mIsSummaryWithChildren) {
             mChildrenContainer.setActualHeight(height);
