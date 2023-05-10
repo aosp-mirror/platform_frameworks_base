@@ -47,14 +47,14 @@ class KeyboardBacklightInteractorTest : SysuiTestCase() {
     @Test
     fun emitsNull_whenKeyboardJustConnected() = runTest {
         val latest by collectLastValue(underTest.backlight)
-        keyboardRepository.setKeyboardConnected(true)
+        keyboardRepository.setIsAnyKeyboardConnected(true)
 
         assertThat(latest).isNull()
     }
 
     @Test
     fun emitsBacklight_whenKeyboardConnectedAndBacklightChanged() = runTest {
-        keyboardRepository.setKeyboardConnected(true)
+        keyboardRepository.setIsAnyKeyboardConnected(true)
         keyboardRepository.setBacklight(BacklightModel(1, 5))
 
         assertThat(underTest.backlight.first()).isEqualTo(BacklightModel(1, 5))
@@ -63,10 +63,10 @@ class KeyboardBacklightInteractorTest : SysuiTestCase() {
     @Test
     fun emitsNull_afterKeyboardDisconnecting() = runTest {
         val latest by collectLastValue(underTest.backlight)
-        keyboardRepository.setKeyboardConnected(true)
+        keyboardRepository.setIsAnyKeyboardConnected(true)
         keyboardRepository.setBacklight(BacklightModel(1, 5))
 
-        keyboardRepository.setKeyboardConnected(false)
+        keyboardRepository.setIsAnyKeyboardConnected(false)
 
         assertThat(latest).isNull()
     }
