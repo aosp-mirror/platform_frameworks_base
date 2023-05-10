@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"มีการติดตั้งผู้ออกใบรับรองในอุปกรณ์นี้ อาจมีการตรวจสอบหรือแก้ไขการจราจรของข้อมูลในเครือข่ายที่ปลอดภัยของคุณ"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในอุปกรณ์ของคุณ"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ผู้ดูแลระบบได้เปิดการบันทึกกิจกรรมของเครือข่าย ซึ่งจะตรวจสอบการรับส่งข้อมูลในโปรไฟล์งานแต่ไม่ตรวจสอบในโปรไฟล์ส่วนตัวของคุณ"</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่ายรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"อุปกรณ์นี้เชื่อมต่ออินเทอร์เน็ตผ่าน <xliff:g id="VPN_APP_0">%1$s</xliff:g> และ <xliff:g id="VPN_APP_1">%2$s</xliff:g> ผู้ดูแลระบบไอทีสามารถดูกิจกรรมที่คุณทำในเครือข่าย ซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"แอปงานเชื่อมต่ออินเทอร์เน็ตผ่าน <xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ดูแลระบบไอทีและผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายในแอปงานได้ ซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บ"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"แอปส่วนตัวเชื่อมต่ออินเทอร์เน็ตผ่าน<xliff:g id="VPN_APP">%1$s</xliff:g> ผู้ให้บริการ VPN สามารถดูกิจกรรมที่คุณทำในเครือข่ายซึ่งรวมถึงอีเมลและข้อมูลการท่องเว็บได้"</string>
@@ -640,7 +638,7 @@
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"แป้นพิมพ์ลัด"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"สลับรูปแบบแป้นพิมพ์"</string>
     <string name="keyboard_shortcut_clear_text" msgid="4679927133259287577">"ล้างข้อความ"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"ทางลัด"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="1156178106617830429">"แป้นพิมพ์ลัด"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"ค้นหาแป้นพิมพ์ลัด"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"ไม่พบแป้นพิมพ์ลัด"</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"ระบบ"</string>
@@ -880,7 +878,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"แตะเพื่อเปิดฟีเจอร์การช่วยเหลือพิเศษ ปรับแต่งหรือแทนที่ปุ่มนี้ในการตั้งค่า\n\n"<annotation id="link">"ดูการตั้งค่า"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"ย้ายปุ่มไปที่ขอบเพื่อซ่อนชั่วคราว"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"เลิกทำ"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"นำทางลัด<xliff:g id="FEATURE_NAME">%s</xliff:g>ออกแล้ว"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"นำทางลัด <xliff:g id="FEATURE_NAME">%s</xliff:g> ออกแล้ว"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{นำทางลัด # รายการออกแล้ว}other{นำทางลัด # รายการออกแล้ว}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"ย้ายไปด้านซ้ายบน"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"ย้ายไปด้านขวาบน"</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ลำโพงและจอแสดงผล"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"อุปกรณ์ที่แนะนำ"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"วิธีการทำงานของการออกอากาศ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ประกาศ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ผู้ที่อยู่ใกล้คุณและมีอุปกรณ์บลูทูธที่รองรับสามารถรับฟังสื่อที่คุณกำลังออกอากาศได้"</string>

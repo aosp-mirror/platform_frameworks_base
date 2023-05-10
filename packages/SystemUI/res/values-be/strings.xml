@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На гэтай прыладзе ўсталяваны цэнтр сертыфікацыі. Ваш абаронены сеткавы трафік могуць праглядваць ці змяняць."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ваш адміністратар уключыў вядзенне журнала сеткі, з дапамогай якога адсочваецца трафік на вашай прыладзе."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Ваш адміністратар уключыў вядзенне журнала сеткі, з дапамогай якога адсочваецца трафік у вашым працоўным профілі. Трафік вашага асабістага профілю застаецца недаступным."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Гэта прылада падключана да інтэрнэту праз праграму \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Пастаўшчык VPN можа бачыць вашы дзеянні ў сетцы, у тым ліку інфармацыю пра электронную пошту і даныя прагляду."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Гэта прылада падключана да інтэрнэту праз праграму \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваш IT-адміністратар можа бачыць вашы дзеянні ў сетцы, у тым ліку інфармацыю пра электронную пошту і даныя прагляду."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Гэта прылада падключана да інтэрнэту праз праграмы \"<xliff:g id="VPN_APP_0">%1$s</xliff:g>\" і \"<xliff:g id="VPN_APP_1">%2$s</xliff:g>\". Ваш IT-адміністратар можа бачыць вашы дзеянні ў сетцы, у тым ліку інфармацыю пра электронную пошту і даныя прагляду."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Вашы працоўныя праграмы падключаны да інтэрнэту праз праграму \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваш IT-адміністратар і пастаўшчык VPN могуць бачыць вашы дзеянні ў сетцы ў працоўных праграмах, у тым ліку інфармацыю пра электронную пошту і даныя прагляду."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Вашы асабістыя праграмы падключаны да інтэрнэту праз праграму \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Пастаўшчык VPN можа бачыць вашы дзеянні ў сетцы, у тым ліку інфармацыю пра электронную пошту і даныя прагляду."</string>
@@ -880,7 +878,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Націсніце, каб адкрыць спецыяльныя магчымасці. Рэгулюйце ці замяняйце кнопку ў Наладах.\n\n"<annotation id="link">"Прагляд налад"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Каб часова схаваць кнопку, перамясціце яе на край"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Адрабіць"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Выдалены <xliff:g id="FEATURE_NAME">%s</xliff:g> ярлык"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Выдалены ярлык <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Выдалены # ярлык}one{Выдалены # ярлык}few{Выдалена # ярлыкі}many{Выдалена # ярлыкоў}other{Выдалена # ярлыка}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Перамясціць лявей і вышэй"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Перамясціць правей і вышэй"</string>
@@ -978,7 +976,7 @@
     <string name="media_output_dialog_multiple_devices" msgid="1093771040315422350">"Выбрана прылад: <xliff:g id="COUNT">%1$d</xliff:g>"</string>
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(адключана)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Не ўдалося пераключыцца. Дакраніцеся, каб паўтарыць спробу."</string>
-    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Падключыце прыладу"</string>
+    <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Падключыць прыладу"</string>
     <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Для трансляцыі гэтага сеанса адкрыйце праграму."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Невядомая праграма"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Спыніць трансляцыю"</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Дынамікі і дысплэі"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Прылады, якія падтрымліваюцца"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Як адбываецца трансляцыя"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляцыя"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Людзі паблізу, у якіх ёсць прылады з Bluetooth, змогуць праслухваць мультымедыйнае змесціва, якое вы трансліруеце"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Усталявана праграма \"Камера\"."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Праграма наладжана."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Даступная хаця б адна прылада."</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Выберыце стандартную праграму для нататак, каб карыстацца хуткай камандай для нататак"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Выберыце праграму"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Дакраніцеся і ўтрымлівайце ярлык"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Скасаваць"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Пераключыцца на іншы экран"</string>

@@ -390,7 +390,7 @@
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Ak pridáte nového používatelia, ukončí sa režim pre hostí a odstránia sa všetky aplikácie a údaje z aktuálnej relácie hosťa."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dosiahnutý limit počtu používateľov"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Môžete vytvoriť iba jedného používateľa.}few{Môžete pridať až # používateľov.}many{You can add up to # users.}other{Môžete pridať až # používateľov.}}"</string>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"Odstrániť používateľa?"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"Odobrať používateľa?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Všetky aplikácie a údaje tohto používateľa budú odstránené."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Odstrániť"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Chcete spustiť nahrávanie alebo prenos s aktivovaným povolením <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tomto zariadení je nainštalovaná certifikačná autorita. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku na vašom zariadení."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Správca aktivoval zapisovanie do denníka siete, ktoré sleduje premávku vo vašom pracovnom profile, ale nie osobnom."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Toto zariadenie je k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vašu aktivitu v sieti vrátane e‑mailov a dát prehliadania vidí poskytovateľ siete VPN."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Toto zariadenie je k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vašu aktivitu v sieti vrátane e‑mailov a dát prehliadania vidí váš správca IT."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Toto zariadenie je k internetu pripojené prostredníctvom aplikácií <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vašu aktivitu v sieti vrátane e‑mailov a dát prehliadania vidí váš správca IT."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše pracovné aplikácie sú k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vašu aktivitu v sieti v pracovných aplikáciách vrátane e‑mailov a dát prehliadania vidí váš správca IT a poskytovateľ siete VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vaše osobné aplikácie sú k internetu pripojené prostredníctvom aplikácie <xliff:g id="VPN_APP">%1$s</xliff:g>. Vašu aktivitu v sieti vrátane e‑mailov a dát prehliadania vidí váš poskytovateľ siete VPN."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Reproduktory a obrazovky"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Navrhované zariadenia"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ako vysielanie funguje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Vysielanie"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ľudia v okolí s kompatibilnými zariadeniami s rozhraním Bluetooth si môžu vypočuť médiá, ktoré vysielate"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Nainštalujte si aplikáciu kamery"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikácia je nastavená"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• K dispozícii je minimálne jedno zariadenie"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Vyberte predvolenú aplikáciu na písanie poznámok, ku ktorej priradíte skratku pre poznámky"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Výber aplikácie"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Pridržte skratku"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Zrušiť"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Prepnite obrazovky"</string>

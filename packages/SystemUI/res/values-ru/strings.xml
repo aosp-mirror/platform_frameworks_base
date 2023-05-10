@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На устройстве установлен сертификат ЦС. Ваш защищенный сетевой трафик могут отслеживать и изменять."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик на вашем устройстве."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Администратор включил ведение сетевого журнала, чтобы отслеживать трафик в вашем рабочем профиле (информация из личного профиля не собирается)."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Это устройство подключено к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны поставщику услуг VPN."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Это устройство подключено к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны вашему системному администратору."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Это устройство подключено к интернету через сервисы \"<xliff:g id="VPN_APP_0">%1$s</xliff:g>\" и \"<xliff:g id="VPN_APP_1">%2$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны вашему системному администратору."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Рабочие приложения подключены к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши сетевые действия в этих приложениях, включая данные о работе с электронной почтой и в браузере, видны вашему системному администратору и поставщику услуг VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Личные приложения подключены к интернету через сервис \"<xliff:g id="VPN_APP">%1$s</xliff:g>\". Ваши действия в сети, включая данные о работе с электронной почтой и в браузере, видны вашему поставщику услуг VPN."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Колонки и дисплеи"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Рекомендуемые устройства"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Как работают трансляции"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Трансляция"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Находящиеся рядом с вами люди с совместимыми устройствами Bluetooth могут слушать медиафайлы, которые вы транслируете."</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Установлено приложение камеры."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Приложение установлено."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Доступно хотя бы одно устройство."</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Выберите стандартное приложение для заметок, которое будет открываться при нажатии кнопки быстрого доступа."</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Выбрать приложение"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Нажмите и удерживайте ярлык"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Отмена"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Переключиться на другой экран"</string>
