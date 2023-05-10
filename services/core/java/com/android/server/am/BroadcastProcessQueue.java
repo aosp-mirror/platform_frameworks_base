@@ -143,6 +143,12 @@ class BroadcastProcessQueue {
     private int mActiveCountSinceIdle;
 
     /**
+     * Count of {@link #mActive} broadcasts with assumed delivery that have been dispatched
+     * since this queue was last idle.
+     */
+    private int mActiveAssumedDeliveryCountSinceIdle;
+
+    /**
      * Flag indicating that the currently active broadcast is being dispatched
      * was scheduled via a cold start.
      */
@@ -182,7 +188,7 @@ class BroadcastProcessQueue {
     private int mCountInstrumented;
     private int mCountManifest;
 
-    private boolean mPrioritizeEarliest;
+    private int mCountPrioritizeEarliestRequests;
 
     private @UptimeMillisLong long mRunnableAt = Long.MAX_VALUE;
     private @Reason int mRunnableAtReason = REASON_EMPTY;
@@ -499,6 +505,14 @@ class BroadcastProcessQueue {
         return mActiveCountSinceIdle;
     }
 
+    /**
+     * Count of {@link #mActive} broadcasts with assumed delivery that have been dispatched
+     * since this queue was last idle.
+     */
+    public int getActiveAssumedDeliveryCountSinceIdle() {
+        return mActiveAssumedDeliveryCountSinceIdle;
+    }
+
     public void setActiveViaColdStart(boolean activeViaColdStart) {
         mActiveViaColdStart = activeViaColdStart;
     }
@@ -532,6 +546,8 @@ class BroadcastProcessQueue {
         mActive = (BroadcastRecord) next.arg1;
         mActiveIndex = next.argi1;
         mActiveCountSinceIdle++;
+        mActiveAssumedDeliveryCountSinceIdle +=
+                (mActive.isAssumedDelivered(mActiveIndex) ? 1 : 0);
         mActiveViaColdStart = false;
         mActiveWasStopped = false;
         next.recycle();
@@ -545,6 +561,7 @@ class BroadcastProcessQueue {
         mActive = null;
         mActiveIndex = 0;
         mActiveCountSinceIdle = 0;
+        mActiveAssumedDeliveryCountSinceIdle = 0;
         mActiveViaColdStart = false;
         invalidateRunnableAt();
     }
@@ -748,7 +765,7 @@ class BroadcastProcessQueue {
         final BroadcastRecord nextLPRecord = (BroadcastRecord) nextLPArgs.arg1;
         final int nextLPRecordIndex = nextLPArgs.argi1;
         final BroadcastRecord nextHPRecord = (BroadcastRecord) highPriorityQueue.peekFirst().arg1;
-        final boolean shouldConsiderLPQueue = (mPrioritizeEarliest
+        final boolean shouldConsiderLPQueue = (mCountPrioritizeEarliestRequests > 0
                 || consecutiveHighPriorityCount >= maxHighPriorityDispatchLimit);
         final boolean isLPQueueEligible = shouldConsiderLPQueue
                 && nextLPRecord.enqueueTime <= nextHPRecord.enqueueTime
@@ -761,10 +778,9 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * When {@code prioritizeEarliest} is set to {@code true}, then earliest enqueued
-     * broadcasts would be prioritized for dispatching, even if there are urgent broadcasts
-     * waiting. This is typically used in case there are callers waiting for "barrier" to be
-     * reached.
+     * Add a request to prioritize dispatching of broadcasts that have been enqueued the earliest,
+     * even if there are urgent broadcasts waiting to be dispatched. This is typically used in
+     * case there are callers waiting for "barrier" to be reached.
      *
      * @return if this operation may have changed internal state, indicating
      *         that the caller is responsible for invoking
@@ -772,11 +788,37 @@ class BroadcastProcessQueue {
      */
     @CheckResult
     @VisibleForTesting
-    boolean setPrioritizeEarliest(boolean prioritizeEarliest) {
-        if (mPrioritizeEarliest != prioritizeEarliest) {
-            mPrioritizeEarliest = prioritizeEarliest;
+    boolean addPrioritizeEarliestRequest() {
+        if (mCountPrioritizeEarliestRequests == 0) {
+            mCountPrioritizeEarliestRequests++;
             invalidateRunnableAt();
             return true;
+        } else {
+            mCountPrioritizeEarliestRequests++;
+            return false;
+        }
+    }
+
+    /**
+     * Remove a request to prioritize dispatching of broadcasts that have been enqueued the
+     * earliest, even if there are urgent broadcasts waiting to be dispatched. This is typically
+     * used in case there are callers waiting for "barrier" to be reached.
+     *
+     * <p> Once there are no more remaining requests, the dispatching order reverts back to normal.
+     *
+     * @return if this operation may have changed internal state, indicating
+     *         that the caller is responsible for invoking
+     *         {@link BroadcastQueueModernImpl#updateRunnableList}
+     */
+    @CheckResult
+    boolean removePrioritizeEarliestRequest() {
+        mCountPrioritizeEarliestRequests--;
+        if (mCountPrioritizeEarliestRequests == 0) {
+            invalidateRunnableAt();
+            return true;
+        } else if (mCountPrioritizeEarliestRequests < 0) {
+            mCountPrioritizeEarliestRequests = 0;
+            return false;
         } else {
             return false;
         }
@@ -837,7 +879,7 @@ class BroadcastProcessQueue {
     }
 
     /**
-     * Quickly determine if this queue has broadcasts enqueued before the given
+     * Quickly determine if this queue has non-deferred broadcasts enqueued before the given
      * barrier timestamp that are still waiting to be delivered.
      */
     public boolean isBeyondBarrierLocked(@UptimeMillisLong long barrierTime) {
@@ -857,6 +899,41 @@ class BroadcastProcessQueue {
 
         return (activeBeyond && nextBeyond && nextUrgentBeyond && nextOffloadBeyond)
                 || isDeferredUntilActive();
+    }
+
+    /**
+     * Quickly determine if this queue has non-deferred broadcasts waiting to be dispatched,
+     * that match {@code intent}, as defined by {@link Intent#filterEquals(Intent)}.
+     */
+    public boolean isDispatched(@NonNull Intent intent) {
+        final boolean activeDispatched = (mActive == null)
+                || (!intent.filterEquals(mActive.intent));
+        final boolean dispatched = isDispatchedInQueue(mPending, intent);
+        final boolean urgentDispatched = isDispatchedInQueue(mPendingUrgent, intent);
+        final boolean offloadDispatched = isDispatchedInQueue(mPendingOffload, intent);
+
+        return (activeDispatched && dispatched && urgentDispatched && offloadDispatched)
+                || isDeferredUntilActive();
+    }
+
+    /**
+     * Quickly determine if the {@code queue} has non-deferred broadcasts waiting to be dispatched,
+     * that match {@code intent}, as defined by {@link Intent#filterEquals(Intent)}.
+     */
+    private boolean isDispatchedInQueue(@NonNull ArrayDeque<SomeArgs> queue,
+            @NonNull Intent intent) {
+        final Iterator<SomeArgs> it = queue.iterator();
+        while (it.hasNext()) {
+            final SomeArgs args = it.next();
+            if (args == null) {
+                return true;
+            }
+            final BroadcastRecord record = (BroadcastRecord) args.arg1;
+            if (intent.filterEquals(record.intent)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public boolean isRunnable() {
@@ -1309,6 +1386,7 @@ class BroadcastProcessQueue {
         pw.print(" m:"); pw.print(mCountManifest);
 
         pw.print(" csi:"); pw.print(mActiveCountSinceIdle);
+        pw.print(" adcsi:"); pw.print(mActiveAssumedDeliveryCountSinceIdle);
         pw.print(" ccu:"); pw.print(mActiveCountConsecutiveUrgent);
         pw.print(" ccn:"); pw.print(mActiveCountConsecutiveNormal);
         pw.println();

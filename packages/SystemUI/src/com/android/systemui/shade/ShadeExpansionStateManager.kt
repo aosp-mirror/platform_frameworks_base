@@ -54,10 +54,18 @@ class ShadeExpansionStateManager @Inject constructor() : ShadeStateEvents {
      * Listener will also be immediately notified with the current values.
      */
     fun addExpansionListener(listener: ShadeExpansionListener) {
-        expansionListeners.add(listener)
+        addShadeExpansionListener(listener)
         listener.onPanelExpansionChanged(
             ShadeExpansionChangeEvent(fraction, expanded, tracking, dragDownPxAmount)
         )
+    }
+
+    /**
+     * Adds a listener that will be notified when the panel expansion fraction has changed.
+     * @see #addExpansionListener
+     */
+    fun addShadeExpansionListener(listener: ShadeExpansionListener) {
+        expansionListeners.add(listener)
     }
 
     /** Removes an expansion listener. */

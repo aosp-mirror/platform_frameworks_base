@@ -16,7 +16,7 @@
 
 package com.android.server.credentials.metrics;
 
-import static com.android.server.credentials.MetricUtilities.DELTA_CUT;
+import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 
 import android.annotation.NonNull;
@@ -44,10 +44,17 @@ public class ProviderSessionMetric {
 
     // Specific candidate provider metric for the provider this session handles
     @NonNull
-    protected final CandidatePhaseMetric mCandidatePhasePerProviderMetric =
-            new CandidatePhaseMetric();
+    protected final CandidatePhaseMetric mCandidatePhasePerProviderMetric;
 
-    public ProviderSessionMetric() {}
+    // IFF there was an authentication entry clicked, this stores all required information for
+    // that event. This is for the 'get' flow.
+    @NonNull
+    protected final BrowsedAuthenticationMetric mBrowsedAuthenticationMetric;
+
+    public ProviderSessionMetric(int sessionIdTrackTwo) {
+        mCandidatePhasePerProviderMetric = new CandidatePhaseMetric(sessionIdTrackTwo);
+        mBrowsedAuthenticationMetric = new BrowsedAuthenticationMetric(sessionIdTrackTwo);
+    }
 
     /**
      * Retrieve the candidate provider phase metric and the data it contains.
@@ -55,6 +62,7 @@ public class ProviderSessionMetric {
     public CandidatePhaseMetric getCandidatePhasePerProviderMetric() {
         return mCandidatePhasePerProviderMetric;
     }
+
 
     /**
      * This collects for ProviderSessions, with respect to the candidate providers, whether
@@ -78,6 +86,13 @@ public class ProviderSessionMetric {
         }
     }
 
+    private void collectAuthEntryUpdate(boolean isFailureStatus,
+            boolean isCompletionStatus, int providerSessionUid) {
+        // TODO(b/271135048) - Mimic typical candidate update, but with authentication metric
+        // Collect the final timestamps (and start timestamp), status, exceptions and the provider
+        // uid. This occurs typically *after* the collection is complete.
+    }
+
     /**
      * Used to collect metrics at the update stage when a candidate provider gives back an update.
      *
@@ -86,8 +101,12 @@ public class ProviderSessionMetric {
      * @param providerSessionUid the uid of the provider
      */
     public void collectCandidateMetricUpdate(boolean isFailureStatus,
-            boolean isCompletionStatus, int providerSessionUid) {
+            boolean isCompletionStatus, int providerSessionUid, boolean isAuthEntry) {
         try {
+            if (isAuthEntry) {
+                collectAuthEntryUpdate(isFailureStatus, isCompletionStatus, providerSessionUid);
+                return;
+            }
             mCandidatePhasePerProviderMetric.setCandidateUid(providerSessionUid);
             mCandidatePhasePerProviderMetric
                     .setQueryFinishTimeNanoseconds(System.nanoTime());
@@ -119,7 +138,6 @@ public class ProviderSessionMetric {
      */
     public void collectCandidateMetricSetupViaInitialMetric(InitialPhaseMetric initMetric) {
         try {
-            mCandidatePhasePerProviderMetric.setSessionId(initMetric.getSessionId());
             mCandidatePhasePerProviderMetric.setServiceBeganTimeNanoseconds(
                     initMetric.getCredentialServiceStartedTimeNanoseconds());
             mCandidatePhasePerProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
@@ -133,13 +151,14 @@ public class ProviderSessionMetric {
      * purposes.
      *
      * @param response contains entries and data from the candidate provider responses
+     * @param isAuthEntry indicates if this is an auth entry collection or not
      * @param <R> the response type associated with the API flow in progress
      */
-    public <R> void collectCandidateEntryMetrics(R response) {
+    public <R> void collectCandidateEntryMetrics(R response, boolean isAuthEntry) {
         try {
             if (response instanceof BeginGetCredentialResponse) {
                 beginGetCredentialResponseCollectionCandidateEntryMetrics(
-                        (BeginGetCredentialResponse) response);
+                        (BeginGetCredentialResponse) response, isAuthEntry);
             } else if (response instanceof BeginCreateCredentialResponse) {
                 beginCreateCredentialResponseCollectionCandidateEntryMetrics(
                         (BeginCreateCredentialResponse) response);
@@ -170,7 +189,7 @@ public class ProviderSessionMetric {
         entryCounts.put(EntryEnum.AUTHENTICATION_ENTRY, numAuthEntries);
 
         entries.forEach(entry -> {
-            String entryKey = generateMetricKey(entry.getType(), DELTA_CUT);
+            String entryKey = generateMetricKey(entry.getType(), DELTA_RESPONSES_CUT);
             responseCounts.put(entryKey, responseCounts.getOrDefault(entryKey, 0) + 1);
         });
 
@@ -198,7 +217,7 @@ public class ProviderSessionMetric {
     }
 
     private void beginGetCredentialResponseCollectionCandidateEntryMetrics(
-            BeginGetCredentialResponse response) {
+            BeginGetCredentialResponse response, boolean isAuthEntry) {
         Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
         Map<String, Integer> responseCounts = new LinkedHashMap<>();
         int numCredEntries = response.getCredentialEntries().size();
@@ -212,11 +231,16 @@ public class ProviderSessionMetric {
         entryCounts.put(EntryEnum.AUTHENTICATION_ENTRY, numAuthEntries);
 
         response.getCredentialEntries().forEach(entry -> {
-            String entryKey = generateMetricKey(entry.getType(), DELTA_CUT);
+            String entryKey = generateMetricKey(entry.getType(), DELTA_RESPONSES_CUT);
             responseCounts.put(entryKey, responseCounts.getOrDefault(entryKey, 0) + 1);
         });
 
         ResponseCollective responseCollective = new ResponseCollective(responseCounts, entryCounts);
-        mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
+
+        if (!isAuthEntry) {
+            mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
+        } else {
+            // TODO(b/immediately) - Add the auth entry get logic
+        }
     }
 }

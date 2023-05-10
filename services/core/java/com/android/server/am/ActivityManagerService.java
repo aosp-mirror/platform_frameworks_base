@@ -3761,6 +3761,15 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void forceStopPackage(final String packageName, int userId) {
+        forceStopPackage(packageName, userId, /*flags=*/ 0);
+    }
+
+    @Override
+    public void forceStopPackageEvenWhenStopping(final String packageName, int userId) {
+        forceStopPackage(packageName, userId, ActivityManager.FLAG_OR_STOPPED);
+    }
+
+    private void forceStopPackage(final String packageName, int userId, int userRunningFlags) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: forceStopPackage() from pid="
@@ -3776,7 +3785,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long callingId = Binder.clearCallingIdentity();
         try {
             IPackageManager pm = AppGlobals.getPackageManager();
-            synchronized(this) {
+            synchronized (this) {
                 int[] users = userId == UserHandle.USER_ALL
                         ? mUserController.getUsers() : new int[] { userId };
                 for (int user : users) {
@@ -3804,7 +3813,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         Slog.w(TAG, "Failed trying to unstop package "
                                 + packageName + ": " + e);
                     }
-                    if (mUserController.isUserRunning(user, 0)) {
+                    if (mUserController.isUserRunning(user, userRunningFlags)) {
                         forceStopPackageLocked(packageName, pkgUid, "from pid " + callingPid);
                         finishForceStopPackageLocked(packageName, pkgUid);
                     }
@@ -7511,12 +7520,70 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "registerUidObserver");
         }
         mUidObserverController.register(observer, which, cutpoint, callingPackage,
-                Binder.getCallingUid());
+                Binder.getCallingUid(), /*uids*/null);
+    }
+
+    /**
+     * Registers a UidObserver with a uid filter.
+     *
+     * @param observer The UidObserver implementation to register.
+     * @param which    A bitmask of events to observe. See ActivityManager.UID_OBSERVER_*.
+     * @param cutpoint The cutpoint for onUidStateChanged events. When the state crosses this
+     *                 threshold in either direction, onUidStateChanged will be called.
+     * @param callingPackage The name of the calling package.
+     * @param uids     A list of uids to watch. If all uids are to be watched, use
+     *                 registerUidObserver instead.
+     * @throws RemoteException
+     * @return Returns A binder token identifying the UidObserver registration.
+     */
+    @Override
+    public IBinder registerUidObserverForUids(IUidObserver observer, int which, int cutpoint,
+            String callingPackage, int[] uids) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "registerUidObserver");
+        }
+        return mUidObserverController.register(observer, which, cutpoint, callingPackage,
+                Binder.getCallingUid(), uids);
     }
 
     @Override
     public void unregisterUidObserver(IUidObserver observer) {
         mUidObserverController.unregister(observer);
+    }
+
+    /**
+     * Adds a uid to the list of uids that a UidObserver will receive updates about.
+     *
+     * @param observerToken  The binder token identifying the UidObserver registration.
+     * @param callingPackage The name of the calling package.
+     * @param uid            The uid to watch.
+     * @throws RemoteException
+     */
+    @Override
+    public void addUidToObserver(IBinder observerToken, String callingPackage, int uid) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "registerUidObserver");
+        }
+        mUidObserverController.addUidToObserver(observerToken, uid);
+    }
+
+    /**
+     * Removes a uid from the list of uids that a UidObserver will receive updates about.
+     *
+     * @param observerToken  The binder token identifying the UidObserver registration.
+     * @param callingPackage The name of the calling package.
+     * @param uid            The uid to stop watching.
+     * @throws RemoteException
+     */
+    @Override
+    public void removeUidFromObserver(IBinder observerToken, String callingPackage, int uid) {
+        if (!hasUsageStatsPermission(callingPackage)) {
+            enforceCallingPermission(android.Manifest.permission.PACKAGE_USAGE_STATS,
+                    "registerUidObserver");
+        }
+        mUidObserverController.removeUidFromObserver(observerToken, uid);
     }
 
     @Override
@@ -18613,7 +18680,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 int which, int cutpoint, @NonNull String callingPackage) {
             mNetworkPolicyUidObserver = observer;
             mUidObserverController.register(observer, which, cutpoint, callingPackage,
-                    Binder.getCallingUid());
+                    Binder.getCallingUid(), /*uids*/null);
         }
 
         @Override
@@ -18904,6 +18971,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         pw.println("Gave up waiting for application barriers!");
         pw.flush();
+    }
+
+    void waitForBroadcastDispatch(@NonNull PrintWriter pw, @NonNull Intent intent) {
+        enforceCallingPermission(permission.DUMP, "waitForBroadcastDispatch");
+        for (BroadcastQueue queue : mBroadcastQueues) {
+            queue.waitForDispatched(intent, pw);
+        }
     }
 
     void setIgnoreDeliveryGroupPolicy(@NonNull String broadcastAction) {

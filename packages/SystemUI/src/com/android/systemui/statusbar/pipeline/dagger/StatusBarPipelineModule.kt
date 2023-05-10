@@ -44,6 +44,8 @@ import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerPr
 import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxyImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinderImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositorySwitcher
@@ -107,6 +109,11 @@ abstract class StatusBarPipelineModule {
         impl: CollapsedStatusBarViewModelImpl
     ): CollapsedStatusBarViewModel
 
+    @Binds
+    abstract fun collapsedStatusBarViewBinder(
+        impl: CollapsedStatusBarViewBinderImpl
+    ): CollapsedStatusBarViewBinder
+
     companion object {
         @Provides
         @SysUISingleton
@@ -160,7 +167,7 @@ abstract class StatusBarPipelineModule {
         @SysUISingleton
         @SharedConnectivityInputLog
         fun provideSharedConnectivityTableLogBuffer(factory: LogBufferFactory): LogBuffer {
-            return factory.create("SharedConnectivityInputLog", 30)
+            return factory.create("SharedConnectivityInputLog", 60)
         }
 
         @Provides

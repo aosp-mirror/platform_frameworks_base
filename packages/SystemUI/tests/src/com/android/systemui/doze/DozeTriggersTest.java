@@ -301,6 +301,22 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     @Test
+    public void test_onSensor_tap() {
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_TAP, 100, 200, null);
+
+        verify(mHost).onSlpiTap(100, 200);
+        verify(mMachine).wakeUp(DozeLog.REASON_SENSOR_TAP);
+    }
+
+    @Test
+    public void test_onSensor_double_tap() {
+        mTriggers.onSensor(DozeLog.REASON_SENSOR_DOUBLE_TAP, 100, 200, null);
+
+        verify(mHost).onSlpiTap(100, 200);
+        verify(mMachine).wakeUp(DozeLog.REASON_SENSOR_DOUBLE_TAP);
+    }
+
+    @Test
     public void testPickupGestureDroppedKeyguardOccluded() {
         // GIVEN device is in doze (screen blank, but running doze sensors)
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);

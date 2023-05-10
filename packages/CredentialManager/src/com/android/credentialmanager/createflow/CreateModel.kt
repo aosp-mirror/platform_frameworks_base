@@ -34,6 +34,21 @@ data class CreateCredentialUiState(
   val foundCandidateFromUserDefaultProvider: Boolean,
 )
 
+internal fun isFlowAutoSelectable(
+    uiState: CreateCredentialUiState
+): Boolean {
+  return uiState.requestDisplayInfo.isAutoSelectRequest &&
+      // Even if the flow is auto selectable, still allow passkey intro screen to show once if
+      // applicable.
+      uiState.currentScreenState != CreateScreenState.PASSKEY_INTRO &&
+      uiState.currentScreenState != CreateScreenState.MORE_ABOUT_PASSKEYS_INTRO &&
+      uiState.remoteEntry == null &&
+      uiState.sortedCreateOptionsPairs.size == 1 &&
+      uiState.activeEntry?.activeEntryInfo?.let {
+        it is CreateOptionInfo && it.allowAutoSelect
+      } ?: false
+}
+
 internal fun hasContentToDisplay(state: CreateCredentialUiState): Boolean {
     return state.sortedCreateOptionsPairs.isNotEmpty() ||
         (!state.requestDisplayInfo.preferImmediatelyAvailableCredentials &&
@@ -72,8 +87,9 @@ class CreateOptionInfo(
     val passwordCount: Int?,
     val passkeyCount: Int?,
     val totalCredentialCount: Int?,
-    val lastUsedTime: Instant?,
+    val lastUsedTime: Instant,
     val footerDescription: String?,
+    val allowAutoSelect: Boolean,
 ) : BaseEntry(
     providerId,
     entryKey,
@@ -107,6 +123,8 @@ data class RequestDisplayInfo(
   val preferImmediatelyAvailableCredentials: Boolean,
   val appPreferredDefaultProviderId: String?,
   val userSetDefaultProviderIds: Set<String>,
+  // Whether the given CreateCredentialRequest allows auto select.
+  val isAutoSelectRequest: Boolean,
 )
 
 /**

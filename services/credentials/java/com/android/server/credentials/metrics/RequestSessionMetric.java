@@ -16,14 +16,16 @@
 
 package com.android.server.credentials.metrics;
 
-import static com.android.server.credentials.MetricUtilities.DELTA_CUT;
+import static com.android.server.credentials.MetricUtilities.DELTA_EXCEPTION_CUT;
+import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPhase;
+import static com.android.server.credentials.MetricUtilities.logApiCalledNoUidFinal;
 
+import android.annotation.NonNull;
 import android.credentials.GetCredentialRequest;
 import android.credentials.ui.UserSelectionDialogResult;
-import android.os.IBinder;
 import android.util.Slog;
 
 import com.android.server.credentials.ProviderSession;
@@ -47,13 +49,24 @@ public class RequestSessionMetric {
     // As emits occur in sequential order, increment this counter and utilize
     protected int mSequenceCounter = 0;
 
-    protected final InitialPhaseMetric mInitialPhaseMetric = new InitialPhaseMetric();
+    protected final InitialPhaseMetric mInitialPhaseMetric;
     protected final ChosenProviderFinalPhaseMetric
-            mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric();
+            mChosenProviderFinalPhaseMetric;
     // TODO(b/271135048) - Replace this with a new atom per each browsing emit (V4)
     protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric = new ArrayList<>();
+    // Specific aggregate candidate provider metric for the provider this session handles
+    @NonNull
+    protected final CandidateAggregateMetric mCandidateAggregateMetric;
+    // Since track two is shared, this allows provider sessions to capture a metric-specific
+    // session token for the flow where the provider is known
+    private final int mSessionIdTrackTwo;
 
-    public RequestSessionMetric() {
+    public RequestSessionMetric(int sessionIdTrackOne, int sessionIdTrackTwo) {
+        mSessionIdTrackTwo = sessionIdTrackTwo;
+        mInitialPhaseMetric = new InitialPhaseMetric(sessionIdTrackOne);
+        mCandidateAggregateMetric = new CandidateAggregateMetric(sessionIdTrackOne);
+        mChosenProviderFinalPhaseMetric = new ChosenProviderFinalPhaseMetric(
+                sessionIdTrackOne, sessionIdTrackTwo);
     }
 
     /**
@@ -75,18 +88,25 @@ public class RequestSessionMetric {
     }
 
     /**
+     * @return the aggregate candidate phase metrics associated with the request session
+     */
+    public CandidateAggregateMetric getCandidateAggregateMetric() {
+        return mCandidateAggregateMetric;
+    }
+
+    /**
      * Upon starting the service, this fills the initial phase metric properly.
      *
      * @param timestampStarted the timestamp the service begins at
-     * @param mRequestId       the IBinder used to retrieve a unique id
      * @param mCallingUid      the calling process's uid
      * @param metricCode       typically pulled from {@link ApiName}
+     * @param callingAppFlowUniqueInt the unique integer used as the session id for the calling app
+     *                                known flow
      */
-    public void collectInitialPhaseMetricInfo(long timestampStarted, IBinder mRequestId,
+    public void collectInitialPhaseMetricInfo(long timestampStarted,
             int mCallingUid, int metricCode) {
         try {
             mInitialPhaseMetric.setCredentialServiceStartedTimeNanoseconds(timestampStarted);
-            mInitialPhaseMetric.setSessionId(mRequestId.hashCode());
             mInitialPhaseMetric.setCallerUid(mCallingUid);
             mInitialPhaseMetric.setApiName(metricCode);
         } catch (Exception e) {
@@ -168,11 +188,9 @@ public class RequestSessionMetric {
         Map<String, Integer> uniqueRequestCounts = new LinkedHashMap<>();
         try {
             request.getCredentialOptions().forEach(option -> {
-                String optionKey = generateMetricKey(option.getType(), DELTA_CUT);
-                if (!uniqueRequestCounts.containsKey(optionKey)) {
-                    uniqueRequestCounts.put(optionKey, 0);
-                }
-                uniqueRequestCounts.put(optionKey, uniqueRequestCounts.get(optionKey) + 1);
+                String optionKey = generateMetricKey(option.getType(), DELTA_RESPONSES_CUT);
+                uniqueRequestCounts.put(optionKey, uniqueRequestCounts.getOrDefault(optionKey,
+                        0) + 1);
             });
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during get request metric logging: " + e);
@@ -207,7 +225,6 @@ public class RequestSessionMetric {
             CandidatePhaseMetric selectedProviderPhaseMetric) {
         try {
             CandidateBrowsingPhaseMetric browsingPhaseMetric = new CandidateBrowsingPhaseMetric();
-            browsingPhaseMetric.setSessionId(mInitialPhaseMetric.getSessionId());
             browsingPhaseMetric.setEntryEnum(
                     EntryEnum.getMetricCodeFromString(selection.getEntryKey()));
             browsingPhaseMetric.setProviderUid(selectedProviderPhaseMetric.getCandidateUid());
@@ -218,7 +235,7 @@ public class RequestSessionMetric {
     }
 
     /**
-     * Updates the final phase metric with the designated bit
+     * Updates the final phase metric with the designated bit.
      *
      * @param exceptionBitFinalPhase represents if the final phase provider had an exception
      */
@@ -227,6 +244,21 @@ public class RequestSessionMetric {
             mChosenProviderFinalPhaseMetric.setHasException(exceptionBitFinalPhase);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error setting final exception metric: " + e);
+        }
+    }
+
+    /**
+     * This allows collecting the framework exception string for the final phase metric.
+     * NOTE that this exception will be cut for space optimizations.
+     *
+     * @param exception the framework exception that is being recorded
+     */
+    public void collectFrameworkException(String exception) {
+        try {
+            mChosenProviderFinalPhaseMetric.setFrameworkException(
+                    generateMetricKey(exception, DELTA_EXCEPTION_CUT));
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
         }
     }
 
@@ -260,7 +292,6 @@ public class RequestSessionMetric {
      */
     public void collectChosenMetricViaCandidateTransfer(CandidatePhaseMetric candidatePhaseMetric) {
         try {
-            mChosenProviderFinalPhaseMetric.setSessionId(candidatePhaseMetric.getSessionId());
             mChosenProviderFinalPhaseMetric.setChosenUid(candidatePhaseMetric.getCandidateUid());
 
             mChosenProviderFinalPhaseMetric.setQueryPhaseLatencyMicroseconds(
@@ -284,7 +315,7 @@ public class RequestSessionMetric {
      * In the final phase, this helps log use cases that were either pure failures or user
      * canceled. It's expected that {@link #collectFinalPhaseProviderMetricStatus(boolean,
      * ProviderStatusForMetrics) collectFinalPhaseProviderMetricStatus} is called prior to this.
-     * Otherwise, the logging will miss required bits
+     * Otherwise, the logging will miss required bits.
      *
      * @param isUserCanceledError a boolean indicating if the error was due to user cancelling
      */
@@ -318,6 +349,20 @@ public class RequestSessionMetric {
     }
 
     /**
+     * Handles aggregate candidate phase metric emits in the RequestSession context, after the
+     * candidate phase completes.
+     *
+     * @param providers a map with known providers and their held metric objects
+     */
+    public void logCandidateAggregateMetrics(Map<String, ProviderSession> providers) {
+        try {
+            mCandidateAggregateMetric.collectAverages(providers);
+        } catch (Exception e) {
+            Slog.i(TAG, "Unexpected error during aggregate candidate logging " + e);
+        }
+    }
+
+    /**
      * Handles the final logging for RequestSession context for the final phase.
      *
      * @param apiStatus the final status of the api being called
@@ -327,9 +372,15 @@ public class RequestSessionMetric {
             logApiCalledFinalPhase(mChosenProviderFinalPhaseMetric, mCandidateBrowsingPhaseMetric,
                     apiStatus,
                     ++mSequenceCounter);
+            logApiCalledNoUidFinal(mChosenProviderFinalPhaseMetric, mCandidateBrowsingPhaseMetric,
+                    apiStatus,
+                    ++mSequenceCounter);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during final metric emit: " + e);
         }
     }
 
+    public int getSessionIdTrackTwo() {
+        return mSessionIdTrackTwo;
+    }
 }

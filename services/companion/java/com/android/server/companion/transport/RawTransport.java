@@ -35,7 +35,7 @@ class RawTransport extends Transport {
     }
 
     @Override
-    public void start() {
+    void start() {
         if (DEBUG) {
             Slog.d(TAG, "Starting raw transport.");
         }
@@ -54,7 +54,7 @@ class RawTransport extends Transport {
     }
 
     @Override
-    public void stop() {
+    void stop() {
         if (DEBUG) {
             Slog.d(TAG, "Stopping raw transport.");
         }
@@ -62,7 +62,7 @@ class RawTransport extends Transport {
     }
 
     @Override
-    public void close() {
+    void close() {
         stop();
 
         if (DEBUG) {

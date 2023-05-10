@@ -22,8 +22,10 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInterac
 import com.android.systemui.keyguard.shared.model.TransitionState
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -43,6 +45,9 @@ interface CollapsedStatusBarViewModel {
      * otherwise.
      */
     val isTransitioningFromLockscreenToOccluded: StateFlow<Boolean>
+
+    /** Emits whenever a transition from lockscreen to dream has started. */
+    val transitionFromLockscreenToDreamStartedEvent: Flow<Unit>
 }
 
 @SysUISingleton
@@ -59,4 +64,9 @@ constructor(
                     it.transitionState == TransitionState.RUNNING
             }
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialValue = false)
+
+    override val transitionFromLockscreenToDreamStartedEvent: Flow<Unit> =
+        keyguardTransitionInteractor.lockscreenToDreamingTransition
+            .filter { it.transitionState == TransitionState.STARTED }
+            .map {}
 }
