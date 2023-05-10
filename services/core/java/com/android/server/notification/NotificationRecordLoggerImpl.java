@@ -74,7 +74,8 @@ class NotificationRecordLoggerImpl implements NotificationRecordLogger {
                 notificationReported.is_ongoing,
                 notificationReported.is_foreground_service,
                 notificationReported.timeout_millis,
-                notificationReported.is_non_dismissible);
+                notificationReported.is_non_dismissible,
+                notificationReported.post_duration_millis);
     }
 
     @Override
