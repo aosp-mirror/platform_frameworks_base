@@ -69,7 +69,7 @@ import androidx.test.filters.LargeTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.filters.Suppress;
 
-import com.android.frameworks.servicestests.R;
+import com.android.server.pm.test.service.server.R;
 import com.android.internal.content.InstallLocationUtils;
 import com.android.server.pm.pkg.parsing.ParsingPackage;
 import com.android.server.pm.pkg.parsing.ParsingPackageUtils;

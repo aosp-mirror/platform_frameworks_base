@@ -331,7 +331,7 @@
     <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"நீங்கள் பணியாற்றிக் கொண்டிருக்கும் சாளரத்தின் உள்ளடக்கத்தைப் பார்க்கலாம்."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"தொடுவதன் மூலம் அறிவதை இயக்கும்"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"தட்டிய உள்ளடக்கம் சத்தமாகப் படிக்கப்படும், சைகைகளைப் பயன்படுத்தி திரையில் உலாவலாம்."</string>
-    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"நீங்கள் தட்டச்சு செய்யும் உரையைக் கவனிக்கும்"</string>
+    <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"நீங்கள் டைப் செய்யும் வார்த்தையைக் கவனிக்கும்."</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"கிரெடிட் கார்டு எண்கள் மற்றும் கடவுச்சொற்கள் போன்ற தனிப்பட்ட தகவலும் உள்ளடங்கும்."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"திரை பெரிதாவதைக் கட்டுப்படுத்தும்"</string>
     <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"திரையின் ஜூம் அளவையும் நிலையையும் கட்டுப்படுத்தலாம்."</string>
@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"உங்கள் பகிர்ந்த சேமிப்பகத்திலுள்ள வீடியோ ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"பகிர்ந்த சேமிப்பகத்திலுள்ள பட ஃபைல்களைப் படித்தல்"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"உங்கள் பகிர்ந்த சேமிப்பகத்திலுள்ள பட ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"பகிர்ந்த சேமிப்பகத்தில் இருந்து பயனர் தேர்ந்தெடுக்கும் பட/வீடியோ ஃபைல்களைப் படித்தல்"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"உங்கள் பகிர்ந்த சேமிப்பகத்தில் இருந்து நீங்கள் தேர்ந்தெடுக்கும் பட/வீடியோ ஃபைல்களைப் படிக்க ஆப்ஸை அனுமதிக்கும்."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கங்களை மாற்றும் அல்லது நீக்கும்"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"பகிர்ந்த சேமிப்பகத்தின் உள்ளடக்கத்தில் மாற்றங்களைச் செய்ய அனுமதிக்கும்."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP அழைப்புகளைச் செய்தல்/பெறுதல்"</string>

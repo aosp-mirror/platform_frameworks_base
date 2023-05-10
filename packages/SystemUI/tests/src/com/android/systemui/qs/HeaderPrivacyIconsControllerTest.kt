@@ -19,6 +19,7 @@ import com.android.systemui.privacy.PrivacyDialogController
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
 import com.android.systemui.statusbar.phone.StatusIconContainer
+import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -66,6 +67,8 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
     private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock
     private lateinit var safetyCenterManager: SafetyCenterManager
+    @Mock
+    private lateinit var deviceProvisionedController: DeviceProvisionedController
 
     private val uiExecutor = FakeExecutor(FakeSystemClock())
     private val backgroundExecutor = FakeExecutor(FakeSystemClock())
@@ -80,6 +83,7 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
         whenever(privacyChip.context).thenReturn(context)
         whenever(privacyChip.resources).thenReturn(context.resources)
         whenever(privacyChip.isAttachedToWindow).thenReturn(true)
+        whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(true)
 
         cameraSlotName = context.getString(com.android.internal.R.string.status_bar_camera)
         microphoneSlotName = context.getString(com.android.internal.R.string.status_bar_microphone)
@@ -98,7 +102,8 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
                 activityStarter,
                 appOpsController,
                 broadcastDispatcher,
-                safetyCenterManager
+                safetyCenterManager,
+                deviceProvisionedController
         )
 
         backgroundExecutor.runAllReady()
@@ -197,6 +202,18 @@ class HeaderPrivacyIconsControllerTest : SysuiTestCase() {
             capture(broadcastReceiverCaptor),
             capture(intentFilterCaptor), any(), nullable(), anyInt(), nullable()
         )
+    }
+
+    @Test
+    fun testNoDialogWhenDeviceNotProvisioned() {
+        whenever(deviceProvisionedController.isDeviceProvisioned).thenReturn(false)
+        controller.onParentVisible()
+
+        val captor = argumentCaptor<View.OnClickListener>()
+        verify(privacyChip).setOnClickListener(capture(captor))
+
+        captor.value.onClick(privacyChip)
+        verify(privacyDialogController, never()).showDialog(any(Context::class.java))
     }
 
     private fun setPrivacyController(micCamera: Boolean, location: Boolean) {

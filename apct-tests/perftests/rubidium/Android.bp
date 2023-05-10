@@ -32,6 +32,7 @@ android_test {
         "collector-device-lib-platform",
         "compatibility-device-util-axt",
         "platform-test-annotations",
+        "framework-adservices-lib",
         "adservices-service-core",
         "androidx.core_core",
     ],

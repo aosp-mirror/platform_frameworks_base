@@ -71,7 +71,6 @@ import com.android.systemui.util.mockito.KotlinArgumentCaptor
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -577,14 +576,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindAlbumView_bitmapInLaterStates_setAfterExecutors() {
-        val bmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bmp)
-        canvas.drawColor(Color.RED)
-        val albumArt = Icon.createWithBitmap(bmp)
+        val redBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val redCanvas = Canvas(redBmp)
+        redCanvas.drawColor(Color.RED)
+        val redArt = Icon.createWithBitmap(redBmp)
+
+        val greenBmp = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+        val greenCanvas = Canvas(greenBmp)
+        greenCanvas.drawColor(Color.GREEN)
+        val greenArt = Icon.createWithBitmap(greenBmp)
 
         val state0 = mediaData.copy(artwork = null)
-        val state1 = mediaData.copy(artwork = albumArt)
-        val state2 = mediaData.copy(artwork = albumArt)
+        val state1 = mediaData.copy(artwork = redArt)
+        val state2 = mediaData.copy(artwork = redArt)
+        val state3 = mediaData.copy(artwork = greenArt)
         player.attachPlayer(viewHolder)
 
         // First binding sets (empty) drawable
@@ -613,6 +618,12 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor.runAllReady()
         mainExecutor.runAllReady()
         verify(albumView, times(2)).setImageDrawable(any(Drawable::class.java))
+
+        // Fourth binding to new image runs transition due to color scheme change
+        player.bindPlayer(state3, PACKAGE)
+        bgExecutor.runAllReady()
+        mainExecutor.runAllReady()
+        verify(albumView, times(3)).setImageDrawable(any(Drawable::class.java))
     }
 
     @Test
@@ -1536,7 +1547,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun tapContentView_showOverLockscreen_openActivity() {
         // WHEN we are on lockscreen and this activity can show over lockscreen
         whenever(keyguardStateController.isShowing).thenReturn(true)
-        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
 
         val clickIntent = mock(Intent::class.java)
         val pendingIntent = mock(PendingIntent::class.java)
@@ -1547,17 +1558,20 @@ public class MediaControlPanelTest : SysuiTestCase() {
         player.bindPlayer(data, KEY)
         verify(viewHolder.player).setOnClickListener(captor.capture())
 
-        // THEN it shows without dismissing keyguard first
+        // THEN it sends the PendingIntent without dismissing keyguard first,
+        // and does not use the Intent directly (see b/271845008)
         captor.value.onClick(viewHolder.player)
-        verify(activityStarter).startActivity(eq(clickIntent), eq(true),
-                nullable(), eq(true))
+        verify(pendingIntent).send()
+        verify(pendingIntent, never()).getIntent()
+        verify(activityStarter, never()).postStartActivityDismissingKeyguard(eq(clickIntent), any())
     }
 
     @Test
     fun tapContentView_noShowOverLockscreen_dismissKeyguard() {
         // WHEN we are on lockscreen and the activity cannot show over lockscreen
         whenever(keyguardStateController.isShowing).thenReturn(true)
-        whenever(activityIntentHelper.wouldShowOverLockscreen(any(), any())).thenReturn(false)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
+            .thenReturn(false)
 
         val clickIntent = mock(Intent::class.java)
         val pendingIntent = mock(PendingIntent::class.java)
@@ -1880,6 +1894,48 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(expandedSet.getVisibility(recSubtitle1.id)).isEqualTo(ConstraintSet.GONE)
         assertThat(expandedSet.getVisibility(recSubtitle2.id)).isEqualTo(ConstraintSet.GONE)
         assertThat(expandedSet.getVisibility(recSubtitle3.id)).isEqualTo(ConstraintSet.GONE)
+    }
+
+    @Test
+    fun outputSwitcher_hasCustomIntent_openOverLockscreen() {
+        // When the device for a media player has an intent that opens over lockscreen
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.isActivity).thenReturn(true)
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any())).thenReturn(true)
+
+        val customDevice = device.copy(intent = pendingIntent)
+        val dataWithDevice = mediaData.copy(device = customDevice)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(dataWithDevice, KEY)
+
+        // When the user taps on the output switcher,
+        seamless.callOnClick()
+
+        // Then we send the pending intent as is, without modifying the original intent
+        verify(pendingIntent).send()
+        verify(pendingIntent, never()).getIntent()
+    }
+
+    @Test
+    fun outputSwitcher_hasCustomIntent_requiresUnlock() {
+        // When the device for a media player has an intent that cannot open over lockscreen
+        val pendingIntent = mock(PendingIntent::class.java)
+        whenever(pendingIntent.isActivity).thenReturn(true)
+        whenever(keyguardStateController.isShowing).thenReturn(true)
+        whenever(activityIntentHelper.wouldPendingShowOverLockscreen(any(), any()))
+                .thenReturn(false)
+
+        val customDevice = device.copy(intent = pendingIntent)
+        val dataWithDevice = mediaData.copy(device = customDevice)
+        player.attachPlayer(viewHolder)
+        player.bindPlayer(dataWithDevice, KEY)
+
+        // When the user taps on the output switcher,
+        seamless.callOnClick()
+
+        // Then we request keyguard dismissal
+        verify(activityStarter).postStartActivityDismissingKeyguard(eq(pendingIntent))
     }
 
     private fun getScrubbingChangeListener(): SeekBarViewModel.ScrubbingChangeListener =

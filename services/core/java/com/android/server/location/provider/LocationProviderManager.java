@@ -300,6 +300,7 @@ public class LocationProviderManager extends
         public void deliverOnFlushComplete(int requestCode) throws PendingIntent.CanceledException {
             BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setDontSendToRestrictedApps(true);
+            options.setPendingIntentBackgroundActivityLaunchAllowed(false);
 
             mPendingIntent.send(mContext, 0, new Intent().putExtra(KEY_FLUSH_COMPLETE, requestCode),
                     null, null, null, options.toBundle());

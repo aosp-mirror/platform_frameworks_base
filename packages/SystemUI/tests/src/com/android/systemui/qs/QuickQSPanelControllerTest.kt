@@ -126,8 +126,7 @@ class QuickQSPanelControllerTest : SysuiTestCase() {
 
     @Test
     fun testMediaExpansionUpdatedWhenConfigurationChanged() {
-        // times(2) because both controller and base controller are registering their listeners
-        verify(quickQSPanel, times(2)).addOnConfigurationChangedListener(captor.capture())
+        verify(quickQSPanel).addOnConfigurationChangedListener(captor.capture())
 
         // verify that media starts in the expanded state by default
         verify(mediaHost).expansion = MediaHostState.EXPANDED

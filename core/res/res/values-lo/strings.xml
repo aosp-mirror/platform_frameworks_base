@@ -260,7 +260,7 @@
     <string name="global_action_toggle_silent_mode" msgid="8464352592860372188">"ໂໝດປິດສຽງ"</string>
     <string name="global_action_silent_mode_on_status" msgid="2371892537738632013">"ປິດສຽງແລ້ວ"</string>
     <string name="global_action_silent_mode_off_status" msgid="6608006545950920042">"ເປິດສຽງແລ້ວ"</string>
-    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ໂໝດໃນຍົນ"</string>
+    <string name="global_actions_toggle_airplane_mode" msgid="6911684460146916206">"ໂໝດຢູ່ໃນຍົນ"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="5508025516695361936">"ເປີດໂໝດຢູ່ໃນຍົນແລ້ວ"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="8522219771500505475">"ປິດໂໝດໃນຍົນແລ້ວ"</string>
     <string name="global_action_settings" msgid="4671878836947494217">"​ການ​ຕັ້ງ​ຄ່າ"</string>
@@ -691,6 +691,8 @@
     <string name="permdesc_readMediaVideo" msgid="3846400073770403528">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ວິດີໂອຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_readMediaImages" msgid="4057590631020986789">"ອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
     <string name="permdesc_readMediaImages" msgid="5836219373138469259">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ຮູບຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
+    <string name="permlab_readVisualUserSelect" msgid="5516204215354667586">"ອ່ານໄຟລ໌ຮູບ ແລະ ວິດີໂອທີ່ຜູ້ໃຊ້ເລືອກຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນ"</string>
+    <string name="permdesc_readVisualUserSelect" msgid="8027174717714968217">"ອະນຸຍາດໃຫ້ແອັບອ່ານໄຟລ໌ຮູບ ແລະ ວິດີໂອທີ່ທ່ານເລືອກຈາກບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_sdcardWrite" msgid="4863021819671416668">"ແກ້ໄຂ ຫຼືລຶບເນື້ອຫາໃນບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ"</string>
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"ອະນຸຍາດໃຫ້ແອັບຂຽນເນື້ອຫາຕ່າງໆຂອງບ່ອນຈັດເກັບຂໍ້ມູນທີ່ແບ່ງປັນຂອງທ່ານ."</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"ຮັບສາຍ/ໂທອອກ ຜ່ານ SIP"</string>

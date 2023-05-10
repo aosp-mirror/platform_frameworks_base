@@ -49,9 +49,9 @@
     <item msgid="1999413958589971747">"Unngår dårlig tilkobling midlertidig"</item>
   </string-array>
   <string-array name="hdcp_checking_titles">
-    <item msgid="2377230797542526134">"Kontrollér aldri"</item>
-    <item msgid="3919638466823112484">"Kontrollér kun DRM-innhold"</item>
-    <item msgid="9048424957228926377">"Kontrollér alltid"</item>
+    <item msgid="2377230797542526134">"Kontroller aldri"</item>
+    <item msgid="3919638466823112484">"Kontroller kun DRM-innhold"</item>
+    <item msgid="9048424957228926377">"Kontroller alltid"</item>
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"Bruk aldri HDCP-kontroll"</item>

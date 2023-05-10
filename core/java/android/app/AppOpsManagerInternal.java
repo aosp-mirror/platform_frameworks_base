@@ -26,13 +26,11 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IAppOpsCallback;
-import com.android.internal.util.function.DecFunction;
 import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.QuintConsumer;
 import com.android.internal.util.function.QuintFunction;
-import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
 
 /**
@@ -135,6 +133,7 @@ public abstract class AppOpsManagerInternal {
         /**
          * Allows overriding start proxy operation behavior.
          *
+         * @param clientId The client calling start, represented by an IBinder
          * @param code The op code to start.
          * @param attributionSource The permission identity of the caller.
          * @param startIfModeDefault Whether to start the op of the mode is default.
@@ -148,11 +147,12 @@ public abstract class AppOpsManagerInternal {
          * @param superImpl The super implementation.
          * @return The app op note result.
          */
-        SyncNotedAppOp startProxyOperation(int code, @NonNull AttributionSource attributionSource,
-                boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp, String message,
-                boolean shouldCollectMessage, boolean skipProxyOperation, @AttributionFlags
-                int proxyAttributionFlags, @AttributionFlags int proxiedAttributionFlags,
-                int attributionChainId, @NonNull DecFunction<Integer, AttributionSource, Boolean,
+        SyncNotedAppOp startProxyOperation(@NonNull IBinder clientId, int code,
+                @NonNull AttributionSource attributionSource, boolean startIfModeDefault,
+                boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage,
+                boolean skipProxyOperation, @AttributionFlags int proxyAttributionFlags,
+                @AttributionFlags int proxiedAttributionFlags, int attributionChainId,
+                @NonNull UndecFunction<IBinder, Integer, AttributionSource, Boolean,
                         Boolean, String, Boolean, Boolean, Integer, Integer, Integer,
                         SyncNotedAppOp> superImpl);
 
@@ -176,10 +176,15 @@ public abstract class AppOpsManagerInternal {
          *
          * @param code The op code to finish.
          * @param attributionSource The permission identity of the caller.
+         * @param skipProxyOperation Whether to skip the proxy in the proxy/proxied operation
+         * @param clientId The client calling finishProxyOperation
+         * @param superImpl The "standard" implementation to potentially call
          */
-        void finishProxyOperation(int code, @NonNull AttributionSource attributionSource,
+        void finishProxyOperation(@NonNull IBinder clientId, int code,
+                @NonNull AttributionSource attributionSource,
                 boolean skipProxyOperation,
-                @NonNull TriFunction<Integer, AttributionSource, Boolean, Void> superImpl);
+                @NonNull QuadFunction<IBinder, Integer, AttributionSource, Boolean,
+                        Void> superImpl);
     }
 
     /**

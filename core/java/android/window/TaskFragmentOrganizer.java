@@ -179,15 +179,6 @@ public class TaskFragmentOrganizer extends WindowOrganizer {
         super.applyTransaction(t);
     }
 
-    // Suppress the lint because it is not a registration method.
-    @SuppressWarnings("ExecutorRegistration")
-    @Override
-    public int applySyncTransaction(@NonNull WindowContainerTransaction t,
-            @NonNull WindowContainerTransactionCallback callback) {
-        t.setTaskFragmentOrganizer(mInterface);
-        return super.applySyncTransaction(t, callback);
-    }
-
     private final ITaskFragmentOrganizer mInterface = new ITaskFragmentOrganizer.Stub() {
         @Override
         public void onTaskFragmentAppeared(@NonNull TaskFragmentInfo taskFragmentInfo) {

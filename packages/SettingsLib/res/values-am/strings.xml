@@ -243,7 +243,7 @@
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"የQR ኮድን በመጠቀም መሣሪያን ያጣምሩ"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"የQR ኮድ መቃኛን በመጠቀም አዲስ መሣሪያዎችን ያጣምሩ"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"የማጣመሪያ ኮድን በመጠቀም መሣሪያን ያጣምሩ"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"የስድስት አኃዝ ኮድ በመጠቀም አዲስ መሣሪያዎችን ያጣምሩ"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"የስድስት አሃዝ ኮድ በመጠቀም አዲስ መሣሪያዎችን ያጣምሩ"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"የተጣመሩ መሣሪያዎች"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"አሁን ላይ ተገናኝቷል"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"የመሣሪያ ዝርዝሮች"</string>
@@ -354,7 +354,7 @@
     <string name="wait_for_debugger" msgid="7461199843335409809">"ስህተት ማስወገጃውን ጠብቅ"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ስህተቱ የተወገደለት መተግበሪያ ከመፈጸሙ በፊት የስህተት ማስወገጃው እስኪያያዝ ድረስ እየጠበቀው ነው"</string>
     <string name="debug_input_category" msgid="7349460906970849771">"ግብዓት"</string>
-    <string name="debug_drawing_category" msgid="5066171112313666619">"ስዕል"</string>
+    <string name="debug_drawing_category" msgid="5066171112313666619">"ሥዕል"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"የተፋጠነ የሃርድዌር አሰጣጥ"</string>
     <string name="media_category" msgid="8122076702526144053">"ማህደረመረጃ"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"ቁጥጥር"</string>
@@ -372,7 +372,7 @@
     <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"የሃርድዌር ንብርብሮች ሲዘምኑ አረንጓዴ አብራ"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"የጂፒዩ አልፎ መሳል አርም"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"የHW ተደራቢዎችን አሰናክል"</string>
-    <string name="disable_overlays_summary" msgid="1954852414363338166">"ለማያ ገጽ ማቀናበሪያ ሁልጊዜ GPU ተጠቀም"</string>
+    <string name="disable_overlays_summary" msgid="1954852414363338166">"ለማያ ገፅ ማቀናበሪያ ሁልጊዜ GPU ተጠቀም"</string>
     <string name="simulate_color_space" msgid="1206503300335835151">"የቀለም ህዋ አስመስል"</string>
     <string name="enable_opengl_traces_title" msgid="4638773318659125196">"የ OpenGL ክትትሎችን ያንቁ"</string>
     <string name="usb_audio_disable_routing" msgid="3367656923544254975">"የUSB ተሰሚ ማዛወር ያሰናክሉ"</string>
@@ -380,7 +380,7 @@
     <string name="debug_layout" msgid="1659216803043339741">"የአቀማመጥ ገደቦችን አሳይ"</string>
     <string name="debug_layout_summary" msgid="8825829038287321978">"የቅንጥብ ገደቦች፣ ጠርዞች፣ ወዘተ አሳይ"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"የቀኝ-ወደ-ግራ አቀማመጥ አቅጣጫ አስገድድ"</string>
-    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ለሁሉም አካባቢዎች የማያ ገጽ አቀማመጥ ከቀኝ-ወደ-ግራ እንዲሆን አስገድድ"</string>
+    <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"ለሁሉም አካባቢዎች የማያ ገፅ አቀማመጥ ከቀኝ-ወደ-ግራ እንዲሆን አስገድድ"</string>
     <string name="window_blurs" msgid="6831008984828425106">"የመስኮት ደረጃ ብዥታዎችን ፍቀድ"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA አስገድድ"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"4x MSAA በ OpenGL ES 2.0 መተግበሪያዎች ውስጥ ያንቁ"</string>
@@ -401,7 +401,7 @@
     <string name="show_all_anrs" msgid="9160563836616468726">"የጀርባ ኤኤንአሮችን አሳይ"</string>
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ለጀርባ መተግበሪያዎች የመተግበሪያ ምላሽ አይሰጥም መገናኛን አሳይ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"የማሳወቂያ ሰርጥ ማስጠንቀቂያዎችን አሳይ"</string>
-    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"አንድ መተግበሪያ የሚሰራ ሰርጥ ሳይኖረው ማሳወቂያ ሲለጥፍ በማያ ገጽ-ላይ ማስጠንቀቂያን ያሳያል"</string>
+    <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"አንድ መተግበሪያ የሚሰራ ሰርጥ ሳይኖረው ማሳወቂያ ሲለጥፍ በማያ ገፅ-ላይ ማስጠንቀቂያን ያሳያል"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"በውጫዊ ላይ ሃይል ይፈቀዳል"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"የዝርዝር ሰነዶች እሴቶች ግምት ውስጥ ሳያስገባ ማንኛውም መተግበሪያ ወደ ውጫዊ ማከማቻው ለመጻፍ ብቁ ያደርጋል"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"እንቅስቃሴዎች ዳግመኛ እንዲመጣጠኑ አስገድድ"</string>
@@ -554,10 +554,10 @@
     <string name="shared_data_title" msgid="1017034836800864953">"የተጋራ ውሂብ"</string>
     <string name="shared_data_summary" msgid="5516326713822885652">"የተጋራ ውሂብን ይመልከቱ እና ያሻሽሉ"</string>
     <string name="shared_data_no_blobs_text" msgid="3108114670341737434">"ለዚህ ተጠቃሚ ምንም የተጋራ ውሂብ የለም።"</string>
-    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"የተጋራውን ውሂብ በማግኘት ላይ ስሕተት ነበረ። እንደገና ይሞክሩ።"</string>
+    <string name="shared_data_query_failure_text" msgid="3489828881998773687">"የተጋራውን ውሂብ በማግኘት ላይ ስህተት ነበረ። እንደገና ይሞክሩ።"</string>
     <string name="blob_id_text" msgid="8680078988996308061">"የተጋራ ውሂብ መታወቂያ፦ <xliff:g id="BLOB_ID">%d</xliff:g>"</string>
     <string name="blob_expires_text" msgid="7882727111491739331">"በ<xliff:g id="DATE">%s</xliff:g> ላይ የአገልግሎት ጊዜው ያበቃል"</string>
-    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"የተጋራውን ውሂብ በመሰረዝ ላይ ስሕተት ነበረ።"</string>
+    <string name="shared_data_delete_failure_text" msgid="3842701391009628947">"የተጋራውን ውሂብ በመሰረዝ ላይ ስህተት ነበረ።"</string>
     <string name="shared_data_no_accessors_dialog_text" msgid="8903738462570715315">"ለዚህ የተጋራ ውሂብ ምንም የሚያስፈልጉ ኪራዮች የሉም። ሊሰርዙት ይፈልጋሉ?"</string>
     <string name="accessor_info_title" msgid="8289823651512477787">"ውሂብ የሚጋሩ መተግበሪያዎች"</string>
     <string name="accessor_no_description_text" msgid="7510967452505591456">"በመተግበሪያው ምንም ዝርዝር መረጃ አልተሰጠም።"</string>
@@ -581,7 +581,7 @@
     <string name="user_new_profile_name" msgid="2405500423304678841">"አዲስ መገለጫ"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"የተጠቃሚ መረጃ"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"የመገለጫ መረጃ"</string>
-    <string name="user_need_lock_message" msgid="4311424336209509301">"የተገደበ መገለጫ መፍጠር ከመቻልዎ በፊት መተግበሪያዎችዎን እና የግል ውሂብዎን ለመጠበቅ ቁልፍ ማያ ገጽ ማዋቀር አለብዎት።"</string>
+    <string name="user_need_lock_message" msgid="4311424336209509301">"የተገደበ መገለጫ መፍጠር ከመቻልዎ በፊት መተግበሪያዎችዎን እና የግል ውሂብዎን ለመጠበቅ ቁልፍ ማያ ገፅ ማዋቀር አለብዎት።"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"ቁልፍ አዘጋጅ"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"ወደ <xliff:g id="USER_NAME">%s</xliff:g> ቀይር"</string>
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"አዲስ ተጠቃሚ በመፍጠር ላይ…"</string>

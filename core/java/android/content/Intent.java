@@ -11433,7 +11433,7 @@ public class Intent implements Parcelable, Cloneable {
     private void toUriInner(StringBuilder uri, String scheme, String defAction,
             String defPackage, int flags) {
         if (scheme != null) {
-            uri.append("scheme=").append(scheme).append(';');
+            uri.append("scheme=").append(Uri.encode(scheme)).append(';');
         }
         if (mAction != null && !mAction.equals(defAction)) {
             uri.append("action=").append(Uri.encode(mAction)).append(';');

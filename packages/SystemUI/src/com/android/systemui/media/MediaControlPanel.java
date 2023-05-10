@@ -428,16 +428,16 @@ public class MediaControlPanel {
                 mLogger.logTapContentView(mUid, mPackageName, mInstanceId);
                 logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
 
-                // See StatusBarNotificationActivityStarter#onNotificationClicked
                 boolean showOverLockscreen = mKeyguardStateController.isShowing()
-                        && mActivityIntentHelper.wouldShowOverLockscreen(clickIntent.getIntent(),
+                        && mActivityIntentHelper.wouldPendingShowOverLockscreen(clickIntent,
                         mLockscreenUserManager.getCurrentUserId());
 
                 if (showOverLockscreen) {
-                    mActivityStarter.startActivity(clickIntent.getIntent(),
-                            /* dismissShade */ true,
-                            /* animationController */ null,
-                            /* showOverLockscreenWhenLocked */ true);
+                    try {
+                        clickIntent.send();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.e(TAG, "Pending intent for " + key + " was cancelled");
+                    }
                 } else {
                     mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
                             buildLaunchAnimatorController(mMediaViewHolder.getPlayer()));
@@ -505,12 +505,15 @@ public class MediaControlPanel {
                     }
                     mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
                     if (device.getIntent() != null) {
-                        if (device.getIntent().isActivity()) {
-                            mActivityStarter.startActivity(
-                                    device.getIntent().getIntent(), true);
+                        PendingIntent deviceIntent = device.getIntent();
+                        boolean showOverLockscreen = mKeyguardStateController.isShowing()
+                                && mActivityIntentHelper.wouldPendingShowOverLockscreen(
+                                    deviceIntent, mLockscreenUserManager.getCurrentUserId());
+                        if (deviceIntent.isActivity() && !showOverLockscreen) {
+                            mActivityStarter.postStartActivityDismissingKeyguard(deviceIntent);
                         } else {
                             try {
-                                device.getIntent().send();
+                                deviceIntent.send();
                             } catch (PendingIntent.CanceledException e) {
                                 Log.e(TAG, "Device pending intent was canceled");
                             }
@@ -673,10 +676,15 @@ public class MediaControlPanel {
                 }
                 mArtworkBoundId = reqId;
 
+                // Transition Colors to current color scheme
+                boolean colorSchemeChanged = mColorSchemeTransition
+                        .updateColorScheme(colorScheme, isArtworkBound);
+
                 // Bind the album view to the artwork or a transition drawable
                 ImageView albumView = mMediaViewHolder.getAlbumView();
                 albumView.setPadding(0, 0, 0, 0);
-                if (updateBackground || (!mIsArtworkBound && isArtworkBound)) {
+                if (updateBackground || colorSchemeChanged
+                        || (!mIsArtworkBound && isArtworkBound)) {
                     if (mPrevArtwork == null) {
                         albumView.setImageDrawable(artwork);
                     } else {
@@ -698,9 +706,6 @@ public class MediaControlPanel {
                     mPrevArtwork = artwork;
                     mIsArtworkBound = isArtworkBound;
                 }
-
-                // Transition Colors to current color scheme
-                mColorSchemeTransition.updateColorScheme(colorScheme, mIsArtworkBound);
 
                 // App icon - use notification icon
                 ImageView appIconView = mMediaViewHolder.getAppIcon();

@@ -19,6 +19,7 @@ package android.content;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.PendingIntentInfo;
+import android.app.ActivityOptions;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Handler;
@@ -158,7 +159,7 @@ public class IntentSender implements Parcelable {
      */
     public void sendIntent(Context context, int code, Intent intent,
             OnFinished onFinished, Handler handler) throws SendIntentException {
-        sendIntent(context, code, intent, onFinished, handler, null);
+        sendIntent(context, code, intent, onFinished, handler, null, null /* options */);
     }
 
     /**
@@ -190,6 +191,42 @@ public class IntentSender implements Parcelable {
     public void sendIntent(Context context, int code, Intent intent,
             OnFinished onFinished, Handler handler, String requiredPermission)
             throws SendIntentException {
+        sendIntent(context, code, intent, onFinished, handler, requiredPermission,
+                null /* options */);
+    }
+
+    /**
+     * Perform the operation associated with this IntentSender, allowing the
+     * caller to specify information about the Intent to use and be notified
+     * when the send has completed.
+     *
+     * @param context The Context of the caller.  This may be null if
+     * <var>intent</var> is also null.
+     * @param code Result code to supply back to the IntentSender's target.
+     * @param intent Additional Intent data.  See {@link Intent#fillIn
+     * Intent.fillIn()} for information on how this is applied to the
+     * original Intent.  Use null to not modify the original Intent.
+     * @param onFinished The object to call back on when the send has
+     * completed, or null for no callback.
+     * @param handler Handler identifying the thread on which the callback
+     * should happen.  If null, the callback will happen from the thread
+     * pool of the process.
+     * @param requiredPermission Name of permission that a recipient of the PendingIntent
+     * is required to hold.  This is only valid for broadcast intents, and
+     * corresponds to the permission argument in
+     * {@link Context#sendBroadcast(Intent, String) Context.sendOrderedBroadcast(Intent, String)}.
+     * If null, no permission is required.
+     * @param options Additional options the caller would like to provide to modify the sending
+     * behavior.  May be built from an {@link ActivityOptions} to apply to an activity start.
+     *
+     * @throws SendIntentException Throws CanceledIntentException if the IntentSender
+     * is no longer allowing more intents to be sent through it.
+     * @hide
+     */
+    public void sendIntent(Context context, int code, Intent intent,
+            OnFinished onFinished, Handler handler, String requiredPermission,
+            @Nullable Bundle options)
+            throws SendIntentException {
         try {
             String resolvedType = intent != null ?
                     intent.resolveTypeIfNeeded(context.getContentResolver())
@@ -199,7 +236,7 @@ public class IntentSender implements Parcelable {
                     onFinished != null
                             ? new FinishedDispatcher(this, onFinished, handler)
                             : null,
-                    requiredPermission, null);
+                    requiredPermission, options);
             if (res < 0) {
                 throw new SendIntentException();
             }
