@@ -1857,6 +1857,13 @@ public final class DevicePolicyResources {
             public static final String MINIRESOLVER_OPEN_IN_PERSONAL =
                     PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
 
+            /**
+             * Title for a dialog shown when the user has no apps capable of handling an intent
+             * in the personal profile, and must choose whether to open the intent in a
+             * cross-profile app in the work profile, or cancel. Accepts the app name as a param.
+             */
+            public static final String MINIRESOLVER_OPEN_WORK = PREFIX + "MINIRESOLVER_OPEN_WORK";
+
             public static final String MINIRESOLVER_USE_WORK_BROWSER =
                     PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
 

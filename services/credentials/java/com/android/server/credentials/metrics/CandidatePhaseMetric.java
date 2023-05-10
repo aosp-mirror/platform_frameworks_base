@@ -32,8 +32,8 @@ import java.util.Map;
 public class CandidatePhaseMetric {
 
     private static final String TAG = "CandidateProviderMetric";
-    // The session id of this provider, default set to -1
-    private int mSessionId = -1;
+    // The session id of this provider metric
+    private final int mSessionIdProvider;
     // Indicates if this provider returned from the query phase, default false
     private boolean mQueryReturned = false;
 
@@ -53,13 +53,15 @@ public class CandidatePhaseMetric {
     private int mProviderQueryStatus = -1;
     // Indicates if an exception was thrown by this provider, false by default
     private boolean mHasException = false;
+    // Indicates the framework only exception belonging to this provider
     private String mFrameworkException = "";
 
     // Stores the response credential information, as well as the response entry information which
     // by default, contains empty info
     private ResponseCollective mResponseCollective = new ResponseCollective(Map.of(), Map.of());
 
-    public CandidatePhaseMetric() {
+    public CandidatePhaseMetric(int sessionIdTrackTwo) {
+        mSessionIdProvider = sessionIdTrackTwo;
     }
 
     /* ---------- Latencies ---------- */
@@ -141,12 +143,8 @@ public class CandidatePhaseMetric {
 
     /* -------------- Session Id ---------------- */
 
-    public void setSessionId(int sessionId) {
-        mSessionId = sessionId;
-    }
-
-    public int getSessionId() {
-        return mSessionId;
+    public int getSessionIdProvider() {
+        return mSessionIdProvider;
     }
 
     /* -------------- Query Returned Status ---------------- */

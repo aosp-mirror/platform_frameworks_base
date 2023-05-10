@@ -22,7 +22,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.content.Context;
-import android.graphics.Rect;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.SparseArray;
@@ -186,8 +185,9 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                         mSyncQueue);
         mWindowDecorByTaskId.put(taskInfo.taskId, windowDecoration);
 
-        final DragPositioningCallback dragPositioningCallback = createDragPositioningCallback(
-                windowDecoration, taskInfo);
+        final DragPositioningCallback dragPositioningCallback =
+                new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration, mDisplayController,
+                        null /* disallowedAreaForEndBounds */);
         final CaptionTouchEventListener touchEventListener =
                 new CaptionTouchEventListener(taskInfo, dragPositioningCallback);
         windowDecoration.setCaptionListeners(touchEventListener, touchEventListener);
@@ -196,17 +196,6 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
         windowDecoration.relayout(taskInfo, startT, finishT,
                 false /* applyStartTransactionOnDraw */);
         setupCaptionColor(taskInfo, windowDecoration);
-    }
-
-    private FluidResizeTaskPositioner createDragPositioningCallback(
-            CaptionWindowDecoration windowDecoration, RunningTaskInfo taskInfo) {
-        final int screenWidth = mDisplayController.getDisplayLayout(taskInfo.displayId).width();
-        final int statusBarHeight = mDisplayController.getDisplayLayout(taskInfo.displayId)
-                .stableInsets().top;
-        final Rect disallowedAreaForEndBounds = new Rect(0, 0, screenWidth,
-                statusBarHeight);
-        return new FluidResizeTaskPositioner(mTaskOrganizer, windowDecoration,
-                    mDisplayController, disallowedAreaForEndBounds);
     }
 
     private class CaptionTouchEventListener implements

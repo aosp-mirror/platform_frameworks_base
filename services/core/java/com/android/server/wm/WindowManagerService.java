@@ -2675,7 +2675,7 @@ public class WindowManagerService extends IWindowManager.Stub
     void finishDrawingWindow(Session session, IWindow client,
             @Nullable SurfaceControl.Transaction postDrawTransaction, int seqId) {
         if (postDrawTransaction != null) {
-            postDrawTransaction.sanitize();
+            postDrawTransaction.sanitize(Binder.getCallingPid(), Binder.getCallingUid());
         }
 
         final long origId = Binder.clearCallingIdentity();
@@ -3922,15 +3922,17 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Returns the touch mode state for the display id passed as argument.
+     *
+     * This method will return the default touch mode state (represented by
+     * {@code com.android.internal.R.bool.config_defaultInTouchMode}) if the display passed as
+     * argument is no longer registered in {@RootWindowContainer}).
      */
     @Override  // Binder call
     public boolean isInTouchMode(int displayId) {
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent == null) {
-                throw new IllegalStateException("Failed to retrieve the touch mode state for"
-                        + "display {" + displayId + "}: display is not registered in "
-                        + "WindowRootContainer");
+                return mContext.getResources().getBoolean(R.bool.config_defaultInTouchMode);
             }
             return displayContent.isInTouchMode();
         }

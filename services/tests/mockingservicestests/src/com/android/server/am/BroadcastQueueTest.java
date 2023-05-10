@@ -1890,6 +1890,36 @@ public class BroadcastQueueTest {
         assertTrue(mQueue.isBeyondBarrierLocked(afterSecond));
     }
 
+    @Test
+    public void testWaitForBroadcastDispatch() throws Exception {
+        final ProcessRecord callerApp = makeActiveProcessRecord(PACKAGE_RED);
+        final ProcessRecord receiverApp = makeActiveProcessRecord(PACKAGE_GREEN);
+
+        final Intent timeTick = new Intent(Intent.ACTION_TIME_TICK);
+        assertTrue(mQueue.isDispatchedLocked(timeTick));
+
+        final Intent timezone = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
+        enqueueBroadcast(makeBroadcastRecord(timezone, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp))));
+
+        assertTrue(mQueue.isDispatchedLocked(timeTick));
+        assertFalse(mQueue.isDispatchedLocked(timezone));
+
+        enqueueBroadcast(makeBroadcastRecord(timeTick, callerApp,
+                List.of(makeRegisteredReceiver(receiverApp))));
+
+        assertFalse(mQueue.isDispatchedLocked(timeTick));
+        assertFalse(mQueue.isDispatchedLocked(timezone));
+
+        mLooper.release();
+
+        mQueue.waitForDispatched(timeTick, LOG_WRITER_INFO);
+        assertTrue(mQueue.isDispatchedLocked(timeTick));
+
+        mQueue.waitForDispatched(timezone, LOG_WRITER_INFO);
+        assertTrue(mQueue.isDispatchedLocked(timezone));
+    }
+
     /**
      * Verify that we OOM adjust for manifest receivers.
      */

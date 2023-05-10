@@ -179,9 +179,37 @@ public class BroadcastConstants {
      * being "runnable" to give other processes a chance to run.
      */
     public int MAX_RUNNING_ACTIVE_BROADCASTS = DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS;
-    private static final String KEY_MAX_RUNNING_ACTIVE_BROADCASTS = "bcast_max_running_active_broadcasts";
+    private static final String KEY_MAX_RUNNING_ACTIVE_BROADCASTS =
+            "bcast_max_running_active_broadcasts";
     private static final int DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS =
             ActivityManager.isLowRamDeviceStatic() ? 8 : 16;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of active "blocking" broadcasts
+     * to dispatch to a "running" System process queue before we retire them back to
+     * being "runnable" to give other processes a chance to run. Here "blocking" refers to
+     * whether or not we are going to block on the finishReceiver() to be called before moving
+     * to the next broadcast.
+     */
+    public int MAX_CORE_RUNNING_BLOCKING_BROADCASTS = DEFAULT_MAX_CORE_RUNNING_BLOCKING_BROADCASTS;
+    private static final String KEY_CORE_MAX_RUNNING_BLOCKING_BROADCASTS =
+            "bcast_max_core_running_blocking_broadcasts";
+    private static final int DEFAULT_MAX_CORE_RUNNING_BLOCKING_BROADCASTS =
+            ActivityManager.isLowRamDeviceStatic() ? 8 : 16;
+
+    /**
+     * For {@link BroadcastQueueModernImpl}: Maximum number of active non-"blocking" broadcasts
+     * to dispatch to a "running" System process queue before we retire them back to
+     * being "runnable" to give other processes a chance to run. Here "blocking" refers to
+     * whether or not we are going to block on the finishReceiver() to be called before moving
+     * to the next broadcast.
+     */
+    public int MAX_CORE_RUNNING_NON_BLOCKING_BROADCASTS =
+            DEFAULT_MAX_CORE_RUNNING_NON_BLOCKING_BROADCASTS;
+    private static final String KEY_CORE_MAX_RUNNING_NON_BLOCKING_BROADCASTS =
+            "bcast_max_core_running_non_blocking_broadcasts";
+    private static final int DEFAULT_MAX_CORE_RUNNING_NON_BLOCKING_BROADCASTS =
+            ActivityManager.isLowRamDeviceStatic() ? 32 : 64;
 
     /**
      * For {@link BroadcastQueueModernImpl}: Maximum number of pending
@@ -369,6 +397,12 @@ public class BroadcastConstants {
                     DEFAULT_MAX_CONSECUTIVE_NORMAL_DISPATCHES);
             MAX_RUNNING_ACTIVE_BROADCASTS = getDeviceConfigInt(KEY_MAX_RUNNING_ACTIVE_BROADCASTS,
                     DEFAULT_MAX_RUNNING_ACTIVE_BROADCASTS);
+            MAX_CORE_RUNNING_BLOCKING_BROADCASTS = getDeviceConfigInt(
+                    KEY_CORE_MAX_RUNNING_BLOCKING_BROADCASTS,
+                    DEFAULT_MAX_CORE_RUNNING_BLOCKING_BROADCASTS);
+            MAX_CORE_RUNNING_NON_BLOCKING_BROADCASTS = getDeviceConfigInt(
+                    KEY_CORE_MAX_RUNNING_NON_BLOCKING_BROADCASTS,
+                    DEFAULT_MAX_CORE_RUNNING_NON_BLOCKING_BROADCASTS);
             MAX_PENDING_BROADCASTS = getDeviceConfigInt(KEY_MAX_PENDING_BROADCASTS,
                     DEFAULT_MAX_PENDING_BROADCASTS);
             DELAY_NORMAL_MILLIS = getDeviceConfigLong(KEY_DELAY_NORMAL_MILLIS,
@@ -418,6 +452,10 @@ public class BroadcastConstants {
             pw.print(KEY_MODERN_QUEUE_ENABLED, MODERN_QUEUE_ENABLED).println();
             pw.print(KEY_MAX_RUNNING_PROCESS_QUEUES, MAX_RUNNING_PROCESS_QUEUES).println();
             pw.print(KEY_MAX_RUNNING_ACTIVE_BROADCASTS, MAX_RUNNING_ACTIVE_BROADCASTS).println();
+            pw.print(KEY_CORE_MAX_RUNNING_BLOCKING_BROADCASTS,
+                    MAX_CORE_RUNNING_BLOCKING_BROADCASTS).println();
+            pw.print(KEY_CORE_MAX_RUNNING_NON_BLOCKING_BROADCASTS,
+                    MAX_CORE_RUNNING_NON_BLOCKING_BROADCASTS).println();
             pw.print(KEY_MAX_PENDING_BROADCASTS, MAX_PENDING_BROADCASTS).println();
             pw.print(KEY_DELAY_NORMAL_MILLIS,
                     TimeUtils.formatDuration(DELAY_NORMAL_MILLIS)).println();

@@ -145,7 +145,8 @@ public class QSTileHostTest extends SysuiTestCase {
         mMainExecutor = new FakeExecutor(new FakeSystemClock());
 
         mSharedPreferencesByUser = new SparseArray<>();
-        when(mTileLifecycleManagerFactory.create(any(Intent.class), any(UserHandle.class)))
+        when(mTileLifecycleManagerFactory
+                .create(any(Intent.class), any(UserHandle.class)))
                 .thenReturn(mTileLifecycleManager);
         when(mUserFileManager.getSharedPreferences(anyString(), anyInt(), anyInt()))
                 .thenAnswer((Answer<SharedPreferences>) invocation -> {

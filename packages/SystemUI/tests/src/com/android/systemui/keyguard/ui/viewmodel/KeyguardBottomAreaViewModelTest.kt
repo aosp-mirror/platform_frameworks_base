@@ -505,9 +505,9 @@ class KeyguardBottomAreaViewModelTest : SysuiTestCase() {
             val value = collectLastValue(underTest.isOverlayContainerVisible)
 
             assertThat(value()).isTrue()
-            repository.setDozing(true)
+            repository.setIsDozing(true)
             assertThat(value()).isFalse()
-            repository.setDozing(false)
+            repository.setIsDozing(false)
             assertThat(value()).isTrue()
         }
 

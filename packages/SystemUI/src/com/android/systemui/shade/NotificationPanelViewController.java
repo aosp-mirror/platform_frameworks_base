@@ -4373,7 +4373,8 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
                 @Override
                 public boolean shouldHeadsUpBeVisible() {
-                    return mHeadsUpAppearanceController.shouldBeVisible();
+                    return mHeadsUpAppearanceController != null &&
+                            mHeadsUpAppearanceController.shouldBeVisible();
                 }
 
                 @Override

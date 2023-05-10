@@ -368,6 +368,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
                     return runWaitForBroadcastBarrier(pw);
                 case "wait-for-application-barrier":
                     return runWaitForApplicationBarrier(pw);
+                case "wait-for-broadcast-dispatch":
+                    return runWaitForBroadcastDispatch(pw);
                 case "set-ignore-delivery-group-policy":
                     return runSetIgnoreDeliveryGroupPolicy(pw);
                 case "clear-ignore-delivery-group-policy":
@@ -3469,6 +3471,18 @@ final class ActivityManagerShellCommand extends ShellCommand {
     int runWaitForApplicationBarrier(PrintWriter pw) throws RemoteException {
         pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
         mInternal.waitForApplicationBarrier(pw);
+        return 0;
+    }
+
+    int runWaitForBroadcastDispatch(PrintWriter pw) throws RemoteException {
+        pw = new PrintWriter(new TeeWriter(LOG_WRITER_INFO, pw));
+        final Intent intent;
+        try {
+            intent = makeIntent(UserHandle.USER_CURRENT);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e.getMessage(), e);
+        }
+        mInternal.waitForBroadcastDispatch(pw, intent);
         return 0;
     }
 

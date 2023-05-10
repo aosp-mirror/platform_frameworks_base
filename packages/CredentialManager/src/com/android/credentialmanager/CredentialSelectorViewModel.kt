@@ -34,6 +34,7 @@ import com.android.credentialmanager.common.DialogState
 import com.android.credentialmanager.common.ProviderActivityResult
 import com.android.credentialmanager.common.ProviderActivityState
 import com.android.credentialmanager.createflow.ActiveEntry
+import com.android.credentialmanager.createflow.isFlowAutoSelectable
 import com.android.credentialmanager.createflow.CreateCredentialUiState
 import com.android.credentialmanager.createflow.CreateScreenState
 import com.android.credentialmanager.getflow.GetCredentialUiState
@@ -238,7 +239,8 @@ class CredentialSelectorViewModel(
             getCredentialUiState = uiState.getCredentialUiState?.copy(
                 currentScreenState = GetScreenState.ALL_SIGN_IN_OPTIONS,
                 isNoAccount = isNoAccount,
-            )
+            ),
+            isInitialRender = true,
         )
     }
 
@@ -262,30 +264,39 @@ class CredentialSelectorViewModel(
     /*****                     Create Flow Callbacks                      *****/
     /**************************************************************************/
     fun createFlowOnConfirmIntro() {
+        userConfigRepo.setIsPasskeyFirstUse(false)
         val prevUiState = uiState.createCredentialUiState
         if (prevUiState == null) {
             Log.d(Constants.LOG_TAG, "Encountered unexpected null create ui state")
             onInternalError()
             return
         }
-        val newUiState = CreateFlowUtils.toCreateCredentialUiState(
-            enabledProviders = prevUiState.enabledProviders,
-            disabledProviders = prevUiState.disabledProviders,
-            defaultProviderIdPreferredByApp =
-            prevUiState.requestDisplayInfo.appPreferredDefaultProviderId,
-            defaultProviderIdsSetByUser =
-            prevUiState.requestDisplayInfo.userSetDefaultProviderIds,
-            requestDisplayInfo = prevUiState.requestDisplayInfo,
+        val newScreenState = CreateFlowUtils.toCreateScreenState(
+            createOptionSize = prevUiState.sortedCreateOptionsPairs.size,
             isOnPasskeyIntroStateAlready = true,
-            isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
+            requestDisplayInfo = prevUiState.requestDisplayInfo,
+            remoteEntry = prevUiState.remoteEntry,
+            isPasskeyFirstUse = true,
         )
-        if (newUiState == null) {
-            Log.d(Constants.LOG_TAG, "Unable to update create ui state")
+        if (newScreenState == null) {
+            Log.d(Constants.LOG_TAG, "Unexpected: couldn't resolve new screen state")
             onInternalError()
             return
         }
-        uiState = uiState.copy(createCredentialUiState = newUiState)
-        userConfigRepo.setIsPasskeyFirstUse(false)
+        val newCreateCredentialUiState = prevUiState.copy(
+            currentScreenState = newScreenState,
+        )
+        val isFlowAutoSelectable = isFlowAutoSelectable(newCreateCredentialUiState)
+        uiState = uiState.copy(
+            createCredentialUiState = newCreateCredentialUiState,
+            isAutoSelectFlow = isFlowAutoSelectable,
+            providerActivityState =
+            if (isFlowAutoSelectable) ProviderActivityState.READY_TO_LAUNCH
+            else ProviderActivityState.NOT_APPLICABLE,
+            selectedEntry =
+            if (isFlowAutoSelectable) newCreateCredentialUiState.activeEntry?.activeEntryInfo
+            else null,
+        )
     }
 
     fun createFlowOnMoreOptionsSelectedOnCreationSelection() {

@@ -201,7 +201,7 @@ object Flags {
     // TODO(b/267722622): Tracking Bug
     @JvmField
     val WALLPAPER_PICKER_UI_FOR_AIWP =
-            releasedFlag(
+            unreleasedFlag(
                     229,
                     "wallpaper_picker_ui_for_aiwp"
             )
@@ -415,12 +415,6 @@ object Flags {
 
     // TODO(b/265045965): Tracking Bug
     val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
-
-    @JvmField
-    // TODO(b/271428141): Tracking Bug
-    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = releasedFlag(
-        1004,
-        "enable_low_light_clock_undocked")
 
     // TODO(b/273509374): Tracking Bug
     @JvmField
@@ -710,6 +704,5 @@ object Flags {
 
     // TODO(b/278761837): Tracking Bug
     @JvmField
-    val USE_NEW_ACTIVITY_STARTER = unreleasedFlag(2801, name = "use_new_activity_starter",
-            teamfood = true)
+    val USE_NEW_ACTIVITY_STARTER = releasedFlag(2801, name = "use_new_activity_starter")
 }

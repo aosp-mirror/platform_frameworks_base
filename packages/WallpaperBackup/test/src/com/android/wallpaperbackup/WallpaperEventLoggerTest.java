@@ -21,16 +21,14 @@ import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_IMG_SYS
 import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_LIVE_LOCK;
 import static com.android.wallpaperbackup.WallpaperEventLogger.WALLPAPER_LIVE_SYSTEM;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.WallpaperInfo;
+import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupManager;
 import android.app.backup.BackupRestoreEventLogger;
 import android.content.Context;
@@ -41,8 +39,6 @@ import android.service.wallpaper.WallpaperService;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
-
-import com.android.wallpaperbackup.utils.TestWallpaperService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,8 +51,7 @@ import java.util.List;
 @RunWith(AndroidJUnit4.class)
 public class WallpaperEventLoggerTest {
 
-    @Mock
-    private BackupRestoreEventLogger mMockLogger;
+    private BackupRestoreEventLogger mEventLogger;
 
     @Mock
     private BackupManager mMockBackupManager;
@@ -73,8 +68,8 @@ public class WallpaperEventLoggerTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        when(mMockBackupAgent.getBackupRestoreEventLogger()).thenReturn(mMockLogger);
-        when(mMockBackupManager.getBackupRestoreEventLogger(any())).thenReturn(mMockLogger);
+        when(mMockBackupAgent.getBackupRestoreEventLogger()).thenReturn(mEventLogger);
+        when(mMockBackupManager.getBackupRestoreEventLogger(any())).thenReturn(mEventLogger);
 
         mWallpaperInfo = getWallpaperInfo();
         mWallpaperEventLogger = new WallpaperEventLogger(mMockBackupManager, mMockBackupAgent);
@@ -82,114 +77,338 @@ public class WallpaperEventLoggerTest {
 
     @Test
     public void onSystemImgWallpaperBackedUp_logsSuccess() {
-        mWallpaperEventLogger.onSystemImageWallpaperBackedUp();
+        setUpLoggerForBackup();
 
-        verify(mMockLogger).logItemsBackedUp(eq(WALLPAPER_IMG_SYSTEM), eq(1));
+        mWallpaperEventLogger.onSystemImageWallpaperBackedUp();
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
     }
 
     @Test
     public void onLockImgWallpaperBackedUp_logsSuccess() {
-        mWallpaperEventLogger.onLockImageWallpaperBackedUp();
+        setUpLoggerForBackup();
 
-        verify(mMockLogger).logItemsBackedUp(eq(WALLPAPER_IMG_LOCK), eq(1));
+        mWallpaperEventLogger.onLockImageWallpaperBackedUp();
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_LOCK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
     }
 
     @Test
     public void onSystemLiveWallpaperBackedUp_logsSuccess() {
-        mWallpaperEventLogger.onSystemLiveWallpaperBackedUp(mWallpaperInfo);
+        setUpLoggerForBackup();
 
-        verify(mMockLogger).logItemsBackedUp(eq(WALLPAPER_LIVE_SYSTEM), eq(1));
+        mWallpaperEventLogger.onSystemLiveWallpaperBackedUp(mWallpaperInfo);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
     }
 
     @Test
     public void onLockLiveWallpaperBackedUp_logsSuccess() {
-        mWallpaperEventLogger.onLockLiveWallpaperBackedUp(mWallpaperInfo);
+        setUpLoggerForBackup();
 
-        verify(mMockLogger).logItemsBackedUp(eq(WALLPAPER_LIVE_LOCK), eq(1));
+        mWallpaperEventLogger.onLockLiveWallpaperBackedUp(mWallpaperInfo);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_LOCK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
     }
 
     @Test
     public void onImgWallpaperBackedUp_nullInfo_doesNotLogMetadata() {
-        mWallpaperEventLogger.onSystemImageWallpaperBackedUp();
+        setUpLoggerForBackup();
 
-        verify(mMockLogger, never()).logBackupMetadata(eq(WALLPAPER_IMG_SYSTEM), anyString());
+        mWallpaperEventLogger.onSystemImageWallpaperBackedUp();
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getMetadataHash()).isNull();
     }
 
 
     @Test
     public void onLiveWallpaperBackedUp_logsMetadata() {
-        mWallpaperEventLogger.onSystemLiveWallpaperBackedUp(mWallpaperInfo);
+        setUpLoggerForBackup();
 
-        verify(mMockLogger).logBackupMetadata(eq(WALLPAPER_LIVE_SYSTEM),
-                eq(TestWallpaperService.class.getName()));
+        mWallpaperEventLogger.onSystemLiveWallpaperBackedUp(mWallpaperInfo);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getMetadataHash()).isNotNull();
     }
 
 
     @Test
     public void onSystemImgWallpaperBackupFailed_logsFail() {
-        mWallpaperEventLogger.onSystemImageWallpaperBackupFailed(WALLPAPER_ERROR);
+        setUpLoggerForBackup();
 
-        verify(mMockLogger).logItemsBackupFailed(eq(WALLPAPER_IMG_SYSTEM), eq(1),
-                eq(WALLPAPER_ERROR));
+        mWallpaperEventLogger.onSystemImageWallpaperBackupFailed(WALLPAPER_ERROR);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(WALLPAPER_ERROR);
     }
 
     @Test
     public void onLockImgWallpaperBackupFailed_logsFail() {
-        mWallpaperEventLogger.onLockImageWallpaperBackupFailed(WALLPAPER_ERROR);
+        setUpLoggerForBackup();
 
-        verify(mMockLogger).logItemsBackupFailed(eq(WALLPAPER_IMG_LOCK), eq(1),
-                eq(WALLPAPER_ERROR));
+        mWallpaperEventLogger.onLockImageWallpaperBackupFailed(WALLPAPER_ERROR);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_LOCK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(WALLPAPER_ERROR);
     }
 
 
     @Test
     public void onSystemLiveWallpaperBackupFailed_logsFail() {
-        mWallpaperEventLogger.onSystemLiveWallpaperBackupFailed(WALLPAPER_ERROR);
+        setUpLoggerForBackup();
 
-        verify(mMockLogger).logItemsBackupFailed(eq(WALLPAPER_LIVE_SYSTEM), eq(1),
-                eq(WALLPAPER_ERROR));
+        mWallpaperEventLogger.onSystemLiveWallpaperBackupFailed(WALLPAPER_ERROR);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(WALLPAPER_ERROR);
     }
 
     @Test
     public void onLockLiveWallpaperBackupFailed_logsFail() {
-        mWallpaperEventLogger.onLockLiveWallpaperBackupFailed(WALLPAPER_ERROR);
+        setUpLoggerForBackup();
 
-        verify(mMockLogger).logItemsBackupFailed(eq(WALLPAPER_LIVE_LOCK), eq(1),
-                eq(WALLPAPER_ERROR));
+        mWallpaperEventLogger.onLockLiveWallpaperBackupFailed(WALLPAPER_ERROR);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_LOCK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(WALLPAPER_ERROR);
     }
 
 
     @Test
     public void onWallpaperBackupException_someProcessed_doesNotLogErrorForProcessedType() {
+        setUpLoggerForBackup();
         mWallpaperEventLogger.onSystemImageWallpaperBackedUp();
 
         mWallpaperEventLogger.onBackupException(new Exception());
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
 
-        verify(mMockLogger, never()).logItemsBackupFailed(eq(WALLPAPER_IMG_SYSTEM), anyInt(),
-                anyString());
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(0);
     }
 
 
     @Test
     public void onWallpaperBackupException_someProcessed_logsErrorForUnprocessedType() {
+        setUpLoggerForBackup();
         mWallpaperEventLogger.onSystemImageWallpaperBackedUp();
 
         mWallpaperEventLogger.onBackupException(new Exception());
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_LOCK);
 
-        verify(mMockLogger).logItemsBackupFailed(eq(WALLPAPER_IMG_LOCK), eq(1),
-                eq(Exception.class.getName()));
-
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
     }
 
     @Test
-    public void onWallpaperBackupException_liveTypeProcessed_doesNotLogErrorForSameImgType() {
+    public void onWallpaperBackupException_liveTypeProcessed_doesNotLogForSameImgType() {
+        setUpLoggerForBackup();
         mWallpaperEventLogger.onSystemLiveWallpaperBackedUp(mWallpaperInfo);
 
         mWallpaperEventLogger.onBackupException(new Exception());
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
 
-        verify(mMockLogger, never()).logItemsBackupFailed(eq(WALLPAPER_IMG_SYSTEM), anyInt(),
-                anyString());
+        assertThat(result).isNull();
     }
+
+    @Test
+    public void onSystemImgWallpaperRestored_logsSuccess() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onSystemImageWallpaperRestored();
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void onLockImgWallpaperRestored_logsSuccess() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onLockImageWallpaperRestored();
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_LOCK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void onSystemLiveWallpaperRestored_logsSuccess() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onSystemLiveWallpaperRestored(mWallpaperInfo.getComponent());
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void onLockLiveWallpaperRestored_logsSuccess() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onLockLiveWallpaperRestored(mWallpaperInfo.getComponent());
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_LOCK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getSuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void onImgWallpaperRestored_nullInfo_doesNotLogMetadata() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onSystemImageWallpaperRestored();
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getMetadataHash()).isNull();
+    }
+
+
+    @Test
+    public void onLiveWallpaperRestored_logsMetadata() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onSystemLiveWallpaperRestored(mWallpaperInfo.getComponent());
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getMetadataHash()).isNotNull();
+    }
+
+
+    @Test
+    public void onSystemImgWallpaperRestoreFailed_logsFail() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onSystemImageWallpaperRestoreFailed(WALLPAPER_ERROR);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(WALLPAPER_ERROR);
+    }
+
+    @Test
+    public void onLockImgWallpaperRestoreFailed_logsFail() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onLockImageWallpaperRestoreFailed(WALLPAPER_ERROR);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_LOCK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(WALLPAPER_ERROR);
+    }
+
+
+    @Test
+    public void onSystemLiveWallpaperRestoreFailed_logsFail() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onSystemLiveWallpaperRestoreFailed(WALLPAPER_ERROR);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(WALLPAPER_ERROR);
+    }
+
+    @Test
+    public void onLockLiveWallpaperRestoreFailed_logsFail() {
+        setUpLoggerForRestore();
+
+        mWallpaperEventLogger.onLockLiveWallpaperRestoreFailed(WALLPAPER_ERROR);
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_LIVE_LOCK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+        assertThat(result.getErrors()).containsKey(WALLPAPER_ERROR);
+    }
+
+
+    @Test
+    public void onWallpaperRestoreException_someProcessed_doesNotLogErrorForProcessedType() {
+        setUpLoggerForRestore();
+        mWallpaperEventLogger.onSystemImageWallpaperRestored();
+
+        mWallpaperEventLogger.onRestoreException(new Exception());
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(0);
+    }
+
+
+    @Test
+    public void onWallpaperRestoreException_someProcessed_logsErrorForUnprocessedType() {
+        setUpLoggerForRestore();
+        mWallpaperEventLogger.onSystemImageWallpaperRestored();
+
+        mWallpaperEventLogger.onRestoreException(new Exception());
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_LOCK);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getFailCount()).isEqualTo(1);
+    }
+
+    @Test
+    public void onWallpaperRestoreException_liveTypeProcessed_doesNotLogForSameImgType() {
+        setUpLoggerForRestore();
+        mWallpaperEventLogger.onSystemLiveWallpaperRestored(mWallpaperInfo.getComponent());
+
+        mWallpaperEventLogger.onRestoreException(new Exception());
+        BackupRestoreEventLogger.DataTypeResult result = getLogsForType(WALLPAPER_IMG_SYSTEM);
+
+        assertThat(result).isNull();
+    }
+
+    private BackupRestoreEventLogger.DataTypeResult getLogsForType(String dataType) {
+        for (BackupRestoreEventLogger.DataTypeResult result :  mEventLogger.getLoggingResults()) {
+            if ((result.getDataType()).equals(dataType)) {
+                return result;
+            }
+        }
+        return null;
+    }
+
+    private void setUpLoggerForBackup() {
+        mEventLogger = new BackupRestoreEventLogger(BackupAnnotations.OperationType.BACKUP);
+        createEventLogger();
+    }
+
+    private void setUpLoggerForRestore() {
+        mEventLogger = new BackupRestoreEventLogger(BackupAnnotations.OperationType.RESTORE);
+        createEventLogger();
+    }
+
+    private void createEventLogger() {
+        when(mMockBackupAgent.getBackupRestoreEventLogger()).thenReturn(mEventLogger);
+        when(mMockBackupManager.getBackupRestoreEventLogger(any())).thenReturn(mEventLogger);
+
+        mWallpaperEventLogger = new WallpaperEventLogger(mMockBackupManager, mMockBackupAgent);
+    }
+
 
     private WallpaperInfo getWallpaperInfo() throws Exception {
         Context context = InstrumentationRegistry.getTargetContext();

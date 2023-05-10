@@ -19,34 +19,61 @@ package com.android.systemui.statusbar.pipeline.shared.ui.binder
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel
+import javax.inject.Inject
+import kotlinx.coroutines.launch
 
-object CollapsedStatusBarViewBinder {
+/**
+ * Interface to assist with binding the [CollapsedStatusBarFragment] to
+ * [CollapsedStatusBarViewModel]. Used only to enable easy testing of [CollapsedStatusBarFragment].
+ */
+interface CollapsedStatusBarViewBinder {
     /**
      * Binds the view to the view-model. [listener] will be notified whenever an event that may
      * change the status bar visibility occurs.
      */
-    @JvmStatic
     fun bind(
+        view: View,
+        viewModel: CollapsedStatusBarViewModel,
+        listener: StatusBarVisibilityChangeListener,
+    )
+}
+
+@SysUISingleton
+class CollapsedStatusBarViewBinderImpl @Inject constructor() : CollapsedStatusBarViewBinder {
+    override fun bind(
         view: View,
         viewModel: CollapsedStatusBarViewModel,
         listener: StatusBarVisibilityChangeListener,
     ) {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
-                viewModel.isTransitioningFromLockscreenToOccluded.collect {
-                    listener.onStatusBarVisibilityMaybeChanged()
+                launch {
+                    viewModel.isTransitioningFromLockscreenToOccluded.collect {
+                        listener.onStatusBarVisibilityMaybeChanged()
+                    }
+                }
+
+                launch {
+                    viewModel.transitionFromLockscreenToDreamStartedEvent.collect {
+                        listener.onTransitionFromLockscreenToDreamStarted()
+                    }
                 }
             }
         }
     }
 }
 
-/**
- * Listener to be notified when the status bar visibility might have changed due to the device
- * moving to a different state.
- */
-fun interface StatusBarVisibilityChangeListener {
+/** Listener for various events that may affect the status bar's visibility. */
+interface StatusBarVisibilityChangeListener {
+    /**
+     * Called when the status bar visibility might have changed due to the device moving to a
+     * different state.
+     */
     fun onStatusBarVisibilityMaybeChanged()
+
+    /** Called when a transition from lockscreen to dream has started. */
+    fun onTransitionFromLockscreenToDreamStarted()
 }

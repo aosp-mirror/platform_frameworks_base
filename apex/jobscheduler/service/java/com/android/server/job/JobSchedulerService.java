@@ -1443,6 +1443,9 @@ public class JobSchedulerService extends com.android.server.SystemService
         if (mActivityManagerInternal.isAppStartModeDisabled(uId, servicePkg)) {
             Slog.w(TAG, "Not scheduling job " + uId + ":" + job.toString()
                     + " -- package not allowed to start");
+            Counter.logIncrementWithUid(
+                    "job_scheduler.value_cntr_w_uid_schedule_failure_app_start_mode_disabled",
+                    uId);
             return JobScheduler.RESULT_FAILURE;
         }
 
@@ -1519,6 +1522,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if ((mConstants.USE_TARE_POLICY && !mTareController.canScheduleEJ(jobStatus))
                         || (!mConstants.USE_TARE_POLICY
                         && !mQuotaController.isWithinEJQuotaLocked(jobStatus))) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler.value_cntr_w_uid_schedule_failure_ej_out_of_quota",
+                            uId);
                     return JobScheduler.RESULT_FAILURE;
                 }
             }
@@ -4083,6 +4089,9 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (!isInStateToScheduleUiJobSource && !isInStateToScheduleUiJobCalling) {
                     Slog.e(TAG, "Uid(s) " + sourceUid + "/" + callingUid
                             + " not in a state to schedule user-initiated jobs");
+                    Counter.logIncrementWithUid(
+                            "job_scheduler.value_cntr_w_uid_schedule_failure_uij_invalid_state",
+                            callingUid);
                     return JobScheduler.RESULT_FAILURE;
                 }
             }
@@ -4124,6 +4133,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                 if (namespace.isEmpty()) {
                     throw new IllegalArgumentException("namespace cannot be empty");
                 }
+                if (namespace.length() > 1000) {
+                    throw new IllegalArgumentException(
+                            "namespace cannot be more than 1000 characters");
+                }
                 namespace = namespace.intern();
             }
             return namespace;
@@ -4132,10 +4145,14 @@ public class JobSchedulerService extends com.android.server.SystemService
         private int validateRunUserInitiatedJobsPermission(int uid, String packageName) {
             final int state = getRunUserInitiatedJobsPermissionState(uid, packageName);
             if (state == PermissionChecker.PERMISSION_HARD_DENIED) {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_schedule_failure_uij_no_permission", uid);
                 throw new SecurityException(android.Manifest.permission.RUN_USER_INITIATED_JOBS
                         + " required to schedule user-initiated jobs.");
             }
             if (state == PermissionChecker.PERMISSION_SOFT_DENIED) {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_schedule_failure_uij_no_permission", uid);
                 return JobScheduler.RESULT_FAILURE;
             }
             return JobScheduler.RESULT_SUCCESS;
