@@ -20,9 +20,6 @@
       "name": "CtsUiAutomationTestCases",
       "options": [
         {
-          "include-annotation": "android.platform.test.annotations.Presubmit"
-        },
-        {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
         }
       ]
@@ -41,9 +38,8 @@
     {
       "name": "FrameworksCoreTests",
       "options": [
-        // TODO(b/267225211) Include android.accessibilityservice in presubmit after
-        // checking stability in postsubmit (and fixing if necessary)
         {
+          "include-filter": "android.accessibilityservice",
           "include-filter": "android.view.accessibility",
           "include-filter": "com.android.internal.accessibility"
         },
