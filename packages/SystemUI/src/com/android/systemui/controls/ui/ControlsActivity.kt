@@ -158,6 +158,10 @@ open class ControlsActivity @Inject constructor(
     override fun onDestroy() {
         super.onDestroy()
 
+        unregisterReceiver()
+    }
+
+    protected open fun unregisterReceiver() {
         broadcastDispatcher.unregisterReceiver(broadcastReceiver)
     }
 
