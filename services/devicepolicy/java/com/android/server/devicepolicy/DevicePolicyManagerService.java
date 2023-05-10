@@ -12294,13 +12294,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 EnforcingAdmin admin = enforcePermissionAndGetEnforcingAdmin(
                         who, MANAGE_DEVICE_POLICY_INPUT_METHODS,
                         caller.getPackageName(), userId);
-                mDevicePolicyEngine.setLocalPolicy(
-                        PolicyDefinition.PERMITTED_INPUT_METHODS,
-                        admin,
-                        packageList == null
-                                ? null
-                                : new StringSetPolicyValue(new HashSet<>(packageList)),
-                        userId);
+                if (packageList == null) {
+                    mDevicePolicyEngine.removeLocalPolicy(
+                            PolicyDefinition.PERMITTED_INPUT_METHODS,
+                            admin,
+                            userId);
+                } else {
+                    mDevicePolicyEngine.setLocalPolicy(
+                            PolicyDefinition.PERMITTED_INPUT_METHODS,
+                            admin,
+                            new StringSetPolicyValue(new HashSet<>(packageList)),
+                            userId);
+                }
             } else {
                 ActiveAdmin admin = getParentOfAdminIfRequired(
                         getProfileOwnerOrDeviceOwnerLocked(caller.getUserId()),
@@ -12337,14 +12342,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         CallerIdentity caller;
-        if (isPermissionCheckFlagEnabled()) {
+        if (isPolicyEngineForFinanceFlagEnabled()) {
             caller = getCallerIdentity(who, callerPackageName);
         } else {
             caller = getCallerIdentity(who);
             Objects.requireNonNull(who, "ComponentName is null");
         }
 
-        if (!isPermissionCheckFlagEnabled()) {
+        if (!isPolicyEngineForFinanceFlagEnabled()) {
             if (calledOnParentInstance) {
                 Preconditions.checkCallAuthorization(
                         isProfileOwnerOfOrganizationOwnedDevice(caller));
@@ -14268,7 +14273,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     resultSet.add(accountType);
                 }
             }
-
         } else {
             caller = getCallerIdentity();
             Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
@@ -24065,13 +24069,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean hasNonTestOnlyActiveAdmins() {
         return mInjector.binderWithCleanCallingIdentity(() -> {
             for (UserInfo userInfo : mUserManager.getUsers()) {
-                List<ComponentName> activeAdmins = getActiveAdmins(userInfo.id);
-                if (activeAdmins == null) {
-                    continue;
-                }
-                for (ComponentName admin : activeAdmins) {
-                    if (!isAdminTestOnlyLocked(admin, userInfo.id)) {
-                        return true;
+                synchronized (getLockObject()) {
+                    List<ComponentName> activeAdmins = getActiveAdmins(userInfo.id);
+                    if (activeAdmins == null) {
+                        continue;
+                    }
+                    for (ComponentName admin : activeAdmins) {
+                        if (!isAdminTestOnlyLocked(admin, userInfo.id)) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -24081,7 +24087,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean shouldMigrateToDevicePolicyEngine() {
         return mInjector.binderWithCleanCallingIdentity(() ->
-                isPermissionCheckFlagEnabled() && !mOwners.isMigratedToPolicyEngine());
+                (isPermissionCheckFlagEnabled() || isPolicyEngineForFinanceFlagEnabled())
+                        && !mOwners.isMigratedToPolicyEngine());
     }
 
     /**
@@ -24090,13 +24097,21 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     private boolean migratePoliciesToDevicePolicyEngine() {
         return mInjector.binderWithCleanCallingIdentity(() -> {
             try {
-                Slogf.i(LOG_TAG, "Started device policies migration to the device policy engine.");
-                migrateAutoTimezonePolicy();
-                migratePermissionGrantStatePolicies();
-                // TODO(b/258811766): add migration logic for all policies
+                synchronized (getLockObject()) {
+                    Slogf.i(LOG_TAG,
+                            "Started device policies migration to the device policy engine.");
+                    if (isUnicornFlagEnabled()) {
+                        migrateAutoTimezonePolicy();
+                        migratePermissionGrantStatePolicies();
+                    }
+                    migrateScreenCapturePolicyLocked();
+                    migratePermittedInputMethodsPolicyLocked();
+                    migrateAccountManagementDisabledPolicyLocked();
+                    migrateUserControlDisabledPackagesLocked();
 
-                mOwners.markMigrationToPolicyEngine();
-                return true;
+                    mOwners.markMigrationToPolicyEngine();
+                    return true;
+                }
             } catch (Exception e) {
                 mDevicePolicyEngine.clearAllPolicies();
                 Slogf.e(LOG_TAG, e, "Error occurred during device policy migration, will "
@@ -24158,6 +24173,136 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 }
             }
         }
+    }
+
+    private void migrateScreenCapturePolicyLocked() {
+        Binder.withCleanCallingIdentity(() -> {
+            if (mPolicyCache.getScreenCaptureDisallowedUser() == UserHandle.USER_NULL) {
+                return;
+            }
+            ActiveAdmin admin = getDeviceOwnerOrProfileOwnerOfOrganizationOwnedDeviceLocked();
+            if (admin != null
+                    && ((isDeviceOwner(admin) && admin.disableScreenCapture)
+                    || (admin.getParentActiveAdmin() != null
+                    && admin.getParentActiveAdmin().disableScreenCapture))) {
+                EnforcingAdmin enforcingAdmin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                        admin.info.getComponent(),
+                        admin.getUserHandle().getIdentifier(),
+                        admin);
+                mDevicePolicyEngine.setGlobalPolicy(
+                        PolicyDefinition.SCREEN_CAPTURE_DISABLED,
+                        enforcingAdmin,
+                        new BooleanPolicyValue(true));
+            }
+
+            List<UserInfo> users = mUserManager.getUsers();
+            for (UserInfo userInfo : users) {
+                ActiveAdmin profileOwner = getProfileOwnerLocked(userInfo.id);
+                if (profileOwner != null && profileOwner.disableScreenCapture) {
+                    EnforcingAdmin enforcingAdmin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            profileOwner.info.getComponent(),
+                            profileOwner.getUserHandle().getIdentifier(),
+                            profileOwner);
+                    mDevicePolicyEngine.setLocalPolicy(
+                            PolicyDefinition.SCREEN_CAPTURE_DISABLED,
+                            enforcingAdmin,
+                            new BooleanPolicyValue(true),
+                            profileOwner.getUserHandle().getIdentifier());
+                }
+            }
+        });
+    }
+
+    private void migratePermittedInputMethodsPolicyLocked() {
+        Binder.withCleanCallingIdentity(() -> {
+            List<UserInfo> users = mUserManager.getUsers();
+            for (UserInfo userInfo : users) {
+                ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(userInfo.id);
+                if (admin != null) {
+                    EnforcingAdmin enforcingAdmin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            admin.info.getComponent(),
+                            admin.getUserHandle().getIdentifier(),
+                            admin);
+                    if (admin.permittedInputMethods != null) {
+                        mDevicePolicyEngine.setLocalPolicy(
+                                PolicyDefinition.PERMITTED_INPUT_METHODS,
+                                enforcingAdmin,
+                                new StringSetPolicyValue(
+                                        new HashSet<>(admin.permittedInputMethods)),
+                                admin.getUserHandle().getIdentifier());
+                    }
+                    if (admin.getParentActiveAdmin() != null
+                            && admin.getParentActiveAdmin().permittedInputMethods != null) {
+                        mDevicePolicyEngine.setLocalPolicy(
+                                PolicyDefinition.PERMITTED_INPUT_METHODS,
+                                enforcingAdmin,
+                                new StringSetPolicyValue(
+                                        new HashSet<>(admin.getParentActiveAdmin()
+                                                .permittedInputMethods)),
+                                getProfileParentId(admin.getUserHandle().getIdentifier()));
+                    }
+                }
+            }
+        });
+    }
+
+    private void migrateAccountManagementDisabledPolicyLocked() {
+        Binder.withCleanCallingIdentity(() -> {
+            List<UserInfo> users = mUserManager.getUsers();
+            for (UserInfo userInfo : users) {
+                ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(userInfo.id);
+                if (admin != null) {
+                    EnforcingAdmin enforcingAdmin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            admin.info.getComponent(),
+                            admin.getUserHandle().getIdentifier(),
+                            admin);
+                    for (String accountType : admin.accountTypesWithManagementDisabled) {
+                        mDevicePolicyEngine.setLocalPolicy(
+                                PolicyDefinition.ACCOUNT_MANAGEMENT_DISABLED(accountType),
+                                enforcingAdmin,
+                                new BooleanPolicyValue(true),
+                                admin.getUserHandle().getIdentifier());
+                    }
+                    if (admin.getParentActiveAdmin() != null) {
+                        for (String accountType : admin.getParentActiveAdmin()
+                                .accountTypesWithManagementDisabled) {
+                            mDevicePolicyEngine.setLocalPolicy(
+                                    PolicyDefinition.ACCOUNT_MANAGEMENT_DISABLED(accountType),
+                                    enforcingAdmin,
+                                    new BooleanPolicyValue(true),
+                                    getProfileParentId(admin.getUserHandle().getIdentifier()));
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    private void migrateUserControlDisabledPackagesLocked() {
+        Binder.withCleanCallingIdentity(() -> {
+            List<UserInfo> users = mUserManager.getUsers();
+            for (UserInfo userInfo : users) {
+                ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(userInfo.id);
+                if (admin != null && admin.protectedPackages != null) {
+                    EnforcingAdmin enforcingAdmin = EnforcingAdmin.createEnterpriseEnforcingAdmin(
+                            admin.info.getComponent(),
+                            admin.getUserHandle().getIdentifier(),
+                            admin);
+                    if (isDeviceOwner(admin)) {
+                        mDevicePolicyEngine.setGlobalPolicy(
+                                PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
+                                enforcingAdmin,
+                                new StringSetPolicyValue(new HashSet<>(admin.protectedPackages)));
+                    } else {
+                        mDevicePolicyEngine.setLocalPolicy(
+                                PolicyDefinition.USER_CONTROLLED_DISABLED_PACKAGES,
+                                enforcingAdmin,
+                                new StringSetPolicyValue(new HashSet<>(admin.protectedPackages)),
+                                admin.getUserHandle().getIdentifier());
+                    }
+                }
+            }
+        });
     }
 
     private List<PackageInfo> getInstalledPackagesOnUser(int userId) {
