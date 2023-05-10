@@ -207,11 +207,11 @@ TEST_F(AssetManager2Test, AssignsOverlayPackageIdLast) {
   AssetManager2 assetmanager;
   assetmanager.SetApkAssets({overlayable_assets_, overlay_assets_, lib_one_assets_});
 
-  auto apk_assets = assetmanager.GetApkAssets();
-  ASSERT_EQ(3, apk_assets.size());
-  ASSERT_EQ(overlayable_assets_, apk_assets[0].promote());
-  ASSERT_EQ(overlay_assets_, apk_assets[1].promote());
-  ASSERT_EQ(lib_one_assets_, apk_assets[2].promote());
+  ASSERT_EQ(3, assetmanager.GetApkAssetsCount());
+  auto op = assetmanager.StartOperation();
+  ASSERT_EQ(overlayable_assets_, assetmanager.GetApkAssets(0));
+  ASSERT_EQ(overlay_assets_, assetmanager.GetApkAssets(1));
+  ASSERT_EQ(lib_one_assets_, assetmanager.GetApkAssets(2));
 
   auto get_first_package_id = [&assetmanager](auto apkAssets) -> uint8_t {
     return assetmanager.GetAssignedPackageId(apkAssets->GetLoadedArsc()->GetPackages()[0].get());
@@ -832,6 +832,28 @@ TEST_F(AssetManager2Test, GetOverlayablesToString) {
   ASSERT_EQ(api.find("not_overlayable"), std::string::npos);
   ASSERT_NE(api.find("resource='com.android.overlayable:string/overlayable2' overlayable='OverlayableResources1' actor='overlay://theme' policy='0x0000000a'\n"),
             std::string::npos);
+}
+
+TEST_F(AssetManager2Test, GetApkAssets) {
+  AssetManager2 assetmanager;
+  assetmanager.SetApkAssets({overlayable_assets_, overlay_assets_, lib_one_assets_});
+
+  ASSERT_EQ(3, assetmanager.GetApkAssetsCount());
+  EXPECT_EQ(1, overlayable_assets_->getStrongCount());
+  EXPECT_EQ(1, overlay_assets_->getStrongCount());
+  EXPECT_EQ(1, lib_one_assets_->getStrongCount());
+
+  {
+    auto op = assetmanager.StartOperation();
+    ASSERT_EQ(overlayable_assets_, assetmanager.GetApkAssets(0));
+    ASSERT_EQ(overlay_assets_, assetmanager.GetApkAssets(1));
+    EXPECT_EQ(2, overlayable_assets_->getStrongCount());
+    EXPECT_EQ(2, overlay_assets_->getStrongCount());
+    EXPECT_EQ(1, lib_one_assets_->getStrongCount());
+  }
+  EXPECT_EQ(1, overlayable_assets_->getStrongCount());
+  EXPECT_EQ(1, overlay_assets_->getStrongCount());
+  EXPECT_EQ(1, lib_one_assets_->getStrongCount());
 }
 
 }  // namespace android

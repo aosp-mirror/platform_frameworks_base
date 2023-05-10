@@ -66,9 +66,9 @@ class IdmapTest : public ::testing::Test {
 
 std::string GetStringFromApkAssets(const AssetManager2& asset_manager,
                                    const AssetManager2::SelectedValue& value) {
-  auto assets = asset_manager.GetApkAssets();
+  auto op = asset_manager.StartOperation();
   const ResStringPool* string_pool =
-      assets[value.cookie].promote()->GetLoadedArsc()->GetStringPool();
+      asset_manager.GetApkAssets(value.cookie)->GetLoadedArsc()->GetStringPool();
   return GetStringFromPool(string_pool, value.data);
 }
 

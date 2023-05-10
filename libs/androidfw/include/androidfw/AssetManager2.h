@@ -102,8 +102,19 @@ class AssetManager2 {
 
   AssetManager2() = default;
   explicit AssetManager2(AssetManager2&& other) = default;
-
   AssetManager2(ApkAssetsList apk_assets, const ResTable_config& configuration);
+
+  struct ScopedOperation {
+    DISALLOW_COPY_AND_ASSIGN(ScopedOperation);
+    friend AssetManager2;
+    const AssetManager2& am_;
+    ScopedOperation(const AssetManager2& am);
+
+   public:
+    ~ScopedOperation();
+  };
+
+  [[nodiscard]] ScopedOperation StartOperation() const;
 
   // Sets/resets the underlying ApkAssets for this AssetManager. The ApkAssets
   // are not owned by the AssetManager, and must have a longer lifetime.
@@ -114,8 +125,9 @@ class AssetManager2 {
   bool SetApkAssets(ApkAssetsList apk_assets, bool invalidate_caches = true);
   bool SetApkAssets(std::initializer_list<ApkAssetsPtr> apk_assets, bool invalidate_caches = true);
 
-  inline const std::vector<ApkAssetsWPtr>& GetApkAssets() const {
-    return apk_assets_;
+  const ApkAssetsPtr& GetApkAssets(ApkAssetsCookie cookie) const;
+  int GetApkAssetsCount() const {
+    return int(apk_assets_.size());
   }
 
   // Returns the string pool for the given asset cookie.
@@ -426,9 +438,16 @@ class AssetManager2 {
   base::expected<const ResolvedBag*, NullOrIOError> GetBag(
       uint32_t resid, std::vector<uint32_t>& child_resids) const;
 
+  // Finish an operation that was running with the current asset manager, and clean up the
+  // promoted apk assets when the last operation ends.
+  void FinishOperation() const;
+
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
-  std::vector<ApkAssetsWPtr> apk_assets_;
+  // The second pair element is the promoted version of the assets, that is held for the duration
+  // of the currently running operation. FinishOperation() clears all promoted assets to make sure
+  // they can be released when the system needs that.
+  mutable std::vector<std::pair<ApkAssetsWPtr, ApkAssetsPtr>> apk_assets_;
 
   // DynamicRefTables for shared library package resolution.
   // These are ordered according to apk_assets_. The mappings may change depending on what is
@@ -454,6 +473,10 @@ class AssetManager2 {
 
   // Cached set of resolved resource values.
   mutable std::unordered_map<uint32_t, SelectedValue> cached_resolved_values_;
+
+  // Tracking the number of the started operations running with the current AssetManager.
+  // Finishing the last one clears all promoted apk assets.
+  mutable int number_of_running_scoped_operations_ = 0;
 
   // Whether or not to save resource resolution steps
   bool resource_resolution_logging_enabled_ = false;
