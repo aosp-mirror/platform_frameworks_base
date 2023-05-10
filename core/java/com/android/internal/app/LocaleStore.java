@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import android.annotation.IntDef;
 import android.app.LocaleManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -29,6 +30,8 @@ import android.view.inputmethod.InputMethodSubtype;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.Serializable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -47,15 +50,42 @@ public class LocaleStore {
     private static boolean sFullyInitialized = false;
 
     public static class LocaleInfo implements Serializable {
-        @VisibleForTesting static final int SUGGESTION_TYPE_NONE = 0;
-        @VisibleForTesting static final int SUGGESTION_TYPE_SIM = 1 << 0;
-        @VisibleForTesting static final int SUGGESTION_TYPE_CFG = 1 << 1;
+        public static final int SUGGESTION_TYPE_NONE = 0;
+        // A mask used to identify the suggested locale is from SIM.
+        public static final int SUGGESTION_TYPE_SIM = 1 << 0;
+        // A mask used to identify the suggested locale is from the config.
+        public static final int SUGGESTION_TYPE_CFG = 1 << 1;
         // Only for per-app language picker
-        @VisibleForTesting static final int SUGGESTION_TYPE_CURRENT = 1 << 2;
+        // A mask used to identify the suggested locale is from the same application's current
+        // configured locale.
+        public static final int SUGGESTION_TYPE_CURRENT = 1 << 2;
         // Only for per-app language picker
-        @VisibleForTesting  static final int SUGGESTION_TYPE_SYSTEM_LANGUAGE = 1 << 3;
+        // A mask used to identify the suggested locale is the system default language.
+        public  static final int SUGGESTION_TYPE_SYSTEM_LANGUAGE = 1 << 3;
         // Only for per-app language picker
-        @VisibleForTesting static final int SUGGESTION_TYPE_OTHER_APP_LANGUAGE = 1 << 4;
+        // A mask used to identify the suggested locale is from other applications' configured
+        // locales.
+        public static final int SUGGESTION_TYPE_OTHER_APP_LANGUAGE = 1 << 4;
+        // Only for per-app language picker
+        // A mask used to identify the suggested locale is what the active IME supports.
+        public static final int SUGGESTION_TYPE_IME_LANGUAGE = 1 << 5;
+        // Only for per-app language picker
+        // A mask used to identify the suggested locale is in the current system languages.
+        public static final int SUGGESTION_TYPE_SYSTEM_AVAILABLE_LANGUAGE = 1 << 6;
+        /** @hide */
+        @IntDef(prefix = { "SUGGESTION_TYPE_" }, value = {
+                SUGGESTION_TYPE_NONE,
+                SUGGESTION_TYPE_SIM,
+                SUGGESTION_TYPE_CFG,
+                SUGGESTION_TYPE_CURRENT,
+                SUGGESTION_TYPE_SYSTEM_LANGUAGE,
+                SUGGESTION_TYPE_OTHER_APP_LANGUAGE,
+                SUGGESTION_TYPE_IME_LANGUAGE,
+                SUGGESTION_TYPE_SYSTEM_AVAILABLE_LANGUAGE
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface SuggestionType {}
+
         private final Locale mLocale;
         private final Locale mParent;
         private final String mId;
@@ -86,6 +116,17 @@ public class LocaleStore {
 
         private LocaleInfo(String localeId) {
             this(Locale.forLanguageTag(localeId));
+        }
+
+        private LocaleInfo(LocaleInfo localeInfo) {
+            this.mLocale = localeInfo.getLocale();
+            this.mId = localeInfo.getId();
+            this.mParent = localeInfo.getParent();
+            this.mHasNumberingSystems = localeInfo.mHasNumberingSystems;
+            this.mIsChecked = localeInfo.getChecked();
+            this.mSuggestionFlags = localeInfo.mSuggestionFlags;
+            this.mIsTranslated = localeInfo.isTranslated();
+            this.mIsPseudo = localeInfo.mIsPseudo;
         }
 
         private static Locale getParent(Locale locale) {
@@ -142,11 +183,29 @@ public class LocaleStore {
             return mSuggestionFlags != SUGGESTION_TYPE_NONE;
         }
 
-        private boolean isSuggestionOfType(int suggestionMask) {
+        /**
+         * Check whether the LocaleInfo is suggested by a specific mask
+         *
+         * @param suggestionMask The mask which is used to identify the suggestion flag.
+         * @return true if the locale is suggested by a specific suggestion flag. Otherwise, false.
+         */
+        public boolean isSuggestionOfType(int suggestionMask) {
             if (!mIsTranslated) { // Never suggest an untranslated locale
                 return false;
             }
             return (mSuggestionFlags & suggestionMask) == suggestionMask;
+        }
+
+        /**
+         * Extend the locale's suggestion type
+         *
+         * @param suggestionMask The mask to extend the suggestion flag
+         */
+        public void extendSuggestionOfType(@SuggestionType int suggestionMask) {
+            if (!mIsTranslated) { // Never suggest an untranslated locale
+                return;
+            }
+            mSuggestionFlags |= suggestionMask;
         }
 
         @UnsupportedAppUsage
@@ -186,14 +245,14 @@ public class LocaleStore {
         private String getLangScriptKey() {
             if (mLangScriptKey == null) {
                 Locale baseLocale = new Locale.Builder()
-                    .setLocale(mLocale)
-                    .setExtension(Locale.UNICODE_LOCALE_EXTENSION, "")
-                    .build();
+                        .setLocale(mLocale)
+                        .setExtension(Locale.UNICODE_LOCALE_EXTENSION, "")
+                        .build();
                 Locale parentWithScript = getParent(LocaleHelper.addLikelySubtags(baseLocale));
                 mLangScriptKey =
                         (parentWithScript == null)
-                        ? mLocale.toLanguageTag()
-                        : parentWithScript.toLanguageTag();
+                                ? mLocale.toLanguageTag()
+                                : parentWithScript.toLanguageTag();
             }
             return mLangScriptKey;
         }
@@ -232,6 +291,10 @@ public class LocaleStore {
 
         public boolean isSystemLocale() {
             return (mSuggestionFlags & SUGGESTION_TYPE_SYSTEM_LANGUAGE) > 0;
+        }
+
+        public boolean isInCurrentSystemLocales() {
+            return (mSuggestionFlags & SUGGESTION_TYPE_SYSTEM_AVAILABLE_LANGUAGE) > 0;
         }
     }
 
@@ -304,13 +367,13 @@ public class LocaleStore {
             Locale locale = localeList == null ? null : localeList.get(0);
 
             if (locale != null) {
-                LocaleInfo localeInfo = new LocaleInfo(locale);
+                LocaleInfo cacheInfo  = getLocaleInfo(locale, sLocaleCache);
+                LocaleInfo localeInfo = new LocaleInfo(cacheInfo);
                 if (isAppSelected) {
                     localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_CURRENT;
                 } else {
                     localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_OTHER_APP_LANGUAGE;
                 }
-                localeInfo.mIsTranslated = true;
                 return localeInfo;
             }
         } catch (IllegalArgumentException e) {
@@ -329,26 +392,27 @@ public class LocaleStore {
             List<InputMethodSubtype> list) {
         Set<LocaleInfo> imeLocales = new HashSet<>();
         for (InputMethodSubtype subtype : list) {
-            LocaleInfo localeInfo = new LocaleInfo(subtype.getLanguageTag());
-            localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_OTHER_APP_LANGUAGE;
-            localeInfo.mIsTranslated = true;
+            Locale locale = Locale.forLanguageTag(subtype.getLanguageTag());
+            LocaleInfo cacheInfo  = getLocaleInfo(locale, sLocaleCache);
+            LocaleInfo localeInfo = new LocaleInfo(cacheInfo);
+            localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_IME_LANGUAGE;
             imeLocales.add(localeInfo);
         }
         return imeLocales;
     }
 
     /**
-     * Returns a list of system languages with LocaleInfo
+     * Returns a list of system locale that removes all extensions except for the numbering system.
      */
-    public static List<LocaleInfo> getSystemCurrentLocaleInfo() {
+    public static List<LocaleInfo> getSystemCurrentLocales() {
         List<LocaleInfo> localeList = new ArrayList<>();
-
         LocaleList systemLangList = LocaleList.getDefault();
         for(int i = 0; i < systemLangList.size(); i++) {
-            LocaleInfo systemLocaleInfo = new LocaleInfo(systemLangList.get(i));
-            systemLocaleInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SIM;
-            systemLocaleInfo.mIsTranslated = true;
-            localeList.add(systemLocaleInfo);
+            Locale sysLocale = getLocaleWithOnlyNumberingSystem(systemLangList.get(i));
+            LocaleInfo cacheInfo  = getLocaleInfo(sysLocale, sLocaleCache);
+            LocaleInfo localeInfo = new LocaleInfo(cacheInfo);
+            localeInfo.mSuggestionFlags |= LocaleInfo.SUGGESTION_TYPE_SYSTEM_AVAILABLE_LANGUAGE;
+            localeList.add(localeInfo);
         }
         return localeList;
     }
@@ -542,12 +606,12 @@ public class LocaleStore {
             Set<String> ignorables,
             LocaleInfo parent,
             boolean translatedOnly,
-            HashMap<String, LocaleInfo> supportedLcoaleInfos) {
+            HashMap<String, LocaleInfo> supportedLocaleInfos) {
 
         boolean hasTargetParent = parent != null;
         String parentId = hasTargetParent ? parent.getId() : null;
         HashSet<LocaleInfo> result = new HashSet<>();
-        for (LocaleStore.LocaleInfo li : supportedLcoaleInfos.values()) {
+        for (LocaleStore.LocaleInfo li : supportedLocaleInfos.values()) {
             if (isShallIgnore(ignorables, li, translatedOnly)) {
                 continue;
             }
@@ -556,13 +620,18 @@ public class LocaleStore {
                     if (li.isSuggestionOfType(LocaleInfo.SUGGESTION_TYPE_SIM)) {
                         result.add(li);
                     } else {
-                        result.add(getLocaleInfo(li.getParent(), supportedLcoaleInfos));
+                        Locale locale = li.getParent();
+                        LocaleInfo localeInfo = getLocaleInfo(locale, supportedLocaleInfos);
+                        addLocaleInfoToMap(locale, localeInfo, supportedLocaleInfos);
+                        result.add(localeInfo);
                     }
                     break;
                 case TIER_REGION:
                     if (parentId.equals(li.getParent().toLanguageTag())) {
-                        result.add(getLocaleInfo(
-                                li.getLocale().stripExtensions(), supportedLcoaleInfos));
+                        Locale locale = li.getLocale().stripExtensions();
+                        LocaleInfo localeInfo = getLocaleInfo(locale, supportedLocaleInfos);
+                        addLocaleInfoToMap(locale, localeInfo, supportedLocaleInfos);
+                        result.add(localeInfo);
                     }
                     break;
                 case TIER_NUMBERING:
@@ -636,7 +705,9 @@ public class LocaleStore {
 
     @UnsupportedAppUsage
     public static LocaleInfo getLocaleInfo(Locale locale) {
-        return getLocaleInfo(locale, sLocaleCache);
+        LocaleInfo localeInfo = getLocaleInfo(locale, sLocaleCache);
+        addLocaleInfoToMap(locale, localeInfo, sLocaleCache);
+        return localeInfo;
     }
 
     private static LocaleInfo getLocaleInfo(
@@ -646,10 +717,7 @@ public class LocaleStore {
         if (!localeInfos.containsKey(id)) {
             // Locale preferences can modify the language tag to current system languages, so we
             // need to check the input locale without extra u extension except numbering system.
-            Locale filteredLocale = new Locale.Builder()
-                    .setLocale(locale.stripExtensions())
-                    .setUnicodeLocaleKeyword("nu", locale.getUnicodeLocaleType("nu"))
-                    .build();
+            Locale filteredLocale = getLocaleWithOnlyNumberingSystem(locale);
             if (localeInfos.containsKey(filteredLocale.toLanguageTag())) {
                 result = new LocaleInfo(locale);
                 LocaleInfo localeInfo = localeInfos.get(filteredLocale.toLanguageTag());
@@ -662,11 +730,27 @@ public class LocaleStore {
                 return result;
             }
             result = new LocaleInfo(locale);
-            localeInfos.put(id, result);
         } else {
             result = localeInfos.get(id);
         }
         return result;
+    }
+
+    private static Locale getLocaleWithOnlyNumberingSystem(Locale locale) {
+        return new Locale.Builder()
+                .setLocale(locale.stripExtensions())
+                .setUnicodeLocaleKeyword("nu", locale.getUnicodeLocaleType("nu"))
+                .build();
+    }
+
+    private static void addLocaleInfoToMap(Locale locale, LocaleInfo localeInfo,
+            HashMap<String, LocaleInfo> map) {
+        if (!map.containsKey(locale.toLanguageTag())) {
+            Locale localeWithNumberingSystem = getLocaleWithOnlyNumberingSystem(locale);
+            if (!map.containsKey(localeWithNumberingSystem.toLanguageTag())) {
+                map.put(locale.toLanguageTag(), localeInfo);
+            }
+        }
     }
 
     /**
