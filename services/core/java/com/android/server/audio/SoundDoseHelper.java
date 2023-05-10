@@ -174,9 +174,6 @@ public class SoundDoseHelper {
      */
     private final SparseIntArray mSafeMediaVolumeDevices = new SparseIntArray();
 
-    /** Used for testing to enforce safe media on all devices */
-    private boolean mForceSafeMediaOnAllDevices = false;
-
     // mMusicActiveMs is the cumulative time of music activity since safe volume was disabled.
     // When this time reaches UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX, the safe media volume is re-enabled
     // automatically. mMusicActiveMs is rounded to a multiple of MUSIC_ACTIVE_POLL_PERIOD_MS.
@@ -430,12 +427,6 @@ public class SoundDoseHelper {
             return;
         }
 
-        synchronized (mSafeMediaVolumeStateLock) {
-            mSafeMediaVolumeState = SAFE_MEDIA_VOLUME_ACTIVE;
-            mMusicActiveMs = 0;
-            saveMusicActiveMs();
-        }
-
         synchronized (mCsdStateLock) {
             mLastMomentaryExposureTimeMs = MOMENTARY_EXPOSURE_TIMEOUT_UNINITIALIZED;
         }
@@ -475,8 +466,6 @@ public class SoundDoseHelper {
         } catch (RemoteException e) {
             Log.e(TAG, "Exception while forcing CSD computation on all devices", e);
         }
-
-        mForceSafeMediaOnAllDevices = computeCsdOnAllDevices;
     }
 
     boolean isCsdEnabled() {
@@ -559,7 +548,7 @@ public class SoundDoseHelper {
     private boolean checkSafeMediaVolume_l(int streamType, int index, int device) {
         return (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE)
                     && (AudioService.mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC)
-                    && (safeDevicesContains(device) || mForceSafeMediaOnAllDevices)
+                    && safeDevicesContains(device)
                     && (index > safeMediaVolumeIndex(device));
     }
 
