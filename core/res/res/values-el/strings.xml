@@ -2164,8 +2164,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Αναίρεση παύσης"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Δεν υπάρχουν εφαρμογές εργασιών"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Δεν υπάρχουν προσωπικές εφαρμογές"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Άνοιγμα προσωπικού <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Άνοιγμα <xliff:g id="APP">%s</xliff:g> εργασίας"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Χρήση προσωπικού προγράμματος περιήγησης"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Χρήση προγράμματος περιήγησης εργασίας"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN ξεκλειδώματος δικτύου κάρτας SIM"</string>
@@ -2319,7 +2323,7 @@
     <string name="mic_access_off_toast" msgid="8111040892954242437">"Το μικρόφωνο έχει αποκλειστεί"</string>
     <string name="concurrent_display_notification_name" msgid="1526911253558311131">"Διπλή οθόνη"</string>
     <string name="concurrent_display_notification_active_title" msgid="4892473462327943673">"Η λειτουργία διπλής οθόνης είναι ενεργή"</string>
-    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> χρησιμοποιεί και τις δύο οθόνες για να εμφανίζει περιεχόμενο"</string>
+    <string name="concurrent_display_notification_active_content" msgid="5889355473710601270">"Η εφαρμ. <xliff:g id="APP_NAME">%1$s</xliff:g> χρησιμοποιεί και τις 2 οθόνες για εμφάνιση περιεχ."</string>
     <string name="concurrent_display_notification_thermal_title" msgid="5921609404644739229">"Η θερμοκρασία της συσκευής είναι πολύ υψηλή"</string>
     <string name="concurrent_display_notification_thermal_content" msgid="2075484836527609319">"Η λειτουργία διπλής οθόνης δεν είναι διαθέσιμη επειδή η θερμοκρασία του τηλεφώνου αυξάνεται υπερβολικά"</string>
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Το Dual Screen δεν είναι διαθέσιμο"</string>
