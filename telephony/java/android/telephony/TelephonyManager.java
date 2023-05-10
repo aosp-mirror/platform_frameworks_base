@@ -11287,29 +11287,6 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the result and response from RIL for oem request
-     *
-     * @param oemReq the data is sent to ril.
-     * @param oemResp the respose data from RIL.
-     * @return negative value request was not handled or get error
-     *         0 request was handled succesfully, but no response data
-     *         positive value success, data length of response
-     * @hide
-     * @deprecated OEM needs a vendor-extension hal and their apps should use that instead
-     */
-    @Deprecated
-    public int invokeOemRilRequestRaw(byte[] oemReq, byte[] oemResp) {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.invokeOemRilRequestRaw(oemReq, oemResp);
-        } catch (RemoteException ex) {
-        } catch (NullPointerException ex) {
-        }
-        return -1;
-    }
-
-    /**
      * @deprecated Use {@link android.telephony.ims.ImsMmTelManager#setVtSettingEnabled(boolean)}
      * instead.
      * @hide

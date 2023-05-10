@@ -323,11 +323,6 @@ public interface RILConstants {
     int SETUP_DATA_AUTH_CHAP      = 2;
     int SETUP_DATA_AUTH_PAP_CHAP  = 3;
 
-    /* LCE service related constants. */
-    int LCE_NOT_AVAILABLE = -1;
-    int LCE_STOPPED = 0;
-    int LCE_ACTIVE = 1;
-
     /**
      * No restriction at all including voice/SMS/USSD/SS/AV64
      * and packet data.
