@@ -1039,7 +1039,7 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> de batterie restante"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connectez votre stylet à un chargeur"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"La batterie du stylet est faible"</string>
-    <string name="video_camera" msgid="7654002575156149298">"Caméra vidéo"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Caméra"</string>
     <string name="call_from_work_profile_title" msgid="6991157106804289643">"Impossible d\'appeler depuis ce profil"</string>
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Votre règle professionnelle ne vous permet de passer des appels que depuis le profil professionnel"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Passer au profil professionnel"</string>

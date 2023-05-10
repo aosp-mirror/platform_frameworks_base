@@ -369,7 +369,7 @@
     <string name="user_add_user_message_guest_remove" msgid="5589286604543355007">\n\n"Ak pridáte nového používatelia, ukončí sa režim pre hostí a odstránia sa všetky aplikácie a údaje z aktuálnej relácie hosťa."</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Dosiahnutý limit počtu používateľov"</string>
     <string name="user_limit_reached_message" msgid="1070703858915935796">"{count,plural, =1{Môžete vytvoriť iba jedného používateľa.}few{Môžete pridať až # používateľov.}many{You can add up to # users.}other{Môžete pridať až # používateľov.}}"</string>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"Odstrániť používateľa?"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"Odobrať používateľa?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Všetky aplikácie a údaje tohto používateľa budú odstránené."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Odstrániť"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Povolenie <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mať prístup k všetkým informáciám zobrazovaným na obrazovke alebo prehrávaným v zariadení počas nahrávania či prenosu. Patria medzi ne informácie, akými sú napríklad heslá, platobné podrobnosti, fotky, správy a prehrávaný zvuk."</string>
