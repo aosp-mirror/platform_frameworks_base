@@ -16,6 +16,8 @@
 
 package android.util;
 
+import java.util.Objects;
+
 /**
  * An array that indexes by a long timestamp, representing milliseconds since the epoch.
  * @param <E> The type of values this container maps to a timestamp.
@@ -65,9 +67,13 @@ public class TimeSparseArray<E> extends LongSparseArray<E> {
      */
     @Override
     public void put(long key, E value) {
-        if (indexOfKey(key) >= 0) {
-            if (!mWtfReported) {
-                Slog.wtf(TAG, "Overwriting value " + get(key) + " by " + value);
+        final int index = indexOfKey(key);
+        if (index >= 0) {
+            final E curValue = valueAt(index);
+            if (Objects.equals(curValue, value)) {
+                Log.w(TAG, "Overwriting value at " + key + " by equal value " + value);
+            } else if (!mWtfReported) {
+                Slog.wtf(TAG, "Overwriting value " + curValue + " by " + value + " at " + key);
                 mWtfReported = true;
             }
         }
