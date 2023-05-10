@@ -587,7 +587,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"Sebelum anda boleh membuat profil yang terhad, anda perlu menyediakan kunci skrin untuk melindungi apl dan data peribadi anda."</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"Tetapkan kunci"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"Tukar kepada <xliff:g id="USER_NAME">%s</xliff:g>"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Mencipta pengguna baharu…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"Membuat pengguna baharu…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"Membuat tetamu baharu…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"Gagal membuat pengguna baharu"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Gagal membuat tetamu baharu"</string>

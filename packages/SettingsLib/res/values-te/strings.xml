@@ -614,7 +614,7 @@
     <string name="guest_reset_button" msgid="2515069346223503479">"గెస్ట్ సెషన్‌ను రీసెట్ చేయండి"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"గెస్ట్ మోడ్ నుండి వైదొలగండి"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"వైదొలగినప్పుడు యాక్టివిటీ అంతా తొలగించబడుతుంది"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"మీ నిష్క్రమణలో, యాక్టివిటీని సేవ్ చేయవచ్చు లేదా తొలగించవచ్చు"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"మీరు వైదొలగేటప్పుడు, యాక్టివిటీని సేవ్ చేయవచ్చు లేదా తొలగించవచ్చు"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"సెషన్ యాక్టివిటీని తొలగించడానికి ఇప్పుడే రీసెట్ చేయండి లేదా మీరు నిష్క్రమించేటప్పుడు యాక్టివిటీని సేవ్ చేయవచ్చు లేదా తొలగించవచ్చు"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ఒక ఫోటో తీయండి"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ఇమేజ్‌ను ఎంచుకోండి"</string>

@@ -587,7 +587,7 @@
     <string name="user_need_lock_message" msgid="4311424336209509301">"निषेधयुक्त प्रोफाइल बनाउनु अघि तपाईँको एप र व्यक्तिगत डेटा सुरक्षा गर्नाका लागि तपाईँले स्क्रिन लक सेटअप गर्नु पर्दछ ।"</string>
     <string name="user_set_lock_button" msgid="1427128184982594856">"लक सेट गर्नुहोस्"</string>
     <string name="user_switch_to_user" msgid="6975428297154968543">"प्रयोगकर्ता बदलेर <xliff:g id="USER_NAME">%s</xliff:g> पार्नुहोस्"</string>
-    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"नयाँ प्रयोगकर्ता बनाउँदै…"</string>
+    <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"नयाँ प्रयोगकर्ता बनाइँदै छ…"</string>
     <string name="creating_new_guest_dialog_message" msgid="1114905602181350690">"नयाँ अतिथि बनाइँदै छ…"</string>
     <string name="add_user_failed" msgid="4809887794313944872">"नयाँ प्रयोगकर्ता सिर्जना गर्न सकिएन"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"नयाँ अतिथि बनाउन सकिएन"</string>

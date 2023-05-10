@@ -230,7 +230,7 @@
     <string name="development_settings_summary" msgid="8718917813868735095">"Ezarri aplikazioak garatzeko aukerak"</string>
     <string name="development_settings_not_available" msgid="355070198089140951">"Erabiltzaile honek ez ditu garatzaileen aukerak"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"Erabiltzaile honek ezin ditu VPN ezarpenak atzitu"</string>
-    <string name="tethering_settings_not_available" msgid="266821736434699780">"Erabiltzaile honek ezin ditu konexioa partekatzeko ezarpenak atzitu"</string>
+    <string name="tethering_settings_not_available" msgid="266821736434699780">"Erabiltzaile honek ezin ditu konexioa partekatzeko aukeraren ezarpenak atzitu"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Erabiltzaile honek ezin ditu APN ezarpenak atzitu"</string>
     <string name="enable_adb" msgid="8072776357237289039">"USB bidezko arazketa"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Gaitu arazketa modua USBa konektatzean"</string>
@@ -279,7 +279,7 @@
     <string name="debug_networking_category" msgid="6829757985772659599">"Sareak"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"Hari gabe bistaratzeko ziurtagiria"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Gaitu wifi-sareetan saioa hasteko modu xehatua"</string>
-    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-sareen bilaketaren muga"</string>
+    <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wifi-sareen bilaketaren moteltzea"</string>
     <string name="wifi_non_persistent_mac_randomization" msgid="7482769677894247316">"Wifi-konexioetan iraunkorrak ez diren MAC helbideak ausaz antolatzea"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Datu-konexioa beti aktibo"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Konexioa partekatzeko hardwarearen azelerazioa"</string>
