@@ -878,7 +878,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Dodirnite za otvaranje značajki pristupačnosti. Prilagodite ili zamijenite taj gumb u postavkama.\n\n"<annotation id="link">"Pregledajte postavke"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Pomaknite gumb do ruba da biste ga privremeno sakrili"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Poništi"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Uklonjen je prečac za <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Uklonjen je prečac za uslugu <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Uklonjen je # prečac}one{Uklonjen je # prečac}few{Uklonjena su # prečaca}other{Uklonjeno je # prečaca}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Premjesti u gornji lijevi kut"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Premjesti u gornji desni kut"</string>
@@ -985,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Zvučnici i zasloni"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Predloženi uređaji"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako emitiranje funkcionira"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emitiranje"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osobe u blizini s kompatibilnim Bluetooth uređajima mogu slušati medije koje emitirate"</string>
@@ -1122,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Instalirajte aplikaciju fotoaparata"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikacija je postavljena"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Dostupan je najmanje jedan uređaj"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Odaberite zadanu aplikaciju za bilješke da biste koristili prečac za pisanje bilježaka"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Odaberite aplikaciju"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Prečac za dodirnuti i zadržati"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Odustani"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Promijenite zaslon odmah"</string>

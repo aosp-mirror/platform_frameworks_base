@@ -83,7 +83,7 @@
     <string name="screenshot_edit_label" msgid="8754981973544133050">"திருத்து"</string>
     <string name="screenshot_edit_description" msgid="3333092254706788906">"ஸ்கிரீன்ஷாட்டைத் திருத்தும்"</string>
     <string name="screenshot_share_description" msgid="2861628935812656612">"ஸ்கிரீன்ஷாட்டைப் பகிர்"</string>
-    <string name="screenshot_scroll_label" msgid="2930198809899329367">"கூடுதலாகப் படமெடு"</string>
+    <string name="screenshot_scroll_label" msgid="2930198809899329367">"கூடுதலாக படமெடு"</string>
     <string name="screenshot_dismiss_description" msgid="4702341245899508786">"ஸ்கிரீன்ஷாட்டை நிராகரிக்கும்"</string>
     <string name="screenshot_dismiss_work_profile" msgid="3101530842987697045">"பணிக் கணக்கு மெசேஜை மூடும்"</string>
     <string name="screenshot_preview_description" msgid="7606510140714080474">"ஸ்கிரீன்ஷாட்டின் மாதிரிக்காட்சி"</string>
@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"இந்தச் சாதனத்தில் சான்றிதழ் அங்கீகாரம் நிறுவப்பட்டுள்ளது. உங்களின் பாதுகாப்பான நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படலாம் அல்லது மாற்றப்படலாம்."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"உங்கள் நிர்வாகி, நெட்வொர்க் பதிவெடுத்தலை இயக்கியுள்ளார். இது சாதனத்தில் ட்ராஃபிக்கைக் கண்காணிக்கும்."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"உங்கள் நிர்வாகி \'நெட்வொர்க் பதிவெடுத்தலை\' இயக்கியுள்ளார், இது உங்கள் பணிக் கணக்கில் டிராஃபிக்கைக் கண்காணிக்கும். ஆனால் தனிப்பட்ட கணக்கில் கண்காணிக்காது."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"இந்தச் சாதனம் <xliff:g id="VPN_APP">%1$s</xliff:g> மூலம் இணையத்துடன் இணைக்கப்பட்டுள்ளது. உங்களின் நெட்வொர்க் செயல்பாட்டை (மின்னஞ்சல்கள், உலாவிய தரவு உட்பட) VPN வழங்குநரால் பார்க்க முடியும்."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"இந்தச் சாதனம் <xliff:g id="VPN_APP">%1$s</xliff:g> மூலம் இணையத்துடன் இணைக்கப்பட்டுள்ளது. உங்களின் நெட்வொர்க் செயல்பாட்டை (மின்னஞ்சல்கள், உலாவிய தரவு உட்பட) உங்கள் IT நிர்வாகியால் பார்க்க முடியும்."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"இந்தச் சாதனம் <xliff:g id="VPN_APP_0">%1$s</xliff:g>, <xliff:g id="VPN_APP_1">%2$s</xliff:g> ஆகியவை மூலம் இணையத்துடன் இணைக்கப்பட்டுள்ளது. உங்களின் நெட்வொர்க் செயல்பாட்டை (மின்னஞ்சல்கள், உலாவிய தரவு உட்பட) உங்கள் IT நிர்வாகியால் பார்க்க முடியும்."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"உங்கள் பணி ஆப்ஸ் <xliff:g id="VPN_APP">%1$s</xliff:g> மூலம் இணையத்துடன் இணைக்கப்பட்டுள்ளது. பணி ஆப்ஸில் உங்களின் நெட்வொர்க் செயல்பாட்டை (மின்னஞ்சல்கள், உலாவிய தரவு உட்பட) உங்கள் IT நிர்வாகியாலும் VPN வழங்குநராலும் பார்க்க முடியும்."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"உங்கள் தனிப்பட்ட ஆப்ஸ் <xliff:g id="VPN_APP">%1$s</xliff:g> மூலம் இணையத்துடன் இணைக்கப்பட்டுள்ளது. உங்களின் நெட்வொர்க் செயல்பாட்டை (மின்னஞ்சல்கள், உலாவிய தரவு உட்பட) உங்கள் VPN வழங்குநரால் பார்க்க முடியும்."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ஸ்பீக்கர்கள் &amp; டிஸ்ப்ளேக்கள்"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"பரிந்துரைக்கப்படும் சாதனங்கள்"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"பிராட்காஸ்ட் எவ்வாறு செயல்படுகிறது?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"பிராட்காஸ்ட்"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"நீங்கள் பிராட்காஸ்ட் செய்யும் மீடியாவை அருகிலுள்ளவர்கள் இணக்கமான புளூடூத் சாதனங்கள் மூலம் கேட்கலாம்"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• கேமரா ஆப்ஸ் நிறுவப்பட்டிருக்க வேண்டும்"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• இந்த ஆப்ஸ் அமைக்கப்பட்டிருக்க வேண்டும்"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• குறைந்தபட்சம் ஒரு சாதனமாவது கிடைக்க வேண்டும்"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"குறிப்பெடுத்தல் ஷார்ட்கட்டைப் பயன்படுத்த, குறிப்பெடுப்பதற்கான இயல்புநிலை ஆப்ஸைத் தேர்ந்தெடுக்கவும்"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"ஆப்ஸைத் தேர்ந்தெடு"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ஷார்ட்கட்டை தொட்டுப் பிடிக்கவும்"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"ரத்துசெய்"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"இப்போது திரைகளை மாற்றவா?"</string>
