@@ -23,6 +23,8 @@ import java.util.Objects;
 /**
  * Immutable representation of the information in the [Audio Status] operand:
  * volume status (0 <= N <= 100) and mute status (muted or unmuted).
+ * The volume level is limited to the range [0, 100] upon construction.
+ * This object cannot represent an audio status where the volume is unknown, or out of bounds.
  */
 public class AudioStatus {
     public static final int MAX_VOLUME = 100;
@@ -32,7 +34,7 @@ public class AudioStatus {
     boolean mMute;
 
     public AudioStatus(int volume, boolean mute) {
-        mVolume = volume;
+        mVolume = Math.max(Math.min(volume, MAX_VOLUME), MIN_VOLUME);
         mMute = mute;
     }
 

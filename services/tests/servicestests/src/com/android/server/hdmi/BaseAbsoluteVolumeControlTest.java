@@ -438,6 +438,21 @@ public abstract class BaseAbsoluteVolumeControlTest {
     }
 
     @Test
+    public void giveAudioStatusSent_reportAudioStatusVolumeOutOfBounds_avcNotEnabled() {
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
+        enableSystemAudioModeIfNeeded();
+        receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_SUPPORTED);
+
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        receiveReportAudioStatus(127, false);
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+    }
+
+    @Test
     public void avcEnabled_cecVolumeDisabled_absoluteVolumeDisabled() {
         enableAbsoluteVolumeControl();
 
@@ -510,6 +525,14 @@ public abstract class BaseAbsoluteVolumeControlTest {
                 anyInt());
         verify(mAudioManager, never()).adjustStreamVolume(eq(AudioManager.STREAM_MUSIC),
                 eq(AudioManager.ADJUST_UNMUTE), anyInt());
+        clearInvocations(mAudioManager);
+
+        // Volume not within range [0, 100]: sets neither volume nor mute
+        receiveReportAudioStatus(127, true);
+        verify(mAudioManager, never()).setStreamVolume(eq(AudioManager.STREAM_MUSIC), anyInt(),
+                anyInt());
+        verify(mAudioManager, never()).adjustStreamVolume(eq(AudioManager.STREAM_MUSIC), anyInt(),
+                anyInt());
         clearInvocations(mAudioManager);
 
         // If AudioService causes us to send <Set Audio Volume Level>, the System Audio device's

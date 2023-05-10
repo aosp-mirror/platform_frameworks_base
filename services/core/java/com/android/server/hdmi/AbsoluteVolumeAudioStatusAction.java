@@ -74,6 +74,13 @@ final class AbsoluteVolumeAudioStatusAction extends HdmiCecFeatureAction {
 
         boolean mute = HdmiUtils.isAudioStatusMute(cmd);
         int volume = HdmiUtils.getAudioStatusVolume(cmd);
+
+        // If the volume is out of range, report it as handled and ignore the message.
+        // According to the spec, such values are either reserved or indicate an unknown volume.
+        if (volume == Constants.UNKNOWN_VOLUME) {
+            return true;
+        }
+
         AudioStatus audioStatus = new AudioStatus(volume, mute);
         if (mState == STATE_WAIT_FOR_INITIAL_AUDIO_STATUS) {
             localDevice().getService().enableAbsoluteVolumeControl(audioStatus);
