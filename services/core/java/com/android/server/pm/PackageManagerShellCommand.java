@@ -16,6 +16,7 @@
 
 package com.android.server.pm;
 
+import static android.Manifest.permission.GET_APP_METADATA;
 import static android.content.pm.PackageInstaller.LOCATION_DATA_APP;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
@@ -3576,6 +3577,7 @@ class PackageManagerShellCommand extends ShellCommand {
     }
 
     private int runGetAppMetadata() {
+        mContext.enforceCallingOrSelfPermission(GET_APP_METADATA, "getAppMetadataFd");
         final PrintWriter pw = getOutPrintWriter();
         String pkgName = getNextArgRequired();
         ParcelFileDescriptor pfd = null;

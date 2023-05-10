@@ -499,13 +499,6 @@ final class InstallPackageHelper {
             mPm.setUpCustomResolverActivity(pkg, pkgSetting);
         }
 
-        File appMetadataFile = new File(pkgSetting.getPath(), APP_METADATA_FILE_NAME);
-        if (appMetadataFile.exists()) {
-            pkgSetting.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
-        } else {
-            pkgSetting.setAppMetadataFilePath(null);
-        }
-
         if (pkg.getPackageName().equals("android")) {
             mPm.setPlatformPackage(pkg, pkgSetting);
         }
@@ -2170,6 +2163,13 @@ final class InstallPackageHelper {
                 installRequest.setNewUsers(
                         ps.queryInstalledUsers(mPm.mUserManager.getUserIds(), true));
                 ps.setUpdateAvailable(false /*updateAvailable*/);
+
+                File appMetadataFile = new File(ps.getPath(), APP_METADATA_FILE_NAME);
+                if (appMetadataFile.exists()) {
+                    ps.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+                } else {
+                    ps.setAppMetadataFilePath(null);
+                }
             }
             if (installRequest.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
                 mPm.updateSequenceNumberLP(ps, installRequest.getNewUsers());

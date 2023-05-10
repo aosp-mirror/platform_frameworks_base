@@ -921,6 +921,7 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
                 p.getUsesStaticLibraries(), p.getUsesStaticLibrariesVersions(), p.getMimeGroups(),
                 mDomainVerificationManager.generateNewId());
         if (ret != null) {
+            ret.setAppMetadataFilePath(p.getAppMetadataFilePath());
             ret.getPkgState().setUpdatedSystemApp(false);
         }
         mDisabledSysPackages.remove(name);
@@ -3699,6 +3700,8 @@ public final class Settings implements Watchable, Snappable, ResilientAtomicFile
             ps.setAppId(sharedUserAppId);
             ps.setSharedUserAppId(sharedUserAppId);
         }
+
+        ps.setAppMetadataFilePath(parser.getAttributeValue(null, "appMetadataFilePath"));
 
         int outerDepth = parser.getDepth();
         int type;
