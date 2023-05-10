@@ -24,7 +24,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.VisibleForTesting
-import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -146,26 +146,22 @@ private fun NavControllerWrapperImpl.NavContent(
                 arguments = spp.parameter,
                 enterTransition = {
                     slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Start, animationSpec = slideEffect
                     ) + fadeIn(animationSpec = fadeEffect)
                 },
                 exitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.Start,
-                        animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.Start, animationSpec = slideEffect
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
                 popEnterTransition = {
                     slideIntoContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End,
-                        animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.End, animationSpec = slideEffect
                     ) + fadeIn(animationSpec = fadeEffect)
                 },
                 popExitTransition = {
                     slideOutOfContainer(
-                        AnimatedContentTransitionScope.SlideDirection.End,
-                        animationSpec = slideEffect
+                        AnimatedContentScope.SlideDirection.End, animationSpec = slideEffect
                     ) + fadeOut(animationSpec = fadeEffect)
                 },
             ) { navBackStackEntry ->
