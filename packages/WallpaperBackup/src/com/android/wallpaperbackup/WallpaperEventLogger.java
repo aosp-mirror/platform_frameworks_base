@@ -61,6 +61,10 @@ public class WallpaperEventLogger {
     static final String ERROR_NO_WALLPAPER = "no_wallpaper";
     @BackupRestoreError
     static final String ERROR_QUOTA_EXCEEDED = "quota_exceeded";
+    @BackupRestoreError
+    static final String ERROR_SET_COMPONENT_EXCEPTION = "exception_in_set_component";
+    @BackupRestoreError
+    static final String ERROR_LIVE_PACKAGE_NOT_INSTALLED = "live_pkg_not_installed_in_restore";
 
     private final BackupRestoreEventLogger mLogger;
 
@@ -68,6 +72,14 @@ public class WallpaperEventLogger {
 
     WallpaperEventLogger(BackupManager backupManager, WallpaperBackupAgent wallpaperAgent) {
         mLogger = backupManager.getBackupRestoreEventLogger(/* backupAgent */ wallpaperAgent);
+    }
+
+    WallpaperEventLogger(BackupRestoreEventLogger logger) {
+        mLogger = logger;
+    }
+
+    BackupRestoreEventLogger getBackupRestoreLogger() {
+        return mLogger;
     }
 
     void onSystemImageWallpaperBackedUp() {
