@@ -20,6 +20,7 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWA
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAKING;
 
 import android.annotation.NonNull;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -38,6 +39,7 @@ import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor;
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
@@ -99,6 +101,7 @@ public final class DozeServiceHost implements DozeHost {
     private CentralSurfaces mCentralSurfaces;
     private boolean mAlwaysOnSuppressed;
     private boolean mPulsePending;
+    private DozeInteractor mDozeInteractor;
 
     @Inject
     public DozeServiceHost(DozeLog dozeLog, PowerManager powerManager,
@@ -115,6 +118,7 @@ public final class DozeServiceHost implements DozeHost {
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             AuthController authController,
             NotificationIconAreaController notificationIconAreaController,
+            DozeInteractor dozeInteractor,
             BurnInInteractor burnInInteractor) {
         super();
         mDozeLog = dozeLog;
@@ -136,6 +140,7 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationIconAreaController = notificationIconAreaController;
         mBurnInInteractor = burnInInteractor;
         mHeadsUpManagerPhone.addListener(mOnHeadsUpChangedListener);
+        mDozeInteractor = dozeInteractor;
     }
 
     // TODO: we should try to not pass status bar in here if we can avoid it.
@@ -226,6 +231,7 @@ public final class DozeServiceHost implements DozeHost {
         for (Callback callback : mCallbacks) {
             callback.onDozingChanged(dozing);
         }
+        mDozeInteractor.setIsDozing(dozing);
         mStatusBarStateController.setIsDozing(dozing);
     }
 
@@ -360,7 +366,14 @@ public final class DozeServiceHost implements DozeHost {
 
     @Override
     public void onSlpiTap(float screenX, float screenY) {
-        if (screenX > 0 && screenY > 0 && mAmbientIndicationContainer != null
+        if (screenX < 0 || screenY < 0) return;
+        dispatchTouchEventToAmbientIndicationContainer(screenX, screenY);
+
+        mDozeInteractor.setLastTapToWakePosition(new Point((int) screenX, (int) screenY));
+    }
+
+    private void dispatchTouchEventToAmbientIndicationContainer(float screenX, float screenY) {
+        if (mAmbientIndicationContainer != null
                 && mAmbientIndicationContainer.getVisibility() == View.VISIBLE) {
             int[] locationOnScreen = new int[2];
             mAmbientIndicationContainer.getLocationOnScreen(locationOnScreen);
