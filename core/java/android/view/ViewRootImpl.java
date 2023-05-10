@@ -815,7 +815,6 @@ public final class ViewRootImpl implements ViewParent,
     final HighContrastTextManager mHighContrastTextManager;
 
     SendWindowContentChangedAccessibilityEvent mSendWindowContentChangedAccessibilityEvent;
-    boolean mSendingAccessibilityWindowContentChange = false;
 
     HashSet<View> mTempHashSet;
 
@@ -9875,29 +9874,7 @@ public final class ViewRootImpl implements ViewParent,
 
     @Override
     public void notifySubtreeAccessibilityStateChanged(View child, View source, int changeType) {
-        Objects.requireNonNull(source);
-        if (changeType == AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE) {
-            postSendWindowContentChangedCallback(source, changeType);
-            return;
-        }
-        if (mSendingAccessibilityWindowContentChange) {
-            // This allows re-entering this method.
-            // Some apps update views during an event dispatch, which triggers another a11y event.
-            // In order to avoid an infinite loop, postpone second event dispatch.
-            mHandler.post(() -> notifySubtreeAccessibilityStateChanged(child, source, changeType));
-            return;
-        }
-
-        AccessibilityEvent event =
-                new AccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
-        event.setContentChangeTypes(changeType);
-        event.setAction(mAccessibilityManager.getPerformingAction());
-        mSendingAccessibilityWindowContentChange = true;
-        try {
-            source.sendAccessibilityEventUnchecked(event);
-        } finally {
-            mSendingAccessibilityWindowContentChange = false;
-        }
+        postSendWindowContentChangedCallback(Objects.requireNonNull(source), changeType);
     }
 
     @Override
@@ -10953,6 +10930,11 @@ public final class ViewRootImpl implements ViewParent,
                     run();
                 }
             }
+
+            if (!canContinueThrottle(source, changeType)) {
+                removeCallbacksAndRun();
+            }
+
             if (mSource != null) {
                 // If there is no common predecessor, then mSource points to
                 // a removed view, hence in this case always prefer the source.
@@ -10987,18 +10969,32 @@ public final class ViewRootImpl implements ViewParent,
                 mOrigin = Thread.currentThread().getStackTrace();
             }
             final long timeSinceLastMillis = SystemClock.uptimeMillis() - mLastEventTimeMillis;
-            final long minEventIntevalMillis =
+            final long minEventIntervalMillis =
                     ViewConfiguration.getSendRecurringAccessibilityEventsInterval();
-            if (timeSinceLastMillis >= minEventIntevalMillis) {
+            if (timeSinceLastMillis >= minEventIntervalMillis) {
                 removeCallbacksAndRun();
             } else {
-                mHandler.postDelayed(this, minEventIntevalMillis - timeSinceLastMillis);
+                mHandler.postDelayed(this, minEventIntervalMillis - timeSinceLastMillis);
             }
         }
 
         public void removeCallbacksAndRun() {
             mHandler.removeCallbacks(this);
             run();
+        }
+
+        private boolean canContinueThrottle(View source, int changeType) {
+            if (mSource == null) {
+                // We don't have a pending event.
+                return true;
+            }
+            if (mSource == source) {
+                // We can merge a new event with a pending event from the same source.
+                return true;
+            }
+            // We can merge subtree change events.
+            return changeType == AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE
+                    && mChangeTypes == AccessibilityEvent.CONTENT_CHANGE_TYPE_SUBTREE;
         }
     }
 
