@@ -36,7 +36,6 @@ import com.android.server.LocalServices;
 import com.android.server.sensors.SensorManagerInternal;
 
 import java.io.PrintWriter;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -73,15 +72,10 @@ public class SensorController {
 
     void close() {
         synchronized (mLock) {
-            final Iterator<Map.Entry<IBinder, SensorDescriptor>> iterator =
-                    mSensorDescriptors.entrySet().iterator();
-            if (iterator.hasNext()) {
-                final Map.Entry<IBinder, SensorDescriptor> entry = iterator.next();
-                final IBinder token = entry.getKey();
-                final SensorDescriptor sensorDescriptor = entry.getValue();
-                iterator.remove();
-                closeSensorDescriptorLocked(token, sensorDescriptor);
-            }
+            mSensorDescriptors.values().forEach(
+                    descriptor -> mSensorManagerInternal.removeRuntimeSensor(
+                            descriptor.getHandle()));
+            mSensorDescriptors.clear();
         }
     }
 
@@ -110,19 +104,9 @@ public class SensorController {
             throw new SensorCreationException("Received an invalid virtual sensor handle.");
         }
 
-        // The handle is valid from here, so ensure that all failures clean it up.
-        final BinderDeathRecipient binderDeathRecipient;
-        try {
-            binderDeathRecipient = new BinderDeathRecipient(sensorToken);
-            sensorToken.linkToDeath(binderDeathRecipient, /* flags= */ 0);
-        } catch (RemoteException e) {
-            mSensorManagerInternal.removeRuntimeSensor(handle);
-            throw new SensorCreationException("Client died before sensor could be created.", e);
-        }
-
         synchronized (mLock) {
             SensorDescriptor sensorDescriptor = new SensorDescriptor(
-                    handle, config.getType(), config.getName(), binderDeathRecipient);
+                    handle, config.getType(), config.getName());
             mSensorDescriptors.put(sensorToken, sensorDescriptor);
         }
         return handle;
@@ -149,15 +133,8 @@ public class SensorController {
             if (sensorDescriptor == null) {
                 throw new IllegalArgumentException("Could not unregister sensor for given token");
             }
-            closeSensorDescriptorLocked(token, sensorDescriptor);
+            mSensorManagerInternal.removeRuntimeSensor(sensorDescriptor.getHandle());
         }
-    }
-
-    @GuardedBy("mLock")
-    private void closeSensorDescriptorLocked(IBinder token, SensorDescriptor sensorDescriptor) {
-        token.unlinkToDeath(sensorDescriptor.getDeathRecipient(), /* flags= */ 0);
-        final int handle = sensorDescriptor.getHandle();
-        mSensorManagerInternal.removeRuntimeSensor(handle);
     }
 
 
@@ -177,7 +154,7 @@ public class SensorController {
     void addSensorForTesting(IBinder deviceToken, int handle, int type, String name) {
         synchronized (mLock) {
             mSensorDescriptors.put(deviceToken,
-                    new SensorDescriptor(handle, type, name, () -> {}));
+                    new SensorDescriptor(handle, type, name));
         }
     }
 
@@ -285,13 +262,11 @@ public class SensorController {
     static final class SensorDescriptor {
 
         private final int mHandle;
-        private final IBinder.DeathRecipient mDeathRecipient;
         private final int mType;
         private final String mName;
 
-        SensorDescriptor(int handle, int type, String name, IBinder.DeathRecipient deathRecipient) {
+        SensorDescriptor(int handle, int type, String name) {
             mHandle = handle;
-            mDeathRecipient = deathRecipient;
             mType = type;
             mName = name;
         }
@@ -303,26 +278,6 @@ public class SensorController {
         }
         public String getName() {
             return mName;
-        }
-        public IBinder.DeathRecipient getDeathRecipient() {
-            return mDeathRecipient;
-        }
-    }
-
-    private final class BinderDeathRecipient implements IBinder.DeathRecipient {
-        private final IBinder mSensorToken;
-
-        BinderDeathRecipient(IBinder sensorToken) {
-            mSensorToken = sensorToken;
-        }
-
-        @Override
-        public void binderDied() {
-            // All callers are expected to call {@link VirtualDevice#unregisterSensor} before
-            // quitting, which removes this death recipient. If this is invoked, the remote end
-            // died, or they disposed of the object without properly unregistering.
-            Slog.e(TAG, "Virtual sensor controller binder died");
-            unregisterSensor(mSensorToken);
         }
     }
 
