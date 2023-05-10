@@ -166,7 +166,7 @@ public final class UiccCardInfo implements Parcelable {
                 + " Please Use UiccPortInfo API instead");
         }
         //always return ICCID from first port.
-        return getPorts().stream().findFirst().get().getIccId();
+        return mPortList.isEmpty() ? null : mPortList.get(0).getIccId();
     }
 
     /**

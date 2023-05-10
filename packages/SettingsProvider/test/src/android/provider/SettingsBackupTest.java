@@ -77,7 +77,8 @@ public class SettingsBackupTest {
                     Settings.System.SCREEN_BRIGHTNESS, // removed in P
                     Settings.System.SETUP_WIZARD_HAS_RUN, // Only used by SuW
                     Settings.System.SHOW_GTALK_SERVICE_STATUS, // candidate for backup?
-                    Settings.System.SHOW_TOUCHES, // bug?
+                    Settings.System.SHOW_TOUCHES,
+                    Settings.System.SHOW_KEY_PRESSES,
                     Settings.System.SIP_ADDRESS_ONLY, // value, not a setting
                     Settings.System.SIP_ALWAYS, // value, not a setting
                     Settings.System.SYSTEM_LOCALES, // bug?
@@ -114,6 +115,8 @@ public class SettingsBackupTest {
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     Settings.Global.AIRPLANE_MODE_ON,
                     Settings.Global.AIRPLANE_MODE_RADIOS,
+                    Settings.Global.SATELLITE_MODE_RADIOS,
+                    Settings.Global.SATELLITE_MODE_ENABLED,
                     Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS,
                     Settings.Global.ALLOW_USER_SWITCHING_WHEN_SYSTEM_USER_LOCKED,
                     Settings.Global.ALWAYS_FINISH_ACTIVITIES,
@@ -137,6 +140,7 @@ public class SettingsBackupTest {
                     Settings.Global.AUTOFILL_LOGGING_LEVEL,
                     Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS,
+                    Settings.Global.AUTO_TIME_ZONE_EXPLICIT,
                     Settings.Global.AVERAGE_TIME_TO_DISCHARGE,
                     Settings.Global.BATTERY_CHARGING_STATE_UPDATE_DELAY,
                     Settings.Global.BATTERY_ESTIMATES_LAST_UPDATE_TIME,
@@ -257,6 +261,7 @@ public class SettingsBackupTest {
                     Settings.Global.EMERGENCY_AFFORDANCE_NEEDED,
                     Settings.Global.EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS,
                     Settings.Global.EMERGENCY_GESTURE_TAP_DETECTION_MIN_TIME_MS,
+                    Settings.Global.EMERGENCY_GESTURE_STICKY_UI_MAX_DURATION_MILLIS,
                     Settings.Global.EMULATE_DISPLAY_CUTOUT,
                     Settings.Global.ENABLE_ACCESSIBILITY_GLOBAL_GESTURE_ENABLED,
                     Settings.Global.ENABLE_CACHE_QUOTA_CALCULATION,
@@ -264,13 +269,11 @@ public class SettingsBackupTest {
                     Settings.Global.ENABLE_DELETION_HELPER_NO_THRESHOLD_TOGGLE,
                     Settings.Global.ENABLE_DISKSTATS_LOGGING,
                     Settings.Global.ENABLE_EPHEMERAL_FEATURE,
-                    Settings.Global.ENABLE_RESTRICTED_BUCKET,
                     Settings.Global.ENABLE_TARE,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_ENABLED,
                     Settings.Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                     Settings.Global.SMART_REPLIES_IN_NOTIFICATIONS_FLAGS,
                     Settings.Global.SMART_SUGGESTIONS_IN_NOTIFICATIONS_FLAGS,
-                    Settings.Global.STYLUS_HANDWRITING_ENABLED,
                     Settings.Global.STYLUS_EVER_USED,
                     Settings.Global.ENABLE_ADB_INCREMENTAL_INSTALL_DEFAULT,
                     Settings.Global.ENABLE_MULTI_SLOT_TIMEOUT_MILLIS,
@@ -372,7 +375,6 @@ public class SettingsBackupTest {
                     Settings.Global.NETPOLICY_QUOTA_FRAC_JOBS,
                     Settings.Global.NETPOLICY_QUOTA_FRAC_MULTIPATH,
                     Settings.Global.NETPOLICY_OVERRIDE_ENABLED,
-                    Settings.Global.NETWORK_AVOID_BAD_WIFI,
                     Settings.Global.NETWORK_DEFAULT_DAILY_MULTIPATH_QUOTA_BYTES,
                     Settings.Global.NETWORK_METERED_MULTIPATH_PREFERENCE,
                     Settings.Global.NETWORK_WATCHLIST_LAST_REPORT_TIME,
@@ -420,6 +422,7 @@ public class SettingsBackupTest {
                     Settings.Global.RADIO_NFC,
                     Settings.Global.RADIO_WIFI,
                     Settings.Global.RADIO_WIMAX,
+                    Settings.Global.RADIO_UWB,
                     Settings.Global.REMOVE_GUEST_ON_EXIT,
                     Settings.Global.RECOMMENDED_NETWORK_EVALUATOR_CACHE_EXPIRY_MS,
                     Settings.Global.READ_EXTERNAL_STORAGE_ENFORCED_DEFAULT,
@@ -447,6 +450,7 @@ public class SettingsBackupTest {
                     Settings.Global.SHOW_PEOPLE_SPACE,
                     Settings.Global.SHOW_NEW_NOTIF_DISMISS,
                     Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
+                    Settings.Global.SHOW_TARE_DEVELOPER_OPTIONS,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
                     Settings.Global.SIGNED_CONFIG_VERSION,
@@ -625,7 +629,6 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.STEM_3_DATA,
                     Settings.Global.Wearable.STEM_3_DEFAULT_DATA,
                     Settings.Global.Wearable.WEAR_OS_VERSION_STRING,
-                    Settings.Global.Wearable.BUTTON_SET,
                     Settings.Global.Wearable.SIDE_BUTTON,
                     Settings.Global.Wearable.ANDROID_WEAR_VERSION,
                     Settings.Global.Wearable.SYSTEM_CAPABILITIES,
@@ -641,6 +644,7 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.PAIRED_DEVICE_OS_TYPE,
                     Settings.Global.Wearable.COMPANION_BLE_ROLE,
                     Settings.Global.Wearable.COMPANION_NAME,
+                    Settings.Global.Wearable.COMPANION_APP_NAME,
                     Settings.Global.Wearable.USER_HFP_CLIENT_SETTING,
                     Settings.Global.Wearable.COMPANION_OS_VERSION,
                     Settings.Global.Wearable.ENABLE_ALL_LANGUAGES,
@@ -660,13 +664,21 @@ public class SettingsBackupTest {
                     Settings.Global.Wearable.SCREEN_UNLOCK_SOUND_ENABLED,
                     Settings.Global.Wearable.BEDTIME_MODE,
                     Settings.Global.Wearable.BEDTIME_HARD_MODE,
-                    Settings.Global.Wearable.EARLY_UPDATES_STATUS,
                     Settings.Global.Wearable.RSB_WAKE_ENABLED,
                     Settings.Global.Wearable.LOCK_SCREEN_STATE,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_ENABLED,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_TYPE,
                     Settings.Global.Wearable.ACCESSIBILITY_VIBRATION_WATCH_SPEED,
-                    Settings.Global.Wearable.SCREENSHOT_ENABLED);
+                    Settings.Global.Wearable.SCREENSHOT_ENABLED,
+                    Settings.Global.Wearable.DISABLE_AOD_WHILE_PLUGGED,
+                    Settings.Global.Wearable.NETWORK_LOCATION_OPT_IN,
+                    Settings.Global.Wearable.CUSTOM_COLOR_FOREGROUND,
+                    Settings.Global.Wearable.CUSTOM_COLOR_BACKGROUND,
+                    Settings.Global.Wearable.PHONE_SWITCHING_STATUS,
+                    Settings.Global.Wearable.TETHER_CONFIG_STATE,
+                    Settings.Global.Wearable.PHONE_SWITCHING_SUPPORTED,
+                    Settings.Global.Wearable.WEAR_MEDIA_CONTROLS_PACKAGE,
+                    Settings.Global.Wearable.WEAR_MEDIA_SESSIONS_PACKAGE);
 
     private static final Set<String> BACKUP_DENY_LIST_SECURE_SETTINGS =
              newHashSet(
@@ -719,6 +731,8 @@ public class SettingsBackupTest {
                  Settings.Secure.DOCKED_CLOCK_FACE,
                  Settings.Secure.DOZE_PULSE_ON_LONG_PRESS,
                  Settings.Secure.EMERGENCY_ASSISTANCE_APPLICATION,
+                 Settings.Secure.EMERGENCY_GESTURE_UI_SHOWING,
+                 Settings.Secure.EMERGENCY_GESTURE_UI_LAST_STARTED_MILLIS,
                  Settings.Secure.ENABLED_INPUT_METHODS,  // Intentionally removed in P
                  Settings.Secure.ENABLED_NOTIFICATION_ASSISTANT,
                  Settings.Secure.ENABLED_NOTIFICATION_LISTENERS,
@@ -780,6 +794,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SMS_DEFAULT_APPLICATION,
                  Settings.Secure.SPELL_CHECKER_ENABLED,  // Intentionally removed in Q
                  Settings.Secure.STYLUS_BUTTONS_ENABLED,
+                 Settings.Secure.STYLUS_HANDWRITING_ENABLED,
                  Settings.Secure.TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.KNOWN_TRUST_AGENTS_INITIALIZED,
                  Settings.Secure.TV_APP_USES_NON_SYSTEM_INPUTS,
@@ -827,7 +842,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
                  Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                  Settings.Secure.UI_TRANSLATION_ENABLED,
-                 Settings.Secure.CREDENTIAL_SERVICE);
+                 Settings.Secure.CREDENTIAL_SERVICE,
+                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {

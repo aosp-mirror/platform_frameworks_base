@@ -16,12 +16,16 @@
 
 package android.window;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.SurfaceControl;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Information when removing a starting window of a particular task.
@@ -55,11 +59,28 @@ public final class StartingWindowRemovalInfo implements Parcelable {
      */
     public boolean playRevealAnimation;
 
+    /** The mode is no need to defer removing the starting window for IME */
+    public static final int DEFER_MODE_NONE = 0;
+
+    /** The mode to defer removing the starting window until IME has drawn */
+    public static final int DEFER_MODE_NORMAL = 1;
+
+    /** The mode to defer the starting window removal until IME drawn and finished the rotation */
+    public static final int DEFER_MODE_ROTATION = 2;
+
+    @IntDef(prefix = { "DEFER_MODE_" }, value = {
+            DEFER_MODE_NONE,
+            DEFER_MODE_NORMAL,
+            DEFER_MODE_ROTATION,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface DeferMode {}
+
     /**
      * Whether need to defer removing the starting window for IME.
      * @hide
      */
-    public boolean deferRemoveForIme;
+    public @DeferMode int deferRemoveForImeMode;
 
     /**
      * The rounded corner radius
@@ -95,7 +116,7 @@ public final class StartingWindowRemovalInfo implements Parcelable {
         windowAnimationLeash = source.readTypedObject(SurfaceControl.CREATOR);
         mainFrame = source.readTypedObject(Rect.CREATOR);
         playRevealAnimation = source.readBoolean();
-        deferRemoveForIme = source.readBoolean();
+        deferRemoveForImeMode = source.readInt();
         roundedCornerRadius = source.readFloat();
         windowlessSurface = source.readBoolean();
         removeImmediately = source.readBoolean();
@@ -107,7 +128,7 @@ public final class StartingWindowRemovalInfo implements Parcelable {
         dest.writeTypedObject(windowAnimationLeash, flags);
         dest.writeTypedObject(mainFrame, flags);
         dest.writeBoolean(playRevealAnimation);
-        dest.writeBoolean(deferRemoveForIme);
+        dest.writeInt(deferRemoveForImeMode);
         dest.writeFloat(roundedCornerRadius);
         dest.writeBoolean(windowlessSurface);
         dest.writeBoolean(removeImmediately);
@@ -119,7 +140,7 @@ public final class StartingWindowRemovalInfo implements Parcelable {
                 + " frame=" + mainFrame
                 + " playRevealAnimation=" + playRevealAnimation
                 + " roundedCornerRadius=" + roundedCornerRadius
-                + " deferRemoveForIme=" + deferRemoveForIme
+                + " deferRemoveForImeMode=" + deferRemoveForImeMode
                 + " windowlessSurface=" + windowlessSurface
                 + " removeImmediately=" + removeImmediately + "}";
     }

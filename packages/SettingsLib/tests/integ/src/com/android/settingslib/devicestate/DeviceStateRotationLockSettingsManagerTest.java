@@ -70,12 +70,20 @@ public class DeviceStateRotationLockSettingsManagerTest {
         when(mMockContext.getApplicationContext()).thenReturn(mMockContext);
         when(mMockContext.getResources()).thenReturn(mMockResources);
         when(mMockContext.getContentResolver()).thenReturn(context.getContentResolver());
+        when(mMockResources.getStringArray(R.array.config_perDeviceStateRotationLockDefaults))
+                .thenReturn(new String[]{"0:1", "1:0:2", "2:2"});
+        when(mMockResources.getIntArray(R.array.config_foldedDeviceStates))
+                .thenReturn(new int[]{0});
+        when(mMockResources.getIntArray(R.array.config_halfFoldedDeviceStates))
+                .thenReturn(new int[]{1});
+        when(mMockResources.getIntArray(R.array.config_openDeviceStates))
+                .thenReturn(new int[]{2});
         mFakeSecureSettings.registerContentObserver(
                 Settings.Secure.DEVICE_STATE_ROTATION_LOCK,
                 /* notifyForDescendents= */ false, //NOTYPO
                 mContentObserver,
                 UserHandle.USER_CURRENT);
-        mManager = new DeviceStateRotationLockSettingsManager(context, mFakeSecureSettings);
+        mManager = new DeviceStateRotationLockSettingsManager(mMockContext, mFakeSecureSettings);
     }
 
     @Test
@@ -106,10 +114,25 @@ public class DeviceStateRotationLockSettingsManagerTest {
     }
 
     @Test
+    public void updateSetting_twiceWithSameValue_persistedValueDifferent_persistsAgain() {
+        mManager.updateSetting(/* deviceState= */ 1, /* rotationLocked= */ true);
+        // This persists a different setting than what was set above. It simulates the persisted
+        // setting being changed from a different process.
+        persistSettings("0:1:1:2:2:2");
+        mNumSettingsChanges = 0;
+
+        // Updating again with the same value as in the first line of the test should persist the
+        // setting, as it is different to what is actually persisted.
+        mManager.updateSetting(/* deviceState= */ 1, /* rotationLocked= */ true);
+
+        assertThat(mNumSettingsChanges).isEqualTo(1);
+    }
+
+    @Test
     public void getSettableDeviceStates_returnsExpectedValuesInOriginalOrder() {
         when(mMockResources.getStringArray(
                 R.array.config_perDeviceStateRotationLockDefaults)).thenReturn(
-                new String[]{"2:2", "4:0", "1:1", "0:0"});
+                new String[]{"2:1", "1:0:1", "0:2"});
 
         List<SettableDeviceState> settableDeviceStates =
                 DeviceStateRotationLockSettingsManager.getInstance(
@@ -117,9 +140,8 @@ public class DeviceStateRotationLockSettingsManagerTest {
 
         assertThat(settableDeviceStates).containsExactly(
                 new SettableDeviceState(/* deviceState= */ 2, /* isSettable= */ true),
-                new SettableDeviceState(/* deviceState= */ 4, /* isSettable= */ false),
-                new SettableDeviceState(/* deviceState= */ 1, /* isSettable= */ true),
-                new SettableDeviceState(/* deviceState= */ 0, /* isSettable= */ false)
+                new SettableDeviceState(/* deviceState= */ 1, /* isSettable= */ false),
+                new SettableDeviceState(/* deviceState= */ 0, /* isSettable= */ true)
         ).inOrder();
     }
 

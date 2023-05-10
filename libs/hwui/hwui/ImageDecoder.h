@@ -79,7 +79,7 @@ public:
     // Set whether the ImageDecoder should handle RestorePrevious frames.
     void setHandleRestorePrevious(bool handle);
 
-    SkCodec::Result extractGainmap(Bitmap* destination);
+    SkCodec::Result extractGainmap(Bitmap* destination, bool isShared);
 
 private:
     // State machine for keeping track of how to handle RestorePrevious (RP)

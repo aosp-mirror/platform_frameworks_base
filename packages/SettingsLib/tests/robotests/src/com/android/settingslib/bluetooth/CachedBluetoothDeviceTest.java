@@ -1150,9 +1150,11 @@ public class CachedBluetoothDeviceTest {
         assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
         assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
         assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
+        verify(mCachedDevice).fillData();
         assertThat(mSubCachedDevice.mRssi).isEqualTo(RSSI_1);
         assertThat(mSubCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
         assertThat(mSubCachedDevice.mDevice).isEqualTo(mDevice);
+        verify(mSubCachedDevice).fillData();
         assertThat(mCachedDevice.getMemberDevice().contains(mSubCachedDevice)).isTrue();
     }
 

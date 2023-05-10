@@ -39,7 +39,7 @@ oneway interface ITvInteractiveAppClient {
     void onSessionStateChanged(int state, int err, int seq);
     void onBiInteractiveAppCreated(in Uri biIAppUri, in String biIAppId, int seq);
     void onTeletextAppStateChanged(int state, int seq);
-    void onAdBuffer(in AdBuffer buffer, int seq);
+    void onAdBufferReady(in AdBuffer buffer, int seq);
     void onCommandRequest(in String cmdType, in Bundle parameters, int seq);
     void onTimeShiftCommandRequest(in String cmdType, in Bundle parameters, int seq);
     void onSetVideoBounds(in Rect rect, int seq);

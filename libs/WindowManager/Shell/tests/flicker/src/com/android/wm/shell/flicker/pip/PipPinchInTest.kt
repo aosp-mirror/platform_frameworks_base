@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
@@ -34,6 +35,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 270677470)
 class PipPinchInTest(flicker: FlickerTest) : PipTransition(flicker) {
     override val transition: FlickerBuilder.() -> Unit
         get() = buildTransition { transitions { pipApp.pinchInPipWindow(wmHelper, 0.4f, 30) } }

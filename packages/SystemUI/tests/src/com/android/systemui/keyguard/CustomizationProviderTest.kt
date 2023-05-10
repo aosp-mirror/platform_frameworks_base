@@ -33,6 +33,7 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.FakeKeyguardQuickAffordanceConfig
@@ -94,6 +95,8 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
+    private lateinit var dockManager: DockManagerFake
+
     private lateinit var underTest: CustomizationProvider
     private lateinit var testScope: TestScope
 
@@ -103,6 +106,8 @@ class CustomizationProviderTest : SysuiTestCase() {
         whenever(previewRenderer.surfacePackage).thenReturn(previewSurfacePackage)
         whenever(previewRendererFactory.create(any())).thenReturn(previewRenderer)
         whenever(backgroundHandler.looper).thenReturn(TestableLooper.get(this).looper)
+
+        dockManager = DockManagerFake()
 
         underTest = CustomizationProvider()
         val testDispatcher = UnconfinedTestDispatcher()
@@ -188,10 +193,12 @@ class CustomizationProviderTest : SysuiTestCase() {
                 launchAnimator = launchAnimator,
                 logger = logger,
                 devicePolicyManager = devicePolicyManager,
+                dockManager = dockManager,
                 backgroundDispatcher = testDispatcher,
             )
         underTest.previewManager =
             KeyguardRemotePreviewManager(
+                applicationScope = testScope.backgroundScope,
                 previewRendererFactory = previewRendererFactory,
                 mainDispatcher = testDispatcher,
                 backgroundHandler = backgroundHandler,
@@ -210,7 +217,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun `onAttachInfo - reportsContext`() {
+    fun onAttachInfo_reportsContext() {
         val callback: SystemUIAppComponentFactoryBase.ContextAvailableCallback = mock()
         underTest.setContextAvailableCallback(callback)
 
@@ -253,7 +260,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     }
 
     @Test
-    fun `insert and query selection`() =
+    fun insertAndQuerySelection() =
         testScope.runTest {
             val slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START
             val affordanceId = AFFORDANCE_2
@@ -277,7 +284,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `query slots`() =
+    fun querySlotsProvidesTwoSlots() =
         testScope.runTest {
             assertThat(querySlots())
                 .isEqualTo(
@@ -295,7 +302,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `query affordances`() =
+    fun queryAffordancesProvidesTwoAffordances() =
         testScope.runTest {
             assertThat(queryAffordances())
                 .isEqualTo(
@@ -315,7 +322,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `delete and query selection`() =
+    fun deleteAndQuerySelection() =
         testScope.runTest {
             insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,
@@ -350,7 +357,7 @@ class CustomizationProviderTest : SysuiTestCase() {
         }
 
     @Test
-    fun `delete all selections in a slot`() =
+    fun deleteAllSelectionsInAslot() =
         testScope.runTest {
             insertSelection(
                 slotId = KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_START,

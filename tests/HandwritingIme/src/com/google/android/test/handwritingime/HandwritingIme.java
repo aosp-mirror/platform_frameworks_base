@@ -25,7 +25,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.CursorAnchorInfo;
 import android.view.inputmethod.DeleteGesture;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.HandwritingGesture;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InsertGesture;
@@ -34,6 +36,7 @@ import android.view.inputmethod.RemoveSpaceGesture;
 import android.view.inputmethod.SelectGesture;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
@@ -43,9 +46,6 @@ import java.util.Random;
 import java.util.function.IntConsumer;
 
 public class HandwritingIme extends InputMethodService {
-
-    public static final int HEIGHT_DP = 100;
-
     private static final int OP_NONE = 0;
     private static final int OP_SELECT = 1;
     private static final int OP_DELETE = 2;
@@ -61,6 +61,12 @@ public class HandwritingIme extends InputMethodService {
     private Spinner mRichGestureModeSpinner;
     private Spinner mRichGestureGranularitySpinner;
     private PointF mRichGestureStartPoint;
+
+    static final int BOUNDS_INFO_NONE = 0;
+    static final int BOUNDS_INFO_VISIBLE_LINE_BOUNDS = 1;
+    static final int BOUNDS_INFO_EDITOR_BOUNDS = 2;
+    private int mBoundsInfoMode = BOUNDS_INFO_NONE;
+    private LinearLayout mBoundsInfoCheckBoxes;
 
     private final IntConsumer mResultConsumer = value -> Log.d(TAG, "Gesture result: " + value);
 
@@ -201,12 +207,7 @@ public class HandwritingIme extends InputMethodService {
     public View onCreateInputView() {
         Log.d(TAG, "onCreateInputView");
         final ViewGroup view = new FrameLayout(this);
-        final View inner = new View(this);
-        final float density = getResources().getDisplayMetrics().density;
-        final int height = (int) (HEIGHT_DP * density);
         view.setPadding(0, 0, 0, 0);
-        view.addView(inner, new FrameLayout.LayoutParams(
-                FrameLayout.LayoutParams.MATCH_PARENT, height));
 
         LinearLayout layout = new LinearLayout(this);
         layout.setLayoutParams(new LinearLayout.LayoutParams(
@@ -214,9 +215,9 @@ public class HandwritingIme extends InputMethodService {
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.addView(getRichGestureActionsSpinner());
         layout.addView(getRichGestureGranularitySpinner());
-
+        layout.addView(getBoundsInfoCheckBoxes());
+        layout.setBackgroundColor(getColor(R.color.holo_green_light));
         view.addView(layout);
-        inner.setBackgroundColor(getColor(R.color.holo_green_light));
 
         return view;
     }
@@ -228,7 +229,7 @@ public class HandwritingIme extends InputMethodService {
         mRichGestureModeSpinner = new Spinner(this);
         mRichGestureModeSpinner.setPadding(100, 0, 100, 0);
         mRichGestureModeSpinner.setTooltipText("Handwriting IME mode");
-        String[] items = new String[] {
+        String[] items = new String[]{
                 "Handwriting IME - Rich gesture disabled",
                 "Rich gesture SELECT",
                 "Rich gesture DELETE",
@@ -257,6 +258,69 @@ public class HandwritingIme extends InputMethodService {
         });
         mRichGestureModeSpinner.setSelection(0); // default disabled
         return mRichGestureModeSpinner;
+    }
+
+    private void updateCursorAnchorInfo(int boundsInfoMode) {
+        final InputConnection ic = getCurrentInputConnection();
+        if (ic == null) return;
+
+        if (boundsInfoMode == BOUNDS_INFO_NONE) {
+            ic.requestCursorUpdates(0);
+            return;
+        }
+
+        final int cursorUpdateMode = InputConnection.CURSOR_UPDATE_MONITOR;
+        int cursorUpdateFilter = 0;
+        if ((boundsInfoMode & BOUNDS_INFO_EDITOR_BOUNDS) != 0) {
+            cursorUpdateFilter |= InputConnection.CURSOR_UPDATE_FILTER_EDITOR_BOUNDS;
+        }
+
+        if ((boundsInfoMode & BOUNDS_INFO_VISIBLE_LINE_BOUNDS) != 0) {
+            cursorUpdateFilter |= InputConnection.CURSOR_UPDATE_FILTER_VISIBLE_LINE_BOUNDS;
+        }
+        ic.requestCursorUpdates(cursorUpdateMode | cursorUpdateFilter);
+    }
+
+    private void updateBoundsInfoMode() {
+        if (mInk != null) {
+            mInk.setBoundsInfoMode(mBoundsInfoMode);
+        }
+        updateCursorAnchorInfo(mBoundsInfoMode);
+    }
+
+    private View getBoundsInfoCheckBoxes() {
+        if (mBoundsInfoCheckBoxes != null) {
+            return mBoundsInfoCheckBoxes;
+        }
+        mBoundsInfoCheckBoxes = new LinearLayout(this);
+        mBoundsInfoCheckBoxes.setPadding(100, 0, 100, 0);
+        mBoundsInfoCheckBoxes.setOrientation(LinearLayout.HORIZONTAL);
+
+        final CheckBox editorBoundsInfoCheckBox = new CheckBox(this);
+        editorBoundsInfoCheckBox.setText("EditorBoundsInfo");
+        editorBoundsInfoCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                mBoundsInfoMode |= BOUNDS_INFO_EDITOR_BOUNDS;
+            } else {
+                mBoundsInfoMode &= ~BOUNDS_INFO_EDITOR_BOUNDS;
+            }
+            updateBoundsInfoMode();
+        });
+
+        final CheckBox visibleLineBoundsInfoCheckBox = new CheckBox(this);
+        visibleLineBoundsInfoCheckBox.setText("VisibleLineBounds");
+        visibleLineBoundsInfoCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                mBoundsInfoMode |= BOUNDS_INFO_VISIBLE_LINE_BOUNDS;
+            } else {
+                mBoundsInfoMode &= ~BOUNDS_INFO_VISIBLE_LINE_BOUNDS;
+            }
+            updateBoundsInfoMode();
+        });
+
+        mBoundsInfoCheckBoxes.addView(editorBoundsInfoCheckBox);
+        mBoundsInfoCheckBoxes.addView(visibleLineBoundsInfoCheckBox);
+        return mBoundsInfoCheckBoxes;
     }
 
     private View getRichGestureGranularitySpinner() {
@@ -294,6 +358,7 @@ public class HandwritingIme extends InputMethodService {
         Log.d(TAG, "onPrepareStylusHandwriting ");
         if (mInk == null) {
             mInk = new InkView(this, new HandwritingFinisherImpl(), new StylusConsumer());
+            mInk.setBoundsInfoMode(mBoundsInfoMode);
         }
     }
 
@@ -322,5 +387,17 @@ public class HandwritingIme extends InputMethodService {
 
     private boolean areRichGesturesEnabled() {
         return mRichGestureMode != OP_NONE;
+    }
+
+    @Override
+    public void onUpdateCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
+        if (mInk != null) {
+            mInk.setCursorAnchorInfo(cursorAnchorInfo);
+        }
+    }
+
+    @Override
+    public void onStartInput(EditorInfo attribute, boolean restarting) {
+        updateCursorAnchorInfo(mBoundsInfoMode);
     }
 }

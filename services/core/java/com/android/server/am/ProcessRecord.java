@@ -16,9 +16,14 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_ACTIVITY;
+
+import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
+
+import static java.util.Objects.requireNonNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -42,6 +47,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.server.ServerProtoEnums;
+import android.system.OsConstants;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -63,7 +69,6 @@ import com.android.server.wm.WindowProcessListener;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Full information about a particular process that
@@ -419,6 +424,16 @@ class ProcessRecord implements WindowProcessListener {
      */
     Runnable mSuccessorStartRunnable;
 
+    /**
+     * Whether or not the process group of this process has been created.
+     */
+    volatile boolean mProcessGroupCreated;
+
+    /**
+     * Whether or not we should skip the process group creation.
+     */
+    volatile boolean mSkipProcessGroupCreation;
+
     void setStartParams(int startUid, HostingRecord hostingRecord, String seInfo,
             long startUptime, long startElapsedTime) {
         this.mStartUid = startUid;
@@ -575,7 +590,9 @@ class ProcessRecord implements WindowProcessListener {
         processName = _processName;
         sdkSandboxClientAppPackage = _sdkSandboxClientAppPackage;
         if (isSdkSandbox) {
-            sdkSandboxClientAppVolumeUuid = getClientInfoForSdkSandbox().volumeUuid;
+            final ApplicationInfo clientInfo = getClientInfoForSdkSandbox();
+            sdkSandboxClientAppVolumeUuid = clientInfo != null
+                    ? clientInfo.volumeUuid : null;
         } else {
             sdkSandboxClientAppVolumeUuid = null;
         }
@@ -635,6 +652,11 @@ class ProcessRecord implements WindowProcessListener {
         synchronized (mProfile.mProfilerLock) {
             mProfile.setPid(pid);
         }
+    }
+
+    @GuardedBy({"mService", "mProcLock"})
+    int getSetAdj() {
+        return mState.getSetAdj();
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
@@ -1039,7 +1061,13 @@ class ProcessRecord implements WindowProcessListener {
         mInFullBackup = inFullBackup;
     }
 
+    @GuardedBy("mService")
+    public void setCached(boolean cached) {
+        mState.setCached(cached);
+    }
+
     @Override
+    @GuardedBy("mService")
     public boolean isCached() {
         return mState.isCached();
     }
@@ -1169,8 +1197,26 @@ class ProcessRecord implements WindowProcessListener {
                 EventLog.writeEvent(EventLogTags.AM_KILL,
                         userId, mPid, processName, mState.getSetAdj(), reason);
                 Process.killProcessQuiet(mPid);
-                if (asyncKPG) ProcessList.killProcessGroup(uid, mPid);
-                else Process.killProcessGroup(uid, mPid);
+                final boolean killProcessGroup;
+                if (mHostingRecord != null
+                        && (mHostingRecord.usesWebviewZygote() || mHostingRecord.usesAppZygote())) {
+                    synchronized (ProcessRecord.this) {
+                        killProcessGroup = mProcessGroupCreated;
+                        if (!killProcessGroup) {
+                            // The process group hasn't been created, request to skip it.
+                            mSkipProcessGroupCreation = true;
+                        }
+                    }
+                } else {
+                    killProcessGroup = true;
+                }
+                if (killProcessGroup) {
+                    if (asyncKPG) {
+                        ProcessList.killProcessGroup(uid, mPid);
+                    } else {
+                        Process.sendSignalToProcessGroup(uid, mPid, OsConstants.SIGKILL);
+                    }
+                }
             } else {
                 mPendingStart = false;
             }
@@ -1339,16 +1385,19 @@ class ProcessRecord implements WindowProcessListener {
      * {@param originatingToken} if you have one such originating token, this is useful for tracing
      * back the grant in the case of the notification token.
      */
-    void addOrUpdateBackgroundStartPrivileges(Binder entity,
-            BackgroundStartPrivileges backgroundStartPrivileges) {
-        Objects.requireNonNull(entity);
+    void addOrUpdateBackgroundStartPrivileges(@NonNull Binder entity,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges) {
+        requireNonNull(entity, "entity");
+        requireNonNull(backgroundStartPrivileges, "backgroundStartPrivileges");
+        checkArgument(backgroundStartPrivileges.allowsAny(),
+                "backgroundStartPrivileges does not allow anything");
         mWindowProcessController.addOrUpdateBackgroundStartPrivileges(entity,
                 backgroundStartPrivileges);
         setBackgroundStartPrivileges(entity, backgroundStartPrivileges);
     }
 
-    void removeBackgroundStartPrivileges(Binder entity) {
-        Objects.requireNonNull(entity);
+    void removeBackgroundStartPrivileges(@NonNull Binder entity) {
+        requireNonNull(entity, "entity");
         mWindowProcessController.removeBackgroundStartPrivileges(entity);
         setBackgroundStartPrivileges(entity, null);
     }
@@ -1434,7 +1483,7 @@ class ProcessRecord implements WindowProcessListener {
             }
             mService.updateLruProcessLocked(this, activityChange, null /* client */);
             if (updateOomAdj) {
-                mService.updateOomAdjLocked(this, OomAdjuster.OOM_ADJ_REASON_ACTIVITY);
+                mService.updateOomAdjLocked(this, OOM_ADJ_REASON_ACTIVITY);
             }
         }
     }

@@ -396,6 +396,12 @@ public class TvRecordingClient {
         }
     }
 
+    // For testing purposes only.
+    /** @hide */
+    public TvInputManager.SessionCallback getSessionCallback() {
+        return mSessionCallback;
+    }
+
     /**
      * Callback used to receive various status updates on the
      * {@link android.media.tv.TvInputService.RecordingSession}

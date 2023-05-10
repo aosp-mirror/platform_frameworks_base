@@ -16,23 +16,19 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
 import android.tools.common.Rotation
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
-import android.tools.device.flicker.isShellTransitionsEnabled
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.BaseTest
+import com.android.server.wm.flicker.helpers.ImeShownOnAppStartHelper
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
 import com.android.server.wm.flicker.helpers.setRotation
-import org.junit.Assume
-import org.junit.Before
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -53,11 +49,6 @@ open class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: Flicker
     private val testApp = SimpleAppHelper(instrumentation)
     private val imeTestApp =
         ImeShownOnAppStartHelper(instrumentation, flicker.scenario.startRotation)
-
-    @Before
-    open fun before() {
-        Assume.assumeFalse(isShellTransitionsEnabled)
-    }
 
     /** {@inheritDoc} */
     override val transition: FlickerBuilder.() -> Unit = {
@@ -95,9 +86,7 @@ open class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: Flicker
         }
     }
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 265016201)
-    @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
 
     @Presubmit
     @Test
@@ -115,7 +104,7 @@ open class ShowImeOnAppStartWhenLaunchingAppFromQuickSwitchTest(flicker: Flicker
         }
     }
 
-    @FlakyTest(bugId = 244414110)
+    @Presubmit
     @Test
     open fun imeLayerIsVisibleWhenSwitchingToImeApp() {
         flicker.assertLayersStart { isVisible(ComponentNameMatcher.IME) }

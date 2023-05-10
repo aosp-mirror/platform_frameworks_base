@@ -1805,10 +1805,15 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids, 
     if (!is_system_server && getuid() == 0) {
         const int rc = createProcessGroup(uid, getpid());
         if (rc != 0) {
-            fail_fn(rc == -EROFS ? CREATE_ERROR("createProcessGroup failed, kernel missing "
-                                                "CONFIG_CGROUP_CPUACCT?")
-                                 : CREATE_ERROR("createProcessGroup(%d, %d) failed: %s", uid,
-                                                /* pid= */ 0, strerror(-rc)));
+            if (rc == -ESRCH) {
+                // If process is dead, treat this as a non-fatal error
+                ALOGE("createProcessGroup(%d, %d) failed: %s", uid, /* pid= */ 0, strerror(-rc));
+            } else {
+                fail_fn(rc == -EROFS ? CREATE_ERROR("createProcessGroup failed, kernel missing "
+                                                    "CONFIG_CGROUP_CPUACCT?")
+                                     : CREATE_ERROR("createProcessGroup(%d, %d) failed: %s", uid,
+                                                    /* pid= */ 0, strerror(-rc)));
+            }
         }
     }
 
@@ -2291,7 +2296,9 @@ pid_t zygote::ForkCommon(JNIEnv* env, bool is_system_server,
     // region shared with the child process we reduce the number of pages that
     // transition to the private-dirty state when malloc adjusts the meta-data
     // on each of the pages it is managing after the fork.
-    mallopt(M_PURGE, 0);
+    if (mallopt(M_PURGE_ALL, 0) != 1) {
+      mallopt(M_PURGE, 0);
+    }
   }
 
   pid_t pid = fork();

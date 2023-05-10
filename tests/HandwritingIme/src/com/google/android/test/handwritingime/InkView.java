@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowMetrics;
+import android.view.inputmethod.CursorAnchorInfo;
 
 class InkView extends View {
     private static final long FINISH_TIMEOUT = 1500;
@@ -36,6 +37,9 @@ class InkView extends View {
     private float mX, mY;
     private static final float STYLUS_MOVE_TOLERANCE = 1;
     private Runnable mFinishRunnable;
+
+    private CursorAnchorInfo mCursorAnchorInfo;
+    private int mBoundsInfoMode;
 
     InkView(Context context, HandwritingIme.HandwritingFinisher hwController,
             HandwritingIme.StylusConsumer consumer) {
@@ -66,6 +70,7 @@ class InkView extends View {
 
         canvas.drawPath(mPath, mPaint);
         canvas.drawARGB(20, 255, 50, 50);
+        BoundsInfoDrawHelper.draw(canvas, this, mBoundsInfoMode, mCursorAnchorInfo);
     }
 
     private void stylusStart(float x, float y) {
@@ -156,4 +161,15 @@ class InkView extends View {
         return mFinishRunnable;
     }
 
+    void setCursorAnchorInfo(CursorAnchorInfo cursorAnchorInfo) {
+        mCursorAnchorInfo = cursorAnchorInfo;
+        invalidate();
+    }
+
+    void setBoundsInfoMode(int boundsInfoMode) {
+        if (boundsInfoMode != mBoundsInfoMode) {
+            invalidate();
+        }
+        mBoundsInfoMode = boundsInfoMode;
+    }
 }

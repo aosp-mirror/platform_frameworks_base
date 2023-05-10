@@ -57,6 +57,8 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.concurrent.CountDownLatch;
+
 /**
  * Tests for {@link com.android.server.power.hint.HintManagerService}.
  *
@@ -149,29 +151,28 @@ public class HintManagerServiceTest {
         // Set session to background and calling updateHintAllowed() would invoke pause();
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
-        final Object sync = new Object();
+
+        // Using CountDownLatch to ensure above onUidStateChanged() job was digested.
+        final CountDownLatch latch = new CountDownLatch(1);
         FgThread.getHandler().post(() -> {
-            synchronized (sync) {
-                sync.notify();
-            }
+            latch.countDown();
         });
-        synchronized (sync) {
-            sync.wait();
-        }
+        latch.await();
+
         assumeFalse(a.updateHintAllowed());
         verify(mNativeWrapperMock, times(1)).halPauseHintSession(anyLong());
 
         // Set session to foreground and calling updateHintAllowed() would invoke resume();
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0, 0);
+
+        // Using CountDownLatch to ensure above onUidStateChanged() job was digested.
+        final CountDownLatch latch2 = new CountDownLatch(1);
         FgThread.getHandler().post(() -> {
-            synchronized (sync) {
-                sync.notify();
-            }
+            latch2.countDown();
         });
-        synchronized (sync) {
-            sync.wait();
-        }
+        latch2.await();
+
         assumeTrue(a.updateHintAllowed());
         verify(mNativeWrapperMock, times(1)).halResumeHintSession(anyLong());
     }
@@ -237,15 +238,14 @@ public class HintManagerServiceTest {
         // Set session to background, then the duration would not be updated.
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0, 0);
-        final Object sync = new Object();
+
+        // Using CountDownLatch to ensure above onUidStateChanged() job was digested.
+        final CountDownLatch latch = new CountDownLatch(1);
         FgThread.getHandler().post(() -> {
-            synchronized (sync) {
-                sync.notify();
-            }
+            latch.countDown();
         });
-        synchronized (sync) {
-            sync.wait();
-        }
+        latch.await();
+
         assumeFalse(a.updateHintAllowed());
         a.reportActualWorkDuration(DURATIONS_THREE, TIMESTAMPS_THREE);
         verify(mNativeWrapperMock, never()).halReportActualWorkDuration(anyLong(), any(), any());
@@ -287,15 +287,14 @@ public class HintManagerServiceTest {
 
         service.mUidObserver.onUidStateChanged(
                 a.mUid, ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND, 0, 0);
-        final Object sync = new Object();
+
+        // Using CountDownLatch to ensure above onUidStateChanged() job was digested.
+        final CountDownLatch latch = new CountDownLatch(1);
         FgThread.getHandler().post(() -> {
-            synchronized (sync) {
-                sync.notify();
-            }
+            latch.countDown();
         });
-        synchronized (sync) {
-            sync.wait();
-        }
+        latch.await();
+
         assertFalse(a.updateHintAllowed());
     }
 

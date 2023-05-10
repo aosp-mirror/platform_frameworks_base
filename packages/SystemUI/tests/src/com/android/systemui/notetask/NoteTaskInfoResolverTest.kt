@@ -22,8 +22,6 @@ import android.content.pm.PackageManager
 import android.test.suitebuilder.annotation.SmallTest
 import androidx.test.runner.AndroidJUnit4
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.settings.FakeUserTracker
-import com.android.systemui.settings.UserTracker
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
@@ -46,14 +44,13 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
 
     @Mock lateinit var packageManager: PackageManager
     @Mock lateinit var roleManager: RoleManager
-    private val userTracker: UserTracker = FakeUserTracker()
 
     private lateinit var underTest: NoteTaskInfoResolver
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        underTest = NoteTaskInfoResolver(roleManager, packageManager, userTracker)
+        underTest = NoteTaskInfoResolver(roleManager, packageManager)
     }
 
     @Test
@@ -72,11 +69,12 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
             )
             .thenReturn(ApplicationInfo().apply { this.uid = uid })
 
-        val actual = underTest.resolveInfo()
+        val actual = underTest.resolveInfo(user = context.user)
 
         requireNotNull(actual) { "Note task info must not be null" }
         assertThat(actual.packageName).isEqualTo(packageName)
         assertThat(actual.uid).isEqualTo(uid)
+        assertThat(actual.user).isEqualTo(context.user)
     }
 
     @Test
@@ -94,11 +92,12 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
             )
             .thenThrow(PackageManager.NameNotFoundException(packageName))
 
-        val actual = underTest.resolveInfo()
+        val actual = underTest.resolveInfo(user = context.user)
 
         requireNotNull(actual) { "Note task info must not be null" }
         assertThat(actual.packageName).isEqualTo(packageName)
         assertThat(actual.uid).isEqualTo(0)
+        assertThat(actual.user).isEqualTo(context.user)
     }
 
     @Test
@@ -107,7 +106,7 @@ internal class NoteTaskInfoResolverTest : SysuiTestCase() {
             emptyList<String>()
         }
 
-        val actual = underTest.resolveInfo()
+        val actual = underTest.resolveInfo(user = context.user)
 
         assertThat(actual).isNull()
     }

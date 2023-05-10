@@ -327,6 +327,7 @@
         <item>@string/wfcSpnFormat_wifi_calling_wo_hyphen</item>
         <item>@string/wfcSpnFormat_vowifi</item>
         <item>@string/wfcSpnFormat_spn_wifi_calling_vo_hyphen</item>
+        <item>@string/wfcSpnFormat_wifi_call</item>
     </string-array>
 
     <!-- Spn during Wi-Fi Calling: "<operator>" -->
@@ -353,6 +354,8 @@
     <string name="wfcSpnFormat_wifi_calling_wo_hyphen">WiFi Calling</string>
     <!-- Spn during Wi-Fi Calling: "VoWifi" -->
     <string name="wfcSpnFormat_vowifi">VoWifi</string>
+    <!-- Spn during Wi_Fi Calling: "WiFi Call" (without hyphen).  This string is shown in the call banner for calls which take place over a WiFi network. -->
+    <string name="wfcSpnFormat_wifi_call">WiFi Call</string>
 
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
@@ -858,6 +861,12 @@
     <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
     <string name="managed_profile_label">Switch to work profile</string>
 
+    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <string name="user_owner_app_label">Switch to personal <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
+
+    <!-- "Switch" is a verb; it means to change user profile by tapping another user profile name. -->
+    <string name="managed_profile_app_label">Switch to work <xliff:g id="app_name" example="Gmail">%1$s</xliff:g></string>
+
     <!-- Title of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permgrouplab_contacts">Contacts</string>
     <!-- Description of a category of application permissions, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1344,16 +1353,6 @@
     <!-- Description of the background body sensors permission, listed so the user can decide whether to allow the application to access data from body sensors in the background. [CHAR LIMIT=NONE] -->
     <string name="permdesc_bodySensors_background" product="default">Allows the app to access body sensor data, such as heart rate, temperature, and blood oxygen percentage, while the app is in the background.</string>
 
-    <!-- Title of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access body sensor wrist temperature data. [CHAR LIMIT=NONE] -->
-    <string name="permlab_bodySensorsWristTemperature">Access body sensor wrist temperature data while the app is in use.</string>
-    <!-- Description of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_bodySensorsWristTemperature" product="default">Allows the app to access body sensor wrist temperature data, while the app is in use.</string>
-
-    <!-- Title of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access body sensor wrist temperature data. [CHAR LIMIT=NONE] -->
-    <string name="permlab_bodySensors_wristTemperature_background">Access body sensor wrist temperature data while the app is in the background.</string>
-    <!-- Description of the body sensors wrist temperature permission, listed so the user can decide whether to allow the application to access data from body sensors. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default">Allows the app to access body sensor wrist temperature data, while the app is in the background.</string>
-
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">Read calendar events and details</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1459,7 +1458,8 @@
       without your intervention. This may result in unexpected charges or calls.
       Note that this doesn\'t allow the app to call emergency numbers.
       Malicious apps may cost you money by making calls without your
-      confirmation.</string>
+      confirmation, or dial carrier codes which cause incoming calls to be
+      automatically forwarded to another number.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessImsCallService">access IMS call service</string>
@@ -1977,8 +1977,8 @@
     <string name="face_error_user_canceled">Face Unlock canceled by user</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
-    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=90] -->
-    <string name="face_error_lockout_permanent">Too many attempts. Face Unlock disabled.</string>
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=100] -->
+    <string name="face_error_lockout_permanent">Too many attempts. Face Unlock unavailable.</string>
     <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=90] -->
     <string name="face_error_lockout_screen_lock">Too many attempts. Enter screen lock instead.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
@@ -2187,6 +2187,11 @@
     <string name="permlab_highSamplingRateSensors">access sensor data at a high sampling rate</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
     <string name="permdesc_highSamplingRateSensors">Allows the app to sample sensor data at a rate greater than 200 Hz</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR_LIMIT=NONE] -->
+    <string name="permlab_updatePackagesWithoutUserAction">update app without user action</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this.[CHAR_LIMIT=NONE] -->
+    <string name="permdesc_updatePackagesWithoutUserAction">Allows the holder to update the app it previously installed without user action</string>
 
     <!-- Policy administration -->
 
@@ -3787,8 +3792,10 @@
     <!-- Title of the physical keyboard category in the input method selector [CHAR LIMIT=30] -->
     <string name="hardware">Show virtual keyboard</string>
 
-    <!-- Title of the notification to prompt the user to configure physical keyboard settings. -->
-    <string name="select_keyboard_layout_notification_title">Configure physical keyboard</string>
+    <!-- Title of the notification to prompt the user to configure physical keyboard settings. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="select_keyboard_layout_notification_title">Configure <xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g></string>
+    <!-- Title of the notification to prompt the user to configure physical keyboard settings when multiple keyboards connected. [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="select_multiple_keyboards_layout_notification_title">Configure physical keyboards</string>
     <!-- Message of the notification to prompt the user to configure physical keyboard settings
          where the user can associate language with physical keyboard layout. -->
     <string name="select_keyboard_layout_notification_message">Tap to select language and layout</string>
@@ -4595,24 +4602,13 @@
 
     <!-- Message shown in dialog when user goes over a multiple of 100% of the safe weekly dose -->
     <string name="csd_dose_reached_warning" product="default">
-        "Warning,\nYou have exceeded the amount of loud sound signals one can safely listen to in a week over headphones.\n\nGoing over this limit will permanently damage your hearing."
-    </string>
-
-    <!-- Message shown in dialog when user goes over 500% of the safe weekly dose and volume is
-    automatically lowered -->
-    <string name="csd_dose_repeat_warning" product="default">
-        "Warning,\nYou have exceeded 5 times the amount of loud sound signals one can safely listen to in a week over headphones.\n\nVolume has been lowered to protect your hearing."
-    </string>
-
-    <!-- Message shown in dialog when user's dose enters RS2 -->
-    <string name="csd_entering_RS2_warning" product="default">
-        "The level at which you are listening to media can result in hearing damage when sustained over long periods of time.\n\nContinuing to play at this level for long periods of time could damage your hearing."
+        "Keep listening at a high volume?\n\nHeadphone volume has been high for longer than recommended, which can damage your hearing"
     </string>
 
     <!-- Message shown in dialog when user is momentarily listening to unsafely loud content
     over headphones -->
     <string name="csd_momentary_exposure_warning" product="default">
-        "Warning,\nYou are currently listening to loud content played at an unsafe level.\n\nContinuing to listen this loud will permanently damage your hearing."
+        "Loud sound detected\n\nHeadphone volume has been higher than recommended, which can damage your hearing"
     </string>
 
     <!-- Dialog title for dialog shown when the accessibility shortcut is activated, and we want
@@ -5359,15 +5355,11 @@
     <string name="app_suspended_unsuspend_message">Unpause app</string>
 
     <!-- Title of a dialog. This text is confirming that the user wants to turn on access to their work apps, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=30] -->
-    <string name="work_mode_off_title">Turn on work apps?</string>
-    <!-- Text in a dialog. This text is confirming that the user wants to turn on access to their work apps and notifications, which the user had previously paused. "Work" is an adjective. [CHAR LIMIT=NONE] -->
-    <string name="work_mode_off_message">Get access to your work apps and notifications</string>
-    <!-- Title for button to turn on work profile. [CHAR LIMIT=NONE] -->
-    <string name="work_mode_turn_on">Turn on</string>
+    <string name="work_mode_off_title">Unpause work apps?</string>
+    <!-- Title for button to unpause on work profile. [CHAR LIMIT=NONE] -->
+    <string name="work_mode_turn_on">Unpause</string>
     <!-- Title for button to launch the personal safety app to make an emergency call    -->
     <string name="work_mode_emergency_call_button">Emergency</string>
-    <!-- Text shown in a dialog when the user tries to launch a disabled work profile app when work apps are paused-->
-    <string name="work_mode_dialer_off_message">Get access to your work apps and calls</string>
 
     <!-- Title of the dialog that is shown when the user tries to launch a blocked application [CHAR LIMIT=50] -->
     <string name="app_blocked_title">App is not available</string>
@@ -5900,20 +5892,21 @@
     <string name="resolver_cant_access_personal_apps_explanation">This content can\u2019t be opened with personal apps</string>
 
     <!-- Error message. This text lets the user know that they need to turn on work apps in order to share or open content. There's also a button a user can tap to turn on the apps. [CHAR LIMIT=NONE] -->
-    <string name="resolver_turn_on_work_apps">Work profile is paused</string>
-    <!-- Button text. This button turns on a user's work profile so they can access their work apps and data. [CHAR LIMIT=NONE] -->
-    <string name="resolver_switch_on_work">Tap to turn on</string>
+    <string name="resolver_turn_on_work_apps">Work apps are paused</string>
+    <!-- Button text. This button unpauses a user's work apps and data. [CHAR LIMIT=NONE] -->
+    <string name="resolver_switch_on_work">Unpause</string>
 
     <!-- Error message. This text lets the user know that their current work apps don't support the specific content. [CHAR LIMIT=NONE] -->
     <string name="resolver_no_work_apps_available">No work apps</string>
 
     <!-- Error message. This text lets the user know that their current personal apps don't support the specific content. [CHAR LIMIT=NONE] -->
     <string name="resolver_no_personal_apps_available">No personal apps</string>
-
+    <!-- Dialog title. User must choose to open content in a cross-profile app or cancel. [CHAR LIMIT=NONE] -->
+    <string name="miniresolver_open_work">Open work <xliff:g id="app" example="YouTube">%s</xliff:g>?</string>
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
-    <string name="miniresolver_open_in_personal">Open <xliff:g id="app" example="YouTube">%s</xliff:g> in your personal profile?</string>
+    <string name="miniresolver_open_in_personal">Open in personal <xliff:g id="app" example="YouTube">%s</xliff:g>?</string>
     <!-- Dialog title. User must choose between opening content in a cross-profile app or same-profile browser. [CHAR LIMIT=NONE] -->
-    <string name="miniresolver_open_in_work">Open <xliff:g id="app" example="YouTube">%s</xliff:g> in your work profile?</string>
+    <string name="miniresolver_open_in_work">Open in work <xliff:g id="app" example="YouTube">%s</xliff:g>?</string>
     <!-- Button option. Open the link in the personal browser. [CHAR LIMIT=NONE] -->
     <string name="miniresolver_use_personal_browser">Use personal browser</string>
     <!-- Button option. Open the link in the work browser. [CHAR LIMIT=NONE] -->
@@ -6262,6 +6255,27 @@ ul.</string>
     <string name="concurrent_display_notification_thermal_title">Device is too warm</string>
     <!-- Content of concurrent display thermal notification. [CHAR LIMIT=NONE] -->
     <string name="concurrent_display_notification_thermal_content">Dual Screen is unavailable because your phone is getting too warm</string>
+    <!-- Title of concurrent display power saver notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_power_save_title">Dual Screen is unavailable</string>
+    <!-- Content of concurrent display power saver notification. [CHAR LIMIT=NONE] -->
+    <string name="concurrent_display_notification_power_save_content">Dual Screen is unavailable because Battery Saver is on. You can turn this off in Settings.</string>
+    <!-- Text of power saver notification settings button. [CHAR LIMIT=NONE] -->
+    <string name="device_state_notification_settings_button">Go to Settings</string>
     <!-- Text of device state notification turn off button. [CHAR LIMIT=NONE] -->
     <string name="device_state_notification_turn_off_button">Turn off</string>
+
+    <!-- Notification title when a keyboard has been configured [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="keyboard_layout_notification_selected_title"><xliff:g id="device_name" example="Foobar USB Keyboard">%s</xliff:g> configured</string>
+    <!-- Notification message shown when one layout was configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_one_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when two layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_two_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="German">%2$s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when three layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_three_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="German">%2$s</xliff:g>, <xliff:g id="layout_3" example="French">%3$s</xliff:g>. Tap to change.</string>
+    <!-- Notification message shown when more than three layout were configured for a physical keyboard [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_more_than_three_selected_message">Keyboard layout set to <xliff:g id="layout_1" example="English (US)">%1$s</xliff:g>, <xliff:g id="layout_2" example="English (US)">%2$s</xliff:g>, <xliff:g id="layout_3" example="French">%3$s</xliff:g>\u2026 Tap to change.</string>
+    <!-- Notification title when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_TITLE] -->
+    <string name="keyboard_layout_notification_multiple_selected_title">Physical keyboards configured</string>
+    <!-- Notification message when multiple keyboards with selected layouts have been connected the first time simultaneously [CHAR LIMIT=NOTIF_BODY] -->
+    <string name="keyboard_layout_notification_multiple_selected_message">Tap to view keyboards</string>
 </resources>

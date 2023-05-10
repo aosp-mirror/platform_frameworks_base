@@ -26,8 +26,8 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IActivityManager;
-import android.app.IUidObserver;
 import android.app.SearchManager;
+import android.app.UidObserver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -360,34 +360,17 @@ public final class PinnerService extends SystemService {
 
     private void registerUidListener() {
         try {
-            mAm.registerUidObserver(new IUidObserver.Stub() {
+            mAm.registerUidObserver(new UidObserver() {
                 @Override
-                public void onUidGone(int uid, boolean disabled) throws RemoteException {
+                public void onUidGone(int uid, boolean disabled) {
                     mPinnerHandler.sendMessage(PooledLambda.obtainMessage(
                             PinnerService::handleUidGone, PinnerService.this, uid));
                 }
 
                 @Override
-                public void onUidActive(int uid) throws RemoteException {
+                public void onUidActive(int uid)  {
                     mPinnerHandler.sendMessage(PooledLambda.obtainMessage(
                             PinnerService::handleUidActive, PinnerService.this, uid));
-                }
-
-                @Override
-                public void onUidIdle(int uid, boolean disabled) throws RemoteException {
-                }
-
-                @Override
-                public void onUidStateChanged(int uid, int procState, long procStateSeq,
-                        int capability) throws RemoteException {
-                }
-
-                @Override
-                public void onUidCachedChanged(int uid, boolean cached) throws RemoteException {
-                }
-
-                @Override
-                public void onUidProcAdjChanged(int uid) throws RemoteException {
                 }
             }, UID_OBSERVER_GONE | UID_OBSERVER_ACTIVE, 0, null);
         } catch (RemoteException e) {

@@ -18,7 +18,7 @@ package com.android.server.wm.flicker.rotation
 
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -39,6 +39,7 @@ import org.junit.runners.Parameterized
  *      0 -> 90 degrees
  *      90 -> 0 degrees
  * ```
+ *
  * Actions:
  * ```
  *     Launch an app (via intent)
@@ -47,22 +48,29 @@ import org.junit.runners.Parameterized
  *     Change device orientation
  *     Stop tracing
  * ```
+ *
  * To run this test: `atest FlickerTests:ChangeAppRotationTest`
  *
  * To run only the presubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
  * ```
+ *
  * To run only the postsubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
  * ```
+ *
  * To run only the flaky assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

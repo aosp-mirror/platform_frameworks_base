@@ -34,6 +34,7 @@ import android.app.trust.TrustManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
@@ -106,8 +107,8 @@ public class LockSettingsStorageTests {
         when(mockUserManager.getProfileParent(eq(3))).thenReturn(new UserInfo(0, "name", 0));
 
         MockLockSettingsContext context = new MockLockSettingsContext(origContext,
-                mSettingsRule.mockContentResolver(origContext), mockUserManager,
-                mock(NotificationManager.class), mock(DevicePolicyManager.class),
+                mock(Resources.class), mSettingsRule.mockContentResolver(origContext),
+                mockUserManager, mock(NotificationManager.class), mock(DevicePolicyManager.class),
                 mock(StorageManager.class), mock(TrustManager.class), mock(KeyguardManager.class),
                 mock(FingerprintManager.class), mock(FaceManager.class),
                 mock(PackageManager.class));

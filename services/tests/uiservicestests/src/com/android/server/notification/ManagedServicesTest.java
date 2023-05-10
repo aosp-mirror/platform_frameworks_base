@@ -96,6 +96,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
 
 public class ManagedServicesTest extends UiServiceTestCase {
 
@@ -130,13 +131,18 @@ public class ManagedServicesTest extends UiServiceTestCase {
     private ArrayMap<Integer, ArrayMap<Integer, String>> mExpectedPrimary;
     private ArrayMap<Integer, ArrayMap<Integer, String>> mExpectedSecondary;
 
+    private UserHandle mUser;
+    private String mPkg;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        getContext().setMockPackageManager(mPm);
-        getContext().addMockSystemService(Context.USER_SERVICE, mUm);
-        getContext().addMockSystemService(DEVICE_POLICY_SERVICE, mDpm);
+        mContext.setMockPackageManager(mPm);
+        mContext.addMockSystemService(Context.USER_SERVICE, mUm);
+        mContext.addMockSystemService(DEVICE_POLICY_SERVICE, mDpm);
+        mUser = mContext.getUser();
+        mPkg = mContext.getPackageName();
 
         List<UserInfo> users = new ArrayList<>();
         users.add(mZero);
@@ -861,8 +867,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -891,8 +897,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -921,8 +927,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -951,8 +957,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -981,8 +987,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1011,8 +1017,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1437,8 +1443,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1464,8 +1470,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1492,8 +1498,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1522,8 +1528,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1552,8 +1558,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1791,8 +1797,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1837,8 +1843,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1880,8 +1886,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
         ApplicationInfo ai = new ApplicationInfo();
         ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
 
-        when(context.getPackageName()).thenReturn(mContext.getPackageName());
-        when(context.getUserId()).thenReturn(mContext.getUserId());
+        when(context.getPackageName()).thenReturn(mPkg);
+        when(context.getUserId()).thenReturn(mUser.getIdentifier());
         when(context.getPackageManager()).thenReturn(pm);
         when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
 
@@ -1913,6 +1919,18 @@ public class ManagedServicesTest extends UiServiceTestCase {
         // Test that setComponentState overrides the meta-data and service is bound
         service.setComponentState(cn_disallowed, 0, true);
         assertTrue(service.isBound(cn_disallowed, 0));
+    }
+
+    @Test
+    public void isComponentEnabledForCurrentProfiles_isThreadSafe() throws InterruptedException {
+        for (UserInfo userInfo : mUm.getUsers()) {
+            mService.addApprovedList("pkg1/cmp1:pkg2/cmp2:pkg3/cmp3", userInfo.id, true);
+        }
+        testThreadSafety(() -> {
+            mService.rebindServices(false, 0);
+            assertThat(mService.isComponentEnabledForCurrentProfiles(
+                    new ComponentName("pkg1", "cmp1"))).isTrue();
+        }, 20, 30);
     }
 
     private void mockServiceInfoWithMetaData(List<ComponentName> componentNames,
@@ -2292,5 +2310,39 @@ public class ManagedServicesTest extends UiServiceTestCase {
         public boolean shouldReflectToSettings() {
             return false;
         }
+    }
+
+    /**
+     * Helper method to test the thread safety of some operations.
+     *
+     * <p>Runs the supplied {@code operationToTest}, {@code nRunsPerThread} times,
+     * concurrently using {@code nThreads} threads, and waits for all of them to finish.
+     */
+    private static void testThreadSafety(Runnable operationToTest, int nThreads,
+            int nRunsPerThread) throws InterruptedException {
+        final CountDownLatch startLatch = new CountDownLatch(1);
+        final CountDownLatch doneLatch = new CountDownLatch(nThreads);
+
+        for (int i = 0; i < nThreads; i++) {
+            Runnable threadRunnable = () -> {
+                try {
+                    startLatch.await();
+                    for (int j = 0; j < nRunsPerThread; j++) {
+                        operationToTest.run();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    doneLatch.countDown();
+                }
+            };
+            new Thread(threadRunnable, "Test Thread #" + i).start();
+        }
+
+        // Ready set go
+        startLatch.countDown();
+
+        // Wait for all test threads to be done.
+        doneLatch.await();
     }
 }

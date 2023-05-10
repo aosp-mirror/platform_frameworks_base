@@ -19,8 +19,10 @@ package com.android.server.biometrics.log;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Intent;
+import android.hardware.biometrics.AuthenticateOptions;
 import android.hardware.biometrics.IBiometricContextListener;
 import android.hardware.biometrics.common.AuthenticateReason;
+import android.hardware.biometrics.common.DisplayState;
 import android.hardware.biometrics.common.OperationContext;
 import android.hardware.biometrics.common.OperationReason;
 import android.hardware.biometrics.common.WakeReason;
@@ -44,15 +46,17 @@ public class OperationContextExt {
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
     @Surface.Rotation private int mOrientation = Surface.ROTATION_0;
     private int mFoldState = IBiometricContextListener.FoldState.UNKNOWN;
+    private final boolean mIsBP;
 
-    /** Create a new empty context. */
-    public OperationContextExt() {
-        this(new OperationContext());
+    /** Create a context. */
+    public OperationContextExt(boolean isBP) {
+        this(new OperationContext(), isBP);
     }
 
     /** Create a wrapped context. */
-    public OperationContextExt(@NonNull OperationContext context) {
+    public OperationContextExt(@NonNull OperationContext context, boolean isBP) {
         mAidlContext = context;
+        mIsBP = isBP;
     }
 
     /**
@@ -188,8 +192,15 @@ public class OperationContextExt {
     }
 
     /** {@link OperationContext#reason}. */
+    @OperationReason
     public byte getReason() {
         return mAidlContext.reason;
+    }
+
+    /** {@link OperationContext#wakeReason}. */
+    @WakeReason
+    public int getWakeReason() {
+        return mAidlContext.wakeReason;
     }
 
     /** If the screen is currently on. */
@@ -197,9 +208,15 @@ public class OperationContextExt {
         return mIsDisplayOn;
     }
 
-    /** {@link OperationContext#isAod}. */
+    /** @deprecated prefer {@link #getDisplayState()} to {@link OperationContext#isAod}. */
     public boolean isAod() {
         return mAidlContext.isAod;
+    }
+
+    /** {@link OperationContext#displayState}. */
+    @DisplayState
+    public int getDisplayState() {
+        return mAidlContext.displayState;
     }
 
     /** {@link OperationContext#isCrypto}. */
@@ -226,6 +243,7 @@ public class OperationContextExt {
     /** Update this object with the latest values from the given context. */
     OperationContextExt update(@NonNull BiometricContext biometricContext) {
         mAidlContext.isAod = biometricContext.isAod();
+        mAidlContext.displayState = toAidlDisplayState(biometricContext.getDisplayState());
         setFirstSessionId(biometricContext);
 
         mIsDisplayOn = biometricContext.isDisplayOn();
@@ -236,19 +254,36 @@ public class OperationContextExt {
         return this;
     }
 
-    private void setFirstSessionId(@NonNull BiometricContext biometricContext) {
-        mSessionInfo = biometricContext.getKeyguardEntrySessionInfo();
-        if (mSessionInfo != null) {
-            mAidlContext.id = mSessionInfo.getId();
-            mAidlContext.reason = OperationReason.KEYGUARD;
-            return;
+    @DisplayState
+    private static int toAidlDisplayState(@AuthenticateOptions.DisplayState int state) {
+        switch (state) {
+            case AuthenticateOptions.DISPLAY_STATE_AOD:
+                return DisplayState.AOD;
+            case AuthenticateOptions.DISPLAY_STATE_LOCKSCREEN:
+                return DisplayState.LOCKSCREEN;
+            case AuthenticateOptions.DISPLAY_STATE_NO_UI:
+                return DisplayState.NO_UI;
+            case AuthenticateOptions.DISPLAY_STATE_SCREENSAVER:
+                return DisplayState.SCREENSAVER;
         }
+        return DisplayState.UNKNOWN;
+    }
 
-        mSessionInfo = biometricContext.getBiometricPromptSessionInfo();
-        if (mSessionInfo != null) {
-            mAidlContext.id = mSessionInfo.getId();
-            mAidlContext.reason = OperationReason.BIOMETRIC_PROMPT;
-            return;
+    private void setFirstSessionId(@NonNull BiometricContext biometricContext) {
+        if (mIsBP) {
+            mSessionInfo = biometricContext.getBiometricPromptSessionInfo();
+            if (mSessionInfo != null) {
+                mAidlContext.id = mSessionInfo.getId();
+                mAidlContext.reason = OperationReason.BIOMETRIC_PROMPT;
+                return;
+            }
+        } else {
+            mSessionInfo = biometricContext.getKeyguardEntrySessionInfo();
+            if (mSessionInfo != null) {
+                mAidlContext.id = mSessionInfo.getId();
+                mAidlContext.reason = OperationReason.KEYGUARD;
+                return;
+            }
         }
 
         // no session

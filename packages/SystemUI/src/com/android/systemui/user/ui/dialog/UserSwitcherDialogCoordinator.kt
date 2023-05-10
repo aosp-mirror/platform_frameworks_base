@@ -26,13 +26,16 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.broadcast.BroadcastSender
+import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.tiles.UserDetailView
+import com.android.systemui.user.UserSwitchFullscreenDialog
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
+import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import dagger.Lazy
 import javax.inject.Inject
 import javax.inject.Provider
@@ -54,6 +57,8 @@ constructor(
     private val userDetailAdapterProvider: Provider<UserDetailView.Adapter>,
     private val eventLogger: Lazy<UiEventLogger>,
     private val activityStarter: Lazy<ActivityStarter>,
+    private val falsingCollector: Lazy<FalsingCollector>,
+    private val userSwitcherViewModel: Lazy<UserSwitcherViewModel>,
 ) : CoreStartable {
 
     private var currentDialog: Dialog? = null
@@ -123,6 +128,15 @@ constructor(
                                     InteractionJankMonitor.CUJ_USER_DIALOG_OPEN,
                                     INTERACTION_JANK_EXIT_GUEST_MODE_TAG,
                                 ),
+                            )
+                        is ShowDialogRequestModel.ShowUserSwitcherFullscreenDialog ->
+                            Pair(
+                                UserSwitchFullscreenDialog(
+                                    context = context.get(),
+                                    falsingCollector = falsingCollector.get(),
+                                    userSwitcherViewModel = userSwitcherViewModel.get(),
+                                ),
+                                null, /* dialogCuj */
                             )
                     }
                 currentDialog = dialog

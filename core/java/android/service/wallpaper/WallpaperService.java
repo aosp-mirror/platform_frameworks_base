@@ -60,6 +60,7 @@ import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -97,6 +98,7 @@ import android.view.WindowManagerGlobal;
 import android.window.ClientWindowFrames;
 import android.window.ScreenCapture;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.HandlerCaller;
 import com.android.internal.view.BaseIWindow;
@@ -104,11 +106,13 @@ import com.android.internal.view.BaseSurfaceHolder;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -165,20 +169,26 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_ZOOM = 10100;
     private static final int MSG_RESIZE_PREVIEW = 10110;
     private static final int MSG_REPORT_SHOWN = 10150;
+    private static final int MSG_UPDATE_SCREEN_TURNING_ON = 10170;
     private static final int MSG_UPDATE_DIMMING = 10200;
     private static final int MSG_WALLPAPER_FLAGS_CHANGED = 10210;
-    private static final List<Float> PROHIBITED_STEPS = Arrays.asList(0f, Float.POSITIVE_INFINITY,
-            Float.NEGATIVE_INFINITY);
 
+    /** limit calls to {@link Engine#onComputeColors} to at most once per second */
     private static final int NOTIFY_COLORS_RATE_LIMIT_MS = 1000;
-    private static final int PROCESS_LOCAL_COLORS_INTERVAL_MS = 1000;
+
+    /** limit calls to {@link Engine#processLocalColorsInternal} to at most once per 2 seconds */
+    private static final int PROCESS_LOCAL_COLORS_INTERVAL_MS = 2000;
 
     private static final boolean ENABLE_WALLPAPER_DIMMING =
             SystemProperties.getBoolean("persist.debug.enable_wallpaper_dimming", true);
 
     private static final long DIMMING_ANIMATION_DURATION_MS = 300L;
 
+    @GuardedBy("itself")
     private final ArrayMap<IBinder, IWallpaperEngineWrapper> mActiveEngines = new ArrayMap<>();
+
+    private Handler mBackgroundHandler;
+    private HandlerThread mBackgroundThread;
 
     static final class WallpaperCommand {
         String action;
@@ -198,14 +208,6 @@ public abstract class WallpaperService extends Service {
      */
     public class Engine {
         IWallpaperEngineWrapper mIWallpaperEngine;
-        final ArraySet<RectF> mLocalColorAreas = new ArraySet<>(4);
-        final ArraySet<RectF> mLocalColorsToAdd = new ArraySet<>(4);
-
-        // 2D matrix [x][y] to represent a page of a portion of a window
-        EngineWindowPage[] mWindowPages = new EngineWindowPage[0];
-        Bitmap mLastScreenshot;
-        int mLastWindowPage = -1;
-        private boolean mResetWindowPages;
 
         // Copies from mIWallpaperEngine.
         HandlerCaller mCaller;
@@ -214,6 +216,16 @@ public abstract class WallpaperService extends Service {
 
         boolean mInitializing = true;
         boolean mVisible;
+        /**
+         * Whether the screen is turning on.
+         * After the display is powered on, brightness is initially off. It is turned on only after
+         * all windows have been drawn, and sysui notifies that it's ready (See
+         * {@link com.android.internal.policy.IKeyguardDrawnCallback}).
+         * As some wallpapers use visibility as a signal to start animations, this makes sure
+         * {@link Engine#onVisibilityChanged} is invoked only when the display is both on and
+         * visible (with brightness on).
+         */
+        private boolean mIsScreenTurningOn;
         boolean mReportedVisible;
         boolean mDestroyed;
         // Set to true after receiving WallpaperManager#COMMAND_FREEZE. It's reset back to false
@@ -266,11 +278,34 @@ public abstract class WallpaperService extends Service {
 
         final Object mLock = new Object();
         boolean mOffsetMessageEnqueued;
+
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-        float mPendingXOffset;
-        float mPendingYOffset;
-        float mPendingXOffsetStep;
-        float mPendingYOffsetStep;
+        @GuardedBy("mLock")
+        private float mPendingXOffset;
+        @GuardedBy("mLock")
+        private float mPendingYOffset;
+        @GuardedBy("mLock")
+        private float mPendingXOffsetStep;
+        @GuardedBy("mLock")
+        private float mPendingYOffsetStep;
+
+        /**
+         * local color extraction related fields. When a user calls `addLocalColorAreas`
+         */
+        @GuardedBy("mLock")
+        private final ArraySet<RectF> mLocalColorAreas = new ArraySet<>(4);
+
+        @GuardedBy("mLock")
+        private final ArraySet<RectF> mLocalColorsToAdd = new ArraySet<>(4);
+        private long mLastProcessLocalColorsTimestamp;
+        private AtomicBoolean mProcessLocalColorsPending = new AtomicBoolean(false);
+        private int mPixelCopyCount = 0;
+        // 2D matrix [x][y] to represent a page of a portion of a window
+        @GuardedBy("mLock")
+        private EngineWindowPage[] mWindowPages = new EngineWindowPage[0];
+        private Bitmap mLastScreenshot;
+        private boolean mResetWindowPages;
+
         boolean mPendingSync;
         MotionEvent mPendingMove;
         boolean mIsInAmbientMode;
@@ -279,12 +314,8 @@ public abstract class WallpaperService extends Service {
         private long mLastColorInvalidation;
         private final Runnable mNotifyColorsChanged = this::notifyColorsChanged;
 
-        // used to throttle processLocalColors
-        private long mLastProcessLocalColorsTimestamp;
-        private AtomicBoolean mProcessLocalColorsPending = new AtomicBoolean(false);
         private final Supplier<Long> mClockFunction;
         private final Handler mHandler;
-
         private Display mDisplay;
         private Context mDisplayContext;
         private int mDisplayState;
@@ -402,6 +433,7 @@ public abstract class WallpaperService extends Service {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0,
                         mergedConfiguration);
+                mIWallpaperEngine.mPendingResizeCount.incrementAndGet();
                 mCaller.sendMessage(msg);
             }
 
@@ -854,7 +886,7 @@ public abstract class WallpaperService extends Service {
                             + "was not established.");
                 }
                 mResetWindowPages = true;
-                processLocalColors(mPendingXOffset, mPendingXOffsetStep);
+                processLocalColors();
             } catch (RemoteException e) {
                 Log.w(TAG, "Can't notify system because wallpaper connection was lost.", e);
             }
@@ -1000,6 +1032,7 @@ public abstract class WallpaperService extends Service {
                     out.print(" mDestroyed="); out.println(mDestroyed);
             out.print(prefix); out.print("mVisible="); out.print(mVisible);
                     out.print(" mReportedVisible="); out.println(mReportedVisible);
+                    out.print(" mIsScreenTurningOn="); out.println(mIsScreenTurningOn);
             out.print(prefix); out.print("mDisplay="); out.println(mDisplay);
             out.print(prefix); out.print("mCreated="); out.print(mCreated);
                     out.print(" mSurfaceCreated="); out.print(mSurfaceCreated);
@@ -1021,6 +1054,10 @@ public abstract class WallpaperService extends Service {
             out.print(prefix); out.print("mZoom="); out.println(mZoom);
             out.print(prefix); out.print("mPreviewSurfacePosition=");
                     out.println(mPreviewSurfacePosition);
+            final int pendingCount = mIWallpaperEngine.mPendingResizeCount.get();
+            if (pendingCount != 0) {
+                out.print(prefix); out.print("mPendingResizeCount="); out.println(pendingCount);
+            }
             synchronized (mLock) {
                 out.print(prefix); out.print("mPendingXOffset="); out.print(mPendingXOffset);
                         out.print(" mPendingXOffset="); out.println(mPendingXOffset);
@@ -1083,10 +1120,6 @@ public abstract class WallpaperService extends Service {
             }
         }
 
-        private void updateConfiguration(MergedConfiguration mergedConfiguration) {
-            mMergedConfiguration.setTo(mergedConfiguration);
-        }
-
         void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {
             if (mDestroyed) {
                 Log.w(TAG, "Ignoring updateSurface due to destroyed");
@@ -1135,7 +1168,7 @@ public abstract class WallpaperService extends Service {
                             | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
                     final Configuration config = mMergedConfiguration.getMergedConfiguration();
-                    final Rect maxBounds = config.windowConfiguration.getMaxBounds();
+                    final Rect maxBounds = new Rect(config.windowConfiguration.getMaxBounds());
                     if (myWidth == ViewGroup.LayoutParams.MATCH_PARENT
                             && myHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
                         mLayout.width = myWidth;
@@ -1191,6 +1224,17 @@ public abstract class WallpaperService extends Service {
                     final int relayoutResult = mSession.relayout(mWindow, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, 0, 0, mWinFrames, mMergedConfiguration,
                             mSurfaceControl, mInsetsState, mTempControls, mSyncSeqIdBundle);
+                    final Rect outMaxBounds = mMergedConfiguration.getMergedConfiguration()
+                            .windowConfiguration.getMaxBounds();
+                    if (!outMaxBounds.equals(maxBounds)) {
+                        Log.i(TAG, "Retry updateSurface because bounds changed from relayout: "
+                                + maxBounds + " -> " + outMaxBounds);
+                        mSurfaceHolder.mSurfaceLock.unlock();
+                        mDrawingAllowed = false;
+                        mCaller.sendMessage(mCaller.obtainMessageI(MSG_WINDOW_RESIZED,
+                                redrawNeeded ? 1 : 0));
+                        return;
+                    }
 
                     final int transformHint = SurfaceControl.rotationToBufferTransform(
                             (mDisplay.getInstallOrientation() + mDisplay.getRotation()) % 4);
@@ -1389,10 +1433,9 @@ public abstract class WallpaperService extends Service {
                         mIsCreating = false;
                         mSurfaceCreated = true;
                         if (redrawNeeded) {
-                            resetWindowPages();
                             mSession.finishDrawing(mWindow, null /* postDrawTransaction */,
                                                    Integer.MAX_VALUE);
-                            processLocalColors(mPendingXOffset, mPendingXOffsetStep);
+                            processLocalColors();
                         }
                         reposition();
                         reportEngineShown(shouldWaitForEngineShown());
@@ -1458,7 +1501,9 @@ public abstract class WallpaperService extends Service {
                     com.android.internal.R.dimen.config_wallpaperDimAmount);
             mWallpaperDimAmount = mDefaultDimAmount;
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
-            mDisplayState = mDisplay.getState();
+            mDisplayState = mDisplay.getCommittedState();
+            mMergedConfiguration.setOverrideConfiguration(
+                    mDisplayContext.getResources().getConfiguration());
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
             Trace.beginSection("WPMS.Engine.onCreate");
@@ -1532,11 +1577,18 @@ public abstract class WallpaperService extends Service {
             }
         }
 
+        void onScreenTurningOnChanged(boolean isScreenTurningOn) {
+            if (!mDestroyed) {
+                mIsScreenTurningOn = isScreenTurningOn;
+                reportVisibility(false);
+            }
+        }
+
         void doVisibilityChanged(boolean visible) {
             if (!mDestroyed) {
                 mVisible = visible;
                 reportVisibility(false);
-                if (mReportedVisible) processLocalColors(mPendingXOffset, mPendingXOffsetStep);
+                if (mReportedVisible) processLocalColors();
             } else {
                 AnimationHandler.requestAnimatorsEnabled(visible, this);
             }
@@ -1548,8 +1600,10 @@ public abstract class WallpaperService extends Service {
                 return;
             }
             if (!mDestroyed) {
-                mDisplayState = mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getState();
-                boolean visible = mVisible && mDisplayState != Display.STATE_OFF;
+                mDisplayState =
+                        mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getCommittedState();
+                boolean displayVisible = Display.isOnState(mDisplayState) && !mIsScreenTurningOn;
+                boolean visible = mVisible && displayVisible;
                 if (DEBUG) {
                     Log.v(
                             TAG,
@@ -1639,14 +1693,14 @@ public abstract class WallpaperService extends Service {
             }
 
             // setup local color extraction data
-            processLocalColors(xOffset, xOffsetStep);
+            processLocalColors();
         }
 
         /**
          * Thread-safe util to call {@link #processLocalColorsInternal} with a minimum interval of
          * {@link #PROCESS_LOCAL_COLORS_INTERVAL_MS} between two calls.
          */
-        private void processLocalColors(float xOffset, float xOffsetStep) {
+        private void processLocalColors() {
             if (mProcessLocalColorsPending.compareAndSet(false, true)) {
                 final long now = mClockFunction.get();
                 final long timeSinceLastColorProcess = now - mLastProcessLocalColorsTimestamp;
@@ -1656,80 +1710,98 @@ public abstract class WallpaperService extends Service {
                 mHandler.postDelayed(() -> {
                     mLastProcessLocalColorsTimestamp = now + timeToWait;
                     mProcessLocalColorsPending.set(false);
-                    processLocalColorsInternal(xOffset, xOffsetStep);
+                    processLocalColorsInternal();
                 }, timeToWait);
             }
         }
 
-        private void processLocalColorsInternal(float xOffset, float xOffsetStep) {
-            // implemented by the wallpaper
+        /**
+         * Default implementation of the local color extraction.
+         * This will take a screenshot of the whole wallpaper on the main thread.
+         * Then, in a background thread, for each launcher page, for each area that needs color
+         * extraction in this page, creates a sub-bitmap and call {@link WallpaperColors#fromBitmap}
+         * to extract the colors. Every time a launcher page has been processed, call
+         * {@link #notifyLocalColorsChanged} with the color and areas of this page.
+         */
+        private void processLocalColorsInternal() {
             if (supportsLocalColorExtraction()) return;
-            if (DEBUG) {
-                Log.d(TAG, "processLocalColors " + xOffset + " of step "
-                        + xOffsetStep);
-            }
-            //below is the default implementation
-            if (xOffset % xOffsetStep > MIN_PAGE_ALLOWED_MARGIN
-                    || !mSurfaceHolder.getSurface().isValid()) return;
-            int xCurrentPage;
+            float xOffset;
+            float xOffsetStep;
+            float wallpaperDimAmount;
+            int xPage;
             int xPages;
-            if (!validStep(xOffsetStep)) {
-                if (DEBUG) {
-                    Log.w(TAG, "invalid offset step " + xOffsetStep);
-                }
-                xOffset = 0;
-                xOffsetStep = 1;
-                xCurrentPage = 0;
-                xPages = 1;
-            } else {
-                xPages = Math.round(1 / xOffsetStep) + 1;
-                xOffsetStep = (float) 1 / (float) xPages;
-                float shrink = (float) (xPages - 1) / (float) xPages;
-                xOffset *= shrink;
-                xCurrentPage = Math.round(xOffset / xOffsetStep);
-            }
-            if (DEBUG) {
-                Log.d(TAG, "xPages " + xPages + " xPage " + xCurrentPage);
-                Log.d(TAG, "xOffsetStep " + xOffsetStep + " xOffset " + xOffset);
-            }
-
-            float finalXOffsetStep = xOffsetStep;
-            float finalXOffset = xOffset;
-
-            Trace.beginSection("WallpaperService#processLocalColors");
-            resetWindowPages();
-            int xPage = xCurrentPage;
+            Set<RectF> areas;
             EngineWindowPage current;
-            if (mWindowPages.length == 0 || (mWindowPages.length != xPages)) {
-                mWindowPages = new EngineWindowPage[xPages];
-                initWindowPages(mWindowPages, finalXOffsetStep);
-            }
-            if (mLocalColorsToAdd.size() != 0) {
-                for (RectF colorArea : mLocalColorsToAdd) {
-                    if (!isValid(colorArea)) continue;
-                    mLocalColorAreas.add(colorArea);
-                    int colorPage = getRectFPage(colorArea, finalXOffsetStep);
-                    EngineWindowPage currentPage = mWindowPages[colorPage];
-                    currentPage.setLastUpdateTime(0);
-                    currentPage.removeColor(colorArea);
-                }
-                mLocalColorsToAdd.clear();
-            }
-            if (xPage >= mWindowPages.length) {
+
+            synchronized (mLock) {
+                xOffset = mPendingXOffset;
+                xOffsetStep = mPendingXOffsetStep;
+                wallpaperDimAmount = mWallpaperDimAmount;
+
                 if (DEBUG) {
-                    Log.e(TAG, "error xPage >= mWindowPages.length page: " + xPage);
-                    Log.e(TAG, "error on page " + xPage + " out of " + xPages);
-                    Log.e(TAG,
-                            "error on xOffsetStep " + finalXOffsetStep
-                                    + " xOffset " + finalXOffset);
+                    Log.d(TAG, "processLocalColors " + xOffset + " of step "
+                            + xOffsetStep);
                 }
-                xPage = mWindowPages.length - 1;
+                if (xOffset % xOffsetStep > MIN_PAGE_ALLOWED_MARGIN
+                        || !mSurfaceHolder.getSurface().isValid()) return;
+                int xCurrentPage;
+                if (!validStep(xOffsetStep)) {
+                    if (DEBUG) {
+                        Log.w(TAG, "invalid offset step " + xOffsetStep);
+                    }
+                    xOffset = 0;
+                    xOffsetStep = 1;
+                    xCurrentPage = 0;
+                    xPages = 1;
+                } else {
+                    xPages = Math.round(1 / xOffsetStep) + 1;
+                    xOffsetStep = (float) 1 / (float) xPages;
+                    float shrink = (float) (xPages - 1) / (float) xPages;
+                    xOffset *= shrink;
+                    xCurrentPage = Math.round(xOffset / xOffsetStep);
+                }
+                if (DEBUG) {
+                    Log.d(TAG, "xPages " + xPages + " xPage " + xCurrentPage);
+                    Log.d(TAG, "xOffsetStep " + xOffsetStep + " xOffset " + xOffset);
+                }
+
+                float finalXOffsetStep = xOffsetStep;
+                float finalXOffset = xOffset;
+
+                resetWindowPages();
+                xPage = xCurrentPage;
+                if (mWindowPages.length == 0 || (mWindowPages.length != xPages)) {
+                    mWindowPages = new EngineWindowPage[xPages];
+                    initWindowPages(mWindowPages, finalXOffsetStep);
+                }
+                if (mLocalColorsToAdd.size() != 0) {
+                    for (RectF colorArea : mLocalColorsToAdd) {
+                        if (!isValid(colorArea)) continue;
+                        mLocalColorAreas.add(colorArea);
+                        int colorPage = getRectFPage(colorArea, finalXOffsetStep);
+                        EngineWindowPage currentPage = mWindowPages[colorPage];
+                        currentPage.setLastUpdateTime(0);
+                        currentPage.removeColor(colorArea);
+                    }
+                    mLocalColorsToAdd.clear();
+                }
+                if (xPage >= mWindowPages.length) {
+                    if (DEBUG) {
+                        Log.e(TAG, "error xPage >= mWindowPages.length page: " + xPage);
+                        Log.e(TAG, "error on page " + xPage + " out of " + xPages);
+                        Log.e(TAG,
+                                "error on xOffsetStep " + finalXOffsetStep
+                                        + " xOffset " + finalXOffset);
+                    }
+                    xPage = mWindowPages.length - 1;
+                }
+                current = mWindowPages[xPage];
+                areas = new HashSet<>(current.getAreas());
             }
-            current = mWindowPages[xPage];
-            updatePage(current, xPage, xPages, finalXOffsetStep);
-            Trace.endSection();
+            updatePage(current, areas, xPage, xPages, wallpaperDimAmount);
         }
 
+        @GuardedBy("mLock")
         private void initWindowPages(EngineWindowPage[] windowPages, float step) {
             for (int i = 0; i < windowPages.length; i++) {
                 windowPages[i] = new EngineWindowPage();
@@ -1746,16 +1818,16 @@ public abstract class WallpaperService extends Service {
             }
         }
 
-        void updatePage(EngineWindowPage currentPage, int pageIndx, int numPages,
-                float xOffsetStep) {
+        void updatePage(EngineWindowPage currentPage, Set<RectF> areas, int pageIndx, int numPages,
+                float wallpaperDimAmount) {
+
             // in case the clock is zero, we start with negative time
             long current = SystemClock.elapsedRealtime() - DEFAULT_UPDATE_SCREENSHOT_DURATION;
             long lapsed = current - currentPage.getLastUpdateTime();
             // Always update the page when the last update time is <= 0
             // This is important especially when the device first boots
-            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION) {
-                return;
-            }
+            if (lapsed < DEFAULT_UPDATE_SCREENSHOT_DURATION) return;
+
             Surface surface = mSurfaceHolder.getSurface();
             if (!surface.isValid()) return;
             boolean widthIsLarger = mSurfaceSize.x > mSurfaceSize.y;
@@ -1768,43 +1840,59 @@ public abstract class WallpaperService extends Service {
                 Log.e(TAG, "wrong width and height values of bitmap " + width + " " + height);
                 return;
             }
+            final String pixelCopySectionName = "WallpaperService#pixelCopy";
+            final int pixelCopyCount = mPixelCopyCount++;
+            Trace.beginAsyncSection(pixelCopySectionName, pixelCopyCount);
             Bitmap screenShot = Bitmap.createBitmap(width, height,
                     Bitmap.Config.ARGB_8888);
             final Bitmap finalScreenShot = screenShot;
-            Trace.beginSection("WallpaperService#pixelCopy");
-            PixelCopy.request(surface, screenShot, (res) -> {
-                Trace.endSection();
-                if (DEBUG) Log.d(TAG, "result of pixel copy is " + res);
-                if (res != PixelCopy.SUCCESS) {
-                    Bitmap lastBitmap = currentPage.getBitmap();
-                    // assign the last bitmap taken for now
-                    currentPage.setBitmap(mLastScreenshot);
-                    Bitmap lastScreenshot = mLastScreenshot;
-                    if (lastScreenshot != null && !lastScreenshot.isRecycled()
-                            && !Objects.equals(lastBitmap, lastScreenshot)) {
-                        updatePageColors(currentPage, pageIndx, numPages, xOffsetStep);
+            try {
+                // TODO(b/274427458) check if this can be done in the background.
+                PixelCopy.request(surface, screenShot, (res) -> {
+                    Trace.endAsyncSection(pixelCopySectionName, pixelCopyCount);
+                    if (DEBUG) {
+                        Log.d(TAG, "result of pixel copy is: "
+                                + (res == PixelCopy.SUCCESS ? "SUCCESS" : "FAILURE"));
                     }
-                } else {
-                    mLastScreenshot = finalScreenShot;
-                    // going to hold this lock for a while
-                    currentPage.setBitmap(finalScreenShot);
-                    currentPage.setLastUpdateTime(current);
-                    updatePageColors(currentPage, pageIndx, numPages, xOffsetStep);
-                }
-            }, mHandler);
-
+                    if (res != PixelCopy.SUCCESS) {
+                        Bitmap lastBitmap = currentPage.getBitmap();
+                        // assign the last bitmap taken for now
+                        currentPage.setBitmap(mLastScreenshot);
+                        Bitmap lastScreenshot = mLastScreenshot;
+                        if (lastScreenshot != null && !Objects.equals(lastBitmap, lastScreenshot)) {
+                            updatePageColors(
+                                    currentPage, areas, pageIndx, numPages, wallpaperDimAmount);
+                        }
+                    } else {
+                        mLastScreenshot = finalScreenShot;
+                        currentPage.setBitmap(finalScreenShot);
+                        currentPage.setLastUpdateTime(current);
+                        updatePageColors(
+                                currentPage, areas, pageIndx, numPages, wallpaperDimAmount);
+                    }
+                }, mBackgroundHandler);
+            } catch (IllegalArgumentException e) {
+                // this can potentially happen if the surface is invalidated right between the
+                // surface.isValid() check and the PixelCopy operation.
+                // in this case, stop: we'll compute colors on the next processLocalColors call.
+                Log.w(TAG, "Cancelling processLocalColors: exception caught during PixelCopy");
+            }
         }
         // locked by the passed page
-        private void updatePageColors(EngineWindowPage page, int pageIndx, int numPages,
-                float xOffsetStep) {
+        private void updatePageColors(EngineWindowPage page, Set<RectF> areas,
+                int pageIndx, int numPages, float wallpaperDimAmount) {
             if (page.getBitmap() == null) return;
+            if (!mBackgroundHandler.getLooper().isCurrentThread()) {
+                throw new IllegalStateException(
+                        "ProcessLocalColors should be called from the background thread");
+            }
             Trace.beginSection("WallpaperService#updatePageColors");
             if (DEBUG) {
                 Log.d(TAG, "updatePageColorsLocked for page " + pageIndx + " with areas "
                         + page.getAreas().size() + " and bitmap size of "
                         + page.getBitmap().getWidth() + " x " + page.getBitmap().getHeight());
             }
-            for (RectF area: page.getAreas()) {
+            for (RectF area: areas) {
                 if (area == null) continue;
                 RectF subArea = generateSubRect(area, pageIndx, numPages);
                 Bitmap b = page.getBitmap();
@@ -1814,12 +1902,12 @@ public abstract class WallpaperService extends Service {
                 int height = Math.round(b.getHeight() * subArea.height());
                 Bitmap target;
                 try {
-                    target = Bitmap.createBitmap(page.getBitmap(), x, y, width, height);
+                    target = Bitmap.createBitmap(b, x, y, width, height);
                 } catch (Exception e) {
                     Log.e(TAG, "Error creating page local color bitmap", e);
                     continue;
                 }
-                WallpaperColors color = WallpaperColors.fromBitmap(target, mWallpaperDimAmount);
+                WallpaperColors color = WallpaperColors.fromBitmap(target, wallpaperDimAmount);
                 target.recycle();
                 WallpaperColors currentColor = page.getColors(area);
 
@@ -1836,12 +1924,14 @@ public abstract class WallpaperService extends Service {
                                 + " local color callback for area" + area + " for page " + pageIndx
                                 + " of " + numPages);
                     }
-                    try {
-                        mConnection.onLocalWallpaperColorsChanged(area, color,
-                                mDisplayContext.getDisplayId());
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Error calling Connection.onLocalWallpaperColorsChanged", e);
-                    }
+                    mHandler.post(() -> {
+                        try {
+                            mConnection.onLocalWallpaperColorsChanged(area, color,
+                                    mDisplayContext.getDisplayId());
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Error calling Connection.onLocalWallpaperColorsChanged", e);
+                        }
+                    });
                 }
             }
             Trace.endSection();
@@ -1867,16 +1957,17 @@ public abstract class WallpaperService extends Service {
             return new RectF(left, in.top, right, in.bottom);
         }
 
+        @GuardedBy("mLock")
         private void resetWindowPages() {
             if (supportsLocalColorExtraction()) return;
             if (!mResetWindowPages) return;
             mResetWindowPages = false;
-            mLastWindowPage = -1;
             for (int i = 0; i < mWindowPages.length; i++) {
                 mWindowPages[i].setLastUpdateTime(0L);
             }
         }
 
+        @GuardedBy("mLock")
         private int getRectFPage(RectF area, float step) {
             if (!isValid(area)) return 0;
             if (!validStep(step)) return 0;
@@ -1897,12 +1988,12 @@ public abstract class WallpaperService extends Service {
             if (DEBUG) {
                 Log.d(TAG, "addLocalColorsAreas adding local color areas " + regions);
             }
-            mHandler.post(() -> {
-                mLocalColorsToAdd.addAll(regions);
-                processLocalColors(mPendingXOffset, mPendingYOffset);
+            mBackgroundHandler.post(() -> {
+                synchronized (mLock) {
+                    mLocalColorsToAdd.addAll(regions);
+                }
+                processLocalColors();
             });
-
-
         }
 
         /**
@@ -1912,16 +2003,18 @@ public abstract class WallpaperService extends Service {
          */
         public void removeLocalColorsAreas(@NonNull List<RectF> regions) {
             if (supportsLocalColorExtraction()) return;
-            mHandler.post(() -> {
-                float step = mPendingXOffsetStep;
-                mLocalColorsToAdd.removeAll(regions);
-                mLocalColorAreas.removeAll(regions);
-                if (!validStep(step)) {
-                    return;
-                }
-                for (int i = 0; i < mWindowPages.length; i++) {
-                    for (int j = 0; j < regions.size(); j++) {
-                        mWindowPages[i].removeArea(regions.get(j));
+            mBackgroundHandler.post(() -> {
+                synchronized (mLock) {
+                    float step = mPendingXOffsetStep;
+                    mLocalColorsToAdd.removeAll(regions);
+                    mLocalColorAreas.removeAll(regions);
+                    if (!validStep(step)) {
+                        return;
+                    }
+                    for (int i = 0; i < mWindowPages.length; i++) {
+                        for (int j = 0; j < regions.size(); j++) {
+                            mWindowPages[i].removeArea(regions.get(j));
+                        }
                     }
                 }
             });
@@ -1939,7 +2032,7 @@ public abstract class WallpaperService extends Service {
         }
 
         private boolean validStep(float step) {
-            return !PROHIBITED_STEPS.contains(step) && step > 0. && step <= 1.;
+            return !Float.isNaN(step) && step > 0f && step <= 1f;
         }
 
         void doCommand(WallpaperCommand cmd) {
@@ -2247,6 +2340,8 @@ public abstract class WallpaperService extends Service {
         final IBinder mWindowToken;
         final int mWindowType;
         final boolean mIsPreview;
+        final AtomicInteger mPendingResizeCount = new AtomicInteger();
+        boolean mReportDraw;
         boolean mShownReported;
         int mReqWidth;
         int mReqHeight;
@@ -2420,13 +2515,29 @@ public abstract class WallpaperService extends Service {
             // if they are visible, so we need to toggle the state to get their attention.
             if (!mEngine.mDestroyed) {
                 mEngine.detach();
-                for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
-                    if (engineWrapper.mEngine != null && engineWrapper.mEngine.mVisible) {
-                        engineWrapper.mEngine.doVisibilityChanged(false);
-                        engineWrapper.mEngine.doVisibilityChanged(true);
+                synchronized (mActiveEngines) {
+                    for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+                        if (engineWrapper.mEngine != null && engineWrapper.mEngine.mVisible) {
+                            engineWrapper.mEngine.doVisibilityChanged(false);
+                            engineWrapper.mEngine.doVisibilityChanged(true);
+                        }
                     }
                 }
             }
+        }
+
+        public void updateScreenTurningOn(boolean isScreenTurningOn) {
+            Message msg = mCaller.obtainMessageBO(MSG_UPDATE_SCREEN_TURNING_ON, isScreenTurningOn,
+                    null);
+            mCaller.sendMessage(msg);
+        }
+
+        public void onScreenTurningOn() throws RemoteException {
+            updateScreenTurningOn(true);
+        }
+
+        public void onScreenTurnedOn() throws RemoteException {
+            updateScreenTurningOn(false);
         }
 
         @Override
@@ -2473,6 +2584,13 @@ public abstract class WallpaperService extends Service {
                             + ": " + message.arg1);
                     mEngine.doVisibilityChanged(message.arg1 != 0);
                     break;
+                case MSG_UPDATE_SCREEN_TURNING_ON:
+                    if (DEBUG) {
+                        Log.v(TAG,
+                                message.arg1 != 0 ? "Screen turning on" : "Screen turned on");
+                    }
+                    mEngine.onScreenTurningOnChanged(/* isScreenTurningOn= */ message.arg1 != 0);
+                    break;
                 case MSG_WALLPAPER_OFFSETS: {
                     mEngine.doOffsetsChanged(true);
                 } break;
@@ -2481,11 +2599,7 @@ public abstract class WallpaperService extends Service {
                     mEngine.doCommand(cmd);
                 } break;
                 case MSG_WINDOW_RESIZED: {
-                    final boolean reportDraw = message.arg1 != 0;
-                    mEngine.updateConfiguration(((MergedConfiguration) message.obj));
-                    mEngine.updateSurface(true, false, reportDraw);
-                    mEngine.doOffsetsChanged(true);
-                    mEngine.scaleAndCropScreenshot();
+                    handleResized((MergedConfiguration) message.obj, message.arg1 != 0);
                 } break;
                 case MSG_WINDOW_MOVED: {
                     // Do nothing. What does it mean for a Wallpaper to move?
@@ -2533,6 +2647,40 @@ public abstract class WallpaperService extends Service {
                     Log.w(TAG, "Unknown message type " + message.what);
             }
         }
+
+        /**
+         * In general this performs relayout for IWindow#resized. If there are several pending
+         * (in the message queue) MSG_WINDOW_RESIZED from server side, only the last one will be
+         * handled (ignore intermediate states). Note that this procedure cannot be skipped if the
+         * configuration is not changed because this is also used to dispatch insets changes.
+         */
+        private void handleResized(MergedConfiguration config, boolean reportDraw) {
+            // The config can be null when retrying for a changed config from relayout, otherwise
+            // it is from IWindow#resized which always sends non-null config.
+            final int pendingCount = config != null ? mPendingResizeCount.decrementAndGet() : -1;
+            if (reportDraw) {
+                mReportDraw = true;
+            }
+            if (pendingCount > 0) {
+                if (DEBUG) {
+                    Log.d(TAG, "Skip outdated resize, bounds="
+                            + config.getMergedConfiguration().windowConfiguration.getMaxBounds()
+                            + " pendingCount=" + pendingCount);
+                }
+                return;
+            }
+            if (config != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Update config from resized, bounds="
+                            + config.getMergedConfiguration().windowConfiguration.getMaxBounds());
+                }
+                mEngine.mMergedConfiguration.setTo(config);
+            }
+            mEngine.updateSurface(true /* forceRelayout */, false /* forceReport */, mReportDraw);
+            mReportDraw = false;
+            mEngine.doOffsetsChanged(true);
+            mEngine.scaleAndCropScreenshot();
+        }
     }
 
     /**
@@ -2554,7 +2702,9 @@ public abstract class WallpaperService extends Service {
             IWallpaperEngineWrapper engineWrapper =
                     new IWallpaperEngineWrapper(mTarget, conn, windowToken, windowType,
                             isPreview, reqWidth, reqHeight, padding, displayId, which);
-            mActiveEngines.put(windowToken, engineWrapper);
+            synchronized (mActiveEngines) {
+                mActiveEngines.put(windowToken, engineWrapper);
+            }
             if (DEBUG) {
                 Slog.v(TAG, "IWallpaperServiceWrapper Attaching window token " + windowToken);
             }
@@ -2563,7 +2713,10 @@ public abstract class WallpaperService extends Service {
 
         @Override
         public void detach(IBinder windowToken) {
-            IWallpaperEngineWrapper engineWrapper = mActiveEngines.remove(windowToken);
+            IWallpaperEngineWrapper engineWrapper;
+            synchronized (mActiveEngines) {
+                engineWrapper = mActiveEngines.remove(windowToken);
+            }
             if (engineWrapper == null) {
                 Log.w(TAG, "Engine for window token " + windowToken + " already detached");
                 return;
@@ -2578,6 +2731,9 @@ public abstract class WallpaperService extends Service {
     @Override
     public void onCreate() {
         Trace.beginSection("WPMS.onCreate");
+        mBackgroundThread = new HandlerThread("DefaultWallpaperLocalColorExtractor");
+        mBackgroundThread.start();
+        mBackgroundHandler = new Handler(mBackgroundThread.getLooper());
         super.onCreate();
         Trace.endSection();
     }
@@ -2586,10 +2742,18 @@ public abstract class WallpaperService extends Service {
     public void onDestroy() {
         Trace.beginSection("WPMS.onDestroy");
         super.onDestroy();
-        for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
-            engineWrapper.destroy();
+        synchronized (mActiveEngines) {
+            for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+                engineWrapper.destroy();
+            }
+            mActiveEngines.clear();
         }
-        mActiveEngines.clear();
+        if (mBackgroundThread != null) {
+            // onDestroy might be called without a previous onCreate if WallpaperService was
+            // instantiated manually. While this is a misuse of the API, some things break
+            // if here we don't take into consideration this scenario.
+            mBackgroundThread.quitSafely();
+        }
         Trace.endSection();
     }
 
@@ -2614,14 +2778,18 @@ public abstract class WallpaperService extends Service {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter out, String[] args) {
         out.print("State of wallpaper "); out.print(this); out.println(":");
-        for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
-            Engine engine = engineWrapper.mEngine;
-            if (engine == null) {
-                Slog.w(TAG, "Engine for wrapper " + engineWrapper + " not attached");
-                continue;
+        synchronized (mActiveEngines) {
+            for (IWallpaperEngineWrapper engineWrapper : mActiveEngines.values()) {
+                Engine engine = engineWrapper.mEngine;
+                if (engine == null) {
+                    Slog.w(TAG, "Engine for wrapper " + engineWrapper + " not attached");
+                    continue;
+                }
+                out.print("  Engine ");
+                out.print(engine);
+                out.println(":");
+                engine.dump("    ", fd, out, args);
             }
-            out.print("  Engine "); out.print(engine); out.println(":");
-            engine.dump("    ", fd, out, args);
         }
     }
 }

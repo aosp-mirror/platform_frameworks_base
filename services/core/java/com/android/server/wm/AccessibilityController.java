@@ -25,6 +25,8 @@ import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFI
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
+import static com.android.internal.util.DumpUtils.dumpSparseArray;
+import static com.android.internal.util.DumpUtils.dumpSparseArrayValues;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.ENTRY;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER;
 import static com.android.server.accessibility.AccessibilityTraceFileProto.MAGIC_NUMBER_H;
@@ -542,15 +544,12 @@ final class AccessibilityController {
     }
 
     void dump(PrintWriter pw, String prefix) {
-        for (int i = 0; i < mDisplayMagnifiers.size(); i++) {
-            final DisplayMagnifier displayMagnifier = mDisplayMagnifiers.valueAt(i);
-            if (displayMagnifier != null) {
-                displayMagnifier.dump(pw, prefix
-                        + "Magnification display# " + mDisplayMagnifiers.keyAt(i));
-            }
-        }
-        pw.println(prefix
-                + "mWindowsForAccessibilityObserver=" + mWindowsForAccessibilityObserver);
+        dumpSparseArray(pw, prefix, mDisplayMagnifiers, "magnification display",
+                (index, key) -> pw.printf("%sDisplay #%d:", prefix + "  ", key),
+                dm -> dm.dump(pw, ""));
+        dumpSparseArrayValues(pw, prefix, mWindowsForAccessibilityObserver,
+                "windows for accessibility observer");
+        mAccessibilityWindowsPopulator.dump(pw, prefix);
     }
 
     void onFocusChanged(InputTarget lastTarget, InputTarget newTarget) {

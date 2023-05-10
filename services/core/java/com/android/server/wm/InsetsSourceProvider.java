@@ -47,7 +47,7 @@ import android.view.WindowInsets;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
-import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.TriFunction;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
@@ -58,7 +58,7 @@ import java.util.function.Consumer;
  * Controller for a specific inset source on the server. It's called provider as it provides the
  * {@link InsetsSource} to the client that uses it in {@link android.view.InsetsSourceConsumer}.
  */
-abstract class InsetsSourceProvider {
+class InsetsSourceProvider {
 
     protected final DisplayContent mDisplayContent;
     protected final @NonNull InsetsSource mSource;
@@ -73,8 +73,9 @@ abstract class InsetsSourceProvider {
     private @Nullable InsetsControlTarget mFakeControlTarget;
 
     private @Nullable ControlAdapter mAdapter;
-    private TriConsumer<DisplayFrames, WindowContainer, Rect> mFrameProvider;
-    private SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>> mOverrideFrameProviders;
+    private TriFunction<DisplayFrames, WindowContainer, Rect, Integer> mFrameProvider;
+    private SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
+            mOverrideFrameProviders;
     private final SparseArray<Rect> mOverrideFrames = new SparseArray<Rect>();
     private boolean mIsLeashReadyForDispatching;
     private final Rect mSourceFrame = new Rect();
@@ -149,8 +150,8 @@ abstract class InsetsSourceProvider {
      *                               resulting frame that should be reported to given window type.
      */
     void setWindowContainer(@Nullable WindowContainer windowContainer,
-            @Nullable TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider,
-            @Nullable SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
+            @Nullable TriFunction<DisplayFrames, WindowContainer, Rect, Integer> frameProvider,
+            @Nullable SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
                     overrideFrameProviders) {
         if (mWindowContainer != null) {
             if (mControllable) {
@@ -203,7 +204,7 @@ abstract class InsetsSourceProvider {
             if (mServerVisible) {
                 mTmpRect.set(mWindowContainer.getBounds());
                 if (mFrameProvider != null) {
-                    mFrameProvider.accept(mWindowContainer.getDisplayContent().mDisplayFrames,
+                    mFrameProvider.apply(mWindowContainer.getDisplayContent().mDisplayFrames,
                             mWindowContainer, mTmpRect);
                 }
             } else {
@@ -216,10 +217,11 @@ abstract class InsetsSourceProvider {
 
         mSourceFrame.set(frame);
         if (mFrameProvider != null) {
-            mFrameProvider.accept(mWindowContainer.getDisplayContent().mDisplayFrames,
-                    mWindowContainer, mSourceFrame);
-        } else {
-            mSourceFrame.inset(win.mGivenContentInsets);
+            final int flags = mFrameProvider.apply(
+                    mWindowContainer.getDisplayContent().mDisplayFrames,
+                    mWindowContainer,
+                    mSourceFrame);
+            mSource.setFlags(flags);
         }
         updateSourceFrameForServerVisibility();
 
@@ -235,10 +237,10 @@ abstract class InsetsSourceProvider {
                 } else {
                     overrideFrame = new Rect(frame);
                 }
-                final TriConsumer<DisplayFrames, WindowContainer, Rect> provider =
+                final TriFunction<DisplayFrames, WindowContainer, Rect, Integer> provider =
                         mOverrideFrameProviders.get(windowType);
                 if (provider != null) {
-                    mOverrideFrameProviders.get(windowType).accept(
+                    mOverrideFrameProviders.get(windowType).apply(
                             mWindowContainer.getDisplayContent().mDisplayFrames, mWindowContainer,
                             overrideFrame);
                 }
@@ -276,7 +278,7 @@ abstract class InsetsSourceProvider {
         source.setVisible(mSource.isVisible());
         mTmpRect.set(frame);
         if (mFrameProvider != null) {
-            mFrameProvider.accept(displayFrames, mWindowContainer, mTmpRect);
+            mFrameProvider.apply(displayFrames, mWindowContainer, mTmpRect);
         }
         source.setFrame(mTmpRect);
         return source;

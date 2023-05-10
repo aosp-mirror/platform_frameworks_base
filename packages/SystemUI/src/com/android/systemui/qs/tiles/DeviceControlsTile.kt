@@ -40,6 +40,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import java.util.concurrent.atomic.AtomicBoolean
@@ -47,6 +48,7 @@ import javax.inject.Inject
 
 class DeviceControlsTile @Inject constructor(
     host: QSHost,
+    uiEventLogger: QsEventLogger,
     @Background backgroundLooper: Looper,
     @Main mainHandler: Handler,
     falsingManager: FalsingManager,
@@ -56,14 +58,15 @@ class DeviceControlsTile @Inject constructor(
     qsLogger: QSLogger,
     private val controlsComponent: ControlsComponent
 ) : QSTileImpl<QSTile.State>(
-        host,
-        backgroundLooper,
-        mainHandler,
-        falsingManager,
-        metricsLogger,
-        statusBarStateController,
-        activityStarter,
-        qsLogger
+    host,
+    uiEventLogger,
+    backgroundLooper,
+    mainHandler,
+    falsingManager,
+    metricsLogger,
+    statusBarStateController,
+    activityStarter,
+    qsLogger
 ) {
 
     private var hasControlsApps = AtomicBoolean(false)

@@ -19,7 +19,6 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
     android:layout_width="match_parent"
-    android:background="?android:attr/colorBackground"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:paddingStart="?android:attr/listPreferredItemPaddingStart"
@@ -48,16 +47,6 @@
             android:hyphenationFrequency="normalFast"
             android:lineBreakWordStyle="phrase"
             style="@style/MainSwitchText.Settingslib" />
-
-        <ImageView
-            android:id="@+id/restricted_icon"
-            android:layout_width="@dimen/settingslib_restricted_icon_size"
-            android:layout_height="@dimen/settingslib_restricted_icon_size"
-            android:tint="?android:attr/colorAccent"
-            android:layout_gravity="center_vertical"
-            android:layout_marginEnd="@dimen/settingslib_restricted_icon_margin_end"
-            android:src="@drawable/settingslib_ic_info"
-            android:visibility="gone" />
 
         <Switch
             android:id="@android:id/switch_widget"

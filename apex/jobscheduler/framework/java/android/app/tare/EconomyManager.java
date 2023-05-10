@@ -19,7 +19,9 @@ package android.app.tare;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
+import android.os.RemoteException;
 import android.util.Log;
 
 import java.lang.annotation.Retention;
@@ -30,6 +32,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * @hide
  */
+@TestApi
 @SystemService(Context.RESOURCE_ECONOMY_SERVICE)
 public class EconomyManager {
     private static final String TAG = "TARE-" + EconomyManager.class.getSimpleName();
@@ -95,13 +98,17 @@ public class EconomyManager {
         }
     }
 
-
+    /** @hide */
+    @TestApi
     public static final int ENABLED_MODE_OFF = 0;
+    /** @hide */
     public static final int ENABLED_MODE_ON = 1;
     /**
      * Go through the motions, tracking events, updating balances and other TARE state values,
      * but don't use TARE to affect actual device behavior.
+     * @hide
      */
+    @TestApi
     public static final int ENABLED_MODE_SHADOW = 2;
 
     /** @hide */
@@ -114,6 +121,7 @@ public class EconomyManager {
     public @interface EnabledMode {
     }
 
+    /** @hide */
     public static String enabledModeToString(@EnabledMode int mode) {
         switch (mode) {
             case ENABLED_MODE_OFF: return "ENABLED_MODE_OFF";
@@ -123,11 +131,18 @@ public class EconomyManager {
         }
     }
 
+    /** @hide */
+    @TestApi
     public static final String KEY_ENABLE_TARE_MODE = "enable_tare_mode";
+    /** @hide */
     public static final String KEY_ENABLE_POLICY_ALARM = "enable_policy_alarm";
+    /** @hide */
     public static final String KEY_ENABLE_POLICY_JOB_SCHEDULER = "enable_policy_job";
+    /** @hide */
     public static final int DEFAULT_ENABLE_TARE_MODE = ENABLED_MODE_OFF;
+    /** @hide */
     public static final boolean DEFAULT_ENABLE_POLICY_ALARM = true;
+    /** @hide */
     public static final boolean DEFAULT_ENABLE_POLICY_JOB_SCHEDULER = true;
 
     // Keys for AlarmManager TARE factors
@@ -612,4 +627,27 @@ public class EconomyManager {
     public static final long DEFAULT_JS_ACTION_JOB_MIN_RUNNING_BASE_PRICE_CAKES = arcToCake(1);
     /** @hide */
     public static final long DEFAULT_JS_ACTION_JOB_TIMEOUT_PENALTY_BASE_PRICE_CAKES = arcToCake(60);
+
+    //////// APIs below ////////
+
+    private final IEconomyManager mService;
+
+    /** @hide */
+    public EconomyManager(IEconomyManager service) {
+        mService = service;
+    }
+
+    /**
+     * Returns the current enabled status of TARE.
+     * @hide
+     */
+    @EnabledMode
+    @TestApi
+    public int getEnabledMode() {
+        try {
+            return mService.getEnabledMode();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

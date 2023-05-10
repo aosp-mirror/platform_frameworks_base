@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 import static android.text.TextUtils.formatSimple;
@@ -37,8 +38,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_L
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
-import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_FINISH_RECEIVER;
-import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -68,7 +67,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
@@ -79,6 +77,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserJourneyLogger;
 import com.android.server.pm.UserManagerInternal;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -601,7 +600,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     r.dispatchTime - r.enqueueTime,
                     r.receiverTime - r.dispatchTime,
                     finishTime - r.receiverTime,
-                    packageState);
+                    packageState,
+                    r.curApp.info.packageName,
+                    r.callerPackage);
         }
         if (state == BroadcastRecord.IDLE) {
             Slog.w(TAG_BROADCAST, "finishReceiver [" + mQueueName + "] called but state is IDLE");
@@ -780,7 +781,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     BROADCAST_DELIVERY_EVENT_REPORTED__RECEIVER_TYPE__RUNTIME,
                     BROADCAST_DELIVERY_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
                     dispatchDelay, receiveDelay, 0 /* finish_delay */,
-                    SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL);
+                    SERVICE_REQUEST_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                    app != null ? app.info.packageName : null, callingPackage);
         }
     }
 
@@ -833,8 +835,8 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                         OOM_ADJ_REASON_START_RECEIVER);
             }
         } else if (filter.receiverList.app != null) {
-            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(filter.receiverList.app,
-                    OOM_ADJ_REASON_START_RECEIVER);
+            mService.mOomAdjuster.unfreezeTemporarily(filter.receiverList.app,
+                    CachedAppOptimizer.UNFREEZE_REASON_START_RECEIVER);
         }
 
         try {
@@ -1127,8 +1129,9 @@ public class BroadcastQueueImpl extends BroadcastQueue {
                     }
                     if (sendResult) {
                         if (r.callerApp != null) {
-                            mService.mOomAdjuster.mCachedAppOptimizer.unfreezeTemporarily(
-                                    r.callerApp, OOM_ADJ_REASON_FINISH_RECEIVER);
+                            mService.mOomAdjuster.unfreezeTemporarily(
+                                    r.callerApp,
+                                    CachedAppOptimizer.UNFREEZE_REASON_FINISH_RECEIVER);
                         }
                         try {
                             if (DEBUG_BROADCAST) {
@@ -1515,7 +1518,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             final UserInfo userInfo =
                     (umInternal != null) ? umInternal.getUserInfo(r.userId) : null;
             if (userInfo != null) {
-                userType = UserManager.getUserTypeForStatsd(userInfo.userType);
+                userType = UserJourneyLogger.getUserTypeForStatsd(userInfo.userType);
             }
             Slog.i(TAG_BROADCAST,
                     "BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED action:"
@@ -1790,6 +1793,23 @@ public class BroadcastQueueImpl extends BroadcastQueue {
         return mDispatcher.isBeyondBarrier(barrierTime);
     }
 
+    public boolean isDispatchedLocked(Intent intent) {
+        if (isIdleLocked()) return true;
+
+        for (int i = 0; i < mParallelBroadcasts.size(); i++) {
+            if (intent.filterEquals(mParallelBroadcasts.get(i).intent)) {
+                return false;
+            }
+        }
+
+        final BroadcastRecord pending = getPendingBroadcastLocked();
+        if ((pending != null) && intent.filterEquals(pending.intent)) {
+            return false;
+        }
+
+        return mDispatcher.isDispatched(intent);
+    }
+
     public void waitForIdle(PrintWriter pw) {
         waitFor(() -> isIdleLocked(), pw, "idle");
     }
@@ -1797,6 +1817,10 @@ public class BroadcastQueueImpl extends BroadcastQueue {
     public void waitForBarrier(PrintWriter pw) {
         final long barrierTime = SystemClock.uptimeMillis();
         waitFor(() -> isBeyondBarrierLocked(barrierTime), pw, "barrier");
+    }
+
+    public void waitForDispatched(Intent intent, PrintWriter pw) {
+        waitFor(() -> isDispatchedLocked(intent), pw, "dispatch");
     }
 
     private void waitFor(BooleanSupplier condition, PrintWriter pw, String conditionName) {

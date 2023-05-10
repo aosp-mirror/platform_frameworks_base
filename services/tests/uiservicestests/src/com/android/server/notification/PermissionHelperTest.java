@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -47,7 +48,6 @@ import android.util.Pair;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.UiServiceTestCase;
-import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -67,7 +67,7 @@ import java.util.Set;
 public class PermissionHelperTest extends UiServiceTestCase {
 
     @Mock
-    private PermissionManagerServiceInternal mPmi;
+    private Context mContext;
     @Mock
     private IPackageManager mPackageManager;
     @Mock
@@ -80,7 +80,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mPermissionHelper = new PermissionHelper(mPmi, mPackageManager, mPermManager);
+        mPermissionHelper = new PermissionHelper(mContext, mPackageManager, mPermManager);
         PackageInfo testPkgInfo = new PackageInfo();
         testPkgInfo.requestedPermissions = new String[]{ Manifest.permission.POST_NOTIFICATIONS };
         when(mPackageManager.getPackageInfo(anyString(), anyLong(), anyInt()))
@@ -89,12 +89,12 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testHasPermission() throws Exception {
-        when(mPmi.checkUidPermission(anyInt(), anyString()))
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_GRANTED);
 
         assertThat(mPermissionHelper.hasPermission(1)).isTrue();
 
-        when(mPmi.checkUidPermission(anyInt(), anyString()))
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_DENIED);
 
         assertThat(mPermissionHelper.hasPermission(1)).isFalse();
@@ -135,6 +135,68 @@ public class PermissionHelperTest extends UiServiceTestCase {
         Set<Pair<Integer, String>> actual = mPermissionHelper.getAppsRequestingPermission(0);
 
         assertThat(actual).containsExactlyElementsIn(expected);
+    }
+
+    @Test
+    public void testHasRequestedPermission_otherPermission() throws Exception {
+        final String permission = "correct";
+
+        String packageName = "testHasRequestedPermission_otherPermission";
+
+        PackageInfo info = new PackageInfo();
+        info.packageName = packageName;
+        info.requestedPermissions = new String[]{"something else"};
+
+        when(mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS, 0)).thenReturn(info);
+
+        assertThat(mPermissionHelper.hasRequestedPermission(permission, packageName, 0)).isFalse();
+
+    }
+
+    @Test
+    public void testHasRequestedPermission_noPermissions() throws Exception {
+        final String permission = "correct";
+
+        String packageName = "testHasRequestedPermission_noPermissions";
+
+        PackageInfo info = new PackageInfo();
+        info.packageName = packageName;
+
+        when(mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS, 0)).thenReturn(info);
+
+        assertThat(mPermissionHelper.hasRequestedPermission(permission, packageName, 0)).isFalse();
+    }
+
+    @Test
+    public void testHasRequestedPermission_singlePermissions() throws Exception {
+        final String permission = "correct";
+
+        String packageName = "testHasRequestedPermission_twoPermissions";
+
+        PackageInfo info = new PackageInfo();
+        info.packageName = packageName;
+        info.requestedPermissions =
+                new String[]{permission};
+
+        when(mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS, 0)).thenReturn(info);
+
+        assertThat(mPermissionHelper.hasRequestedPermission(permission, packageName, 0)).isTrue();
+    }
+
+    @Test
+    public void testHasRequestedPermission_twoPermissions() throws Exception {
+        final String permission = "correct";
+
+        String packageName = "testHasRequestedPermission_twoPermissions";
+
+        PackageInfo info = new PackageInfo();
+        info.packageName = packageName;
+        info.requestedPermissions =
+                new String[]{"something else", permission};
+
+        when(mPackageManager.getPackageInfo(packageName, GET_PERMISSIONS, 0)).thenReturn(info);
+
+        assertThat(mPermissionHelper.hasRequestedPermission(permission, packageName, 0)).isTrue();
     }
 
     @Test
@@ -179,7 +241,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_grantUserSet() throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_DENIED);
         mPermissionHelper.setNotificationPermission("pkg", 10, true, true);
 
@@ -193,7 +255,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
     @Test
     public void testSetNotificationPermission_pkgPerm_grantedByDefaultPermSet_allUserSet()
             throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_DENIED);
         when(mPermManager.getPermissionFlags(anyString(),
                 eq(Manifest.permission.POST_NOTIFICATIONS),
@@ -211,7 +273,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_revokeUserSet() throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_GRANTED);
 
         mPermissionHelper.setNotificationPermission("pkg", 10, false, true);
@@ -225,7 +287,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_grantNotUserSet() throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_DENIED);
 
         mPermissionHelper.setNotificationPermission("pkg", 10, true, false);
@@ -238,7 +300,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_revokeNotUserSet() throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_GRANTED);
 
         mPermissionHelper.setNotificationPermission("pkg", 10, false, false);
@@ -278,7 +340,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_alreadyGrantedNotRegranted() throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_GRANTED);
         mPermissionHelper.setNotificationPermission("pkg", 10, true, false);
 
@@ -288,7 +350,7 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_alreadyRevokedNotRerevoked() throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_DENIED);
         mPermissionHelper.setNotificationPermission("pkg", 10, false, false);
 
@@ -298,16 +360,19 @@ public class PermissionHelperTest extends UiServiceTestCase {
 
     @Test
     public void testSetNotificationPermission_doesntRequestNotChanged() throws Exception {
-        when(mPmi.checkPermission(anyString(), anyString(), anyInt()))
+        int testUid = -1;
+        when(mContext.checkPermission(anyString(), anyInt(), anyInt()))
                 .thenReturn(PERMISSION_GRANTED);
+        when(mPackageManager.getPackageUid(anyString(), anyInt(), anyInt()))
+                .thenReturn(testUid);
         PackageInfo testPkgInfo = new PackageInfo();
         testPkgInfo.requestedPermissions = new String[]{ Manifest.permission.RECORD_AUDIO };
         when(mPackageManager.getPackageInfo(anyString(), anyLong(), anyInt()))
                 .thenReturn(testPkgInfo);
         mPermissionHelper.setNotificationPermission("pkg", 10, false, false);
 
-        verify(mPmi, never()).checkPermission(
-                eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10));
+        verify(mContext, never()).checkPermission(
+                eq(Manifest.permission.POST_NOTIFICATIONS), eq(-1), eq(testUid));
         verify(mPermManager, never()).revokeRuntimePermission(
                 eq("pkg"), eq(Manifest.permission.POST_NOTIFICATIONS), eq(10), anyString());
     }

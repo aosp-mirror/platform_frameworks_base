@@ -27,9 +27,6 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Surface;
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 /**
  * Provides access to the low-level TV input hardware abstraction layer.
  */
@@ -64,6 +61,8 @@ final class TvInputHal implements Handler.Callback {
     private static native TvStreamConfig[] nativeGetStreamConfigs(long ptr, int deviceId,
             int generation);
     private static native void nativeClose(long ptr);
+    private static native int nativeSetTvMessageEnabled(long ptr, int deviceId, int streamId,
+            int type, boolean enabled);
 
     private final Object mLock = new Object();
     private long mPtr = 0;
@@ -93,6 +92,25 @@ final class TvInputHal implements Handler.Callback {
                 return ERROR_STALE_CONFIG;
             }
             if (nativeAddOrUpdateStream(mPtr, deviceId, streamConfig.getStreamId(), surface) == 0) {
+                return SUCCESS;
+            } else {
+                return ERROR_UNKNOWN;
+            }
+        }
+    }
+
+    public int setTvMessageEnabled(int deviceId, TvStreamConfig streamConfig, int type,
+            boolean enabled) {
+        synchronized (mLock) {
+            if (mPtr == 0) {
+                return ERROR_NO_INIT;
+            }
+            int generation = mStreamConfigGenerations.get(deviceId, 0);
+            if (generation != streamConfig.getGeneration()) {
+                return ERROR_STALE_CONFIG;
+            }
+            if (nativeSetTvMessageEnabled(mPtr, deviceId, streamConfig.getStreamId(), type,
+                    enabled) == 0) {
                 return SUCCESS;
             } else {
                 return ERROR_UNKNOWN;

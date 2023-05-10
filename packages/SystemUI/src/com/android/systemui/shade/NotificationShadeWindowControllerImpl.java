@@ -423,12 +423,18 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
     }
 
     private boolean isExpanded(NotificationShadeWindowState state) {
-        return !state.forceWindowCollapsed && (state.isKeyguardShowingAndNotOccluded()
+        boolean isExpanded = !state.forceWindowCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
                 || state.headsUpNotificationShowing
                 || state.scrimsVisibility != ScrimController.TRANSPARENT)
                 || state.backgroundBlurRadius > 0
                 || state.launchingActivityFromNotification;
+        mLogger.logIsExpanded(isExpanded, state.forceWindowCollapsed,
+                state.isKeyguardShowingAndNotOccluded(), state.panelVisible,
+                state.keyguardFadingAway, state.bouncerShowing, state.headsUpNotificationShowing,
+                state.scrimsVisibility != ScrimController.TRANSPARENT,
+                state.backgroundBlurRadius > 0, state.launchingActivityFromNotification);
+        return isExpanded;
     }
 
     private void applyFitsSystemWindows(NotificationShadeWindowState state) {
@@ -561,6 +567,7 @@ public class NotificationShadeWindowControllerImpl implements NotificationShadeW
         for (StatusBarWindowCallback cb : activeCallbacks) {
             cb.onStateChanged(mCurrentState.keyguardShowing,
                     mCurrentState.keyguardOccluded,
+                    mCurrentState.keyguardGoingAway,
                     mCurrentState.bouncerShowing,
                     mCurrentState.dozing,
                     mCurrentState.panelExpanded,

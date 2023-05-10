@@ -32,22 +32,25 @@ import java.util.Objects;
 
 final class BooleanPolicySerializer extends PolicySerializer<Boolean> {
 
+    private static final String ATTR_VALUE = "value";
+
+    private static final String TAG = "BooleanPolicySerializer";
+
     @Override
-    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer, String attributeName,
-            @NonNull Boolean value)
+    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer, @NonNull Boolean value)
             throws IOException {
         Objects.requireNonNull(value);
-        serializer.attributeBoolean(/* namespace= */ null, attributeName, value);
+        serializer.attributeBoolean(/* namespace= */ null, ATTR_VALUE, value);
     }
 
     @Nullable
     @Override
-    BooleanPolicyValue readFromXml(TypedXmlPullParser parser, String attributeName) {
+    BooleanPolicyValue readFromXml(TypedXmlPullParser parser) {
         try {
             return new BooleanPolicyValue(
-                    parser.getAttributeBoolean(/* namespace= */ null, attributeName));
+                    parser.getAttributeBoolean(/* namespace= */ null, ATTR_VALUE));
         } catch (XmlPullParserException e) {
-            Log.e(DevicePolicyEngine.TAG, "Error parsing Boolean policy value", e);
+            Log.e(TAG, "Error parsing Boolean policy value", e);
             return null;
         }
     }

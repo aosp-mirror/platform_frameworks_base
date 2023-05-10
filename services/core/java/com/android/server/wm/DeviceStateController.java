@@ -24,6 +24,7 @@ import android.os.HandlerExecutor;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.ArrayList;
@@ -51,7 +52,8 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
     private final int[] mReverseRotationAroundZAxisStates;
     @GuardedBy("this")
     @NonNull
-    private final List<Consumer<DeviceState>> mDeviceStateCallbacks = new ArrayList<>();
+    @VisibleForTesting
+    final List<Consumer<DeviceState>> mDeviceStateCallbacks = new ArrayList<>();
 
     private final boolean mMatchBuiltInDisplayOrientationToDefaultDisplay;
 
@@ -95,6 +97,12 @@ final class DeviceStateController implements DeviceStateManager.DeviceStateCallb
     void registerDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
         synchronized (this) {
             mDeviceStateCallbacks.add(callback);
+        }
+    }
+
+    void unregisterDeviceStateCallback(@NonNull Consumer<DeviceState> callback) {
+        synchronized (this) {
+            mDeviceStateCallbacks.remove(callback);
         }
     }
 

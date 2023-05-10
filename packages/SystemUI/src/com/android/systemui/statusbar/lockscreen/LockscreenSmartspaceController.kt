@@ -353,7 +353,11 @@ constructor(
                 }
             }
 
-            override fun startPendingIntent(pi: PendingIntent, showOnLockscreen: Boolean) {
+            override fun startPendingIntent(
+                    view: View,
+                    pi: PendingIntent,
+                    showOnLockscreen: Boolean
+            ) {
                 if (showOnLockscreen) {
                     pi.send()
                 } else {

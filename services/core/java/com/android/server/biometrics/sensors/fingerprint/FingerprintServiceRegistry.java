@@ -20,7 +20,6 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintAuthenticatorsRegisteredCallback;
@@ -28,7 +27,6 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BiometricServiceRegistry;
 
 import java.util.List;
@@ -53,10 +51,8 @@ public class FingerprintServiceRegistry extends BiometricServiceRegistry<Service
     @Override
     protected void registerService(@NonNull IBiometricService service,
             @NonNull FingerprintSensorPropertiesInternal props) {
-        @BiometricManager.Authenticators.Types final int strength =
-                Utils.propertyStrengthToAuthenticatorStrength(props.sensorStrength);
         try {
-            service.registerAuthenticator(props.sensorId, TYPE_FINGERPRINT, strength,
+            service.registerAuthenticator(TYPE_FINGERPRINT, props,
                     new FingerprintAuthenticator(mService, props.sensorId));
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when registering sensorId: " + props.sensorId);

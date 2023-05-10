@@ -50,7 +50,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -154,6 +153,8 @@ public class DeviceIdleControllerTest {
         ConstraintController constraintController;
         // Freeze time for testing.
         long nowElapsed;
+        boolean useMotionSensor = true;
+        boolean isLocationPrefetchEnabled = true;
 
         InjectorForTest(Context ctx) {
             super(ctx);
@@ -223,6 +224,11 @@ public class DeviceIdleControllerTest {
         }
 
         @Override
+        boolean isLocationPrefetchEnabled() {
+            return isLocationPrefetchEnabled;
+        }
+
+        @Override
         PowerManager getPowerManager() {
             return mPowerManager;
         }
@@ -245,7 +251,7 @@ public class DeviceIdleControllerTest {
 
         @Override
         boolean useMotionSensor() {
-            return true;
+            return useMotionSensor;
         }
     }
 
@@ -345,6 +351,12 @@ public class DeviceIdleControllerTest {
         mAnyMotionDetector = new AnyMotionDetectorForTest();
         mInjector = new InjectorForTest(getContext());
 
+        setupDeviceIdleController();
+    }
+
+    private void setupDeviceIdleController() {
+        reset(mTelephonyManager);
+
         mDeviceIdleController = new DeviceIdleController(getContext(), mInjector);
         spyOn(mDeviceIdleController);
         doNothing().when(mDeviceIdleController).publishBinderService(any(), any());
@@ -371,6 +383,10 @@ public class DeviceIdleControllerTest {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
+    }
+
+    @After
+    public void cleanupDeviceIdleController() {
         // DeviceIdleController adds these to LocalServices in the constructor, so we have to remove
         // them after each test, otherwise, subsequent tests will fail.
         LocalServices.removeServiceForTest(AppStateTracker.class);
@@ -613,8 +629,59 @@ public class DeviceIdleControllerTest {
 
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_INACTIVE);
-        verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT), eq(false));
+        verify(mDeviceIdleController).scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT));
+    }
+
+    @Test
+    public void testStateActiveToStateInactive_DoNotUseMotionSensor() {
+        mInjector.useMotionSensor = false;
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        verifyStateConditions(STATE_ACTIVE);
+
+        setAlarmSoon(false);
+        setChargingOn(false);
+        setScreenOn(false);
+        setEmergencyCallActive(false);
+
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyStateConditions(STATE_INACTIVE);
+        verify(mDeviceIdleController).scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT));
+        // The device configuration doesn't require a motion sensor to proceed with idling.
+        // This should be the case on TVs or other such devices. We should set an alarm to move
+        // forward if the motion sensor is missing in this case.
+        verify(mAlarmManager).setWindow(
+                anyInt(), anyLong(), anyLong(),
+                eq("DeviceIdleController.deep"), any(), any(Handler.class));
+    }
+
+    @Test
+    public void testStateActiveToStateInactive_MissingMotionSensor() {
+        mInjector.useMotionSensor = true;
+        mMotionSensor = null;
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        verifyStateConditions(STATE_ACTIVE);
+
+        setAlarmSoon(false);
+        setChargingOn(false);
+        setScreenOn(false);
+        setEmergencyCallActive(false);
+
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyStateConditions(STATE_INACTIVE);
+        verify(mDeviceIdleController).scheduleAlarmLocked(eq(mConstants.INACTIVE_TIMEOUT));
+        // The device configuration requires a motion sensor to proceed with idling,
+        // so we should never set an alarm to move forward if the motion sensor is
+        // missing in this case.
+        verify(mAlarmManager, never()).setWindow(
+                anyInt(), anyLong(), anyLong(),
+                eq("DeviceIdleController.deep"), any(), any(Handler.class));
+        verify(mAlarmManager, never()).set(
+                anyInt(), anyLong(),
+                eq("DeviceIdleController.deep"), any(), any(Handler.class));
     }
 
     @Test
@@ -634,7 +701,7 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_INACTIVE);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(timeUntilAlarm + mConstants.INACTIVE_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(timeUntilAlarm + mConstants.INACTIVE_TIMEOUT));
 
         enterDeepState(STATE_ACTIVE);
         setQuickDozeEnabled(true);
@@ -644,7 +711,7 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController).scheduleAlarmLocked(
-                eq(timeUntilAlarm + mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                eq(timeUntilAlarm + mConstants.QUICK_DOZE_DELAY_TIMEOUT));
     }
 
     @Test
@@ -671,59 +738,56 @@ public class DeviceIdleControllerTest {
         setScreenOn(false);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         enterDeepState(STATE_INACTIVE);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         enterDeepState(STATE_IDLE_PENDING);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         enterDeepState(STATE_SENSING);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         enterDeepState(STATE_LOCATING);
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
         inOrder.verify(mDeviceIdleController)
-                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT), eq(false));
+                .scheduleAlarmLocked(eq(mConstants.QUICK_DOZE_DELAY_TIMEOUT));
 
         // IDLE should stay as IDLE.
         enterDeepState(STATE_IDLE);
         // Clear out any alarm setting from the order before checking for this section.
-        inOrder.verify(mDeviceIdleController, atLeastOnce())
-                .scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, atLeastOnce()).scheduleAlarmLocked(anyLong());
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_IDLE);
-        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong());
 
         // IDLE_MAINTENANCE should stay as IDLE_MAINTENANCE.
         enterDeepState(STATE_IDLE_MAINTENANCE);
         // Clear out any alarm setting from the order before checking for this section.
-        inOrder.verify(mDeviceIdleController, atLeastOnce())
-                .scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, atLeastOnce()).scheduleAlarmLocked(anyLong());
         setQuickDozeEnabled(true);
         verifyStateConditions(STATE_IDLE_MAINTENANCE);
-        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong());
 
         // State is already QUICK_DOZE_DELAY. No work should be done.
         enterDeepState(STATE_QUICK_DOZE_DELAY);
         // Clear out any alarm setting from the order before checking for this section.
-        inOrder.verify(mDeviceIdleController, atLeastOnce())
-                .scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, atLeastOnce()).scheduleAlarmLocked(anyLong());
         setQuickDozeEnabled(true);
         mDeviceIdleController.becomeInactiveIfAppropriateLocked();
         verifyStateConditions(STATE_QUICK_DOZE_DELAY);
-        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong(), anyBoolean());
+        inOrder.verify(mDeviceIdleController, never()).scheduleAlarmLocked(anyLong());
     }
 
     @Test
@@ -754,6 +818,94 @@ public class DeviceIdleControllerTest {
 
         mDeviceIdleController.stepIdleStateLocked("testing");
         verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testStepIdleStateLocked_ValidStates_MissingMotionSensor() {
+        mInjector.useMotionSensor = true;
+        mMotionSensor = null;
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+        mInjector.locationManager = mLocationManager;
+        doReturn(mock(LocationProvider.class)).when(mLocationManager).getProvider(anyString());
+        // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
+        setAlarmSoon(false);
+
+        InOrder alarmManagerInOrder = inOrder(mAlarmManager);
+
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyStateConditions(STATE_INACTIVE);
+
+        // The device configuration requires a motion sensor to proceed with idling,
+        // so we should never set an alarm to move forward if the motion sensor is
+        // missing in this case.
+        alarmManagerInOrder.verify(mAlarmManager, never())
+                .setWindow(anyInt(), anyLong(), anyLong(),
+                        eq("DeviceIdleController.deep"), any(), any(Handler.class));
+
+        // Pretend that someone is forcing state stepping via adb
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        // verifyStateConditions knows this state typically shouldn't happen during normal
+        // operation, so we can't use it directly here. For this test, all we care about
+        // is that the state stepped forward.
+        assertEquals(STATE_IDLE_PENDING, mDeviceIdleController.getState());
+        // Still no alarm
+        alarmManagerInOrder.verify(mAlarmManager, never())
+                .setWindow(anyInt(), anyLong(), anyLong(),
+                        eq("DeviceIdleController.deep"), any(), any(Handler.class));
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        // verifyStateConditions knows this state typically shouldn't happen during normal
+        // operation, so we can't use it directly here. For this test, all we care about
+        // is that the state stepped forward.
+        assertEquals(STATE_SENSING, mDeviceIdleController.getState());
+        // Still no alarm
+        alarmManagerInOrder.verify(mAlarmManager, never())
+                .setWindow(anyInt(), anyLong(), anyLong(),
+                        eq("DeviceIdleController.deep"), any(), any(Handler.class));
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        // Location manager exists with a provider, so SENSING should go to LOCATING.
+        // verifyStateConditions knows this state typically shouldn't happen during normal
+        // operation, so we can't use it directly here. For this test, all we care about
+        // is that the state stepped forward.
+        assertEquals(STATE_LOCATING, mDeviceIdleController.getState());
+        // Still no alarm
+        alarmManagerInOrder.verify(mAlarmManager, never())
+                .setWindow(anyInt(), anyLong(), anyLong(),
+                        eq("DeviceIdleController.deep"), any(), any(Handler.class));
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE);
+        // The device was forced into IDLE. AlarmManager should be notified.
+        alarmManagerInOrder.verify(mAlarmManager)
+                .setIdleUntil(anyInt(), anyLong(),
+                        eq("DeviceIdleController.deep"), any(), any(Handler.class));
+
+        // Should just alternate between IDLE and IDLE_MAINTENANCE now. Since we've gotten to this
+        // point, alarms should be set on each transition.
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+        alarmManagerInOrder.verify(mAlarmManager)
+                .setWindow(anyInt(), anyLong(), anyLong(),
+                        eq("DeviceIdleController.deep"), any(), any(Handler.class));
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE);
+        alarmManagerInOrder.verify(mAlarmManager)
+                .setIdleUntil(anyInt(), anyLong(),
+                        eq("DeviceIdleController.deep"), any(), any(Handler.class));
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+        alarmManagerInOrder.verify(mAlarmManager)
+                .setWindow(anyInt(), anyLong(), anyLong(),
+                        eq("DeviceIdleController.deep"), any(), any(Handler.class));
     }
 
     @Test
@@ -845,6 +997,43 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
+    public void testStepIdleStateLocked_ValidStates_LocationPrefetchDisabled() {
+        mInjector.locationManager = mLocationManager;
+        mInjector.isLocationPrefetchEnabled = false;
+        cleanupDeviceIdleController();
+        setupDeviceIdleController();
+        doReturn(mock(LocationProvider.class)).when(mLocationManager).getProvider(anyString());
+        // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
+        setAlarmSoon(false);
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyStateConditions(STATE_INACTIVE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_PENDING);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_SENSING);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        // Prefetch location is off, so SENSING should go straight through to IDLE.
+        verifyStateConditions(STATE_IDLE);
+
+        // Should just alternate between IDLE and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
     public void testStepIdleStateLocked_ValidStates_WithLocationManager_NoProviders() {
         // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
         setAlarmSoon(false);
@@ -863,6 +1052,46 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.stepIdleStateLocked("testing");
         // Location manager exists but there isn't a network or GPS provider,
         // so SENSING should go straight to IDLE.
+        verifyStateConditions(STATE_IDLE);
+
+        // Should just alternate between IDLE and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testStepIdleStateLocked_ValidStates_WithLocationManager_MissingProviders() {
+        mInjector.locationManager = mLocationManager;
+        doReturn(null).when(mLocationManager)
+                .getProvider(eq(LocationManager.FUSED_PROVIDER));
+        doReturn(null).when(mLocationManager)
+                .getProvider(eq(LocationManager.GPS_PROVIDER));
+        doReturn(mock(LocationProvider.class)).when(mLocationManager)
+                .getProvider(eq(LocationManager.NETWORK_PROVIDER));
+        // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
+        setAlarmSoon(false);
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyStateConditions(STATE_INACTIVE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_PENDING);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_SENSING);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        // Location manager exists, but the required providers don't exist,
+        // so SENSING should go straight through to IDLE.
         verifyStateConditions(STATE_IDLE);
 
         // Should just alternate between IDLE and IDLE_MAINTENANCE now.
@@ -2532,17 +2761,12 @@ public class DeviceIdleControllerTest {
         if (ret == mDeviceIdleController.SET_IDLE_FACTOR_RESULT_OK) {
             enterDeepState(STATE_IDLE);
             long now = SystemClock.elapsedRealtime();
-            long alarm = mDeviceIdleController.getNextAlarmTime();
             mDeviceIdleController.setIdleStartTimeForTest(
                     now - (long) (mConstants.IDLE_TIMEOUT * 0.6));
-            long newAlarm = mDeviceIdleController.getNextAlarmTime();
-            assertTrue("maintenance not reschedule IDLE_TIMEOUT * 0.6",
-                    newAlarm == alarm);
+            verifyStateConditions(STATE_IDLE);
             mDeviceIdleController.setIdleStartTimeForTest(
                     now - (long) (mConstants.IDLE_TIMEOUT * 1.2));
-            newAlarm = mDeviceIdleController.getNextAlarmTime();
-            assertTrue("maintenance not reschedule IDLE_TIMEOUT * 1.2",
-                    (newAlarm - now) < minuteInMillis);
+            verifyStateConditions(STATE_IDLE_MAINTENANCE);
             mDeviceIdleController.resetPreIdleTimeoutMode();
         }
     }

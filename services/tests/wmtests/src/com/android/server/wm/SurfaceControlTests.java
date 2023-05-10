@@ -16,18 +16,33 @@
 
 package com.android.server.wm;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import android.app.Activity;
+import android.app.Instrumentation;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
+import android.util.Log;
 import android.view.SurfaceControl;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class for testing {@link SurfaceControl}.
@@ -103,6 +118,66 @@ public class SurfaceControlTests {
         } finally {
             SurfaceControl.setDebugUsageAfterRelease(false);
             p.recycle();
+        }
+    }
+
+    @Test
+    public void testSurfaceChangedOnRotation() {
+        final Instrumentation instrumentation = getInstrumentation();
+        final Context context = instrumentation.getContext();
+        final Intent intent = new Intent().setComponent(
+                new ComponentName(context, ActivityOptionsTest.MainActivity.class))
+                .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        final Activity activity = instrumentation.startActivitySync(intent);
+        final SurfaceView sv = new SurfaceView(activity);
+        final AtomicInteger surfaceChangedCount = new AtomicInteger();
+        instrumentation.runOnMainSync(() -> activity.setContentView(sv));
+        sv.getHolder().addCallback(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(@NonNull SurfaceHolder holder) {
+            }
+            @Override
+            public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width,
+                    int height) {
+                surfaceChangedCount.getAndIncrement();
+                Log.i("surfaceChanged", "width=" + width + " height=" + height
+                        + " getTransformHint="
+                        + sv.getViewRootImpl().getSurfaceControl().getTransformHint());
+            }
+            @Override
+            public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+            }
+        });
+        final int rotation = activity.getResources().getConfiguration()
+                .windowConfiguration.getRotation();
+        activity.setRequestedOrientation(activity.getResources().getConfiguration().orientation
+                == Configuration.ORIENTATION_PORTRAIT
+                ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        instrumentation.getUiAutomation().syncInputTransactions();
+        instrumentation.waitForIdleSync();
+        final int newRotation = activity.getResources().getConfiguration()
+                .windowConfiguration.getRotation();
+        if (rotation == newRotation) {
+            // The device might not support requested orientation.
+            activity.finishAndRemoveTask();
+            return;
+        }
+        final int count = surfaceChangedCount.get();
+        activity.moveTaskToBack(true /* nonRoot */);
+        instrumentation.getUiAutomation().syncInputTransactions();
+        context.startActivity(intent);
+        instrumentation.getUiAutomation().syncInputTransactions();
+        final int countAfterToFront = count - surfaceChangedCount.get();
+        activity.finishAndRemoveTask();
+
+        // The first count is triggered from creation, so the target number is 2.
+        if (count > 2) {
+            fail("More than once surfaceChanged for rotation change: " + count);
+        }
+        if (countAfterToFront > 1) {
+            fail("More than once surfaceChanged for app transition with rotation change: "
+                    + countAfterToFront);
         }
     }
 

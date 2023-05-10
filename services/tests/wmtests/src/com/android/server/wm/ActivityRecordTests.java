@@ -45,6 +45,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.UI_MODE_TYPE_DESK;
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.os.Process.NOBODY_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -82,6 +83,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_CANCELLED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REMOVED;
 import static com.android.server.wm.ActivityRecord.FINISH_RESULT_REQUESTED;
+import static com.android.server.wm.ActivityRecord.LAUNCH_SOURCE_TYPE_HOME;
 import static com.android.server.wm.ActivityRecord.State.DESTROYED;
 import static com.android.server.wm.ActivityRecord.State.DESTROYING;
 import static com.android.server.wm.ActivityRecord.State.FINISHING;
@@ -491,6 +493,62 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
+    public void testDeskModeChange_doesNotRelaunch() throws RemoteException {
+        mWm.mSkipActivityRelaunchWhenDocking = true;
+
+        final ActivityRecord activity = createActivityWithTask();
+        // The activity will already be relaunching out of the gate, finish the relaunch so we can
+        // test properly.
+        activity.finishRelaunching();
+        // Clear out any calls to scheduleTransaction from launching the activity.
+        reset(mAtm.getLifecycleManager());
+
+        final Task task = activity.getTask();
+        activity.setState(RESUMED, "Testing");
+
+        // Send a desk UI mode config update.
+        final Configuration newConfig = new Configuration(task.getConfiguration());
+        newConfig.uiMode |= UI_MODE_TYPE_DESK;
+        task.onRequestedOverrideConfigurationChanged(newConfig);
+        ensureActivityConfiguration(activity);
+
+        // The activity shouldn't start relaunching since it doesn't have any desk resources.
+        assertFalse(activity.isRelaunching());
+
+        // The configuration change is still sent to the activity, even if it doesn't relaunch.
+        final ActivityConfigurationChangeItem expected =
+                ActivityConfigurationChangeItem.obtain(newConfig);
+        verify(mAtm.getLifecycleManager()).scheduleTransaction(
+                eq(activity.app.getThread()), eq(activity.token), eq(expected));
+    }
+
+    @Test
+    public void testDeskModeChange_relaunchesWithDeskResources() {
+        mWm.mSkipActivityRelaunchWhenDocking = true;
+
+        final ActivityRecord activity = createActivityWithTask();
+        // The activity will already be relaunching out of the gate, finish the relaunch so we can
+        // test properly.
+        activity.finishRelaunching();
+
+        // Activities with desk resources should get relaunched when a UI_MODE_TYPE_DESK change
+        // comes in.
+        doReturn(true).when(activity).hasDeskResources();
+
+        final Task task = activity.getTask();
+        activity.setState(RESUMED, "Testing");
+
+        // Send a desk UI mode config update.
+        final Configuration newConfig = new Configuration(task.getConfiguration());
+        newConfig.uiMode |= UI_MODE_TYPE_DESK;
+        task.onRequestedOverrideConfigurationChanged(newConfig);
+        ensureActivityConfiguration(activity);
+
+        // The activity will relaunch since it has desk resources.
+        assertTrue(activity.isRelaunching());
+    }
+
+    @Test
     public void testSetRequestedOrientationUpdatesConfiguration() throws Exception {
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
@@ -532,12 +590,18 @@ public class ActivityRecordTests extends WindowTestsBase {
                 throw new IllegalStateException("Orientation in new config should be either"
                         + "landscape or portrait.");
         }
+
+        final DisplayRotation displayRotation = activity.mDisplayContent.getDisplayRotation();
+        spyOn(displayRotation);
+
         activity.setRequestedOrientation(requestedOrientation);
 
         final ActivityConfigurationChangeItem expected =
                 ActivityConfigurationChangeItem.obtain(newConfig);
         verify(mAtm.getLifecycleManager()).scheduleTransaction(eq(activity.app.getThread()),
                 eq(activity.token), eq(expected));
+
+        verify(displayRotation).onSetRequestedOrientation();
     }
 
     @Test
@@ -787,7 +851,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                     }
 
                     @Override
-                    public void onAnimationCancelled(boolean isKeyguardOccluded) {
+                    public void onAnimationCancelled() {
                     }
                 }, 0, 0));
         activity.updateOptionsLocked(opts);
@@ -1205,6 +1269,8 @@ public class ActivityRecordTests extends WindowTestsBase {
                     any(ClientTransaction.class));
         } catch (RemoteException ignored) {
         }
+
+        assertNull(targetActivity.results);
     }
 
     @Test
@@ -2333,7 +2399,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         holder.addConnection(connection);
         assertTrue(holder.isActivityVisible());
         final int[] count = new int[1];
-        final Consumer<Object> c = conn -> count[0]++;
+        final Consumer<Object> c = conn -> {
+            count[0]++;
+            assertFalse(Thread.holdsLock(activity));
+        };
         holder.forEachConnection(c);
         assertEquals(1, count[0]);
 
@@ -2377,7 +2446,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setScreenOrientation(SCREEN_ORIENTATION_BEHIND)
                 .build();
         final int topOrientation = activityTop.getRequestedConfigurationOrientation();
-        assertEquals(SCREEN_ORIENTATION_PORTRAIT, topOrientation);
+        assertEquals(ORIENTATION_PORTRAIT, topOrientation);
     }
 
     private void verifyProcessInfoUpdate(ActivityRecord activity, State state,
@@ -3055,7 +3124,7 @@ public class ActivityRecordTests extends WindowTestsBase {
                 .setSystemDecorations(true).build();
         // Add a decor insets provider window.
         final WindowState navbar = createNavBarWithProvidedInsets(squareDisplay);
-        assertTrue(navbar.providesNonDecorInsets()
+        assertTrue(navbar.providesDisplayDecorInsets()
                 && squareDisplay.getDisplayPolicy().updateDecorInsetsInfo());
         squareDisplay.sendNewConfiguration();
         final Task task = new TaskBuilder(mSupervisor).setDisplay(squareDisplay).build();
@@ -3621,6 +3690,23 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Collect activity in the transition if the Task windowing mode is going to change.
         assertTrue(activity.inTransition());
+    }
+
+    /**
+     * Verifies the task is moved to back when back pressed if the root activity was originally
+     * started from Launcher.
+     */
+    @Test
+    public void testMoveTaskToBackWhenStartedFromLauncher() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord ar = createActivityRecord(task);
+        task.realActivity = ar.mActivityComponent;
+        ar.intent.setAction(Intent.ACTION_MAIN);
+        ar.intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        doReturn(true).when(ar).isLaunchSourceType(eq(LAUNCH_SOURCE_TYPE_HOME));
+
+        mAtm.mActivityClientController.onBackPressed(ar.token, null /* callback */);
+        verify(task).moveTaskToBack(any());
     }
 
     private ICompatCameraControlCallback getCompatCameraControlCallback() {

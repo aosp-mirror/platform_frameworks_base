@@ -40,6 +40,7 @@ import org.junit.runners.Parameterized
  *     Press home
  *     Check if pip window moves up (visually)
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

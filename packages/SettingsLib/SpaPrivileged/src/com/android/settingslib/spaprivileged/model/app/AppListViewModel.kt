@@ -80,12 +80,15 @@ internal open class AppListViewModelImpl<T : AppRecord>(
     private val scope = viewModelScope + Dispatchers.IO
 
     private val userSubGraphsFlow = appListConfig.flow.map { config ->
-        config.userIds.map { userId -> UserSubGraph(userId, config.showInstantApps) }
+        config.userIds.map { userId ->
+            UserSubGraph(userId, config.showInstantApps, config.matchAnyUserForAdmin)
+        }
     }.shareIn(scope = scope, started = SharingStarted.Eagerly, replay = 1)
 
     private inner class UserSubGraph(
         private val userId: Int,
         private val showInstantApps: Boolean,
+        private val matchAnyUserForAdmin: Boolean,
     ) {
         private val userIdFlow = flowOf(userId)
 
@@ -110,7 +113,8 @@ internal open class AppListViewModelImpl<T : AppRecord>(
 
         fun reloadApps() {
             scope.launch {
-                appsStateFlow.value = appListRepository.loadApps(userId, showInstantApps)
+                appsStateFlow.value =
+                    appListRepository.loadApps(userId, showInstantApps, matchAnyUserForAdmin)
             }
         }
     }

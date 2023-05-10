@@ -20,16 +20,25 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_LOCAL;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import android.platform.test.annotations.Presubmit;
+
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+@Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class InputMethodManagerServiceTests {
@@ -86,5 +95,26 @@ public class InputMethodManagerServiceTests {
         assertEquals(SYSTEM_DECORATION_SUPPORT_DISPLAY_ID,
                 InputMethodManagerService.computeImeDisplayIdForTarget(
                         SYSTEM_DECORATION_SUPPORT_DISPLAY_ID, sChecker));
+    }
+
+    @Test
+    public void testSoftInputShowHideHistoryDump_withNulls_doesntThrow() {
+        var writer = new StringWriter();
+        var history = new InputMethodManagerService.SoftInputShowHideHistory();
+        history.addEntry(new InputMethodManagerService.SoftInputShowHideHistory.Entry(
+                null,
+                null,
+                null,
+                SOFT_INPUT_STATE_UNSPECIFIED,
+                SoftInputShowHideReason.SHOW_SOFT_INPUT,
+                false,
+                null,
+                null,
+                null,
+                null));
+
+        history.dump(new PrintWriter(writer), "" /* prefix */);
+
+        // Asserts that dump doesn't throw an NPE.
     }
 }

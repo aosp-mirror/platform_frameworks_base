@@ -64,6 +64,7 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
     protected ArrayList<LocaleStore.LocaleInfo> mOriginalLocaleOptions;
     protected int mSuggestionCount;
     protected final boolean mCountryMode;
+    protected boolean mIsNumberingMode;
     protected LayoutInflater mInflater;
 
     protected Locale mDisplayLocale = null;
@@ -87,6 +88,14 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
             }
             mLocaleOptions.add(li);
         }
+    }
+
+    public void setNumberingSystemMode(boolean isNumberSystemMode) {
+        mIsNumberingMode = isNumberSystemMode;
+    }
+
+    public boolean getIsForNumberingSystem() {
+        return mIsNumberingMode;
     }
 
     @Override
@@ -209,7 +218,6 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
         if (convertView == null && mInflater == null) {
             mInflater = LayoutInflater.from(parent.getContext());
         }
-
         int itemType = getItemViewType(position);
         View itemView = getNewViewIfNeeded(convertView, parent, itemType, position);
         switch (itemType) {
@@ -217,13 +225,13 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
             case TYPE_HEADER_ALL_OTHERS:
                 TextView textView = (TextView) itemView;
                 if (itemType == TYPE_HEADER_SUGGESTED) {
-                   if (mCountryMode) {
+                    if (mCountryMode && !mIsNumberingMode) {
                         setTextTo(textView, R.string.language_picker_regions_section_suggested);
                     } else {
                         setTextTo(textView, R.string.language_picker_section_suggested);
                     }
                 } else {
-                    if (mCountryMode) {
+                    if (mCountryMode && !mIsNumberingMode) {
                         setTextTo(textView, R.string.region_picker_section_all);
                     } else {
                         setTextTo(textView, R.string.language_picker_section_all);
@@ -419,9 +427,11 @@ public class SuggestedLocaleAdapter extends BaseAdapter implements Filterable {
 
     private void updateTextView(View convertView, TextView text, int position) {
         LocaleStore.LocaleInfo item = (LocaleStore.LocaleInfo) getItem(position);
-        text.setText(item.getLabel(mCountryMode));
+        text.setText(mIsNumberingMode
+                ? item.getNumberingSystem() : item.getLabel(mCountryMode));
         text.setTextLocale(item.getLocale());
-        text.setContentDescription(item.getContentDescription(mCountryMode));
+        text.setContentDescription(mIsNumberingMode
+                        ? item.getNumberingSystem() : item.getContentDescription(mCountryMode));
         if (mCountryMode) {
             int layoutDir = TextUtils.getLayoutDirectionFromLocale(item.getParent());
             //noinspection ResourceType

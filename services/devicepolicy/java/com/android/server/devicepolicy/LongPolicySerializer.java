@@ -32,21 +32,25 @@ import java.util.Objects;
 
 final class LongPolicySerializer extends PolicySerializer<Long> {
 
+    private static final String TAG = "LongPolicySerializer";
+
+    private static final String ATTR_VALUE = "value";
+
     @Override
-    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer, String attributeName,
+    void saveToXml(PolicyKey policyKey, TypedXmlSerializer serializer,
             @NonNull Long value) throws IOException {
         Objects.requireNonNull(value);
-        serializer.attributeLong(/* namespace= */ null, attributeName, value);
+        serializer.attributeLong(/* namespace= */ null, ATTR_VALUE, value);
     }
 
     @Nullable
     @Override
-    LongPolicyValue readFromXml(TypedXmlPullParser parser, String attributeName) {
+    LongPolicyValue readFromXml(TypedXmlPullParser parser) {
         try {
             return new LongPolicyValue(
-                    parser.getAttributeLong(/* namespace= */ null, attributeName));
+                    parser.getAttributeLong(/* namespace= */ null, ATTR_VALUE));
         } catch (XmlPullParserException e) {
-            Log.e(DevicePolicyEngine.TAG, "Error parsing Long policy value", e);
+            Log.e(TAG, "Error parsing Long policy value", e);
             return null;
         }
     }

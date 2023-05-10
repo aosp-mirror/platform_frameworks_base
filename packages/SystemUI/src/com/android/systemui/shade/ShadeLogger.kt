@@ -18,11 +18,11 @@ package com.android.systemui.shade
 
 import android.view.MotionEvent
 import com.android.systemui.log.dagger.ShadeLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
-import com.android.systemui.shade.NotificationPanelViewController.FLING_COLLAPSE
-import com.android.systemui.shade.NotificationPanelViewController.FLING_EXPAND
-import com.android.systemui.shade.NotificationPanelViewController.FLING_HIDE
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
+import com.android.systemui.shade.ShadeViewController.Companion.FLING_COLLAPSE
+import com.android.systemui.shade.ShadeViewController.Companion.FLING_EXPAND
+import com.android.systemui.shade.ShadeViewController.Companion.FLING_HIDE
 import com.google.errorprone.annotations.CompileTimeConstant
 import javax.inject.Inject
 
@@ -278,6 +278,118 @@ class ShadeLogger @Inject constructor(@ShadeLog private val buffer: LogBuffer) {
             LogLevel.VERBOSE,
             { bool1 = splitShadeEnabled },
             { "Split shade state changed: split shade ${if (bool1) "enabled" else "disabled"}" }
+        )
+    }
+
+    fun logNotificationsTopPadding(message: String, padding: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = message
+                int1 = padding
+            },
+            { "QSC NotificationsTopPadding $str1: $int1"}
+        )
+    }
+
+    fun logClippingTopBound(message: String, top: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = message
+                int1 = top
+            },
+            { "QSC ClippingTopBound $str1: $int1" }
+        )
+    }
+
+    fun logNotificationsClippingTopBound(top: Int, nsslTop: Int) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                int1 = top
+                int2 = nsslTop
+            },
+            { "QSC NotificationsClippingTopBound set to $int1 - $int2" }
+        )
+    }
+
+    fun logOnTouchEventLastReturn(
+        event: MotionEvent,
+        dozing: Boolean,
+        handled: Boolean,
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                bool1 = dozing
+                bool2 = handled
+                long1 = event.eventTime
+                long2 = event.downTime
+                int1 = event.action
+                int2 = event.classification
+                double1 = event.y.toDouble()
+            },
+            {
+                "NPVC onTouchEvent last return: !mDozing: $bool1 || handled: $bool2 " +
+                        "\neventTime=$long1,downTime=$long2,y=$double1,action=$int1,class=$int2"
+            }
+        )
+    }
+
+    fun logHandleTouchLastReturn(
+        event: MotionEvent,
+        gestureWaitForTouchSlop: Boolean,
+        tracking: Boolean,
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                bool1 = gestureWaitForTouchSlop
+                bool2 = tracking
+                long1 = event.eventTime
+                long2 = event.downTime
+                int1 = event.action
+                int2 = event.classification
+                double1 = event.y.toDouble()
+            },
+            {
+                "NPVC handleTouch last return: !mGestureWaitForTouchSlop: $bool1 " +
+                        "|| mTracking: $bool2 " +
+                        "\neventTime=$long1,downTime=$long2,y=$double1,action=$int1,class=$int2"
+            }
+        )
+    }
+
+    fun logUpdateNotificationPanelTouchState(
+        disabled: Boolean,
+        isGoingToSleep: Boolean,
+        shouldControlScreenOff: Boolean,
+        deviceInteractive: Boolean,
+        isPulsing: Boolean,
+        isFrpActive: Boolean,
+    ) {
+        buffer.log(
+            TAG,
+            LogLevel.VERBOSE,
+            {
+                bool1 = disabled
+                bool2 = isGoingToSleep
+                bool3 = shouldControlScreenOff
+                bool4 = deviceInteractive
+                str1 = isPulsing.toString()
+                str2 = isFrpActive.toString()
+            },
+            {
+                "CentralSurfaces updateNotificationPanelTouchState set disabled to: $bool1\n" +
+                        "isGoingToSleep: $bool2, !shouldControlScreenOff: $bool3," +
+                        "!mDeviceInteractive: $bool4, !isPulsing: $str1, isFrpActive: $str2"
+            }
         )
     }
 }

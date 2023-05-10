@@ -35,6 +35,7 @@ public class HdmiCecMessageValidator {
             ERROR_DESTINATION,
             ERROR_PARAMETER,
             ERROR_PARAMETER_SHORT,
+            ERROR_PARAMETER_LONG,
     })
     public @interface ValidationResult {};
 
@@ -43,6 +44,7 @@ public class HdmiCecMessageValidator {
     static final int ERROR_DESTINATION = 2;
     static final int ERROR_PARAMETER = 3;
     static final int ERROR_PARAMETER_SHORT = 4;
+    static final int ERROR_PARAMETER_LONG = 5;
 
     interface ParameterValidator {
         /**
@@ -159,11 +161,13 @@ public class HdmiCecMessageValidator {
         addValidationInfo(Constants.MESSAGE_SET_MENU_LANGUAGE,
                 new AsciiValidator(3), DEST_BROADCAST);
 
-        ParameterValidator statusRequestValidator = new OneByteRangeValidator(0x01, 0x03);
+        ParameterValidator statusRequestValidator = new MinimumOneByteRangeValidator(0x01, 0x03);
         addValidationInfo(
-                Constants.MESSAGE_DECK_CONTROL, new OneByteRangeValidator(0x01, 0x04), DEST_DIRECT);
+                Constants.MESSAGE_DECK_CONTROL,
+                        new MinimumOneByteRangeValidator(0x01, 0x04), DEST_DIRECT);
         addValidationInfo(
-                Constants.MESSAGE_DECK_STATUS, new OneByteRangeValidator(0x11, 0x1F), DEST_DIRECT);
+                Constants.MESSAGE_DECK_STATUS,
+                        new MinimumOneByteRangeValidator(0x11, 0x1F), DEST_DIRECT);
         addValidationInfo(Constants.MESSAGE_GIVE_DECK_STATUS, statusRequestValidator, DEST_DIRECT);
         addValidationInfo(Constants.MESSAGE_PLAY, new PlayModeValidator(), DEST_DIRECT);
 
@@ -201,9 +205,11 @@ public class HdmiCecMessageValidator {
 
         // Messages for the Device Menu Control.
         addValidationInfo(
-                Constants.MESSAGE_MENU_REQUEST, new OneByteRangeValidator(0x00, 0x02), DEST_DIRECT);
+                Constants.MESSAGE_MENU_REQUEST,
+                        new MinimumOneByteRangeValidator(0x00, 0x02), DEST_DIRECT);
         addValidationInfo(
-                Constants.MESSAGE_MENU_STATUS, new OneByteRangeValidator(0x00, 0x01), DEST_DIRECT);
+                Constants.MESSAGE_MENU_STATUS,
+                        new MinimumOneByteRangeValidator(0x00, 0x01), DEST_DIRECT);
 
         // Messages for the Remote Control Passthrough.
         addValidationInfo(
@@ -214,7 +220,7 @@ public class HdmiCecMessageValidator {
         // Messages for the Power Status.
         addValidationInfo(
                 Constants.MESSAGE_REPORT_POWER_STATUS,
-                new OneByteRangeValidator(0x00, 0x03),
+                new MinimumOneByteRangeValidator(0x00, 0x03),
                 DEST_DIRECT | DEST_BROADCAST);
 
         // Messages for the General Protocol.
@@ -229,17 +235,17 @@ public class HdmiCecMessageValidator {
                 oneByteValidator, DEST_DIRECT);
         addValidationInfo(
                 Constants.MESSAGE_SET_SYSTEM_AUDIO_MODE,
-                new OneByteRangeValidator(0x00, 0x01),
+                new MinimumOneByteRangeValidator(0x00, 0x01),
                 DEST_ALL);
         addValidationInfo(
                 Constants.MESSAGE_SYSTEM_AUDIO_MODE_STATUS,
-                new OneByteRangeValidator(0x00, 0x01),
+                new SingleByteRangeValidator(0x00, 0x01),
                 DEST_DIRECT);
 
         // Messages for the Audio Rate Control.
         addValidationInfo(
                 Constants.MESSAGE_SET_AUDIO_RATE,
-                new OneByteRangeValidator(0x00, 0x06),
+                new MinimumOneByteRangeValidator(0x00, 0x06),
                 DEST_DIRECT);
 
         // Messages for Feature Discovery.
@@ -900,11 +906,14 @@ public class HdmiCecMessageValidator {
         }
     }
 
-    /** Check if the given parameters are one byte parameters and within range. */
-    private static class OneByteRangeValidator implements ParameterValidator {
+    /**
+     * Check if the given parameters are at least one byte parameters
+     * and the first byte is within range.
+     */
+    private static class MinimumOneByteRangeValidator implements ParameterValidator {
         private final int mMinValue, mMaxValue;
 
-        OneByteRangeValidator(int minValue, int maxValue) {
+        MinimumOneByteRangeValidator(int minValue, int maxValue) {
             mMinValue = minValue;
             mMaxValue = maxValue;
         }
@@ -913,6 +922,26 @@ public class HdmiCecMessageValidator {
         public int isValid(byte[] params) {
             if (params.length < 1) {
                 return ERROR_PARAMETER_SHORT;
+            }
+            return toErrorCode(isWithinRange(params[0], mMinValue, mMaxValue));
+        }
+    }
+
+    /** Check if the given parameters are exactly one byte parameters and within range. */
+    private static class SingleByteRangeValidator implements ParameterValidator {
+        private final int mMinValue, mMaxValue;
+
+        SingleByteRangeValidator(int minValue, int maxValue) {
+            mMinValue = minValue;
+            mMaxValue = maxValue;
+        }
+
+        @Override
+        public int isValid(byte[] params) {
+            if (params.length < 1) {
+                return ERROR_PARAMETER_SHORT;
+            } else if (params.length > 1) {
+                return ERROR_PARAMETER_LONG;
             }
             return toErrorCode(isWithinRange(params[0], mMinValue, mMaxValue));
         }

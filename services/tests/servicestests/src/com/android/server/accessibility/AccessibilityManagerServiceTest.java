@@ -281,8 +281,8 @@ public class AccessibilityManagerServiceTest {
     @Test
     public void testRegisterProxy() throws Exception {
         mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY);
-        verify(mProxyManager).registerProxy(eq(mMockServiceClient), eq(TEST_DISPLAY),
-                eq(mTestableContext), anyInt(), any(), eq(mMockSecurityPolicy),
+        verify(mProxyManager).registerProxy(eq(mMockServiceClient), eq(TEST_DISPLAY), anyInt(),
+                eq(mMockSecurityPolicy),
                 eq(mA11yms), eq(mA11yms.getTraceManager()),
                 eq(mMockWindowManagerService));
     }
@@ -295,7 +295,7 @@ public class AccessibilityManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY));
-        verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
+        verify(mProxyManager, never()).registerProxy(any(), anyInt(), anyInt(), any(),
                 any(), any(), any());
     }
 
@@ -307,7 +307,7 @@ public class AccessibilityManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, TEST_DISPLAY));
-        verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
+        verify(mProxyManager, never()).registerProxy(any(), anyInt(), anyInt(), any(),
                 any(), any(), any());
     }
 
@@ -316,7 +316,7 @@ public class AccessibilityManagerServiceTest {
     public void testRegisterProxyForDefaultDisplay() throws Exception {
         assertThrows(IllegalArgumentException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, Display.DEFAULT_DISPLAY));
-        verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
+        verify(mProxyManager, never()).registerProxy(any(), anyInt(), anyInt(), any(),
                 any(), any(), any());
     }
 
@@ -325,7 +325,7 @@ public class AccessibilityManagerServiceTest {
     public void testRegisterProxyForInvalidDisplay() throws Exception {
         assertThrows(IllegalArgumentException.class,
                 () -> mA11yms.registerProxyForDisplay(mMockServiceClient, Display.INVALID_DISPLAY));
-        verify(mProxyManager, never()).registerProxy(any(), anyInt(), any(), anyInt(), any(), any(),
+        verify(mProxyManager, never()).registerProxy(any(), anyInt(), anyInt(), any(),
                 any(), any(), any());
     }
 

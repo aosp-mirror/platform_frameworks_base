@@ -55,6 +55,10 @@ cc_defaults {
         // GCC false-positives on this warning, and since we -Werror that's
         // a problem
         "-Wno-free-nonheap-object",
+
+        // Do not de-optimise cold code paths in AFDO.
+        // Some code paths might be infrequently executed but critical to latency.
+        "-fno-profile-sample-accurate",
     ],
 
     include_dirs: [
@@ -125,6 +129,7 @@ cc_defaults {
                 "libandroidfw",
                 "libcrypto",
                 "libsync",
+                "libui",
             ],
             static_libs: [
                 "libEGL_blobCache",
@@ -395,7 +400,7 @@ cc_defaults {
         "libharfbuzz_ng",
         "libimage_io",
         "libjpeg",
-        "libjpegrecoverymap",
+        "libultrahdr",
         "liblog",
         "libminikin",
         "libz",
@@ -737,6 +742,9 @@ cc_test {
         "tests/unit/TypefaceTests.cpp",
         "tests/unit/VectorDrawableTests.cpp",
         "tests/unit/WebViewFunctorManagerTests.cpp",
+    ],
+    data: [
+        ":hwuimicro",
     ],
 }
 

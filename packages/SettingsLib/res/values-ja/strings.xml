@@ -258,13 +258,13 @@
     <string name="keep_screen_on" msgid="1187161672348797558">"スリープモードにしない"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"充電中に画面をスリープにしない"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI スヌープログ"</string>
-    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth パケットをキャプチャします（この設定を変更した場合は Bluetooth を切り替えてください）。"</string>
+    <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Bluetooth パケットをキャプチャします（設定変更後はBluetoothをオフ/オンしてください）。"</string>
     <string name="oem_unlock_enable" msgid="5334869171871566731">"OEM ロック解除"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"ブートローダーによるロック解除を許可する"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"OEM ロック解除の許可"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"警告: この設定をONにしている場合、このデバイスではデバイス保護機能を利用できません。"</string>
-    <string name="mock_location_app" msgid="6269380172542248304">"現在地情報の強制変更アプリを選択"</string>
-    <string name="mock_location_app_not_set" msgid="6972032787262831155">"現在地情報の強制変更アプリが設定されていません"</string>
+    <string name="mock_location_app" msgid="6269380172542248304">"仮の現在地情報アプリを選択"</string>
+    <string name="mock_location_app_not_set" msgid="6972032787262831155">"仮の現在地情報アプリが設定されていません"</string>
     <string name="mock_location_app_set" msgid="4706722469342913843">"現在地情報の強制変更アプリ: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="debug_networking_category" msgid="6829757985772659599">"ネットワーク"</string>
     <string name="wifi_display_certification" msgid="1805579519992520381">"ワイヤレス ディスプレイ認証"</string>
@@ -337,7 +337,7 @@
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP チェック動作を設定"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"デバッグ"</string>
     <string name="debug_app" msgid="8903350241392391766">"デバッグアプリを選択"</string>
-    <string name="debug_app_not_set" msgid="1934083001283807188">"デバッグアプリケーションが設定されていません"</string>
+    <string name="debug_app_not_set" msgid="1934083001283807188">"デバッグ アプリケーションが設定されていません"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"デバッグアプリケーション: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"アプリを選択"</string>
     <string name="no_application" msgid="9038334538870247690">"なし"</string>
@@ -347,7 +347,7 @@
     <string name="debug_drawing_category" msgid="5066171112313666619">"描画"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"ハードウェアアクセラレーテッドレンダリング"</string>
     <string name="media_category" msgid="8122076702526144053">"メディア"</string>
-    <string name="debug_monitoring_category" msgid="1597387133765424994">"監視"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"モニタリング"</string>
     <string name="strict_mode" msgid="889864762140862437">"厳格モードを有効にする"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"メインスレッドの処理が長引く場合は画面を点滅させる"</string>
     <string name="pointer_location" msgid="7516929526199520173">"ポインタの位置"</string>
@@ -371,6 +371,8 @@
     <string name="debug_layout_summary" msgid="8825829038287321978">"クリップの境界線、マージンなどを表示"</string>
     <string name="force_rtl_layout_all_locales" msgid="8690762598501599796">"RTL レイアウト方向を使用"</string>
     <string name="force_rtl_layout_all_locales_summary" msgid="6663016859517239880">"すべての言語/地域で画面レイアウト方向を RTL に設定"</string>
+    <string name="transparent_navigation_bar" msgid="1933192171384678484">"透明なナビゲーション バー"</string>
+    <string name="transparent_navigation_bar_summary" msgid="5454359021817330722">"ナビゲーション バーの背景色をデフォルトで透明にします"</string>
     <string name="window_blurs" msgid="6831008984828425106">"ウィンドウ レベルでのぼかしを許可"</string>
     <string name="force_msaa" msgid="4081288296137775550">"4x MSAA を適用"</string>
     <string name="force_msaa_summary" msgid="9070437493586769500">"OpenGL ES 2.0 アプリで 4x MSAA を有効にする"</string>
@@ -383,7 +385,7 @@
     <string name="window_animation_scale_title" msgid="5236381298376812508">"ウィンドウ アニメ スケール"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"トランジション アニメ スケール"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 再生時間スケール"</string>
-    <string name="overlay_display_devices_title" msgid="5411894622334469607">"2 次画面シミュレート"</string>
+    <string name="overlay_display_devices_title" msgid="5411894622334469607">"第2画面のシミュレーション"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"アプリ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"アクティビティを保持しない"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ユーザーが離れたアクティビティを直ちに破棄する"</string>
@@ -467,8 +469,8 @@
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"完了まであと <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> - 完了まであと <xliff:g id="TIME">%2$s</xliff:g>"</string>
-    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電最適化済み"</string>
-    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電最適化済み"</string>
+    <string name="power_charging_limited" msgid="8202147604844938236">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電が最適化されています"</string>
+    <string name="power_charging_future_paused" msgid="4730177778538118032">"<xliff:g id="LEVEL">%1$s</xliff:g> - 充電が最適化されています"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"不明"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"充電中"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"急速充電中"</string>
@@ -517,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"長くします。"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"短くします。"</string>
     <string name="cancel" msgid="5665114069455378395">"キャンセル"</string>
+    <string name="next" msgid="2699398661093607009">"次へ"</string>
+    <string name="back" msgid="5554327870352703710">"戻る"</string>
+    <string name="save" msgid="3745809743277153149">"保存"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="done" msgid="381184316122520313">"完了"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"アラームとリマインダー"</string>
@@ -569,10 +574,11 @@
     <string name="user_add_user_item_title" msgid="2394272381086965029">"ユーザー"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"制限付きプロファイル"</string>
     <string name="user_add_user_title" msgid="5457079143694924885">"新しいユーザーを追加しますか？"</string>
-    <string name="user_add_user_message_long" msgid="1527434966294733380">"追加ユーザーを作成して、このデバイスを他のユーザーと共有できます。各ユーザーは各自のスペースを所有して、アプリや壁紙などのカスタマイズを行うことができます。Wi-Fi など、すべてのユーザーに影響するデバイス設定を変更することもできます。\n\n新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーがアプリを更新でき、その影響は他のユーザーにも及びます。ユーザー補助機能の設定とサービスは新しいユーザーに適用されないことがあります。"</string>
+    <string name="user_add_user_message_long" msgid="1527434966294733380">"追加したユーザーとは、このデバイスを共有できます。各ユーザーには独自のスペースが作成され、アプリや壁紙などをカスタマイズできます。Wi-Fi など、すべてのユーザーに影響するデバイス設定を変更することもできます。\n\n新しいユーザーは各自でスペースをセットアップする必要があります。\n\nアプリの更新は、すべてのユーザーが行えます。ユーザー補助機能の設定とサービスは新しいユーザーに引き継がれないことがあります。"</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"新しく追加したユーザーは各自でスペースをセットアップする必要があります。\n\nすべてのユーザーがアプリを更新でき、その影響は他のユーザーにも及びます。"</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"このユーザーに管理者権限を付与しますか？"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"管理者は、他のユーザーの管理、デバイスの設定の変更、デバイスの出荷時設定へのリセットを行えます。"</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"このユーザーを管理者にしますか？"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"管理者には、他のユーザーにはない特別な権限が与えられます。管理者は、すべてのユーザーの管理、このデバイスの更新やリセット、設定の変更、インストール済みのすべてのアプリの確認、他のユーザーに対する管理者権限の許可や取り消しを行えます。"</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"管理者にする"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"ユーザーを今すぐセットアップ"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"ユーザーがデバイスを使って各自のスペースをセットアップできるようにします"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"プロファイルを今すぐセットアップしますか？"</string>
@@ -604,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"新しいゲスト セッションが開始し、現在のセッションのすべてのアプリとデータが削除されます"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"ゲストモードを終了しますか？"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"現在のゲスト セッションからすべてのアプリとデータが削除されます"</string>
-    <string name="grant_admin" msgid="4273077214151417783">"このユーザーに管理者権限を付与します"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"ユーザーに管理者権限を付与しません"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"はい、管理者にします"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"いいえ、管理者にしません"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"終了"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"ゲストアクティビティの保存"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"現在のセッションのアクティビティの保存や、すべてのアプリとデータの削除を行えます"</string>
@@ -679,4 +685,5 @@
     <item msgid="7728484337962740316">"右に移動"</item>
     <item msgid="324200556467459329">"上に移動"</item>
   </string-array>
+    <string name="font_scale_percentage" msgid="2624057443622817886">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
 </resources>

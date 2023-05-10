@@ -54,6 +54,12 @@ prebuilt_etc {
     src: "hiddenapi-package-whitelist.xml",
 }
 
+prebuilt_etc {
+    name: "preinstalled-packages-asl-files.xml",
+    sub_dir: "sysconfig",
+    src: "preinstalled-packages-asl-files.xml",
+}
+
 // Privapp permission whitelist files
 
 prebuilt_etc {

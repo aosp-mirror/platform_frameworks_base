@@ -29,6 +29,7 @@ import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.util.Assert
 import com.android.systemui.util.sensors.AsyncSensorManager
@@ -46,6 +47,7 @@ class KeyguardLiftController @Inject constructor(
     private val statusBarStateController: StatusBarStateController,
     private val asyncSensorManager: AsyncSensorManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val keyguardFaceAuthInteractor: KeyguardFaceAuthInteractor,
     private val dumpManager: DumpManager
 ) : Dumpable, CoreStartable {
 
@@ -72,6 +74,7 @@ class KeyguardLiftController @Inject constructor(
             // Not listening anymore since trigger events unregister themselves
             isListening = false
             updateListeningState()
+            keyguardFaceAuthInteractor.onDeviceLifted()
             keyguardUpdateMonitor.requestFaceAuth(
                 FaceAuthApiRequestReason.PICK_UP_GESTURE_TRIGGERED
             )

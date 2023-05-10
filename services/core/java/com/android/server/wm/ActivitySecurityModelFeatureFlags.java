@@ -43,7 +43,7 @@ class ActivitySecurityModelFeatureFlags {
     static final String DOC_LINK = "go/android-asm";
 
     /** Used to determine which version of the ASM logic was used in logs while we iterate */
-    static final int ASM_VERSION = 6;
+    static final int ASM_VERSION = 7;
 
     private static final String NAMESPACE = NAMESPACE_WINDOW_MANAGER;
     private static final String KEY_ASM_PREFIX = "ActivitySecurity__";
@@ -89,6 +89,9 @@ class ActivitySecurityModelFeatureFlags {
 
         if (flagEnabled) {
             String[] packageNames = sPm.getPackagesForUid(uid);
+            if (packageNames == null) {
+                return true;
+            }
             for (int i = 0; i < packageNames.length; i++) {
                 if (sExcludedPackageNames.contains(packageNames[i])) {
                     return false;

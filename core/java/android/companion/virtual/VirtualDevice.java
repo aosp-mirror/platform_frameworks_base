@@ -26,6 +26,11 @@ import java.util.Objects;
 
 /**
  * Details of a particular virtual device.
+ *
+ * <p>Read-only device representation exposing the properties of an existing virtual device.
+ *
+ * <p class="note">Not to be confused with {@link VirtualDeviceManager.VirtualDevice}, which is used
+ * by the virtual device creator and allows them to manage the device.
  */
 public final class VirtualDevice implements Parcelable {
 

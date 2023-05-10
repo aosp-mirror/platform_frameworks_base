@@ -32,6 +32,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.SharedMemory;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.app.IHotwordRecognitionStatusCallback;
@@ -84,8 +85,7 @@ public class VisualQueryDetector {
      * @see HotwordDetector#updateState(PersistableBundle, SharedMemory)
      */
     public void updateState(@Nullable PersistableBundle options,
-            @Nullable SharedMemory sharedMemory) throws
-            HotwordDetector.IllegalDetectorStateException {
+            @Nullable SharedMemory sharedMemory) {
         mInitializationDelegate.updateState(options, sharedMemory);
     }
 
@@ -104,7 +104,7 @@ public class VisualQueryDetector {
      * @see HotwordDetector#startRecognition()
      */
     @RequiresPermission(allOf = {CAMERA, RECORD_AUDIO})
-    public boolean startRecognition() throws HotwordDetector.IllegalDetectorStateException {
+    public boolean startRecognition() {
         if (DEBUG) {
             Slog.i(TAG, "#startRecognition");
         }
@@ -128,7 +128,7 @@ public class VisualQueryDetector {
      * @see HotwordDetector#stopRecognition()
      */
     @RequiresPermission(allOf = {CAMERA, RECORD_AUDIO})
-    public boolean stopRecognition() throws HotwordDetector.IllegalDetectorStateException {
+    public boolean stopRecognition() {
         if (DEBUG) {
             Slog.i(TAG, "#stopRecognition");
         }
@@ -217,9 +217,23 @@ public class VisualQueryDetector {
         void onVisualQueryDetectionServiceRestarted();
 
         /**
-         * Called when the detection fails due to an error.
+         * Called when the detection fails due to an error occurs in the
+         * {@link VisualQueryDetectionService}, {@link VisualQueryDetectionServiceFailure} will be
+         * reported to the detector.
+         *
+         * @param visualQueryDetectionServiceFailure It provides the error code, error message and
+         *                                           suggested action.
          */
-        void onFailure(@NonNull DetectorFailure detectorFailure);
+        void onFailure(
+                @NonNull VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure);
+
+        /**
+         * Called when the detection fails due to an unknown error occurs, an error message
+         * will be reported to the detector.
+         *
+         * @param errorMessage It provides the error message.
+         */
+        void onUnknownFailure(@NonNull String errorMessage);
     }
 
     private class VisualQueryDetectorInitializationDelegate extends AbstractDetector {
@@ -236,13 +250,13 @@ public class VisualQueryDetector {
         }
 
         @Override
-        public boolean stopRecognition() throws IllegalDetectorStateException {
+        public boolean stopRecognition() {
             throwIfDetectorIsNoLongerActive();
             return true;
         }
 
         @Override
-        public boolean startRecognition() throws IllegalDetectorStateException {
+        public boolean startRecognition() {
             throwIfDetectorIsNoLongerActive();
             return true;
         }
@@ -251,7 +265,7 @@ public class VisualQueryDetector {
         public final boolean startRecognition(
                 @NonNull ParcelFileDescriptor audioStream,
                 @NonNull AudioFormat audioFormat,
-                @Nullable PersistableBundle options) throws IllegalDetectorStateException {
+                @Nullable PersistableBundle options) {
             //No-op, not supported by VisualQueryDetector as it should be trusted.
             return false;
         }
@@ -296,10 +310,17 @@ public class VisualQueryDetector {
 
         /** Called when the detection fails due to an error. */
         @Override
-        public void onDetectionFailure(DetectorFailure detectorFailure) {
-            Slog.v(TAG, "BinderCallback#onDetectionFailure");
-            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> mCallback.onFailure(detectorFailure)));
+        public void onVisualQueryDetectionServiceFailure(
+                VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure) {
+            Slog.v(TAG, "BinderCallback#onVisualQueryDetectionServiceFailure: "
+                    + visualQueryDetectionServiceFailure);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                if (visualQueryDetectionServiceFailure != null) {
+                    mCallback.onFailure(visualQueryDetectionServiceFailure);
+                } else {
+                    mCallback.onUnknownFailure("Error data is null");
+                }
+            }));
         }
     }
 
@@ -370,13 +391,40 @@ public class VisualQueryDetector {
         }
 
         @Override
-        public void onError(int status) throws RemoteException {
-            Slog.v(TAG, "Initialization Error: (" + status + ")");
-            // Do nothing
+        public void onHotwordDetectionServiceFailure(
+                HotwordDetectionServiceFailure hotwordDetectionServiceFailure)
+                throws RemoteException {
+            // It should never be called here.
+            Slog.w(TAG, "onHotwordDetectionServiceFailure: " + hotwordDetectionServiceFailure);
         }
 
         @Override
-        public void onDetectionFailure(DetectorFailure detectorFailure) throws RemoteException {
+        public void onVisualQueryDetectionServiceFailure(
+                VisualQueryDetectionServiceFailure visualQueryDetectionServiceFailure)
+                throws RemoteException {
+            Slog.v(TAG, "onVisualQueryDetectionServiceFailure: "
+                    + visualQueryDetectionServiceFailure);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                if (visualQueryDetectionServiceFailure != null) {
+                    mCallback.onFailure(visualQueryDetectionServiceFailure);
+                } else {
+                    mCallback.onUnknownFailure("Error data is null");
+                }
+            }));
+        }
+
+        @Override
+        public void onSoundTriggerFailure(SoundTriggerFailure soundTriggerFailure) {
+            Slog.wtf(TAG, "Unexpected STFailure in VisualQueryDetector" + soundTriggerFailure);
+        }
+
+        @Override
+        public void onUnknownFailure(String errorMessage) throws RemoteException {
+            Slog.v(TAG, "onUnknownFailure: " + errorMessage);
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(() -> {
+                mCallback.onUnknownFailure(
+                        !TextUtils.isEmpty(errorMessage) ? errorMessage : "Error data is null");
+            }));
         }
     }
 }

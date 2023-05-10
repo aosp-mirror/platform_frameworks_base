@@ -200,7 +200,7 @@ extern int register_com_android_internal_content_F2fsUtils(JNIEnv* env);
 extern int register_com_android_internal_content_NativeLibraryHelper(JNIEnv *env);
 extern int register_com_android_internal_content_om_OverlayConfig(JNIEnv *env);
 extern int register_com_android_internal_content_om_OverlayManagerImpl(JNIEnv* env);
-extern int register_com_android_internal_expresslog_Utils(JNIEnv* env);
+extern int register_com_android_modules_expresslog_Utils(JNIEnv* env);
 extern int register_com_android_internal_net_NetworkUtilsInternal(JNIEnv* env);
 extern int register_com_android_internal_os_ClassLoaderFactory(JNIEnv* env);
 extern int register_com_android_internal_os_FuseAppLoop(JNIEnv* env);
@@ -1586,7 +1586,7 @@ static const RegJNIRec gRegJNI[] = {
         REG_JNI(register_android_os_incremental_IncrementalManager),
         REG_JNI(register_com_android_internal_content_om_OverlayConfig),
         REG_JNI(register_com_android_internal_content_om_OverlayManagerImpl),
-        REG_JNI(register_com_android_internal_expresslog_Utils),
+        REG_JNI(register_com_android_modules_expresslog_Utils),
         REG_JNI(register_com_android_internal_net_NetworkUtilsInternal),
         REG_JNI(register_com_android_internal_os_ClassLoaderFactory),
         REG_JNI(register_com_android_internal_os_LongArrayMultiStateCounter),

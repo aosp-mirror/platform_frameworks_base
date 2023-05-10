@@ -45,6 +45,16 @@ class ObjectPrinter {
     }
 
     /**
+     * Same as {@link #print(StringBuilder, Object, int)} with default max length.
+     *
+     * @param builder             StringBuilder to print into.
+     * @param obj                 The object to print.
+     */
+    static void print(@NonNull StringBuilder builder, @Nullable Object obj) {
+        print(builder, obj, kDefaultMaxCollectionLength);
+    }
+
+    /**
      * A version of {@link #print(Object, int)} that uses a {@link StringBuilder}.
      *
      * @param builder             StringBuilder to print into.

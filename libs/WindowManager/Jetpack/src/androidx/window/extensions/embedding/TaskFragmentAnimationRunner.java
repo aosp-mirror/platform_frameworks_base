@@ -83,10 +83,7 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
     }
 
     @Override
-    public void onAnimationCancelled(boolean isKeyguardOccluded) {
-        if (TaskFragmentAnimationController.DEBUG) {
-            Log.v(TAG, "onAnimationCancelled: isKeyguardOccluded=" + isKeyguardOccluded);
-        }
+    public void onAnimationCancelled() {
         mHandler.post(this::cancelAnimation);
     }
 
@@ -215,6 +212,8 @@ class TaskFragmentAnimationRunner extends IRemoteAnimationRunner.Stub {
             } else {
                 closingTargets.add(target);
                 closingWholeScreenBounds.union(target.screenSpaceBounds);
+                // Union the start bounds since this may be the ClosingChanging animation.
+                closingWholeScreenBounds.union(target.startBounds);
             }
         }
 

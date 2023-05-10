@@ -18,14 +18,20 @@ package com.android.wm.shell.back;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.WindowConfiguration;
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.RemoteException;
@@ -69,11 +75,7 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
                 mBackAnimationBackground, mock(SurfaceControl.Transaction.class),
                 mock(Choreographer.class));
         spyOn(mCustomizeActivityAnimation);
-        spyOn(mCustomizeActivityAnimation.mCustomAnimationLoader);
-        doReturn(mMockCloseAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader)
-                .load(any(), eq(false));
-        doReturn(mMockOpenAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader)
-                .load(any(), eq(true));
+        spyOn(mCustomizeActivityAnimation.mCustomAnimationLoader.mTransitionAnimation);
     }
 
     RemoteAnimationTarget createAnimationTarget(boolean open) {
@@ -87,6 +89,12 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
 
     @Test
     public void receiveFinishAfterInvoke() throws InterruptedException {
+        spyOn(mCustomizeActivityAnimation.mCustomAnimationLoader);
+        doReturn(mMockCloseAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader)
+                .loadAnimation(any(), eq(false));
+        doReturn(mMockOpenAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader)
+                .loadAnimation(any(), eq(true));
+
         mCustomizeActivityAnimation.prepareNextAnimation(
                 new BackNavigationInfo.CustomAnimationInfo("TestPackage"));
         final RemoteAnimationTarget close = createAnimationTarget(false);
@@ -112,6 +120,12 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
 
     @Test
     public void receiveFinishAfterCancel() throws InterruptedException {
+        spyOn(mCustomizeActivityAnimation.mCustomAnimationLoader);
+        doReturn(mMockCloseAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader)
+                .loadAnimation(any(), eq(false));
+        doReturn(mMockOpenAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader)
+                .loadAnimation(any(), eq(true));
+
         mCustomizeActivityAnimation.prepareNextAnimation(
                 new BackNavigationInfo.CustomAnimationInfo("TestPackage"));
         final RemoteAnimationTarget close = createAnimationTarget(false);
@@ -151,5 +165,68 @@ public class CustomizeActivityAnimationTest extends ShellTestCase {
         }
         verify(mCustomizeActivityAnimation).onGestureCommitted();
         finishCalled.await(1, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void testLoadCustomAnimation() {
+        testLoadCustomAnimation(10, 20, 0);
+    }
+
+    @Test
+    public void testLoadCustomAnimationNoEnter() {
+        testLoadCustomAnimation(0, 10, 0);
+    }
+
+    @Test
+    public void testLoadWindowAnimations() {
+        testLoadCustomAnimation(0, 0, 30);
+    }
+
+    @Test
+    public void testCustomAnimationHigherThanWindowAnimations() {
+        testLoadCustomAnimation(10, 20, 30);
+    }
+
+    private void testLoadCustomAnimation(int enterResId, int exitResId, int windowAnimations) {
+        final String testPackage = "TestPackage";
+        BackNavigationInfo.Builder builder = new BackNavigationInfo.Builder()
+                .setCustomAnimation(testPackage, enterResId, exitResId, Color.GREEN)
+                .setWindowAnimations(testPackage, windowAnimations);
+        final BackNavigationInfo.CustomAnimationInfo info = builder.build()
+                .getCustomAnimationInfo();
+
+        doReturn(mMockOpenAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader
+                        .mTransitionAnimation)
+                .loadAppTransitionAnimation(eq(testPackage), eq(enterResId));
+        doReturn(mMockCloseAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader
+                        .mTransitionAnimation)
+                .loadAppTransitionAnimation(eq(testPackage), eq(exitResId));
+        doReturn(mMockCloseAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader
+                        .mTransitionAnimation)
+                .loadAnimationAttr(eq(testPackage), eq(windowAnimations), anyInt(), anyBoolean());
+        doReturn(mMockOpenAnimation).when(mCustomizeActivityAnimation.mCustomAnimationLoader
+                        .mTransitionAnimation).loadDefaultAnimationAttr(anyInt(), anyBoolean());
+
+        CustomizeActivityAnimation.AnimationLoadResult result =
+                mCustomizeActivityAnimation.mCustomAnimationLoader.loadAll(info);
+
+        if (exitResId != 0) {
+            if (enterResId == 0) {
+                verify(mCustomizeActivityAnimation.mCustomAnimationLoader.mTransitionAnimation,
+                        never()).loadAppTransitionAnimation(eq(testPackage), eq(enterResId));
+                verify(mCustomizeActivityAnimation.mCustomAnimationLoader.mTransitionAnimation)
+                        .loadDefaultAnimationAttr(anyInt(), anyBoolean());
+            } else {
+                assertEquals(result.mEnterAnimation, mMockOpenAnimation);
+            }
+            assertEquals(result.mBackgroundColor, Color.GREEN);
+            assertEquals(result.mCloseAnimation, mMockCloseAnimation);
+            verify(mCustomizeActivityAnimation.mCustomAnimationLoader.mTransitionAnimation, never())
+                    .loadAnimationAttr(eq(testPackage), anyInt(), anyInt(), anyBoolean());
+        } else if (windowAnimations != 0) {
+            verify(mCustomizeActivityAnimation.mCustomAnimationLoader.mTransitionAnimation,
+                    times(2)).loadAnimationAttr(eq(testPackage), anyInt(), anyInt(), anyBoolean());
+            assertEquals(result.mCloseAnimation, mMockCloseAnimation);
+        }
     }
 }

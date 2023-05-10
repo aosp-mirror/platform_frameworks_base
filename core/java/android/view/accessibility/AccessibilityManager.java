@@ -2116,6 +2116,58 @@ public final class AccessibilityManager {
         }
     }
 
+    /**
+     * Determines if the accessibility target is allowed.
+     *
+     * @param packageName The name of the application attempting to perform the operation.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param userId The id of the user for whom to perform the operation.
+     * @return {@code true} the accessibility target is allowed.
+     * @hide
+     */
+    public boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.isAccessibilityTargetAllowed(packageName, uid, userId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while check accessibility target status", re);
+            return false;
+        }
+    }
+
+    /**
+     * Sends restricted dialog intent if the accessibility target is disallowed.
+     *
+     * @param packageName The name of the application attempting to perform the operation.
+     * @param uid The user id of the application attempting to perform the operation.
+     * @param userId The id of the user for whom to perform the operation.
+     * @return {@code true} if the restricted dialog is shown.
+     * @hide
+     */
+    public boolean sendRestrictedDialogIntent(String packageName, int uid, int userId) {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+            if (service == null) {
+                return false;
+            }
+        }
+
+        try {
+            return service.sendRestrictedDialogIntent(packageName, uid, userId);
+        } catch (RemoteException re) {
+            Log.e(LOG_TAG, "Error while show restricted dialog", re);
+            return false;
+        }
+    }
+
     private IAccessibilityManager getServiceLocked() {
         if (mService == null) {
             tryConnectToServiceLocked(null);

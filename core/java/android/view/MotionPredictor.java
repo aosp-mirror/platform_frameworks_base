@@ -49,15 +49,17 @@ public final class MotionPredictor {
 
     // Pointer to the native object.
     private final long mPtr;
-    private final Context mContext;
+    // Device-specific override to enable/disable motion prediction.
+    private final boolean mIsPredictionEnabled;
 
     /**
      * Create a new MotionPredictor for the provided {@link Context}.
      * @param context The context for the predictions
      */
     public MotionPredictor(@NonNull Context context) {
-        mContext = context;
-        final int offsetNanos = mContext.getResources().getInteger(
+        mIsPredictionEnabled = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableMotionPrediction);
+        final int offsetNanos = context.getResources().getInteger(
                 com.android.internal.R.integer.config_motionPredictionOffsetNanos);
         mPtr = nativeInitialize(offsetNanos);
         RegistryHolder.REGISTRY.registerNativeAllocation(this, mPtr);
@@ -73,7 +75,7 @@ public final class MotionPredictor {
      * @throws IllegalArgumentException if an inconsistent MotionEvent stream is sent.
      */
     public void record(@NonNull MotionEvent event) {
-        if (!isPredictionEnabled()) {
+        if (!mIsPredictionEnabled) {
             return;
         }
         nativeRecord(mPtr, event);
@@ -94,19 +96,10 @@ public final class MotionPredictor {
      */
     @Nullable
     public MotionEvent predict(long predictionTimeNanos) {
-        if (!isPredictionEnabled()) {
+        if (!mIsPredictionEnabled) {
             return null;
         }
         return nativePredict(mPtr, predictionTimeNanos);
-    }
-
-    private boolean isPredictionEnabled() {
-        // Device-specific override
-        if (!mContext.getResources().getBoolean(
-                com.android.internal.R.bool.config_enableMotionPrediction)) {
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -120,7 +113,7 @@ public final class MotionPredictor {
      * @see MotionEvent#getSource
      */
     public boolean isPredictionAvailable(int deviceId, int source) {
-        return isPredictionEnabled() && nativeIsPredictionAvailable(mPtr, deviceId, source);
+        return mIsPredictionEnabled && nativeIsPredictionAvailable(mPtr, deviceId, source);
     }
 
     private static native long nativeInitialize(int offsetNanos);

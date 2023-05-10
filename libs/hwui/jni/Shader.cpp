@@ -1,6 +1,9 @@
 #undef LOG_TAG
 #define LOG_TAG "ShaderJNI"
 
+#include <vector>
+
+#include "Gainmap.h"
 #include "GraphicsJNI.h"
 #include "SkBitmap.h"
 #include "SkBlendMode.h"
@@ -17,9 +20,8 @@
 #include "SkShader.h"
 #include "SkString.h"
 #include "SkTileMode.h"
+#include "effects/GainmapRenderer.h"
 #include "include/effects/SkRuntimeEffect.h"
-
-#include <vector>
 
 using namespace android::uirenderer;
 
@@ -74,7 +76,20 @@ static jlong createBitmapShaderHelper(JNIEnv* env, jobject o, jlong matrixPtr, j
     if (bitmapHandle) {
         // Only pass a valid SkBitmap object to the constructor if the Bitmap exists. Otherwise,
         // we'll pass an empty SkBitmap to avoid crashing/excepting for compatibility.
-        image = android::bitmap::toBitmap(bitmapHandle).makeImage();
+        auto& bitmap = android::bitmap::toBitmap(bitmapHandle);
+        image = bitmap.makeImage();
+
+        if (!isDirectSampled && bitmap.hasGainmap()) {
+            sk_sp<SkShader> gainmapShader = MakeGainmapShader(
+                    image, bitmap.gainmap()->bitmap->makeImage(), bitmap.gainmap()->info,
+                    (SkTileMode)tileModeX, (SkTileMode)tileModeY, sampling);
+            if (gainmapShader) {
+                if (matrix) {
+                    gainmapShader = gainmapShader->makeWithLocalMatrix(*matrix);
+                }
+                return reinterpret_cast<jlong>(gainmapShader.release());
+            }
+        }
     }
 
     if (!image.get()) {

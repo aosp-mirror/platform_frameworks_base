@@ -385,10 +385,22 @@ public class TypedValue {
      *
      * @return The complex unit type.
      */
-     public int getComplexUnit()
-     {
-         return COMPLEX_UNIT_MASK & (data>>TypedValue.COMPLEX_UNIT_SHIFT);
-     }
+    public int getComplexUnit() {
+        return getUnitFromComplexDimension(data);
+    }
+
+    /**
+     * Return the complex unit type for the given complex dimension. For example, a dimen type
+     * with value 12sp will return {@link #COMPLEX_UNIT_SP}. Use with values created with {@link
+     * #createComplexDimension(int, int)} etc.
+     *
+     * @return The complex unit type.
+     *
+     * @hide
+     */
+    public static int getUnitFromComplexDimension(int complexDimension) {
+        return COMPLEX_UNIT_MASK & (complexDimension >> TypedValue.COMPLEX_UNIT_SHIFT);
+    }
 
     /**
      * Converts an unpacked complex data value holding a dimension to its final floating point pixel

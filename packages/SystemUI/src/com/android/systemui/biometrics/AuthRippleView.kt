@@ -28,10 +28,10 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.animation.PathInterpolator
 import com.android.internal.graphics.ColorUtils
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.surfaceeffects.ripple.RippleShader
 
-private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.4f
+private const val RIPPLE_SPARKLE_STRENGTH: Float = 0.3f
 
 /**
  * Handles two ripple effects: dwell ripple and unlocked ripple
@@ -54,12 +54,11 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
     private var lockScreenColorVal = Color.WHITE
     private val fadeDuration = 83L
     private val retractDuration = 400L
-    private var alphaInDuration: Long = 0
     private val dwellShader = DwellRippleShader()
     private val dwellPaint = Paint()
     private val rippleShader = RippleShader()
     private val ripplePaint = Paint()
-    private var unlockedRippleAnimator: AnimatorSet? = null
+    private var unlockedRippleAnimator: Animator? = null
     private var fadeDwellAnimator: Animator? = null
     private var retractDwellAnimator: Animator? = null
     private var dwellPulseOutAnimator: Animator? = null
@@ -75,8 +74,8 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         }
     private var radius: Float = 0f
         set(value) {
-            rippleShader.rippleSize.setMaxSize(value * 2f, value * 2f)
-            field = value
+            field = value * .9f
+            rippleShader.rippleSize.setMaxSize(field * 2f, field * 2f)
         }
     private var origin: Point = Point()
         set(value) {
@@ -85,11 +84,12 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         }
 
     init {
-        rippleShader.color = 0xffffffff.toInt() // default color
         rippleShader.rawProgress = 0f
+        rippleShader.pixelDensity = resources.displayMetrics.density
         rippleShader.sparkleStrength = RIPPLE_SPARKLE_STRENGTH
-        setupRippleFadeParams()
+        updateRippleFadeParams()
         ripplePaint.shader = rippleShader
+        setLockScreenColor(0xffffffff.toInt()) // default color
 
         dwellShader.color = 0xffffffff.toInt() // default color
         dwellShader.progress = 0f
@@ -108,10 +108,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         radius = maxOf(location.x, location.y, width - location.x, height - location.y).toFloat()
         dwellOrigin = location
         dwellRadius = sensorRadius * 1.5f
-    }
-
-    fun setAlphaInDuration(duration: Long) {
-        alphaInDuration = duration
     }
 
     /**
@@ -252,7 +248,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
 
                 override fun onAnimationEnd(animation: Animator?) {
                     drawDwell = false
-                    resetRippleAlpha()
                 }
             })
             start()
@@ -266,7 +261,6 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         unlockedRippleAnimator?.cancel()
 
         val rippleAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-            interpolator = Interpolators.LINEAR_OUT_SLOW_IN
             duration = AuthRippleController.RIPPLE_ANIMATION_DURATION
             addUpdateListener { animator ->
                 val now = animator.currentPlayTime
@@ -277,22 +271,7 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
             }
         }
 
-        val alphaInAnimator = ValueAnimator.ofInt(0, 255).apply {
-            duration = alphaInDuration
-            addUpdateListener { animator ->
-                rippleShader.color = ColorUtils.setAlphaComponent(
-                    rippleShader.color,
-                    animator.animatedValue as Int
-                )
-                invalidate()
-            }
-        }
-
-        unlockedRippleAnimator = AnimatorSet().apply {
-            playTogether(
-                rippleAnimator,
-                alphaInAnimator
-            )
+        unlockedRippleAnimator = rippleAnimator.apply {
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationStart(animation: Animator?) {
                     drawRipple = true
@@ -310,17 +289,12 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         unlockedRippleAnimator?.start()
     }
 
-    fun resetRippleAlpha() {
-        rippleShader.color = ColorUtils.setAlphaComponent(
-                rippleShader.color,
-                255
-        )
-    }
-
     fun setLockScreenColor(color: Int) {
         lockScreenColorVal = color
-        rippleShader.color = lockScreenColorVal
-        resetRippleAlpha()
+        rippleShader.color = ColorUtils.setAlphaComponent(
+                lockScreenColorVal,
+                62
+        )
     }
 
     fun updateDwellRippleColor(isDozing: Boolean) {
@@ -339,15 +313,17 @@ class AuthRippleView(context: Context?, attrs: AttributeSet?) : View(context, at
         )
     }
 
-    private fun setupRippleFadeParams() {
+    private fun updateRippleFadeParams() {
         with(rippleShader) {
-            baseRingFadeParams.fadeOutStart = RippleShader.DEFAULT_BASE_RING_FADE_OUT_START
-            baseRingFadeParams.fadeOutEnd = RippleShader.DEFAULT_FADE_OUT_END
+            baseRingFadeParams.fadeInStart = 0f
+            baseRingFadeParams.fadeInEnd = .2f
+            baseRingFadeParams.fadeOutStart = .2f
+            baseRingFadeParams.fadeOutEnd = 1f
 
-            centerFillFadeParams.fadeInStart = RippleShader.DEFAULT_FADE_IN_START
-            centerFillFadeParams.fadeInEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_IN_END
-            centerFillFadeParams.fadeOutStart = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_START
-            centerFillFadeParams.fadeOutEnd = RippleShader.DEFAULT_CENTER_FILL_FADE_OUT_END
+            centerFillFadeParams.fadeInStart = 0f
+            centerFillFadeParams.fadeInEnd = .15f
+            centerFillFadeParams.fadeOutStart = .15f
+            centerFillFadeParams.fadeOutEnd = .56f
         }
     }
 

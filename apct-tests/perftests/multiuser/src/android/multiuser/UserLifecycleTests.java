@@ -24,11 +24,9 @@ import static org.junit.Assume.assumeTrue;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
-import android.app.ActivityTaskManager;
 import android.app.AppGlobals;
 import android.app.IActivityManager;
 import android.app.IStopUserCallback;
-import android.app.WaitResult;
 import android.app.WallpaperManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -69,6 +67,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Perf tests for user life cycle events.
@@ -101,7 +100,6 @@ public class UserLifecycleTests {
     private static final long TIMEOUT_MAX_TEST_TIME_MS = 24 * 60_000;
 
     private static final int TIMEOUT_IN_SECOND = 30;
-    private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
 
     /** Name of users/profiles in the test. Users with this name may be freely removed. */
     private static final String TEST_USER_NAME = "UserLifecycleTests_test_user";
@@ -127,6 +125,7 @@ public class UserLifecycleTests {
     private BroadcastWaiter mBroadcastWaiter;
     private UserSwitchWaiter mUserSwitchWaiter;
     private String mUserSwitchTimeoutMs;
+    private String mDisableUserSwitchingDialogAnimations;
 
     private final BenchmarkRunner mRunner = new BenchmarkRunner();
     @Rule
@@ -153,16 +152,17 @@ public class UserLifecycleTests {
             Log.w(TAG, "WARNING: Tests are being run from user " + mAm.getCurrentUser()
                     + " rather than the system user");
         }
-        mUserSwitchTimeoutMs = setSystemProperty("debug.usercontroller.user_switch_timeout_ms",
-                "100000");
-        if (TextUtils.isEmpty(mUserSwitchTimeoutMs)) {
-            mUserSwitchTimeoutMs = "invalid";
-        }
+        mUserSwitchTimeoutMs = setSystemProperty(
+                "debug.usercontroller.user_switch_timeout_ms", "100000");
+        mDisableUserSwitchingDialogAnimations = setSystemProperty(
+                "debug.usercontroller.disable_user_switching_dialog_animations", "true");
     }
 
     @After
     public void tearDown() throws Exception {
         setSystemProperty("debug.usercontroller.user_switch_timeout_ms", mUserSwitchTimeoutMs);
+        setSystemProperty("debug.usercontroller.disable_user_switching_dialog_animations",
+                mDisableUserSwitchingDialogAnimations);
         mBroadcastWaiter.close();
         mUserSwitchWaiter.close();
         for (int userId : mUsersToRemove) {
@@ -1259,15 +1259,13 @@ public class UserLifecycleTests {
      * <p> This should always be used for profiles since profiles cannot be started in foreground.
      */
     private void startUserInBackgroundAndWaitForUnlock(int userId) {
-        final ProgressWaiter waiter = new ProgressWaiter();
-        boolean success = false;
         try {
-            mIam.startUserInBackgroundWithListener(userId, waiter);
-            success = waiter.waitForFinish(TIMEOUT_IN_SECOND);
-        } catch (RemoteException e) {
-            Log.e(TAG, "startUserInBackgroundAndWaitForUnlock failed", e);
+            attestTrue("Failed to start user " + userId + " in background.",
+                    ShellHelper.runShellCommandWithTimeout("am start-user -w " + userId,
+                            TIMEOUT_IN_SECOND).startsWith("Success:"));
+        } catch (TimeoutException e) {
+            fail("Could not start user " + userId + " in " + TIMEOUT_IN_SECOND + " seconds");
         }
-        attestTrue("Failed to start user " + userId + " in background.", success);
     }
 
     /** Starts the given user in the foreground. */
@@ -1387,14 +1385,20 @@ public class UserLifecycleTests {
      * Launches the given package in the given user.
      * Make sure the keyguard has been dismissed prior to calling.
      */
-    private void startApp(int userId, String packageName) throws RemoteException {
-        final Context context = InstrumentationRegistry.getContext();
-        final WaitResult result = ActivityTaskManager.getService().startActivityAndWait(null,
-                context.getPackageName(), context.getAttributionTag(),
-                context.getPackageManager().getLaunchIntentForPackage(packageName), null, null,
-                null, 0, 0, null, null, userId);
-        attestTrue("User " + userId + " failed to start " + packageName,
-                result.result == ActivityManager.START_SUCCESS);
+    private void startApp(int userId, String packageName) {
+        final String failMessage = "User " + userId + " failed to start " + packageName;
+        final String component = InstrumentationRegistry.getContext().getPackageManager()
+                .getLaunchIntentForPackage(packageName).getComponent().flattenToShortString();
+        try {
+            final String result = ShellHelper.runShellCommandWithTimeout(
+                    "am start -W -n " + component + " --user " + userId, TIMEOUT_IN_SECOND);
+            assertTrue(failMessage + ", component=" + component + ", result=" + result,
+                    result.contains("Status: ok")
+                    && !result.contains("Warning:")
+                    && !result.contains("Error:"));
+        } catch (TimeoutException e) {
+            fail(failMessage + " in " + TIMEOUT_IN_SECOND + " seconds");
+        }
     }
 
     private class ProgressWaiter extends IProgressListener.Stub {
@@ -1469,17 +1473,11 @@ public class UserLifecycleTests {
     private void removeUser(int userId) throws RemoteException {
         stopUserAfterWaitingForBroadcastIdle(userId, true);
         try {
-            mUm.removeUser(userId);
-            final long startTime = System.currentTimeMillis();
-            final long timeoutInMs = TIMEOUT_IN_SECOND * 1000;
-            while (mUm.getUserInfo(userId) != null &&
-                    System.currentTimeMillis() - startTime < timeoutInMs) {
-                TimeUnit.MILLISECONDS.sleep(CHECK_USER_REMOVED_INTERVAL_MS);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        } catch (Exception e) {
-            // Ignore
+            ShellHelper.runShellCommandWithTimeout("pm remove-user -w " + userId,
+                    TIMEOUT_IN_SECOND);
+        } catch (TimeoutException e) {
+            Log.e(TAG, String.format("Could not remove user %d in %d seconds",
+                    userId, TIMEOUT_IN_SECOND), e);
         }
         if (mUm.getUserInfo(userId) != null) {
             mUsersToRemove.add(userId);
@@ -1538,11 +1536,15 @@ public class UserLifecycleTests {
     private String setSystemProperty(String name, String value) throws Exception {
         final String oldValue = ShellHelper.runShellCommand("getprop " + name);
         assertEquals("", ShellHelper.runShellCommand("setprop " + name + " " + value));
-        return oldValue;
+        return TextUtils.firstNotEmpty(oldValue, "invalid");
     }
 
     private void waitForBroadcastIdle() {
-        ShellHelper.runShellCommand("am wait-for-broadcast-idle");
+        try {
+            ShellHelper.runShellCommandWithTimeout("am wait-for-broadcast-idle", TIMEOUT_IN_SECOND);
+        } catch (TimeoutException e) {
+            Log.e(TAG, "Ending waitForBroadcastIdle because it is taking too long", e);
+        }
     }
 
     private void sleep(long ms) {

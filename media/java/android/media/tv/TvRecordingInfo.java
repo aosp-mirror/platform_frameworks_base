@@ -131,7 +131,6 @@ public final class TvRecordingInfo implements Parcelable {
      * cause the recording to start later than the specified time. This should cause the actual
      * duration of the recording to decrease.
      */
-    @NonNull
     public long getStartPaddingMillis() {
         return mStartPaddingMillis;
     }
@@ -144,7 +143,6 @@ public final class TvRecordingInfo implements Parcelable {
      * cause the recording to end earlier than the specified time. This should cause the actual
      * duration of the recording to decrease.
      */
-    @NonNull
     public long getEndPaddingMillis() {
         return mEndPaddingMillis;
     }
@@ -176,7 +174,6 @@ public final class TvRecordingInfo implements Parcelable {
      * https://www.oipf.tv/docs/OIPF-T1-R2_Specification-Volume-5-Declarative-Application-Environment-v2_3-2014-01-24.pdf
      * ">Open IPTV Forum Release 2 Specification</a>. It is described in Volume 5, section 7.10.1.1.
      */
-    @NonNull
     @DaysOfWeek
     public int getRepeatDays() {
         return mRepeatDays;
@@ -228,7 +225,6 @@ public final class TvRecordingInfo implements Parcelable {
      * Returns the scheduled start time of the recording in milliseconds since the epoch.
      */
     @IntRange(from = 0)
-    @NonNull
     public long getScheduledStartTimeMillis() {
         return mScheduledStartTimeMillis;
     }
@@ -237,7 +233,6 @@ public final class TvRecordingInfo implements Parcelable {
      * Returns the scheduled duration of the recording in milliseconds since the epoch.
      */
     @IntRange(from = 0)
-    @NonNull
     public long getScheduledDurationMillis() {
         return mScheduledDurationMillis;
     }
@@ -292,7 +287,6 @@ public final class TvRecordingInfo implements Parcelable {
      * <p> Returns -1 for recordings that have not yet started.
      */
     @IntRange(from = -1)
-    @NonNull
     public long getRecordingStartTimeMillis() {
         return mRecordingStartTimeMillis;
     }
@@ -306,7 +300,6 @@ public final class TvRecordingInfo implements Parcelable {
      * <p> Returns -1 for recordings that have not yet started.
      */
     @IntRange(from = -1)
-    @NonNull
     public long getRecordingDurationMillis() {
         return mRecordingDurationMillis;
     }

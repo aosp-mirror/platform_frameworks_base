@@ -39,11 +39,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.HashSet;
+
+import kotlinx.coroutines.CoroutineScope;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -54,15 +57,18 @@ public class ConditionMonitorTest extends SysuiTestCase {
     private HashSet<Condition> mConditions;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
 
+    @Mock
+    private CoroutineScope mScope;
+
     private Monitor mConditionMonitor;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
 
-        mCondition1 = spy(new FakeCondition());
-        mCondition2 = spy(new FakeCondition());
-        mCondition3 = spy(new FakeCondition());
+        mCondition1 = spy(new FakeCondition(mScope));
+        mCondition2 = spy(new FakeCondition(mScope));
+        mCondition3 = spy(new FakeCondition(mScope));
         mConditions = new HashSet<>(Arrays.asList(mCondition1, mCondition2, mCondition3));
 
         mConditionMonitor = new Monitor(mExecutor);
@@ -396,7 +402,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void unsetCondition_shouldNotAffectValue() {
-        final FakeCondition settableCondition = new FakeCondition(null, false);
+        final FakeCondition settableCondition = new FakeCondition(mScope, null, false);
         mCondition1.fakeUpdateCondition(true);
         mCondition2.fakeUpdateCondition(true);
         mCondition3.fakeUpdateCondition(true);
@@ -414,7 +420,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void setUnsetCondition_shouldAffectValue() {
-        final FakeCondition settableCondition = new FakeCondition(null, false);
+        final FakeCondition settableCondition = new FakeCondition(mScope, null, false);
         mCondition1.fakeUpdateCondition(true);
         mCondition2.fakeUpdateCondition(true);
         mCondition3.fakeUpdateCondition(true);
@@ -443,7 +449,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void clearingOverridingCondition_shouldBeExcluded() {
-        final FakeCondition overridingCondition = new FakeCondition(true, true);
+        final FakeCondition overridingCondition = new FakeCondition(mScope, true, true);
         mCondition1.fakeUpdateCondition(false);
         mCondition2.fakeUpdateCondition(false);
         mCondition3.fakeUpdateCondition(false);
@@ -466,7 +472,7 @@ public class ConditionMonitorTest extends SysuiTestCase {
 
     @Test
     public void settingUnsetOverridingCondition_shouldBeIncluded() {
-        final FakeCondition overridingCondition = new FakeCondition(null, true);
+        final FakeCondition overridingCondition = new FakeCondition(mScope, null, true);
         mCondition1.fakeUpdateCondition(false);
         mCondition2.fakeUpdateCondition(false);
         mCondition3.fakeUpdateCondition(false);

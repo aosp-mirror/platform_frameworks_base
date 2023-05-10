@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.hardware.input.IInputManager
 import android.hardware.input.InputManager
+import android.hardware.input.InputManagerGlobal
 import android.os.test.TestLooper
 import android.platform.test.annotations.Presubmit
 import android.provider.Settings
@@ -102,7 +103,8 @@ class KeyRemapperTests {
             dataStore,
             testLooper.looper
         )
-        val inputManager = InputManager.resetInstance(iInputManager)
+        InputManagerGlobal.resetInstance(iInputManager)
+        val inputManager = InputManager(context)
         Mockito.`when`(context.getSystemService(Mockito.eq(Context.INPUT_SERVICE)))
             .thenReturn(inputManager)
         Mockito.`when`(iInputManager.inputDeviceIds).thenReturn(intArrayOf(DEVICE_ID))
@@ -110,7 +112,7 @@ class KeyRemapperTests {
 
     @After
     fun tearDown() {
-        InputManager.clearInstance()
+        InputManagerGlobal.clearInstance()
     }
 
     @Test

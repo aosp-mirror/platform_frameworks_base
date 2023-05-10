@@ -142,6 +142,8 @@ public class WindowMagnificationManager implements
     private boolean mMagnificationFollowTypingEnabled = true;
     @GuardedBy("mLock")
     private final SparseBooleanArray mIsImeVisibleArray = new SparseBooleanArray();
+    @GuardedBy("mLock")
+    private final SparseArray<Float> mLastActivatedScale = new SparseArray<>();
 
     private boolean mReceiverRegistered = false;
     @VisibleForTesting
@@ -528,6 +530,7 @@ public class WindowMagnificationManager implements
                 return;
             }
             magnifier.setScale(scale);
+            mLastActivatedScale.put(displayId, scale);
         }
     }
 
@@ -615,6 +618,9 @@ public class WindowMagnificationManager implements
             previousEnabled = magnifier.mEnabled;
             enabled = magnifier.enableWindowMagnificationInternal(scale, centerX, centerY,
                     animationCallback, windowPosition, id);
+            if (enabled) {
+                mLastActivatedScale.put(displayId, getScale(displayId));
+            }
         }
 
         if (enabled) {
@@ -752,6 +758,15 @@ public class WindowMagnificationManager implements
         }
     }
 
+    protected float getLastActivatedScale(int displayId) {
+        synchronized (mLock) {
+            if (!mLastActivatedScale.contains(displayId)) {
+                return -1.0f;
+            }
+            return mLastActivatedScale.get(displayId);
+        }
+    }
+
     /**
      * Moves window magnification on the specified display with the specified offset.
      *
@@ -779,8 +794,10 @@ public class WindowMagnificationManager implements
      * @return {@code true} if the event was handled, {@code false} otherwise
      */
     public boolean showMagnificationButton(int displayId, int magnificationMode) {
-        return mConnectionWrapper != null && mConnectionWrapper.showMagnificationButton(
-                displayId, magnificationMode);
+        synchronized (mLock) {
+            return mConnectionWrapper != null
+                    && mConnectionWrapper.showMagnificationButton(displayId, magnificationMode);
+        }
     }
 
     /**
@@ -790,8 +807,23 @@ public class WindowMagnificationManager implements
      * @return {@code true} if the event was handled, {@code false} otherwise
      */
     public boolean removeMagnificationButton(int displayId) {
-        return mConnectionWrapper != null && mConnectionWrapper.removeMagnificationButton(
-                displayId);
+        synchronized (mLock) {
+            return mConnectionWrapper != null
+                    && mConnectionWrapper.removeMagnificationButton(displayId);
+        }
+    }
+
+    /**
+     * Requests System UI remove magnification settings panel on the specified display.
+     *
+     * @param displayId The logical display id.
+     * @return {@code true} if the event was handled, {@code false} otherwise
+     */
+    public boolean removeMagnificationSettingsPanel(int displayId) {
+        synchronized (mLock) {
+            return mConnectionWrapper != null
+                    && mConnectionWrapper.removeMagnificationSettingsPanel(displayId);
+        }
     }
 
     /**

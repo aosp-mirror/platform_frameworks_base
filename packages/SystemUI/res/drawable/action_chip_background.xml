@@ -20,7 +20,7 @@
     android:color="@color/overlay_button_ripple">
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
-            <solid android:color="?androidprv:attr/colorAccentSecondary"/>
+            <solid android:color="?androidprv:attr/materialColorSecondary"/>
             <corners android:radius="@dimen/overlay_button_corner_radius"/>
         </shape>
     </item>

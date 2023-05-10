@@ -22,9 +22,7 @@ import android.util.Log
 import com.android.systemui.biometrics.EllipseOverlapDetectorParams
 import com.android.systemui.dagger.SysUISingleton
 import kotlin.math.cos
-import kotlin.math.pow
 import kotlin.math.sin
-import kotlin.math.sqrt
 
 private enum class SensorPixelPosition {
     OUTSIDE, // Pixel that falls outside of sensor circle
@@ -42,8 +40,8 @@ private val TAG = "EllipseOverlapDetector"
 @SysUISingleton
 class EllipseOverlapDetector(private val params: EllipseOverlapDetectorParams) : OverlapDetector {
     override fun isGoodOverlap(touchData: NormalizedTouchData, nativeSensorBounds: Rect): Boolean {
-        // First, check if entire ellipse is within the sensor
-        if (isEllipseWithinSensor(touchData, nativeSensorBounds)) {
+        // First, check if touch is within bounding box,
+        if (nativeSensorBounds.contains(touchData.x.toInt(), touchData.y.toInt())) {
             return true
         }
 
@@ -118,29 +116,5 @@ class EllipseOverlapDetector(private val params: EllipseOverlapDetectorParams) :
                 (c - d) * (c - d) / ((touchData.major / 2) * (touchData.major / 2))
 
         return result <= 1
-    }
-
-    /** Returns whether the entire ellipse is contained within the sensor area */
-    private fun isEllipseWithinSensor(
-        touchData: NormalizedTouchData,
-        nativeSensorBounds: Rect
-    ): Boolean {
-        val a2 = (touchData.minor / 2.0).pow(2.0)
-        val b2 = (touchData.major / 2.0).pow(2.0)
-
-        val sin2a = sin(touchData.orientation.toDouble()).pow(2.0)
-        val cos2a = cos(touchData.orientation.toDouble()).pow(2.0)
-
-        val cx = sqrt(a2 * cos2a + b2 * sin2a)
-        val cy = sqrt(a2 * sin2a + b2 * cos2a)
-
-        val ellipseRect =
-            Rect(
-                (-cx + touchData.x).toInt(),
-                (-cy + touchData.y).toInt(),
-                (cx + touchData.x).toInt(),
-                (cy + touchData.y).toInt()
-            )
-        return nativeSensorBounds.contains(ellipseRect)
     }
 }

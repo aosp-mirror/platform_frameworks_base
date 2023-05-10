@@ -23,10 +23,10 @@ import android.view.WindowInsetsController.Appearance
 import android.view.WindowInsetsController.Behavior
 import com.android.internal.statusbar.LetterboxDetails
 import com.android.internal.view.AppearanceRegion
+import com.android.systemui.Dumpable
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.SysuiStatusBarStateController
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent.CentralSurfacesScope
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -37,7 +37,7 @@ import javax.inject.Inject
  * It is responsible for modifying any attributes if necessary, and then notifying the other
  * downstream listeners.
  */
-@CentralSurfacesScope
+@SysUISingleton
 class SystemBarAttributesListener
 @Inject
 internal constructor(
@@ -45,18 +45,14 @@ internal constructor(
     private val letterboxAppearanceCalculator: LetterboxAppearanceCalculator,
     private val statusBarStateController: SysuiStatusBarStateController,
     private val lightBarController: LightBarController,
-    private val dumpManager: DumpManager,
-) : CentralSurfacesComponent.Startable, StatusBarBoundsProvider.BoundsChangeListener {
+    dumpManager: DumpManager,
+) : Dumpable, StatusBarBoundsProvider.BoundsChangeListener {
 
     private var lastLetterboxAppearance: LetterboxAppearance? = null
     private var lastSystemBarAttributesParams: SystemBarAttributesParams? = null
 
-    override fun start() {
-        dumpManager.registerDumpable(javaClass.simpleName, this::dump)
-    }
-
-    override fun stop() {
-        dumpManager.unregisterDumpable(javaClass.simpleName)
+    init {
+        dumpManager.registerCriticalDumpable(this)
     }
 
     override fun onStatusBarBoundsChanged() {
@@ -128,7 +124,7 @@ internal constructor(
     private fun shouldUseLetterboxAppearance(letterboxDetails: Array<LetterboxDetails>) =
         letterboxDetails.isNotEmpty()
 
-    private fun dump(printWriter: PrintWriter, strings: Array<String>) {
+    override fun dump(printWriter: PrintWriter, strings: Array<String>) {
         printWriter.println("lastSystemBarAttributesParams: $lastSystemBarAttributesParams")
         printWriter.println("lastLetterboxAppearance: $lastLetterboxAppearance")
     }

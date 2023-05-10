@@ -1126,16 +1126,6 @@ public final class SQLiteConnectionPool implements Closeable {
         mConnectionWaiterPool = waiter;
     }
 
-    void clearAcquiredConnectionsPreparedStatementCache() {
-        synchronized (mLock) {
-            if (!mAcquiredConnections.isEmpty()) {
-                for (SQLiteConnection connection : mAcquiredConnections.keySet()) {
-                    connection.clearPreparedStatementCache();
-                }
-            }
-        }
-    }
-
     /**
      * Dumps debugging information about this connection pool.
      *
@@ -1146,7 +1136,10 @@ public final class SQLiteConnectionPool implements Closeable {
         Printer indentedPrinter = PrefixPrinter.create(printer, "    ");
         synchronized (mLock) {
             if (directories != null) {
-                directories.add(new File(mConfiguration.path).getParent());
+                String parent = new File(mConfiguration.path).getParent();
+                if (parent != null) {
+                    directories.add(parent);
+                }
             }
             boolean isCompatibilityWalEnabled = mConfiguration.isLegacyCompatibilityWalEnabled();
             printer.println("Connection pool for " + mConfiguration.path + ":");

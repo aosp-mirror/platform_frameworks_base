@@ -19,12 +19,12 @@ package com.android.systemui.shade
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.R
-import com.android.systemui.statusbar.phone.dagger.CentralSurfacesComponent
+import com.android.systemui.dagger.SysUISingleton
 
 /**
  * Standard implementation of [CombinedShadeHeadersConstraintManager].
  */
-@CentralSurfacesComponent.CentralSurfacesScope
+@SysUISingleton
 object CombinedShadeHeadersConstraintManagerImpl : CombinedShadeHeadersConstraintManager {
 
     override fun privacyChipVisibilityConstraints(visible: Boolean): ConstraintsChanges {

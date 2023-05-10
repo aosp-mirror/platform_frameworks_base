@@ -43,6 +43,7 @@ import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
 import static com.android.server.pm.PackageManagerServiceUtils.compareSignatures;
+import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 import static com.android.server.pm.PackageManagerServiceUtils.logCriticalInfo;
 
 import android.Manifest;
@@ -350,6 +351,8 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
     static final boolean DEBUG_ABI_SELECTION = false;
     public static final boolean DEBUG_INSTANT = Build.IS_DEBUGGABLE;
+
+    static final String SHELL_PACKAGE_NAME = "com.android.shell";
 
     static final boolean HIDE_EPHEMERAL_APIS = false;
 
@@ -1328,11 +1331,13 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             throw new ParcelableException(new PackageManager.NameNotFoundException(packageName));
         }
 
-        final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName);
+        final InstallSourceInfo installSourceInfo = snapshot.getInstallSourceInfo(packageName,
+                userId);
+        final String initiatingPackageName = installSourceInfo.getInitiatingPackageName();
         final String installerPackageName;
         if (installSourceInfo != null) {
-            if (!TextUtils.isEmpty(installSourceInfo.getInitiatingPackageName())) {
-                installerPackageName = installSourceInfo.getInitiatingPackageName();
+            if (!isInstalledByAdb(initiatingPackageName)) {
+                installerPackageName = initiatingPackageName;
             } else {
                 installerPackageName = installSourceInfo.getInstallingPackageName();
             }
@@ -2351,6 +2356,32 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                         SystemClock.uptimeMillis() - startTime);
             }
 
+            // If this is first boot or first boot after OTA then set the file path to the app
+            // metadata files for preloaded packages.
+            if (mFirstBoot || isDeviceUpgrading()) {
+                ArrayMap<String, String> paths = systemConfig.getAppMetadataFilePaths();
+                for (Map.Entry<String, String> entry : paths.entrySet()) {
+                    String pkgName = entry.getKey();
+                    String path = entry.getValue();
+                    File file = new File(path);
+                    if (!file.exists()) {
+                        path = null;
+                    }
+                    PackageSetting disabledPkgSetting = mSettings.getDisabledSystemPkgLPr(pkgName);
+                    if (disabledPkgSetting == null) {
+                        PackageSetting pkgSetting = mSettings.getPackageLPr(pkgName);
+                        if (pkgSetting != null) {
+                            pkgSetting.setAppMetadataFilePath(path);
+                        } else {
+                            Slog.w(TAG, "Cannot set app metadata file for nonexistent package "
+                                    + pkgName);
+                        }
+                    } else {
+                        disabledPkgSetting.setAppMetadataFilePath(path);
+                    }
+                }
+            }
+
             // Rebuild the live computer since some attributes have been rebuilt.
             mLiveComputer = createLiveComputer();
 
@@ -2569,7 +2600,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
             if (best == null || cur.priority > best.priority) {
                 if (computer.isComponentEffectivelyEnabled(cur.getComponentInfo(),
-                        UserHandle.USER_SYSTEM)) {
+                        UserHandle.SYSTEM)) {
                     best = cur;
                 } else {
                     Slog.w(TAG, "Domain verification agent found but not enabled");
@@ -3774,7 +3805,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     }
 
     private void setEnabledSettings(List<ComponentEnabledSetting> settings, int userId,
-            String callingPackage) {
+            @NonNull String callingPackage) {
         final int callingUid = Binder.getCallingUid();
         // TODO: This method is not properly snapshotified beyond this call
         final Computer preLockSnapshot = snapshotComputer();
@@ -4046,11 +4077,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         boolean success = false;
         if (!setting.isComponent()) {
             // We're dealing with an application/package level state change
-            if (newState == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
-                    || newState == PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
-                // Don't care about who enables an app.
-                callingPackage = null;
-            }
             pkgSetting.setEnabled(newState, userId, callingPackage);
             if ((newState == COMPONENT_ENABLED_STATE_DISABLED_USER
                     || newState == COMPONENT_ENABLED_STATE_DISABLED)
@@ -4884,13 +4910,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             mHandler.post(() -> {
                 final int id = verificationId >= 0 ? verificationId : -verificationId;
                 final PackageVerificationState state = mPendingVerification.get(id);
-                if (state == null || state.timeoutExtended() || !state.checkRequiredVerifierUid(
-                        callingUid)) {
-                    // Only allow calls from required verifiers.
+                if (state == null || !state.extendTimeout(callingUid)) {
+                    // Invalid uid or already extended.
                     return;
                 }
-
-                state.extendTimeout();
 
                 final PackageVerificationResponse response = new PackageVerificationResponse(
                         verificationCodeAtTimeout, callingUid);
@@ -5159,12 +5182,16 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 throw new ParcelableException(
                         new PackageManager.NameNotFoundException(packageName));
             }
-            try {
-                File file = new File(ps.getPath(), APP_METADATA_FILE_NAME);
-                return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-            } catch (FileNotFoundException e) {
-                return null;
+            String filePath = ps.getAppMetadataFilePath();
+            if (filePath != null) {
+                File file = new File(filePath);
+                try {
+                    return ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+                } catch (FileNotFoundException e) {
+                    return null;
+                }
             }
+            return null;
         }
 
         @Override
@@ -5228,6 +5255,12 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             res.add(fi);
 
             return new ParceledListSlice<>(res);
+        }
+
+        @Override
+        public @NonNull List<String> getInitialNonStoppedSystemPackages() {
+            return mInitialNonStoppedSystemPackages != null
+                    ? new ArrayList<>(mInitialNonStoppedSystemPackages) : new ArrayList<>();
         }
 
         @Override
@@ -5560,32 +5593,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         public void registerDexModule(String packageName, String dexModulePath,
                 boolean isSharedModule,
                 IDexModuleRegisterCallback callback) {
-            if (useArtService()) {
-                // ART Service currently doesn't support this explicit dexopting and instead relies
-                // on background dexopt for secondary dex files. This API is problematic since it
-                // doesn't provide the correct classloader context.
-                Slog.i(TAG,
-                        "Ignored unsupported registerDexModule call for " + dexModulePath + " in "
-                                + packageName);
-                return;
-            }
-
-            int userId = UserHandle.getCallingUserId();
-            ApplicationInfo ai = snapshot().getApplicationInfo(packageName, /*flags*/ 0, userId);
-            DexManager.RegisterDexModuleResult result;
-            if (ai == null) {
-                Slog.w(PackageManagerService.TAG,
-                        "Registering a dex module for a package that does not exist for the" +
-                                " calling user. package=" + packageName + ", user=" + userId);
-                result = new DexManager.RegisterDexModuleResult(false, "Package not installed");
-            } else {
-                try {
-                    result = mDexManager.registerDexModule(
-                            ai, dexModulePath, isSharedModule, userId);
-                } catch (LegacyDexoptDisabledException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            // ART Service doesn't support this explicit dexopting and instead relies on background
+            // dexopt for secondary dex files. For compat parity between ART Service and the legacy
+            // code it's disabled for both.
+            //
+            // Also, this API is problematic anyway since it doesn't provide the correct classloader
+            // context, so it is hard to produce dexopt artifacts that the runtime can load
+            // successfully.
+            Slog.i(TAG,
+                    "Ignored unsupported registerDexModule call for " + dexModulePath + " in "
+                            + packageName);
+            DexManager.RegisterDexModuleResult result = new DexManager.RegisterDexModuleResult(
+                    false, "registerDexModule call not supported since Android U");
 
             if (callback != null) {
                 mHandler.post(() -> {
@@ -5826,21 +5845,28 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
 
         @Override
         public void setComponentEnabledSetting(ComponentName componentName,
-                int newState, int flags, int userId) {
+                int newState, int flags, int userId, String callingPackage) {
             if (!mUserManager.exists(userId)) return;
+            if (callingPackage == null) {
+                callingPackage = Integer.toString(Binder.getCallingUid());
+            }
 
             setEnabledSettings(List.of(new PackageManager.ComponentEnabledSetting(componentName, newState, flags)),
-                    userId, null /* callingPackage */);
+                    userId, callingPackage);
         }
 
         @Override
-        public void setComponentEnabledSettings(List<PackageManager.ComponentEnabledSetting> settings, int userId) {
+        public void setComponentEnabledSettings(
+                List<PackageManager.ComponentEnabledSetting> settings, int userId,
+                String callingPackage) {
             if (!mUserManager.exists(userId)) return;
             if (settings == null || settings.isEmpty()) {
                 throw new IllegalArgumentException("The list of enabled settings is empty");
             }
-
-            setEnabledSettings(settings, userId, null /* callingPackage */);
+            if (callingPackage == null) {
+                callingPackage = Integer.toString(Binder.getCallingUid());
+            }
+            setEnabledSettings(settings, userId, callingPackage);
         }
 
         @Override
@@ -6811,11 +6837,18 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
             if (ps == null) {
                 return null;
             }
-            return new IncrementalStatesInfo(ps.isLoading(), ps.getLoadingProgress());
+            return new IncrementalStatesInfo(ps.isLoading(), ps.getLoadingProgress(),
+                    ps.getLoadingCompletedTime());
         }
 
         @Override
         public boolean isSameApp(@Nullable String packageName, int callingUid, int userId) {
+            return isSameApp(packageName, /*flags=*/0, callingUid, userId);
+        }
+
+        @Override
+        public boolean isSameApp(@Nullable String packageName,
+                @PackageManager.PackageInfoFlagsBits long flags, int callingUid, int userId) {
             if (packageName == null) {
                 return false;
             }
@@ -6824,7 +6857,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
                 return packageName.equals(mRequiredSdkSandboxPackage);
             }
             Computer snapshot = snapshot();
-            int uid = snapshot.getPackageUid(packageName, 0, userId);
+            int uid = snapshot.getPackageUid(packageName, flags, userId);
             return UserHandle.isSameApp(uid, callingUid);
         }
 
@@ -7217,6 +7250,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
      * TODO: In the meantime, can this be moved to a schedule call?
      * TODO(b/182523293): This should be removed once we finish migration of permission storage.
      */
+    @SuppressWarnings("GuardedBy")
     void writeSettingsLPrTEMP(boolean sync) {
         snapshotComputer(false);
         mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
@@ -7266,6 +7300,10 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
     static boolean isPreapprovalRequestAvailable() {
         final long token = Binder.clearCallingIdentity();
         try {
+            if (!Resources.getSystem().getBoolean(
+                    com.android.internal.R.bool.config_isPreApprovalRequestAvailable)) {
+                return false;
+            }
             return DeviceConfig.getBoolean(NAMESPACE_PACKAGE_MANAGER_SERVICE,
                     PROPERTY_IS_PRE_APPROVAL_REQUEST_AVAILABLE, true /* defaultValue */);
         } finally {
@@ -7277,7 +7315,7 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         final long token = Binder.clearCallingIdentity();
         try {
             return DeviceConfig.getBoolean(NAMESPACE_PACKAGE_MANAGER_SERVICE,
-                    PROPERTY_IS_UPDATE_OWNERSHIP_ENFORCEMENT_AVAILABLE, false /* defaultValue */);
+                    PROPERTY_IS_UPDATE_OWNERSHIP_ENFORCEMENT_AVAILABLE, true /* defaultValue */);
         } finally {
             Binder.restoreCallingIdentity(token);
         }

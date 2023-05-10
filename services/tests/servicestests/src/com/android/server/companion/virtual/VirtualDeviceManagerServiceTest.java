@@ -359,8 +359,7 @@ public class VirtualDeviceManagerServiceTest {
         mInputController = new InputController(mNativeWrapperMock,
                 new Handler(TestableLooper.get(this).getLooper()),
                 mContext.getSystemService(WindowManager.class), threadVerifier);
-        mSensorController =
-                new SensorController(new Object(), VIRTUAL_DEVICE_ID_1, mVirtualSensorCallback);
+        mSensorController = new SensorController(VIRTUAL_DEVICE_ID_1, mVirtualSensorCallback);
         mCameraAccessController =
                 new CameraAccessController(mContext, mLocalService, mCameraAccessBlockedCallback);
 
@@ -536,7 +535,8 @@ public class VirtualDeviceManagerServiceTest {
                 .build();
 
         doReturn(SENSOR_HANDLE).when(mSensorManagerInternalMock).createRuntimeSensor(
-                anyInt(), anyInt(), anyString(), anyString(), anyInt(), any());
+                anyInt(), anyInt(), anyString(), anyString(), anyFloat(), anyFloat(), anyFloat(),
+                anyInt(), anyInt(), anyInt(), any());
         mDeviceImpl.close();
         mDeviceImpl = createVirtualDevice(VIRTUAL_DEVICE_ID_1, DEVICE_OWNER_UID_1, params);
 
@@ -1159,6 +1159,7 @@ public class VirtualDeviceManagerServiceTest {
         final int fd = 1;
         final int keyCode = KeyEvent.KEYCODE_A;
         final int action = VirtualKeyEvent.ACTION_UP;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_KEYBOARD, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
@@ -1166,8 +1167,9 @@ public class VirtualDeviceManagerServiceTest {
         mDeviceImpl.sendKeyEvent(BINDER, new VirtualKeyEvent.Builder()
                 .setKeyCode(keyCode)
                 .setAction(action)
+                .setEventTimeNanos(eventTimeNanos)
                 .build());
-        verify(mNativeWrapperMock).writeKeyEvent(fd, keyCode, action);
+        verify(mNativeWrapperMock).writeKeyEvent(fd, keyCode, action, eventTimeNanos);
     }
 
     @Test
@@ -1187,14 +1189,17 @@ public class VirtualDeviceManagerServiceTest {
         final int fd = 1;
         final int buttonCode = VirtualMouseButtonEvent.BUTTON_BACK;
         final int action = VirtualMouseButtonEvent.ACTION_BUTTON_PRESS;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
         doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mDeviceImpl.sendButtonEvent(BINDER, new VirtualMouseButtonEvent.Builder()
                 .setButtonCode(buttonCode)
-                .setAction(action).build());
-        verify(mNativeWrapperMock).writeButtonEvent(fd, buttonCode, action);
+                .setAction(action)
+                .setEventTimeNanos(eventTimeNanos)
+                .build());
+        verify(mNativeWrapperMock).writeButtonEvent(fd, buttonCode, action, eventTimeNanos);
     }
 
     @Test
@@ -1228,13 +1233,17 @@ public class VirtualDeviceManagerServiceTest {
         final int fd = 1;
         final float x = -0.2f;
         final float y = 0.7f;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
                 INPUT_DEVICE_ID);
         doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mDeviceImpl.sendRelativeEvent(BINDER, new VirtualMouseRelativeEvent.Builder()
-                .setRelativeX(x).setRelativeY(y).build());
-        verify(mNativeWrapperMock).writeRelativeEvent(fd, x, y);
+                .setRelativeX(x)
+                .setRelativeY(y)
+                .setEventTimeNanos(eventTimeNanos)
+                .build());
+        verify(mNativeWrapperMock).writeRelativeEvent(fd, x, y, eventTimeNanos);
     }
 
     @Test
@@ -1269,14 +1278,17 @@ public class VirtualDeviceManagerServiceTest {
         final int fd = 1;
         final float x = 0.5f;
         final float y = 1f;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_MOUSE, DISPLAY_ID_1, PHYS, DEVICE_NAME_1,
                 INPUT_DEVICE_ID);
         doReturn(DISPLAY_ID_1).when(mInputManagerInternalMock).getVirtualMousePointerDisplayId();
         mDeviceImpl.sendScrollEvent(BINDER, new VirtualMouseScrollEvent.Builder()
                 .setXAxisMovement(x)
-                .setYAxisMovement(y).build());
-        verify(mNativeWrapperMock).writeScrollEvent(fd, x, y);
+                .setYAxisMovement(y)
+                .setEventTimeNanos(eventTimeNanos)
+                .build());
+        verify(mNativeWrapperMock).writeScrollEvent(fd, x, y, eventTimeNanos);
     }
 
     @Test
@@ -1317,6 +1329,7 @@ public class VirtualDeviceManagerServiceTest {
         final float x = 100.5f;
         final float y = 200.5f;
         final int action = VirtualTouchEvent.ACTION_UP;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_TOUCHSCREEN, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
@@ -1326,9 +1339,10 @@ public class VirtualDeviceManagerServiceTest {
                 .setAction(action)
                 .setPointerId(pointerId)
                 .setToolType(toolType)
+                .setEventTimeNanos(eventTimeNanos)
                 .build());
         verify(mNativeWrapperMock).writeTouchEvent(fd, pointerId, toolType, action, x, y, Float.NaN,
-                Float.NaN);
+                Float.NaN, eventTimeNanos);
     }
 
     @Test
@@ -1341,6 +1355,7 @@ public class VirtualDeviceManagerServiceTest {
         final int action = VirtualTouchEvent.ACTION_UP;
         final float pressure = 1.0f;
         final float majorAxisSize = 10.0f;
+        final long eventTimeNanos = 5000L;
         mInputController.addDeviceForTesting(BINDER, fd,
                 InputController.InputDeviceDescriptor.TYPE_TOUCHSCREEN, DISPLAY_ID_1, PHYS,
                 DEVICE_NAME_1, INPUT_DEVICE_ID);
@@ -1352,9 +1367,10 @@ public class VirtualDeviceManagerServiceTest {
                 .setToolType(toolType)
                 .setPressure(pressure)
                 .setMajorAxisSize(majorAxisSize)
+                .setEventTimeNanos(eventTimeNanos)
                 .build());
         verify(mNativeWrapperMock).writeTouchEvent(fd, pointerId, toolType, action, x, y, pressure,
-                majorAxisSize);
+                majorAxisSize, eventTimeNanos);
     }
 
     @Test

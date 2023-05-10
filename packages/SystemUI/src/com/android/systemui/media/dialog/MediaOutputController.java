@@ -25,7 +25,11 @@ import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.WallpaperColors;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcast;
+import android.bluetooth.BluetoothLeBroadcastAssistant;
+import android.bluetooth.BluetoothLeBroadcastMetadata;
+import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -66,6 +70,7 @@ import com.android.settingslib.RestrictedLockUtilsInternal;
 import com.android.settingslib.Utils;
 import com.android.settingslib.bluetooth.BluetoothUtils;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastAssistant;
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastMetadata;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.settingslib.media.InfoMediaManager;
@@ -121,9 +126,10 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private final LocalBluetoothManager mLocalBluetoothManager;
     private final ActivityStarter mActivityStarter;
     private final DialogLaunchAnimator mDialogLaunchAnimator;
-    private final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     private final CommonNotifCollection mNotifCollection;
     private final Object mMediaDevicesLock = new Object();
+    @VisibleForTesting
+    final List<MediaDevice> mGroupMediaDevices = new CopyOnWriteArrayList<>();
     @VisibleForTesting
     final List<MediaDevice> mMediaDevices = new CopyOnWriteArrayList<>();
     final List<MediaDevice> mCachedMediaDevices = new CopyOnWriteArrayList<>();
@@ -395,7 +401,6 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             launchIntent.putExtra(EXTRA_ROUTE_ID, routeId);
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mCallback.dismissDialog();
-            mContext.startActivity(launchIntent);
             mActivityStarter.startActivity(launchIntent, true, controller);
         }
     }
@@ -709,7 +714,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             dividerItems.forEach((key, item) -> {
                 finalMediaItems.add(key, item);
             });
-            finalMediaItems.add(new MediaItem());
+            attachConnectNewDeviceItemIfNeeded(finalMediaItems);
             mMediaItemList.clear();
             mMediaItemList.addAll(finalMediaItems);
         }
@@ -745,7 +750,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                     finalMediaItems.add(new MediaItem(device));
                 }
             }
-            finalMediaItems.add(new MediaItem());
+            attachConnectNewDeviceItemIfNeeded(finalMediaItems);
             mMediaItemList.clear();
             mMediaItemList.addAll(finalMediaItems);
         }
@@ -754,6 +759,13 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private void attachGroupDivider(List<MediaItem> mediaItems, String title) {
         mediaItems.add(
                 new MediaItem(title, MediaItem.MediaItemType.TYPE_GROUP_DIVIDER));
+    }
+
+    private void attachConnectNewDeviceItemIfNeeded(List<MediaItem> mediaItems) {
+        // Attach "Connect a device" item only when current output is not remote and not a group
+        if (!isCurrentConnectedDeviceRemote() && getSelectedMediaDevice().size() == 1) {
+            mediaItems.add(new MediaItem());
+        }
     }
 
     private void attachRangeInfo(List<MediaDevice> devices) {
@@ -769,6 +781,12 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         MediaDevice currentConnectedMediaDevice = getCurrentConnectedMediaDevice();
         return currentConnectedMediaDevice != null && isActiveRemoteDevice(
                 currentConnectedMediaDevice);
+    }
+
+    boolean isCurrentOutputDeviceHasSessionOngoing() {
+        MediaDevice currentConnectedMediaDevice = getCurrentConnectedMediaDevice();
+        return currentConnectedMediaDevice != null
+                && (currentConnectedMediaDevice.isHostForOngoingSession());
     }
 
     public boolean isAdvancedLayoutSupported() {
@@ -996,7 +1014,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
-        mDialogLaunchAnimator.showFromView(dialog, mediaOutputDialog);
+        dialog.show();
     }
 
     String getBroadcastName() {
@@ -1050,7 +1068,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
                 ALLOWLIST_DURATION_MS);
     }
 
-    String getBroadcastMetadata() {
+    String getLocalBroadcastMetadataQrCodeString() {
         LocalBluetoothLeBroadcast broadcast =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
         if (broadcast == null) {
@@ -1060,6 +1078,17 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         final LocalBluetoothLeBroadcastMetadata metadata =
                 broadcast.getLocalBluetoothLeBroadcastMetaData();
         return metadata != null ? metadata.convertToQrCodeString() : "";
+    }
+
+    BluetoothLeBroadcastMetadata getBroadcastMetadata() {
+        LocalBluetoothLeBroadcast broadcast =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
+        if (broadcast == null) {
+            Log.d(TAG, "getBroadcastMetadata: LE Audio Broadcast is null");
+            return null;
+        }
+
+        return broadcast.getLatestBluetoothLeBroadcastMetadata();
     }
 
     boolean isActiveRemoteDevice(@NonNull MediaDevice device) {
@@ -1122,7 +1151,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return true;
     }
 
-    void registerLeBroadcastServiceCallBack(
+    void registerLeBroadcastServiceCallback(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull BluetoothLeBroadcast.Callback callback) {
         LocalBluetoothLeBroadcast broadcast =
@@ -1131,10 +1160,11 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             Log.d(TAG, "The broadcast profile is null");
             return;
         }
+        Log.d(TAG, "Register LE broadcast callback");
         broadcast.registerServiceCallBack(executor, callback);
     }
 
-    void unregisterLeBroadcastServiceCallBack(
+    void unregisterLeBroadcastServiceCallback(
             @NonNull BluetoothLeBroadcast.Callback callback) {
         LocalBluetoothLeBroadcast broadcast =
                 mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastProfile();
@@ -1142,7 +1172,57 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             Log.d(TAG, "The broadcast profile is null");
             return;
         }
+        Log.d(TAG, "Unregister LE broadcast callback");
         broadcast.unregisterServiceCallBack(callback);
+    }
+
+    boolean isThereAnyBroadcastSourceIntoSinkDevice(BluetoothDevice sink) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "The broadcast assistant profile is null");
+            return false;
+        }
+        List<BluetoothLeBroadcastReceiveState> sourceList = assistant.getAllSources(sink);
+        Log.d(TAG, "isThereAnyBroadcastSourceIntoSinkDevice: List size: " + sourceList.size());
+        return !sourceList.isEmpty();
+    }
+
+    boolean addSourceIntoSinkDeviceWithBluetoothLeAssistant(BluetoothDevice sink,
+            BluetoothLeBroadcastMetadata metadata, boolean isGroupOp) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "The broadcast assistant profile is null");
+            return false;
+        }
+        assistant.addSource(sink, metadata, isGroupOp);
+        return true;
+    }
+
+    void registerLeBroadcastAssistantServiceCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "The broadcast assistant profile is null");
+            return;
+        }
+        Log.d(TAG, "Register LE broadcast assistant callback");
+        assistant.registerServiceCallBack(executor, callback);
+    }
+
+    void unregisterLeBroadcastAssistantServiceCallback(
+            @NonNull BluetoothLeBroadcastAssistant.Callback callback) {
+        LocalBluetoothLeBroadcastAssistant assistant =
+                mLocalBluetoothManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+        if (assistant == null) {
+            Log.d(TAG, "The broadcast assistant profile is null");
+            return;
+        }
+        Log.d(TAG, "Unregister LE broadcast assistant callback");
+        assistant.unregisterServiceCallBack(callback);
     }
 
     private boolean isPlayBackInfoLocal() {
@@ -1185,7 +1265,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         return null;
     }
 
-    private final MediaController.Callback mCb = new MediaController.Callback() {
+    @VisibleForTesting
+    final MediaController.Callback mCb = new MediaController.Callback() {
         @Override
         public void onMetadataChanged(MediaMetadata metadata) {
             mCallback.onMediaChanged();

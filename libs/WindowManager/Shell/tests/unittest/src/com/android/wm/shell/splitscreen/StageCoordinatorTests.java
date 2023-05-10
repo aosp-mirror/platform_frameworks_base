@@ -113,6 +113,7 @@ public class StageCoordinatorTests extends ShellTestCase {
 
     private SurfaceSession mSurfaceSession = new SurfaceSession();
     private SurfaceControl mRootLeash;
+    private SurfaceControl mDividerLeash;
     private ActivityManager.RunningTaskInfo mRootTask;
     private StageCoordinator mStageCoordinator;
     private Transitions mTransitions;
@@ -129,12 +130,14 @@ public class StageCoordinatorTests extends ShellTestCase {
                 mTaskOrganizer, mMainStage, mSideStage, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mSplitLayout, mTransitions, mTransactionPool,
                 mMainExecutor, Optional.empty()));
+        mDividerLeash = new SurfaceControl.Builder(mSurfaceSession).setName("fakeDivider").build();
 
         when(mSplitLayout.getBounds1()).thenReturn(mBounds1);
         when(mSplitLayout.getBounds2()).thenReturn(mBounds2);
         when(mSplitLayout.getRootBounds()).thenReturn(mRootBounds);
         when(mSplitLayout.isLandscape()).thenReturn(false);
         when(mSplitLayout.applyTaskChanges(any(), any(), any())).thenReturn(true);
+        when(mSplitLayout.getDividerLeash()).thenReturn(mDividerLeash);
 
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootLeash = new SurfaceControl.Builder(mSurfaceSession).setName("test").build();
@@ -145,39 +148,47 @@ public class StageCoordinatorTests extends ShellTestCase {
     }
 
     @Test
-    public void testMoveToStage() {
+    public void testMoveToStage_splitActiveBackground() {
+        when(mStageCoordinator.isSplitActive()).thenReturn(true);
+
         final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+        final WindowContainerTransaction wct = spy(new WindowContainerTransaction());
 
-        mStageCoordinator.moveToStage(task, STAGE_TYPE_MAIN, SPLIT_POSITION_BOTTOM_OR_RIGHT,
-                new WindowContainerTransaction());
-        verify(mMainStage).addTask(eq(task), any(WindowContainerTransaction.class));
-        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
-
-        mStageCoordinator.moveToStage(task, STAGE_TYPE_SIDE, SPLIT_POSITION_BOTTOM_OR_RIGHT,
-                new WindowContainerTransaction());
-        verify(mSideStage).addTask(eq(task), any(WindowContainerTransaction.class));
+        mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
+        verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+        verify(mMainStage).reparentTopTask(eq(wct));
+        verify(mSplitLayout).resetDividerPosition();
         assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
+        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
     }
 
     @Test
-    public void testMoveToUndefinedStage() {
-        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
-
-        // Verify move to undefined stage while split screen not activated moves task to side stage.
-        when(mStageCoordinator.isSplitScreenVisible()).thenReturn(false);
-        mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null);
-        mStageCoordinator.moveToStage(task, STAGE_TYPE_UNDEFINED, SPLIT_POSITION_BOTTOM_OR_RIGHT,
-                new WindowContainerTransaction());
-        verify(mSideStage).addTask(eq(task), any(WindowContainerTransaction.class));
-        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
-
-        // Verify move to undefined stage after split screen activated moves task based on position.
+    public void testMoveToStage_splitActiveForeground() {
+        when(mStageCoordinator.isSplitActive()).thenReturn(true);
         when(mStageCoordinator.isSplitScreenVisible()).thenReturn(true);
-        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
-        mStageCoordinator.moveToStage(task, STAGE_TYPE_UNDEFINED, SPLIT_POSITION_TOP_OR_LEFT,
-                new WindowContainerTransaction());
-        verify(mMainStage).addTask(eq(task), any(WindowContainerTransaction.class));
-        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getMainStagePosition());
+        // Assume current side stage is top or left.
+        mStageCoordinator.setSideStagePosition(SPLIT_POSITION_TOP_OR_LEFT, null);
+
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+
+        mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
+        verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getMainStagePosition());
+        assertEquals(SPLIT_POSITION_TOP_OR_LEFT, mStageCoordinator.getSideStagePosition());
+    }
+
+    @Test
+    public void testMoveToStage_splitInctive() {
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+
+        mStageCoordinator.moveToStage(task, SPLIT_POSITION_BOTTOM_OR_RIGHT, wct);
+        verify(mStageCoordinator).prepareEnterSplitScreen(eq(wct), eq(task),
+                eq(SPLIT_POSITION_BOTTOM_OR_RIGHT));
+        assertEquals(SPLIT_POSITION_BOTTOM_OR_RIGHT, mStageCoordinator.getSideStagePosition());
     }
 
     @Test

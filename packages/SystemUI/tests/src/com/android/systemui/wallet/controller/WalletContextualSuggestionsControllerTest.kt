@@ -32,9 +32,9 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import java.util.ArrayList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -46,7 +46,7 @@ import org.junit.runners.JUnit4
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.isNull
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
@@ -66,12 +66,14 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
+        whenever(broadcastDispatcher.broadcastFlow(any(), nullable(), anyInt(), nullable()))
+            .thenCallRealMethod()
         whenever(
-                broadcastDispatcher.broadcastFlow<List<String>?>(
+                broadcastDispatcher.broadcastFlow<Unit>(
                     any(),
-                    isNull(),
-                    any(),
-                    any(),
+                    nullable(),
+                    anyInt(),
+                    nullable(),
                     any()
                 )
             )
@@ -81,113 +83,105 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
             .thenReturn(true)
 
         whenever(CARD_1.cardId).thenReturn(ID_1)
+        whenever(CARD_1.cardType).thenReturn(WalletCard.CARD_TYPE_NON_PAYMENT)
         whenever(CARD_2.cardId).thenReturn(ID_2)
+        whenever(CARD_2.cardType).thenReturn(WalletCard.CARD_TYPE_NON_PAYMENT)
         whenever(CARD_3.cardId).thenReturn(ID_3)
+        whenever(CARD_3.cardType).thenReturn(WalletCard.CARD_TYPE_NON_PAYMENT)
+        whenever(PAYMENT_CARD.cardId).thenReturn(PAYMENT_ID)
+        whenever(PAYMENT_CARD.cardType).thenReturn(WalletCard.CARD_TYPE_PAYMENT)
     }
 
     @Test
-    fun `state - has wallet cards - received contextual cards`() = runTest {
-        setUpWalletClient(listOf(CARD_1, CARD_2))
-        val latest =
-            collectLastValue(
-                createWalletContextualSuggestionsController(backgroundScope)
-                    .contextualSuggestionCards,
-            )
+    fun state_hasWalletCardsCallbacksCalled() = runTest {
+        setUpWalletClient(listOf(CARD_1, CARD_2, PAYMENT_CARD))
+        val controller = createWalletContextualSuggestionsController(backgroundScope)
+        var latest1 = emptyList<WalletCard>()
+        var latest2 = emptyList<WalletCard>()
+        val callback1: (List<WalletCard>) -> Unit = { latest1 = it }
+        val callback2: (List<WalletCard>) -> Unit = { latest2 = it }
 
         runCurrent()
-        verifyRegistered()
-        broadcastReceiver.value.onReceive(
-            mockContext,
-            createContextualCardsIntent(listOf(ID_1, ID_2))
-        )
+        controller.registerWalletCardsReceivedCallback(callback1)
+        controller.registerWalletCardsReceivedCallback(callback2)
+        controller.unregisterWalletCardsReceivedCallback(callback2)
+        runCurrent()
+        verifyBroadcastReceiverRegistered()
+        turnScreenOn()
+        runCurrent()
 
-        assertThat(latest()).containsExactly(CARD_1, CARD_2)
+        assertThat(latest1).containsExactly(CARD_1, CARD_2)
+        assertThat(latest2).isEmpty()
     }
 
     @Test
-    fun `state - no wallet cards - received contextual cards`() = runTest {
+    fun state_noWalletCards_setSuggestionCards() = runTest {
         setUpWalletClient(emptyList())
+        val controller = createWalletContextualSuggestionsController(backgroundScope)
         val latest =
             collectLastValue(
-                createWalletContextualSuggestionsController(backgroundScope)
-                    .contextualSuggestionCards,
+                controller.contextualSuggestionCards,
             )
 
         runCurrent()
-        verifyRegistered()
-        broadcastReceiver.value.onReceive(
-            mockContext,
-            createContextualCardsIntent(listOf(ID_1, ID_2))
-        )
+        verifyBroadcastReceiverRegistered()
+        turnScreenOn()
+        controller.setSuggestionCardIds(setOf(ID_1, ID_2))
 
         assertThat(latest()).isEmpty()
     }
 
     @Test
-    fun `state - has wallet cards - no contextual cards`() = runTest {
-        setUpWalletClient(listOf(CARD_1, CARD_2))
+    fun state_hasWalletCards_setAndUpdateSuggestionCards() = runTest {
+        setUpWalletClient(listOf(CARD_1, CARD_2, PAYMENT_CARD))
+        val controller = createWalletContextualSuggestionsController(backgroundScope)
         val latest =
             collectLastValue(
-                createWalletContextualSuggestionsController(backgroundScope)
-                    .contextualSuggestionCards,
+                controller.contextualSuggestionCards,
             )
 
         runCurrent()
-        verifyRegistered()
-        broadcastReceiver.value.onReceive(mockContext, createContextualCardsIntent(emptyList()))
+        verifyBroadcastReceiverRegistered()
+        turnScreenOn()
 
+        controller.setSuggestionCardIds(setOf(ID_1, ID_2))
+        assertThat(latest()).containsExactly(CARD_1, CARD_2)
+        controller.setSuggestionCardIds(emptySet())
         assertThat(latest()).isEmpty()
     }
 
     @Test
-    fun `state - wallet cards error`() = runTest {
+    fun state_walletCardsError() = runTest {
         setUpWalletClient(shouldFail = true)
+        val controller = createWalletContextualSuggestionsController(backgroundScope)
         val latest =
             collectLastValue(
-                createWalletContextualSuggestionsController(backgroundScope)
-                    .contextualSuggestionCards,
+                controller.contextualSuggestionCards,
             )
 
         runCurrent()
-        verifyRegistered()
-        broadcastReceiver.value.onReceive(
-            mockContext,
-            createContextualCardsIntent(listOf(ID_1, ID_2))
-        )
+        verifyBroadcastReceiverRegistered()
+        controller.setSuggestionCardIds(setOf(ID_1, ID_2))
 
         assertThat(latest()).isEmpty()
     }
 
     @Test
-    fun `state - no contextual cards extra`() = runTest {
-        setUpWalletClient(listOf(CARD_1, CARD_2))
-        val latest =
-            collectLastValue(
-                createWalletContextualSuggestionsController(backgroundScope)
-                    .contextualSuggestionCards,
-            )
-
-        runCurrent()
-        verifyRegistered()
-        broadcastReceiver.value.onReceive(mockContext, Intent(INTENT_NAME))
-
-        assertThat(latest()).isEmpty()
-    }
-
-    @Test
-    fun `state - has wallet cards - received contextual cards - feature disabled`() = runTest {
+    fun state_hasWalletCards_receivedContextualCards_featureDisabled() = runTest {
         whenever(featureFlags.isEnabled(eq(Flags.ENABLE_WALLET_CONTEXTUAL_LOYALTY_CARDS)))
             .thenReturn(false)
-        setUpWalletClient(listOf(CARD_1, CARD_2))
+        setUpWalletClient(listOf(CARD_1, CARD_2, PAYMENT_CARD))
+        val controller = createWalletContextualSuggestionsController(backgroundScope)
         val latest =
             collectLastValue(
-                createWalletContextualSuggestionsController(backgroundScope)
-                    .contextualSuggestionCards,
+                controller.contextualSuggestionCards,
             )
 
         runCurrent()
-        verify(broadcastDispatcher, never()).broadcastFlow(any(), isNull(), any(), any())
-        assertThat(latest()).isNull()
+        verify(broadcastDispatcher, never()).broadcastFlow(any(), nullable(), anyInt(), nullable())
+        controller.setSuggestionCardIds(setOf(ID_1, ID_2))
+
+        assertThat(latest()).isEmpty()
     }
 
     private fun createWalletContextualSuggestionsController(
@@ -201,17 +195,20 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
         )
     }
 
-    private fun verifyRegistered() {
+    private fun verifyBroadcastReceiverRegistered() {
         verify(broadcastDispatcher)
-            .registerReceiver(capture(broadcastReceiver), any(), isNull(), isNull(), any(), any())
+            .registerReceiver(
+                capture(broadcastReceiver),
+                any(),
+                nullable(),
+                nullable(),
+                anyInt(),
+                nullable()
+            )
     }
 
-    private fun createContextualCardsIntent(
-        ids: List<String> = emptyList(),
-    ): Intent {
-        val intent = Intent(INTENT_NAME)
-        intent.putStringArrayListExtra("cardIds", ArrayList(ids))
-        return intent
+    private fun turnScreenOn() {
+        broadcastReceiver.value.onReceive(mockContext, Intent(Intent.ACTION_SCREEN_ON))
     }
 
     private fun setUpWalletClient(
@@ -238,6 +235,7 @@ class WalletContextualSuggestionsControllerTest : SysuiTestCase() {
         private val CARD_2: WalletCard = mock()
         private const val ID_3: String = "789"
         private val CARD_3: WalletCard = mock()
-        private val INTENT_NAME: String = "WalletSuggestionsIntent"
+        private const val PAYMENT_ID: String = "payment"
+        private val PAYMENT_CARD: WalletCard = mock()
     }
 }

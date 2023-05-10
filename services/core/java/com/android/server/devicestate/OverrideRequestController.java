@@ -64,6 +64,18 @@ final class OverrideRequestController {
      */
     static final int FLAG_THERMAL_CRITICAL = 1 << 0;
 
+    /**
+     * A flag indicating that the status change was triggered by power save mode.
+     */
+    static final int FLAG_POWER_SAVE_ENABLED = 1 << 1;
+
+    @IntDef(flag = true, prefix = {"FLAG_"}, value = {
+            FLAG_THERMAL_CRITICAL,
+            FLAG_POWER_SAVE_ENABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface StatusChangedFlag {}
+
     static String statusToString(@RequestStatus int status) {
         switch (status) {
             case STATUS_ACTIVE:
@@ -228,13 +240,18 @@ final class OverrideRequestController {
             @DeviceStateProvider.SupportedStatesUpdatedReason int reason) {
         boolean isThermalCritical =
                 reason == DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_THERMAL_CRITICAL;
+        boolean isPowerSaveEnabled =
+                reason == DeviceStateProvider.SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED;
+        @StatusChangedFlag int flags = 0;
+        flags |= isThermalCritical ? FLAG_THERMAL_CRITICAL : 0;
+        flags |= isPowerSaveEnabled ? FLAG_POWER_SAVE_ENABLED : 0;
         if (mBaseStateRequest != null && !contains(newSupportedStates,
                 mBaseStateRequest.getRequestedState())) {
-            cancelCurrentBaseStateRequestLocked(isThermalCritical ? FLAG_THERMAL_CRITICAL : 0);
+            cancelCurrentBaseStateRequestLocked(flags);
         }
 
         if (mRequest != null && !contains(newSupportedStates, mRequest.getRequestedState())) {
-            cancelCurrentRequestLocked(isThermalCritical ? FLAG_THERMAL_CRITICAL : 0);
+            cancelCurrentRequestLocked(flags);
         }
     }
 
@@ -255,7 +272,8 @@ final class OverrideRequestController {
         cancelRequestLocked(requestToCancel, 0 /* flags */);
     }
 
-    private void cancelRequestLocked(@NonNull OverrideRequest requestToCancel, int flags) {
+    private void cancelRequestLocked(@NonNull OverrideRequest requestToCancel,
+            @StatusChangedFlag int flags) {
         mListener.onStatusChanged(requestToCancel, STATUS_CANCELED, flags);
     }
 
@@ -267,7 +285,7 @@ final class OverrideRequestController {
         cancelCurrentRequestLocked(0 /* flags */);
     }
 
-    private void cancelCurrentRequestLocked(int flags) {
+    private void cancelCurrentRequestLocked(@StatusChangedFlag int flags) {
         if (mRequest == null) {
             Slog.w(TAG, "Attempted to cancel a null OverrideRequest");
             return;
@@ -285,7 +303,7 @@ final class OverrideRequestController {
         cancelCurrentBaseStateRequestLocked(0 /* flags */);
     }
 
-    private void cancelCurrentBaseStateRequestLocked(int flags) {
+    private void cancelCurrentBaseStateRequestLocked(@StatusChangedFlag int flags) {
         if (mBaseStateRequest == null) {
             Slog.w(TAG, "Attempted to cancel a null OverrideRequest");
             return;
@@ -312,6 +330,6 @@ final class OverrideRequestController {
          * cancelled request.
          */
         void onStatusChanged(@NonNull OverrideRequest request, @RequestStatus int newStatus,
-                int flags);
+                @StatusChangedFlag int flags);
     }
 }

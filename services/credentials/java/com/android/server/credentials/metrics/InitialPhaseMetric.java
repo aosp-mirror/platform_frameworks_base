@@ -16,25 +16,24 @@
 
 package com.android.server.credentials.metrics;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
  * This handles metrics collected prior to any remote calls to providers.
  * Some types are redundant across these metric collectors, but that has debug use-cases as
  * these data-types are available at different moments of the flow (and typically, one can feed
  * into the next).
- * TODO(b/270403549) - iterate on this in V3+
  */
 public class InitialPhaseMetric {
-    private static final String TAG = "PreCandidateMetric";
+    private static final String TAG = "InitialPhaseMetric";
 
     // The api being called, default set to unknown
     private int mApiName = ApiName.UNKNOWN.getMetricCode();
     // The caller uid of the calling application, default to -1
     private int mCallerUid = -1;
-    // The session id to unite multiple atom emits, default to -1
-    private long mSessionId = -1;
-    // A sequence id to order united emits, default to -1
-    private int mSequenceId = -1;
-    private int mCountRequestClassType = -1;
+    // The session id to unite multiple atom emits
+    private final int mSessionIdCaller;
 
     // Raw timestamps in nanoseconds, *the only* one logged as such (i.e. 64 bits) since it is a
     // reference point.
@@ -44,17 +43,24 @@ public class InitialPhaseMetric {
     // over to the next latency object.
     private long mCredentialServiceBeginQueryTimeNanoseconds = -1;
 
+    // Indicates if the origin was specified when making this API request
+    private boolean mOriginSpecified = false;
 
-    public InitialPhaseMetric() {
+    // Stores the deduped request information, particularly {"req":5}
+    private Map<String, Integer> mRequestCounts = new LinkedHashMap<>();
+
+
+    public InitialPhaseMetric(int sessionIdTrackOne) {
+        mSessionIdCaller = sessionIdTrackOne;
     }
 
     /* ---------- Latencies ---------- */
 
-    /* -- Direct Latencies -- */
+    /* -- Direct Latency Utility -- */
 
     public int getServiceStartToQueryLatencyMicroseconds() {
-        return (int) ((this.mCredentialServiceStartedTimeNanoseconds
-                - this.mCredentialServiceBeginQueryTimeNanoseconds) / 1000);
+        return (int) ((mCredentialServiceStartedTimeNanoseconds
+                - mCredentialServiceBeginQueryTimeNanoseconds) / 1000);
     }
 
     /* -- Timestamps -- */
@@ -62,7 +68,7 @@ public class InitialPhaseMetric {
     public void setCredentialServiceStartedTimeNanoseconds(
             long credentialServiceStartedTimeNanoseconds
     ) {
-        this.mCredentialServiceStartedTimeNanoseconds = credentialServiceStartedTimeNanoseconds;
+        mCredentialServiceStartedTimeNanoseconds = credentialServiceStartedTimeNanoseconds;
     }
 
     public void setCredentialServiceBeginQueryTimeNanoseconds(
@@ -100,31 +106,47 @@ public class InitialPhaseMetric {
 
     /* ------ SessionId ------ */
 
-    public void setSessionId(long sessionId) {
-        mSessionId = sessionId;
-    }
-
-    public long getSessionId() {
-        return mSessionId;
-    }
-
-    /* ------ SequenceId ------ */
-
-    public void setSequenceId(int sequenceId) {
-        mSequenceId = sequenceId;
-    }
-
-    public int getSequenceId() {
-        return mSequenceId;
+    public int getSessionIdCaller() {
+        return mSessionIdCaller;
     }
 
     /* ------ Count Request Class Types ------ */
 
-    public void setCountRequestClassType(int countRequestClassType) {
-        mCountRequestClassType = countRequestClassType;
+    public int getCountRequestClassType() {
+        return mRequestCounts.size();
     }
 
-    public int getCountRequestClassType() {
-        return mCountRequestClassType;
+    /* ------ Origin Specified ------ */
+
+    public void setOriginSpecified(boolean originSpecified) {
+        mOriginSpecified = originSpecified;
+    }
+
+    public boolean isOriginSpecified() {
+        return mOriginSpecified;
+    }
+
+    /* ------ Unique Request Counts Map Information ------ */
+
+    public void setRequestCounts(Map<String, Integer> requestCounts) {
+        mRequestCounts = requestCounts;
+    }
+
+    /**
+     * Returns the unique, deduped, request classtypes for logging.
+     * @return a string array for deduped classtypes
+     */
+    public String[] getUniqueRequestStrings() {
+        String[] result = new String[mRequestCounts.keySet().size()];
+        mRequestCounts.keySet().toArray(result);
+        return result;
+    }
+
+    /**
+     * Returns the unique, deduped, request classtype counts for logging.
+     * @return a string array for deduped classtype counts
+     */
+    public int[] getUniqueRequestCounts() {
+        return mRequestCounts.values().stream().mapToInt(Integer::intValue).toArray();
     }
 }

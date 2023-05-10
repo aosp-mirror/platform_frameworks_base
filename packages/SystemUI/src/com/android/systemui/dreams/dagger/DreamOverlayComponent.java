@@ -24,8 +24,8 @@ import android.annotation.Nullable;
 
 import androidx.lifecycle.LifecycleOwner;
 
+import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.DreamOverlayContainerViewController;
-import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.touch.DreamOverlayTouchMonitor;
 import com.android.systemui.dreams.touch.DreamTouchHandler;
 import com.android.systemui.dreams.touch.dagger.DreamTouchModule;

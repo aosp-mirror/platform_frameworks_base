@@ -41,6 +41,7 @@ class ClipboardToast extends Toast.Callback {
         }
         mCopiedToast = Toast.makeText(mContext,
                 R.string.clipboard_overlay_text_copied, Toast.LENGTH_SHORT);
+        mCopiedToast.addCallback(this);
         mCopiedToast.show();
     }
 

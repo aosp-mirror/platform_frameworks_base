@@ -144,7 +144,8 @@ public class MockIContentProvider implements IContentProvider {
     }
 
     @Override
-    public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException {
+    public String[] getStreamTypes(@NonNull AttributionSource attributionSource,
+            Uri url, String mimeTypeFilter) throws RemoteException {
         throw new UnsupportedOperationException("unimplemented mock method");
     }
 

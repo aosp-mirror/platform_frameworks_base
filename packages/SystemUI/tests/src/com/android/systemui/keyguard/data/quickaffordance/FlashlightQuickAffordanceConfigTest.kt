@@ -21,6 +21,7 @@ import android.content.Context
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.statusbar.policy.FlashlightController
@@ -41,6 +42,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
 
@@ -60,7 +62,7 @@ class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
     }
 
     @Test
-    fun `flashlight is off -- triggered -- icon is on and active`() = runTest {
+    fun flashlightIsOff_triggered_iconIsOnAndActive() = runTest {
         // given
         flashlightController.isEnabled = false
         flashlightController.isAvailable = true
@@ -83,7 +85,7 @@ class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
     }
 
     @Test
-    fun `flashlight is on -- triggered -- icon is off and inactive`() = runTest {
+    fun flashlightIsOn_triggered_iconIsOffAndInactive() = runTest {
         // given
         flashlightController.isEnabled = true
         flashlightController.isAvailable = true
@@ -106,7 +108,7 @@ class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
     }
 
     @Test
-    fun `flashlight is on -- receives error -- icon is off and inactive`() = runTest {
+    fun flashlightIsOn_receivesError_iconIsOffAndInactive() = runTest {
         // given
         flashlightController.isEnabled = true
         flashlightController.isAvailable = false
@@ -129,7 +131,7 @@ class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
     }
 
     @Test
-    fun `flashlight availability now off -- hidden`() = runTest {
+    fun flashlightAvailabilityNowOff_hidden() = runTest {
         // given
         flashlightController.isEnabled = true
         flashlightController.isAvailable = false
@@ -146,7 +148,7 @@ class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
     }
 
     @Test
-    fun `flashlight availability now on -- flashlight on -- inactive and icon off`() = runTest {
+    fun flashlightAvailabilityNowOn_flashlightOn_inactiveAndIconOff() = runTest {
         // given
         flashlightController.isEnabled = true
         flashlightController.isAvailable = false
@@ -168,7 +170,7 @@ class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
     }
 
     @Test
-    fun `flashlight availability now on -- flashlight off -- inactive and icon off`() = runTest {
+    fun flashlightAvailabilityNowOn_flashlightOff_inactiveAndIconOff() = runTest {
         // given
         flashlightController.isEnabled = false
         flashlightController.isAvailable = false
@@ -190,7 +192,7 @@ class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
     }
 
     @Test
-    fun `flashlight available -- picker state default`() = runTest {
+    fun flashlightAvailable_pickerStateDefault() = runTest {
         // given
         flashlightController.isAvailable = true
 
@@ -202,7 +204,7 @@ class FlashlightQuickAffordanceConfigTest : LeakCheckedTest() {
     }
 
     @Test
-    fun `flashlight not available -- picker state unavailable`() = runTest {
+    fun flashlightNotAvailable_pickerStateUnavailable() = runTest {
         // given
         flashlightController.isAvailable = false
 

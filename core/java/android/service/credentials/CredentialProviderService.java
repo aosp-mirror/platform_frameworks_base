@@ -18,7 +18,6 @@ package android.service.credentials;
 
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
-import android.Manifest;
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.SdkConstant;
@@ -35,7 +34,7 @@ import android.os.ICancellationSignal;
 import android.os.Looper;
 import android.os.OutcomeReceiver;
 import android.os.RemoteException;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.Objects;
 
@@ -156,7 +155,34 @@ public abstract class CredentialProviderService extends Service {
 
     private static final String TAG = "CredProviderService";
 
-    public static final String CAPABILITY_META_DATA_KEY = "android.credentials.capabilities";
+     /**
+      * Name under which a Credential Provider service component publishes information
+      * about itself.  This meta-data must reference an XML resource containing
+      * an
+      * <code>&lt;{@link android.R.styleable#CredentialProvider credential-provider}&gt;</code>
+      * tag.
+      *
+      * For example (AndroidManifest.xml):
+      * <code>
+      * <meta-data
+      *         android:name="android.credentials.provider"
+      *          android:resource="@xml/provider"/>
+      * </code>
+      *
+      * For example (xml/provider.xml):
+      * <code>
+      * <credential-provider xmlns:android="http://schemas.android.com/apk/res/android"
+      *       android:settingsSubtitle="@string/providerSubtitle">
+      *      <capabilities>
+      *          <capability>@string/passwords</capability>
+      *          <capability>@string/passkeys</capability>
+      *      </capabilities>
+      *      <string name="passwords">android.credentials.TYPE_PASSWORD_CREDENTIAL</string>
+      *      <string name="passkeys">android.credentials.TYPE_PUBLIC_KEY_CREDENTIAL</string>
+      *  </credential-provider>
+      * </code>
+      */
+    public static final String SERVICE_META_DATA = "android.credentials.provider";
 
     /** @hide */
     public static final String TEST_SYSTEM_PROVIDER_META_DATA_KEY =
@@ -199,17 +225,23 @@ public abstract class CredentialProviderService extends Service {
         if (SERVICE_INTERFACE.equals(intent.getAction())) {
             return mInterface.asBinder();
         }
-        Log.i(TAG, "Failed to bind with intent: " + intent);
+        Slog.w(TAG, "Failed to bind with intent: " + intent);
         return null;
     }
 
     private final ICredentialProviderService mInterface = new ICredentialProviderService.Stub() {
-        public ICancellationSignal onBeginGetCredential(BeginGetCredentialRequest request,
+        @Override
+        public void onBeginGetCredential(BeginGetCredentialRequest request,
                 IBeginGetCredentialCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onBeginGetCredential,
@@ -219,11 +251,6 @@ public abstract class CredentialProviderService extends Service {
                             GetCredentialException>() {
                         @Override
                         public void onResult(BeginGetCredentialResponse result) {
-                            // If provider service does not possess the HYBRID permission, this
-                            // check will throw an exception in the provider process.
-                            if (result.getRemoteCredentialEntry() != null) {
-                                enforceRemoteEntryPermission();
-                            }
                             try {
                                 callback.onSuccess(result);
                             } catch (RemoteException e) {
@@ -240,25 +267,20 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
-            return transport;
-        }
-        private void enforceRemoteEntryPermission() {
-            String permission =
-                    Manifest.permission.PROVIDE_REMOTE_CREDENTIALS;
-            getApplicationContext().enforceCallingOrSelfPermission(
-                    permission,
-                    String.format("Provider must have %s, in order to set a "
-                            + "remote entry", permission)
-            );
         }
 
         @Override
-        public ICancellationSignal onBeginCreateCredential(BeginCreateCredentialRequest request,
+        public void onBeginCreateCredential(BeginCreateCredentialRequest request,
                 IBeginCreateCredentialCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onBeginCreateCredential,
@@ -268,11 +290,6 @@ public abstract class CredentialProviderService extends Service {
                             BeginCreateCredentialResponse, CreateCredentialException>() {
                         @Override
                         public void onResult(BeginCreateCredentialResponse result) {
-                            // If provider service does not possess the HYBRID permission, this
-                            // check will throw an exception in the provider process.
-                            if (result.getRemoteCreateEntry() != null) {
-                                enforceRemoteEntryPermission();
-                            }
                             try {
                                 callback.onSuccess(result);
                             } catch (RemoteException e) {
@@ -289,16 +306,20 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
-            return transport;
         }
 
         @Override
-        public ICancellationSignal onClearCredentialState(ClearCredentialStateRequest request,
+        public void onClearCredentialState(ClearCredentialStateRequest request,
                 IClearCredentialStateCallback callback) {
             Objects.requireNonNull(request);
             Objects.requireNonNull(callback);
 
             ICancellationSignal transport = CancellationSignal.createTransport();
+            try {
+                callback.onCancellable(transport);
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
 
             mHandler.sendMessage(obtainMessage(
                     CredentialProviderService::onClearCredentialState,
@@ -323,7 +344,6 @@ public abstract class CredentialProviderService extends Service {
                         }
                     }
             ));
-            return transport;
         }
     };
 

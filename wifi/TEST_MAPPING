@@ -3,5 +3,15 @@
     {
       "name": "FrameworksWifiNonUpdatableApiTests"
     }
+  ],
+  "presubmit-large": [
+    {
+      "name": "CtsWifiTestCases",
+      "options": [
+        {
+          "exclude-annotation": "android.net.wifi.cts.VirtualDeviceNotSupported"
+        }
+      ]
+    }
   ]
 }

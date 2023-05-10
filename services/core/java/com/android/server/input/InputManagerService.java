@@ -18,6 +18,7 @@ package com.android.server.input;
 
 import static android.provider.DeviceConfig.NAMESPACE_INPUT_NATIVE_BOOT;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
+import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
 import android.Manifest;
 import android.annotation.EnforcePermission;
@@ -32,6 +33,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.Sensors;
@@ -100,6 +102,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.VerifiedInputEvent;
 import android.view.ViewConfiguration;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
 
@@ -386,6 +389,11 @@ public class InputManagerService extends IInputManager.Stub
     /** Whether to use the dev/input/event or uevent subsystem for the audio jack. */
     final boolean mUseDevInputEventForAudioJack;
 
+    private final Object mFocusEventDebugViewLock = new Object();
+    @GuardedBy("mFocusEventDebugViewLock")
+    @Nullable
+    private FocusEventDebugView mFocusEventDebugView;
+
     /** Point of injection for test dependencies. */
     @VisibleForTesting
     static class Injector {
@@ -427,7 +435,7 @@ public class InputManagerService extends IInputManager.Stub
         mContext = injector.getContext();
         mHandler = new InputManagerHandler(injector.getLooper());
         mNative = injector.getNativeService(this);
-        mSettingsObserver = new InputSettingsObserver(mContext, mHandler, mNative);
+        mSettingsObserver = new InputSettingsObserver(mContext, mHandler, this, mNative);
         mKeyboardLayoutManager = new KeyboardLayoutManager(mContext, mNative, mDataStore,
                 injector.getLooper());
         mBatteryController = new BatteryController(mContext, mNative, injector.getLooper());
@@ -547,6 +555,10 @@ public class InputManagerService extends IInputManager.Stub
         mBatteryController.systemRunning();
         mKeyboardBacklightController.systemRunning();
         mKeyRemapper.systemRunning();
+
+        mNative.setStylusPointerIconEnabled(
+                Objects.requireNonNull(mContext.getSystemService(InputManager.class))
+                        .isStylusPointerIconEnabled());
     }
 
     private void reloadDeviceAliases() {
@@ -682,13 +694,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @NonNull
     private InputChannel createSpyWindowGestureMonitor(IBinder monitorToken, String name,
-            int displayId, int pid, int uid) {
-        final SurfaceControl sc = mWindowManagerCallbacks.createSurfaceForGestureMonitor(name,
-                displayId);
-        if (sc == null) {
-            throw new IllegalArgumentException(
-                    "Could not create gesture monitor surface on display: " + displayId);
-        }
+            SurfaceControl sc, int displayId, int pid, int uid) {
         final InputChannel channel = createInputChannel(name);
 
         try {
@@ -745,9 +751,18 @@ public class InputManagerService extends IInputManager.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            final InputChannel inputChannel =
-                            createSpyWindowGestureMonitor(monitorToken, name, displayId, pid, uid);
-            return new InputMonitor(inputChannel, new InputMonitorHost(inputChannel.getToken()));
+            final SurfaceControl sc = mWindowManagerCallbacks.createSurfaceForGestureMonitor(name,
+                    displayId);
+            if (sc == null) {
+                throw new IllegalArgumentException(
+                        "Could not create gesture monitor surface on display: " + displayId);
+            }
+
+            final InputChannel inputChannel = createSpyWindowGestureMonitor(
+                    monitorToken, name, sc, displayId, pid, uid);
+            return new InputMonitor(inputChannel,
+                new InputMonitorHost(inputChannel.getToken()),
+                new SurfaceControl(sc, "IMS.monitorGestureInput"));
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -2453,6 +2468,11 @@ public class InputManagerService extends IInputManager.Stub
     // Native callback.
     @SuppressWarnings("unused")
     private int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
+        synchronized (mFocusEventDebugViewLock) {
+            if (mFocusEventDebugView != null) {
+                mFocusEventDebugView.reportEvent(event);
+            }
+        }
         return mWindowManagerCallbacks.interceptKeyBeforeQueueing(event, policyFlags);
     }
 
@@ -2749,13 +2769,6 @@ public class InputManagerService extends IInputManager.Stub
         return null;
     }
 
-    // Native callback.
-    @SuppressWarnings("unused")
-    private boolean isStylusPointerIconEnabled() {
-        return Objects.requireNonNull(mContext.getSystemService(InputManager.class))
-                .isStylusPointerIconEnabled();
-    }
-
     private static class PointerDisplayIdChangedArgs {
         final int mPointerDisplayId;
         final float mXPosition;
@@ -2862,9 +2875,6 @@ public class InputManagerService extends IInputManager.Stub
         int getPointerLayer();
 
         int getPointerDisplayId();
-
-        /** Gets the x and y coordinates of the cursor's current position. */
-        PointF getCursorPosition();
 
         /**
          * Notifies window manager that a {@link android.view.MotionEvent#ACTION_DOWN} pointer event
@@ -3189,7 +3199,11 @@ public class InputManagerService extends IInputManager.Stub
 
         @Override
         public PointF getCursorPosition() {
-            return mWindowManagerCallbacks.getCursorPosition();
+            final float[] p = mNative.getMouseCursorPosition();
+            if (p == null || p.length != 2) {
+                throw new IllegalStateException("Failed to get mouse cursor position");
+            }
+            return new PointF(p[0], p[1]);
         }
 
         @Override
@@ -3364,6 +3378,45 @@ public class InputManagerService extends IInputManager.Stub
             }
             applyAdditionalDisplayInputPropertiesLocked(properties);
         }
+    }
+
+    void updateFocusEventDebugViewEnabled(boolean enabled) {
+        FocusEventDebugView view;
+        synchronized (mFocusEventDebugViewLock) {
+            if (enabled == (mFocusEventDebugView != null)) {
+                return;
+            }
+            if (enabled) {
+                mFocusEventDebugView = new FocusEventDebugView(mContext);
+                view = mFocusEventDebugView;
+            } else {
+                view = mFocusEventDebugView;
+                mFocusEventDebugView = null;
+            }
+        }
+        Objects.requireNonNull(view);
+
+        // Interact with WM outside the lock, since the lock is part of the input hotpath.
+        final WindowManager wm =
+                Objects.requireNonNull(mContext.getSystemService(WindowManager.class));
+        if (!enabled) {
+            wm.removeView(view);
+            return;
+        }
+
+        // TODO: Support multi display
+        final WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.type = WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
+        lp.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+        lp.setFitInsetsTypes(0);
+        lp.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        lp.format = PixelFormat.TRANSLUCENT;
+        lp.setTitle("FocusEventDebugView - display " + mContext.getDisplayId());
+        lp.inputFeatures |= WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
+        wm.addView(view, lp);
     }
 
     interface KeyboardBacklightControllerInterface {

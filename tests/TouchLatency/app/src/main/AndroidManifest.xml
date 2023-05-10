@@ -30,12 +30,6 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-
-        <activity android:name=".TouchLatencyActivityPresentation"
-            android:label="@string/app_name"
-            android:parentActivityName=".TouchLatencyActivity"
-            android:exported="true">
-        </activity>
     </application>
 
 </manifest>

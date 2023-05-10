@@ -316,7 +316,7 @@ fun ModalBottomSheetLayout(
         rememberModalBottomSheetState(Hidden),
     sheetShape: Shape = MaterialTheme.shapes.large,
     sheetElevation: Dp = ModalBottomSheetDefaults.Elevation,
-    sheetBackgroundColor: Color = MaterialTheme.colorScheme.surface,
+    sheetBackgroundColor: Color,
     sheetContentColor: Color = contentColorFor(sheetBackgroundColor),
     content: @Composable () -> Unit
 ) {
@@ -454,7 +454,7 @@ internal fun Scrim(
     if (color.isSpecified) {
         val alpha by animateFloatAsState(
             targetValue = if (visible) 1f else 0f,
-            animationSpec = TweenSpec()
+            animationSpec = TweenSpec(durationMillis = SwipeableDefaults.DefaultDurationMillis)
         )
         LocalConfiguration.current
         val resources = LocalContext.current.resources

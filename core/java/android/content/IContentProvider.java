@@ -182,8 +182,19 @@ public interface IContentProvider extends IInterface {
     public boolean refresh(@NonNull AttributionSource attributionSource, Uri url,
             @Nullable Bundle extras, ICancellationSignal cancellationSignal) throws RemoteException;
 
+    /**
+     * @deprecated -- use getStreamTypes with AttributionSource
+     */
+    @Deprecated
+    default String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException {
+        return getStreamTypes(new AttributionSource(Binder.getCallingUid(),
+                AppGlobals.getPackageManager().getPackagesForUid(Binder.getCallingUid())[0],
+                null), url, mimeTypeFilter);
+    }
+
     // Data interchange.
-    public String[] getStreamTypes(Uri url, String mimeTypeFilter) throws RemoteException;
+    String[] getStreamTypes(AttributionSource attributionSource,
+            Uri url, String mimeTypeFilter) throws RemoteException;
 
     public AssetFileDescriptor openTypedAssetFile(@NonNull AttributionSource attributionSource,
             Uri url, String mimeType, Bundle opts, ICancellationSignal signal)

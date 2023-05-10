@@ -28,6 +28,11 @@ public interface CastController extends CallbackController<Callback>, Dumpable {
     void startCasting(CastDevice device);
     void stopCasting(CastDevice device);
 
+    /**
+     * @return whether we have a connected device.
+     */
+    boolean hasConnectedCastDevice();
+
     public interface Callback {
         void onCastDevicesChanged();
     }

@@ -28,7 +28,6 @@ import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
-import android.view.ContentRecordingSession;
 import android.view.Display;
 import android.view.Surface;
 
@@ -54,8 +53,6 @@ public final class VirtualDisplayConfig implements Parcelable {
     private final int mDisplayIdToMirror;
     private final boolean mWindowManagerMirroringEnabled;
     private ArraySet<String> mDisplayCategories = null;
-    @Nullable
-    private ContentRecordingSession mContentRecordingSession;
     private final float mRequestedRefreshRate;
 
     private VirtualDisplayConfig(
@@ -68,7 +65,6 @@ public final class VirtualDisplayConfig implements Parcelable {
             @Nullable String uniqueId,
             int displayIdToMirror,
             boolean windowManagerMirroringEnabled,
-            ContentRecordingSession session,
             @NonNull ArraySet<String> displayCategories,
             float requestedRefreshRate) {
         mName = name;
@@ -80,7 +76,6 @@ public final class VirtualDisplayConfig implements Parcelable {
         mUniqueId = uniqueId;
         mDisplayIdToMirror = displayIdToMirror;
         mWindowManagerMirroringEnabled = windowManagerMirroringEnabled;
-        mContentRecordingSession = session;
         mDisplayCategories = displayCategories;
         mRequestedRefreshRate = requestedRefreshRate;
     }
@@ -161,17 +156,6 @@ public final class VirtualDisplayConfig implements Parcelable {
     }
 
     /**
-     * Returns the recording session associated with this VirtualDisplay. Only used for
-     * recording via {@link MediaProjection}.
-     *
-     * @hide
-     */
-    @Nullable
-    public ContentRecordingSession getContentRecordingSession() {
-        return mContentRecordingSession;
-    }
-
-    /**
      * Returns the display categories.
      *
      * @see Builder#setDisplayCategories
@@ -202,7 +186,6 @@ public final class VirtualDisplayConfig implements Parcelable {
         dest.writeString8(mUniqueId);
         dest.writeInt(mDisplayIdToMirror);
         dest.writeBoolean(mWindowManagerMirroringEnabled);
-        dest.writeTypedObject(mContentRecordingSession, flags);
         dest.writeArraySet(mDisplayCategories);
         dest.writeFloat(mRequestedRefreshRate);
     }
@@ -228,7 +211,6 @@ public final class VirtualDisplayConfig implements Parcelable {
                 && Objects.equals(mUniqueId, that.mUniqueId)
                 && mDisplayIdToMirror == that.mDisplayIdToMirror
                 && mWindowManagerMirroringEnabled == that.mWindowManagerMirroringEnabled
-                && Objects.equals(mContentRecordingSession, that.mContentRecordingSession)
                 && Objects.equals(mDisplayCategories, that.mDisplayCategories)
                 && mRequestedRefreshRate == that.mRequestedRefreshRate;
     }
@@ -237,8 +219,8 @@ public final class VirtualDisplayConfig implements Parcelable {
     public int hashCode() {
         int hashCode = Objects.hash(
                 mName, mWidth, mHeight, mDensityDpi, mFlags, mSurface, mUniqueId,
-                mDisplayIdToMirror, mWindowManagerMirroringEnabled, mContentRecordingSession,
-                mDisplayCategories, mRequestedRefreshRate);
+                mDisplayIdToMirror, mWindowManagerMirroringEnabled, mDisplayCategories,
+                mRequestedRefreshRate);
         return hashCode;
     }
 
@@ -255,7 +237,6 @@ public final class VirtualDisplayConfig implements Parcelable {
                 + " mUniqueId=" + mUniqueId
                 + " mDisplayIdToMirror=" + mDisplayIdToMirror
                 + " mWindowManagerMirroringEnabled=" + mWindowManagerMirroringEnabled
-                + " mContentRecordingSession=" + mContentRecordingSession
                 + " mDisplayCategories=" + mDisplayCategories
                 + " mRequestedRefreshRate=" + mRequestedRefreshRate
                 + ")";
@@ -271,7 +252,6 @@ public final class VirtualDisplayConfig implements Parcelable {
         mUniqueId = in.readString8();
         mDisplayIdToMirror = in.readInt();
         mWindowManagerMirroringEnabled = in.readBoolean();
-        mContentRecordingSession = in.readTypedObject(ContentRecordingSession.CREATOR);
         mDisplayCategories = (ArraySet<String>) in.readArraySet(null);
         mRequestedRefreshRate = in.readFloat();
     }
@@ -303,8 +283,6 @@ public final class VirtualDisplayConfig implements Parcelable {
         private String mUniqueId = null;
         private int mDisplayIdToMirror = DEFAULT_DISPLAY;
         private boolean mWindowManagerMirroringEnabled = false;
-        @Nullable
-        private ContentRecordingSession mContentRecordingSession;
         private ArraySet<String> mDisplayCategories = new ArraySet<>();
         private float mRequestedRefreshRate = 0.0f;
 
@@ -397,18 +375,6 @@ public final class VirtualDisplayConfig implements Parcelable {
         }
 
         /**
-         * Sets the recording session associated with this {@link VirtualDisplay}. Only used for
-         * recording via {@link MediaProjection}.
-         *
-         * @hide
-         */
-        @NonNull
-        public Builder setContentRecordingSession(@Nullable ContentRecordingSession session) {
-            mContentRecordingSession = session;
-            return this;
-        }
-
-        /**
          * Sets the display categories.
          *
          * <p>The categories of the display indicate the type of activities allowed to run on that
@@ -438,7 +404,7 @@ public final class VirtualDisplayConfig implements Parcelable {
          *
          * <p>For best results, specify a divisor of the physical refresh rate, e.g., 30 or 60 on
          * a 120hz display. If an arbitrary refresh rate is specified, the rate will be rounded up
-         * down to a divisor of the physical display. If unset or zero, the virtual display will be
+         * to a divisor of the physical display. If unset or zero, the virtual display will be
          * refreshed at the physical display refresh rate.
          *
          * @see Display#getRefreshRate()
@@ -469,7 +435,6 @@ public final class VirtualDisplayConfig implements Parcelable {
                     mUniqueId,
                     mDisplayIdToMirror,
                     mWindowManagerMirroringEnabled,
-                    mContentRecordingSession,
                     mDisplayCategories,
                     mRequestedRefreshRate);
         }

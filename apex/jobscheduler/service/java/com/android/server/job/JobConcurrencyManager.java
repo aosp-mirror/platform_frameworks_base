@@ -62,7 +62,8 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.StatLogger;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.modules.expresslog.Histogram;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
@@ -471,6 +472,13 @@ class JobConcurrencyManager {
     private final Consumer<PackageStats> mPackageStatsStagingCountClearer =
             PackageStats::resetStagedCount;
 
+    private static final Histogram sConcurrencyHistogramLogger = new Histogram(
+            "job_scheduler.value_hist_job_concurrency",
+            // Create a histogram that expects values in the range [0, 99].
+            // Include more buckets than MAX_CONCURRENCY_LIMIT to account for/identify the cases
+            // where we may create additional slots for TOP-started EJs and UIJs
+            new Histogram.UniformOptions(100, 0, 99));
+
     private final StatLogger mStatLogger = new StatLogger(new String[]{
             "assignJobsToContexts",
             "refreshSystemState",
@@ -499,7 +507,7 @@ class JobConcurrencyManager {
         mInjector = injector;
         mNotificationCoordinator = new JobNotificationCoordinator();
 
-        mHandler = JobSchedulerBackgroundThread.getHandler();
+        mHandler = AppSchedulingModuleThread.getHandler();
 
         mGracePeriodObserver = new GracePeriodObserver(mContext);
         mShouldRestrictBgUser = mContext.getResources().getBoolean(
@@ -533,7 +541,8 @@ class JobConcurrencyManager {
             mIdleContexts.add(
                     mInjector.createJobServiceContext(mService, this,
                             mNotificationCoordinator, batteryStats,
-                            mService.mJobPackageTracker, mContext.getMainLooper()));
+                            mService.mJobPackageTracker,
+                            AppSchedulingModuleThread.get().getLooper()));
         }
     }
 
@@ -1258,10 +1267,14 @@ class JobConcurrencyManager {
 
                 final BackgroundStartPrivileges bsp =
                         activityManagerInternal.getBackgroundStartPrivileges(uid);
-                final boolean balAllowed = bsp.allowsBackgroundActivityStarts();
                 if (DEBUG) {
-                    Slog.d(TAG, "Job " + job.toShortString() + " bal state: " + bsp);
+                    Slog.d(TAG, "Job " + job.toShortString() + " bsp state: " + bsp);
                 }
+                // Intentionally use the background activity start BSP here instead of
+                // the full BAL check since the former is transient and better indicates that the
+                // user recently interacted with the app, while the latter includes
+                // permanent exceptions that don't warrant bypassing normal concurrency policy.
+                final boolean balAllowed = bsp.allowsBackgroundActivityStarts();
                 cachedPrivilegedState.put(uid,
                         balAllowed ? PRIVILEGED_STATE_BAL : PRIVILEGED_STATE_NONE);
                 return balAllowed;
@@ -1428,6 +1441,7 @@ class JobConcurrencyManager {
         mService.mJobPackageTracker.noteConcurrency(mRunningJobs.size(),
                 // TODO: log per type instead of only TOP
                 mWorkCountTracker.getRunningJobCount(WORK_TYPE_TOP));
+        sConcurrencyHistogramLogger.logSample(mActiveServices.size());
     }
 
     @GuardedBy("mLock")
@@ -1920,12 +1934,24 @@ class JobConcurrencyManager {
         return null;
     }
 
+    boolean isNotificationAssociatedWithAnyUserInitiatedJobs(int notificationId, int userId,
+            @NonNull String packageName) {
+        return mNotificationCoordinator.isNotificationAssociatedWithAnyUserInitiatedJobs(
+                notificationId, userId, packageName);
+    }
+
+    boolean isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
+            @NonNull String notificationChannel, int userId, @NonNull String packageName) {
+        return mNotificationCoordinator.isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
+                notificationChannel, userId, packageName);
+    }
+
     @NonNull
     private JobServiceContext createNewJobServiceContext() {
         return mInjector.createJobServiceContext(mService, this, mNotificationCoordinator,
                 IBatteryStats.Stub.asInterface(
                         ServiceManager.getService(BatteryStats.SERVICE_NAME)),
-                mService.mJobPackageTracker, mContext.getMainLooper());
+                mService.mJobPackageTracker, AppSchedulingModuleThread.get().getLooper());
     }
 
     @GuardedBy("mLock")

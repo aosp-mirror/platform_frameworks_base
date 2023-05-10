@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.notification.row;
 
 import android.annotation.ColorInt;
-import android.annotation.DrawableRes;
-import android.annotation.StringRes;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
@@ -50,8 +48,8 @@ public class FooterView extends StackScrollerDecorView {
 
     // Footer label
     private TextView mSeenNotifsFooterTextView;
-    private @StringRes int mSeenNotifsFilteredText;
-    private int mUnlockIconSize;
+    private String mSeenNotifsFilteredText;
+    private Drawable mSeenNotifsFilteredIcon;
 
     public FooterView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -87,30 +85,12 @@ public class FooterView extends StackScrollerDecorView {
         mManageButton = findViewById(R.id.manage_text);
         mSeenNotifsFooterTextView = findViewById(R.id.unlock_prompt_footer);
         updateResources();
-        updateText();
+        updateContent();
         updateColors();
     }
 
-    public void setFooterLabelTextAndIcon(@StringRes int text, @DrawableRes int icon) {
-        mSeenNotifsFilteredText = text;
-        if (mSeenNotifsFilteredText != 0) {
-            mSeenNotifsFooterTextView.setText(mSeenNotifsFilteredText);
-        } else {
-            mSeenNotifsFooterTextView.setText(null);
-        }
-        Drawable drawable;
-        if (icon == 0) {
-            drawable = null;
-        } else {
-            drawable = getResources().getDrawable(icon);
-            drawable.setBounds(0, 0, mUnlockIconSize, mUnlockIconSize);
-        }
-        mSeenNotifsFooterTextView.setCompoundDrawablesRelative(drawable, null, null, null);
-        updateFooterVisibilityMode();
-    }
-
-    private void updateFooterVisibilityMode() {
-        if (mSeenNotifsFilteredText != 0) {
+    public void setFooterLabelVisible(boolean isVisible) {
+        if (isVisible) {
             mManageButton.setVisibility(View.GONE);
             mClearAllButton.setVisibility(View.GONE);
             mSeenNotifsFooterTextView.setVisibility(View.VISIBLE);
@@ -141,10 +121,10 @@ public class FooterView extends StackScrollerDecorView {
             return;
         }
         mShowHistory = showHistory;
-        updateText();
+        updateContent();
     }
 
-    private void updateText() {
+    private void updateContent() {
         if (mShowHistory) {
             mManageButton.setText(mManageNotificationHistoryText);
             mManageButton.setContentDescription(mManageNotificationHistoryText);
@@ -152,6 +132,9 @@ public class FooterView extends StackScrollerDecorView {
             mManageButton.setText(mManageNotificationText);
             mManageButton.setContentDescription(mManageNotificationText);
         }
+        mSeenNotifsFooterTextView.setText(mSeenNotifsFilteredText);
+        mSeenNotifsFooterTextView
+                .setCompoundDrawablesRelative(mSeenNotifsFilteredIcon, null, null, null);
     }
 
     public boolean isHistoryShown() {
@@ -166,7 +149,7 @@ public class FooterView extends StackScrollerDecorView {
         mClearAllButton.setContentDescription(
                 mContext.getString(R.string.accessibility_clear_all));
         updateResources();
-        updateText();
+        updateContent();
     }
 
     /**
@@ -190,8 +173,11 @@ public class FooterView extends StackScrollerDecorView {
         mManageNotificationText = getContext().getString(R.string.manage_notifications_text);
         mManageNotificationHistoryText = getContext()
                 .getString(R.string.manage_notifications_history_text);
-        mUnlockIconSize = getResources()
+        int unlockIconSize = getResources()
                 .getDimensionPixelSize(R.dimen.notifications_unseen_footer_icon_size);
+        mSeenNotifsFilteredText = getContext().getString(R.string.unlock_to_see_notif_text);
+        mSeenNotifsFilteredIcon = getContext().getDrawable(R.drawable.ic_friction_lock_closed);
+        mSeenNotifsFilteredIcon.setBounds(0, 0, unlockIconSize, unlockIconSize);
     }
 
     @Override

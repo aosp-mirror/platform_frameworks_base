@@ -108,20 +108,13 @@ You can then include your module in one of three places:
 
 ### Using injection with Fragments
 
-Fragments are created as part of the FragmentManager, so they need to be
-setup so the manager knows how to create them. To do that, add a method
-to com.android.systemui.fragments.FragmentService$FragmentCreator that
-returns your fragment class. That is all that is required, once the method
-exists, FragmentService will automatically pick it up and use injection
-whenever your fragment needs to be created.
+Fragments are created as part of the FragmentManager, so injectable Fragments need to be registered
+so the manager knows how to create them. This is done via
+[FragmentService#addFragmentInstantiationProvider](../src/com/android/systemui/fragments/FragmentService.java).
+Pass it the class of your fragment and a `Provider` for your fragment at some time before your
+Fragment is accessed.
 
-```java
-public interface FragmentCreator {
-    NavigationBarFragment createNavigationBar();
-}
-```
-
-If you need to create your fragment (i.e. for the add or replace transaction),
+When you need to create your fragment (i.e. for the add or replace transaction),
 then the FragmentHostManager can do this for you.
 
 ```java

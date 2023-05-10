@@ -34,6 +34,7 @@ import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_CAMERA_SANDBOXED;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
@@ -42,6 +43,8 @@ import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO_SANDBOXED;
+import static android.app.AppOpsManager.OP_RUN_ANY_IN_BACKGROUND;
 import static android.app.AppOpsManager.OP_VIBRATE;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
@@ -157,10 +160,10 @@ import com.android.server.LockGuard;
 import com.android.server.SystemServerInitThreadPool;
 import com.android.server.SystemServiceManager;
 import com.android.server.pm.PackageList;
+import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageState;
-import com.android.server.pm.pkg.PackageStateInternal;
 import com.android.server.pm.pkg.component.ParsedAttribution;
 import com.android.server.policy.AppOpsPolicy;
 
@@ -366,6 +369,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     /** Package Manager internal. Access via {@link #getPackageManagerInternal()} */
     private @Nullable PackageManagerInternal mPackageManagerInternal;
+
+    /** Package Manager local. Access via {@link #getPackageManagerLocal()} */
+    private @Nullable PackageManagerLocal mPackageManagerLocal;
 
     /** User Manager internal. Access via {@link #getUserManagerInternal()} */
     private @Nullable UserManagerInternal mUserManagerInternal;
@@ -1189,42 +1195,64 @@ public class AppOpsService extends IAppOpsService.Stub {
     /**
      * Initialize uid state objects for state contained in the checking service.
      */
-    private void initializeUidStates() {
+    @VisibleForTesting
+    void initializeUidStates() {
         UserManagerInternal umi = getUserManagerInternal();
-        int[] userIds = umi.getUserIds();
         synchronized (this) {
-            for (int i = 0; i < userIds.length; i++) {
-                int userId = userIds[i];
-                initializeUserUidStatesLocked(userId);
+            int[] userIds = umi.getUserIds();
+            try (PackageManagerLocal.UnfilteredSnapshot snapshot =
+                         getPackageManagerLocal().withUnfilteredSnapshot()) {
+                Map<String, PackageState> packageStates = snapshot.getPackageStates();
+                for (int i = 0; i < userIds.length; i++) {
+                    int userId = userIds[i];
+                    initializeUserUidStatesLocked(userId, packageStates);
+                }
             }
         }
     }
 
     private void initializeUserUidStates(int userId) {
         synchronized (this) {
-            initializeUserUidStatesLocked(userId);
+            try (PackageManagerLocal.UnfilteredSnapshot snapshot =
+                    getPackageManagerLocal().withUnfilteredSnapshot()) {
+                initializeUserUidStatesLocked(userId, snapshot.getPackageStates());
+            }
         }
     }
 
-    private void initializeUserUidStatesLocked(int userId) {
-        ArrayMap<String, ? extends PackageStateInternal> packageStates =
-                getPackageManagerInternal().getPackageStates();
-        for (int j = 0; j < packageStates.size(); j++) {
-            PackageStateInternal packageState = packageStates.valueAt(j);
-            int uid = UserHandle.getUid(userId, packageState.getAppId());
-            UidState uidState = getUidStateLocked(uid, true);
-            String packageName = packageStates.keyAt(j);
-            Ops ops = new Ops(packageName, uidState);
-            uidState.pkgOps.put(packageName, ops);
+    private void initializeUserUidStatesLocked(int userId, Map<String,
+            PackageState> packageStates) {
+        for (Map.Entry<String, PackageState> entry : packageStates.entrySet()) {
+            int appId = entry.getValue().getAppId();
+            String packageName = entry.getKey();
 
-            SparseIntArray packageModes =
-                    mAppOpsCheckingService.getNonDefaultPackageModes(packageName, userId);
-            for (int k = 0; k < packageModes.size(); k++) {
-                int code = packageModes.get(k);
+            initializePackageUidStateLocked(userId, appId, packageName);
+        }
+    }
+
+    /*
+      Be careful not to clear any existing data; only want to add objects that don't already exist.
+     */
+    private void initializePackageUidStateLocked(int userId, int appId, String packageName) {
+        int uid = UserHandle.getUid(userId, appId);
+        UidState uidState = getUidStateLocked(uid, true);
+        Ops ops = uidState.pkgOps.get(packageName);
+        if (ops == null) {
+            ops = new Ops(packageName, uidState);
+            uidState.pkgOps.put(packageName, ops);
+        }
+
+        SparseIntArray packageModes =
+                mAppOpsCheckingService.getNonDefaultPackageModes(packageName, userId);
+        for (int k = 0; k < packageModes.size(); k++) {
+            int code = packageModes.keyAt(k);
+
+            if (ops.indexOfKey(code) < 0) {
                 ops.put(code, new Op(uidState, packageName, code, uid));
             }
-            uidState.evalForegroundOps();
         }
+
+        uidState.evalForegroundOps();
     }
 
     /**
@@ -1523,19 +1551,20 @@ public class AppOpsService extends IAppOpsService.Stub {
     }
 
     private void enforceGetAppOpsStatsPermissionIfNeeded(int uid, String packageName) {
-        final int callingUid = Binder.getCallingUid();
         // We get to access everything
-        if (callingUid == Process.myPid()) {
+        final int callingPid = Binder.getCallingPid();
+        if (callingPid == Process.myPid()) {
             return;
         }
         // Apps can access their own data
+        final int callingUid = Binder.getCallingUid();
         if (uid == callingUid && packageName != null
                 && checkPackage(uid, packageName) == MODE_ALLOWED) {
             return;
         }
         // Otherwise, you need a permission...
-        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
-                Binder.getCallingPid(), callingUid, null);
+        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS, callingPid,
+                callingUid, null);
     }
 
     /**
@@ -1741,6 +1770,11 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setUidMode(int code, int uid, int mode) {
         setUidMode(code, uid, mode, null);
+        if (code == OP_RUN_ANY_IN_BACKGROUND) {
+            // TODO (b/280869337): Remove this once we have the required data.
+            Slog.wtfStack(TAG, "setUidMode called for RUN_ANY_IN_BACKGROUND by uid: "
+                    + UserHandle.formatUid(Binder.getCallingUid()));
+        }
     }
 
     private void setUidMode(int code, int uid, int mode,
@@ -1916,6 +1950,17 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public void setMode(int code, int uid, @NonNull String packageName, int mode) {
         setMode(code, uid, packageName, mode, null);
+        final int callingUid = Binder.getCallingUid();
+        if (code == OP_RUN_ANY_IN_BACKGROUND && mode != MODE_ALLOWED) {
+            // TODO (b/280869337): Remove this once we have the required data.
+            final String callingPackage = ArrayUtils.firstOrNull(getPackagesForUid(callingUid));
+            Slog.wtfStack(TAG,
+                    "RUN_ANY_IN_BACKGROUND for package " + packageName + " changed to mode: "
+                            + modeToName(mode) + " via setMode. Calling package: " + callingPackage
+                            + ", calling uid: " + UserHandle.formatUid(callingUid)
+                            + ", calling pid: " + Binder.getCallingPid()
+                            + ", system pid: " + Process.myPid());
+        }
     }
 
     void setMode(int code, int uid, @NonNull String packageName, int mode,
@@ -2096,7 +2141,9 @@ public class AppOpsService extends IAppOpsService.Stub {
                         final int code = opModes.keyAt(j);
                         if (AppOpsManager.opAllowsReset(code)) {
                             int previousMode = opModes.valueAt(j);
-                            uidState.setUidMode(code, AppOpsManager.opToDefaultMode(code));
+                            int newMode = isUidOpGrantedByRole(uidState.uid, code) ? MODE_ALLOWED :
+                                    AppOpsManager.opToDefaultMode(code);
+                            uidState.setUidMode(code, newMode);
                             for (String packageName : getPackagesForUid(uidState.uid)) {
                                 callbacks = addCallbacks(callbacks, code, uidState.uid, packageName,
                                         previousMode,
@@ -2139,10 +2186,15 @@ public class AppOpsService extends IAppOpsService.Stub {
                             deferResetOpToDpm(curOp.op, reqPackageName, reqUserId);
                             continue;
                         }
-                        if (AppOpsManager.opAllowsReset(curOp.op)
-                                && curOp.getMode() != AppOpsManager.opToDefaultMode(curOp.op)) {
+                        if (AppOpsManager.opAllowsReset(curOp.op)) {
                             int previousMode = curOp.getMode();
-                            curOp.setMode(AppOpsManager.opToDefaultMode(curOp.op));
+                            int newMode = isPackageOpGrantedByRole(packageName, uidState.uid,
+                                    curOp.op) ? MODE_ALLOWED : AppOpsManager.opToDefaultMode(
+                                    curOp.op);
+                            if (previousMode == newMode) {
+                                continue;
+                            }
+                            curOp.setMode(newMode);
                             changed = true;
                             uidChanged = true;
                             final int uid = curOp.uidState.uid;
@@ -2195,6 +2247,41 @@ public class AppOpsService extends IAppOpsService.Stub {
             ChangeRec change = allChanges.get(i);
             notifyOpChangedSync(change.op, change.uid, change.pkg,
                     AppOpsManager.opToDefaultMode(change.op), change.previous_mode);
+        }
+    }
+
+    private boolean isUidOpGrantedByRole(int uid, int code) {
+        if (!AppOpsManager.opIsUidAppOpPermission(code)) {
+            return false;
+        }
+        PackageManager packageManager = mContext.getPackageManager();
+        long token = Binder.clearCallingIdentity();
+        try {
+            // Permissions are managed by UIDs, but unfortunately a package name is required in API.
+            String packageName = ArrayUtils.firstOrNull(packageManager.getPackagesForUid(uid));
+            if (packageName == null) {
+                return false;
+            }
+            int permissionFlags = packageManager.getPermissionFlags(AppOpsManager.opToPermission(
+                    code), packageName, UserHandle.getUserHandleForUid(uid));
+            return (permissionFlags & PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE) != 0;
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private boolean isPackageOpGrantedByRole(@NonNull String packageName, int uid, int code) {
+        if (!AppOpsManager.opIsPackageAppOpPermission(code)) {
+            return false;
+        }
+        PackageManager packageManager = mContext.getPackageManager();
+        long token = Binder.clearCallingIdentity();
+        try {
+            int permissionFlags = packageManager.getPermissionFlags(AppOpsManager.opToPermission(
+                    code), packageName, UserHandle.getUserHandleForUid(uid));
+            return (permissionFlags & PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE) != 0;
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
@@ -2959,17 +3046,29 @@ public class AppOpsService extends IAppOpsService.Stub {
                     packageName);
         }
 
-        // As a special case for OP_RECORD_AUDIO_HOTWORD, which we use only for attribution
-        // purposes and not as a check, also make sure that the caller is allowed to access
-        // the data gated by OP_RECORD_AUDIO.
+        // As a special case for OP_RECORD_AUDIO_HOTWORD, OP_RECEIVE_AMBIENT_TRIGGER_AUDIO and
+        // OP_RECORD_AUDIO_SANDBOXED which we use only for attribution purposes and not as a check,
+        // also make sure that the caller is allowed to access the data gated by OP_RECORD_AUDIO.
         //
         // TODO: Revert this change before Android 12.
-        if (code == OP_RECORD_AUDIO_HOTWORD || code == OP_RECEIVE_AMBIENT_TRIGGER_AUDIO) {
-            int result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
+        int result = MODE_DEFAULT;
+        if (code == OP_RECORD_AUDIO_HOTWORD || code == OP_RECEIVE_AMBIENT_TRIGGER_AUDIO
+                || code == OP_RECORD_AUDIO_SANDBOXED) {
+            result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
+            // Check result
             if (result != AppOpsManager.MODE_ALLOWED) {
                 return new SyncNotedAppOp(result, code, attributionTag, packageName);
             }
         }
+        // As a special case for OP_CAMERA_SANDBOXED.
+        if (code == OP_CAMERA_SANDBOXED) {
+            result = checkOperation(OP_CAMERA, uid, packageName);
+            // Check result
+            if (result != AppOpsManager.MODE_ALLOWED) {
+                return new SyncNotedAppOp(result, code, attributionTag, packageName);
+            }
+        }
+
         return startOperationUnchecked(clientId, code, uid, packageName, attributionTag,
                 Process.INVALID_UID, null, null, OP_FLAG_SELF, startIfModeDefault,
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,
@@ -3604,6 +3703,20 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         return mPackageManagerInternal;
+    }
+
+    /**
+     * @return {@link PackageManagerLocal}
+     */
+    private @NonNull PackageManagerLocal getPackageManagerLocal() {
+        if (mPackageManagerLocal == null) {
+            mPackageManagerLocal = LocalManagerRegistry.getManager(PackageManagerLocal.class);
+        }
+        if (mPackageManagerLocal == null) {
+            throw new IllegalStateException("PackageManagerLocal not loaded");
+        }
+
+        return mPackageManagerLocal;
     }
 
     /**

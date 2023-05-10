@@ -104,6 +104,9 @@ class BackPanelControllerTest : SysuiTestCase() {
         continueTouch(START_X + touchSlop.toFloat() + 1)
         // Move again to cross the back trigger threshold
         continueTouch(START_X + touchSlop + triggerThreshold + 1)
+        // Wait threshold duration and hold touch past trigger threshold
+        Thread.sleep((MAX_DURATION_ENTRY_BEFORE_ACTIVE_ANIMATION + 1).toLong())
+        continueTouch(START_X + touchSlop + triggerThreshold + 1)
 
         assertThat(mBackPanelController.currentState)
             .isEqualTo(BackPanelController.GestureState.ACTIVE)
@@ -114,20 +117,28 @@ class BackPanelControllerTest : SysuiTestCase() {
 
         finishTouchActionUp(START_X + touchSlop + triggerThreshold + 1)
         assertThat(mBackPanelController.currentState)
-            .isEqualTo(BackPanelController.GestureState.FLUNG)
+            .isEqualTo(BackPanelController.GestureState.COMMITTED)
         verify(backCallback).triggerBack()
     }
 
     @Test
     fun handlesBackCancelled() {
         startTouch()
+        // Move once to cross the touch slop
         continueTouch(START_X + touchSlop.toFloat() + 1)
+        // Move again to cross the back trigger threshold
         continueTouch(
             START_X + touchSlop + triggerThreshold -
-                mBackPanelController.params.deactivationSwipeTriggerThreshold
+                mBackPanelController.params.deactivationTriggerThreshold
+        )
+        // Wait threshold duration and hold touch before trigger threshold
+        Thread.sleep((MAX_DURATION_ENTRY_BEFORE_ACTIVE_ANIMATION + 1).toLong())
+        continueTouch(
+            START_X + touchSlop + triggerThreshold -
+                mBackPanelController.params.deactivationTriggerThreshold
         )
         clearInvocations(backCallback)
-        Thread.sleep(MIN_DURATION_ACTIVE_ANIMATION)
+        Thread.sleep(MIN_DURATION_ACTIVE_BEFORE_INACTIVE_ANIMATION)
         // Move in the opposite direction to cross the deactivation threshold and cancel back
         continueTouch(START_X)
 

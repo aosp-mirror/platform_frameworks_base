@@ -39,6 +39,7 @@ import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 
@@ -150,7 +151,6 @@ public class DozeMachine {
     private final DockManager mDockManager;
     private final Part[] mParts;
     private final UserTracker mUserTracker;
-
     private final ArrayList<State> mQueuedRequests = new ArrayList<>();
     private State mState = State.UNINITIALIZED;
     private int mPulseReason;
@@ -398,7 +398,8 @@ public class DozeMachine {
         }
         if ((mState == State.DOZE_AOD_PAUSED || mState == State.DOZE_AOD_PAUSING
                 || mState == State.DOZE_AOD || mState == State.DOZE
-                || mState == State.DOZE_AOD_DOCKED) && requestedState == State.DOZE_PULSE_DONE) {
+                || mState == State.DOZE_AOD_DOCKED || mState == State.DOZE_SUSPEND_TRIGGERS)
+                && requestedState == State.DOZE_PULSE_DONE) {
             Log.i(TAG, "Dropping pulse done because current state is already done: " + mState);
             return mState;
         }
@@ -511,9 +512,11 @@ public class DozeMachine {
 
         class Delegate implements Service {
             private final Service mDelegate;
+            private final Executor mBgExecutor;
 
-            public Delegate(Service delegate) {
+            public Delegate(Service delegate, Executor bgExecutor) {
                 mDelegate = delegate;
+                mBgExecutor = bgExecutor;
             }
 
             @Override
@@ -533,7 +536,9 @@ public class DozeMachine {
 
             @Override
             public void setDozeScreenBrightness(int brightness) {
-                mDelegate.setDozeScreenBrightness(brightness);
+                mBgExecutor.execute(() -> {
+                    mDelegate.setDozeScreenBrightness(brightness);
+                });
             }
         }
     }

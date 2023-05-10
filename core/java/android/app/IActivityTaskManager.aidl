@@ -174,6 +174,9 @@ interface IActivityTaskManager {
     ActivityTaskManager.RootTaskInfo getFocusedRootTaskInfo();
     Rect getTaskBounds(int taskId);
 
+    /** Focuses the top task on a display if it isn't already focused. Used for Recents. */
+    void focusTopTask(int displayId);
+
     void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition);
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES)")
     void updateLockTaskPackages(int userId, in String[] packages);

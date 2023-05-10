@@ -124,6 +124,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     protected final int mTextColorHint;
 
     private AuthPanelController mPanelController;
+
     private PromptInfo mPromptInfo;
     private boolean mRequireConfirmation;
     private int mUserId;
@@ -258,18 +259,17 @@ public abstract class AuthBiometricView extends LinearLayout {
     }
 
     /** Ignore all events from this (secondary) modality except successful authentication. */
-    protected boolean ignoreUnsuccessfulEventsFrom(@Modality int modality) {
+    protected boolean ignoreUnsuccessfulEventsFrom(@Modality int modality,
+            String unsuccessfulReason) {
         return false;
     }
 
     /** Create the controller for managing the icons transitions during the prompt.*/
     @NonNull
     protected abstract AuthIconController createIconController();
-
     void setPanelController(AuthPanelController panelController) {
         mPanelController = panelController;
     }
-
     void setPromptInfo(PromptInfo promptInfo) {
         mPromptInfo = promptInfo;
     }
@@ -462,9 +462,16 @@ public abstract class AuthBiometricView extends LinearLayout {
         return false;
     }
 
+    /**
+     * Updates mIconView animation on updates to fold state, device rotation, or rear display mode
+     * @param animation new asset to use for iconw
+     */
+    public void updateIconViewAnimation(int animation) {
+        mIconView.setAnimation(animation);
+    }
+
     public void updateState(@BiometricState int newState) {
         Log.v(TAG, "newState: " + newState);
-
         mIconController.updateState(mState, newState);
 
         switch (newState) {
@@ -541,7 +548,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      */
     public void onAuthenticationFailed(
             @Modality int modality, @Nullable String failureReason) {
-        if (ignoreUnsuccessfulEventsFrom(modality)) {
+        if (ignoreUnsuccessfulEventsFrom(modality, failureReason)) {
             return;
         }
 
@@ -556,7 +563,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      * @param error message
      */
     public void onError(@Modality int modality, String error) {
-        if (ignoreUnsuccessfulEventsFrom(modality)) {
+        if (ignoreUnsuccessfulEventsFrom(modality, error)) {
             return;
         }
 
@@ -586,7 +593,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      * @param help message
      */
     public void onHelp(@Modality int modality, String help) {
-        if (ignoreUnsuccessfulEventsFrom(modality)) {
+        if (ignoreUnsuccessfulEventsFrom(modality, help)) {
             return;
         }
         if (mSize != AuthDialog.SIZE_MEDIUM) {
@@ -624,7 +631,6 @@ public abstract class AuthBiometricView extends LinearLayout {
     public void restoreState(@Nullable Bundle savedState) {
         mSavedState = savedState;
     }
-
     private void setTextOrHide(TextView view, CharSequence charSequence) {
         if (TextUtils.isEmpty(charSequence)) {
             view.setVisibility(View.GONE);
@@ -657,8 +663,9 @@ public abstract class AuthBiometricView extends LinearLayout {
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mIconController.onConfigurationChanged(newConfig);
-        updateState(mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_STATE));
+        if (mSavedState != null) {
+            updateState(mSavedState.getInt(AuthDialog.KEY_BIOMETRIC_STATE));
+        }
     }
 
     @Override
@@ -734,10 +741,10 @@ public abstract class AuthBiometricView extends LinearLayout {
 
         mTitleView.setText(mPromptInfo.getTitle());
 
-        //setSelected could make marguee work
+        // setSelected could make marquee work
         mTitleView.setSelected(true);
         mSubtitleView.setSelected(true);
-        //make description view become scrollable
+        // make description view become scrollable
         mDescriptionView.setMovementMethod(new ScrollingMovementMethod());
 
         if (isDeviceCredentialAllowed()) {

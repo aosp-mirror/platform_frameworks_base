@@ -108,6 +108,12 @@ public class AvatarPickerActivity extends Activity {
                 mWaitingForActivityResult);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mAdapter.onAdapterResume();
+    }
+
     private void setUpButtons() {
         GlifLayout glifLayout = findViewById(R.id.glif_layout);
         FooterBarMixin mixin = glifLayout.getMixin(FooterBarMixin.class);
@@ -198,6 +204,8 @@ public class AvatarPickerActivity extends Activity {
         private final int[] mUserIconColors;
         private int mSelectedPosition = NONE;
 
+        private int mLastSelectedPosition = NONE;
+
         AvatarAdapter() {
             final boolean canTakePhoto =
                     PhotoCapabilityUtils.canTakePhoto(AvatarPickerActivity.this);
@@ -226,12 +234,10 @@ public class AvatarPickerActivity extends Activity {
             if (position == mTakePhotoPosition) {
                 viewHolder.setDrawable(getDrawable(R.drawable.avatar_take_photo_circled));
                 viewHolder.setContentDescription(getString(R.string.user_image_take_photo));
-                viewHolder.setClickListener(view -> mAvatarPhotoController.takePhoto());
 
             } else if (position == mChoosePhotoPosition) {
                 viewHolder.setDrawable(getDrawable(R.drawable.avatar_choose_photo_circled));
                 viewHolder.setContentDescription(getString(R.string.user_image_choose_photo));
-                viewHolder.setClickListener(view -> mAvatarPhotoController.choosePhoto());
 
             } else if (position >= mPreselectedImageStartPosition) {
                 int index = indexFromPosition(position);
@@ -240,17 +246,30 @@ public class AvatarPickerActivity extends Activity {
                 if (mImageDescriptions != null) {
                     viewHolder.setContentDescription(mImageDescriptions.get(index));
                 } else {
-                    viewHolder.setContentDescription(
-                            getString(R.string.default_user_icon_description));
+                    viewHolder.setContentDescription(getString(
+                            R.string.default_user_icon_description));
                 }
-                viewHolder.setClickListener(view -> {
-                    if (mSelectedPosition == position) {
-                        deselect(position);
-                    } else {
-                        select(position);
-                    }
-                });
             }
+            viewHolder.setClickListener(view -> onViewHolderSelected(position));
+        }
+
+        private void onViewHolderSelected(int position) {
+            if ((mTakePhotoPosition == position) && (mLastSelectedPosition != position)) {
+                mAvatarPhotoController.takePhoto();
+            } else if ((mChoosePhotoPosition == position) && (mLastSelectedPosition != position)) {
+                mAvatarPhotoController.choosePhoto();
+            } else {
+                if (mSelectedPosition == position) {
+                    deselect(position);
+                } else {
+                    select(position);
+                }
+            }
+            mLastSelectedPosition = position;
+        }
+
+        public void onAdapterResume() {
+            mLastSelectedPosition = NONE;
         }
 
         @Override

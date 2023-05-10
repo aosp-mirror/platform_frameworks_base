@@ -24,13 +24,16 @@ import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_KEYGUARD_GOING_AWAY;
+import static android.view.WindowManager.TRANSIT_KEYGUARD_UNOCCLUDE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
+import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 
 import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
@@ -65,6 +68,12 @@ public class TransitionUtil {
         return type == TRANSIT_CLOSE || type == TRANSIT_TO_BACK;
     }
 
+    /** Returns {@code true} if the transition is opening or closing mode. */
+    public static boolean isOpenOrCloseMode(@TransitionInfo.TransitionMode int mode) {
+        return mode == TRANSIT_OPEN || mode == TRANSIT_CLOSE
+                || mode == TRANSIT_TO_FRONT || mode == TRANSIT_TO_BACK;
+    }
+
     /** Returns {@code true} if the transition has a display change. */
     public static boolean hasDisplayChange(@NonNull TransitionInfo info) {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
@@ -73,6 +82,23 @@ public class TransitionUtil {
                 return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * Some transitions we always need to report to keyguard even if they are empty.
+     * TODO (b/274954192): Remove this once keyguard dispatching moves to Shell.
+     */
+    public static boolean alwaysReportToKeyguard(TransitionInfo info) {
+        // occlusion status of activities can change while screen is off so there will be no
+        // visibility change but we still need keyguardservice to be notified.
+        if (info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE) return true;
+
+        // It's possible for some activities to stop with bad timing (esp. since we can't yet
+        // queue activity transitions initiated by apps) that results in an empty transition for
+        // keyguard going-away. In general, we should should always report Keyguard-going-away.
+        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) return true;
+
         return false;
     }
 
@@ -88,6 +114,20 @@ public class TransitionUtil {
         return (change.getTaskInfo() == null)
                 && !change.hasFlags(FLAG_IS_WALLPAPER)
                 && !change.hasFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
+    }
+
+    /** Returns `true` if `change` is the divider. */
+    public static boolean isDividerBar(TransitionInfo.Change change) {
+        return isNonApp(change) && change.hasFlags(FLAG_IS_DIVIDER_BAR);
+    }
+
+    /** Returns `true` if `change` is only re-ordering. */
+    public static boolean isOrderOnly(TransitionInfo.Change change) {
+        return change.getMode() == TRANSIT_CHANGE
+                && (change.getFlags() & FLAG_MOVED_TO_TOP) != 0
+                && change.getStartAbsBounds().equals(change.getEndAbsBounds())
+                && (change.getLastParent() == null
+                        || change.getLastParent().equals(change.getParent()));
     }
 
     /**
@@ -139,11 +179,20 @@ public class TransitionUtil {
         // changes should be ordered top-to-bottom in z
         final int mode = change.getMode();
 
-        t.reparent(leash, info.getRootLeash());
+        final int rootIdx = TransitionUtil.rootIndexFor(change, info);
+        t.reparent(leash, info.getRoot(rootIdx).getLeash());
         final Rect absBounds =
                 (mode == TRANSIT_OPEN) ? change.getEndAbsBounds() : change.getStartAbsBounds();
-        t.setPosition(leash, absBounds.left - info.getRootOffset().x,
-                absBounds.top - info.getRootOffset().y);
+        t.setPosition(leash, absBounds.left - info.getRoot(rootIdx).getOffset().x,
+                absBounds.top - info.getRoot(rootIdx).getOffset().y);
+
+        if (isDividerBar(change)) {
+            if (isOpeningType(mode)) {
+                t.setAlpha(leash, 0.f);
+            }
+            t.setLayer(leash, Integer.MAX_VALUE);
+            return;
+        }
 
         // Put all the OPEN/SHOW on top
         if (TransitionUtil.isOpeningType(mode)) {
@@ -179,12 +228,13 @@ public class TransitionUtil {
             // making leashes means we have to handle them specially.
             return change.getLeash();
         }
+        final int rootIdx = TransitionUtil.rootIndexFor(change, info);
         SurfaceControl leashSurface = new SurfaceControl.Builder()
                 .setName(change.getLeash().toString() + "_transition-leash")
                 .setContainerLayer()
                 // Initial the surface visible to respect the visibility of the original surface.
                 .setHidden(false)
-                .setParent(info.getRootLeash())
+                .setParent(info.getRoot(rootIdx).getLeash())
                 .build();
         // Copied Transitions setup code (which expects bottom-to-top order, so we swap here)
         setupLeash(leashSurface, change, info.getChanges().size() - order, info, t);
@@ -214,6 +264,10 @@ public class TransitionUtil {
      */
     public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
             SurfaceControl leash) {
+        if (isDividerBar(change)) {
+            return getDividerTarget(change, leash);
+        }
+
         int taskId;
         boolean isNotInRecents;
         ActivityManager.RunningTaskInfo taskInfo;
@@ -253,12 +307,46 @@ public class TransitionUtil {
                 new Rect(change.getStartAbsBounds()),
                 taskInfo,
                 change.getAllowEnterPip(),
-                (change.getFlags() & FLAG_IS_DIVIDER_BAR) != 0
-                        ? TYPE_DOCK_DIVIDER : INVALID_WINDOW_TYPE
+                INVALID_WINDOW_TYPE
         );
         target.setWillShowImeOnTarget(
                 (change.getFlags() & TransitionInfo.FLAG_WILL_IME_SHOWN) != 0);
         target.setRotationChange(change.getEndRotation() - change.getStartRotation());
         return target;
+    }
+
+    private static RemoteAnimationTarget getDividerTarget(TransitionInfo.Change change,
+            SurfaceControl leash) {
+        return new RemoteAnimationTarget(-1 /* taskId */, newModeToLegacyMode(change.getMode()),
+                leash, false /* isTranslucent */, null /* clipRect */,
+                null /* contentInsets */, Integer.MAX_VALUE /* prefixOrderIndex */,
+                new android.graphics.Point(0, 0) /* position */, change.getStartAbsBounds(),
+                change.getStartAbsBounds(), new WindowConfiguration(), true, null /* startLeash */,
+                null /* startBounds */, null /* taskInfo */, false /* allowEnterPip */,
+                TYPE_DOCK_DIVIDER);
+    }
+
+    /**
+     * Finds the "correct" root idx for a change. The change's end display is prioritized, then
+     * the start display. If there is no display, it will fallback on the 0th root in the
+     * transition. There MUST be at-least 1 root in the transition (ie. it's not a no-op).
+     */
+    public static int rootIndexFor(@NonNull TransitionInfo.Change change,
+            @NonNull TransitionInfo info) {
+        int rootIdx = info.findRootIndex(change.getEndDisplayId());
+        if (rootIdx >= 0) return rootIdx;
+        rootIdx = info.findRootIndex(change.getStartDisplayId());
+        if (rootIdx >= 0) return rootIdx;
+        return 0;
+    }
+
+    /**
+     * Gets the {@link TransitionInfo.Root} for the given {@link TransitionInfo.Change}.
+     * @see #rootIndexFor(TransitionInfo.Change, TransitionInfo)
+     */
+    @NonNull
+    public static TransitionInfo.Root getRootFor(@NonNull TransitionInfo.Change change,
+            @NonNull TransitionInfo info) {
+        return info.getRoot(rootIndexFor(change, info));
     }
 }

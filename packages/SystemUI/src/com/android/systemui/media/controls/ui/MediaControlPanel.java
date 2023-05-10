@@ -32,6 +32,8 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Color;
@@ -54,6 +56,8 @@ import android.os.Process;
 import android.os.Trace;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,6 +72,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.constraintlayout.widget.ConstraintSet;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.internal.jank.InteractionJankMonitor;
@@ -78,7 +83,6 @@ import com.android.systemui.ActivityIntentHelper;
 import com.android.systemui.R;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.GhostedViewLaunchAnimatorController;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.bluetooth.BroadcastDialogController;
 import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -119,16 +123,17 @@ import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.time.SystemClock;
 
+import dagger.Lazy;
+
+import kotlin.Triple;
+import kotlin.Unit;
+
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
-
-import dagger.Lazy;
-import kotlin.Triple;
-import kotlin.Unit;
 
 /**
  * A view controller used for Media Playback.
@@ -151,7 +156,7 @@ public class MediaControlPanel {
     private static final float REC_MEDIA_COVER_SCALE_FACTOR = 1.25f;
     private static final float MEDIA_SCRIM_START_ALPHA = 0.25f;
     private static final float MEDIA_REC_SCRIM_START_ALPHA = 0.15f;
-    private static final float MEDIA_PLAYER_SCRIM_END_ALPHA = 0.9f;
+    private static final float MEDIA_PLAYER_SCRIM_END_ALPHA = 1.0f;
     private static final float MEDIA_REC_SCRIM_END_ALPHA = 1.0f;
 
     private static final Intent SETTINGS_INTENT = new Intent(ACTION_MEDIA_CONTROLS_SETTINGS);
@@ -468,6 +473,7 @@ public class MediaControlPanel {
         TransitionLayout recommendations = vh.getRecommendations();
 
         mMediaViewController.attach(recommendations, MediaViewController.TYPE.RECOMMENDATION);
+        mMediaViewController.configurationChangeListener = this::updateRecommendationsVisibility;
 
         mRecommendationViewHolder.getRecommendations().setOnLongClickListener(v -> {
             if (mFalsingManager.isFalseLongTap(FalsingManager.LOW_PENALTY)) return true;
@@ -519,16 +525,15 @@ public class MediaControlPanel {
                 mLogger.logTapContentView(mUid, mPackageName, mInstanceId);
                 logSmartspaceCardReported(SMARTSPACE_CARD_CLICK_EVENT);
 
-                // See StatusBarNotificationActivityStarter#onNotificationClicked
                 boolean showOverLockscreen = mKeyguardStateController.isShowing()
-                        && mActivityIntentHelper.wouldShowOverLockscreen(clickIntent.getIntent(),
+                        && mActivityIntentHelper.wouldPendingShowOverLockscreen(clickIntent,
                         mLockscreenUserManager.getCurrentUserId());
-
                 if (showOverLockscreen) {
-                    mActivityStarter.startActivity(clickIntent.getIntent(),
-                            /* dismissShade */ true,
-                            /* animationController */ null,
-                            /* showOverLockscreenWhenLocked */ true);
+                    try {
+                        clickIntent.send();
+                    } catch (PendingIntent.CanceledException e) {
+                        Log.e(TAG, "Pending intent for " + key + " was cancelled");
+                    }
                 } else {
                     mActivityStarter.postStartActivityDismissingKeyguard(clickIntent,
                             buildLaunchAnimatorController(mMediaViewHolder.getPlayer()));
@@ -648,14 +653,17 @@ public class MediaControlPanel {
                     } else {
                         mLogger.logOpenOutputSwitcher(mUid, mPackageName, mInstanceId);
                         if (device.getIntent() != null) {
-                            if (device.getIntent().isActivity()) {
-                                mActivityStarter.startActivity(
-                                        device.getIntent().getIntent(), true);
+                            PendingIntent deviceIntent = device.getIntent();
+                            boolean showOverLockscreen = mKeyguardStateController.isShowing()
+                                    && mActivityIntentHelper.wouldPendingShowOverLockscreen(
+                                        deviceIntent, mLockscreenUserManager.getCurrentUserId());
+                            if (deviceIntent.isActivity() && !showOverLockscreen) {
+                                mActivityStarter.postStartActivityDismissingKeyguard(deviceIntent);
                             } else {
                                 try {
                                     BroadcastOptions options = BroadcastOptions.makeBasic();
                                     options.setInteractive(true);
-                                    device.getIntent().send(options.toBundle());
+                                    deviceIntent.send(options.toBundle());
                                 } catch (PendingIntent.CanceledException e) {
                                     Log.e(TAG, "Device pending intent was canceled");
                                 }
@@ -833,7 +841,7 @@ public class MediaControlPanel {
                         scaleTransitionDrawableLayer(transitionDrawable, 1, width, height);
                         transitionDrawable.setLayerGravity(0, Gravity.CENTER);
                         transitionDrawable.setLayerGravity(1, Gravity.CENTER);
-                        transitionDrawable.setCrossFadeEnabled(!isArtworkBound);
+                        transitionDrawable.setCrossFadeEnabled(true);
 
                         albumView.setImageDrawable(transitionDrawable);
                         transitionDrawable.startTransition(isArtworkBound ? 333 : 80);
@@ -994,18 +1002,9 @@ public class MediaControlPanel {
 
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
-        if (width == 0 || height == 0 || targetWidth == 0 || targetHeight == 0) {
-            return;
-        }
-
-        float scale;
-        if ((width / (float) height) > (targetWidth / (float) targetHeight)) {
-            // Drawable is wider than target view, scale to match height
-            scale = targetHeight / (float) height;
-        } else {
-            // Drawable is taller than target view, scale to match width
-            scale = targetWidth / (float) width;
-        }
+        float scale = MediaDataUtils.getScaleFactor(new Pair(width, height),
+                new Pair(targetWidth, targetHeight));
+        if (scale == 0) return;
         transitionDrawable.setLayerSize(layer, (int) (scale * width), (int) (scale * height));
     }
 
@@ -1362,6 +1361,7 @@ public class MediaControlPanel {
 
         boolean hasTitle = false;
         boolean hasSubtitle = false;
+        int fittedRecsNum = getNumberOfFittedRecommendations();
         for (int itemIndex = 0; itemIndex < NUM_REQUIRED_RECOMMENDATIONS; itemIndex++) {
             SmartspaceAction recommendation = recommendations.get(itemIndex);
 
@@ -1374,7 +1374,8 @@ public class MediaControlPanel {
                         itemIndex
                 );
             } else {
-                mediaCoverImageView.setImageIcon(recommendation.getIcon());
+                mediaCoverImageView.post(
+                        () -> mediaCoverImageView.setImageIcon(recommendation.getIcon()));
             }
 
             // Set up the media item's click listener if applicable.
@@ -1441,12 +1442,20 @@ public class MediaControlPanel {
 
         // If there's no subtitles and/or titles for any of the albums, hide those views.
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         final boolean titlesVisible = hasTitle;
         final boolean subtitlesVisible = hasSubtitle;
-        mRecommendationViewHolder.getMediaTitles().forEach((titleView) ->
-                setVisibleAndAlpha(expandedSet, titleView.getId(), titlesVisible));
-        mRecommendationViewHolder.getMediaSubtitles().forEach((subtitleView) ->
-                setVisibleAndAlpha(expandedSet, subtitleView.getId(), subtitlesVisible));
+        mRecommendationViewHolder.getMediaTitles().forEach((titleView) -> {
+            setVisibleAndAlpha(expandedSet, titleView.getId(), titlesVisible);
+            setVisibleAndAlpha(collapsedSet, titleView.getId(), titlesVisible);
+        });
+        mRecommendationViewHolder.getMediaSubtitles().forEach((subtitleView) -> {
+            setVisibleAndAlpha(expandedSet, subtitleView.getId(), subtitlesVisible);
+            setVisibleAndAlpha(collapsedSet, subtitleView.getId(), subtitlesVisible);
+        });
+
+        // Media covers visibility.
+        setMediaCoversVisibility(fittedRecsNum);
 
         // Guts
         Runnable onDismissClickedRunnable = () -> {
@@ -1481,6 +1490,51 @@ public class MediaControlPanel {
             mMediaViewController.refreshState();
         }
         Trace.endSection();
+    }
+
+    private Unit updateRecommendationsVisibility() {
+        int fittedRecsNum = getNumberOfFittedRecommendations();
+        setMediaCoversVisibility(fittedRecsNum);
+        return Unit.INSTANCE;
+    }
+
+    private void setMediaCoversVisibility(int fittedRecsNum) {
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
+        List<ViewGroup> mediaCoverContainers = mRecommendationViewHolder.getMediaCoverContainers();
+        // Hide media cover that cannot fit in the recommendation card.
+        for (int itemIndex = 0; itemIndex < NUM_REQUIRED_RECOMMENDATIONS; itemIndex++) {
+            setVisibleAndAlpha(expandedSet, mediaCoverContainers.get(itemIndex).getId(),
+                    itemIndex < fittedRecsNum);
+            setVisibleAndAlpha(collapsedSet, mediaCoverContainers.get(itemIndex).getId(),
+                    itemIndex < fittedRecsNum);
+        }
+    }
+
+    @VisibleForTesting
+    protected int getNumberOfFittedRecommendations() {
+        Resources res = mContext.getResources();
+        Configuration config = res.getConfiguration();
+        int defaultDpWidth = res.getInteger(R.integer.default_qs_media_rec_width_dp);
+        int recCoverWidth = res.getDimensionPixelSize(R.dimen.qs_media_rec_album_width)
+                + res.getDimensionPixelSize(R.dimen.qs_media_info_spacing) * 2;
+
+        // On landscape, media controls should take half of the screen width.
+        int displayAvailableDpWidth = config.screenWidthDp;
+        if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            displayAvailableDpWidth = displayAvailableDpWidth / 2;
+        }
+        int fittedNum;
+        if (displayAvailableDpWidth > defaultDpWidth) {
+            int recCoverDefaultWidth = res.getDimensionPixelSize(
+                    R.dimen.qs_media_rec_default_width);
+            fittedNum = recCoverDefaultWidth / recCoverWidth;
+        } else {
+            int displayAvailableWidth = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    displayAvailableDpWidth, res.getDisplayMetrics());
+            fittedNum = displayAvailableWidth / recCoverWidth;
+        }
+        return Math.min(fittedNum, NUM_REQUIRED_RECOMMENDATIONS);
     }
 
     private void fetchAndUpdateRecommendationColors(Drawable appIcon) {

@@ -38,8 +38,6 @@ class TaskbarDelegateTest : SysuiTestCase() {
     private lateinit var mTaskStackChangeListeners: TaskStackChangeListeners
     private lateinit var mTaskbarDelegate: TaskbarDelegate
     @Mock
-    lateinit var mEdgeBackGestureHandlerFactory : EdgeBackGestureHandler.Factory
-    @Mock
     lateinit var mEdgeBackGestureHandler : EdgeBackGestureHandler
     @Mock
     lateinit var mLightBarControllerFactory : LightBarTransitionsController.Factory
@@ -73,13 +71,13 @@ class TaskbarDelegateTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        `when`(mEdgeBackGestureHandlerFactory.create(context)).thenReturn(mEdgeBackGestureHandler)
+        `when`(mNavBarHelper.edgeBackGestureHandler).thenReturn(mEdgeBackGestureHandler)
         `when`(mLightBarControllerFactory.create(any())).thenReturn(mLightBarTransitionController)
         `when`(mNavBarHelper.currentSysuiState).thenReturn(mCurrentSysUiState)
         `when`(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState)
         mTaskStackChangeListeners = TaskStackChangeListeners.getTestInstance()
-        mTaskbarDelegate = TaskbarDelegate(context, mEdgeBackGestureHandlerFactory,
-                mLightBarControllerFactory, mStatusBarKeyguardViewManager)
+        mTaskbarDelegate = TaskbarDelegate(context, mLightBarControllerFactory,
+            mStatusBarKeyguardViewManager)
         mTaskbarDelegate.setDependencies(mCommandQueue, mOverviewProxyService, mNavBarHelper,
         mNavigationModeController, mSysUiState, mDumpManager, mAutoHideController,
                 mLightBarController, mOptionalPip, mBackAnimation, mTaskStackChangeListeners)

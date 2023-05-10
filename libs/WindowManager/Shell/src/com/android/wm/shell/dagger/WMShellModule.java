@@ -30,7 +30,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
@@ -45,6 +44,7 @@ import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.SystemWindows;
+import com.android.wm.shell.common.TabletopModeController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ShellBackgroundThread;
@@ -53,6 +53,8 @@ import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.desktopmode.DesktopModeTaskRepository;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
+import com.android.wm.shell.desktopmode.EnterDesktopTaskTransitionHandler;
+import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.freeform.FreeformComponents;
 import com.android.wm.shell.freeform.FreeformTaskListener;
@@ -65,6 +67,7 @@ import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipAppOpsListener;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
@@ -81,10 +84,12 @@ import com.android.wm.shell.pip.phone.PipMotionHelper;
 import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.DefaultMixedHandler;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
@@ -166,7 +171,7 @@ public abstract class WMShellModule {
             BubblePositioner positioner,
             DisplayController displayController,
             @DynamicOverride Optional<OneHandedController> oneHandedOptional,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
@@ -315,7 +320,7 @@ public abstract class WMShellModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
@@ -344,6 +349,7 @@ public abstract class WMShellModule {
             PhonePipKeepClearAlgorithm pipKeepClearAlgorithm,
             PipBoundsState pipBoundsState,
             PipSizeSpecHandler pipSizeSpecHandler,
+            PipDisplayLayoutState pipDisplayLayoutState,
             PipMotionHelper pipMotionHelper,
             PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController,
@@ -355,23 +361,24 @@ public abstract class WMShellModule {
             TaskStackListenerImpl taskStackListener,
             PipParamsChangedForwarder pipParamsChangedForwarder,
             DisplayInsetsController displayInsetsController,
+            TabletopModeController pipTabletopController,
             Optional<OneHandedController> oneHandedController,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(
                 context, shellInit, shellCommandHandler, shellController,
                 displayController, pipAnimationController, pipAppOpsListener, pipBoundsAlgorithm,
-                pipKeepClearAlgorithm, pipBoundsState, pipSizeSpecHandler, pipMotionHelper,
-                pipMediaController, phonePipMenuController, pipTaskOrganizer, pipTransitionState,
-                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
-                taskStackListener, pipParamsChangedForwarder, displayInsetsController,
-                oneHandedController, mainExecutor));
+                pipKeepClearAlgorithm, pipBoundsState, pipSizeSpecHandler, pipDisplayLayoutState,
+                pipMotionHelper, pipMediaController, phonePipMenuController, pipTaskOrganizer,
+                pipTransitionState, pipTouchHandler, pipTransitionController,
+                windowManagerShellWrapper, taskStackListener, pipParamsChangedForwarder,
+                displayInsetsController, pipTabletopController, oneHandedController, mainExecutor));
     }
 
     @WMSingleton
     @Provides
     static PipBoundsState providePipBoundsState(Context context,
-            PipSizeSpecHandler pipSizeSpecHandler) {
-        return new PipBoundsState(context, pipSizeSpecHandler);
+            PipSizeSpecHandler pipSizeSpecHandler, PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PipBoundsState(context, pipSizeSpecHandler, pipDisplayLayoutState);
     }
 
     @WMSingleton
@@ -388,8 +395,9 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static PipSizeSpecHandler providePipSizeSpecHelper(Context context) {
-        return new PipSizeSpecHandler(context);
+    static PipSizeSpecHandler providePipSizeSpecHelper(Context context,
+            PipDisplayLayoutState pipDisplayLayoutState) {
+        return new PipSizeSpecHandler(context, pipDisplayLayoutState);
     }
 
     @WMSingleton
@@ -446,7 +454,7 @@ public abstract class WMShellModule {
             SyncTransactionQueue syncTransactionQueue,
             PipTransitionState pipTransitionState,
             PipBoundsState pipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
+            PipDisplayLayoutState pipDisplayLayoutState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PhonePipMenuController menuPhoneController,
             PipAnimationController pipAnimationController,
@@ -458,7 +466,7 @@ public abstract class WMShellModule {
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context,
-                syncTransactionQueue, pipTransitionState, pipBoundsState, pipSizeSpecHandler,
+                syncTransactionQueue, pipTransitionState, pipBoundsState, pipDisplayLayoutState,
                 pipBoundsAlgorithm, menuPhoneController, pipAnimationController,
                 pipSurfaceTransactionHelper, pipTransitionController, pipParamsChangedForwarder,
                 splitScreenControllerOptional, displayController, pipUiEventLogger,
@@ -477,12 +485,12 @@ public abstract class WMShellModule {
     static PipTransitionController providePipTransitionController(Context context,
             ShellInit shellInit, ShellTaskOrganizer shellTaskOrganizer, Transitions transitions,
             PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipBoundsState pipBoundsState, PipSizeSpecHandler pipSizeSpecHandler,
+            PipBoundsState pipBoundsState, PipDisplayLayoutState pipDisplayLayoutState,
             PipTransitionState pipTransitionState, PhonePipMenuController pipMenuController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<SplitScreenController> splitScreenOptional) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
-                pipBoundsState, pipSizeSpecHandler, pipTransitionState, pipMenuController,
+                pipBoundsState, pipDisplayLayoutState, pipTransitionState, pipMenuController,
                 pipBoundsAlgorithm, pipAnimationController, pipSurfaceTransactionHelper,
                 splitScreenOptional);
     }
@@ -523,9 +531,20 @@ public abstract class WMShellModule {
             ShellInit shellInit,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
+            Optional<RecentsTransitionHandler> recentsTransitionHandler,
             Transitions transitions) {
         return new DefaultMixedHandler(shellInit, transitions, splitScreenOptional,
-                pipTouchHandlerOptional);
+                pipTouchHandlerOptional, recentsTransitionHandler);
+    }
+
+    @WMSingleton
+    @Provides
+    static RecentsTransitionHandler provideRecentsTransitionHandler(
+            ShellInit shellInit,
+            Transitions transitions,
+            Optional<RecentTasksController> recentTasksController) {
+        return new RecentsTransitionHandler(shellInit, transitions,
+                recentTasksController.orElse(null));
     }
 
     //
@@ -615,14 +634,8 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static UnfoldBackgroundController provideUnfoldBackgroundController(
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            Context context
-    ) {
-        return new UnfoldBackgroundController(
-                context,
-                rootTaskDisplayAreaOrganizer
-        );
+    static UnfoldBackgroundController provideUnfoldBackgroundController(Context context) {
+        return new UnfoldBackgroundController(context);
     }
 
     //
@@ -654,13 +667,36 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             ShellController shellController,
+            DisplayController displayController,
             ShellTaskOrganizer shellTaskOrganizer,
+            SyncTransactionQueue syncQueue,
+            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
             Transitions transitions,
+            EnterDesktopTaskTransitionHandler enterDesktopTransitionHandler,
+            ExitDesktopTaskTransitionHandler exitDesktopTransitionHandler,
             @DynamicOverride DesktopModeTaskRepository desktopModeTaskRepository,
             @ShellMainThread ShellExecutor mainExecutor
     ) {
-        return new DesktopTasksController(context, shellInit, shellController, shellTaskOrganizer,
-                transitions, desktopModeTaskRepository, mainExecutor);
+        return new DesktopTasksController(context, shellInit, shellController, displayController,
+                shellTaskOrganizer, syncQueue, rootTaskDisplayAreaOrganizer, transitions,
+                enterDesktopTransitionHandler, exitDesktopTransitionHandler,
+                desktopModeTaskRepository, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static EnterDesktopTaskTransitionHandler provideEnterDesktopModeTaskTransitionHandler(
+            Transitions transitions) {
+        return new EnterDesktopTaskTransitionHandler(transitions);
+    }
+
+    @WMSingleton
+    @Provides
+    static ExitDesktopTaskTransitionHandler provideExitDesktopTaskTransitionHandler(
+            Transitions transitions,
+            Context context
+    ) {
+        return new ExitDesktopTaskTransitionHandler(transitions, context);
     }
 
     @WMSingleton

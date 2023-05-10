@@ -21,7 +21,7 @@ class StatusBarLaunchAnimatorController(
     override fun onIntentStarted(willAnimate: Boolean) {
         delegate.onIntentStarted(willAnimate)
         if (willAnimate) {
-            centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(true)
+            centralSurfaces.shadeViewController.setIsLaunchAnimationRunning(true)
         } else {
             centralSurfaces.collapsePanelOnMainThread()
         }
@@ -29,16 +29,16 @@ class StatusBarLaunchAnimatorController(
 
     override fun onLaunchAnimationStart(isExpandingFullyAbove: Boolean) {
         delegate.onLaunchAnimationStart(isExpandingFullyAbove)
-        centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(true)
+        centralSurfaces.shadeViewController.setIsLaunchAnimationRunning(true)
         if (!isExpandingFullyAbove) {
-            centralSurfaces.notificationPanelViewController.collapseWithDuration(
+            centralSurfaces.shadeViewController.collapseWithDuration(
                 ActivityLaunchAnimator.TIMINGS.totalDuration.toInt())
         }
     }
 
     override fun onLaunchAnimationEnd(isExpandingFullyAbove: Boolean) {
         delegate.onLaunchAnimationEnd(isExpandingFullyAbove)
-        centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(false)
+        centralSurfaces.shadeViewController.setIsLaunchAnimationRunning(false)
         centralSurfaces.onLaunchAnimationEnd(isExpandingFullyAbove)
     }
 
@@ -48,12 +48,12 @@ class StatusBarLaunchAnimatorController(
         linearProgress: Float
     ) {
         delegate.onLaunchAnimationProgress(state, progress, linearProgress)
-        centralSurfaces.notificationPanelViewController.applyLaunchAnimationProgress(linearProgress)
+        centralSurfaces.shadeViewController.applyLaunchAnimationProgress(linearProgress)
     }
 
     override fun onLaunchAnimationCancelled(newKeyguardOccludedState: Boolean?) {
         delegate.onLaunchAnimationCancelled()
-        centralSurfaces.notificationPanelViewController.setIsLaunchAnimationRunning(false)
+        centralSurfaces.shadeViewController.setIsLaunchAnimationRunning(false)
         centralSurfaces.onLaunchAnimationCancelled(isLaunchForActivity)
     }
 }

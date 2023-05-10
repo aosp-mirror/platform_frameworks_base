@@ -36,7 +36,10 @@ abstract class SwipeUpGestureHandler(
     displayTracker: DisplayTracker,
     private val logger: SwipeUpGestureLogger,
     private val loggerTag: String,
-) : GenericGestureDetector(SwipeUpGestureHandler::class.simpleName!!, displayTracker) {
+) : GenericGestureDetector(
+        SwipeUpGestureHandler::class.simpleName!!,
+        displayTracker.defaultDisplayId
+) {
 
     private var startY: Float = 0f
     private var startTime: Long = 0L

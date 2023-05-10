@@ -52,6 +52,9 @@ final class LetterboxConfiguration {
      */
     static final float MIN_FIXED_ORIENTATION_LETTERBOX_ASPECT_RATIO = 1.0f;
 
+    /** Letterboxed app window position multiplier indicating center position. */
+    static final float LETTERBOX_POSITION_MULTIPLIER_CENTER = 0.5f;
+
     /** Enum for Letterbox background type. */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({LETTERBOX_BACKGROUND_SOLID_COLOR, LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND,
@@ -183,6 +186,10 @@ final class LetterboxConfiguration {
     // portrait device orientation.
     private boolean mIsVerticalReachabilityEnabled;
 
+    // Whether book mode automatic horizontal reachability positioning is allowed for letterboxed
+    // fullscreen apps in landscape device orientation.
+    private boolean mIsAutomaticReachabilityInBookModeEnabled;
+
     // Whether education is allowed for letterboxed fullscreen apps.
     private boolean mIsEducationEnabled;
 
@@ -206,6 +213,10 @@ final class LetterboxConfiguration {
     // engines wait to get focus before drawing the content of the app so this needs to be used
     // otherwise the apps get blacked out when they are resumed and do not have focus yet.
     private boolean mIsCompatFakeFocusEnabled;
+
+    // Whether should use split screen aspect ratio for the activity when camera compat treatment
+    // is enabled and activity is connected to the camera in fullscreen.
+    private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
 
     // Whether camera compatibility treatment is enabled.
     // See DisplayRotationCompatPolicy for context.
@@ -276,6 +287,8 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsHorizontalReachabilityEnabled);
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsVerticalReachabilityEnabled);
+        mIsAutomaticReachabilityInBookModeEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsAutomaticReachabilityInBookModeEnabled);
         mDefaultPositionForHorizontalReachability =
                 readLetterboxHorizontalReachabilityPositionFromConfig(mContext, false);
         mDefaultPositionForVerticalReachability =
@@ -293,6 +306,8 @@ final class LetterboxConfiguration {
                 R.bool.config_letterboxIsEnabledForTranslucentActivities);
         mIsCameraCompatTreatmentEnabled = mContext.getResources().getBoolean(
                 R.bool.config_isWindowManagerCameraCompatTreatmentEnabled);
+        mIsCameraCompatSplitScreenAspectRatioEnabled = mContext.getResources().getBoolean(
+                R.bool.config_isWindowManagerCameraCompatSplitScreenAspectRatioEnabled);
         mIsCompatFakeFocusEnabled = mContext.getResources().getBoolean(
                 R.bool.config_isCompatFakeFocusEnabled);
         mIsPolicyForIgnoringRequestedOrientationEnabled = mContext.getResources().getBoolean(
@@ -314,6 +329,7 @@ final class LetterboxConfiguration {
         mDeviceConfig.updateFlagActiveStatus(
                 /* isActive */ mTranslucentLetterboxingEnabled,
                 /* key */ KEY_ENABLE_LETTERBOX_TRANSLUCENT_ACTIVITY);
+
         mLetterboxConfigurationPersister = letterboxConfigurationPersister;
         mLetterboxConfigurationPersister.start();
     }
@@ -666,6 +682,14 @@ final class LetterboxConfiguration {
         return mIsVerticalReachabilityEnabled;
     }
 
+    /*
+     * Whether automatic horizontal reachability repositioning in book mode is allowed for
+     * letterboxed fullscreen apps in landscape device orientation.
+     */
+    boolean getIsAutomaticReachabilityInBookModeEnabled() {
+        return mIsAutomaticReachabilityInBookModeEnabled;
+    }
+
     /**
      * Overrides whether horizontal reachability repositioning is allowed for letterboxed fullscreen
      * apps in landscape device orientation.
@@ -680,6 +704,14 @@ final class LetterboxConfiguration {
      */
     void setIsVerticalReachabilityEnabled(boolean enabled) {
         mIsVerticalReachabilityEnabled = enabled;
+    }
+
+    /**
+     * Overrides whether automatic horizontal reachability repositioning in book mode is allowed for
+     * letterboxed fullscreen apps in landscape device orientation.
+     */
+    void setIsAutomaticReachabilityInBookModeEnabled(boolean enabled) {
+        mIsAutomaticReachabilityInBookModeEnabled = enabled;
     }
 
     /**
@@ -700,6 +732,16 @@ final class LetterboxConfiguration {
     void resetIsVerticalReachabilityEnabled() {
         mIsVerticalReachabilityEnabled = mContext.getResources().getBoolean(
                 R.bool.config_letterboxIsVerticalReachabilityEnabled);
+    }
+
+    /**
+     * Resets whether automatic horizontal reachability repositioning in book mode is
+     * allowed for letterboxed fullscreen apps in landscape device orientation to
+     * {@link R.bool.config_letterboxIsAutomaticReachabilityInBookModeEnabled}.
+     */
+    void resetEnabledAutomaticReachabilityInBookMode() {
+        mIsAutomaticReachabilityInBookModeEnabled = mContext.getResources().getBoolean(
+                R.bool.config_letterboxIsAutomaticReachabilityInBookModeEnabled);
     }
 
     /*
@@ -1073,6 +1115,14 @@ final class LetterboxConfiguration {
      */
     boolean isPolicyForIgnoringRequestedOrientationEnabled() {
         return mIsPolicyForIgnoringRequestedOrientationEnabled;
+    }
+
+    /**
+     * Whether should use split screen aspect ratio for the activity when camera compat treatment
+     * is enabled and activity is connected to the camera in fullscreen.
+     */
+    boolean isCameraCompatSplitScreenAspectRatioEnabled() {
+        return mIsCameraCompatSplitScreenAspectRatioEnabled;
     }
 
     /** Whether camera compatibility treatment is enabled. */

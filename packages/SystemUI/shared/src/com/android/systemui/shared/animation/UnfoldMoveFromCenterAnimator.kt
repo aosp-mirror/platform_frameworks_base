@@ -192,4 +192,4 @@ class UnfoldMoveFromCenterAnimator @JvmOverloads constructor(
     )
 }
 
-private const val TRANSLATION_PERCENTAGE = 0.3f
+private const val TRANSLATION_PERCENTAGE = 0.08f

@@ -17,6 +17,8 @@
 package com.android.systemui.screenshot
 
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ComponentInfoFlags
+import android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS
 import android.view.Display
 import android.view.IWindowManager
 import android.view.ViewGroup
@@ -45,7 +47,7 @@ constructor(
         // Convert component names to app names.
         return components.map {
             packageManager
-                .getActivityInfo(it, PackageManager.ComponentInfoFlags.of(0))
+                .getActivityInfo(it, ComponentInfoFlags.of(MATCH_DISABLED_COMPONENTS.toLong()))
                 .loadLabel(packageManager)
         }
     }

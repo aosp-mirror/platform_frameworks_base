@@ -28,6 +28,7 @@ import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.quickaffordance.BuiltInKeyguardQuickAffordanceKeys
@@ -237,6 +238,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
     @JvmField @Parameter(3) var needsToUnlockFirst: Boolean = false
     @JvmField @Parameter(4) var startActivity: Boolean = false
     private lateinit var homeControls: FakeKeyguardQuickAffordanceConfig
+    private lateinit var dockManager: DockManagerFake
     private lateinit var userTracker: UserTracker
 
     @Before
@@ -247,6 +249,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
         userTracker = FakeUserTracker()
         homeControls =
             FakeKeyguardQuickAffordanceConfig(BuiltInKeyguardQuickAffordanceKeys.HOME_CONTROLS)
+        dockManager = DockManagerFake()
         val quickAccessWallet =
             FakeKeyguardQuickAffordanceConfig(
                 BuiltInKeyguardQuickAffordanceKeys.QUICK_ACCESS_WALLET
@@ -335,6 +338,7 @@ class KeyguardQuickAffordanceInteractorParameterizedTest : SysuiTestCase() {
                 launchAnimator = launchAnimator,
                 logger = logger,
                 devicePolicyManager = devicePolicyManager,
+                dockManager = dockManager,
                 backgroundDispatcher = testDispatcher,
             )
     }

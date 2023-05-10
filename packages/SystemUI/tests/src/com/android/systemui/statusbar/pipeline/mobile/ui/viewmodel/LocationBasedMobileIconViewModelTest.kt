@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.FakeAirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.AirplaneModeInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconInteractor
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.model.SignalIconModel
 import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModelTest.Companion.defaultSignal
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
@@ -71,9 +72,9 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
             setLevel(1)
             setIsDefaultDataEnabled(true)
             setIsFailedConnection(false)
-            setIconGroup(TelephonyIcons.THREE_G)
             setIsEmergencyOnly(false)
             setNumberOfLevels(4)
+            networkTypeIconGroup.value = NetworkTypeIconModel.DefaultIcon(TelephonyIcons.THREE_G)
             isDataConnected.value = true
         }
         commonImpl =
@@ -91,7 +92,7 @@ class LocationBasedMobileIconViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun `location based view models receive same icon id when common impl updates`() =
+    fun locationBasedViewModelsReceiveSameIconIdWhenCommonImplUpdates() =
         testScope.runTest {
             var latestHome: SignalIconModel? = null
             val homeJob = homeIcon.icon.onEach { latestHome = it }.launchIn(this)

@@ -25,7 +25,6 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +33,7 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 /** Contains information on what CredentialProvider has what provisioned Credential. */
-public final class CredentialDescriptionRegistry {
+public class CredentialDescriptionRegistry {
 
     private static final int MAX_ALLOWED_CREDENTIAL_DESCRIPTIONS = 128;
     private static final int MAX_ALLOWED_ENTRIES_PER_PROVIDER = 16;
@@ -51,14 +50,15 @@ public final class CredentialDescriptionRegistry {
     /** Represents the results of a given query into the registry. */
     public static final class FilterResult {
         final String mPackageName;
-        final String mFlattenedRequest;
+        final Set<String> mElementKeys;
         final List<CredentialEntry> mCredentialEntries;
 
-        private FilterResult(String packageName,
-                String flattenedRequest,
+        @VisibleForTesting
+        FilterResult(String packageName,
+                Set<String> elementKeys,
                 List<CredentialEntry> credentialEntries) {
             mPackageName = packageName;
-            mFlattenedRequest = flattenedRequest;
+            mElementKeys = elementKeys;
             mCredentialEntries = credentialEntries;
         }
     }
@@ -92,13 +92,26 @@ public final class CredentialDescriptionRegistry {
         }
     }
 
-    /** Clears an existing session for a given user identifier. */
+    /** Clears an existing session for a given user identifier. Used when testing only. */
     @GuardedBy("sLock")
     @VisibleForTesting
-    public static void clearAllSessions() {
+    static void clearAllSessions() {
         sLock.lock();
         try {
             sCredentialDescriptionSessionPerUser.clear();
+        } finally {
+            sLock.unlock();
+        }
+    }
+
+    /** Sets an existing session for a given user identifier. Used when testing only. */
+    @GuardedBy("sLock")
+    @VisibleForTesting
+    static void setSession(int userId, CredentialDescriptionRegistry
+            credentialDescriptionRegistry) {
+        sLock.lock();
+        try {
+            sCredentialDescriptionSessionPerUser.put(userId, credentialDescriptionRegistry);
         } finally {
             sLock.unlock();
         }
@@ -150,16 +163,17 @@ public final class CredentialDescriptionRegistry {
     /** Returns package names and entries of a CredentialProviders that can satisfy a given
      * {@link CredentialDescription}. */
     public Set<FilterResult> getFilteredResultForProvider(String packageName,
-            String flatRequestStrings) {
+            Set<String> requestedKeyElements) {
         Set<FilterResult> result = new HashSet<>();
         if (!mCredentialDescriptions.containsKey(packageName)) {
             return result;
         }
         Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
         for (CredentialDescription containedDescription: currentSet) {
-            if (flatRequestStrings.equals(containedDescription.getFlattenedRequestString())) {
+            if (checkForMatch(containedDescription.getSupportedElementKeys(),
+                    requestedKeyElements)) {
                 result.add(new FilterResult(packageName,
-                        containedDescription.getFlattenedRequestString(), containedDescription
+                        containedDescription.getSupportedElementKeys(), containedDescription
                         .getCredentialEntries()));
             }
         }
@@ -168,14 +182,15 @@ public final class CredentialDescriptionRegistry {
 
     /** Returns package names of CredentialProviders that can satisfy a given
      * {@link CredentialDescription}. */
-    public Set<FilterResult> getMatchingProviders(Set<String> flatRequestString) {
+    public Set<FilterResult> getMatchingProviders(Set<Set<String>> supportedElementKeys) {
         Set<FilterResult> result = new HashSet<>();
         for (String packageName: mCredentialDescriptions.keySet()) {
             Set<CredentialDescription> currentSet = mCredentialDescriptions.get(packageName);
             for (CredentialDescription containedDescription : currentSet) {
-                if (flatRequestString.contains(containedDescription.getFlattenedRequestString())) {
+                if (canProviderSatisfyAny(containedDescription.getSupportedElementKeys(),
+                        supportedElementKeys)) {
                     result.add(new FilterResult(packageName,
-                            containedDescription.getFlattenedRequestString(), containedDescription
+                            containedDescription.getSupportedElementKeys(), containedDescription
                             .getCredentialEntries()));
                 }
             }
@@ -187,6 +202,21 @@ public final class CredentialDescriptionRegistry {
         if (mCredentialDescriptions.containsKey(packageName)) {
             mCredentialDescriptions.remove(packageName);
         }
+    }
+
+    private static boolean canProviderSatisfyAny(Set<String> registeredElementKeys,
+            Set<Set<String>> requestedElementKeys) {
+        for (Set<String> requestedUnflattenedString : requestedElementKeys) {
+            if (registeredElementKeys.containsAll(requestedUnflattenedString)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    static boolean checkForMatch(Set<String> registeredElementKeys,
+            Set<String> requestedElementKeys) {
+        return registeredElementKeys.containsAll(requestedElementKeys);
     }
 
 }

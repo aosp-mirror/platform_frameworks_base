@@ -33,7 +33,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 
 /**
  * This is a utility class for defining some utility methods and constants
@@ -189,5 +191,20 @@ public class PackageUtil {
             }
         }
         return targetSdkVersion;
+    }
+
+
+    /**
+     * Quietly close a closeable resource (e.g. a stream or file). The input may already
+     * be closed and it may even be null.
+     */
+    static void safeClose(Closeable resource) {
+        if (resource != null) {
+            try {
+                resource.close();
+            } catch (IOException ioe) {
+                // Catch and discard the error
+            }
+        }
     }
 }

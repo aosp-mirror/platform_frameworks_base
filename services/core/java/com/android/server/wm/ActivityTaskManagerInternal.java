@@ -144,6 +144,13 @@ public abstract class ActivityTaskManagerInternal {
         void acquire(int displayId);
 
         /**
+         * Acquires a sleep token.
+         * @param displayId The display to apply to.
+         * @param isSwappingDisplay Whether the display is swapping to another physical display.
+         */
+        void acquire(int displayId, boolean isSwappingDisplay);
+
+        /**
          * Releases the sleep token.
          * @param displayId The display to apply to.
          */
@@ -171,6 +178,9 @@ public abstract class ActivityTaskManagerInternal {
     /**
      * Returns the top activity from each of the currently visible root tasks, and the related task
      * id. The first entry will be the focused activity.
+     *
+     * <p>NOTE: If the top activity is in the split screen, the other activities in the same split
+     * screen will also be returned.
      */
     public abstract List<ActivityAssistInfo> getTopVisibleActivities();
 
@@ -465,7 +475,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean attachApplication(WindowProcessController wpc) throws RemoteException;
 
     /** @see IActivityManager#notifyLockedProfile(int) */
-    public abstract void notifyLockedProfile(@UserIdInt int userId, int currentUserId);
+    public abstract void notifyLockedProfile(@UserIdInt int userId);
 
     /** @see IActivityManager#startConfirmDeviceCredentialIntent(Intent, Bundle) */
     public abstract void startConfirmDeviceCredentialIntent(Intent intent, Bundle options);
@@ -473,9 +483,10 @@ public abstract class ActivityTaskManagerInternal {
     /** Writes current activity states to the proto stream. */
     public abstract void writeActivitiesToProto(ProtoOutputStream proto);
 
-    /** Dump the current state based on the command. */
+    /** Dump the current state based on the command and filters. */
     public abstract void dump(String cmd, FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage);
+            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage,
+            int displayIdFilter);
 
     /** Dump the current state for inclusion in process dump. */
     public abstract boolean dumpForProcesses(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
@@ -489,7 +500,7 @@ public abstract class ActivityTaskManagerInternal {
     /** Dump the current activities state. */
     public abstract boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
             String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
-            boolean dumpFocusedRootTaskOnly, @UserIdInt int userId);
+            boolean dumpFocusedRootTaskOnly, int displayIdFilter, @UserIdInt int userId);
 
     /** Dump the current state for inclusion in oom dump. */
     public abstract void dumpForOom(PrintWriter pw);
@@ -747,4 +758,10 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Unregister a task stack listener so that it stops receiving callbacks. */;
     public abstract void unregisterTaskStackListener(ITaskStackListener listener);
+
+    /**
+     * Gets the id of the display the activity was launched on.
+     * @param token The activity token.
+     */
+    public abstract int getDisplayId(IBinder token);
 }

@@ -33,6 +33,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,8 +53,12 @@ public class CredentialDescriptionRegistryTest {
     private static final String CALLING_PACKAGE_NAME_2 = "com.credman.app2";
     private static final String MDOC_CREDENTIAL_TYPE = "MDOC";
     private static final String PASSKEY_CREDENTIAL_TYPE = "PASSKEY";
-    private static final String FLATTENED_REQUEST = "FLATTENED_REQ";
-    private static final String FLATTENED_REQUEST_2 = "FLATTENED_REQ_2";
+    private static final HashSet<String> FLATTENED_REGISTRY = new HashSet<>(List.of(
+            "FLATTENED_REQ", "FLATTENED_REQ123", "FLATTENED_REQa"));
+    private static final HashSet<String> FLATTENED_REGISTRY_2 =
+            new HashSet<>(List.of("FLATTENED_REQ_2"));
+    private static final HashSet<String> FLATTENED_REQUEST =
+            new HashSet<>(List.of("FLATTENED_REQ;FLATTENED_REQ123"));
 
     private CredentialDescriptionRegistry mCredentialDescriptionRegistry;
     private CredentialEntry mEntry;
@@ -104,12 +109,12 @@ public class CredentialDescriptionRegistryTest {
     @Test
     public void testEvictProvider_existingProviders_succeeds() {
         final CredentialDescription credentialDescription =
-                new CredentialDescription(MDOC_CREDENTIAL_TYPE, FLATTENED_REQUEST,
+                new CredentialDescription(MDOC_CREDENTIAL_TYPE, FLATTENED_REGISTRY,
                         Collections.emptyList());
         final RegisterCredentialDescriptionRequest registerCredentialDescriptionRequest =
                 new RegisterCredentialDescriptionRequest(credentialDescription);
         final CredentialDescription credentialDescription2 =
-                new CredentialDescription(MDOC_CREDENTIAL_TYPE, FLATTENED_REQUEST_2,
+                new CredentialDescription(MDOC_CREDENTIAL_TYPE, FLATTENED_REGISTRY_2,
                         Collections.emptyList());
         final RegisterCredentialDescriptionRequest registerCredentialDescriptionRequest2 =
                 new RegisterCredentialDescriptionRequest(credentialDescription2);
@@ -130,12 +135,12 @@ public class CredentialDescriptionRegistryTest {
     @Test
     public void testGetMatchingProviders_existingProviders_succeeds() {
         final CredentialDescription credentialDescription =
-                new CredentialDescription(MDOC_CREDENTIAL_TYPE, FLATTENED_REQUEST,
+                new CredentialDescription(MDOC_CREDENTIAL_TYPE, FLATTENED_REGISTRY,
                         Collections.emptyList());
         final RegisterCredentialDescriptionRequest registerCredentialDescriptionRequest =
                 new RegisterCredentialDescriptionRequest(credentialDescription);
         final CredentialDescription credentialDescription2 =
-                new CredentialDescription(MDOC_CREDENTIAL_TYPE, FLATTENED_REQUEST,
+                new CredentialDescription(MDOC_CREDENTIAL_TYPE, FLATTENED_REGISTRY,
                         Collections.emptyList());
         final RegisterCredentialDescriptionRequest registerCredentialDescriptionRequest2 =
                 new RegisterCredentialDescriptionRequest(credentialDescription2);
@@ -171,11 +176,11 @@ public class CredentialDescriptionRegistryTest {
     public void testExecuteRegisterRequest_existingProviders_filterSucceeds() {
         final CredentialDescription credentialDescription =
                 new CredentialDescription(MDOC_CREDENTIAL_TYPE,
-                        FLATTENED_REQUEST,
+                        FLATTENED_REGISTRY,
                         List.of(mEntry, mEntry2));
         final CredentialDescription credentialDescription2 =
                 new CredentialDescription(PASSKEY_CREDENTIAL_TYPE,
-                        FLATTENED_REQUEST_2,
+                        FLATTENED_REGISTRY_2,
                         List.of(mEntry3));
         final RegisterCredentialDescriptionRequest registerCredentialDescriptionRequest =
                 new RegisterCredentialDescriptionRequest(Set.of(credentialDescription,

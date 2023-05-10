@@ -19,6 +19,8 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_NONE;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RESTRICTION_CHANGE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
@@ -70,7 +72,7 @@ import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
 import android.app.IProcessObserver;
-import android.app.IUidObserver;
+import android.app.UidObserver;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
@@ -106,6 +108,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.storage.StorageManagerInternal;
 import android.system.Os;
+import android.system.OsConstants;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -2297,6 +2300,8 @@ public final class ProcessList {
 
             final Process.ProcessStartResult startResult;
             boolean regularZygote = false;
+            app.mProcessGroupCreated = false;
+            app.mSkipProcessGroupCreation = false;
             if (hostingRecord.usesWebviewZygote()) {
                 startResult = startWebView(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
@@ -2325,13 +2330,29 @@ public final class ProcessList {
                         isTopApp, app.getDisabledCompatChanges(), pkgDataInfoMap,
                         allowlistedAppDataInfoMap, bindMountAppsData, bindMountAppStorageDirs,
                         new String[]{PROC_START_SEQ_IDENT + app.getStartSeq()});
+                // By now the process group should have been created by zygote.
+                app.mProcessGroupCreated = true;
             }
 
             if (!regularZygote) {
                 // webview and app zygote don't have the permission to create the nodes
-                if (Process.createProcessGroup(uid, startResult.pid) < 0) {
-                    throw new AssertionError("Unable to create process group for " + app.processName
-                            + " (" + startResult.pid + ")");
+                synchronized (app) {
+                    if (!app.mSkipProcessGroupCreation) {
+                        // If we're not told to skip the process group creation, go create it.
+                        final int res = Process.createProcessGroup(uid, startResult.pid);
+                        if (res < 0) {
+                            if (res == -OsConstants.ESRCH) {
+                                Slog.e(ActivityManagerService.TAG,
+                                        "Unable to create process group for "
+                                        + app.processName + " (" + startResult.pid + ")");
+                            } else {
+                                throw new AssertionError("Unable to create process group for "
+                                    + app.processName + " (" + startResult.pid + ")");
+                            }
+                        } else {
+                            app.mProcessGroupCreated = true;
+                        }
+                    }
                 }
             }
 
@@ -2574,7 +2595,10 @@ public final class ProcessList {
                     + ", " + reason);
             app.setPendingStart(false);
             killProcessQuiet(pid);
-            Process.killProcessGroup(app.uid, app.getPid());
+            final int appPid = app.getPid();
+            if (appPid != 0) {
+                Process.killProcessGroup(app.uid, appPid);
+            }
             noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
                     ApplicationExitInfo.SUBREASON_INVALID_START, reason);
             return false;
@@ -2872,7 +2896,7 @@ public final class ProcessList {
                     reasonCode, subReason, reason, !doFreeze /* async */);
         }
         killAppZygotesLocked(packageName, appId, userId, false /* force */);
-        mService.updateOomAdjLocked(OomAdjuster.OOM_ADJ_REASON_PROCESS_END);
+        mService.updateOomAdjLocked(OOM_ADJ_REASON_PROCESS_END);
         if (doFreeze) {
             freezePackageCgroup(packageUID, false);
         }
@@ -4897,12 +4921,14 @@ public final class ProcessList {
         final boolean isAllowed =
                 isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.getCurProcState(),
                         uidRec.getCurCapability())
-                || isProcStateAllowedWhileOnRestrictBackground(uidRec.getCurProcState());
+                || isProcStateAllowedWhileOnRestrictBackground(uidRec.getCurProcState(),
+                        uidRec.getCurCapability());
         // Denotes whether uid's process state was previously allowed network access.
         final boolean wasAllowed =
                 isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.getSetProcState(),
                         uidRec.getSetCapability())
-                || isProcStateAllowedWhileOnRestrictBackground(uidRec.getSetProcState());
+                || isProcStateAllowedWhileOnRestrictBackground(uidRec.getSetProcState(),
+                        uidRec.getSetCapability());
 
         // When the uid is coming to foreground, AMS should inform the app thread that it should
         // block for the network rules to get updated before launching an activity.
@@ -5135,7 +5161,7 @@ public final class ProcessList {
                 }
             });
             /* Will be a no-op if nothing pending */
-            mService.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_NONE);
+            mService.updateOomAdjPendingTargetsLocked(OOM_ADJ_REASON_RESTRICTION_CHANGE);
         }
     }
 
@@ -5195,6 +5221,17 @@ public final class ProcessList {
             app.setDyingPid(0);
         }
         mAppExitInfoTracker.scheduleNoteProcessDied(app);
+    }
+
+    /**
+     * Called by ActivityManagerService when a recoverable native crash occurs.
+     */
+    @GuardedBy("mService")
+    void noteAppRecoverableCrash(final ProcessRecord app) {
+        if (DEBUG_PROCESSES) {
+            Slog.i(TAG, "note: " + app + " has a recoverable native crash");
+        }
+        mAppExitInfoTracker.scheduleNoteAppRecoverableCrash(app);
     }
 
     /**
@@ -5276,7 +5313,7 @@ public final class ProcessList {
         return new Pair<>(numForegroundServices, procs);
     }
 
-    private final class ImperceptibleKillRunner extends IUidObserver.Stub {
+    private final class ImperceptibleKillRunner extends UidObserver {
         private static final String EXTRA_PID = "pid";
         private static final String EXTRA_UID = "uid";
         private static final String EXTRA_TIMESTAMP = "timestamp";
@@ -5532,24 +5569,8 @@ public final class ProcessList {
         }
 
         @Override
-        public void onUidActive(int uid) {
-        }
-
-        @Override
-        public void onUidIdle(int uid, boolean disabled) {
-        }
-
-        @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
             mHandler.obtainMessage(H.MSG_UID_STATE_CHANGED, uid, procState).sendToTarget();
-        }
-
-        @Override
-        public void onUidCachedChanged(int uid, boolean cached) {
-        }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
         }
     };
 }

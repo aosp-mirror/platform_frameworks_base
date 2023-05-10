@@ -104,7 +104,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         when(mMockRunner.asBinder()).thenReturn(new Binder());
         mController = spy(new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
                 DEFAULT_DISPLAY));
-        mController.mShouldAttachNavBarToAppDuringTransition = false;
         mRootHomeTask = mDefaultDisplay.getDefaultTaskDisplayArea().getRootHomeTask();
         assertNotNull(mRootHomeTask);
     }
@@ -814,13 +813,13 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     }
 
     private void setupForShouldAttachNavBarDuringTransition() {
-        mController.mShouldAttachNavBarToAppDuringTransition = true;
         final WindowState navBar = spy(createWindow(null, TYPE_NAVIGATION_BAR, "NavigationBar"));
         mDefaultDisplay.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
         mWm.setRecentsAnimationController(mController);
         doReturn(navBar).when(mController).getNavigationBarWindow();
         final DisplayPolicy displayPolicy = spy(mDefaultDisplay.getDisplayPolicy());
         doReturn(displayPolicy).when(mDefaultDisplay).getDisplayPolicy();
+        doReturn(true).when(displayPolicy).shouldAttachNavBarToAppDuringTransition();
     }
 
     private static void initializeRecentsAnimationController(RecentsAnimationController controller,

@@ -55,6 +55,7 @@ class AppOpsControllerTest {
     @Before
     fun setUp() {
         whenever(context.appOpsManager).thenReturn(appOpsManager)
+        whenever(context.packageManager).thenReturn(packageManager)
         doNothing().`when`(packageManager)
                 .updatePermissionFlags(anyString(), anyString(), anyInt(), anyInt(), any())
     }

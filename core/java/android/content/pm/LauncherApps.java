@@ -17,6 +17,7 @@
 package android.content.pm;
 
 import static android.Manifest.permission;
+import static android.Manifest.permission.READ_FRAME_BUFFER;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -68,6 +69,7 @@ import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
+import android.window.IDumpCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.infra.AndroidFuture;
@@ -763,10 +765,6 @@ public class LauncherApps {
     @Nullable
     public PendingIntent getMainActivityLaunchIntent(@NonNull ComponentName component,
             @Nullable Bundle startActivityOptions, @NonNull UserHandle user) {
-        if (mContext.checkSelfPermission(android.Manifest.permission.START_TASKS_FROM_RECENTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.w(TAG, "Only allowed for recents.");
-        }
         logErrorForInvalidProfileAccess(user);
         if (DEBUG) {
             Log.i(TAG, "GetMainActivityLaunchIntent " + component + " " + user);
@@ -1169,6 +1167,32 @@ public class LauncherApps {
             }
         }
         return shortcuts;
+    }
+
+    /**
+     * Register a callback to be called right before the wmtrace data is moved to the bugreport.
+     * @hide
+     */
+    @RequiresPermission(READ_FRAME_BUFFER)
+    public void registerDumpCallback(IDumpCallback cb) {
+        try {
+            mService.registerDumpCallback(cb);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
+    }
+
+    /**
+     * Unregister a callback, so that it won't be called when LauncherApps dumps.
+     * @hide
+     */
+    @RequiresPermission(READ_FRAME_BUFFER)
+    public void unRegisterDumpCallback(IDumpCallback cb) {
+        try {
+            mService.unRegisterDumpCallback(cb);
+        } catch (RemoteException e) {
+            e.rethrowAsRuntimeException();
+        }
     }
 
     /**

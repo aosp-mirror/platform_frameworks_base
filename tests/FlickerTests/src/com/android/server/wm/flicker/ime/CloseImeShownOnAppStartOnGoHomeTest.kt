@@ -18,7 +18,7 @@ package com.android.server.wm.flicker.ime
 
 import android.platform.test.annotations.Presubmit
 import android.tools.common.Rotation
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -40,6 +40,7 @@ import org.junit.runners.Parameterized
  *     Don't show if this is not explicitly requested by the user and the input method
  *     is fullscreen. That would be too disruptive.
  * ```
+ *
  * More details on b/190352379
  *
  * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToHomeTest`

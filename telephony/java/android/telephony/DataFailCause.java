@@ -997,7 +997,8 @@ public final class DataFailCause {
      */
     public static final int IWLAN_CONGESTION = 0x3C8C;
 
-    /** IKE configuration error resulting in failure  */
+    // Below IWLAN error codes are defined by the UE and do not relate to any 3GPP spec value
+    /** IKE configuration error resulting in failure */
     public static final int IWLAN_IKEV2_CONFIG_FAILURE = 0x4000;
     /**
      * Sent in the response to an IKE_AUTH message when, for some reason,
@@ -1014,6 +1015,57 @@ public final class DataFailCause {
     public static final int IWLAN_DNS_RESOLUTION_TIMEOUT = 0x4005;
     /** Expected to update or bring down an ePDG tunnel, but no tunnel found*/
     public static final int IWLAN_TUNNEL_NOT_FOUND = 0x4006;
+    /**
+     * Failed to apply tunnel transform
+     *
+     * @hide
+     */
+    public static final int IWLAN_TUNNEL_TRANSFORM_FAILED = 0x4007;
+    /**
+     * IWLAN PDN setup failed due to Wi-Fi lost during IKE tunnel setup,
+     * match exception reported by IKE module
+     *
+     * @hide
+     */
+    public static final int IWLAN_IKE_NETWORK_LOST_EXCEPTION = 0x4008;
+    /**
+     * Carrier-specific error codes during IKEv2 SA setup
+     *
+     * @hide
+     */
+    public static final int IWLAN_IKE_PRIVATE_PROTOCOL_ERROR = 0x4009;
+    /**
+     * IKE Session closed before child session opened
+     *
+     * @hide
+     */
+    public static final int IWLAN_IKE_SESSION_CLOSED_BEFORE_CHILD_SESSION_OPENED = 0x400A;
+    /**
+     * IKE Init timeout, no response from EPDG
+     *
+     * @hide
+     */
+    public static final int IWLAN_IKE_INIT_TIMEOUT = 0x400B;
+    /**
+     * DPD message does not get an ack after the re-tx attempts and duration, i.e., times out.
+     *
+     * @hide
+     */
+    public static final int IWLAN_IKE_DPD_TIMEOUT = 0x400C;
+    /**
+     * The Wi-Fi to Wi-Fi handover of the IMS PDN fails because the network does not respond to the
+     * MOBIKE/rekey mobility message in the expected manner
+     *
+     * @hide
+     */
+    public static final int IWLAN_IKE_MOBILITY_TIMEOUT = 0x400D;
+    /**
+     * IKE client sent "IKE AUTH request 3" to the network but got "Internal address failure" from
+     * the network since no internal addresses can be assigned.
+     *
+     * @hide
+     */
+    public static final int IWLAN_EPDG_INTERNAL_ADDRESS_FAILURE = 0x400E;
 
     // OEM sepecific error codes. To be used by OEMs when they don't
     // want to reveal error code which would be replaced by ERROR_UNSPECIFIED
@@ -1508,6 +1560,16 @@ public final class DataFailCause {
         sFailCauseMap.put(IWLAN_DNS_RESOLUTION_NAME_FAILURE, "IWLAN_DNS_RESOLUTION_NAME_FAILURE");
         sFailCauseMap.put(IWLAN_DNS_RESOLUTION_TIMEOUT, "IWLAN_DNS_RESOLUTION_TIMEOUT");
         sFailCauseMap.put(IWLAN_TUNNEL_NOT_FOUND, "IWLAN_TUNNEL_NOT_FOUND");
+        sFailCauseMap.put(IWLAN_TUNNEL_TRANSFORM_FAILED, "IWLAN_TUNNEL_TRANSFORM_FAILED");
+        sFailCauseMap.put(IWLAN_IKE_INIT_TIMEOUT, "IWLAN_IKE_INIT_TIMEOUT");
+        sFailCauseMap.put(IWLAN_IKE_NETWORK_LOST_EXCEPTION, "IWLAN_IKE_NETWORK_LOST_EXCEPTION");
+        sFailCauseMap.put(IWLAN_IKE_PRIVATE_PROTOCOL_ERROR, "IWLAN_IKE_PRIVATE_PROTOCOL_ERROR");
+        sFailCauseMap.put(IWLAN_IKE_SESSION_CLOSED_BEFORE_CHILD_SESSION_OPENED,
+                "IWLAN_IKE_SESSION_CLOSED_BEFORE_CHILD_SESSION_OPENED");
+        sFailCauseMap.put(IWLAN_IKE_DPD_TIMEOUT, "IWLAN_IKE_DPD_TIMEOUT");
+        sFailCauseMap.put(IWLAN_IKE_MOBILITY_TIMEOUT, "IWLAN_IKE_MOBILITY_TIMEOUT");
+        sFailCauseMap.put(IWLAN_EPDG_INTERNAL_ADDRESS_FAILURE,
+                "IWLAN_EPDG_INTERNAL_ADDRESS_FAILURE");
         sFailCauseMap.put(OEM_DCFAILCAUSE_1, "OEM_DCFAILCAUSE_1");
         sFailCauseMap.put(OEM_DCFAILCAUSE_2, "OEM_DCFAILCAUSE_2");
         sFailCauseMap.put(OEM_DCFAILCAUSE_3, "OEM_DCFAILCAUSE_3");

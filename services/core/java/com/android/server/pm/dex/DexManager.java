@@ -16,7 +16,6 @@
 
 package com.android.server.pm.dex;
 
-import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 import static com.android.server.pm.dex.PackageDexUsage.DexUseInfo;
 import static com.android.server.pm.dex.PackageDexUsage.PackageUseInfo;
@@ -657,62 +656,6 @@ public class DexManager {
         if (updated) {
             mPackageDexUsage.maybeWriteAsync();
         }
-    }
-
-    // TODO(calin): questionable API in the presence of class loaders context. Needs amends as the
-    // compilation happening here will use a pessimistic context.
-    public RegisterDexModuleResult registerDexModule(ApplicationInfo info, String dexPath,
-            boolean isSharedModule, int userId) throws LegacyDexoptDisabledException {
-        // Find the owning package record.
-        DexSearchResult searchResult = getDexPackage(info, dexPath, userId);
-
-        if (searchResult.mOutcome == DEX_SEARCH_NOT_FOUND) {
-            return new RegisterDexModuleResult(false, "Package not found");
-        }
-        if (!info.packageName.equals(searchResult.mOwningPackageName)) {
-            return new RegisterDexModuleResult(false, "Dex path does not belong to package");
-        }
-        if (searchResult.mOutcome == DEX_SEARCH_FOUND_PRIMARY ||
-                searchResult.mOutcome == DEX_SEARCH_FOUND_SPLIT) {
-            return new RegisterDexModuleResult(false, "Main apks cannot be registered");
-        }
-
-        // We found the package. Now record the usage for all declared ISAs.
-        boolean update = false;
-        // If this is a shared module set the loading package to an arbitrary package name
-        // so that we can mark that module as usedByOthers.
-        String loadingPackage = isSharedModule ? ".shared.module" : searchResult.mOwningPackageName;
-        for (String isa : getAppDexInstructionSets(info.primaryCpuAbi, info.secondaryCpuAbi)) {
-            boolean newUpdate = mPackageDexUsage.record(searchResult.mOwningPackageName,
-                    dexPath, userId, isa, /*primaryOrSplit*/ false,
-                    loadingPackage,
-                    PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT,
-                    /*overwriteCLC=*/ false);
-            update |= newUpdate;
-        }
-        if (update) {
-            mPackageDexUsage.maybeWriteAsync();
-        }
-
-        DexUseInfo dexUseInfo = mPackageDexUsage.getPackageUseInfo(searchResult.mOwningPackageName)
-                .getDexUseInfoMap().get(dexPath);
-
-        // Try to optimize the package according to the install reason.
-        DexoptOptions options = new DexoptOptions(info.packageName,
-                PackageManagerService.REASON_INSTALL, /*flags*/0);
-
-        int result = mPackageDexOptimizer.dexOptSecondaryDexPath(info, dexPath, dexUseInfo,
-                options);
-
-        // If we fail to optimize the package log an error but don't propagate the error
-        // back to the app. The app cannot do much about it and the background job
-        // will rety again when it executes.
-        // TODO(calin): there might be some value to return the error here but it may
-        // cause red herrings since that doesn't mean the app cannot use the module.
-        if (result != PackageDexOptimizer.DEX_OPT_FAILED) {
-            Slog.e(TAG, "Failed to optimize dex module " + dexPath);
-        }
-        return new RegisterDexModuleResult(true, "Dex module registered successfully");
     }
 
     /**

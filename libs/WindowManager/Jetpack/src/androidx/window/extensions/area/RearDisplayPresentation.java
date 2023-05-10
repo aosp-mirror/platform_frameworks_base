@@ -42,14 +42,14 @@ class RearDisplayPresentation extends Presentation implements ExtensionWindowAre
     /**
      * {@code mStateConsumer} is notified that their content is now visible when the
      * {@link Presentation} object is started. There is no comparable callback for
-     * {@link WindowAreaComponent#SESSION_STATE_INVISIBLE} in {@link #onStop()} due to the
+     * {@link WindowAreaComponent#SESSION_STATE_CONTENT_INVISIBLE} in {@link #onStop()} due to the
      * timing of when a {@link android.hardware.devicestate.DeviceStateRequest} is cancelled
      * ending rear display presentation mode happening before the {@link Presentation} is stopped.
      */
     @Override
     protected void onStart() {
         super.onStart();
-        mStateConsumer.accept(WindowAreaComponent.SESSION_STATE_VISIBLE);
+        mStateConsumer.accept(WindowAreaComponent.SESSION_STATE_CONTENT_VISIBLE);
     }
 
     @NonNull

@@ -41,7 +41,8 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
 
     // Desktop mode feature flag.
     static final boolean DESKTOP_MODE_SUPPORTED = SystemProperties.getBoolean(
-            "persist.wm.debug.desktop_mode", false);
+            "persist.wm.debug.desktop_mode", false) || SystemProperties.getBoolean(
+            "persist.wm.debug.desktop_mode_2", false);
     // Override default freeform task width when desktop mode is enabled. In dips.
     private static final int DESKTOP_MODE_DEFAULT_WIDTH_DP = SystemProperties.getInt(
             "persist.wm.debug.desktop_mode.default_width", 840);
@@ -79,8 +80,8 @@ public class DesktopModeLaunchParamsModifier implements LaunchParamsModifier {
             appendLog("not in bounds phase, skipping");
             return RESULT_SKIP;
         }
-        if (!task.inFreeformWindowingMode()) {
-            appendLog("not a freeform task, skipping");
+        if (!task.isActivityTypeStandard()) {
+            appendLog("not standard activity type, skipping");
             return RESULT_SKIP;
         }
         if (!currentParams.mBounds.isEmpty()) {

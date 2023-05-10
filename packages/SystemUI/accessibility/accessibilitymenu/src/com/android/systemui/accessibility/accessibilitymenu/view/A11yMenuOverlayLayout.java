@@ -194,13 +194,15 @@ public class A11yMenuOverlayLayout {
     /** Updates a11y menu layout position by configuring layout params. */
     private void updateLayoutPosition() {
         final Display display = mDisplayManager.getDisplay(Display.DEFAULT_DISPLAY);
-        final int orientation = mService.getResources().getConfiguration().orientation;
+        final Configuration configuration = mService.getResources().getConfiguration();
+        final int orientation = configuration.orientation;
         if (display != null && orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            final boolean ltr = configuration.getLayoutDirection() == View.LAYOUT_DIRECTION_LTR;
             switch (display.getRotation()) {
-                case Surface.ROTATION_90:
+                case Surface.ROTATION_0:
                 case Surface.ROTATION_180:
                     mLayoutParameter.gravity =
-                            Gravity.END | Gravity.BOTTOM
+                            (ltr ? Gravity.END : Gravity.START) | Gravity.BOTTOM
                                     | Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
                     mLayoutParameter.width = WindowManager.LayoutParams.WRAP_CONTENT;
                     mLayoutParameter.height = WindowManager.LayoutParams.MATCH_PARENT;
@@ -208,10 +210,10 @@ public class A11yMenuOverlayLayout {
                     mLayoutParameter.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
                     mLayout.setBackgroundResource(R.drawable.shadow_90deg);
                     break;
-                case Surface.ROTATION_0:
+                case Surface.ROTATION_90:
                 case Surface.ROTATION_270:
                     mLayoutParameter.gravity =
-                            Gravity.START | Gravity.BOTTOM
+                            (ltr ? Gravity.START : Gravity.END) | Gravity.BOTTOM
                                     | Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL;
                     mLayoutParameter.width = WindowManager.LayoutParams.WRAP_CONTENT;
                     mLayoutParameter.height = WindowManager.LayoutParams.MATCH_PARENT;

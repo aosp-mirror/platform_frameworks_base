@@ -40,6 +40,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.log.BiometricContext;
 import com.android.server.biometrics.log.BiometricLogger;
+import com.android.server.biometrics.log.OperationContextExt;
 import com.android.server.biometrics.sensors.AuthSessionCoordinator;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricNotificationUtils;
@@ -165,8 +166,17 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         final AidlSession session = getFreshDaemon();
 
         if (session.hasContextMethods()) {
-            return session.getSession().authenticateWithContext(
-                    mOperationId, getOperationContext().toAidlContext(getOptions()));
+            final OperationContextExt opContext = getOperationContext();
+            final ICancellationSignal cancel = session.getSession().authenticateWithContext(
+                    mOperationId, opContext.toAidlContext(getOptions()));
+            getBiometricContext().subscribe(opContext, ctx -> {
+                try {
+                    session.getSession().onContextChanged(ctx);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Unable to notify context changed", e);
+                }
+            });
+            return cancel;
         } else {
             return session.getSession().authenticate(mOperationId);
         }
@@ -174,6 +184,8 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
 
     @Override
     protected void stopHalOperation() {
+        unsubscribeBiometricContext();
+
         if (mCancellationSignal != null) {
             try {
                 mCancellationSignal.cancel();
@@ -200,6 +212,8 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         // 1) Authenticated == true
         // 2) Error occurred
         // 3) Authenticated == false
+        // 4) onLockout
+        // 5) onLockoutTimed
         mCallback.onClientFinished(this, true /* success */);
     }
 
@@ -292,11 +306,7 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         PerformanceTracker.getInstanceForSensorId(getSensorId())
                 .incrementTimedLockoutForUser(getTargetUserId());
 
-        try {
-            getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-        }
+        onError(error, 0 /* vendorCode */);
     }
 
     @Override
@@ -311,10 +321,6 @@ class FaceAuthenticationClient extends AuthenticationClient<AidlSession, FaceAut
         PerformanceTracker.getInstanceForSensorId(getSensorId())
                 .incrementPermanentLockoutForUser(getTargetUserId());
 
-        try {
-            getListener().onError(getSensorId(), getCookie(), error, 0 /* vendorCode */);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote exception", e);
-        }
+        onError(error, 0 /* vendorCode */);
     }
 }

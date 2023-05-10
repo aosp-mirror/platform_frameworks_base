@@ -276,9 +276,9 @@ public class ThermalStatusRestrictionTest {
         assertFalse(mThermalStatusRestriction.isJobRestricted(ejRunning));
         assertTrue(mThermalStatusRestriction.isJobRestricted(ejRunningLong));
         assertFalse(mThermalStatusRestriction.isJobRestricted(ui));
-        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRetried));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(uiRetried));
         assertFalse(mThermalStatusRestriction.isJobRestricted(uiRunning));
-        assertTrue(mThermalStatusRestriction.isJobRestricted(uiRunningLong));
+        assertFalse(mThermalStatusRestriction.isJobRestricted(uiRunningLong));
 
         mStatusChangedListener.onThermalStatusChanged(THERMAL_STATUS_SEVERE);
 

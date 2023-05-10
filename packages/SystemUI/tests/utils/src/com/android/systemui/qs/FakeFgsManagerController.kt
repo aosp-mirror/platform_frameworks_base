@@ -23,11 +23,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 /** A fake [FgsManagerController] to be used in tests. */
 class FakeFgsManagerController(
-    isAvailable: Boolean = true,
     showFooterDot: Boolean = false,
     numRunningPackages: Int = 0,
 ) : FgsManagerController {
-    override val isAvailable: MutableStateFlow<Boolean> = MutableStateFlow(isAvailable)
 
     override var numRunningPackages = numRunningPackages
         set(value) {

@@ -18,19 +18,17 @@
 
 //#define LOG_NDEBUG 0
 
-#include <nativehelper/JNIHelp.h>
-
-#include <inttypes.h>
-
 #include <android_runtime/AndroidRuntime.h>
+#include <android_runtime/Log.h>
 #include <gui/DisplayEventDispatcher.h>
+#include <inttypes.h>
+#include <nativehelper/JNIHelp.h>
+#include <nativehelper/ScopedLocalRef.h>
 #include <utils/Log.h>
 #include <utils/Looper.h>
 #include <utils/threads.h>
+
 #include "android_os_MessageQueue.h"
-
-#include <nativehelper/ScopedLocalRef.h>
-
 #include "core_jni_helpers.h"
 
 namespace android {
@@ -65,6 +63,7 @@ static struct {
 
         jfieldID frameInterval;
         jfieldID preferredFrameTimelineIndex;
+        jfieldID frameTimelinesLength;
         jfieldID frameTimelines;
     } vsyncEventDataClassInfo;
 
@@ -129,11 +128,17 @@ void NativeDisplayEventReceiver::dispose() {
 static jobject createJavaVsyncEventData(JNIEnv* env, VsyncEventData vsyncEventData) {
     ScopedLocalRef<jobjectArray>
             frameTimelineObjs(env,
-                              env->NewObjectArray(VsyncEventData::kFrameTimelinesLength,
+                              env->NewObjectArray(vsyncEventData.frameTimelinesLength,
                                                   gDisplayEventReceiverClassInfo
                                                           .frameTimelineClassInfo.clazz,
                                                   /*initial element*/ NULL));
-    for (int i = 0; i < VsyncEventData::kFrameTimelinesLength; i++) {
+    if (!frameTimelineObjs.get() || env->ExceptionCheck()) {
+        ALOGW("%s: Failed to create FrameTimeline array", __func__);
+        LOGW_EX(env);
+        env->ExceptionClear();
+        return NULL;
+    }
+    for (int i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
         VsyncEventData::FrameTimeline frameTimeline = vsyncEventData.frameTimelines[i];
         ScopedLocalRef<jobject>
                 frameTimelineObj(env,
@@ -144,12 +149,18 @@ static jobject createJavaVsyncEventData(JNIEnv* env, VsyncEventData vsyncEventDa
                                                 frameTimeline.vsyncId,
                                                 frameTimeline.expectedPresentationTime,
                                                 frameTimeline.deadlineTimestamp));
+        if (!frameTimelineObj.get() || env->ExceptionCheck()) {
+            ALOGW("%s: Failed to create FrameTimeline object", __func__);
+            LOGW_EX(env);
+            env->ExceptionClear();
+            return NULL;
+        }
         env->SetObjectArrayElement(frameTimelineObjs.get(), i, frameTimelineObj.get());
     }
     return env->NewObject(gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
                           gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.init,
                           frameTimelineObjs.get(), vsyncEventData.preferredFrameTimelineIndex,
-                          vsyncEventData.frameInterval);
+                          vsyncEventData.frameTimelinesLength, vsyncEventData.frameInterval);
 }
 
 void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDisplayId displayId,
@@ -165,25 +176,33 @@ void NativeDisplayEventReceiver::dispatchVsync(nsecs_t timestamp, PhysicalDispla
                          gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo
                                  .preferredFrameTimelineIndex,
                          vsyncEventData.preferredFrameTimelineIndex);
+        env->SetIntField(vsyncEventDataObj.get(),
+                         gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo
+                                 .frameTimelinesLength,
+                         vsyncEventData.frameTimelinesLength);
         env->SetLongField(vsyncEventDataObj.get(),
                           gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.frameInterval,
                           vsyncEventData.frameInterval);
 
-        jobjectArray frameTimelinesObj = reinterpret_cast<jobjectArray>(
-                env->GetObjectField(vsyncEventDataObj.get(),
-                                    gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo
-                                            .frameTimelines));
-        for (int i = 0; i < VsyncEventData::kFrameTimelinesLength; i++) {
+        ScopedLocalRef<jobjectArray>
+                frameTimelinesObj(env,
+                                  reinterpret_cast<jobjectArray>(
+                                          env->GetObjectField(vsyncEventDataObj.get(),
+                                                              gDisplayEventReceiverClassInfo
+                                                                      .vsyncEventDataClassInfo
+                                                                      .frameTimelines)));
+        for (int i = 0; i < vsyncEventData.frameTimelinesLength; i++) {
             VsyncEventData::FrameTimeline& frameTimeline = vsyncEventData.frameTimelines[i];
-            jobject frameTimelineObj = env->GetObjectArrayElement(frameTimelinesObj, i);
-            env->SetLongField(frameTimelineObj,
+            ScopedLocalRef<jobject>
+                    frameTimelineObj(env, env->GetObjectArrayElement(frameTimelinesObj.get(), i));
+            env->SetLongField(frameTimelineObj.get(),
                               gDisplayEventReceiverClassInfo.frameTimelineClassInfo.vsyncId,
                               frameTimeline.vsyncId);
-            env->SetLongField(frameTimelineObj,
+            env->SetLongField(frameTimelineObj.get(),
                               gDisplayEventReceiverClassInfo.frameTimelineClassInfo
                                       .expectedPresentationTime,
                               frameTimeline.expectedPresentationTime);
-            env->SetLongField(frameTimelineObj,
+            env->SetLongField(frameTimelineObj.get(),
                               gDisplayEventReceiverClassInfo.frameTimelineClassInfo.deadline,
                               frameTimeline.deadlineTimestamp);
         }
@@ -378,11 +397,14 @@ int register_android_view_DisplayEventReceiver(JNIEnv* env) {
             GetMethodIDOrDie(env, gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
                              "<init>",
                              "([Landroid/view/"
-                             "DisplayEventReceiver$VsyncEventData$FrameTimeline;IJ)V");
+                             "DisplayEventReceiver$VsyncEventData$FrameTimeline;IIJ)V");
 
     gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.preferredFrameTimelineIndex =
             GetFieldIDOrDie(env, gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
                             "preferredFrameTimelineIndex", "I");
+    gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.frameTimelinesLength =
+            GetFieldIDOrDie(env, gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
+                            "frameTimelinesLength", "I");
     gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.frameInterval =
             GetFieldIDOrDie(env, gDisplayEventReceiverClassInfo.vsyncEventDataClassInfo.clazz,
                             "frameInterval", "J");

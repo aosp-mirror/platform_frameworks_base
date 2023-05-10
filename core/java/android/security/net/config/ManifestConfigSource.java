@@ -25,7 +25,7 @@ import java.util.Set;
 
 /** @hide */
 public class ManifestConfigSource implements ConfigSource {
-    private static final boolean DBG = true;
+    private static final boolean DBG = false;
     private static final String LOG_TAG = "NetworkSecurityConfig";
 
     private final Object mLock = new Object();

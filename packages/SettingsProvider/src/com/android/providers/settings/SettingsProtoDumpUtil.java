@@ -120,6 +120,17 @@ class SettingsProtoDumpUtil {
             dumpProtoUserSettingsLocked(proto, SettingsServiceDumpProto.USER_SETTINGS,
                     settingsRegistry, UserHandle.of(users.keyAt(i)));
         }
+
+        // Generation registry
+        dumpProtoGenerationRegistryLocked(proto, SettingsServiceDumpProto.GENERATION_REGISTRY,
+                settingsRegistry);
+    }
+
+    private static void dumpProtoGenerationRegistryLocked(@NonNull ProtoOutputStream proto,
+            long fieldId, SettingsProvider.SettingsRegistry settingsRegistry) {
+        final long token = proto.start(fieldId);
+        settingsRegistry.getGenerationRegistry().dumpProto(proto);
+        proto.end(token);
     }
 
     /**
@@ -2766,6 +2777,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.System.SHOW_TOUCHES,
                 SystemSettingsProto.DevOptions.SHOW_TOUCHES);
+        dumpSetting(s, p,
+                Settings.System.SHOW_KEY_PRESSES,
+                SystemSettingsProto.DevOptions.SHOW_KEY_PRESSES);
         dumpSetting(s, p,
                 Settings.System.POINTER_LOCATION,
                 SystemSettingsProto.DevOptions.POINTER_LOCATION);

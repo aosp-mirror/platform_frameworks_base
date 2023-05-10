@@ -105,8 +105,8 @@ public class FontManagerShellCommand extends ShellCommand {
         w.println("    Update font families with the new definitions.");
         w.println();
         w.println("install-debug-cert [cert file path]");
-        w.println("    Install debug certificate file. This command can be used only on userdebug");
-        w.println("    or eng device with root user.");
+        w.println("    Install debug certificate file. This command can be used only on");
+        w.println("    debuggable device with root user.");
         w.println();
         w.println("clear");
         w.println("    Remove all installed font files and reset to the initial state.");
@@ -334,8 +334,8 @@ public class FontManagerShellCommand extends ShellCommand {
     }
 
     private int installCert(ShellCommand shell) throws SystemFontException {
-        if (!(Build.IS_USERDEBUG || Build.IS_ENG)) {
-            throw new SecurityException("Only userdebug/eng device can add debug certificate");
+        if (!Build.IS_DEBUGGABLE) {
+            throw new SecurityException("Only debuggable device can add debug certificate");
         }
         if (Binder.getCallingUid() != Process.ROOT_UID) {
             throw new SecurityException("Only root can add debug certificate");

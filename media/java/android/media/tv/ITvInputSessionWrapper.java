@@ -223,7 +223,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
             case DO_TIME_SHIFT_SET_MODE: {
-                mTvInputSessionImpl.timeShiftSetMode((Integer) msg.obj);
+                mTvInputSessionImpl.timeShiftSetMode(msg.arg1);
+                break;
             }
             case DO_TIME_SHIFT_ENABLE_POSITION_TRACKING: {
                 mTvInputSessionImpl.timeShiftEnablePositionTracking((Boolean) msg.obj);
@@ -249,7 +250,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_SELECT_AUDIO_PRESENTATION: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputSessionImpl.selectAudioPresentation(args.argi1, args.argi2);
+                mTvInputSessionImpl.selectAudioPresentation(
+                        (Integer) args.arg1, (Integer) args.arg2);
                 args.recycle();
                 break;
             }
@@ -267,7 +269,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
             }
             case DO_SET_TV_MESSAGE_ENABLED: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputSessionImpl.setTvMessageEnabled((String) args.arg1, (Boolean) args.arg2);
+                mTvInputSessionImpl.setTvMessageEnabled((Integer) args.arg1, (Boolean) args.arg2);
+                args.recycle();
                 break;
             }
             case DO_REQUEST_AD: {
@@ -275,12 +278,12 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
                 break;
             }
             case DO_NOTIFY_AD_BUFFER: {
-                mTvInputSessionImpl.notifyAdBuffer((AdBuffer) msg.obj);
+                mTvInputSessionImpl.notifyAdBufferReady((AdBuffer) msg.obj);
                 break;
             }
             case DO_NOTIFY_TV_MESSAGE: {
                 SomeArgs args = (SomeArgs) msg.obj;
-                mTvInputSessionImpl.onTvMessageReceived((String) args.arg1, (Bundle) args.arg2);
+                mTvInputSessionImpl.onTvMessageReceived((Integer) args.arg1, (Bundle) args.arg2);
                 break;
             }
             default: {
@@ -347,8 +350,8 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
 
     @Override
     public void selectAudioPresentation(int presentationId, int programId) {
-        mCaller.executeOrSendMessage(mCaller.obtainMessageII(DO_SELECT_AUDIO_PRESENTATION,
-                                                             presentationId, programId));
+        mCaller.executeOrSendMessage(
+                mCaller.obtainMessageOO(DO_SELECT_AUDIO_PRESENTATION, presentationId, programId));
     }
 
     @Override
@@ -465,13 +468,19 @@ public class ITvInputSessionWrapper extends ITvInputSession.Stub implements Hand
     }
 
     @Override
-    public void notifyAdBuffer(AdBuffer buffer) {
+    public void notifyAdBufferReady(AdBuffer buffer) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageO(DO_NOTIFY_AD_BUFFER, buffer));
     }
 
     @Override
-    public void notifyTvMessage(String type, Bundle data) {
+    public void notifyTvMessage(int type, Bundle data) {
         mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_NOTIFY_TV_MESSAGE, type, data));
+    }
+
+    @Override
+    public void setTvMessageEnabled(int type, boolean enabled) {
+        mCaller.executeOrSendMessage(mCaller.obtainMessageOO(DO_SET_TV_MESSAGE_ENABLED, type,
+                enabled));
     }
 
     private final class TvInputEventReceiver extends InputEventReceiver {

@@ -17,12 +17,20 @@
 package com.android.systemui.biometrics.dagger
 
 import com.android.settingslib.udfps.UdfpsUtils
+import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
+import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepositoryImpl
 import com.android.systemui.biometrics.data.repository.PromptRepository
 import com.android.systemui.biometrics.data.repository.PromptRepositoryImpl
+import com.android.systemui.biometrics.data.repository.RearDisplayStateRepository
+import com.android.systemui.biometrics.data.repository.RearDisplayStateRepositoryImpl
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.CredentialInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractorImpl
+import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractor
+import com.android.systemui.biometrics.domain.interactor.SideFpsOverlayInteractorImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.util.concurrency.ThreadFactory
 import dagger.Binds
@@ -41,11 +49,28 @@ interface BiometricsModule {
 
     @Binds
     @SysUISingleton
+    fun fingerprintRepository(impl: FingerprintPropertyRepositoryImpl):
+            FingerprintPropertyRepository
+    @Binds
+    @SysUISingleton
+    fun rearDisplayStateRepository(impl: RearDisplayStateRepositoryImpl): RearDisplayStateRepository
+
+    @Binds
+    @SysUISingleton
     fun providesCredentialInteractor(impl: CredentialInteractorImpl): CredentialInteractor
 
     @Binds
     @SysUISingleton
+    fun providesDisplayStateInteractor(impl: DisplayStateInteractorImpl): DisplayStateInteractor
+
+    @Binds
+    @SysUISingleton
     fun bindsLogContextInteractor(impl: LogContextInteractorImpl): LogContextInteractor
+
+    @Binds
+    @SysUISingleton
+    fun providesSideFpsOverlayInteractor(impl: SideFpsOverlayInteractorImpl):
+            SideFpsOverlayInteractor
 
     companion object {
         /** Background [Executor] for HAL related operations. */

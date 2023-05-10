@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -65,6 +66,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -76,9 +78,11 @@ import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseArray;
 import android.view.Display;
@@ -107,6 +111,7 @@ import android.window.TransitionRequestInfo;
 
 import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.wm.DisplayWindowSettings.SettingsProvider.SettingsEntry;
 
 import org.junit.After;
@@ -144,6 +149,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
     WindowManagerService mWm;
     private final IWindow mIWindow = new TestIWindow();
     private Session mMockSession;
+    private boolean mUseFakeSettingsProvider;
 
     DisplayInfo mDisplayInfo = new DisplayInfo();
     DisplayContent mDefaultDisplay;
@@ -191,6 +197,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
      */
     private static boolean sOverridesCheckedTestDisplay;
 
+    private boolean mOriginalPerDisplayFocusEnabled;
+
     @BeforeClass
     public static void setUpOnceBase() {
         AttributeCache.init(getInstrumentation().getTargetContext());
@@ -202,6 +210,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         mSupervisor = mAtm.mTaskSupervisor;
         mRootWindowContainer = mAtm.mRootWindowContainer;
         mWm = mSystemServicesTestRule.getWindowManagerService();
+        mOriginalPerDisplayFocusEnabled = mWm.mPerDisplayFocusEnabled;
         SystemServicesTestRule.checkHoldsLock(mWm.mGlobalLock);
 
         mDefaultDisplay = mWm.mRoot.getDefaultDisplay();
@@ -270,16 +279,10 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
     @After
     public void tearDown() throws Exception {
-        // Revert back to device overrides.
-        mAtm.mWindowManager.mLetterboxConfiguration.resetFixedOrientationLetterboxAspectRatio();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetLetterboxHorizontalPositionMultiplier();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetLetterboxVerticalPositionMultiplier();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetIsHorizontalReachabilityEnabled();
-        mAtm.mWindowManager.mLetterboxConfiguration.resetIsVerticalReachabilityEnabled();
-        mAtm.mWindowManager.mLetterboxConfiguration
-                .resetIsSplitScreenAspectRatioForUnresizableAppsEnabled();
-        mAtm.mWindowManager.mLetterboxConfiguration
-                .resetIsDisplayAspectRatioEnabledForFixedOrientationLetterbox();
+        if (mUseFakeSettingsProvider) {
+            FakeSettingsProvider.clearSettingsProvider();
+        }
+        mWm.mPerDisplayFocusEnabled = mOriginalPerDisplayFocusEnabled;
     }
 
     /**
@@ -360,9 +363,12 @@ class WindowTestsBase extends SystemServiceTestsBase {
                     new InsetsFrameProvider(owner, 0, WindowInsets.Type.tappableElement()),
                     new InsetsFrameProvider(owner, 0, WindowInsets.Type.mandatorySystemGestures())
             };
-            for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
-                mNavBarWindow.mAttrs.paramsForRotation[rot] =
-                        getNavBarLayoutParamsForRotation(rot, owner);
+            // If the navigation bar cannot move then it is always at the bottom.
+            if (mDisplayContent.getDisplayPolicy().navigationBarCanMove()) {
+                for (int rot = Surface.ROTATION_0; rot <= Surface.ROTATION_270; rot++) {
+                    mNavBarWindow.mAttrs.paramsForRotation[rot] =
+                            getNavBarLayoutParamsForRotation(rot, owner);
+                }
             }
         }
         if (addAll || ArrayUtils.contains(requestedWindows, W_DOCK_DIVIDER)) {
@@ -426,6 +432,17 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // Called before display is created.
     }
 
+    /** Avoid writing values to real Settings. */
+    ContentResolver useFakeSettingsProvider() {
+        mUseFakeSettingsProvider = true;
+        FakeSettingsProvider.clearSettingsProvider();
+        final FakeSettingsProvider provider = new FakeSettingsProvider();
+        // SystemServicesTestRule#setUpSystemCore has called spyOn for the ContentResolver.
+        final ContentResolver resolver = mContext.getContentResolver();
+        doReturn(provider.getIContentProvider()).when(resolver).acquireProvider(Settings.AUTHORITY);
+        return resolver;
+    }
+
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
         final WindowState win = createWindow(parent, type, name);
         // Prevent common windows from been IME targets.
@@ -461,10 +478,27 @@ class WindowTestsBase extends SystemServiceTestsBase {
         return navbar;
     }
 
+    WindowState createStatusBarWithProvidedInsets(DisplayContent dc) {
+        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, dc, "statusBar");
+        final Binder owner = new Binder();
+        statusBar.mAttrs.providedInsets = new InsetsFrameProvider[] {
+                new InsetsFrameProvider(owner, 0, WindowInsets.Type.statusBars())
+                        .setInsetsSize(Insets.of(0, STATUS_BAR_HEIGHT, 0, 0))
+        };
+        dc.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
+        return statusBar;
+    }
+
     WindowState createAppWindow(Task task, int type, String name) {
         final ActivityRecord activity = createNonAttachedActivityRecord(task.getDisplayContent());
         task.addChild(activity, 0);
         return createWindow(null, type, activity, name);
+    }
+
+    WindowState createDreamWindow(WindowState parent, int type, String name) {
+        final WindowToken token = createWindowToken(
+                mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM, type);
+        return createWindow(parent, type, token, name);
     }
 
     // TODO: Move these calls to a builder?
@@ -879,7 +913,11 @@ class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     BLASTSyncEngine createTestBLASTSyncEngine() {
-        return new BLASTSyncEngine(mWm) {
+        return createTestBLASTSyncEngine(mWm.mH);
+    }
+
+    BLASTSyncEngine createTestBLASTSyncEngine(Handler handler) {
+        return new BLASTSyncEngine(mWm, handler) {
             @Override
             void scheduleTimeout(SyncGroup s, long timeoutMs) {
                 // Disable timeout.
@@ -1746,7 +1784,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
     static class TestTransitionController extends TransitionController {
         TestTransitionController(ActivityTaskManagerService atms) {
             super(atms);
-            mTaskSnapshotController = mock(TaskSnapshotController.class);
+            doReturn(this).when(atms).getTransitionController();
+            mSnapshotController = mock(SnapshotController.class);
             mTransitionTracer = mock(TransitionTracer.class);
         }
     }
@@ -1799,7 +1838,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         }
 
         public void finish() {
-            mController.finishTransition(mLastTransit.getToken());
+            mController.finishTransition(mLastTransit);
         }
     }
 }

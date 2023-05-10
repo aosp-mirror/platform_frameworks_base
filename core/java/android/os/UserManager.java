@@ -65,7 +65,6 @@ import android.util.Log;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.R;
-import com.android.internal.util.FrameworkStatsLog;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
@@ -2533,38 +2532,6 @@ public class UserManager {
     }
 
     /**
-     * Returns the enum defined in the statsd UserLifecycleJourneyReported atom corresponding to the
-     * user type.
-     * @hide
-     */
-    public static int getUserTypeForStatsd(@NonNull String userType) {
-        switch (userType) {
-            case USER_TYPE_FULL_SYSTEM:
-                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_SYSTEM;
-            case USER_TYPE_FULL_SECONDARY:
-                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_SECONDARY;
-            case USER_TYPE_FULL_GUEST:
-                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_GUEST;
-            case USER_TYPE_FULL_DEMO:
-                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_DEMO;
-            case USER_TYPE_FULL_RESTRICTED:
-                return FrameworkStatsLog
-                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_RESTRICTED;
-            case USER_TYPE_PROFILE_MANAGED:
-                return FrameworkStatsLog
-                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__PROFILE_MANAGED;
-            case USER_TYPE_SYSTEM_HEADLESS:
-                return FrameworkStatsLog
-                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__SYSTEM_HEADLESS;
-            case USER_TYPE_PROFILE_CLONE:
-                return FrameworkStatsLog
-                        .USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__PROFILE_CLONE;
-            default:
-                return FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__TYPE_UNKNOWN;
-        }
-    }
-
-    /**
      * @hide
      * @deprecated Use {@link #isRestrictedProfile()}
      */
@@ -3056,14 +3023,14 @@ public class UserManager {
     }
 
     /**
-     * See {@link com.android.server.pm.UserManagerInternal#getDisplayAssignedToUser(int)}.
+     * See {@link com.android.server.pm.UserManagerInternal#getMainDisplayAssignedToUser(int)}.
      *
      * @hide
      */
     @TestApi
-    public int getDisplayIdAssignedToUser() {
+    public int getMainDisplayIdAssignedToUser() {
         try {
-            return mService.getDisplayIdAssignedToUser();
+            return mService.getMainDisplayIdAssignedToUser();
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -3706,17 +3673,24 @@ public class UserManager {
      * {@link android.Manifest.permission#CREATE_USERS} suffices if flags are in
      * com.android.server.pm.UserManagerService#ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION.
      *
+     *
      * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_GUEST}.
      * @return the {@link UserInfo} object for the created user.
      *
      * @throws UserOperationException if the user could not be created.
+     *
+     * @deprecated Pre-created users are deprecated. This method should no longer be used, and will
+     *             be removed once all the callers are removed.
+     *
      * @hide
      */
+    @Deprecated
     @TestApi
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
     public @NonNull UserInfo preCreateUser(@NonNull String userType)
             throws UserOperationException {
+        Log.w(TAG, "preCreateUser(): Pre-created user is deprecated.");
         try {
             return mService.preCreateUserWithThrow(userType);
         } catch (ServiceSpecificException e) {
@@ -4250,7 +4224,8 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS
     })
-    public List<UserInfo> getUsers() {
+    @TestApi
+    public @NonNull List<UserInfo> getUsers() {
         return getUsers(/*excludePartial= */ true, /* excludeDying= */ false,
                 /* excludePreCreated= */ true);
     }
@@ -4271,6 +4246,7 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.CREATE_USERS
     })
+    @TestApi
     public @NonNull List<UserInfo> getAliveUsers() {
         return getUsers(/*excludePartial= */ true, /* excludeDying= */ true,
                 /* excludePreCreated= */ true);
@@ -4296,8 +4272,11 @@ public class UserManager {
     /**
      * Returns information for all users on this device, based on the filtering parameters.
      *
+     * @deprecated Pre-created users are deprecated and no longer supported.
+     *             Use {@link #getUsers()}, or {@link #getAliveUsers()} instead.
      * @hide
      */
+    @Deprecated
     @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.MANAGE_USERS,
@@ -5601,16 +5580,15 @@ public class UserManager {
      *
      * @see #KEY_RESTRICTIONS_PENDING
      *
-     * @deprecated Use
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing apps on the device with the ability to set
+     * restrictions, e.g. an Enterprise Device Policy Controller (DPC) and a Supervision admin.
+     * This API will only to return the restrictions set by the DPCs. To retrieve restrictions
+     * set by all managing apps, use
      * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
-     * Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, it is
-     * possible for there to be multiple managing agents on the device with the ability to set
-     * restrictions. This API will only to return the restrictions set by device policy controllers
-     * (DPCs)
      *
      * @see DevicePolicyManager
      */
-    @Deprecated
     @WorkerThread
     @UserHandleAware(enabledSinceTargetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public Bundle getApplicationRestrictions(String packageName) {
@@ -5623,12 +5601,15 @@ public class UserManager {
     }
 
     /**
-     * @deprecated Use
+     * <p>Starting from Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * it is possible for there to be multiple managing apps on the device with the ability to set
+     * restrictions, e.g. an Enterprise Device Policy Controller (DPC) and a Supervision admin.
+     * This API will only to return the restrictions set by the DPCs. To retrieve restrictions
+     * set by all managing apps, use
      * {@link android.content.RestrictionsManager#getApplicationRestrictionsPerAdmin} instead.
      *
      * @hide
      */
-    @Deprecated
     @WorkerThread
     public Bundle getApplicationRestrictions(String packageName, UserHandle user) {
         try {

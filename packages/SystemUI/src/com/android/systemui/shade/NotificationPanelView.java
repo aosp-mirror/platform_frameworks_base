@@ -27,9 +27,6 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.FrameLayout;
 
-import com.android.systemui.R;
-import com.android.systemui.statusbar.phone.TapAgainView;
-
 /** The shade view. */
 public final class NotificationPanelView extends FrameLayout {
     static final boolean DEBUG = false;
@@ -91,10 +88,6 @@ public final class NotificationPanelView extends FrameLayout {
 
     void setRtlChangeListener(RtlChangeListener listener) {
         mRtlChangeListener = listener;
-    }
-
-    public TapAgainView getTapAgainView() {
-        return findViewById(R.id.shade_falsing_tap_again);
     }
 
     /** Sets the touch handler for this view. */

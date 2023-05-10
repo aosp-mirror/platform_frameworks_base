@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
+import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
@@ -46,7 +47,9 @@ import com.android.systemui.accessibility.AccessibilityButtonTargetsObserver;
 import com.android.systemui.accessibility.SystemActions;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler;
 import com.android.systemui.recents.OverviewProxyService;
+import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
@@ -101,6 +104,14 @@ public class NavBarHelperTest extends SysuiTestCase {
     NavBarHelper.NavbarTaskbarStateUpdater mNavbarTaskbarStateUpdater;
     @Mock
     CommandQueue mCommandQueue;
+    @Mock
+    IWindowManager mWm;
+    @Mock
+    DisplayTracker mDisplayTracker;
+    @Mock
+    EdgeBackGestureHandler mEdgeBackGestureHandler;
+    @Mock
+    EdgeBackGestureHandler.Factory mEdgeBackGestureHandlerFactory;
     private AccessibilityManager.AccessibilityServicesStateChangeListener
             mAccessibilityServicesStateChangeListener;
 
@@ -114,6 +125,8 @@ public class NavBarHelperTest extends SysuiTestCase {
         when(mAssistManagerLazy.get()).thenReturn(mAssistManager);
         when(mAssistManager.getAssistInfoForUser(anyInt())).thenReturn(mAssistantComponent);
         when(mUserTracker.getUserId()).thenReturn(1);
+        when(mDisplayTracker.getDefaultDisplayId()).thenReturn(0);
+        when(mEdgeBackGestureHandlerFactory.create(any())).thenReturn(mEdgeBackGestureHandler);
 
         doAnswer((invocation) -> mAccessibilityServicesStateChangeListener =
                 invocation.getArgument(0)).when(
@@ -122,36 +135,70 @@ public class NavBarHelperTest extends SysuiTestCase {
                 mAccessibilityButtonModeObserver, mAccessibilityButtonTargetObserver,
                 mSystemActions, mOverviewProxyService, mAssistManagerLazy,
                 () -> Optional.of(mock(CentralSurfaces.class)), mock(KeyguardStateController.class),
-                mNavigationModeController, mUserTracker, mDumpManager, mCommandQueue);
+                mNavigationModeController, mEdgeBackGestureHandlerFactory, mWm, mUserTracker,
+                mDisplayTracker, mDumpManager, mCommandQueue);
 
     }
 
     @Test
     public void registerListenersInCtor() {
-        verify(mAccessibilityButtonModeObserver, times(1)).addListener(mNavBarHelper);
         verify(mNavigationModeController, times(1)).addListener(mNavBarHelper);
         verify(mOverviewProxyService, times(1)).addCallback(mNavBarHelper);
+        verify(mCommandQueue, times(1)).addCallback(any());
     }
 
     @Test
-    public void registerAssistantContentObserver() {
-        mNavBarHelper.init();
+    public void testSetupBarsRegistersListeners() throws Exception {
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        verify(mAccessibilityButtonModeObserver, times(1)).addListener(mNavBarHelper);
+        verify(mAccessibilityButtonTargetObserver, times(1)).addListener(mNavBarHelper);
+        verify(mAccessibilityManager, times(1)).addAccessibilityServicesStateChangeListener(
+                mNavBarHelper);
         verify(mAssistManager, times(1)).getAssistInfoForUser(anyInt());
+        verify(mWm, times(1)).watchRotation(any(), anyInt());
+        verify(mWm, times(1)).registerWallpaperVisibilityListener(any(), anyInt());
+        verify(mEdgeBackGestureHandler, times(1)).onNavBarAttached();
+    }
+
+    @Test
+    public void testCleanupBarsUnregistersListeners() throws Exception {
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        verify(mAccessibilityButtonModeObserver, times(1)).removeListener(mNavBarHelper);
+        verify(mAccessibilityButtonTargetObserver, times(1)).removeListener(mNavBarHelper);
+        verify(mAccessibilityManager, times(1)).removeAccessibilityServicesStateChangeListener(
+                mNavBarHelper);
+        verify(mWm, times(1)).removeRotationWatcher(any());
+        verify(mWm, times(1)).unregisterWallpaperVisibilityListener(any(), anyInt());
+        verify(mEdgeBackGestureHandler, times(1)).onNavBarDetached();
+    }
+
+    @Test
+    public void replacingBarsHint() {
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        mNavBarHelper.setTogglingNavbarTaskbar(true);
+        mNavBarHelper.removeNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
+        mNavBarHelper.setTogglingNavbarTaskbar(false);
+        // Use any state in cleanup to verify it was not called
+        verify(mAccessibilityButtonModeObserver, times(0)).removeListener(mNavBarHelper);
     }
 
     @Test
     public void callbacksFiredWhenRegistering() {
-        mNavBarHelper.init();
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateAccessibilityServicesState();
         verify(mNavbarTaskbarStateUpdater, times(1))
                 .updateAssistantAvailable(anyBoolean(), anyBoolean());
+        verify(mNavbarTaskbarStateUpdater, times(1))
+                .updateRotationWatcherState(anyInt());
+        verify(mNavbarTaskbarStateUpdater, times(1))
+                .updateWallpaperVisibility(anyBoolean(), anyInt());
     }
 
     @Test
     public void assistantCallbacksFiredAfterConnecting() {
-        mNavBarHelper.init();
         // 1st set of callbacks get called when registering
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -172,7 +219,6 @@ public class NavBarHelperTest extends SysuiTestCase {
 
     @Test
     public void a11yCallbacksFiredAfterModeChange() {
-        mNavBarHelper.init();
         // 1st set of callbacks get called when registering
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -185,7 +231,6 @@ public class NavBarHelperTest extends SysuiTestCase {
 
     @Test
     public void assistantCallbacksFiredAfterNavModeChange() {
-        mNavBarHelper.init();
         // 1st set of callbacks get called when registering
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -198,7 +243,6 @@ public class NavBarHelperTest extends SysuiTestCase {
 
     @Test
     public void removeListenerNoCallbacksFired() {
-        mNavBarHelper.init();
         // 1st set of callbacks get called when registering
         mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
@@ -220,7 +264,7 @@ public class NavBarHelperTest extends SysuiTestCase {
         when(mAccessibilityManager.getAccessibilityShortcutTargets(
                 AccessibilityManager.ACCESSIBILITY_BUTTON)).thenReturn(createFakeShortcutTargets());
 
-        mNavBarHelper.init();
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
         assertThat(mNavBarHelper.getA11yButtonState()).isEqualTo(
                 ACCESSIBILITY_BUTTON_CLICKABLE_STATE);
@@ -230,13 +274,15 @@ public class NavBarHelperTest extends SysuiTestCase {
     public void initAccessibilityStateWithFloatingMenuModeAndTargets_disableClickableState() {
         when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
                 ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU);
-        mNavBarHelper.init();
+
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
 
         assertThat(mNavBarHelper.getA11yButtonState()).isEqualTo(/* disable_clickable_state */ 0);
     }
 
     @Test
     public void onA11yServicesStateChangedWithMultipleServices_a11yButtonClickableState() {
+        mNavBarHelper.registerNavTaskStateUpdater(mNavbarTaskbarStateUpdater);
         when(mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode()).thenReturn(
                 ACCESSIBILITY_BUTTON_MODE_NAVIGATION_BAR);
 
@@ -250,14 +296,7 @@ public class NavBarHelperTest extends SysuiTestCase {
     }
 
     @Test
-    public void registerCommandQueueCallbacks() {
-        mNavBarHelper.init();
-        verify(mCommandQueue, times(1)).addCallback(any());
-    }
-
-    @Test
     public void saveMostRecentSysuiState() {
-        mNavBarHelper.init();
         mNavBarHelper.setWindowState(DISPLAY_ID, WINDOW, STATE_ID);
         NavBarHelper.CurrentSysuiState state1 = mNavBarHelper.getCurrentSysuiState();
 
@@ -274,7 +313,6 @@ public class NavBarHelperTest extends SysuiTestCase {
 
     @Test
     public void ignoreNonNavbarSysuiState() {
-        mNavBarHelper.init();
         mNavBarHelper.setWindowState(DISPLAY_ID, WINDOW, STATE_ID);
         NavBarHelper.CurrentSysuiState state1 = mNavBarHelper.getCurrentSysuiState();
 

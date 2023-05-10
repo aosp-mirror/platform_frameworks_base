@@ -28,6 +28,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verifyNoMor
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -501,6 +502,12 @@ public class ActivityMetricsLaunchObserverTests extends WindowTestsBase {
         onActivityLaunched(mTrampolineActivity);
         mActivityMetricsLogger.notifyActivityLaunching(mTopActivity.intent,
                 mTrampolineActivity /* caller */, mTrampolineActivity.getUid());
+
+        // Simulate a corner case that the trampoline activity is removed by CLEAR_TASK.
+        // The 2 launch events can still be coalesced to one by matching the uid.
+        mTrampolineActivity.takeFromHistory();
+        assertNull(mTrampolineActivity.getTask());
+
         notifyActivityLaunched(START_SUCCESS, mTopActivity);
         transitToDrawnAndVerifyOnLaunchFinished(mTopActivity);
     }

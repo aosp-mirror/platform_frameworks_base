@@ -1,1 +1,2 @@
 include /core/java/android/service/voice/OWNERS
+include /media/java/android/media/soundtrigger/OWNERS

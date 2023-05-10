@@ -45,18 +45,22 @@ import com.android.systemui.Dumpable;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.RemoteTransitionAdapter;
 import com.android.systemui.navigationbar.NavigationBarView;
-import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.ActivityStarter.Callback;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.qs.QSPanelController;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.LightRevealScrim;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.util.Compile;
 
 import java.io.PrintWriter;
 
-public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwner {
+/** */
+public interface CentralSurfaces extends Dumpable, LifecycleOwner {
     boolean MULTIUSER_DEBUG = false;
     // Should match the values in PhoneWindowManager
     String SYSTEM_DIALOG_REASON_KEY = "reason";
@@ -71,6 +75,7 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     boolean DEBUG_MEDIA_FAKE_ARTWORK = false;
     boolean DEBUG_CAMERA_LIFT = false;
     boolean DEBUG_WINDOW_STATE = false;
+    boolean DEBUG_WAKEUP_DELAY = Compile.IS_DEBUG;
     // additional instrumentation for testing purposes; intended to be left on during development
     boolean CHATTY = DEBUG;
     boolean SHOW_LOCKSCREEN_MEDIA_ARTWORK = true;
@@ -122,7 +127,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
         options.setLaunchDisplayId(displayId);
         options.setCallerDisplayId(displayId);
         options.setPendingIntentBackgroundActivityLaunchAllowed(true);
-        options.setInteractive(true);
         return options.toBundle();
     }
 
@@ -156,7 +160,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
         if (animationAdapter != null) {
             if (ENABLE_SHELL_TRANSITIONS) {
                 options = ActivityOptions.makeRemoteTransition(
-                        RemoteTransitionAdapter.adaptRemoteAnimation(animationAdapter));
+                        RemoteTransitionAdapter.adaptRemoteAnimation(animationAdapter,
+                                "SysUILaunch"));
             } else {
                 options = ActivityOptions.makeRemoteAnimation(animationAdapter);
             }
@@ -210,15 +215,14 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
     /**
      * Wakes up the device if the device was dozing.
      */
-    void wakeUpIfDozing(long time, View where, String why, @PowerManager.WakeReason int wakeReason);
+    void wakeUpIfDozing(long time, String why, @PowerManager.WakeReason int wakeReason);
 
     NotificationShadeWindowView getNotificationShadeWindowView();
 
     NotificationShadeWindowViewController getNotificationShadeWindowViewController();
 
-    NotificationPanelViewController getNotificationPanelViewController();
-
-    ViewGroup getBouncerContainer();
+    /** */
+    ShadeViewController getShadeViewController();
 
     /** Get the Keyguard Message Area that displays auth messages. */
     AuthKeyguardMessageArea getKeyguardMessageArea();
@@ -229,29 +233,33 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     boolean isShadeDisabled();
 
-    @Override
+    /** Starts an activity. Please use ActivityStarter instead of using these methods directly. */
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade,
             int flags);
 
-    @Override
+    /** Starts an activity. Please use ActivityStarter instead of using these methods directly. */
     void startActivity(Intent intent, boolean dismissShade);
 
-    @Override
+    /** Starts an activity. Please use ActivityStarter instead of using these methods directly. */
+    void startActivity(Intent intent, boolean dismissShade,
+            @Nullable ActivityLaunchAnimator.Controller animationController);
+
+    /** Starts an activity. Please use ActivityStarter instead of using these methods directly. */
     void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked);
 
-    @Override
+    /** Starts an activity. Please use ActivityStarter instead of using these methods directly. */
     void startActivity(Intent intent, boolean dismissShade,
             @Nullable ActivityLaunchAnimator.Controller animationController,
             boolean showOverLockscreenWhenLocked, UserHandle userHandle);
 
     boolean isLaunchingActivityOverLockscreen();
 
-    @Override
+    /** Starts an activity. Please use ActivityStarter instead of using these methods directly. */
     void startActivity(Intent intent, boolean onlyProvisioned, boolean dismissShade);
 
-    @Override
+    /** Starts an activity. Please use ActivityStarter instead of using these methods directly. */
     void startActivity(Intent intent, boolean dismissShade, Callback callback);
 
     boolean isWakeUpComingFromTouch();
@@ -314,17 +322,39 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     float getDisplayHeight();
 
+    /** Starts an activity intent that dismisses keyguard.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
     void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
             boolean dismissShade, int flags);
 
+    /** Starts an activity intent that dismisses keyguard.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
     void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
             boolean dismissShade);
 
+    /** Starts an activity intent that dismisses keyguard.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
     void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
             boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
             Callback callback, int flags,
             @Nullable ActivityLaunchAnimator.Controller animationController,
             UserHandle userHandle);
+
+    /** Starts an activity intent that dismisses keyguard.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
+    void startActivityDismissingKeyguard(Intent intent, boolean onlyProvisioned,
+            boolean dismissShade, boolean disallowEnterPictureInPictureWhileLaunching,
+            Callback callback, int flags,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            UserHandle userHandle, @Nullable String customMessage);
 
     void readyForKeyguardDone();
 
@@ -339,32 +369,74 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
             boolean dismissShade,
             boolean afterKeyguardGone,
             boolean deferred,
-            boolean willAnimateOnKeyguard);
+            boolean willAnimateOnKeyguard,
+            @Nullable String customMessage);
 
     void resetUserExpandedStates();
 
-    @Override
+    /**
+     * Dismisses Keyguard and executes an action afterwards.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
     void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
             boolean afterKeyguardGone);
 
+    /**
+     * Dismisses Keyguard and executes an action afterwards.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
+    void dismissKeyguardThenExecute(OnDismissAction action, Runnable cancelAction,
+            boolean afterKeyguardGone, @Nullable String customMessage);
+
     void setLockscreenUser(int newUserId);
 
-    @Override
+    /**
+     * Starts a QS runnable on the main thread and dismisses keyguard.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
     void postQSRunnableDismissingKeyguard(Runnable runnable);
 
-    @Override
+    /**
+     * Starts an activity on the main thread with a delay.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
     void postStartActivityDismissingKeyguard(PendingIntent intent);
 
-    @Override
+    /**
+     * Starts an activity on the main thread with a delay.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
     void postStartActivityDismissingKeyguard(PendingIntent intent,
             @Nullable ActivityLaunchAnimator.Controller animationController);
 
-    @Override
+    /**
+     * Starts an activity on the main thread with a delay.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
     void postStartActivityDismissingKeyguard(Intent intent, int delay);
 
-    @Override
+    /**
+     * Starts an activity on the main thread with a delay.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
     void postStartActivityDismissingKeyguard(Intent intent, int delay,
             @Nullable ActivityLaunchAnimator.Controller animationController);
+
+    /**
+     * Starts an activity on the main thread with a delay.
+     *
+     * Please use ActivityStarter instead of using these methods directly.
+     */
+    void postStartActivityDismissingKeyguard(Intent intent, int delay,
+            @Nullable ActivityLaunchAnimator.Controller animationController,
+            @Nullable String customMessage);
 
     void showKeyguard();
 
@@ -422,9 +494,6 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void collapseShade();
 
-    /** Collapse the shade, but conditional on a flag specific to the trigger of a bugreport. */
-    void collapseShadeForBugreport();
-
     int getWakefulnessState();
 
     boolean isScreenFullyOff();
@@ -462,18 +531,14 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void awakenDreams();
 
-    @Override
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
 
-    @Override
     void startPendingIntentDismissingKeyguard(
             PendingIntent intent, @Nullable Runnable intentSentUiThreadCallback);
 
-    @Override
     void startPendingIntentDismissingKeyguard(PendingIntent intent,
             Runnable intentSentUiThreadCallback, View associatedView);
 
-    @Override
     void startPendingIntentDismissingKeyguard(
             PendingIntent intent, @Nullable Runnable intentSentUiThreadCallback,
             @Nullable ActivityLaunchAnimator.Controller animationController);
@@ -539,6 +604,8 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
 
     void extendDozePulse();
 
+    boolean shouldDelayWakeUpAnimation();
+
     public static class KeyboardShortcutsMessage {
         final int mDeviceId;
 
@@ -546,4 +613,15 @@ public interface CentralSurfaces extends Dumpable, ActivityStarter, LifecycleOwn
             mDeviceId = deviceId;
         }
     }
+
+    /**
+     * Sets launching activity over LS state in central surfaces.
+     */
+    void setIsLaunchingActivityOverLockscreen(boolean isLaunchingActivityOverLockscreen);
+
+    /**
+     * Gets an animation controller from a notification row.
+     */
+    ActivityLaunchAnimator.Controller getAnimatorControllerFromNotification(
+            ExpandableNotificationRow associatedView);
 }

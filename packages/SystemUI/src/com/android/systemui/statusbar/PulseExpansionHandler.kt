@@ -31,7 +31,7 @@ import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.classifier.Classifier.NOTIFICATION_DRAG_DOWN
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
@@ -87,13 +87,8 @@ constructor(
             bypassController.isPulseExpanding = value
             if (changed) {
                 if (value) {
-                    val topEntry = headsUpManager.topEntry
-                    topEntry?.let {
-                        roundnessManager.setTrackingHeadsUp(it.row)
-                    }
                     lockscreenShadeTransitionController.onPulseExpansionStarted()
                 } else {
-                    roundnessManager.setTrackingHeadsUp(null)
                     if (!leavingLockscreen) {
                         bypassController.maybePerformPendingUnlock()
                         pulseExpandAbortListener?.run()

@@ -13,37 +13,51 @@
  */
 package lockedregioncodeinjection;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import static com.google.common.base.Preconditions.checkElementIndex;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.commons.TryCatchBlockSorter;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.analysis.Analyzer;
 import org.objectweb.asm.tree.analysis.AnalyzerException;
 import org.objectweb.asm.tree.analysis.BasicValue;
 import org.objectweb.asm.tree.analysis.Frame;
 
-import static com.google.common.base.Preconditions.checkElementIndex;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
- * This visitor does two things:
+ * This visitor operates on two kinds of targets.  For a legacy target, it does the following:
  *
- * 1. Finds all the MONITOR_ENTER / MONITOR_EXIT in the byte code and insert the corresponding pre
+ * 1. Finds all the MONITOR_ENTER / MONITOR_EXIT in the byte code and inserts the corresponding pre
  * and post methods calls should it matches one of the given target type in the Configuration.
  *
  * 2. Find all methods that are synchronized and insert pre method calls in the beginning and post
  * method calls just before all return instructions.
+ *
+ * For a scoped target, it does the following:
+ *
+ * 1. Finds all the MONITOR_ENTER instructions in the byte code.  If the target of the opcode is
+ *    named in a --scope switch, then the pre method is invoked ON THE TARGET immediately after
+ *    MONITOR_ENTER opcode completes.
+ *
+ * 2. Finds all the MONITOR_EXIT instructions in the byte code.  If the target of the opcode is
+ *    named in a --scope switch, then the post method is invoked ON THE TARGET immediately before
+ *    MONITOR_EXIT opcode completes.
  */
 class LockFindingClassVisitor extends ClassVisitor {
     private String className = null;
@@ -73,12 +87,16 @@ class LockFindingClassVisitor extends ClassVisitor {
     class LockFindingMethodVisitor extends MethodVisitor {
         private String owner;
         private MethodVisitor chain;
+        private final String className;
+        private final String methodName;
 
         public LockFindingMethodVisitor(String owner, MethodNode mn, MethodVisitor chain) {
             super(Utils.ASM_VERSION, mn);
             assert owner != null;
             this.owner = owner;
             this.chain = chain;
+            className = owner;
+            methodName = mn.name;
         }
 
         @SuppressWarnings("unchecked")
@@ -93,6 +111,12 @@ class LockFindingClassVisitor extends ClassVisitor {
                 for (LockTarget t : targets) {
                     if (t.getTargetDesc().equals("L" + owner + ";")) {
                         ownerMonitor = t;
+                        if (ownerMonitor.getScoped()) {
+                            final String emsg = String.format(
+                                "scoped targets do not support synchronized methods in %s.%s()",
+                                className, methodName);
+                            throw new RuntimeException(emsg);
+                        }
                     }
                 }
             }
@@ -118,8 +142,10 @@ class LockFindingClassVisitor extends ClassVisitor {
                 AbstractInsnNode s = instructions.getFirst();
                 MethodInsnNode call = new MethodInsnNode(Opcodes.INVOKESTATIC,
                         ownerMonitor.getPreOwner(), ownerMonitor.getPreMethod(), "()V", false);
-                insertMethodCallBefore(mn, frameMap, handlersMap, s, 0, call);
+                insertMethodCallBeforeSync(mn, frameMap, handlersMap, s, 0, call);
             }
+
+            boolean anyDup = false;
 
             for (int i = 0; i < instructions.size(); i++) {
                 AbstractInsnNode s = instructions.get(i);
@@ -131,9 +157,15 @@ class LockFindingClassVisitor extends ClassVisitor {
                         LockTargetState state = (LockTargetState) operand;
                         for (int j = 0; j < state.getTargets().size(); j++) {
                             LockTarget target = state.getTargets().get(j);
-                            MethodInsnNode call = new MethodInsnNode(Opcodes.INVOKESTATIC,
-                                    target.getPreOwner(), target.getPreMethod(), "()V", false);
-                            insertMethodCallAfter(mn, frameMap, handlersMap, s, i, call);
+                            MethodInsnNode call = methodCall(target, true);
+                            if (target.getScoped()) {
+                                TypeInsnNode cast = typeCast(target);
+                                i += insertInvokeAcquire(mn, frameMap, handlersMap, s, i,
+                                        call, cast);
+                                anyDup = true;
+                            } else {
+                                i += insertMethodCallBefore(mn, frameMap, handlersMap, s, i, call);
+                            }
                         }
                     }
                 }
@@ -144,8 +176,9 @@ class LockFindingClassVisitor extends ClassVisitor {
                     if (operand instanceof LockTargetState) {
                         LockTargetState state = (LockTargetState) operand;
                         for (int j = 0; j < state.getTargets().size(); j++) {
-                            // The instruction after a monitor_exit should be a label for the end of the implicit
-                            // catch block that surrounds the synchronized block to call monitor_exit when an exception
+                            // The instruction after a monitor_exit should be a label for
+                            // the end of the implicit catch block that surrounds the
+                            // synchronized block to call monitor_exit when an exception
                             // occurs.
                             checkState(instructions.get(i + 1).getType() == AbstractInsnNode.LABEL,
                                 "Expected to find label after monitor exit");
@@ -161,9 +194,16 @@ class LockFindingClassVisitor extends ClassVisitor {
                                 "Expected label to be the end of monitor exit's try block");
 
                             LockTarget target = state.getTargets().get(j);
-                            MethodInsnNode call = new MethodInsnNode(Opcodes.INVOKESTATIC,
-                                    target.getPostOwner(), target.getPostMethod(), "()V", false);
-                            insertMethodCallAfter(mn, frameMap, handlersMap, label, labelIndex, call);
+                            MethodInsnNode call = methodCall(target, false);
+                            if (target.getScoped()) {
+                                TypeInsnNode cast = typeCast(target);
+                                i += insertInvokeRelease(mn, frameMap, handlersMap, s, i,
+                                        call, cast);
+                                anyDup = true;
+                            } else {
+                                insertMethodCallAfter(mn, frameMap, handlersMap, label,
+                                        labelIndex, call);
+                            }
                         }
                     }
                 }
@@ -174,16 +214,116 @@ class LockFindingClassVisitor extends ClassVisitor {
                     MethodInsnNode call =
                             new MethodInsnNode(Opcodes.INVOKESTATIC, ownerMonitor.getPostOwner(),
                                     ownerMonitor.getPostMethod(), "()V", false);
-                    insertMethodCallBefore(mn, frameMap, handlersMap, s, i, call);
+                    insertMethodCallBeforeSync(mn, frameMap, handlersMap, s, i, call);
                     i++; // Skip ahead. Otherwise, we will revisit this instruction again.
                 }
             }
+
+            if (anyDup) {
+                mn.maxStack++;
+            }
+
             super.visitEnd();
             mn.accept(chain);
         }
+
+        // Insert a call to a monitor pre handler.  The node and the index identify the
+        // monitorenter call itself.  Insert DUP immediately prior to the MONITORENTER.
+        // Insert the typecast and call (in that order) after the MONITORENTER.
+        public int insertInvokeAcquire(MethodNode mn, List<Frame> frameMap,
+                List<List<TryCatchBlockNode>> handlersMap, AbstractInsnNode node, int index,
+                MethodInsnNode call, TypeInsnNode cast) {
+            InsnList instructions = mn.instructions;
+
+            // Insert a DUP right before MONITORENTER, to capture the object being locked.
+            // Note that the object will be typed as java.lang.Object.
+            instructions.insertBefore(node, new InsnNode(Opcodes.DUP));
+            frameMap.add(index, frameMap.get(index));
+            handlersMap.add(index, handlersMap.get(index));
+
+            // Insert the call right after the MONITORENTER.  These entries are pushed after
+            // MONITORENTER so they are inserted in reverse order.  MONITORENTER should be
+            // the target of a try/catch block, which means it must be immediately
+            // followed by a label (which is part of the try/catch block definition).
+            // Move forward past the label so the invocation in inside the proper block.
+            // Throw an error if the next instruction is not a label.
+            node = node.getNext();
+            if (!(node instanceof LabelNode)) {
+                throw new RuntimeException(String.format("invalid bytecode sequence in %s.%s()",
+                                className, methodName));
+            }
+            node = node.getNext();
+            index = instructions.indexOf(node);
+
+            instructions.insertBefore(node, cast);
+            frameMap.add(index, frameMap.get(index));
+            handlersMap.add(index, handlersMap.get(index));
+
+            instructions.insertBefore(node, call);
+            frameMap.add(index, frameMap.get(index));
+            handlersMap.add(index, handlersMap.get(index));
+
+            return 3;
+        }
+
+        // Insert instructions completely before the current opcode.  This is slightly
+        // different from insertMethodCallBefore(), which inserts the call before MONITOREXIT
+        // but inserts the start and end labels after MONITOREXIT.
+        public int insertInvokeRelease(MethodNode mn, List<Frame> frameMap,
+                List<List<TryCatchBlockNode>> handlersMap, AbstractInsnNode node, int index,
+                MethodInsnNode call, TypeInsnNode cast) {
+            InsnList instructions = mn.instructions;
+
+            instructions.insertBefore(node, new InsnNode(Opcodes.DUP));
+            frameMap.add(index, frameMap.get(index));
+            handlersMap.add(index, handlersMap.get(index));
+
+            instructions.insertBefore(node, cast);
+            frameMap.add(index, frameMap.get(index));
+            handlersMap.add(index, handlersMap.get(index));
+
+            instructions.insertBefore(node, call);
+            frameMap.add(index, frameMap.get(index));
+            handlersMap.add(index, handlersMap.get(index));
+
+            return 3;
+        }
     }
 
-    public static void insertMethodCallBefore(MethodNode mn, List<Frame> frameMap,
+    public static MethodInsnNode methodCall(LockTarget target, boolean pre) {
+        String spec = "()V";
+        if (!target.getScoped()) {
+            if (pre) {
+                return new MethodInsnNode(
+                    Opcodes.INVOKESTATIC, target.getPreOwner(), target.getPreMethod(), spec);
+            } else {
+                return new MethodInsnNode(
+                    Opcodes.INVOKESTATIC, target.getPostOwner(), target.getPostMethod(), spec);
+            }
+        } else {
+            if (pre) {
+                return new MethodInsnNode(
+                    Opcodes.INVOKEVIRTUAL, target.getPreOwner(), target.getPreMethod(), spec);
+            } else {
+                return new MethodInsnNode(
+                    Opcodes.INVOKEVIRTUAL, target.getPostOwner(), target.getPostMethod(), spec);
+            }
+        }
+    }
+
+    public static TypeInsnNode typeCast(LockTarget target) {
+        if (!target.getScoped()) {
+            return null;
+        } else {
+            // preOwner and postOwner return the same string for scoped targets.
+            return new TypeInsnNode(Opcodes.CHECKCAST, target.getPreOwner());
+        }
+    }
+
+    /**
+     * Insert a method call before the beginning or end of a synchronized method.
+     */
+    public static void insertMethodCallBeforeSync(MethodNode mn, List<Frame> frameMap,
             List<List<TryCatchBlockNode>> handlersMap, AbstractInsnNode node, int index,
             MethodInsnNode call) {
         List<TryCatchBlockNode> handlers = handlersMap.get(index);
@@ -225,6 +365,22 @@ class LockFindingClassVisitor extends ClassVisitor {
 
         updateCatchHandler(mn, handlers, start, end, handlersMap);
     }
+
+    // Insert instructions completely before the current opcode.  This is slightly different from
+    // insertMethodCallBeforeSync(), which inserts the call before MONITOREXIT but inserts the
+    // start and end labels after MONITOREXIT.
+    public int insertMethodCallBefore(MethodNode mn, List<Frame> frameMap,
+            List<List<TryCatchBlockNode>> handlersMap, AbstractInsnNode node, int index,
+            MethodInsnNode call) {
+        InsnList instructions = mn.instructions;
+
+        instructions.insertBefore(node, call);
+        frameMap.add(index, frameMap.get(index));
+        handlersMap.add(index, handlersMap.get(index));
+
+        return 1;
+    }
+
 
     @SuppressWarnings("unchecked")
     public static void updateCatchHandler(MethodNode mn, List<TryCatchBlockNode> handlers,

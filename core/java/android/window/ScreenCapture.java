@@ -198,17 +198,21 @@ public class ScreenCapture {
          * Create ScreenshotHardwareBuffer from an existing HardwareBuffer object.
          *
          * @param hardwareBuffer       The existing HardwareBuffer object
-         * @param namedColorSpace      Integer value of a named color space {@link ColorSpace.Named}
+         * @param dataspace            Dataspace describing the content.
+         *                             {@see android.hardware.DataSpace}
          * @param containsSecureLayers Indicates whether this graphic buffer contains captured
          *                             contents of secure layers, in which case the screenshot
          *                             should not be persisted.
          * @param containsHdrLayers    Indicates whether this graphic buffer contains HDR content.
          */
         private static ScreenshotHardwareBuffer createFromNative(HardwareBuffer hardwareBuffer,
-                int namedColorSpace, boolean containsSecureLayers, boolean containsHdrLayers) {
-            ColorSpace colorSpace = ColorSpace.get(ColorSpace.Named.values()[namedColorSpace]);
+                int dataspace, boolean containsSecureLayers, boolean containsHdrLayers) {
+            ColorSpace colorSpace = ColorSpace.getFromDataSpace(dataspace);
             return new ScreenshotHardwareBuffer(
-                    hardwareBuffer, colorSpace, containsSecureLayers, containsHdrLayers);
+                    hardwareBuffer,
+                    colorSpace != null ? colorSpace : ColorSpace.get(ColorSpace.Named.SRGB),
+                    containsSecureLayers,
+                    containsHdrLayers);
         }
 
         public ColorSpace getColorSpace() {
@@ -271,6 +275,8 @@ public class ScreenCapture {
         public final boolean mAllowProtected;
         public final long mUid;
         public final boolean mGrayscale;
+        final SurfaceControl[] mExcludeLayers;
+        public final boolean mHintForSeamlessTransition;
 
         private CaptureArgs(CaptureArgs.Builder<? extends CaptureArgs.Builder<?>> builder) {
             mPixelFormat = builder.mPixelFormat;
@@ -281,6 +287,8 @@ public class ScreenCapture {
             mAllowProtected = builder.mAllowProtected;
             mUid = builder.mUid;
             mGrayscale = builder.mGrayscale;
+            mExcludeLayers = builder.mExcludeLayers;
+            mHintForSeamlessTransition = builder.mHintForSeamlessTransition;
         }
 
         private CaptureArgs(Parcel in) {
@@ -292,6 +300,47 @@ public class ScreenCapture {
             mAllowProtected = in.readBoolean();
             mUid = in.readLong();
             mGrayscale = in.readBoolean();
+
+            int excludeLayersLength = in.readInt();
+            if (excludeLayersLength > 0) {
+                mExcludeLayers = new SurfaceControl[excludeLayersLength];
+                for (int index = 0; index < excludeLayersLength; index++) {
+                    mExcludeLayers[index] = SurfaceControl.CREATOR.createFromParcel(in);
+                }
+            } else {
+                mExcludeLayers = null;
+            }
+            mHintForSeamlessTransition = in.readBoolean();
+        }
+
+        /** Release any layers if set using {@link Builder#setExcludeLayers(SurfaceControl[])}. */
+        public void release() {
+            if (mExcludeLayers == null || mExcludeLayers.length == 0) {
+                return;
+            }
+
+            for (SurfaceControl surfaceControl : mExcludeLayers) {
+                if (surfaceControl != null) {
+                    surfaceControl.release();
+                }
+            }
+        }
+
+        /**
+         * Returns an array of {@link SurfaceControl#mNativeObject} corresponding to
+         * {@link #mExcludeLayers}. Used only in native code.
+         */
+        private long[] getNativeExcludeLayers() {
+            if (mExcludeLayers == null || mExcludeLayers.length == 0) {
+                return new long[0];
+            }
+
+            long[] nativeExcludeLayers = new long[mExcludeLayers.length];
+            for (int index = 0; index < mExcludeLayers.length; index++) {
+                nativeExcludeLayers[index] = mExcludeLayers[index].mNativeObject;
+            }
+
+            return nativeExcludeLayers;
         }
 
         /**
@@ -308,6 +357,8 @@ public class ScreenCapture {
             private boolean mAllowProtected;
             private long mUid = -1;
             private boolean mGrayscale;
+            private SurfaceControl[] mExcludeLayers;
+            private boolean mHintForSeamlessTransition;
 
             /**
              * Construct a new {@link CaptureArgs} with the set parameters. The builder remains
@@ -397,6 +448,29 @@ public class ScreenCapture {
             }
 
             /**
+             * An array of {@link SurfaceControl} layer handles to exclude.
+             */
+            public T setExcludeLayers(@Nullable SurfaceControl[] excludeLayers) {
+                mExcludeLayers = excludeLayers;
+                return getThis();
+            }
+
+            /**
+             * Set whether the screenshot will be used in a system animation.
+             * This hint is used for picking the "best" colorspace for the screenshot, in particular
+             * for mixing HDR and SDR content.
+             * E.g., hintForSeamlessTransition is false, then a colorspace suitable for file
+             * encoding, such as BT2100, may be chosen. Otherwise, then the display's color space
+             * would be chosen, with the possibility of having an extended brightness range. This
+             * is important for screenshots that are directly re-routed to a SurfaceControl in
+             * order to preserve accurate colors.
+             */
+            public T setHintForSeamlessTransition(boolean hintForSeamlessTransition) {
+                mHintForSeamlessTransition = hintForSeamlessTransition;
+                return getThis();
+            }
+
+            /**
              * Each sub class should return itself to allow the builder to chain properly
              */
             T getThis() {
@@ -419,6 +493,15 @@ public class ScreenCapture {
             dest.writeBoolean(mAllowProtected);
             dest.writeLong(mUid);
             dest.writeBoolean(mGrayscale);
+            if (mExcludeLayers != null) {
+                dest.writeInt(mExcludeLayers.length);
+                for (SurfaceControl excludeLayer : mExcludeLayers) {
+                    excludeLayer.writeToParcel(dest, flags);
+                }
+            } else {
+                dest.writeInt(0);
+            }
+            dest.writeBoolean(mHintForSeamlessTransition);
         }
 
         public static final Parcelable.Creator<CaptureArgs> CREATOR =
@@ -529,21 +612,12 @@ public class ScreenCapture {
      */
     public static class LayerCaptureArgs extends CaptureArgs {
         private final long mNativeLayer;
-        private final long[] mNativeExcludeLayers;
         private final boolean mChildrenOnly;
 
         private LayerCaptureArgs(Builder builder) {
             super(builder);
             mChildrenOnly = builder.mChildrenOnly;
             mNativeLayer = builder.mLayer.mNativeObject;
-            if (builder.mExcludeLayers != null) {
-                mNativeExcludeLayers = new long[builder.mExcludeLayers.length];
-                for (int i = 0; i < builder.mExcludeLayers.length; i++) {
-                    mNativeExcludeLayers[i] = builder.mExcludeLayers[i].mNativeObject;
-                }
-            } else {
-                mNativeExcludeLayers = null;
-            }
         }
 
         /**
@@ -551,7 +625,6 @@ public class ScreenCapture {
          */
         public static class Builder extends CaptureArgs.Builder<Builder> {
             private SurfaceControl mLayer;
-            private SurfaceControl[] mExcludeLayers;
             private boolean mChildrenOnly = true;
 
             /**
@@ -575,6 +648,8 @@ public class ScreenCapture {
                 setAllowProtected(args.mAllowProtected);
                 setUid(args.mUid);
                 setGrayscale(args.mGrayscale);
+                setExcludeLayers(args.mExcludeLayers);
+                setHintForSeamlessTransition(args.mHintForSeamlessTransition);
             }
 
             public Builder(SurfaceControl layer) {
@@ -586,14 +661,6 @@ public class ScreenCapture {
              */
             public Builder setLayer(SurfaceControl layer) {
                 mLayer = layer;
-                return this;
-            }
-
-            /**
-             * An array of layer handles to exclude.
-             */
-            public Builder setExcludeLayers(@Nullable SurfaceControl[] excludeLayers) {
-                mExcludeLayers = excludeLayers;
                 return this;
             }
 

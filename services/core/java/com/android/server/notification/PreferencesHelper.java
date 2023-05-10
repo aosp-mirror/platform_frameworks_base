@@ -48,6 +48,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.metrics.LogMaker;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
@@ -60,6 +61,7 @@ import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -135,7 +137,6 @@ public class PreferencesHelper implements RankingConfig {
     private static final String ATT_SHOW_BADGE = "show_badge";
     private static final String ATT_APP_USER_LOCKED_FIELDS = "app_user_locked_fields";
     private static final String ATT_ENABLED = "enabled";
-    private static final String ATT_USER_ALLOWED = "allowed";
     private static final String ATT_HIDE_SILENT = "hide_gentle";
     private static final String ATT_SENT_INVALID_MESSAGE = "sent_invalid_msg";
     private static final String ATT_SENT_VALID_MESSAGE = "sent_valid_msg";
@@ -238,7 +239,6 @@ public class PreferencesHelper implements RankingConfig {
                     Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
                     NotificationManagerService.REVIEW_NOTIF_STATE_SHOULD_SHOW);
         }
-        ArrayList<PermissionHelper.PackagePermission> pkgPerms = new ArrayList<>();
         synchronized (mPackagePreferences) {
             while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
                 tag = parser.getName();
@@ -256,18 +256,9 @@ public class PreferencesHelper implements RankingConfig {
                         String name = parser.getAttributeValue(null, ATT_NAME);
                         if (!TextUtils.isEmpty(name)) {
                             restorePackage(parser, forRestore, userId, name, upgradeForBubbles,
-                                    migrateToPermission, pkgPerms);
+                                    migrateToPermission);
                         }
                     }
-                }
-            }
-        }
-        if (migrateToPermission) {
-            for (PackagePermission p : pkgPerms) {
-                try {
-                    mPermissionHelper.setNotificationPermission(p);
-                } catch (Exception e) {
-                    Slog.e(TAG, "could not migrate setting for " + p.packageName, e);
                 }
             }
         }
@@ -276,7 +267,7 @@ public class PreferencesHelper implements RankingConfig {
     @GuardedBy("mPackagePreferences")
     private void restorePackage(TypedXmlPullParser parser, boolean forRestore,
             @UserIdInt int userId, String name, boolean upgradeForBubbles,
-            boolean migrateToPermission, ArrayList<PermissionHelper.PackagePermission> pkgPerms) {
+            boolean migrateToPermission) {
         try {
             int uid = parser.getAttributeInt(null, ATT_UID, UNKNOWN_UID);
             if (forRestore) {
@@ -363,15 +354,12 @@ public class PreferencesHelper implements RankingConfig {
                     String delegateName = XmlUtils.readStringAttribute(parser, ATT_NAME);
                     boolean delegateEnabled = parser.getAttributeBoolean(
                             null, ATT_ENABLED, Delegate.DEFAULT_ENABLED);
-                    boolean userAllowed = parser.getAttributeBoolean(
-                            null, ATT_USER_ALLOWED, Delegate.DEFAULT_USER_ALLOWED);
                     Delegate d = null;
                     if (delegateId != UNKNOWN_UID && !TextUtils.isEmpty(delegateName)) {
-                        d = new Delegate(delegateName, delegateId, delegateEnabled, userAllowed);
+                        d = new Delegate(delegateName, delegateId, delegateEnabled);
                     }
                     r.delegate = d;
                 }
-
             }
 
             try {
@@ -383,14 +371,6 @@ public class PreferencesHelper implements RankingConfig {
             if (migrateToPermission) {
                 r.importance = appImportance;
                 r.migrateToPm = true;
-                if (r.uid != UNKNOWN_UID) {
-                    // Don't call into permission system until we have a valid uid
-                    PackagePermission pkgPerm = new PackagePermission(
-                            r.pkg, UserHandle.getUserId(r.uid),
-                            r.importance != IMPORTANCE_NONE,
-                            hasUserConfiguredSettings(r));
-                    pkgPerms.add(pkgPerm);
-                }
             }
         } catch (Exception e) {
             Slog.w(TAG, "Failed to restore pkg", e);
@@ -409,7 +389,8 @@ public class PreferencesHelper implements RankingConfig {
                 NotificationChannel channel = new NotificationChannel(
                         id, channelName, channelImportance);
                 if (forRestore) {
-                    channel.populateFromXmlForRestore(parser, mContext);
+                    final boolean pkgInstalled = r.uid != UNKNOWN_UID;
+                    channel.populateFromXmlForRestore(parser, pkgInstalled, mContext);
                 } else {
                     channel.populateFromXml(parser);
                 }
@@ -640,9 +621,6 @@ public class PreferencesHelper implements RankingConfig {
                     if (r.delegate.mEnabled != Delegate.DEFAULT_ENABLED) {
                         out.attributeBoolean(null, ATT_ENABLED, r.delegate.mEnabled);
                     }
-                    if (r.delegate.mUserAllowed != Delegate.DEFAULT_USER_ALLOWED) {
-                        out.attributeBoolean(null, ATT_USER_ALLOWED, r.delegate.mUserAllowed);
-                    }
                     out.endTag(null, TAG_DELEGATE);
                 }
 
@@ -725,10 +703,17 @@ public class PreferencesHelper implements RankingConfig {
 
     @Override
     public void setShowBadge(String packageName, int uid, boolean showBadge) {
+        boolean changed = false;
         synchronized (mPackagePreferences) {
-            getOrCreatePackagePreferencesLocked(packageName, uid).showBadge = showBadge;
+            PackagePreferences pkgPrefs = getOrCreatePackagePreferencesLocked(packageName, uid);
+            if (pkgPrefs.showBadge != showBadge) {
+                pkgPrefs.showBadge = showBadge;
+                changed = true;
+            }
         }
-        updateConfig();
+        if (changed) {
+            updateConfig();
+        }
     }
 
     public boolean isInInvalidMsgState(String packageName, int uid) {
@@ -985,7 +970,9 @@ public class PreferencesHelper implements RankingConfig {
                     needsPolicyFileChange = true;
                 }
 
-                updateConfig();
+                if (needsPolicyFileChange) {
+                    updateConfig();
+                }
                 if (needsPolicyFileChange && !wasUndeleted) {
                     mNotificationChannelLogger.logNotificationChannelModified(existing, uid, pkg,
                             previousLoggingImportance, false);
@@ -1072,6 +1059,7 @@ public class PreferencesHelper implements RankingConfig {
             boolean fromUser) {
         Objects.requireNonNull(updatedChannel);
         Objects.requireNonNull(updatedChannel.getId());
+        boolean changed = false;
         boolean needsDndChange = false;
         synchronized (mPackagePreferences) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
@@ -1105,6 +1093,7 @@ public class PreferencesHelper implements RankingConfig {
                         ? Notification.PRIORITY_MAX : Notification.PRIORITY_DEFAULT;
                 r.visibility = updatedChannel.getLockscreenVisibility();
                 r.showBadge = updatedChannel.canShowBadge();
+                changed = true;
             }
 
             if (!channel.equals(updatedChannel)) {
@@ -1113,17 +1102,21 @@ public class PreferencesHelper implements RankingConfig {
                         .setSubtype(fromUser ? 1 : 0));
                 mNotificationChannelLogger.logNotificationChannelModified(updatedChannel, uid, pkg,
                         NotificationChannelLogger.getLoggingImportance(channel), fromUser);
+                changed = true;
             }
 
             if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
                     || channel.getImportance() != updatedChannel.getImportance()) {
                 needsDndChange = true;
+                changed = true;
             }
         }
         if (needsDndChange) {
             updateChannelsBypassingDnd();
         }
-        updateConfig();
+        if (changed) {
+            updateConfig();
+        }
     }
 
     @Override
@@ -1788,7 +1781,7 @@ public class PreferencesHelper implements RankingConfig {
             if (prefs == null || prefs.delegate == null) {
                 return null;
             }
-            if (!prefs.delegate.mUserAllowed || !prefs.delegate.mEnabled) {
+            if (!prefs.delegate.mEnabled) {
                 return null;
             }
             return prefs.delegate.mPkg;
@@ -1802,45 +1795,19 @@ public class PreferencesHelper implements RankingConfig {
             String delegatePkg, int delegateUid) {
         synchronized (mPackagePreferences) {
             PackagePreferences prefs = getOrCreatePackagePreferencesLocked(sourcePkg, sourceUid);
-
-            boolean userAllowed = prefs.delegate == null || prefs.delegate.mUserAllowed;
-            Delegate delegate = new Delegate(delegatePkg, delegateUid, true, userAllowed);
-            prefs.delegate = delegate;
+            prefs.delegate = new Delegate(delegatePkg, delegateUid, true);
         }
-        updateConfig();
     }
 
     /**
      * Used by an app to turn off its notification delegate.
      */
     public void revokeNotificationDelegate(String sourcePkg, int sourceUid) {
-        boolean changed = false;
         synchronized (mPackagePreferences) {
             PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
             if (prefs != null && prefs.delegate != null) {
                 prefs.delegate.mEnabled = false;
-                changed = true;
             }
-        }
-        if (changed) {
-            updateConfig();
-        }
-    }
-
-    /**
-     * Toggles whether an app can have a notification delegate on behalf of a user.
-     */
-    public void toggleNotificationDelegate(String sourcePkg, int sourceUid, boolean userAllowed) {
-        boolean changed = false;
-        synchronized (mPackagePreferences) {
-            PackagePreferences prefs = getPackagePreferencesLocked(sourcePkg, sourceUid);
-            if (prefs != null && prefs.delegate != null) {
-                prefs.delegate.mUserAllowed = userAllowed;
-                changed = true;
-            }
-        }
-        if (changed) {
-            updateConfig();
         }
     }
 
@@ -2081,9 +2048,10 @@ public class PreferencesHelper implements RankingConfig {
                 // before the migration is enabled, this will simply default to false in all cases.
                 boolean importanceIsUserSet = false;
                 // Even if this package's data is not present, we need to write something;
-                // so default to IMPORTANCE_NONE, since if PM doesn't know about the package
-                // for some reason, notifications are not allowed.
-                int importance = IMPORTANCE_NONE;
+                // default to IMPORTANCE_UNSPECIFIED. If PM doesn't know about the package
+                // for some reason, notifications are not allowed, but in logged output we want
+                // to distinguish this case from the actually-banned packages.
+                int importance = IMPORTANCE_UNSPECIFIED;
                 Pair<Integer, String> key = new Pair<>(r.uid, r.pkg);
                 if (pkgPermissions != null && pkgsWithPermissionsToHandle.contains(key)) {
                     Pair<Boolean, Boolean> permissionPair = pkgPermissions.get(key);
@@ -2447,6 +2415,21 @@ public class PreferencesHelper implements RankingConfig {
                         mRestoredWithoutUids.remove(unrestoredPackageKey(pkg, changeUserId));
                         synchronized (mPackagePreferences) {
                             mPackagePreferences.put(packagePreferencesKey(r.pkg, r.uid), r);
+
+                            // Try to restore any unrestored sound resources
+                            for (NotificationChannel channel : r.channels.values()) {
+                                if (!channel.isSoundRestored()) {
+                                    Uri uri = channel.getSound();
+                                    Uri restoredUri = channel.restoreSoundUri(mContext, uri, true);
+                                    if (Settings.System.DEFAULT_NOTIFICATION_URI.equals(
+                                            restoredUri)) {
+                                        Log.w(TAG,
+                                                "Could not restore sound: " + uri + " for channel: "
+                                                        + channel);
+                                    }
+                                    channel.setSound(restoredUri, channel.getAudioAttributes());
+                                }
+                            }
                         }
                         if (r.migrateToPm) {
                             try {
@@ -2681,6 +2664,31 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
+    public void migrateNotificationPermissions(List<UserInfo> users) {
+        for (UserInfo user : users) {
+            List<PackageInfo> packages = mPm.getInstalledPackagesAsUser(
+                    PackageManager.PackageInfoFlags.of(PackageManager.MATCH_ALL),
+                    user.getUserHandle().getIdentifier());
+            for (PackageInfo pi : packages) {
+                synchronized (mPackagePreferences) {
+                    PackagePreferences p = getOrCreatePackagePreferencesLocked(
+                            pi.packageName, pi.applicationInfo.uid);
+                    if (p.migrateToPm && p.uid != UNKNOWN_UID) {
+                        try {
+                            PackagePermission pkgPerm = new PackagePermission(
+                                    p.pkg, UserHandle.getUserId(p.uid),
+                                    p.importance != IMPORTANCE_NONE,
+                                    hasUserConfiguredSettings(p));
+                            mPermissionHelper.setNotificationPermission(pkgPerm);
+                        } catch (Exception e) {
+                            Slog.e(TAG, "could not migrate setting for " + p.pkg, e);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void updateConfig() {
         mRankingHandler.requestSort();
     }
@@ -2726,17 +2734,15 @@ public class PreferencesHelper implements RankingConfig {
 
     private static class Delegate {
         static final boolean DEFAULT_ENABLED = true;
-        static final boolean DEFAULT_USER_ALLOWED = true;
-        String mPkg;
-        int mUid = UNKNOWN_UID;
-        boolean mEnabled = DEFAULT_ENABLED;
-        boolean mUserAllowed = DEFAULT_USER_ALLOWED;
 
-        Delegate(String pkg, int uid, boolean enabled, boolean userAllowed) {
+        final String mPkg;
+        final int mUid;
+        boolean mEnabled;
+
+        Delegate(String pkg, int uid, boolean enabled) {
             mPkg = pkg;
             mUid = uid;
             mEnabled = enabled;
-            mUserAllowed = userAllowed;
         }
 
         public boolean isAllowed(String pkg, int uid) {
@@ -2745,7 +2751,7 @@ public class PreferencesHelper implements RankingConfig {
             }
             return pkg.equals(mPkg)
                     && uid == mUid
-                    && (mUserAllowed && mEnabled);
+                    && mEnabled;
         }
     }
 }

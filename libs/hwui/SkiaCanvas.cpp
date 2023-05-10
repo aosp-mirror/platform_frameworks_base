@@ -50,6 +50,7 @@
 #include "Mesh.h"
 #include "NinePatchUtils.h"
 #include "VectorDrawable.h"
+#include "effects/GainmapRenderer.h"
 #include "hwui/Bitmap.h"
 #include "hwui/MinikinUtils.h"
 #include "hwui/PaintFilter.h"
@@ -589,18 +590,25 @@ void SkiaCanvas::drawMesh(const Mesh& mesh, sk_sp<SkBlender> blender, const Pain
 
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
     auto image = bitmap.makeImage();
+
+    if (bitmap.hasGainmap()) {
+        Paint gainmapPaint = paint ? *paint : Paint();
+        sk_sp<SkShader> gainmapShader = uirenderer::MakeGainmapShader(
+                image, bitmap.gainmap()->bitmap->makeImage(), bitmap.gainmap()->info,
+                SkTileMode::kClamp, SkTileMode::kClamp, gainmapPaint.sampling());
+        gainmapPaint.setShader(gainmapShader);
+        return drawRect(left, top, left + bitmap.width(), top + bitmap.height(), gainmapPaint);
+    }
+
     applyLooper(paint, [&](const Paint& p) {
         mCanvas->drawImage(image, left, top, p.sampling(), &p);
     });
 }
 
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) {
-    auto image = bitmap.makeImage();
     SkAutoCanvasRestore acr(mCanvas, true);
     mCanvas->concat(matrix);
-    applyLooper(paint, [&](const Paint& p) {
-        mCanvas->drawImage(image, 0, 0, p.sampling(), &p);
-    });
+    drawBitmap(bitmap, 0, 0, paint);
 }
 
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float srcRight,
@@ -609,6 +617,16 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float s
     auto image = bitmap.makeImage();
     SkRect srcRect = SkRect::MakeLTRB(srcLeft, srcTop, srcRight, srcBottom);
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
+
+    if (bitmap.hasGainmap()) {
+        Paint gainmapPaint = paint ? *paint : Paint();
+        sk_sp<SkShader> gainmapShader = uirenderer::MakeGainmapShader(
+                image, bitmap.gainmap()->bitmap->makeImage(), bitmap.gainmap()->info,
+                SkTileMode::kClamp, SkTileMode::kClamp, gainmapPaint.sampling());
+        gainmapShader = gainmapShader->makeWithLocalMatrix(SkMatrix::RectToRect(srcRect, dstRect));
+        gainmapPaint.setShader(gainmapShader);
+        return drawRect(dstLeft, dstTop, dstRight, dstBottom, gainmapPaint);
+    }
 
     applyLooper(paint, [&](const Paint& p) {
         mCanvas->drawImageRect(image, srcRect, dstRect, p.sampling(), &p,

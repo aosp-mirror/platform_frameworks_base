@@ -18,9 +18,9 @@ package com.android.systemui.media.taptotransfer.sender
 
 import android.app.StatusBarManager
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.media.taptotransfer.common.MediaTttLoggerUtils
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
 import javax.inject.Inject
 
 /** A logger for all events related to the media tap-to-transfer sender experience. */

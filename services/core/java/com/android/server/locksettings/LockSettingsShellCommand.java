@@ -106,6 +106,14 @@ class LockSettingsShellCommand extends ShellCommand {
                 case COMMAND_HELP:
                     onHelp();
                     return 0;
+                case COMMAND_GET_DISABLED:
+                    runGetDisabled();
+                    return 0;
+                case COMMAND_SET_DISABLED:
+                    // Note: if the user has an LSKF, then this has no immediate effect but instead
+                    // just ensures the lockscreen will be disabled later when the LSKF is cleared.
+                    runSetDisabled();
+                    return 0;
             }
             if (!checkCredential()) {
                 return -1;
@@ -124,14 +132,8 @@ class LockSettingsShellCommand extends ShellCommand {
                 case COMMAND_CLEAR:
                     success = runClear();
                     break;
-                case COMMAND_SET_DISABLED:
-                    runSetDisabled();
-                    break;
                 case COMMAND_VERIFY:
                     runVerify();
-                    break;
-                case COMMAND_GET_DISABLED:
-                    runGetDisabled();
                     break;
                 default:
                     getErrPrintWriter().println("Unknown command: " + cmd);

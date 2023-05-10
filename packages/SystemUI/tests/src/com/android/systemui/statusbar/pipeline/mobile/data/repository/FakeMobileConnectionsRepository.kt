@@ -23,7 +23,6 @@ import com.android.settingslib.SignalIcon
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -66,8 +65,11 @@ class FakeMobileConnectionsRepository(
     private val _defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
     override val defaultDataSubId = _defaultDataSubId
 
-    private val _mobileConnectivity = MutableStateFlow(MobileConnectivityModel())
-    override val defaultMobileNetworkConnectivity = _mobileConnectivity
+    override val mobileIsDefault = MutableStateFlow(false)
+
+    override val hasCarrierMergedConnection = MutableStateFlow(false)
+
+    override val defaultConnectionIsValidated = MutableStateFlow(false)
 
     private val subIdRepos = mutableMapOf<Int, MobileConnectionRepository>()
 
@@ -86,14 +88,6 @@ class FakeMobileConnectionsRepository(
 
     fun setSubscriptions(subs: List<SubscriptionModel>) {
         _subscriptions.value = subs
-    }
-
-    fun setDefaultDataSubId(id: Int) {
-        _defaultDataSubId.value = id
-    }
-
-    fun setMobileConnectivity(model: MobileConnectivityModel) {
-        _mobileConnectivity.value = model
     }
 
     fun setActiveMobileDataSubscriptionId(subId: Int) {

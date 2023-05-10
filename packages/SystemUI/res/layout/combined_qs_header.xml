@@ -14,12 +14,17 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
+
+<!--
+keep split_shade_status_bar height constant to avoid requestLayout calls on each
+frame when animating QS <-> QQS transition
+-->
 <com.android.systemui.util.NoRemeasureMotionLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/split_shade_status_bar"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="@dimen/qs_header_height"
     android:minHeight="@dimen/large_screen_shade_header_min_height"
     android:clickable="false"
     android:focusable="true"
@@ -28,6 +33,14 @@
     android:visibility="gone"
     android:theme="@style/Theme.SystemUI.QuickSettings.Header"
     app:layoutDescription="@xml/combined_qs_header_scene">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/qqs_header_bottom_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="@dimen/large_screen_shade_header_min_height"
+        />
 
     <androidx.constraintlayout.widget.Guideline
         android:layout_width="wrap_content"
@@ -94,7 +107,7 @@
 
     <include
         android:id="@+id/carrier_group"
-        layout="@layout/qs_carrier_group"
+        layout="@layout/shade_carrier_group"
         app:layout_constraintHeight_min="@dimen/large_screen_shade_header_min_height"
         android:minHeight="@dimen/large_screen_shade_header_min_height"
         app:layout_constraintWidth_min="48dp"

@@ -126,7 +126,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private final VirtualDeviceManagerService mService;
     private final PendingTrampolineCallback mPendingTrampolineCallback;
     private final int mOwnerUid;
-    private final int mDeviceId;
+    private int mDeviceId;
     // Thou shall not hold the mVirtualDeviceLock over the mInputController calls.
     // Holding the lock can lead to lock inversion with GlobalWindowManagerLock.
     // 1. After display is created the window manager calls into VDM during construction
@@ -266,8 +266,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             mInputController = inputController;
         }
         if (sensorController == null) {
-            mSensorController = new SensorController(
-                    mVirtualDeviceLock, mDeviceId, mParams.getVirtualSensorCallback());
+            mSensorController = new SensorController(mDeviceId, mParams.getVirtualSensorCallback());
         } else {
             mSensorController = sensorController;
         }
@@ -348,6 +347,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override // Binder call
     public void launchPendingIntent(int displayId, PendingIntent pendingIntent,
             ResultReceiver resultReceiver) {
+        Objects.requireNonNull(pendingIntent);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(displayId)) {
                 throw new SecurityException("Display ID " + displayId
@@ -403,38 +403,44 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void close() {
         super.close_enforcePermission();
         // Remove about-to-be-closed virtual device from the service before butchering it.
-        mService.removeVirtualDevice(mDeviceId);
+        boolean removed = mService.removeVirtualDevice(mDeviceId);
+        mDeviceId = Context.DEVICE_ID_INVALID;
 
-        VirtualDisplayWrapper[] virtualDisplaysToBeReleased;
-        synchronized (mVirtualDeviceLock) {
-            if (mVirtualAudioController != null) {
-                mVirtualAudioController.stopListening();
-                mVirtualAudioController = null;
-            }
-            mLocaleList = null;
-            virtualDisplaysToBeReleased = new VirtualDisplayWrapper[mVirtualDisplays.size()];
-            for (int i = 0; i < mVirtualDisplays.size(); i++) {
-                virtualDisplaysToBeReleased[i] = mVirtualDisplays.valueAt(i);
-            }
-            mVirtualDisplays.clear();
-            mVirtualSensorList = null;
-            mVirtualSensors.clear();
+        // Device is already closed.
+        if (!removed) {
+            return;
         }
-        // Destroy the display outside locked section.
-        for (VirtualDisplayWrapper virtualDisplayWrapper : virtualDisplaysToBeReleased) {
-            mDisplayManager.releaseVirtualDisplay(virtualDisplayWrapper.getToken());
-            // The releaseVirtualDisplay call above won't trigger
-            // VirtualDeviceImpl.onVirtualDisplayRemoved callback because we already removed the
-            // virtual device from the service - we release the other display-tied resources here
-            // with the guarantee it will be done exactly once.
-            releaseOwnedVirtualDisplayResources(virtualDisplayWrapper);
-        }
-
-        mAppToken.unlinkToDeath(this, 0);
-        mCameraAccessController.stopObservingIfNeeded();
 
         final long ident = Binder.clearCallingIdentity();
         try {
+            VirtualDisplayWrapper[] virtualDisplaysToBeReleased;
+            synchronized (mVirtualDeviceLock) {
+                if (mVirtualAudioController != null) {
+                    mVirtualAudioController.stopListening();
+                    mVirtualAudioController = null;
+                }
+                mLocaleList = null;
+                virtualDisplaysToBeReleased = new VirtualDisplayWrapper[mVirtualDisplays.size()];
+                for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                    virtualDisplaysToBeReleased[i] = mVirtualDisplays.valueAt(i);
+                }
+                mVirtualDisplays.clear();
+                mVirtualSensorList = null;
+                mVirtualSensors.clear();
+            }
+            // Destroy the display outside locked section.
+            for (VirtualDisplayWrapper virtualDisplayWrapper : virtualDisplaysToBeReleased) {
+                mDisplayManager.releaseVirtualDisplay(virtualDisplayWrapper.getToken());
+                // The releaseVirtualDisplay call above won't trigger
+                // VirtualDeviceImpl.onVirtualDisplayRemoved callback because we already removed the
+                // virtual device from the service - we release the other display-tied resources
+                // here with the guarantee it will be done exactly once.
+                releaseOwnedVirtualDisplayResources(virtualDisplayWrapper);
+            }
+
+            mAppToken.unlinkToDeath(this, 0);
+            mCameraAccessController.stopObservingIfNeeded();
+
             mInputController.close();
             mSensorController.close();
         } finally {
@@ -497,6 +503,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualDpad(VirtualDpadConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualDpad_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -517,6 +524,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualKeyboard(VirtualKeyboardConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualKeyboard_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -539,6 +547,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @EnforcePermission(android.Manifest.permission.CREATE_VIRTUAL_DEVICE)
     public void createVirtualMouse(VirtualMouseConfig config, @NonNull IBinder deviceToken) {
         super.createVirtualMouse_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -560,6 +569,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void createVirtualTouchscreen(VirtualTouchscreenConfig config,
             @NonNull IBinder deviceToken) {
         super.createVirtualTouchscreen_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -590,6 +600,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void createVirtualNavigationTouchpad(VirtualNavigationTouchpadConfig config,
             @NonNull IBinder deviceToken) {
         super.createVirtualNavigationTouchpad_enforcePermission();
+        Objects.requireNonNull(config);
         synchronized (mVirtualDeviceLock) {
             if (!mVirtualDisplays.contains(config.getAssociatedDisplayId())) {
                 throw new SecurityException(
@@ -1046,18 +1057,30 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
      */
     void showToastWhereUidIsRunning(int uid, String text, @Toast.Duration int duration,
             Looper looper) {
+        ArrayList<Integer> displayIdsForUid = getDisplayIdsWhereUidIsRunning(uid);
+        if (displayIdsForUid.isEmpty()) {
+            return;
+        }
+        DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
+        for (int i = 0; i < displayIdsForUid.size(); i++) {
+            Display display = displayManager.getDisplay(displayIdsForUid.get(i));
+            if (display != null && display.isValid()) {
+                Toast.makeText(mContext.createDisplayContext(display), looper, text,
+                        duration).show();
+            }
+        }
+    }
+
+    private ArrayList<Integer> getDisplayIdsWhereUidIsRunning(int uid) {
+        ArrayList<Integer> displayIdsForUid = new ArrayList<>();
         synchronized (mVirtualDeviceLock) {
-            DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
             for (int i = 0; i < mVirtualDisplays.size(); i++) {
                 if (mVirtualDisplays.valueAt(i).getWindowPolicyController().containsUid(uid)) {
-                    Display display = displayManager.getDisplay(mVirtualDisplays.keyAt(i));
-                    if (display != null && display.isValid()) {
-                        Toast.makeText(mContext.createDisplayContext(display), looper, text,
-                                duration).show();
-                    }
+                    displayIdsForUid.add(mVirtualDisplays.keyAt(i));
                 }
             }
         }
+        return displayIdsForUid;
     }
 
     boolean isDisplayOwnedByVirtualDevice(int displayId) {

@@ -27,15 +27,12 @@ import com.android.systemui.statusbar.notification.collection.coordinator.dagger
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifFilter;
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
-import com.android.systemui.statusbar.notification.collection.provider.SectionStyleProvider;
 import com.android.systemui.statusbar.notification.collection.render.NodeController;
 import com.android.systemui.statusbar.notification.collection.render.SectionHeaderController;
 import com.android.systemui.statusbar.notification.dagger.AlertingHeader;
 import com.android.systemui.statusbar.notification.dagger.SilentHeader;
 import com.android.systemui.statusbar.notification.stack.NotificationPriorityBucketKt;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -52,7 +49,6 @@ public class RankingCoordinator implements Coordinator {
     public static final boolean SHOW_ALL_SECTIONS = false;
     private final StatusBarStateController mStatusBarStateController;
     private final HighPriorityProvider mHighPriorityProvider;
-    private final SectionStyleProvider mSectionStyleProvider;
     private final NodeController mSilentNodeController;
     private final SectionHeaderController mSilentHeaderController;
     private final NodeController mAlertingHeaderController;
@@ -63,13 +59,11 @@ public class RankingCoordinator implements Coordinator {
     public RankingCoordinator(
             StatusBarStateController statusBarStateController,
             HighPriorityProvider highPriorityProvider,
-            SectionStyleProvider sectionStyleProvider,
             @AlertingHeader NodeController alertingHeaderController,
             @SilentHeader SectionHeaderController silentHeaderController,
             @SilentHeader NodeController silentNodeController) {
         mStatusBarStateController = statusBarStateController;
         mHighPriorityProvider = highPriorityProvider;
-        mSectionStyleProvider = sectionStyleProvider;
         mAlertingHeaderController = alertingHeaderController;
         mSilentNodeController = silentNodeController;
         mSilentHeaderController = silentHeaderController;
@@ -78,9 +72,6 @@ public class RankingCoordinator implements Coordinator {
     @Override
     public void attach(NotifPipeline pipeline) {
         mStatusBarStateController.addCallback(mStatusBarStateCallback);
-        mSectionStyleProvider.setMinimizedSections(Collections.singleton(mMinimizedNotifSectioner));
-        mSectionStyleProvider.setSilentSections(
-                Arrays.asList(mSilentNotifSectioner, mMinimizedNotifSectioner));
 
         pipeline.addPreGroupFilter(mSuspendedFilter);
         pipeline.addPreGroupFilter(mDndVisualEffectsFilter);
@@ -190,7 +181,9 @@ public class RankingCoordinator implements Coordinator {
             "DndSuppressingVisualEffects") {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
-            if (mStatusBarStateController.isDozing() && entry.shouldSuppressAmbient()) {
+            if ((mStatusBarStateController.isDozing()
+                    || mStatusBarStateController.getDozeAmount() == 1f)
+                    && entry.shouldSuppressAmbient()) {
                 return true;
             }
 
@@ -200,6 +193,20 @@ public class RankingCoordinator implements Coordinator {
 
     private final StatusBarStateController.StateListener mStatusBarStateCallback =
             new StatusBarStateController.StateListener() {
+                private boolean mPrevDozeAmountIsOne = false;
+
+                @Override
+                public void onDozeAmountChanged(float linear, float eased) {
+                    StatusBarStateController.StateListener.super.onDozeAmountChanged(linear, eased);
+
+                    boolean dozeAmountIsOne = linear == 1f;
+                    if (mPrevDozeAmountIsOne != dozeAmountIsOne) {
+                        mDndVisualEffectsFilter.invalidateList("dozeAmount changed to "
+                                + (dozeAmountIsOne ? "one" : "not one"));
+                        mPrevDozeAmountIsOne = dozeAmountIsOne;
+                    }
+                }
+
                 @Override
                 public void onDozingChanged(boolean isDozing) {
                     mDndVisualEffectsFilter.invalidateList("onDozingChanged to " + isDozing);

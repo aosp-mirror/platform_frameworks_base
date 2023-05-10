@@ -193,7 +193,7 @@ class EnsureActivitiesVisibleHelper {
             }
 
             if (!r.attachedToProcess()) {
-                makeVisibleAndRestartIfNeeded(mStarting, mConfigChanges, isTop,
+                makeVisibleAndRestartIfNeeded(mStarting, mConfigChanges,
                         resumeTopActivity && isTop, r);
             } else if (r.isVisibleRequested()) {
                 // If this activity is already visible, then there is nothing to do here.
@@ -243,15 +243,7 @@ class EnsureActivitiesVisibleHelper {
     }
 
     private void makeVisibleAndRestartIfNeeded(ActivityRecord starting, int configChanges,
-            boolean isTop, boolean andResume, ActivityRecord r) {
-        // We need to make sure the app is running if it's the top, or it is just made visible from
-        // invisible. If the app is already visible, it must have died while it was visible. In this
-        // case, we'll show the dead window but will not restart the app. Otherwise we could end up
-        // thrashing.
-        if (!isTop && r.isVisibleRequested() && !r.isState(INITIALIZING)) {
-            return;
-        }
-
+            boolean andResume, ActivityRecord r) {
         // This activity needs to be visible, but isn't even running...
         // get it started and resume if no other root task in this root task is resumed.
         if (DEBUG_VISIBILITY) {

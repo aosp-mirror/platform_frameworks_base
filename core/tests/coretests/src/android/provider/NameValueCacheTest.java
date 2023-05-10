@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import android.content.ContentProvider;
 import android.content.IContentProvider;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.platform.test.annotations.Presubmit;
 import android.test.mock.MockContentResolver;
 import android.util.MemoryIntArray;
@@ -208,11 +209,17 @@ public class NameValueCacheTest {
                             // special index for unset settings
                             index = 2;
                         }
+                        // Manually make a copy of the memory int array to mimic sending it over IPC
+                        Parcel p = Parcel.obtain();
+                        mSettingsCacheGenerationStore.writeToParcel(p, 0);
+                        p.setDataPosition(0);
+                        MemoryIntArray parcelArray = MemoryIntArray.CREATOR.createFromParcel(p);
                         bundle.putParcelable(Settings.CALL_METHOD_TRACK_GENERATION_KEY,
-                                mSettingsCacheGenerationStore);
+                                parcelArray);
                         bundle.putInt(Settings.CALL_METHOD_GENERATION_INDEX_KEY, index);
                         bundle.putInt(Settings.CALL_METHOD_GENERATION_KEY,
                                 mSettingsCacheGenerationStore.get(index));
+                        p.recycle();
                     }
                     return bundle;
                 });
@@ -222,6 +229,8 @@ public class NameValueCacheTest {
     public void cleanUp() throws IOException {
         mConfigsStorage.clear();
         mSettingsStorage.clear();
+        mSettingsCacheGenerationStore.close();
+        mConfigsCacheGenerationStore.close();
     }
 
     @Test

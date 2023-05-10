@@ -16,13 +16,16 @@
 
 package com.android.systemui.statusbar.notification.interruption
 
+import android.util.Log
+
 import com.android.systemui.log.dagger.NotificationInterruptLog
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel.DEBUG
-import com.android.systemui.plugins.log.LogLevel.INFO
-import com.android.systemui.plugins.log.LogLevel.WARNING
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.LogLevel.INFO
+import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.logKey
+import com.android.systemui.util.Compile
 import javax.inject.Inject
 
 class NotificationInterruptLogger @Inject constructor(
@@ -44,11 +47,13 @@ class NotificationInterruptLogger @Inject constructor(
     }
 
     fun logNoBubbleNotAllowed(entry: NotificationEntry) {
-        buffer.log(TAG, DEBUG, {
-            str1 = entry.logKey
-        }, {
-            "No bubble up: not allowed to bubble: $str1"
-        })
+        if (Compile.IS_DEBUG && Log.isLoggable(TAG, Log.DEBUG)) {
+            buffer.log(TAG, DEBUG, {
+                str1 = entry.logKey
+            }, {
+                "No bubble up: not allowed to bubble: $str1"
+            })
+        }
     }
 
     fun logNoBubbleNoMetadata(entry: NotificationEntry) {
@@ -231,6 +236,14 @@ class NotificationInterruptLogger @Inject constructor(
             str1 = entry.logKey
         }, {
             "No pulsing: ambient effect suppressed: $str1"
+        })
+    }
+
+    fun logNoPulsingNotificationHidden(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.logKey
+        }, {
+            "No pulsing: notification hidden on lock screen: $str1"
         })
     }
 

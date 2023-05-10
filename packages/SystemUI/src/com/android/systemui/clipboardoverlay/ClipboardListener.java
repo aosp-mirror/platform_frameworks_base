@@ -21,7 +21,6 @@ import static android.content.ClipDescription.CLASSIFICATION_COMPLETE;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_UPDATED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_TOAST_SHOWN;
-import static com.android.systemui.flags.Flags.CLIPBOARD_MINIMIZED_LAYOUT;
 
 import static com.google.android.setupcompat.util.WizardManagerHelper.SETTINGS_SECURE_USER_SETUP_COMPLETE;
 
@@ -36,7 +35,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
-import com.android.systemui.flags.FeatureFlags;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -59,7 +57,6 @@ public class ClipboardListener implements
     private final Provider<ClipboardOverlayController> mOverlayProvider;
     private final ClipboardToast mClipboardToast;
     private final ClipboardManager mClipboardManager;
-    private final FeatureFlags mFeatureFlags;
     private final UiEventLogger mUiEventLogger;
     private ClipboardOverlay mClipboardOverlay;
 
@@ -68,13 +65,11 @@ public class ClipboardListener implements
             Provider<ClipboardOverlayController> clipboardOverlayControllerProvider,
             ClipboardToast clipboardToast,
             ClipboardManager clipboardManager,
-            FeatureFlags featureFlags,
             UiEventLogger uiEventLogger) {
         mContext = context;
         mOverlayProvider = clipboardOverlayControllerProvider;
         mClipboardToast = clipboardToast;
         mClipboardManager = clipboardManager;
-        mFeatureFlags = featureFlags;
         mUiEventLogger = uiEventLogger;
     }
 
@@ -113,11 +108,7 @@ public class ClipboardListener implements
         } else {
             mUiEventLogger.log(CLIPBOARD_OVERLAY_UPDATED, 0, clipSource);
         }
-        if (mFeatureFlags.isEnabled(CLIPBOARD_MINIMIZED_LAYOUT)) {
-            mClipboardOverlay.setClipData(clipData, clipSource);
-        } else {
-            mClipboardOverlay.setClipDataLegacy(clipData, clipSource);
-        }
+        mClipboardOverlay.setClipData(clipData, clipSource);
         mClipboardOverlay.setOnSessionCompleteListener(() -> {
             // Session is complete, free memory until it's needed again.
             mClipboardOverlay = null;
@@ -160,8 +151,6 @@ public class ClipboardListener implements
     }
 
     interface ClipboardOverlay {
-        void setClipDataLegacy(ClipData clipData, String clipSource);
-
         void setClipData(ClipData clipData, String clipSource);
 
         void setOnSessionCompleteListener(Runnable runnable);

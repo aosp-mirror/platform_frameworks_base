@@ -31,19 +31,18 @@ import android.widget.TextView
 import androidx.constraintlayout.helper.widget.Flow as FlowWidget
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.user.UserSwitcherPopupMenu
 import com.android.systemui.user.UserSwitcherRootView
 import com.android.systemui.user.shared.model.UserActionModel
 import com.android.systemui.user.ui.viewmodel.UserActionViewModel
 import com.android.systemui.user.ui.viewmodel.UserSwitcherViewModel
 import com.android.systemui.util.children
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 
@@ -56,7 +55,6 @@ object UserSwitcherViewBinder {
     fun bind(
         view: ViewGroup,
         viewModel: UserSwitcherViewModel,
-        lifecycleOwner: LifecycleOwner,
         layoutInflater: LayoutInflater,
         falsingCollector: FalsingCollector,
         onFinish: () -> Unit,
@@ -79,88 +77,92 @@ object UserSwitcherViewBinder {
         addButton.setOnClickListener { viewModel.onOpenMenuButtonClicked() }
         cancelButton.setOnClickListener { viewModel.onCancelButtonClicked() }
 
-        lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.CREATED) {
-                launch {
-                    viewModel.isFinishRequested
-                        .filter { it }
-                        .collect {
-                            onFinish()
-                            viewModel.onFinished()
-                        }
+        view.repeatWhenAttached {
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.CREATED) {
+                    launch {
+                        viewModel.isFinishRequested
+                            .filter { it }
+                            .collect {
+                                //finish requested, we want to dismiss popupmenu at the same time
+                                popupMenu?.dismiss()
+                                onFinish()
+                                viewModel.onFinished()
+                            }
+                    }
                 }
             }
-        }
 
-        lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch { viewModel.isOpenMenuButtonVisible.collect { addButton.isVisible = it } }
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    launch { viewModel.isOpenMenuButtonVisible.collect { addButton.isVisible = it } }
 
-                launch {
-                    viewModel.isMenuVisible.collect { isVisible ->
-                        if (isVisible && popupMenu?.isShowing != true) {
-                            popupMenu?.dismiss()
-                            // Use post to make sure we show the popup menu *after* the activity is
-                            // ready to show one to avoid a WindowManager$BadTokenException.
-                            view.post {
-                                popupMenu =
-                                    createAndShowPopupMenu(
-                                        context = view.context,
-                                        anchorView = addButton,
-                                        adapter = popupMenuAdapter,
-                                        onDismissed = viewModel::onMenuClosed,
-                                    )
-                            }
-                        } else if (!isVisible && popupMenu?.isShowing == true) {
-                            popupMenu?.dismiss()
-                            popupMenu = null
-                        }
-                    }
-                }
-
-                launch {
-                    viewModel.menu.collect { menuViewModels ->
-                        popupMenuAdapter.setItems(menuViewModels)
-                    }
-                }
-
-                launch {
-                    viewModel.maximumUserColumns.collect { maximumColumns ->
-                        flowWidget.setMaxElementsWrap(maximumColumns)
-                    }
-                }
-
-                launch {
-                    viewModel.users.collect { users ->
-                        val viewPool =
-                            gridContainerView.children
-                                .filter { it.tag == USER_VIEW_TAG }
-                                .toMutableList()
-                        viewPool.forEach {
-                            gridContainerView.removeView(it)
-                            flowWidget.removeView(it)
-                        }
-                        users.forEach { userViewModel ->
-                            val userView =
-                                if (viewPool.isNotEmpty()) {
-                                    viewPool.removeAt(0)
-                                } else {
-                                    val inflatedView =
-                                        layoutInflater.inflate(
-                                            R.layout.user_switcher_fullscreen_item,
-                                            view,
-                                            false,
+                    launch {
+                        viewModel.isMenuVisible.collect { isVisible ->
+                            if (isVisible && popupMenu?.isShowing != true) {
+                                popupMenu?.dismiss()
+                                // Use post to make sure we show the popup menu *after* the activity is
+                                // ready to show one to avoid a WindowManager$BadTokenException.
+                                view.post {
+                                    popupMenu =
+                                        createAndShowPopupMenu(
+                                            context = view.context,
+                                            anchorView = addButton,
+                                            adapter = popupMenuAdapter,
+                                            onDismissed = viewModel::onMenuClosed,
                                         )
-                                    inflatedView.tag = USER_VIEW_TAG
-                                    inflatedView
                                 }
-                            userView.id = View.generateViewId()
-                            gridContainerView.addView(userView)
-                            flowWidget.addView(userView)
-                            UserViewBinder.bind(
-                                view = userView,
-                                viewModel = userViewModel,
-                            )
+                            } else if (!isVisible && popupMenu?.isShowing == true) {
+                                popupMenu?.dismiss()
+                                popupMenu = null
+                            }
+                        }
+                    }
+
+                    launch {
+                        viewModel.menu.collect { menuViewModels ->
+                            popupMenuAdapter.setItems(menuViewModels)
+                        }
+                    }
+
+                    launch {
+                        viewModel.maximumUserColumns.collect { maximumColumns ->
+                            flowWidget.setMaxElementsWrap(maximumColumns)
+                        }
+                    }
+
+                    launch {
+                        viewModel.users.collect { users ->
+                            val viewPool =
+                                gridContainerView.children
+                                    .filter { it.tag == USER_VIEW_TAG }
+                                    .toMutableList()
+                            viewPool.forEach {
+                                gridContainerView.removeView(it)
+                                flowWidget.removeView(it)
+                            }
+                            users.forEach { userViewModel ->
+                                val userView =
+                                    if (viewPool.isNotEmpty()) {
+                                        viewPool.removeAt(0)
+                                    } else {
+                                        val inflatedView =
+                                            layoutInflater.inflate(
+                                                R.layout.user_switcher_fullscreen_item,
+                                                view,
+                                                false,
+                                            )
+                                        inflatedView.tag = USER_VIEW_TAG
+                                        inflatedView
+                                    }
+                                userView.id = View.generateViewId()
+                                gridContainerView.addView(userView)
+                                flowWidget.addView(userView)
+                                UserViewBinder.bind(
+                                    view = userView,
+                                    viewModel = userViewModel,
+                                )
+                            }
                         }
                     }
                 }

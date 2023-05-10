@@ -49,9 +49,9 @@ import static com.android.internal.util.XmlUtils.writeBooleanAttribute;
 import static com.android.internal.util.XmlUtils.writeByteArrayAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
 import static com.android.internal.util.XmlUtils.writeUriAttribute;
-import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.PackageInstallerService.prepareStageDir;
 import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
+import static com.android.server.pm.PackageManagerServiceUtils.isInstalledByAdb;
 
 import android.Manifest;
 import android.annotation.AnyThread;
@@ -173,7 +173,6 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.LocalServices;
 import com.android.server.pm.Installer.InstallerException;
-import com.android.server.pm.Installer.LegacyDexoptDisabledException;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.pkg.AndroidPackage;
 import com.android.server.pm.pkg.PackageStateInternal;
@@ -746,6 +745,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private int mValidatedTargetSdk = INVALID_TARGET_SDK_VERSION;
 
+    @GuardedBy("mLock")
+    private boolean mAllowsUpdateOwnership = true;
+
     private static final FileFilter sAddedApkFilter = new FileFilter() {
         @Override
         public boolean accept(File file) {
@@ -867,13 +869,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private static final int USER_ACTION_NOT_NEEDED = 0;
     private static final int USER_ACTION_REQUIRED = 1;
-    private static final int USER_ACTION_PENDING_APK_PARSING = 2;
     private static final int USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER = 3;
 
     @IntDef({
             USER_ACTION_NOT_NEEDED,
             USER_ACTION_REQUIRED,
-            USER_ACTION_PENDING_APK_PARSING,
             USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER,
     })
     @interface UserActionRequirement {}
@@ -925,7 +925,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final int targetPackageUid = snapshot.getPackageUid(packageName, 0, userId);
         final boolean isUpdate = targetPackageUid != -1 || isApexSession();
         final InstallSourceInfo existingInstallSourceInfo = isUpdate
-                ? snapshot.getInstallSourceInfo(packageName)
+                ? snapshot.getInstallSourceInfo(packageName, userId)
                 : null;
         final String existingInstallerPackageName = existingInstallSourceInfo != null
                 ? existingInstallSourceInfo.getInstallingPackageName()
@@ -964,11 +964,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && !isApexSession()
                 && !isUpdateOwner
                 && !isInstallerShell
+                && mAllowsUpdateOwnership
                 // We don't enforce the update ownership for the managed user and profile.
                 && !isFromManagedUserOrProfile) {
             return USER_ACTION_REQUIRED_UPDATE_OWNER_REMINDER;
         }
-
         if (isPermissionGranted) {
             return USER_ACTION_NOT_NEEDED;
         }
@@ -983,7 +983,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 && isUpdateWithoutUserActionPermissionGranted
                 && ((isUpdateOwnershipEnforcementEnabled ? isUpdateOwner
                 : isInstallerOfRecord) || isSelfUpdate)) {
-            return USER_ACTION_PENDING_APK_PARSING;
+            if (!isApexSession()) {
+                if (!isTargetSdkConditionSatisfied(this)) {
+                    return USER_ACTION_REQUIRED;
+                }
+
+                if (!mSilentUpdatePolicy.isSilentUpdateAllowed(
+                        getInstallerPackageName(), getPackageName())) {
+                    // Fall back to the non-silent update if a repeated installation is invoked
+                    // within the throttle time.
+                    return USER_ACTION_REQUIRED;
+                }
+                mSilentUpdatePolicy.track(getInstallerPackageName(), getPackageName());
+                return USER_ACTION_NOT_NEEDED;
+            }
         }
 
         return USER_ACTION_REQUIRED;
@@ -1135,8 +1148,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.userId = userId;
             info.installerPackageName = mInstallSource.mInstallerPackageName;
             info.installerAttributionTag = mInstallSource.mInstallerAttributionTag;
-            info.resolvedBaseCodePath = (mResolvedBaseFile != null) ?
-                    mResolvedBaseFile.getAbsolutePath() : null;
+            info.resolvedBaseCodePath = null;
+            if (mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+                    == PackageManager.PERMISSION_GRANTED) {
+                File file = mResolvedBaseFile;
+                if (file == null) {
+                    // Try to guess mResolvedBaseFile file.
+                    final List<File> addedFiles = getAddedApksLocked();
+                    if (addedFiles.size() > 0) {
+                        file = addedFiles.get(0);
+                    }
+                }
+                if (file != null) {
+                    info.resolvedBaseCodePath = file.getAbsolutePath();
+                }
+            }
             info.progress = progress;
             info.sealed = mSealed;
             info.isCommitted = isCommitted();
@@ -1337,9 +1364,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private String[] getStageDirContentsLocked() {
+        if (stageDir == null) {
+            return EmptyArray.STRING;
+        }
         String[] result = stageDir.list();
         if (result == null) {
-            result = EmptyArray.STRING;
+            return EmptyArray.STRING;
         }
         return result;
     }
@@ -1397,9 +1427,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             return;
         }
 
+        final String initiatingPackageName = getInstallSource().mInitiatingPackageName;
         final String installerPackageName;
-        if (!TextUtils.isEmpty(getInstallSource().mInitiatingPackageName)) {
-            installerPackageName = getInstallSource().mInitiatingPackageName;
+        if (!isInstalledByAdb(initiatingPackageName)) {
+            installerPackageName = initiatingPackageName;
         } else {
             installerPackageName = getInstallSource().mInstallerPackageName;
         }
@@ -1442,7 +1473,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             @NonNull IOnChecksumsReadyListener onChecksumsReadyListener) {
         assertCallerIsOwnerRootOrVerifier();
         final File file = new File(stageDir, name);
-        final String installerPackageName = getInstallSource().mInitiatingPackageName;
+        final String installerPackageName = PackageManagerServiceUtils.isInstalledByAdb(
+                getInstallSource().mInitiatingPackageName)
+                ? getInstallSource().mInstallerPackageName
+                : getInstallSource().mInitiatingPackageName;
         try {
             mPm.requestFileChecksums(file, installerPackageName, optional, required,
                     trustedInstallers, onChecksumsReadyListener);
@@ -1611,13 +1645,14 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new SecurityException("link() can only be run by the system");
         }
 
+        final File target = new File(path);
+        final File source = new File(stageDir, target.getName());
+        var sourcePath = source.getAbsolutePath();
         try {
-            final File target = new File(path);
-            final File source = new File(stageDir, target.getName());
             try {
-                Os.link(path, source.getAbsolutePath());
+                Os.link(path, sourcePath);
                 // Grant READ access for APK to be read successfully
-                Os.chmod(source.getAbsolutePath(), 0644);
+                Os.chmod(sourcePath, 0644);
             } catch (ErrnoException e) {
                 e.rethrowAsIOException();
             }
@@ -1625,6 +1660,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IOException("Can't relabel file: " + source);
             }
         } catch (IOException e) {
+            try {
+                Os.unlink(sourcePath);
+            } catch (Exception ignored) {
+                Slog.d(TAG, "Failed to unlink session file: " + sourcePath);
+            }
+
             throw ExceptionUtils.wrap(e);
         }
     }
@@ -2363,26 +2404,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             session.sendPendingUserActionIntent(target);
             return true;
         }
-
-        if (!session.isApexSession() && userActionRequirement == USER_ACTION_PENDING_APK_PARSING) {
-            if (!isTargetSdkConditionSatisfied(session)) {
-                session.sendPendingUserActionIntent(target);
-                return true;
-            }
-
-            if (session.params.requireUserAction == SessionParams.USER_ACTION_NOT_REQUIRED) {
-                if (!session.mSilentUpdatePolicy.isSilentUpdateAllowed(
-                        session.getInstallerPackageName(), session.getPackageName())) {
-                    // Fall back to the non-silent update if a repeated installation is invoked
-                    // within the throttle time.
-                    session.sendPendingUserActionIntent(target);
-                    return true;
-                }
-                session.mSilentUpdatePolicy.track(session.getInstallerPackageName(),
-                        session.getPackageName());
-            }
-        }
-
         return false;
     }
 
@@ -2560,15 +2581,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
 
                 if (isLinkPossible(fromFiles, toDir)) {
-                    if (!useArtService()) { // ART Service creates oat dirs on demand instead.
-                        if (!mResolvedInstructionSets.isEmpty()) {
-                            final File oatDir = new File(toDir, "oat");
-                            try {
-                                createOatDirs(tempPackageName, mResolvedInstructionSets, oatDir);
-                            } catch (LegacyDexoptDisabledException e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
+                    if (!mResolvedInstructionSets.isEmpty()) {
+                        final File oatDir = new File(toDir, "oat");
+                        createOatDirs(tempPackageName, mResolvedInstructionSets, oatDir);
                     }
                     // pre-create lib dirs for linking if necessary
                     if (!mResolvedNativeLibPaths.isEmpty()) {
@@ -2763,11 +2778,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         : PackageInstaller.ACTION_CONFIRM_INSTALL);
         intent.setPackage(mPm.getPackageInstallerPackageName());
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-        synchronized (mLock) {
-            intent.putExtra(PackageInstaller.EXTRA_RESOLVED_BASE_PATH,
-                    mResolvedBaseFile != null ? mResolvedBaseFile.getAbsolutePath() : null);
-        }
-
         sendOnUserActionRequired(mContext, target, sessionId, intent);
     }
 
@@ -3399,6 +3409,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         // {@link PackageLite#getTargetSdk()}
         mValidatedTargetSdk = packageLite.getTargetSdk();
 
+        mAllowsUpdateOwnership = packageLite.isAllowUpdateOwnership();
+
         return packageLite;
     }
 
@@ -3829,7 +3841,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     private void createOatDirs(String packageName, List<String> instructionSets, File fromDir)
-            throws PackageManagerException, LegacyDexoptDisabledException {
+            throws PackageManagerException {
         for (String instructionSet : instructionSets) {
             try {
                 mInstaller.createOatDir(packageName, fromDir.getAbsolutePath(), instructionSet);

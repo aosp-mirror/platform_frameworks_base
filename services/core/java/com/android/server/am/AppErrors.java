@@ -534,6 +534,8 @@ class AppErrors {
             }
         }
 
+        mService.mOomAdjuster.mCachedAppOptimizer.unfreezeProcess(initialPid,
+                CachedAppOptimizer.UNFREEZE_REASON_PROCESS_END);
         proc.scheduleCrashLocked(message, exceptionTypeId, extras);
         if (force) {
             // If the app is responsive, the scheduled crash will happen as expected
@@ -550,6 +552,15 @@ class AppErrors {
                         }
                     },
                     5000L);
+        }
+    }
+
+    void sendRecoverableCrashToAppExitInfo(
+            ProcessRecord r, ApplicationErrorReport.CrashInfo crashInfo) {
+        if (r == null || crashInfo == null
+                || !"Native crash".equals(crashInfo.exceptionClassName)) return;
+        synchronized (mService) {
+            mService.mProcessList.noteAppRecoverableCrash(r);
         }
     }
 

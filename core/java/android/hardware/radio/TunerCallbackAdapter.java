@@ -144,6 +144,9 @@ final class TunerCallbackAdapter extends ITunerCallback.Stub {
 
         int errorCode;
         switch (status) {
+            case RadioTuner.TUNER_RESULT_CANCELED:
+                errorCode = RadioTuner.ERROR_CANCELLED;
+                break;
             case RadioManager.STATUS_PERMISSION_DENIED:
             case RadioManager.STATUS_DEAD_OBJECT:
                 errorCode = RadioTuner.ERROR_SERVER_DIED;
@@ -152,10 +155,16 @@ final class TunerCallbackAdapter extends ITunerCallback.Stub {
             case RadioManager.STATUS_NO_INIT:
             case RadioManager.STATUS_BAD_VALUE:
             case RadioManager.STATUS_INVALID_OPERATION:
+            case RadioTuner.TUNER_RESULT_INTERNAL_ERROR:
+            case RadioTuner.TUNER_RESULT_INVALID_ARGUMENTS:
+            case RadioTuner.TUNER_RESULT_INVALID_STATE:
+            case RadioTuner.TUNER_RESULT_NOT_SUPPORTED:
+            case RadioTuner.TUNER_RESULT_UNKNOWN_ERROR:
                 Log.i(TAG, "Got an error with no mapping to the legacy API (" + status
                         + "), doing a best-effort conversion to ERROR_SCAN_TIMEOUT");
             // fall through
             case RadioManager.STATUS_TIMED_OUT:
+            case RadioTuner.TUNER_RESULT_TIMEOUT:
             default:
                 errorCode = RadioTuner.ERROR_SCAN_TIMEOUT;
         }

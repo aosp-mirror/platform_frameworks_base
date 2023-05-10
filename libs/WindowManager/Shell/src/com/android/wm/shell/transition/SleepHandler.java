@@ -19,7 +19,6 @@ package com.android.wm.shell.transition;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -42,9 +41,9 @@ class SleepHandler implements Transitions.TransitionHandler {
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+        mSleepTransitions.remove(transition);
         startTransaction.apply();
         finishCallback.onTransitionFinished(null, null);
-        mSleepTransitions.remove(transition);
         return true;
     }
 
@@ -59,7 +58,6 @@ class SleepHandler implements Transitions.TransitionHandler {
     @Override
     public void onTransitionConsumed(@NonNull IBinder transition, boolean aborted,
             @Nullable SurfaceControl.Transaction finishTransaction) {
-        Log.e(Transitions.TAG, "Sleep transition was consumed. This doesn't make sense");
         mSleepTransitions.remove(transition);
     }
 }

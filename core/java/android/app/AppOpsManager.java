@@ -60,13 +60,16 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.LongSparseLongArray;
 import android.util.Pools;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -179,6 +182,8 @@ import java.util.function.Supplier;
  */
 @SystemService(Context.APP_OPS_SERVICE)
 public class AppOpsManager {
+    private static final String LOG_TAG = "AppOpsManager";
+
     /**
      * This is a subtle behavior change to {@link #startWatchingMode}.
      *
@@ -1450,9 +1455,8 @@ public class AppOpsManager {
     public static final int OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             AppProtoEnums.APP_OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD;
 
-    /** @hide Access to wrist temperature sensors. */
-    public static final int OP_BODY_SENSORS_WRIST_TEMPERATURE =
-            AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
+    // App op deprecated/removed.
+    private static final int OP_DEPRECATED_2 = AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
 
     /**
      * Send an intent to launch instead of posting the notification to the status bar.
@@ -1461,9 +1465,25 @@ public class AppOpsManager {
      */
     public static final int OP_USE_FULL_SCREEN_INTENT = AppProtoEnums.APP_OP_USE_FULL_SCREEN_INTENT;
 
+    /**
+     * Hides camera indicator for sandboxed detection apps that directly access the service.
+     *
+     * @hide
+     */
+    public static final int OP_CAMERA_SANDBOXED =
+            AppProtoEnums.APP_OP_CAMERA_SANDBOXED;
+
+    /**
+     * Hides microphone indicator for sandboxed detection apps that directly access the service.
+     *
+     * @hide
+     */
+    public static final int OP_RECORD_AUDIO_SANDBOXED =
+            AppProtoEnums.APP_OP_RECORD_AUDIO_SANDBOXED;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 134;
+    public static final int _NUM_OP = 136;
 
     /**
      * All app ops represented as strings.
@@ -1603,8 +1623,9 @@ public class AppOpsManager {
             OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION,
             OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
             OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
-            OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
             OPSTR_USE_FULL_SCREEN_INTENT,
+            OPSTR_CAMERA_SANDBOXED,
+            OPSTR_RECORD_AUDIO_SANDBOXED
     })
     public @interface AppOpString {}
 
@@ -2013,6 +2034,20 @@ public class AppOpsManager {
     public static final String OPSTR_COARSE_LOCATION_SOURCE = "android:coarse_location_source";
 
     /**
+     * Camera is being recorded in sandboxed detection process.
+     *
+     * @hide
+     */
+    public static final String OPSTR_CAMERA_SANDBOXED = "android:camera_sandboxed";
+
+    /**
+     * Audio is being recorded in sandboxed detection process.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECORD_AUDIO_SANDBOXED = "android:record_audio_sandboxed";
+
+    /**
      * Allow apps to create the requests to manage the media files without user confirmation.
      *
      * @see android.Manifest.permission#MANAGE_MEDIA
@@ -2188,9 +2223,11 @@ public class AppOpsManager {
     public static final String OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             "android:capture_consentless_bugreport_on_userdebug_build";
 
-    /** Access to wrist temperature body sensors. */
-    public static final String OPSTR_BODY_SENSORS_WRIST_TEMPERATURE =
-            "android:body_sensors_wrist_temperature";
+    /**
+     * App op deprecated/removed.
+     * @hide
+     */
+    public static final String OPSTR_DEPRECATED_2 = "android:deprecated_2";
 
     /**
      * Send an intent to launch instead of posting the notification to the status bar.
@@ -2217,8 +2254,7 @@ public class AppOpsManager {
     /** Whether noting for an appop should be collected */
     private static final @ShouldCollectNoteOp byte[] sAppOpsToNote = new byte[_NUM_OP];
 
-    private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
-            // RUNTIME PERMISSIONS
+    private static final int[] RUNTIME_PERMISSION_OPS = {
             // Contacts
             OP_READ_CONTACTS,
             OP_WRITE_CONTACTS,
@@ -2275,8 +2311,13 @@ public class AppOpsManager {
             OP_NEARBY_WIFI_DEVICES,
             // Notifications
             OP_POST_NOTIFICATION,
+    };
 
-            // APPOP PERMISSIONS
+    /**
+     * Ops for app op permissions that are setting the per-package mode for certain reasons. Most
+     * app op permissions should set the per-UID mode instead.
+     */
+    private static final int[] APP_OP_PERMISSION_PACKAGE_OPS = {
             OP_ACCESS_NOTIFICATIONS,
             OP_SYSTEM_ALERT_WINDOW,
             OP_WRITE_SETTINGS,
@@ -2285,9 +2326,16 @@ public class AppOpsManager {
             OP_SMS_FINANCIAL_TRANSACTIONS,
             OP_MANAGE_IPSEC_TUNNELS,
             OP_INSTANT_APP_START_FOREGROUND,
+            OP_LOADER_USAGE_STATS
+    };
+
+    /**
+     * Ops for app op permissions that are setting the per-UID mode for certain reasons. This should
+     * be preferred over the per-package mode for new app op permissions.
+     */
+    private static final int[] APP_OP_PERMISSION_UID_OPS = {
             OP_MANAGE_EXTERNAL_STORAGE,
             OP_INTERACT_ACROSS_PROFILES,
-            OP_LOADER_USAGE_STATS,
             OP_MANAGE_ONGOING_CALLS,
             OP_USE_ICC_AUTH_WITH_DEVICE_IDENTIFIER,
             OP_SCHEDULE_EXACT_ALARM,
@@ -2297,7 +2345,6 @@ public class AppOpsManager {
             OP_READ_MEDIA_VISUAL_USER_SELECTED,
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
-            OP_BODY_SENSORS_WRIST_TEMPERATURE,
             OP_USE_FULL_SCREEN_INTENT
     };
 
@@ -2505,7 +2552,7 @@ public class AppOpsManager {
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_TURN_SCREEN_ON, OPSTR_TURN_SCREEN_ON, "TURN_SCREEN_ON")
             .setPermission(Manifest.permission.TURN_SCREEN_ON)
-            .setDefaultMode(AppOpsManager.MODE_ERRORED).build(),
+            .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
         new AppOpInfo.Builder(OP_GET_ACCOUNTS, OPSTR_GET_ACCOUNTS, "GET_ACCOUNTS")
             .setPermission(Manifest.permission.GET_ACCOUNTS)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
@@ -2717,14 +2764,15 @@ public class AppOpsManager {
                 "CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD")
                 .setPermission(Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD)
                 .build(),
-        new AppOpInfo.Builder(OP_BODY_SENSORS_WRIST_TEMPERATURE,
-                OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
-                "BODY_SENSORS_WRIST_TEMPERATURE")
-                .setPermission(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE)
-                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_DEPRECATED_2, OPSTR_DEPRECATED_2, "DEPRECATED_2")
+                .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_USE_FULL_SCREEN_INTENT, OPSTR_USE_FULL_SCREEN_INTENT,
                 "USE_FULL_SCREEN_INTENT").setPermission(Manifest.permission.USE_FULL_SCREEN_INTENT)
-                .build()
+                .build(),
+        new AppOpInfo.Builder(OP_CAMERA_SANDBOXED, OPSTR_CAMERA_SANDBOXED,
+            "CAMERA_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RECORD_AUDIO_SANDBOXED, OPSTR_RECORD_AUDIO_SANDBOXED,
+                "RECORD_AUDIO_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
     };
 
     // The number of longs needed to form a full bitmask of app ops
@@ -2777,7 +2825,17 @@ public class AppOpsManager {
                 sOpStrToOp.put(sAppOpInfos[i].name, i);
             }
         }
-        for (int op : RUNTIME_AND_APPOP_PERMISSIONS_OPS) {
+        for (int op : RUNTIME_PERMISSION_OPS) {
+            if (sAppOpInfos[op].permission != null) {
+                sPermToOp.put(sAppOpInfos[op].permission, op);
+            }
+        }
+        for (int op : APP_OP_PERMISSION_PACKAGE_OPS) {
+            if (sAppOpInfos[op].permission != null) {
+                sPermToOp.put(sAppOpInfos[op].permission, op);
+            }
+        }
+        for (int op : APP_OP_PERMISSION_UID_OPS) {
             if (sAppOpInfos[op].permission != null) {
                 sPermToOp.put(sAppOpInfos[op].permission, op);
             }
@@ -2944,6 +3002,22 @@ public class AppOpsManager {
      */
     public static boolean opAllowsReset(int op) {
         return !sAppOpInfos[op].disableReset;
+    }
+
+    /**
+     * Retrieve whether the op is a per-package op for an app op permission.
+     * @hide
+     */
+    public static boolean opIsPackageAppOpPermission(int op) {
+        return ArrayUtils.contains(APP_OP_PERMISSION_PACKAGE_OPS, op);
+    }
+
+    /**
+     * Retrieve whether the op is a per-package op for an app op permission.
+     * @hide
+     */
+    public static boolean opIsUidAppOpPermission(int op) {
+        return ArrayUtils.contains(APP_OP_PERMISSION_UID_OPS, op);
     }
 
     /**
@@ -7015,6 +7089,26 @@ public class AppOpsManager {
      */
     public interface OnOpChangedListener {
         public void onOpChanged(String op, String packageName);
+
+        /**
+         * Implementations can override this method to add handling logic for AppOp changes.
+         *
+         * Normally, listeners to AppOp changes work in the same User Space as the App whose Op
+         * has changed. However, in some case listeners can have a single instance responsible for
+         * multiple users. (For ex single Media Provider instance in user 0 is responsible for both
+         * cloned and user 0 spaces). For handling such cases correctly, listeners need to be
+         * passed userId in addition to PackageName and Op.
+
+         * The default impl is to fallback onto {@link #onOpChanged(String, String)
+         *
+         * @param op The Op that changed.
+         * @param packageName Package of the app whose Op changed.
+         * @param userId User Space of the app whose Op changed.
+         * @hide
+         */
+        default void onOpChanged(@NonNull String op, @NonNull String packageName,  int userId) {
+            onOpChanged(op, packageName);
+        }
     }
 
     /**
@@ -7448,6 +7542,7 @@ public class AppOpsManager {
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(int code, int uid, @Mode int mode) {
+        logAnySeriousModeChanges(code, uid, null, mode);
         try {
             mService.setUidMode(code, uid, mode);
         } catch (RemoteException e) {
@@ -7468,6 +7563,7 @@ public class AppOpsManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(@NonNull String appOp, int uid, @Mode int mode) {
+        logAnySeriousModeChanges(strOpToOp(appOp), uid, null, mode);
         try {
             mService.setUidMode(AppOpsManager.strOpToOp(appOp), uid, mode);
         } catch (RemoteException e) {
@@ -7503,11 +7599,32 @@ public class AppOpsManager {
         }
     }
 
+    private void logAnySeriousModeChanges(int code, int uid, String packageName, @Mode int mode) {
+        // TODO (b/280869337): Remove this once we have the required data.
+        if (code != OP_RUN_ANY_IN_BACKGROUND || mode == MODE_ALLOWED) {
+            return;
+        }
+        final StringBuilder log = new StringBuilder("Attempt to change RUN_ANY_IN_BACKGROUND to ")
+                .append(modeToName(mode))
+                .append(" for uid: ")
+                .append(UserHandle.formatUid(uid))
+                .append(" package: ")
+                .append(packageName)
+                .append(" by: ")
+                .append(mContext.getOpPackageName());
+        if (Process.myUid() == Process.SYSTEM_UID) {
+            Slog.wtfStack(LOG_TAG, log.toString());
+        } else {
+            Log.w(LOG_TAG, log.toString());
+        }
+    }
+
     /** @hide */
     @UnsupportedAppUsage
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(int code, int uid, String packageName, @Mode int mode) {
+        logAnySeriousModeChanges(code, uid, packageName, mode);
         try {
             mService.setMode(code, uid, packageName, mode);
         } catch (RemoteException e) {
@@ -7530,6 +7647,7 @@ public class AppOpsManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setMode(@NonNull String op, int uid, @Nullable String packageName,
             @Mode int mode) {
+        logAnySeriousModeChanges(strOpToOp(op), uid, packageName, mode);
         try {
             mService.setMode(strOpToOp(op), uid, packageName, mode);
         } catch (RemoteException e) {
@@ -7687,7 +7805,9 @@ public class AppOpsManager {
                             ((OnOpChangedInternalListener)callback).onOpChanged(op, packageName);
                         }
                         if (sAppOpInfos[op].name != null) {
-                            callback.onOpChanged(sAppOpInfos[op].name, packageName);
+
+                            callback.onOpChanged(sAppOpInfos[op].name, packageName,
+                                    UserHandle.getUserId(uid));
                         }
                     }
                 };
@@ -8371,9 +8491,9 @@ public class AppOpsManager {
     public int noteProxyOp(int op, @Nullable String proxiedPackageName, int proxiedUid,
             @Nullable String proxiedAttributionTag, @Nullable String message) {
         return noteProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag,
-                        mContext.getAttributionSource().getToken())), message,
-                        /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, Process.INVALID_PID, proxiedPackageName,
+                        proxiedAttributionTag, mContext.getAttributionSource().getToken())),
+                        message, /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8458,8 +8578,9 @@ public class AppOpsManager {
             int proxiedUid, @Nullable String proxiedAttributionTag, @Nullable String message) {
         return noteProxyOpNoThrow(strOpToOp(op), new AttributionSource(
                 mContext.getAttributionSource(), new AttributionSource(proxiedUid,
-                        proxiedPackageName, proxiedAttributionTag, mContext.getAttributionSource()
-                        .getToken())), message,/*skipProxyOperation*/ false);
+                        Process.INVALID_PID, proxiedPackageName, proxiedAttributionTag,
+                        mContext.getAttributionSource().getToken())), message,
+                        /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8869,9 +8990,9 @@ public class AppOpsManager {
     public int startProxyOp(@NonNull String op, int proxiedUid, @NonNull String proxiedPackageName,
             @Nullable String proxiedAttributionTag, @Nullable String message) {
         return startProxyOp(op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, proxiedPackageName, proxiedAttributionTag,
-                        mContext.getAttributionSource().getToken())), message,
-                        /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, Process.INVALID_PID, proxiedPackageName,
+                        proxiedAttributionTag, mContext.getAttributionSource().getToken())),
+                        message, /*skipProxyOperation*/ false);
     }
 
     /**
@@ -8917,7 +9038,7 @@ public class AppOpsManager {
             @Nullable String message) {
         return startProxyOpNoThrow(AppOpsManager.strOpToOp(op), new AttributionSource(
                 mContext.getAttributionSource(), new AttributionSource(proxiedUid,
-                        proxiedPackageName, proxiedAttributionTag,
+                        Process.INVALID_PID, proxiedPackageName, proxiedAttributionTag,
                         mContext.getAttributionSource().getToken())), message,
                         /*skipProxyOperation*/ false);
     }
@@ -9066,8 +9187,8 @@ public class AppOpsManager {
             @NonNull String proxiedPackageName, @Nullable String proxiedAttributionTag) {
         IBinder token = mContext.getAttributionSource().getToken();
         finishProxyOp(token, op, new AttributionSource(mContext.getAttributionSource(),
-                new AttributionSource(proxiedUid, proxiedPackageName,  proxiedAttributionTag,
-                        token)), /*skipProxyOperation*/ false);
+                new AttributionSource(proxiedUid, Process.INVALID_PID, proxiedPackageName,
+                        proxiedAttributionTag, token)), /*skipProxyOperation*/ false);
     }
 
     /**

@@ -129,11 +129,8 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
      * {@link WindowAreaComponent#STATUS_AVAILABLE} or
      * {@link WindowAreaComponent#STATUS_UNAVAILABLE} if the feature is supported or not in that
      * state respectively. When the rear display feature is triggered, the status is updated to be
-     * {@link WindowAreaComponent#STATUS_UNAVAILABLE}.
+     * {@link WindowAreaComponent#STATUS_ACTIVE}.
      * TODO(b/240727590): Prefix with AREA_
-     *
-     * TODO(b/239833099): Add a STATUS_ACTIVE option to let apps know if a feature is currently
-     *  enabled.
      *
      * @param consumer {@link Consumer} interested in receiving updates to the status of
      * rear display mode.
@@ -263,8 +260,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 return;
             }
             @WindowAreaStatus int currentStatus = getCurrentRearDisplayPresentationModeStatus();
+            DisplayMetrics metrics =
+                    currentStatus == STATUS_UNSUPPORTED ? null : getRearDisplayMetrics();
             consumer.accept(
-                    new RearDisplayPresentationStatus(currentStatus, getRearDisplayMetrics()));
+                    new RearDisplayPresentationStatus(currentStatus, metrics));
         }
     }
 
@@ -325,12 +324,12 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                         synchronized (mLock) {
                             if (stateStatus == SESSION_STATE_INACTIVE) {
                                 // If the last reported session status was VISIBLE
-                                // then the INVISIBLE state should be dispatched before INACTIVE
+                                // then the ACTIVE state should be dispatched before INACTIVE
                                 // due to not having a good mechanism to know when
                                 // the content is no longer visible before it's fully removed
                                 if (getLastReportedRearDisplayPresentationStatus()
-                                        == SESSION_STATE_VISIBLE) {
-                                    consumer.accept(SESSION_STATE_INVISIBLE);
+                                        == SESSION_STATE_CONTENT_VISIBLE) {
+                                    consumer.accept(SESSION_STATE_ACTIVE);
                                 }
                                 mRearDisplayPresentationController = null;
                             }
@@ -405,14 +404,20 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
         }
     }
 
-
     @GuardedBy("mLock")
     private int getCurrentRearDisplayModeStatus() {
-        if (mRearDisplaySessionStatus == WindowAreaComponent.SESSION_STATE_ACTIVE
-                || !ArrayUtils.contains(mCurrentSupportedDeviceStates, mRearDisplayState)
-                || isRearDisplayActive()) {
+        if (mRearDisplayState == INVALID_DEVICE_STATE) {
+            return WindowAreaComponent.STATUS_UNSUPPORTED;
+        }
+
+        if (!ArrayUtils.contains(mCurrentSupportedDeviceStates, mRearDisplayState)) {
             return WindowAreaComponent.STATUS_UNAVAILABLE;
         }
+
+        if (isRearDisplayActive()) {
+            return WindowAreaComponent.STATUS_ACTIVE;
+        }
+
         return WindowAreaComponent.STATUS_AVAILABLE;
     }
 
@@ -441,6 +446,10 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
 
     @GuardedBy("mLock")
     private int getCurrentRearDisplayPresentationModeStatus() {
+        if (mConcurrentDisplayState == INVALID_DEVICE_STATE) {
+            return WindowAreaComponent.STATUS_UNSUPPORTED;
+        }
+
         if (mCurrentDeviceState == mConcurrentDisplayState
                 || !ArrayUtils.contains(mCurrentSupportedDeviceStates, mConcurrentDisplayState)
                 || isDeviceFolded()) {
@@ -527,7 +536,6 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 if (request.equals(mRearDisplayStateRequest)) {
                     mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_ACTIVE;
                     mRearDisplaySessionCallback.accept(mRearDisplaySessionStatus);
-                    updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
                 }
             }
         }
@@ -540,7 +548,6 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                 }
                 mRearDisplaySessionStatus = WindowAreaComponent.SESSION_STATE_INACTIVE;
                 mRearDisplaySessionCallback.accept(mRearDisplaySessionStatus);
-                updateRearDisplayStatusListeners(getCurrentRearDisplayModeStatus());
             }
         }
     }

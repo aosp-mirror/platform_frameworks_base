@@ -412,7 +412,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
 
     /** Releases and re-inflates {@link DividerView} on the root surface. */
     public void update(SurfaceControl.Transaction t) {
-        if (!mInitialized) return;
+        if (!mInitialized) {
+            init();
+            return;
+        }
         mSplitWindowManager.release(t);
         mImePositionProcessor.reset();
         mSplitWindowManager.init(this, mInsetsState);
@@ -1116,7 +1119,7 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             setDividerInteractive(!mImeShown || !mHasImeFocus || isFloating, true,
                     "onImeStartPositioning");
 
-            return needOffset ? IME_ANIMATION_NO_ALPHA : 0;
+            return mTargetYOffset != mLastYOffset ? IME_ANIMATION_NO_ALPHA : 0;
         }
 
         @Override

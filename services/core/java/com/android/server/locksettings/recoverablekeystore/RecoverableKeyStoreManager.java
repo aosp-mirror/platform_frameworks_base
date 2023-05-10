@@ -31,7 +31,7 @@ import android.annotation.Nullable;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.app.RemoteLockscreenValidationResult;
-import android.app.StartLockscreenValidationRequest;
+import android.app.RemoteLockscreenValidationSession;
 import android.content.Context;
 import android.os.Binder;
 import android.os.RemoteException;
@@ -128,18 +128,14 @@ public class RecoverableKeyStoreManager {
     public static synchronized RecoverableKeyStoreManager
             getInstance(Context context) {
         if (mInstance == null) {
-            RecoverableKeyStoreDb db;
+            RecoverableKeyStoreDb db = RecoverableKeyStoreDb.newInstance(context);
             RemoteLockscreenValidationSessionStorage lockscreenCheckSessions;
             if (FeatureFlagUtils.isEnabled(context,
                     FeatureFlagUtils.SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API)) {
-                // TODO(b/254335492): Remove flag check when feature is launched.
-                db = RecoverableKeyStoreDb.newInstance(context, 7);
                 lockscreenCheckSessions = new RemoteLockscreenValidationSessionStorage();
             } else {
-                db = RecoverableKeyStoreDb.newInstance(context);
                 lockscreenCheckSessions = null;
             }
-
             PlatformKeyManager platformKeyManager;
             ApplicationKeyStorage applicationKeyStorage;
             try {
@@ -999,7 +995,7 @@ public class RecoverableKeyStoreManager {
     /**
      * Starts a session to verify lock screen credentials provided by a remote device.
      */
-    public StartLockscreenValidationRequest startRemoteLockscreenValidation(
+    public RemoteLockscreenValidationSession startRemoteLockscreenValidation(
             LockSettingsService lockSettingsService) {
         if (mRemoteLockscreenValidationSessionStorage == null) {
             throw new UnsupportedOperationException("Under development");
@@ -1021,8 +1017,8 @@ public class RecoverableKeyStoreManager {
         int badGuesses = mDatabase.getBadRemoteGuessCounter(userId);
         int remainingAttempts = Math.max(INVALID_REMOTE_GUESS_LIMIT - badGuesses, 0);
         // TODO(b/254335492): Schedule task to remove inactive session
-        return new StartLockscreenValidationRequest.Builder()
-                .setLockscreenUiType(keyguardCredentialsType)
+        return new RemoteLockscreenValidationSession.Builder()
+                .setLockType(keyguardCredentialsType)
                 .setRemainingAttempts(remainingAttempts)
                 .setSourcePublicKey(encodedPublicKey)
                 .build();
@@ -1046,7 +1042,9 @@ public class RecoverableKeyStoreManager {
                 .build();
         }
         if (session == null) {
-            throw new IllegalStateException("There is no active lock screen check session");
+            return new RemoteLockscreenValidationResult.Builder()
+                .setResultCode(RemoteLockscreenValidationResult.RESULT_SESSION_EXPIRED)
+                .build();
         }
         byte[] decryptedCredentials;
         try {

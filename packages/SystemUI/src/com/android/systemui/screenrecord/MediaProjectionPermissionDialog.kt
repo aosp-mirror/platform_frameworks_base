@@ -23,20 +23,27 @@ import com.android.systemui.R
 class MediaProjectionPermissionDialog(
     context: Context?,
     private val onStartRecordingClicked: Runnable,
+    private val onCancelClicked: Runnable,
     private val appName: String?
 ) : BaseScreenSharePermissionDialog(context, createOptionList(appName), appName) {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // TODO(b/270018943): Handle the case of System sharing (not recording nor casting)
         if (appName == null) {
-            setDialogTitle(R.string.media_projection_permission_dialog_system_service_title)
+            setDialogTitle(R.string.media_projection_entry_cast_permission_dialog_title)
+            setStartButtonText(R.string.media_projection_entry_cast_permission_dialog_continue)
         } else {
-            setDialogTitle(R.string.media_projection_permission_dialog_title)
+            setDialogTitle(R.string.media_projection_entry_app_permission_dialog_title)
+            setStartButtonText(R.string.media_projection_entry_app_permission_dialog_continue)
         }
-        setStartButtonText(R.string.media_projection_permission_dialog_continue)
         setStartButtonOnClickListener {
             // Note that it is important to run this callback before dismissing, so that the
             // callback can disable the dialog exit animation if it wants to.
             onStartRecordingClicked.run()
+            dismiss()
+        }
+        setCancelButtonOnClickListener {
+            onCancelClicked.run()
             dismiss()
         }
     }
@@ -45,26 +52,26 @@ class MediaProjectionPermissionDialog(
         private fun createOptionList(appName: String?): List<ScreenShareOption> {
             val singleAppWarningText =
                 if (appName == null) {
-                    R.string.media_projection_permission_dialog_system_service_warning_single_app
+                    R.string.media_projection_entry_cast_permission_dialog_warning_single_app
                 } else {
-                    R.string.media_projection_permission_dialog_warning_single_app
+                    R.string.media_projection_entry_app_permission_dialog_warning_single_app
                 }
             val entireScreenWarningText =
                 if (appName == null) {
-                    R.string.media_projection_permission_dialog_system_service_warning_entire_screen
+                    R.string.media_projection_entry_cast_permission_dialog_warning_entire_screen
                 } else {
-                    R.string.media_projection_permission_dialog_warning_entire_screen
+                    R.string.media_projection_entry_app_permission_dialog_warning_entire_screen
                 }
 
             return listOf(
                 ScreenShareOption(
                     mode = ENTIRE_SCREEN,
-                    spinnerText = R.string.media_projection_permission_dialog_option_entire_screen,
+                    spinnerText = R.string.screen_share_permission_dialog_option_entire_screen,
                     warningText = entireScreenWarningText
                 ),
                 ScreenShareOption(
                     mode = SINGLE_APP,
-                    spinnerText = R.string.media_projection_permission_dialog_option_single_app,
+                    spinnerText = R.string.screen_share_permission_dialog_option_single_app,
                     warningText = singleAppWarningText
                 )
             )

@@ -139,14 +139,16 @@ public class UiccSlotInfo implements Parcelable {
     public UiccSlotInfo(boolean isEuicc, String cardId,
             @CardStateInfo int cardStateInfo, boolean isExtendedApduSupported,
             boolean isRemovable, @NonNull List<UiccPortInfo> portList) {
-        this.mIsActive = portList.get(0).isActive();
         this.mIsEuicc = isEuicc;
         this.mCardId = cardId;
         this.mCardStateInfo = cardStateInfo;
-        this.mLogicalSlotIdx = portList.get(0).getLogicalSlotIndex();
         this.mIsExtendedApduSupported = isExtendedApduSupported;
         this.mIsRemovable = isRemovable;
         this.mPortList = portList;
+        this.mIsActive = !portList.isEmpty() && portList.get(0).isActive();
+        this.mLogicalSlotIdx = portList.isEmpty()
+                ? SubscriptionManager.INVALID_PHONE_INDEX
+                : portList.get(0).getLogicalSlotIndex();
     }
 
     /**
@@ -164,8 +166,7 @@ public class UiccSlotInfo implements Parcelable {
             throw new UnsupportedOperationException("getIsActive() is not supported by "
             + "UiccSlotInfo. Please Use UiccPortInfo API instead");
         }
-        //always return status from first port.
-        return getPorts().stream().findFirst().get().isActive();
+        return mIsActive;
     }
 
     public boolean getIsEuicc() {
@@ -202,9 +203,7 @@ public class UiccSlotInfo implements Parcelable {
             throw new UnsupportedOperationException("getLogicalSlotIdx() is not supported by "
                 + "UiccSlotInfo. Please use UiccPortInfo API instead");
         }
-        //always return logical slot index from first port.
-        //portList always have at least one element.
-        return getPorts().stream().findFirst().get().getLogicalSlotIndex();
+        return mLogicalSlotIdx;
     }
 
     /**
@@ -281,7 +280,7 @@ public class UiccSlotInfo implements Parcelable {
                 + ", mIsEuicc="
                 + mIsEuicc
                 + ", mCardId="
-                + SubscriptionInfo.givePrintableIccid(mCardId)
+                + SubscriptionInfo.getPrintableId(mCardId)
                 + ", cardState="
                 + mCardStateInfo
                 + ", mIsExtendedApduSupported="

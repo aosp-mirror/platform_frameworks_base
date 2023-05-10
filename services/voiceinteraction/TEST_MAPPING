@@ -5,6 +5,9 @@
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-filter": "android.voiceinteraction.cts.HotwordDetectionServiceStressTest"
         }
       ]
     },
@@ -34,6 +37,14 @@
     },
     {
       "name": "FrameworksVoiceInteractionTests",
+      "options": [
+        {
+          "exclude-annotation": "androidx.test.filters.FlakyTest"
+        }
+      ]
+    },
+    {
+      "name": "CtsSoundTriggerTestCases",
       "options": [
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"

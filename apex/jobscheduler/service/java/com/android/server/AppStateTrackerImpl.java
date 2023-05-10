@@ -22,7 +22,6 @@ import android.app.ActivityManagerInternal.AppBackgroundRestrictionListener;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.PackageOps;
 import android.app.IActivityManager;
-import android.app.IUidObserver;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -54,6 +53,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.StatLogger;
+import com.android.modules.expresslog.Counter;
 import com.android.server.AppStateTrackerProto.ExemptedPackage;
 import com.android.server.AppStateTrackerProto.RunAnyInBackgroundRestrictedPackages;
 import com.android.server.usage.AppStandbyInternal;
@@ -78,6 +78,9 @@ import java.util.Set;
  */
 public class AppStateTrackerImpl implements AppStateTracker {
     private static final boolean DEBUG = false;
+
+    private static final String APP_RESTRICTION_COUNTER_METRIC_ID =
+            "battery.value_app_background_restricted";
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -429,7 +432,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         /**
          * Called when a uid goes into cached, so its alarms using a listener should be removed.
          */
-        public void removeListenerAlarmsForCachedUid(int uid) {
+        public void handleUidCachedChanged(int uid, boolean cached) {
         }
     }
 
@@ -716,11 +719,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         return true;
     }
 
-    private final class UidObserver extends IUidObserver.Stub {
-        @Override
-        public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
-        }
-
+    private final class UidObserver extends android.app.UidObserver {
         @Override
         public void onUidActive(int uid) {
             mHandler.onUidActive(uid);
@@ -740,10 +739,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         public void onUidCachedChanged(int uid, boolean cached) {
             mHandler.onUidCachedChanged(uid, cached);
         }
-
-        @Override
-        public void onUidProcAdjChanged(int uid) {
-        }
     }
 
     private final class AppOpsWatcher extends IAppOpsCallback.Stub {
@@ -755,6 +750,9 @@ public class AppStateTrackerImpl implements AppStateTracker {
                         uid, packageName) != AppOpsManager.MODE_ALLOWED;
             } catch (RemoteException e) {
                 // Shouldn't happen
+            }
+            if (restricted) {
+                Counter.logIncrementWithUid(APP_RESTRICTION_COUNTER_METRIC_ID, uid);
             }
             synchronized (mLock) {
                 if (updateForcedAppStandbyUidPackageLocked(uid, packageName, restricted)) {
@@ -870,9 +868,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
 
         public void onUidCachedChanged(int uid, boolean cached) {
-            if (cached) {
-                obtainMessage(MSG_ON_UID_CACHED, uid, 0).sendToTarget();
-            }
+            obtainMessage(MSG_ON_UID_CACHED, uid, cached ? 1 : 0).sendToTarget();
         }
 
         @Override
@@ -969,14 +965,14 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     }
                     return;
                 case MSG_ON_UID_CACHED:
-                    handleUidCached(msg.arg1);
+                    handleUidCached(msg.arg1, (msg.arg2 != 0));
                     return;
             }
         }
 
-        private void handleUidCached(int uid) {
+        private void handleUidCached(int uid, boolean cached) {
             for (Listener l : cloneListeners()) {
-                l.removeListenerAlarmsForCachedUid(uid);
+                l.handleUidCachedChanged(uid, cached);
             }
         }
 

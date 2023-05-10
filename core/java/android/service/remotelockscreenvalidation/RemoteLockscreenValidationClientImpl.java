@@ -179,7 +179,7 @@ public class RemoteLockscreenValidationClientImpl implements RemoteLockscreenVal
                     PackageManager.ComponentInfoFlags.of(PackageManager.GET_META_DATA));
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, TextUtils.formatSimple("Cannot resolve service %s",
-                    serviceComponent.getClass().getName()));
+                    serviceComponent.getClassName()));
             return null;
         }
     }

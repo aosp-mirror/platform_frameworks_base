@@ -28,6 +28,7 @@ import android.media.INearbyMediaDevicesProvider;
 import android.media.MediaRoute2Info;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
+import android.view.KeyEvent;
 import android.service.notification.StatusBarNotification;
 
 import com.android.internal.statusbar.IAddTileResultCallback;
@@ -141,7 +142,7 @@ oneway interface IStatusBar
     void addQsTile(in ComponentName tile);
     void remQsTile(in ComponentName tile);
     void clickQsTile(in ComponentName tile);
-    void handleSystemKey(in int key);
+    void handleSystemKey(in KeyEvent key);
 
     /**
      * Methods to show toast messages for screen pinning

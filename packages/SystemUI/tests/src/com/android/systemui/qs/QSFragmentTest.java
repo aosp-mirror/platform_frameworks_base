@@ -106,6 +106,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
     @Mock private QSSquishinessController mSquishinessController;
     @Mock private FooterActionsViewModel mFooterActionsViewModel;
     @Mock private FooterActionsViewModel.Factory mFooterActionsViewModelFactory;
+    @Mock private FooterActionsViewBinder mFooterActionsViewBinder;
     @Mock private LargeScreenShadeInterpolator mLargeScreenShadeInterpolator;
     @Mock private FeatureFlags mFeatureFlags;
     private View mQsFragmentView;
@@ -558,6 +559,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
                 mock(QSLogger.class),
                 mock(FooterActionsController.class),
                 mFooterActionsViewModelFactory,
+                mFooterActionsViewBinder,
                 mLargeScreenShadeInterpolator,
                 mFeatureFlags);
     }
@@ -584,7 +586,7 @@ public class QSFragmentTest extends SysuiBaseFragmentTest {
         when(mQsFragmentView.findViewById(R.id.header)).thenReturn(mHeader);
         when(mQsFragmentView.findViewById(android.R.id.edit)).thenReturn(new View(mContext));
         when(mQsFragmentView.findViewById(R.id.qs_footer_actions)).thenAnswer(
-                invocation -> FooterActionsViewBinder.create(mContext));
+                invocation -> new FooterActionsViewBinder().create(mContext));
     }
 
     private void setUpInflater() {

@@ -20,14 +20,12 @@ import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
 import android.tools.common.NavBar
-import android.tools.common.Rotation
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
-import android.tools.device.helpers.WindowUtils
-import android.tools.device.traces.parsers.WindowManagerStateHelper
 import androidx.test.filters.RequiresDevice
+import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
@@ -36,6 +34,7 @@ import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtStart
+import com.android.wm.shell.flicker.splitscreen.benchmark.SwitchAppByDoubleTapDividerBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -51,98 +50,19 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class SwitchAppByDoubleTapDivider(flicker: FlickerTest) : SplitScreenBase(flicker) {
-
+class SwitchAppByDoubleTapDivider(override val flicker: FlickerTest) :
+    SwitchAppByDoubleTapDividerBenchmark(flicker), ICommonAssertions {
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, secondaryApp) }
-            transitions {
-                SplitScreenUtils.doubleTapDividerToSwitch(device)
-                wmHelper.StateSyncBuilder().withAppTransitionIdle().waitForAndVerify()
-
-                waitForLayersToSwitch(wmHelper)
-                waitForWindowsToSwitch(wmHelper)
-            }
+            defaultSetup(this)
+            defaultTeardown(this)
+            thisTransition(this)
         }
-
-    private fun waitForWindowsToSwitch(wmHelper: WindowManagerStateHelper) {
-        wmHelper
-            .StateSyncBuilder()
-            .add("appWindowsSwitched") {
-                val primaryAppWindow =
-                    it.wmState.visibleWindows.firstOrNull { window ->
-                        primaryApp.windowMatchesAnyOf(window)
-                    }
-                        ?: return@add false
-                val secondaryAppWindow =
-                    it.wmState.visibleWindows.firstOrNull { window ->
-                        secondaryApp.windowMatchesAnyOf(window)
-                    }
-                        ?: return@add false
-
-                if (isLandscape(flicker.scenario.endRotation)) {
-                    return@add if (flicker.scenario.isTablet) {
-                        secondaryAppWindow.frame.right <= primaryAppWindow.frame.left
-                    } else {
-                        primaryAppWindow.frame.right <= secondaryAppWindow.frame.left
-                    }
-                } else {
-                    return@add if (flicker.scenario.isTablet) {
-                        primaryAppWindow.frame.bottom <= secondaryAppWindow.frame.top
-                    } else {
-                        primaryAppWindow.frame.bottom <= secondaryAppWindow.frame.top
-                    }
-                }
-            }
-            .waitForAndVerify()
-    }
-
-    private fun waitForLayersToSwitch(wmHelper: WindowManagerStateHelper) {
-        wmHelper
-            .StateSyncBuilder()
-            .add("appLayersSwitched") {
-                val primaryAppLayer =
-                    it.layerState.visibleLayers.firstOrNull { window ->
-                        primaryApp.layerMatchesAnyOf(window)
-                    }
-                        ?: return@add false
-                val secondaryAppLayer =
-                    it.layerState.visibleLayers.firstOrNull { window ->
-                        secondaryApp.layerMatchesAnyOf(window)
-                    }
-                        ?: return@add false
-
-                val primaryVisibleRegion = primaryAppLayer.visibleRegion?.bounds ?: return@add false
-                val secondaryVisibleRegion =
-                    secondaryAppLayer.visibleRegion?.bounds ?: return@add false
-
-                if (isLandscape(flicker.scenario.endRotation)) {
-                    return@add if (flicker.scenario.isTablet) {
-                        secondaryVisibleRegion.right <= primaryVisibleRegion.left
-                    } else {
-                        primaryVisibleRegion.right <= secondaryVisibleRegion.left
-                    }
-                } else {
-                    return@add if (flicker.scenario.isTablet) {
-                        primaryVisibleRegion.bottom <= secondaryVisibleRegion.top
-                    } else {
-                        primaryVisibleRegion.bottom <= secondaryVisibleRegion.top
-                    }
-                }
-            }
-            .waitForAndVerify()
-    }
-
-    private fun isLandscape(rotation: Rotation): Boolean {
-        val displayBounds = WindowUtils.getDisplayBounds(rotation)
-        return displayBounds.width > displayBounds.height
-    }
 
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
-    fun cujCompleted() {
+    override fun cujCompleted() {
         flicker.appWindowIsVisibleAtStart(primaryApp)
         flicker.appWindowIsVisibleAtStart(secondaryApp)
         flicker.splitScreenDividerIsVisibleAtStart()
@@ -150,9 +70,6 @@ class SwitchAppByDoubleTapDivider(flicker: FlickerTest) : SplitScreenBase(flicke
         flicker.appWindowIsVisibleAtEnd(primaryApp)
         flicker.appWindowIsVisibleAtEnd(secondaryApp)
         flicker.splitScreenDividerIsVisibleAtEnd()
-
-        // TODO(b/246490534): Add validation for switched app after withAppTransitionIdle is
-        // robust enough to get the correct end state.
     }
 
     @Presubmit

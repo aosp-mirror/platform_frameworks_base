@@ -23,7 +23,6 @@ import android.telephony.TelephonyManager.NETWORK_TYPE_UMTS
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.log.table.TableLogBuffer
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +49,8 @@ class FakeMobileIconsInteractor(
             FIVE_G_OVERRIDE_KEY to TelephonyIcons.NR_5G,
         )
 
+    private val interactorCache: MutableMap<Int, FakeMobileIconInteractor> = mutableMapOf()
+
     override val isDefaultConnectionFailed = MutableStateFlow(false)
 
     override val filteredSubscriptions = MutableStateFlow<List<SubscriptionModel>>(listOf())
@@ -60,9 +61,8 @@ class FakeMobileIconsInteractor(
     override val alwaysShowDataRatIcon = MutableStateFlow(false)
 
     override val alwaysUseCdmaLevel = MutableStateFlow(false)
-    override val defaultDataSubId = MutableStateFlow(DEFAULT_DATA_SUB_ID)
 
-    override val defaultMobileNetworkConnectivity = MutableStateFlow(MobileConnectivityModel())
+    override val mobileIsDefault = MutableStateFlow(false)
 
     private val _defaultMobileIconMapping = MutableStateFlow(TEST_MAPPING)
     override val defaultMobileIconMapping = _defaultMobileIconMapping
@@ -77,7 +77,15 @@ class FakeMobileIconsInteractor(
 
     /** Always returns a new fake interactor */
     override fun createMobileConnectionInteractorForSubId(subId: Int): MobileIconInteractor {
-        return FakeMobileIconInteractor(tableLogBuffer)
+        return FakeMobileIconInteractor(tableLogBuffer).also { interactorCache[subId] = it }
+    }
+
+    /**
+     * Returns the most recently created interactor for the given subId, or null if an interactor
+     * has never been created for that sub.
+     */
+    fun getInteractorForSubId(subId: Int): FakeMobileIconInteractor? {
+        return interactorCache[subId]
     }
 
     companion object {

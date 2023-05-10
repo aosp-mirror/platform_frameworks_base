@@ -815,8 +815,8 @@ public final class TvInputManagerService extends SystemService {
     }
 
     @GuardedBy("mLock")
-    private boolean createSessionInternalLocked(ITvInputService service, IBinder sessionToken,
-            int userId, AttributionSource tvAppAttributionSource) {
+    private boolean createSessionInternalLocked(
+            ITvInputService service, IBinder sessionToken, int userId) {
         UserState userState = getOrCreateUserStateLocked(userId);
         SessionState sessionState = userState.sessionStateMap.get(sessionToken);
         if (DEBUG) {
@@ -836,7 +836,7 @@ public final class TvInputManagerService extends SystemService {
                         callback, sessionState.inputId, sessionState.sessionId);
             } else {
                 service.createSession(channels[1], callback, sessionState.inputId,
-                        sessionState.sessionId, tvAppAttributionSource);
+                        sessionState.sessionId, sessionState.tvAppAttributionSource);
             }
         } catch (RemoteException e) {
             Slog.e(TAG, "error in createSession", e);
@@ -1547,7 +1547,7 @@ public final class TvInputManagerService extends SystemService {
                     IBinder sessionToken = new Binder();
                     SessionState sessionState = new SessionState(sessionToken, info.getId(),
                             info.getComponent(), isRecordingSession, client, seq, callingUid,
-                            callingPid, resolvedUserId, uniqueSessionId);
+                            callingPid, resolvedUserId, uniqueSessionId, tvAppAttributionSource);
 
                     // Add them to the global session state map of the current user.
                     userState.sessionStateMap.put(sessionToken, sessionState);
@@ -1559,8 +1559,8 @@ public final class TvInputManagerService extends SystemService {
                     serviceState.sessionTokens.add(sessionToken);
 
                     if (serviceState.service != null) {
-                        if (!createSessionInternalLocked(serviceState.service, sessionToken,
-                                    resolvedUserId, tvAppAttributionSource)) {
+                        if (!createSessionInternalLocked(
+                                    serviceState.service, sessionToken, resolvedUserId)) {
                             removeSessionStateLocked(sessionToken, resolvedUserId);
                         }
                     } else {
@@ -2125,10 +2125,10 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void notifyTvMessage(IBinder sessionToken, String type, Bundle data, int userId) {
+        public void notifyTvMessage(IBinder sessionToken, int type, Bundle data, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
-                    userId, "timeShiftEnablePositionTracking");
+                    userId, "notifyTvmessage");
             final long identity = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
@@ -2136,7 +2136,31 @@ public final class TvInputManagerService extends SystemService {
                         getSessionLocked(sessionToken, callingUid, resolvedUserId)
                                 .notifyTvMessage(type, data);
                     } catch (RemoteException | SessionNotFoundException e) {
-                        Slog.e(TAG, "error in timeShiftEnablePositionTracking", e);
+                        Slog.e(TAG, "error in notifyTvMessage", e);
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
+        @Override
+        public void setTvMessageEnabled(IBinder sessionToken, int type, boolean enabled,
+                int userId) {
+            final int callingUid = Binder.getCallingUid();
+            final int resolvedUserId = resolveCallingUserId(Binder.getCallingPid(), callingUid,
+                    userId, "setTvMessageEnabled");
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    try {
+                        final String inputId =
+                                getSessionStateLocked(sessionToken, callingUid, userId).inputId;
+                        mTvInputHardwareManager.setTvMessageEnabled(inputId, type, enabled);
+                        getSessionLocked(sessionToken, callingUid, resolvedUserId)
+                                .setTvMessageEnabled(type, enabled);
+                    } catch (RemoteException | SessionNotFoundException e) {
+                        Slog.e(TAG, "error in setTvMessageEnabled", e);
                     }
                 }
             } finally {
@@ -2590,7 +2614,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void notifyAdBuffer(
+        public void notifyAdBufferReady(
                 IBinder sessionToken, AdBuffer buffer, int userId) {
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
@@ -2602,9 +2626,13 @@ public final class TvInputManagerService extends SystemService {
                     try {
                         SessionState sessionState = getSessionStateLocked(sessionToken, callingUid,
                                 resolvedUserId);
-                        getSessionLocked(sessionState).notifyAdBuffer(buffer);
+                        getSessionLocked(sessionState).notifyAdBufferReady(buffer);
                     } catch (RemoteException | SessionNotFoundException e) {
                         Slog.e(TAG, "error in notifyAdBuffer", e);
+                    } finally {
+                        if (buffer != null) {
+                            buffer.getSharedMemory().close();
+                        }
                     }
                 }
             } finally {
@@ -2690,7 +2718,10 @@ public final class TvInputManagerService extends SystemService {
                         .audioAddress("0")
                         .hdmiPortId(0)
                         .build();
-            mTvInputHardwareManager.onDeviceAvailable(info, null);
+            TvStreamConfig[] configs = {
+                    new TvStreamConfig.Builder().streamId(19001)
+                            .generation(1).maxHeight(600).maxWidth(800).type(1).build()};
+            mTvInputHardwareManager.onDeviceAvailable(info, configs);
         }
 
         /**
@@ -3114,6 +3145,7 @@ public final class TvInputManagerService extends SystemService {
         private final ComponentName componentName;
         private final boolean isRecordingSession;
         private final ITvInputClient client;
+        private final AttributionSource tvAppAttributionSource;
         private final int seq;
         /**
          * The {code UID} of the application that created the session.
@@ -3142,7 +3174,8 @@ public final class TvInputManagerService extends SystemService {
 
         private SessionState(IBinder sessionToken, String inputId, ComponentName componentName,
                 boolean isRecordingSession, ITvInputClient client, int seq, int callingUid,
-                int callingPid, int userId, String sessionId) {
+                int callingPid, int userId, String sessionId,
+                AttributionSource tvAppAttributionSource) {
             this.sessionToken = sessionToken;
             this.inputId = inputId;
             this.componentName = componentName;
@@ -3153,6 +3186,7 @@ public final class TvInputManagerService extends SystemService {
             this.callingPid = callingPid;
             this.userId = userId;
             this.sessionId = sessionId;
+            this.tvAppAttributionSource = tvAppAttributionSource;
         }
 
         @Override
@@ -3202,8 +3236,7 @@ public final class TvInputManagerService extends SystemService {
 
                 // And create sessions, if any.
                 for (IBinder sessionToken : serviceState.sessionTokens) {
-                    if (!createSessionInternalLocked(
-                                serviceState.service, sessionToken, mUserId, null)) {
+                    if (!createSessionInternalLocked(serviceState.service, sessionToken, mUserId)) {
                         tokensToBeRemoved.add(sessionToken);
                     }
                 }
@@ -3765,7 +3798,7 @@ public final class TvInputManagerService extends SystemService {
         }
 
         @Override
-        public void onTvMessage(String type, Bundle data) {
+        public void onTvMessage(int type, Bundle data) {
             synchronized (mLock) {
                 if (DEBUG) {
                     Slog.d(TAG, "onTvMessage(type=" + type + ", data=" + data + ")");
@@ -3862,10 +3895,13 @@ public final class TvInputManagerService extends SystemService {
                     return;
                 }
                 try {
-                    mSessionState.client.onAdBufferConsumed(
-                            buffer, mSessionState.seq);
+                    mSessionState.client.onAdBufferConsumed(buffer, mSessionState.seq);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "error in onAdBufferConsumed", e);
+                } finally {
+                    if (buffer != null) {
+                        buffer.getSharedMemory().close();
+                    }
                 }
             }
         }

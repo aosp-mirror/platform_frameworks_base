@@ -45,7 +45,7 @@ struct UidObserver : public BnUidObserver, public virtual IBinder::DeathRecipien
     void onUidIdle(uid_t uid, bool disabled) override;
     void onUidStateChanged(uid_t uid, int32_t procState, int64_t procStateSeq,
                            int32_t capability) override;
-    void onUidProcAdjChanged(uid_t uid) override;
+    void onUidProcAdjChanged(uid_t uid, int32_t adj) override;
 
     // IBinder::DeathRecipient implementation
     void binderDied(const wp<IBinder>& who) override;
@@ -121,7 +121,7 @@ void UidObserver::onUidActive(uid_t uid __unused) {}
 
 void UidObserver::onUidIdle(uid_t uid __unused, bool disabled __unused) {}
 
-void UidObserver::onUidProcAdjChanged(uid_t uid __unused) {}
+void UidObserver::onUidProcAdjChanged(uid_t uid __unused, int32_t adj __unused) {}
 
 void UidObserver::onUidStateChanged(uid_t uid, int32_t procState,
                                     int64_t procStateSeq __unused,

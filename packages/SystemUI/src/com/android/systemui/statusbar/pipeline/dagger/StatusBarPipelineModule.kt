@@ -22,7 +22,9 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
-import com.android.systemui.plugins.log.LogBuffer
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModel
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.CollapsedStatusBarViewModelImpl
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepository
 import com.android.systemui.statusbar.pipeline.airplane.data.repository.AirplaneModeRepositoryImpl
 import com.android.systemui.statusbar.pipeline.airplane.ui.viewmodel.AirplaneModeViewModel
@@ -35,10 +37,15 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.UserSetupR
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractorImpl
 import com.android.systemui.statusbar.pipeline.mobile.ui.MobileUiAdapter
+import com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconsViewModel
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.MobileMappingsProxyImpl
+import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxy
+import com.android.systemui.statusbar.pipeline.mobile.util.SubscriptionManagerProxyImpl
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinder
+import com.android.systemui.statusbar.pipeline.shared.ui.binder.CollapsedStatusBarViewBinderImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositorySwitcher
@@ -51,6 +58,9 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
+import kotlinx.coroutines.flow.Flow
+import java.util.function.Supplier
+import javax.inject.Named
 
 @Module
 abstract class StatusBarPipelineModule {
@@ -65,8 +75,7 @@ abstract class StatusBarPipelineModule {
 
     @Binds abstract fun wifiRepository(impl: WifiRepositorySwitcher): WifiRepository
 
-    @Binds
-    abstract fun wifiInteractor(impl: WifiInteractorImpl): WifiInteractor
+    @Binds abstract fun wifiInteractor(impl: WifiInteractorImpl): WifiInteractor
 
     @Binds
     abstract fun mobileConnectionsRepository(
@@ -76,6 +85,11 @@ abstract class StatusBarPipelineModule {
     @Binds abstract fun userSetupRepository(impl: UserSetupRepositoryImpl): UserSetupRepository
 
     @Binds abstract fun mobileMappingsProxy(impl: MobileMappingsProxyImpl): MobileMappingsProxy
+
+    @Binds
+    abstract fun subscriptionManagerProxy(
+        impl: SubscriptionManagerProxyImpl
+    ): SubscriptionManagerProxy
 
     @Binds
     abstract fun mobileIconsInteractor(impl: MobileIconsInteractorImpl): MobileIconsInteractor
@@ -89,6 +103,16 @@ abstract class StatusBarPipelineModule {
     @IntoMap
     @ClassKey(CarrierConfigCoreStartable::class)
     abstract fun bindCarrierConfigStartable(impl: CarrierConfigCoreStartable): CoreStartable
+
+    @Binds
+    abstract fun collapsedStatusBarViewModel(
+        impl: CollapsedStatusBarViewModelImpl
+    ): CollapsedStatusBarViewModel
+
+    @Binds
+    abstract fun collapsedStatusBarViewBinder(
+        impl: CollapsedStatusBarViewBinderImpl
+    ): CollapsedStatusBarViewBinder
 
     companion object {
         @Provides
@@ -104,6 +128,17 @@ abstract class StatusBarPipelineModule {
                 disabledWifiRepository
             } else {
                 wifiRepositoryImplFactory.create(wifiManager)
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        @Named(FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON)
+        fun provideFirstMobileSubShowingNetworkTypeIconProvider(
+            mobileIconsViewModel: MobileIconsViewModel,
+        ): Supplier<Flow<Boolean>> {
+            return Supplier<Flow<Boolean>> {
+                mobileIconsViewModel.firstMobileSubShowingNetworkTypeIcon
             }
         }
 
@@ -132,7 +167,7 @@ abstract class StatusBarPipelineModule {
         @SysUISingleton
         @SharedConnectivityInputLog
         fun provideSharedConnectivityTableLogBuffer(factory: LogBufferFactory): LogBuffer {
-            return factory.create("SharedConnectivityInputLog", 30)
+            return factory.create("SharedConnectivityInputLog", 60)
         }
 
         @Provides
@@ -162,5 +197,8 @@ abstract class StatusBarPipelineModule {
         fun provideVerboseMobileViewLogBuffer(factory: LogBufferFactory): LogBuffer {
             return factory.create("VerboseMobileViewLog", 100)
         }
+
+        const val FIRST_MOBILE_SUB_SHOWING_NETWORK_TYPE_ICON =
+            "FirstMobileSubShowingNetworkTypeIcon"
     }
 }

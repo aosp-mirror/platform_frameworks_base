@@ -18,11 +18,11 @@ package com.android.settingslib.spa.widget.scaffold
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,7 +46,7 @@ internal fun SettingsTab(
         selected = selected,
         onClick = onClick,
         modifier = Modifier
-            .height(48.dp)
+            .minimumInteractiveComponentSize()
             .padding(horizontal = 4.dp, vertical = 6.dp)
             .clip(SettingsShape.CornerMedium)
             .background(

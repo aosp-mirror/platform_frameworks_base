@@ -85,17 +85,18 @@ class AppListViewModelTest {
     }
 
     private object FakeAppListRepository : AppListRepository {
-        override suspend fun loadApps(userId: Int, showInstantApps: Boolean) = listOf(APP)
+        override suspend fun loadApps(
+            userId: Int,
+            showInstantApps: Boolean,
+            matchAnyUserForAdmin: Boolean,
+        ) = listOf(APP)
 
         override fun showSystemPredicate(
             userIdFlow: Flow<Int>,
             showSystemFlow: Flow<Boolean>,
         ): Flow<(app: ApplicationInfo) -> Boolean> = flowOf { true }
 
-        override fun getSystemPackageNamesBlocking(
-            userId: Int,
-            showInstantApps: Boolean,
-        ): Set<String> = emptySet()
+        override fun getSystemPackageNamesBlocking(userId: Int): Set<String> = emptySet()
     }
 
     private object FakeAppRepository : AppRepository {
@@ -112,7 +113,11 @@ class AppListViewModelTest {
         const val USER_ID = 0
         const val PACKAGE_NAME = "package.name"
         const val LABEL = "Label"
-        val CONFIG = AppListConfig(userIds = listOf(USER_ID), showInstantApps = false)
+        val CONFIG = AppListConfig(
+            userIds = listOf(USER_ID),
+            showInstantApps = false,
+            matchAnyUserForAdmin = false,
+        )
         val APP = ApplicationInfo().apply {
             packageName = PACKAGE_NAME
         }

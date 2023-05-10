@@ -116,7 +116,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private boolean mShowingAlertWindowNotificationAllowed;
     private boolean mClientDead = false;
     private float mLastReportedAnimatorScale;
-    private String mPackageName;
+    protected String mPackageName;
     private String mRelayoutTag;
     private final InsetsSourceControl.Array mDummyControls =  new InsetsSourceControl.Array();
     final boolean mSetsUnrestrictedKeepClearAreas;
@@ -229,11 +229,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void remove(IWindow window) {
         mService.removeWindow(this, window);
-    }
-
-    @Override
-    public void prepareToReplaceWindows(IBinder appToken, boolean childrenOnly) {
-        mService.setWillReplaceWindows(appToken, childrenOnly);
     }
 
     @Override
@@ -862,7 +857,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public void grantInputChannel(int displayId, SurfaceControl surface,
             IWindow window, IBinder hostInputToken, int flags, int privateFlags, int type,
-            IBinder windowToken, IBinder focusGrantToken, String inputHandleName,
+            int inputFeatures, IBinder windowToken, IBinder focusGrantToken, String inputHandleName,
             InputChannel outInputChannel) {
         if (hostInputToken == null && !mCanAddInternalSystemWindow) {
             // Callers without INTERNAL_SYSTEM_WINDOW permission cannot grant input channel to
@@ -874,7 +869,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         try {
             mService.grantInputChannel(this, mUid, mPid, displayId, surface, window, hostInputToken,
                     flags, mCanAddInternalSystemWindow ? privateFlags : 0,
-                    type, windowToken, focusGrantToken, inputHandleName,
+                    type, inputFeatures, windowToken, focusGrantToken, inputHandleName,
                     outInputChannel);
         } finally {
             Binder.restoreCallingIdentity(identity);
@@ -883,11 +878,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags, int privateFlags, Region region) {
+            int flags, int privateFlags, int inputFeatures, Region region) {
         final long identity = Binder.clearCallingIdentity();
         try {
             mService.updateInputChannel(channelToken, displayId, surface, flags,
-                    mCanAddInternalSystemWindow ? privateFlags : 0, region);
+                    mCanAddInternalSystemWindow ? privateFlags : 0, inputFeatures, region);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

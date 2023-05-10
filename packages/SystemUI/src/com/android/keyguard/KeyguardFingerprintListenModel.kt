@@ -17,9 +17,9 @@
 package com.android.keyguard
 
 import android.annotation.CurrentTimeMillisLong
+import com.android.systemui.common.buffer.RingBuffer
 import com.android.systemui.dump.DumpsysTableLogger
 import com.android.systemui.dump.Row
-import com.android.systemui.plugins.util.RingBuffer
 
 /** Verbose debug information. */
 data class KeyguardFingerprintListenModel(
@@ -41,11 +41,11 @@ data class KeyguardFingerprintListenModel(
     var keyguardIsVisible: Boolean = false,
     var keyguardOccluded: Boolean = false,
     var occludingAppRequestingFp: Boolean = false,
-    var primaryUser: Boolean = false,
     var shouldListenSfpsState: Boolean = false,
     var shouldListenForFingerprintAssistant: Boolean = false,
     var strongerAuthRequired: Boolean = false,
     var switchingUser: Boolean = false,
+    var systemUser: Boolean = false,
     var udfps: Boolean = false,
     var userDoesNotHaveTrust: Boolean = false,
 ) : KeyguardListenModel() {
@@ -72,11 +72,11 @@ data class KeyguardFingerprintListenModel(
             keyguardIsVisible.toString(),
             keyguardOccluded.toString(),
             occludingAppRequestingFp.toString(),
-            primaryUser.toString(),
             shouldListenSfpsState.toString(),
             shouldListenForFingerprintAssistant.toString(),
             strongerAuthRequired.toString(),
             switchingUser.toString(),
+            systemUser.toString(),
             udfps.toString(),
             userDoesNotHaveTrust.toString(),
         )
@@ -112,11 +112,11 @@ data class KeyguardFingerprintListenModel(
                 keyguardIsVisible = model.keyguardIsVisible
                 keyguardOccluded = model.keyguardOccluded
                 occludingAppRequestingFp = model.occludingAppRequestingFp
-                primaryUser = model.primaryUser
                 shouldListenSfpsState = model.shouldListenSfpsState
                 shouldListenForFingerprintAssistant = model.shouldListenForFingerprintAssistant
                 strongerAuthRequired = model.strongerAuthRequired
                 switchingUser = model.switchingUser
+                systemUser = model.systemUser
                 udfps = model.udfps
                 userDoesNotHaveTrust = model.userDoesNotHaveTrust
             }
@@ -158,11 +158,11 @@ data class KeyguardFingerprintListenModel(
                 "keyguardIsVisible",
                 "keyguardOccluded",
                 "occludingAppRequestingFp",
-                "primaryUser",
                 "shouldListenSidFingerprintState",
                 "shouldListenForFingerprintAssistant",
                 "strongAuthRequired",
                 "switchingUser",
+                "systemUser",
                 "underDisplayFingerprint",
                 "userDoesNotHaveTrust",
             )

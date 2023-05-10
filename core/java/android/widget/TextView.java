@@ -62,6 +62,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.content.res.FontScaleConverterFactory;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -462,12 +463,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static final int CHANGE_WATCHER_PRIORITY = 100;
 
     /**
-     * The span priority of the {@link TransformationMethod} that is set on the text. It must be
+     * The span priority of the {@link OffsetMapping} that is set on the text. It must be
      * higher than the {@link DynamicLayout}'s {@link TextWatcher}, so that the transformed text is
      * updated before {@link DynamicLayout#reflow(CharSequence, int, int, int)} being triggered
      * by {@link TextWatcher#onTextChanged(CharSequence, int, int, int)}.
      */
-    private static final int TRANSFORMATION_SPAN_PRIORITY = 200;
+    private static final int OFFSET_MAPPING_SPAN_PRIORITY = 200;
 
     // New state used to change background based on whether this TextView is multiline.
     private static final int[] MULTILINE_STATE_SET = { R.attr.state_multiline };
@@ -805,6 +806,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private CharSequence mHint;
     @UnsupportedAppUsage
     private Layout mHintLayout;
+    private boolean mHideHint;
 
     private MovementMethod mMovement;
 
@@ -866,6 +868,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private float mSpacingMult = 1.0f;
     @UnsupportedAppUsage
     private float mSpacingAdd = 0.0f;
+
+    /**
+     * Remembers what line height was set to originally, before we broke it down into raw pixels.
+     *
+     * <p>This is stored as a complex dimension with both value and unit packed into one field!
+     * {@see TypedValue}
+     */
+    private int mLineHeightComplexDimen;
 
     private int mBreakStrategy;
     private int mHyphenationFrequency;
@@ -1233,7 +1243,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 defStyleAttr, defStyleRes);
         int firstBaselineToTopHeight = -1;
         int lastBaselineToBottomHeight = -1;
-        int lineHeight = -1;
+        float lineHeight = -1f;
+        int lineHeightUnit = -1;
 
         readTextAppearance(context, a, attributes, true /* styleArray */);
 
@@ -1583,7 +1594,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case com.android.internal.R.styleable.TextView_lineHeight:
-                    lineHeight = a.getDimensionPixelSize(attr, -1);
+                    TypedValue peekValue = a.peekValue(attr);
+                    if (peekValue != null && peekValue.type == TypedValue.TYPE_DIMENSION) {
+                        lineHeightUnit = peekValue.getComplexUnit();
+                        lineHeight = TypedValue.complexToFloat(peekValue.data);
+                    } else {
+                        lineHeight = a.getDimensionPixelSize(attr, -1);
+                    }
                     break;
             }
         }
@@ -1936,7 +1953,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setLastBaselineToBottomHeight(lastBaselineToBottomHeight);
         }
         if (lineHeight >= 0) {
-            setLineHeight(lineHeight);
+            if (lineHeightUnit == -1) {
+                setLineHeightPx(lineHeight);
+            } else {
+                setLineHeight(lineHeightUnit, lineHeight);
+            }
         }
     }
 
@@ -4604,7 +4625,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private void setTextSizeInternal(int unit, float size, boolean shouldRequestLayout) {
+    @NonNull
+    private DisplayMetrics getDisplayMetricsOrSystem() {
         Context c = getContext();
         Resources r;
 
@@ -4614,8 +4636,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             r = c.getResources();
         }
 
+        return r.getDisplayMetrics();
+    }
+
+    private void setTextSizeInternal(int unit, float size, boolean shouldRequestLayout) {
         mTextSizeUnit = unit;
-        setRawTextSize(TypedValue.applyDimension(unit, size, r.getDisplayMetrics()),
+        setRawTextSize(TypedValue.applyDimension(unit, size, getDisplayMetricsOrSystem()),
                 shouldRequestLayout);
     }
 
@@ -4624,6 +4650,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (size != mTextPaint.getTextSize()) {
             mTextPaint.setTextSize(size);
 
+            maybeRecalculateLineHeight();
             if (shouldRequestLayout && mLayout != null) {
                 // Do not auto-size right after setting the text size.
                 mNeedsAutoSizeText = false;
@@ -6197,14 +6224,92 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @android.view.RemotableViewMethod
     public void setLineHeight(@Px @IntRange(from = 0) int lineHeight) {
-        Preconditions.checkArgumentNonnegative(lineHeight);
+        setLineHeightPx(lineHeight);
+    }
+
+    private void setLineHeightPx(@Px @FloatRange(from = 0) float lineHeight) {
+        Preconditions.checkArgumentNonNegative(lineHeight,
+                "Expecting non-negative lineHeight while the input is " + lineHeight);
 
         final int fontHeight = getPaint().getFontMetricsInt(null);
         // Make sure we don't setLineSpacing if it's not needed to avoid unnecessary redraw.
+        // TODO(b/274974975): should this also check if lineSpacing needs to change?
         if (lineHeight != fontHeight) {
             // Set lineSpacingExtra by the difference of lineSpacing with lineHeight
             setLineSpacing(lineHeight - fontHeight, 1f);
+
+            mLineHeightComplexDimen =
+                        TypedValue.createComplexDimension(lineHeight, TypedValue.COMPLEX_UNIT_PX);
         }
+    }
+
+    /**
+     * Sets an explicit line height to a given unit and value for this TextView. This is equivalent
+     * to the vertical distance between subsequent baselines in the TextView. See {@link
+     * TypedValue} for the possible dimension units.
+     *
+     * @param unit The desired dimension unit. SP units are strongly recommended so that line height
+     *             stays proportional to the text size when fonts are scaled up for accessibility.
+     * @param lineHeight The desired line height in the given units.
+     *
+     * @see #setLineSpacing(float, float)
+     * @see #getLineSpacingExtra()
+     *
+     * @attr ref android.R.styleable#TextView_lineHeight
+     */
+    @android.view.RemotableViewMethod
+    public void setLineHeight(
+            @TypedValue.ComplexDimensionUnit int unit,
+            @FloatRange(from = 0) float lineHeight
+    ) {
+        var metrics = getDisplayMetricsOrSystem();
+        // We can avoid the recalculation if we know non-linear font scaling isn't being used
+        // (an optimization for the majority case).
+        // We also don't try to do the recalculation unless both textSize and lineHeight are in SP.
+        if (!FontScaleConverterFactory.isNonLinearFontScalingActive(
+                    getResources().getConfiguration().fontScale)
+                || unit != TypedValue.COMPLEX_UNIT_SP
+                || mTextSizeUnit != TypedValue.COMPLEX_UNIT_SP
+        ) {
+            setLineHeightPx(TypedValue.applyDimension(unit, lineHeight, metrics));
+
+            // Do this last so it overwrites what setLineHeightPx() sets it to.
+            mLineHeightComplexDimen = TypedValue.createComplexDimension(lineHeight, unit);
+            return;
+        }
+
+        // Recalculate a proportional line height when non-linear font scaling is in effect.
+        // Otherwise, a desired 2x line height at font scale 1.0 will not be 2x at font scale 2.0,
+        // due to non-linear font scaling compressing higher SP sizes. See b/273326061 for details.
+        // We know they are using SP units for both the text size and the line height
+        // at this point, so determine the ratio between them. This is the *intended* line spacing
+        // multiplier if font scale == 1.0. We can then determine what the pixel value for the line
+        // height would be if we preserved proportions.
+        var textSizePx = getTextSize();
+        var textSizeSp = TypedValue.convertPixelsToDimension(
+                TypedValue.COMPLEX_UNIT_SP,
+                textSizePx,
+                metrics
+        );
+        var ratio = lineHeight / textSizeSp;
+        setLineHeightPx(textSizePx * ratio);
+
+        // Do this last so it overwrites what setLineHeightPx() sets it to.
+        mLineHeightComplexDimen = TypedValue.createComplexDimension(lineHeight, unit);
+    }
+
+    private void maybeRecalculateLineHeight() {
+        if (mLineHeightComplexDimen == 0) {
+            return;
+        }
+        int unit = TypedValue.getUnitFromComplexDimension(mLineHeightComplexDimen);
+        if (unit != TypedValue.COMPLEX_UNIT_SP) {
+            // The lineHeight was never supplied in SP, so we didn't do any fancy recalculations
+            // in setLineHeight(). We don't need to recalculate.
+            return;
+        }
+
+        setLineHeight(unit, TypedValue.complexToFloat(mLineHeightComplexDimen));
     }
 
     /**
@@ -7033,9 +7138,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         final int textLength = text.length();
+        final boolean isOffsetMapping = mTransformed instanceof OffsetMapping;
 
-        if (text instanceof Spannable && (!mAllowTransformationLengthChange
-                || text instanceof OffsetMapping)) {
+        if (text instanceof Spannable && (!mAllowTransformationLengthChange || isOffsetMapping)) {
             Spannable sp = (Spannable) text;
 
             // Remove any ChangeWatchers that might have come from other TextViews.
@@ -7053,8 +7158,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mEditor != null) mEditor.addSpanWatchers(sp);
 
             if (mTransformation != null) {
+                final int priority = isOffsetMapping ? OFFSET_MAPPING_SPAN_PRIORITY : 0;
                 sp.setSpan(mTransformation, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE
-                        | (TRANSFORMATION_SPAN_PRIORITY << Spanned.SPAN_PRIORITY_SHIFT));
+                        | (priority << Spanned.SPAN_PRIORITY_SHIFT));
             }
 
             if (mMovement != null) {
@@ -7075,6 +7181,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
+
+        mHideHint = false;
 
         if (a11yTextChangeType == AccessibilityUtils.TEXT) {
             notifyViewAccessibilityStateChangedIfNeeded(
@@ -7234,6 +7342,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private void setHintInternal(CharSequence hint) {
+        mHideHint = false;
         mHint = TextUtils.stringOrSpannedString(hint);
 
         if (mLayout != null) {
@@ -7272,6 +7381,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @ViewDebug.CapturedViewProperty
     public CharSequence getHint() {
         return mHint;
+    }
+
+    /**
+     * Temporarily hides the hint text until the text is modified, or the hint text is modified, or
+     * the view gains or loses focus.
+     *
+     * @hide
+     */
+    public void hideHint() {
+        if (isShowingHint()) {
+            mHideHint = true;
+            invalidate();
+        }
     }
 
     /**
@@ -8870,7 +8992,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         Layout layout = mLayout;
 
-        if (mHint != null && mText.length() == 0) {
+        if (mHint != null && !mHideHint && mText.length() == 0) {
             if (mHintTextColor != null) {
                 color = mCurHintTextColor;
             }
@@ -11189,7 +11311,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private boolean isShowingHint() {
-        return TextUtils.isEmpty(mText) && !TextUtils.isEmpty(mHint);
+        return TextUtils.isEmpty(mText) && !TextUtils.isEmpty(mHint) && !mHideHint;
     }
 
     /**
@@ -11466,7 +11588,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             changed = true;
         }
 
-        if (requestRectWithoutFocus && isFocused()) {
+        if (requestRectWithoutFocus || isFocused()) {
             // This offsets because getInterestingRect() is in terms of viewport coordinates, but
             // requestRectangleOnScreen() is in terms of content coordinates.
 
@@ -11687,8 +11809,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean hasSelection() {
         final int selectionStart = getSelectionStart();
         final int selectionEnd = getSelectionEnd();
+        final int selectionMin;
+        final int selectionMax;
+        if (selectionStart < selectionEnd) {
+            selectionMin = selectionStart;
+            selectionMax = selectionEnd;
+        } else {
+            selectionMin = selectionEnd;
+            selectionMax = selectionStart;
+        }
 
-        return selectionStart >= 0 && selectionEnd > 0 && selectionStart != selectionEnd;
+        return selectionMin >= 0 && selectionMax > 0 && selectionMin != selectionMax;
     }
 
     String getSelectedText() {
@@ -12333,6 +12464,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(buffer, start, before, after);
         onTextChanged(buffer, start, before, after);
 
+        mHideHint = false;
         clearGesturePreviewHighlight();
     }
 
@@ -12472,6 +12604,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             super.onFocusChanged(focused, direction, previouslyFocusedRect);
             return;
         }
+
+        mHideHint = false;
 
         if (mEditor != null) mEditor.onFocusChanged(focused, direction);
 

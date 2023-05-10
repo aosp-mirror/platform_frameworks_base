@@ -16,7 +16,6 @@
 
 package com.android.settingslib.spa.framework.common
 
-import android.app.settings.SettingsEnums
 import android.os.Bundle
 
 // Defines the category of the log, for quick filter
@@ -32,14 +31,14 @@ enum class LogCategory {
 }
 
 // Defines the log events in Spa.
-enum class LogEvent(val action: Int) {
+enum class LogEvent {
     // Page related events.
-    PAGE_ENTER(SettingsEnums.PAGE_VISIBLE),
-    PAGE_LEAVE(SettingsEnums.PAGE_HIDE),
+    PAGE_ENTER,
+    PAGE_LEAVE,
 
     // Entry related events.
-    ENTRY_CLICK(SettingsEnums.ACTION_SETTINGS_TILE_CLICK),
-    ENTRY_SWITCH(SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE),
+    ENTRY_CLICK,
+    ENTRY_SWITCH,
 }
 
 internal const val LOG_DATA_DISPLAY_NAME = "name"

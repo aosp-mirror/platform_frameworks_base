@@ -24,6 +24,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
+import android.util.Log;
 import android.util.MathUtils;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,16 +35,15 @@ import android.view.animation.PathInterpolator;
 
 import androidx.annotation.NonNull;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.animation.ShadeInterpolation;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
-import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -52,6 +52,8 @@ import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
+import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.notification.stack.ViewState;
@@ -64,8 +66,7 @@ import java.io.PrintWriter;
  * A notification shelf view that is placed inside the notification scroller. It manages the
  * overflow icons that don't fit into the regular list anymore.
  */
-public class NotificationShelf extends ActivatableNotificationView implements
-        View.OnLayoutChangeListener, StateListener {
+public class NotificationShelf extends ActivatableNotificationView implements StateListener {
 
     private static final int TAG_CONTINUOUS_CLIPPING = R.id.continuous_clipping_tag;
     private static final String TAG = "NotificationShelf";
@@ -78,7 +79,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private static final SourceType SHELF_SCROLL = SourceType.from("ShelfScroll");
 
     private NotificationIconContainer mShelfIcons;
-    private int[] mTmp = new int[2];
     private boolean mHideBackground;
     private int mStatusBarHeight;
     private boolean mEnableNotificationClipping;
@@ -87,7 +87,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private int mPaddingBetweenElements;
     private int mNotGoneIndex;
     private boolean mHasItemsInStableShelf;
-    private NotificationIconContainer mCollapsedIcons;
     private int mScrollFastThreshold;
     private int mStatusBarState;
     private boolean mInteractive;
@@ -98,6 +97,12 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private float mCornerAnimationDistance;
     private NotificationShelfController mController;
     private float mActualWidth = -1;
+    private boolean mSensitiveRevealAnimEndabled;
+    private boolean mShelfRefactorFlagEnabled;
+    private boolean mCanModifyColorOfNotifications;
+    private boolean mCanInteract;
+    private NotificationStackScrollLayout mHostLayout;
+    private NotificationRoundnessManager mRoundnessManager;
 
     public NotificationShelf(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -122,23 +127,25 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setClipToPadding(false);
         mShelfIcons.setIsStaticLayout(false);
         requestRoundness(/* top = */ 1f, /* bottom = */ 1f, BASE_VALUE, /* animate = */ false);
-
-        if (!mUseRoundnessSourceTypes) {
-            // Setting this to first in section to get the clipping to the top roundness correct.
-            // This value determines the way we are clipping to the top roundness of the overall
-            // shade
-            setFirstInSection(true);
-        }
         updateResources();
     }
 
     public void bind(AmbientState ambientState,
                      NotificationStackScrollLayoutController hostLayoutController) {
+        assertRefactorFlagDisabled();
         mAmbientState = ambientState;
         mHostLayoutController = hostLayoutController;
         hostLayoutController.setOnNotificationRemovedListener((child, isTransferInProgress) -> {
             child.requestRoundnessReset(SHELF_SCROLL);
         });
+    }
+
+    public void bind(AmbientState ambientState, NotificationStackScrollLayout hostLayout,
+            NotificationRoundnessManager roundnessManager) {
+        if (!checkRefactorFlagEnabled()) return;
+        mAmbientState = ambientState;
+        mHostLayout = hostLayout;
+        mRoundnessManager = roundnessManager;
     }
 
     private void updateResources() {
@@ -232,7 +239,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             } else {
                 viewState.setAlpha(1f - ambientState.getHideAmount());
             }
-            viewState.belowSpeedBump = mHostLayoutController.getSpeedBumpIndex() == 0;
+            viewState.belowSpeedBump = getSpeedBumpIndex() == 0;
             viewState.hideSensitive = false;
             viewState.setXTranslation(getTranslationX());
             viewState.hasItemsInStableShelf = lastViewState.inShelf;
@@ -260,11 +267,26 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
 
             final float stackEnd = ambientState.getStackY() + ambientState.getStackHeight();
-            viewState.setYTranslation(stackEnd - viewState.height);
+            if (mSensitiveRevealAnimEndabled && viewState.hidden) {
+                // if the shelf is hidden, position it at the end of the stack (plus the clip
+                // padding), such that when it appears animated, it will smoothly move in from the
+                // bottom, without jump cutting any notifications
+                viewState.setYTranslation(stackEnd + mPaddingBetweenElements);
+            } else {
+                viewState.setYTranslation(stackEnd - viewState.height);
+            }
         } else {
             viewState.hidden = true;
             viewState.location = ExpandableViewState.LOCATION_GONE;
             viewState.hasItemsInStableShelf = false;
+        }
+    }
+
+    private int getSpeedBumpIndex() {
+        if (mShelfRefactorFlagEnabled) {
+            return mHostLayout.getSpeedBumpIndex();
+        } else {
+            return mHostLayoutController.getSpeedBumpIndex();
         }
     }
 
@@ -380,8 +402,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
         int baseZHeight = mAmbientState.getBaseZHeight();
         int clipTopAmount = 0;
 
-        for (int i = 0; i < mHostLayoutController.getChildCount(); i++) {
-            ExpandableView child = mHostLayoutController.getChildAt(i);
+        for (int i = 0; i < getHostLayoutChildCount(); i++) {
+            ExpandableView child = getHostLayoutChildAt(i);
             if (!child.needsClippingToShelf() || child.getVisibility() == GONE) {
                 continue;
             }
@@ -395,7 +417,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     expandingAnimated, isLastChild, shelfClipStart);
 
             // TODO(b/172289889) scale mPaddingBetweenElements with expansion amount
-            if ((isLastChild && !child.isInShelf()) || aboveShelf || backgroundForceHidden) {
+            if ((!mSensitiveRevealAnimEndabled && ((isLastChild && !child.isInShelf())
+                    || backgroundForceHidden)) || aboveShelf) {
                 notificationClipEnd = shelfStart + getIntrinsicHeight();
             } else {
                 notificationClipEnd = shelfStart - mPaddingBetweenElements;
@@ -419,7 +442,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                     transitionAmount = inShelfAmount;
                 }
                 // We don't want to modify the color if the notification is hun'd
-                if (isLastChild && mController.canModifyColorOfNotifications()) {
+                if (isLastChild && canModifyColorOfNotifications()) {
                     if (colorOfViewBeforeLast == NO_COLOR) {
                         colorOfViewBeforeLast = ownColorUntinted;
                     }
@@ -437,15 +460,14 @@ public class NotificationShelf extends ActivatableNotificationView implements
             }
 
             if (child instanceof ActivatableNotificationView) {
-                ActivatableNotificationView anv =
-                        (ActivatableNotificationView) child;
+                ActivatableNotificationView anv = (ActivatableNotificationView) child;
                 // Because we show whole notifications on the lockscreen, the bottom notification is
                 // always "just about to enter the shelf" by normal scrolling rules.  This is fine
                 // if the shelf is visible, but if the shelf is hidden, it causes incorrect curling.
                 // notificationClipEnd handles the discrepancy between a visible and hidden shelf,
                 // so we use that when on the keyguard (and while animating away) to reduce curling.
-                final float keyguardSafeShelfStart =
-                        mAmbientState.isOnKeyguard() ? notificationClipEnd : shelfStart;
+                final float keyguardSafeShelfStart = !mSensitiveRevealAnimEndabled
+                        && mAmbientState.isOnKeyguard() ? notificationClipEnd : shelfStart;
                 updateCornerRoundnessOnScroll(anv, viewStart, keyguardSafeShelfStart);
             }
         }
@@ -466,11 +488,11 @@ public class NotificationShelf extends ActivatableNotificationView implements
 
         // TODO(b/172289889) transition last icon in shelf to notification icon and vice versa.
         setVisibility(isHidden ? View.INVISIBLE : View.VISIBLE);
-        mShelfIcons.setSpeedBumpIndex(mHostLayoutController.getSpeedBumpIndex());
+        mShelfIcons.setSpeedBumpIndex(getSpeedBumpIndex());
         mShelfIcons.calculateIconXTranslations();
         mShelfIcons.applyIconStates();
-        for (int i = 0; i < mHostLayoutController.getChildCount(); i++) {
-            View child = mHostLayoutController.getChildAt(i);
+        for (int i = 0; i < getHostLayoutChildCount(); i++) {
+            View child = getHostLayoutChildAt(i);
             if (!(child instanceof ExpandableNotificationRow)
                     || child.getVisibility() == GONE) {
                 continue;
@@ -482,6 +504,30 @@ public class NotificationShelf extends ActivatableNotificationView implements
         setHideBackground(hideBackground);
         if (mNotGoneIndex == -1) {
             mNotGoneIndex = notGoneIndex;
+        }
+    }
+
+    private ExpandableView getHostLayoutChildAt(int index) {
+        if (mShelfRefactorFlagEnabled) {
+            return (ExpandableView) mHostLayout.getChildAt(index);
+        } else {
+            return mHostLayoutController.getChildAt(index);
+        }
+    }
+
+    private int getHostLayoutChildCount() {
+        if (mShelfRefactorFlagEnabled) {
+            return mHostLayout.getChildCount();
+        } else {
+            return mHostLayoutController.getChildCount();
+        }
+    }
+
+    private boolean canModifyColorOfNotifications() {
+        if (mShelfRefactorFlagEnabled) {
+            return mCanModifyColorOfNotifications && mAmbientState.isShadeExpanded();
+        } else {
+            return mController.canModifyColorOfNotifications();
         }
     }
 
@@ -499,7 +545,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 && anv == mAmbientState.getTrackedHeadsUpRow();
 
         final boolean shouldUpdateCornerRoundness = viewStart < shelfStart
-                && !mHostLayoutController.isViewAffectedBySwipe(anv)
+                && !isViewAffectedBySwipe(anv)
                 && !isUnlockedHeadsUp
                 && !isHunGoingToShade
                 && !anv.isAboveShelf()
@@ -515,17 +561,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 * mAmbientState.getExpansionFraction();
         final float cornerAnimationTop = shelfStart - cornerAnimationDistance;
 
-        final SourceType sourceType;
-        if (mUseRoundnessSourceTypes) {
-            sourceType = SHELF_SCROLL;
-        } else {
-            sourceType = LegacySourceType.OnScroll;
-        }
-
         final float topValue;
-        if (!mUseRoundnessSourceTypes && anv.isFirstInSection()) {
-            topValue = 1f;
-        } else if (viewStart >= cornerAnimationTop) {
+        if (viewStart >= cornerAnimationTop) {
             // Round top corners within animation bounds
             topValue = MathUtils.saturate(
                     (viewStart - cornerAnimationTop) / cornerAnimationDistance);
@@ -534,12 +571,10 @@ public class NotificationShelf extends ActivatableNotificationView implements
             // Reset top and bottom corners outside of animation bounds.
             topValue = 0f;
         }
-        anv.requestTopRoundness(topValue, sourceType, /* animate = */ false);
+        anv.requestTopRoundness(topValue, SHELF_SCROLL, /* animate = */ false);
 
         final float bottomValue;
-        if (!mUseRoundnessSourceTypes && anv.isLastInSection()) {
-            bottomValue = 1f;
-        } else if (viewEnd >= cornerAnimationTop) {
+        if (viewEnd >= cornerAnimationTop) {
             // Round bottom corners within animation bounds
             bottomValue = MathUtils.saturate(
                     (viewEnd - cornerAnimationTop) / cornerAnimationDistance);
@@ -548,7 +583,15 @@ public class NotificationShelf extends ActivatableNotificationView implements
             // Reset top and bottom corners outside of animation bounds.
             bottomValue = 0f;
         }
-        anv.requestBottomRoundness(bottomValue, sourceType, /* animate = */ false);
+        anv.requestBottomRoundness(bottomValue, SHELF_SCROLL, /* animate = */ false);
+    }
+
+    private boolean isViewAffectedBySwipe(ExpandableView expandableView) {
+        if (!mShelfRefactorFlagEnabled) {
+            return mHostLayoutController.isViewAffectedBySwipe(expandableView);
+        } else {
+            return mRoundnessManager.isViewAffectedBySwipe(expandableView);
+        }
     }
 
     /**
@@ -558,12 +601,28 @@ public class NotificationShelf extends ActivatableNotificationView implements
      * swipes quickly.
      */
     private void clipTransientViews() {
-        for (int i = 0; i < mHostLayoutController.getTransientViewCount(); i++) {
-            View transientView = mHostLayoutController.getTransientView(i);
+        for (int i = 0; i < getHostLayoutTransientViewCount(); i++) {
+            View transientView = getHostLayoutTransientView(i);
             if (transientView instanceof ExpandableView) {
                 ExpandableView transientExpandableView = (ExpandableView) transientView;
                 updateNotificationClipHeight(transientExpandableView, getTranslationY(), -1);
             }
+        }
+    }
+
+    private View getHostLayoutTransientView(int index) {
+        if (mShelfRefactorFlagEnabled) {
+            return mHostLayout.getTransientView(index);
+        } else {
+            return mHostLayoutController.getTransientView(index);
+        }
+    }
+
+    private int getHostLayoutTransientViewCount() {
+        if (mShelfRefactorFlagEnabled) {
+            return mHostLayout.getTransientViewCount();
+        } else {
+            return mHostLayoutController.getTransientViewCount();
         }
     }
 
@@ -860,10 +919,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         return mShelfIcons.getIconState(icon);
     }
 
-    private float getFullyClosedTranslation() {
-        return -(getIntrinsicHeight() - mStatusBarHeight) / 2;
-    }
-
     @Override
     public boolean hasNoContentHeight() {
         return true;
@@ -885,7 +940,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        updateRelativeOffset();
 
         // we always want to clip to our sides, such that nothing can draw outside of these bounds
         int height = getResources().getDisplayMetrics().heightPixels;
@@ -893,13 +947,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         if (mShelfIcons != null) {
             mShelfIcons.setClipBounds(mClipRect);
         }
-    }
-
-    private void updateRelativeOffset() {
-        if (mCollapsedIcons != null) {
-            mCollapsedIcons.getLocationOnScreen(mTmp);
-        }
-        getLocationOnScreen(mTmp);
     }
 
     /**
@@ -916,31 +963,27 @@ public class NotificationShelf extends ActivatableNotificationView implements
         }
     }
 
-    /**
-     * @return whether the shelf has any icons in it when a potential animation has finished, i.e
-     * if the current state would be applied right now
-     */
-    public boolean hasItemsInStableShelf() {
-        return mHasItemsInStableShelf;
-    }
-
-    public void setCollapsedIcons(NotificationIconContainer collapsedIcons) {
-        mCollapsedIcons = collapsedIcons;
-        mCollapsedIcons.addOnLayoutChangeListener(this);
-    }
-
     @Override
     public void onStateChanged(int newState) {
+        assertRefactorFlagDisabled();
         mStatusBarState = newState;
         updateInteractiveness();
     }
 
     private void updateInteractiveness() {
-        mInteractive = mStatusBarState == StatusBarState.KEYGUARD && mHasItemsInStableShelf;
+        mInteractive = canInteract() && mHasItemsInStableShelf;
         setClickable(mInteractive);
         setFocusable(mInteractive);
         setImportantForAccessibility(mInteractive ? View.IMPORTANT_FOR_ACCESSIBILITY_YES
                 : View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS);
+    }
+
+    private boolean canInteract() {
+        if (mShelfRefactorFlagEnabled) {
+            return mCanInteract;
+        } else {
+            return mStatusBarState == StatusBarState.KEYGUARD;
+        }
     }
 
     @Override
@@ -975,31 +1018,67 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft,
-                               int oldTop, int oldRight, int oldBottom) {
-        updateRelativeOffset();
-    }
-
-    @Override
     public boolean needsClippingToShelf() {
         return false;
     }
 
+    private void assertRefactorFlagDisabled() {
+        if (mShelfRefactorFlagEnabled) {
+            NotificationShelfController.throwIllegalFlagStateError(false);
+        }
+    }
+
+    private boolean checkRefactorFlagEnabled() {
+        if (!mShelfRefactorFlagEnabled) {
+            Log.wtf(TAG,
+                    "Code path not supported when Flags.NOTIFICATION_SHELF_REFACTOR is disabled.");
+        }
+        return mShelfRefactorFlagEnabled;
+    }
+
     public void setController(NotificationShelfController notificationShelfController) {
+        assertRefactorFlagDisabled();
         mController = notificationShelfController;
     }
 
+    public void setCanModifyColorOfNotifications(boolean canModifyColorOfNotifications) {
+        if (!checkRefactorFlagEnabled()) return;
+        mCanModifyColorOfNotifications = canModifyColorOfNotifications;
+    }
+
+    public void setCanInteract(boolean canInteract) {
+        if (!checkRefactorFlagEnabled()) return;
+        mCanInteract = canInteract;
+        updateInteractiveness();
+    }
+
     public void setIndexOfFirstViewInShelf(ExpandableView firstViewInShelf) {
-        mIndexOfFirstViewInShelf = mHostLayoutController.indexOfChild(firstViewInShelf);
+        mIndexOfFirstViewInShelf = getIndexOfViewInHostLayout(firstViewInShelf);
+    }
+
+    private int getIndexOfViewInHostLayout(ExpandableView child) {
+        if (mShelfRefactorFlagEnabled) {
+            return mHostLayout.indexOfChild(child);
+        } else {
+            return mHostLayoutController.indexOfChild(child);
+        }
     }
 
     /**
-     * This method resets the OnScroll roundness of a view to 0f
-     * <p>
-     * Note: This should be the only class that handles roundness {@code SourceType.OnScroll}
+     * Set whether the sensitive reveal animation feature flag is enabled
+     * @param enabled true if enabled
      */
-    public static void resetLegacyOnScrollRoundness(ExpandableView expandableView) {
-        expandableView.requestRoundnessReset(LegacySourceType.OnScroll);
+    public void setSensitiveRevealAnimEndabled(boolean enabled) {
+        mSensitiveRevealAnimEndabled = enabled;
+    }
+
+    public void setRefactorFlagEnabled(boolean enabled) {
+        mShelfRefactorFlagEnabled = enabled;
+    }
+
+    public void requestRoundnessResetFor(ExpandableView child) {
+        if (!checkRefactorFlagEnabled()) return;
+        child.requestRoundnessReset(SHELF_SCROLL);
     }
 
     @Override

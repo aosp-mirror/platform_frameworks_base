@@ -16,9 +16,13 @@
 
 package com.android.server.media;
 
+import android.annotation.NonNull;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ResolveInfo;
 import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
@@ -27,11 +31,27 @@ import android.text.TextUtils;
 import com.android.server.LocalServices;
 
 import java.io.PrintWriter;
+import java.util.List;
 
-/**
- * Util class for media server.
- */
-class MediaServerUtils {
+/** Util class for media server. */
+/* package */ class MediaServerUtils {
+
+    /**
+     * Returns whether the provided {@link ComponentName} and {@code action} resolve to a valid
+     * activity for the user defined by {@code userHandle}.
+     */
+    public static boolean isValidActivityComponentName(
+            @NonNull Context context,
+            @NonNull ComponentName componentName,
+            @NonNull String action,
+            @NonNull UserHandle userHandle) {
+        Intent intent = new Intent(action);
+        intent.setComponent(componentName);
+        List<ResolveInfo> resolveInfos =
+                context.getPackageManager()
+                        .queryIntentActivitiesAsUser(intent, /* flags= */ 0, userHandle);
+        return !resolveInfos.isEmpty();
+    }
 
     /**
      * Throws if the given {@code packageName} does not correspond to the given {@code uid}.

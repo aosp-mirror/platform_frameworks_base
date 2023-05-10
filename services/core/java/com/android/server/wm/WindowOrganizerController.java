@@ -33,14 +33,14 @@ import static android.window.TaskFragmentOperation.OP_TYPE_SET_RELATIVE_BOUNDS;
 import static android.window.TaskFragmentOperation.OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT;
 import static android.window.TaskFragmentOperation.OP_TYPE_UNKNOWN;
 import static android.window.WindowContainerTransaction.Change.CHANGE_RELATIVE_BOUNDS;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_ADD_TASK_FRAGMENT_OPERATION;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_FINISH_ACTIVITY;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_LAUNCH_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_PENDING_INTENT;
-import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REMOVE_TASK;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
@@ -135,7 +135,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      */
     static final int CONTROLLABLE_CONFIGS = ActivityInfo.CONFIG_WINDOW_CONFIGURATION
             | ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE | ActivityInfo.CONFIG_SCREEN_SIZE
-            | ActivityInfo.CONFIG_LAYOUT_DIRECTION;
+            | ActivityInfo.CONFIG_LAYOUT_DIRECTION | ActivityInfo.CONFIG_DENSITY;
     static final int CONTROLLABLE_WINDOW_CONFIGS = WINDOW_CONFIG_BOUNDS
             | WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 
@@ -231,19 +231,26 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                  */
                 final BLASTSyncEngine.SyncGroup syncGroup = prepareSyncWithOrganizer(callback);
                 final int syncId = syncGroup.mSyncId;
-                if (!mService.mWindowManager.mSyncEngine.hasActiveSync()) {
-                    mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup);
-                    applyTransaction(t, syncId, null /*transition*/, caller);
-                    setSyncReady(syncId);
+                if (mTransitionController.isShellTransitionsEnabled()) {
+                    mTransitionController.startLegacySyncOrQueue(syncGroup, () -> {
+                        applyTransaction(t, syncId, null /*transition*/, caller);
+                        setSyncReady(syncId);
+                    });
                 } else {
-                    // Because the BLAST engine only supports one sync at a time, queue the
-                    // transaction.
-                    mService.mWindowManager.mSyncEngine.queueSyncSet(
-                            () -> mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup),
-                            () -> {
-                                applyTransaction(t, syncId, null /*transition*/, caller);
-                                setSyncReady(syncId);
-                            });
+                    if (!mService.mWindowManager.mSyncEngine.hasActiveSync()) {
+                        mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup);
+                        applyTransaction(t, syncId, null /*transition*/, caller);
+                        setSyncReady(syncId);
+                    } else {
+                        // Because the BLAST engine only supports one sync at a time, queue the
+                        // transaction.
+                        mService.mWindowManager.mSyncEngine.queueSyncSet(
+                                () -> mService.mWindowManager.mSyncEngine.startSyncSet(syncGroup),
+                                () -> {
+                                    applyTransaction(t, syncId, null /*transition*/, caller);
+                                    setSyncReady(syncId);
+                                });
+                    }
                 }
                 return syncId;
             }
@@ -280,43 +287,32 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     applyTransaction(t, -1 /* syncId */, null, caller);
                     return null;
                 }
-                // In cases where transition is already provided, the "readiness lifecycle" of the
-                // transition is determined outside of this transaction. However, if this is a
-                // direct call from shell, the entire transition lifecycle is contained in the
-                // provided transaction and thus we can setReady immediately after apply.
-                final boolean needsSetReady = transition == null && t != null;
                 final WindowContainerTransaction wct =
                         t != null ? t : new WindowContainerTransaction();
                 if (transition == null) {
                     if (type < 0) {
                         throw new IllegalArgumentException("Can't create transition with no type");
                     }
-                    // If there is already a collecting transition, queue up a new transition and
-                    // return that. The actual start and apply will then be deferred until that
-                    // transition starts collecting. This should almost never happen except during
-                    // tests.
-                    if (mService.mWindowManager.mSyncEngine.hasActiveSync()) {
-                        Slog.w(TAG, "startTransition() while one is already collecting.");
-                        final Transition nextTransition = new Transition(type, 0 /* flags */,
-                                mTransitionController, mService.mWindowManager.mSyncEngine);
-                        ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                                "Creating Pending Transition: %s", nextTransition);
-                        mService.mWindowManager.mSyncEngine.queueSyncSet(
-                                // Make sure to collect immediately to prevent another transition
-                                // from sneaking in before it. Note: moveToCollecting internally
-                                // calls startSyncSet.
-                                () -> mTransitionController.moveToCollecting(nextTransition),
-                                () -> {
-                                    nextTransition.start();
-                                    applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
-                                    if (needsSetReady) {
-                                        nextTransition.setAllReady();
-                                    }
-                                });
-                        return nextTransition.getToken();
-                    }
-                    transition = mTransitionController.createTransition(type);
+                    // This is a direct call from shell, so the entire transition lifecycle is
+                    // contained in the provided transaction if provided. Thus, we can setReady
+                    // immediately after apply.
+                    final boolean needsSetReady = t != null;
+                    final Transition nextTransition = new Transition(type, 0 /* flags */,
+                            mTransitionController, mService.mWindowManager.mSyncEngine);
+                    nextTransition.calcParallelCollectType(wct);
+                    mTransitionController.startCollectOrQueue(nextTransition,
+                            (deferred) -> {
+                                nextTransition.start();
+                                nextTransition.mLogger.mStartWCT = wct;
+                                applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
+                                if (needsSetReady) {
+                                    nextTransition.setAllReady();
+                                }
+                            });
+                    return nextTransition.getToken();
                 }
+                // The transition already started collecting before sending a request to shell,
+                // so just start here.
                 if (!transition.isCollecting() && !transition.isForcePlaying()) {
                     Slog.e(TAG, "Trying to start a transition that isn't collecting. This probably"
                             + " means Shell took too long to respond to a request. WM State may be"
@@ -327,9 +323,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 transition.start();
                 transition.mLogger.mStartWCT = wct;
                 applyTransaction(wct, -1 /*syncId*/, transition, caller);
-                if (needsSetReady) {
-                    transition.setAllReady();
-                }
+                // Since the transition is already provided, it means WMCore is determining the
+                // "readiness lifecycle" outside the provided transaction, so don't set ready here.
                 return transition.getToken();
             }
         } finally {
@@ -391,9 +386,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 // apply the incoming transaction before finish in case it alters the visibility
                 // of the participants.
                 if (t != null) {
+                    // Set the finishing transition before applyTransaction so the visibility
+                    // changes of the transition participants will only set visible-requested
+                    // and still let finishTransition handle the participants.
+                    mTransitionController.mFinishingTransition = transition;
                     applyTransaction(t, syncId, null /*transition*/, caller, transition);
                 }
-                getTransitionController().finishTransition(transitionToken);
+                mTransitionController.finishTransition(transition);
+                mTransitionController.mFinishingTransition = null;
                 if (syncId >= 0) {
                     setSyncReady(syncId);
                 }
@@ -429,19 +429,8 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 return;
             }
 
-            if (!mService.mWindowManager.mSyncEngine.hasActiveSync()) {
-                // Sync is for either transition or applySyncTransaction(). We don't support
-                // multiple sync at the same time because it may cause conflict.
-                // Create a new transition when there is no active sync to collect the changes.
-                final Transition transition = mTransitionController.createTransition(type);
-                applyTransaction(wct, -1 /* syncId */, transition, caller);
-                mTransitionController.requestStartTransition(transition, null /* startTask */,
-                        null /* remoteTransition */, null /* displayChange */);
-                transition.setAllReady();
-                return;
-            }
-
-            if (!shouldApplyIndependently) {
+            if (mService.mWindowManager.mSyncEngine.hasActiveSync()
+                    && !shouldApplyIndependently) {
                 // Although there is an active sync, we want to apply the transaction now.
                 // TODO(b/232042367) Redesign the organizer update on activity callback so that we
                 // we will know about the transition explicitly.
@@ -460,35 +449,31 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 return;
             }
 
-            // It is ok to queue the WCT until the sync engine is free.
-            final Transition nextTransition = new Transition(type, 0 /* flags */,
+            final Transition transition = new Transition(type, 0 /* flags */,
                     mTransitionController, mService.mWindowManager.mSyncEngine);
-            ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                    "Creating Pending Transition for TaskFragment: %s", nextTransition);
-            mService.mWindowManager.mSyncEngine.queueSyncSet(
-                    // Make sure to collect immediately to prevent another transition
-                    // from sneaking in before it. Note: moveToCollecting internally
-                    // calls startSyncSet.
-                    () -> mTransitionController.moveToCollecting(nextTransition),
-                    () -> {
-                        if (mTaskFragmentOrganizerController.isValidTransaction(wct)) {
-                            applyTransaction(wct, -1 /*syncId*/, nextTransition, caller);
-                            mTransitionController.requestStartTransition(nextTransition,
-                                    null /* startTask */, null /* remoteTransition */,
-                                    null /* displayChange */);
-                            nextTransition.setAllReady();
-                        } else {
-                            nextTransition.abort();
-                        }
-                    });
+            TransitionController.OnStartCollect doApply = (deferred) -> {
+                if (deferred && !mTaskFragmentOrganizerController.isValidTransaction(wct)) {
+                    transition.abort();
+                    return;
+                }
+                if (applyTransaction(wct, -1 /* syncId */, transition, caller)
+                        == TRANSACT_EFFECTS_NONE && transition.mParticipants.isEmpty()) {
+                    transition.abort();
+                    return;
+                }
+                mTransitionController.requestStartTransition(transition, null /* startTask */,
+                        null /* remoteTransition */, null /* displayChange */);
+                transition.setAllReady();
+            };
+            mTransitionController.startCollectOrQueue(transition, doApply);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
     }
 
-    private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
+    private int applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition, @NonNull CallerInfo caller) {
-        applyTransaction(t, syncId, transition, caller, null /* finishTransition */);
+        return applyTransaction(t, syncId, transition, caller, null /* finishTransition */);
     }
 
     /**
@@ -496,8 +481,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
      * @param transition A transition to collect changes into.
      * @param caller Info about the calling process.
      * @param finishTransition The transition that is currently being finished.
+     * @return The effects of the window container transaction.
      */
-    private void applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
+    private int applyTransaction(@NonNull WindowContainerTransaction t, int syncId,
             @Nullable Transition transition, @NonNull CallerInfo caller,
             @Nullable Transition finishTransition) {
         int effects = TRANSACT_EFFECTS_NONE;
@@ -634,6 +620,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             mService.mTaskSupervisor.setDeferRootVisibilityUpdate(false /* deferUpdate */);
             mService.continueWindowLayout();
         }
+        return effects;
     }
 
     private int applyChanges(@NonNull WindowContainer<?> container,
@@ -671,12 +658,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
         }
 
-        final int prevWindowingMode = container.getWindowingMode();
-        if (windowingMode > -1 && prevWindowingMode != windowingMode) {
+        if (windowingMode > -1) {
             if (mService.isInLockTaskMode()
                     && WindowConfiguration.inMultiWindowMode(windowingMode)) {
-                throw new UnsupportedOperationException("Not supported to set multi-window"
-                        + " windowing mode during locked task mode.");
+                Slog.w(TAG, "Dropping unsupported request to set multi-window windowing mode"
+                        + " during locked task mode.");
+                return effects;
             }
 
             if (windowingMode == WindowConfiguration.WINDOWING_MODE_PINNED) {
@@ -686,8 +673,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 return effects;
             }
 
+            final int prevMode = container.getRequestedOverrideWindowingMode();
             container.setWindowingMode(windowingMode);
-            if (prevWindowingMode != container.getWindowingMode()) {
+            if (prevMode != container.getWindowingMode()) {
                 // The activity in the container may become focusable or non-focusable due to
                 // windowing modes changes (such as entering or leaving pinned windowing mode),
                 // so also apply the lifecycle effects to this transaction.
@@ -984,19 +972,30 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         switch (type) {
             case HIERARCHY_OP_TYPE_PENDING_INTENT: {
+                final Bundle launchOpts = hop.getLaunchOptions();
+                ActivityOptions activityOptions = launchOpts != null
+                        ? new ActivityOptions(launchOpts) : null;
+                if (activityOptions != null && activityOptions.getTransientLaunch()
+                        && mService.isCallerRecents(hop.getPendingIntent().getCreatorUid())) {
+                    if (mService.getActivityStartController().startExistingRecentsIfPossible(
+                            hop.getActivityIntent(), activityOptions)) {
+                        // Start recents successfully.
+                        break;
+                    }
+                }
+
                 String resolvedType = hop.getActivityIntent() != null
                         ? hop.getActivityIntent().resolveTypeIfNeeded(
                         mService.mContext.getContentResolver())
                         : null;
 
-                ActivityOptions activityOptions = null;
                 if (hop.getPendingIntent().isActivity()) {
                     // Set the context display id as preferred for this activity launches, so that
                     // it can land on caller's display. Or just brought the task to front at the
                     // display where it was on since it has higher preference.
-                    activityOptions = hop.getLaunchOptions() != null
-                            ? new ActivityOptions(hop.getLaunchOptions())
-                            : ActivityOptions.makeBasic();
+                    if (activityOptions == null) {
+                        activityOptions = ActivityOptions.makeBasic();
+                    }
                     activityOptions.setCallerDisplayId(DEFAULT_DISPLAY);
                 }
                 final Bundle options = activityOptions != null ? activityOptions.toBundle() : null;
@@ -1042,28 +1041,24 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 taskDisplayArea.moveRootTaskBehindRootTask(thisTask.getRootTask(), restoreAt);
                 break;
             }
-            case HIERARCHY_OP_TYPE_ADD_RECT_INSETS_PROVIDER: {
-                final Rect insetsProviderWindowContainer = hop.getInsetsProviderFrame();
-                final WindowContainer container =
-                        WindowContainer.fromBinder(hop.getContainer());
+            case HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
                 if (container == null) {
                     Slog.e(TAG, "Attempt to add local insets source provider on unknown: "
-                                    + container);
+                            + container);
                     break;
                 }
-                container.addLocalRectInsetsSourceProvider(
-                        insetsProviderWindowContainer, hop.getInsetsTypes());
+                container.addLocalInsetsFrameProvider(hop.getInsetsFrameProvider());
                 break;
             }
-            case HIERARCHY_OP_TYPE_REMOVE_INSETS_PROVIDER: {
-                final WindowContainer container =
-                        WindowContainer.fromBinder(hop.getContainer());
+            case HIERARCHY_OP_TYPE_REMOVE_INSETS_FRAME_PROVIDER: {
+                final WindowContainer container = WindowContainer.fromBinder(hop.getContainer());
                 if (container == null) {
                     Slog.e(TAG, "Attempt to remove local insets source provider from unknown: "
                                     + container);
                     break;
                 }
-                container.removeLocalInsetsSourceProvider(hop.getInsetsTypes());
+                container.removeLocalInsetsFrameProvider(hop.getInsetsFrameProvider());
                 break;
             }
             case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: {
@@ -1648,7 +1643,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
     private BLASTSyncEngine.SyncGroup prepareSyncWithOrganizer(
             IWindowContainerTransactionCallback callback) {
         final BLASTSyncEngine.SyncGroup s = mService.mWindowManager.mSyncEngine
-                .prepareSyncSet(this, "", BLASTSyncEngine.METHOD_BLAST);
+                .prepareSyncSet(this, "Organizer");
         mTransactionCallbacksByPendingSyncId.put(s.mSyncId, callback);
         return s;
     }

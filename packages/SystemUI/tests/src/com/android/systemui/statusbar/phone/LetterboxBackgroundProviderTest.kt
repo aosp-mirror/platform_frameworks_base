@@ -25,7 +25,6 @@ import android.testing.AndroidTestingRunner
 import android.view.IWindowManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
@@ -52,7 +51,6 @@ class LetterboxBackgroundProviderTest : SysuiTestCase() {
     @get:Rule var expect: Expect = Expect.create()
 
     @Mock private lateinit var windowManager: IWindowManager
-    @Mock private lateinit var dumpManager: DumpManager
     @Mock private lateinit var wallpaperManager: WallpaperManager
 
     private lateinit var provider: LetterboxBackgroundProvider
@@ -65,8 +63,7 @@ class LetterboxBackgroundProviderTest : SysuiTestCase() {
 
         setUpWallpaperManager()
         provider =
-            LetterboxBackgroundProvider(
-                windowManager, fakeExecutor, dumpManager, wallpaperManager, mainHandler)
+            LetterboxBackgroundProvider(windowManager, fakeExecutor, wallpaperManager, mainHandler)
     }
 
     private fun setUpWallpaperManager() {

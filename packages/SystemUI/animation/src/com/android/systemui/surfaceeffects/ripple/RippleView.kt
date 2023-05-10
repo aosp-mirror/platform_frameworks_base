@@ -72,9 +72,9 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
         this.rippleShape = rippleShape
         rippleShader = RippleShader(rippleShape)
 
-        rippleShader.color = RippleAnimationConfig.RIPPLE_DEFAULT_COLOR
+        rippleShader.color = RippleShader.RIPPLE_DEFAULT_COLOR
         rippleShader.rawProgress = 0f
-        rippleShader.sparkleStrength = RippleAnimationConfig.RIPPLE_SPARKLE_STRENGTH
+        rippleShader.sparkleStrength = RippleShader.RIPPLE_SPARKLE_STRENGTH
         rippleShader.pixelDensity = resources.displayMetrics.density
 
         ripplePaint.shader = rippleShader
@@ -209,7 +209,7 @@ open class RippleView(context: Context?, attrs: AttributeSet?) : View(context, a
      *
      * The alpha value of the color will be applied to the ripple. The alpha range is [0-255].
      */
-    fun setColor(color: Int, alpha: Int = RippleAnimationConfig.RIPPLE_DEFAULT_ALPHA) {
+    fun setColor(color: Int, alpha: Int = RippleShader.RIPPLE_DEFAULT_ALPHA) {
         rippleShader.color = ColorUtils.setAlphaComponent(color, alpha)
     }
 

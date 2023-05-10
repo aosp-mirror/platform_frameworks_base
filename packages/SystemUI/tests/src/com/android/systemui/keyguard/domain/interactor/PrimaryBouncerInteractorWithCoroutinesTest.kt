@@ -21,12 +21,15 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.utils.os.FakeHandler
@@ -36,9 +39,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardBouncerRepository
@@ -69,7 +74,8 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
                 dismissCallbackRegistry,
                 context,
                 keyguardUpdateMonitor,
-                keyguardBypassController,
+                Mockito.mock(TrustRepository::class.java),
+                FakeFeatureFlags(),
             )
     }
 
@@ -77,7 +83,7 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     fun notInteractableWhenExpansionIsBelow90Percent() = runTest {
         val isInteractable = collectLastValue(underTest.isInteractable)
 
-        repository.setPrimaryVisible(true)
+        repository.setPrimaryShow(true)
         repository.setPanelExpansion(0.15f)
 
         assertThat(isInteractable()).isFalse()
@@ -87,7 +93,7 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     fun notInteractableWhenExpansionAbove90PercentButNotVisible() = runTest {
         val isInteractable = collectLastValue(underTest.isInteractable)
 
-        repository.setPrimaryVisible(false)
+        repository.setPrimaryShow(false)
         repository.setPanelExpansion(0.05f)
 
         assertThat(isInteractable()).isFalse()
@@ -97,7 +103,7 @@ class PrimaryBouncerInteractorWithCoroutinesTest : SysuiTestCase() {
     fun isInteractableWhenExpansionAbove90PercentAndVisible() = runTest {
         var isInteractable = collectLastValue(underTest.isInteractable)
 
-        repository.setPrimaryVisible(true)
+        repository.setPrimaryShow(true)
         repository.setPanelExpansion(0.09f)
 
         assertThat(isInteractable()).isTrue()

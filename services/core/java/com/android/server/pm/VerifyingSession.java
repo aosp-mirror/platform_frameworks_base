@@ -26,7 +26,6 @@ import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
 import static android.os.PowerWhitelistManager.REASON_PACKAGE_VERIFIER;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
-import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_INTEGRITY_VERIFICATION;
@@ -354,15 +353,15 @@ final class VerifyingSession {
             PackageInfoLite pkgLite,
             PackageVerificationState verificationState) {
 
-        // TODO: http://b/22976637
-        // Apps installed for "all" users use the device owner to verify the app
+        // Apps installed for "all" users use the current user to verify the app
         UserHandle verifierUser = getUser();
         if (verifierUser == UserHandle.ALL) {
-            verifierUser = UserHandle.SYSTEM;
+            verifierUser = UserHandle.of(mPm.mUserManager.getCurrentUserId());
         }
         final int verifierUserId = verifierUser.getIdentifier();
 
-        List<String> requiredVerifierPackages = Arrays.asList(mPm.mRequiredVerifierPackages);
+        List<String> requiredVerifierPackages = new ArrayList<>(
+                Arrays.asList(mPm.mRequiredVerifierPackages));
         boolean requiredVerifierPackagesOverridden = false;
 
         // Allow verifier override for ADB installations which could already be unverified using
@@ -408,7 +407,7 @@ final class VerifyingSession {
         final int numRequiredVerifierPackages = requiredVerifierPackages.size();
         for (int i = numRequiredVerifierPackages - 1; i >= 0; i--) {
             if (!snapshot.isApplicationEffectivelyEnabled(requiredVerifierPackages.get(i),
-                    SYSTEM_UID)) {
+                    verifierUser)) {
                 Slog.w(TAG,
                         "Required verifier: " + requiredVerifierPackages.get(i) + " is disabled");
                 requiredVerifierPackages.remove(i);
@@ -653,20 +652,33 @@ final class VerifyingSession {
 
     private boolean isAdbVerificationEnabled(PackageInfoLite pkgInfoLite, int userId,
             boolean requestedDisableVerification) {
+        boolean verifierIncludeAdb = android.provider.Settings.Global.getInt(
+                mPm.mContext.getContentResolver(),
+                android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
+
         if (mPm.isUserRestricted(userId, UserManager.ENSURE_VERIFY_APPS)) {
+            if (!verifierIncludeAdb) {
+                Slog.w(TAG, "Force verification of ADB install because of user restriction.");
+            }
             return true;
         }
-        // Check if the developer wants to skip verification for ADB installs
+
+        // Check if the verification disabled globally, first.
+        if (!verifierIncludeAdb) {
+            return false;
+        }
+
+        // Check if the developer wants to skip verification for ADB installs.
         if (requestedDisableVerification) {
             if (!packageExists(pkgInfoLite.packageName)) {
-                // Always verify fresh install
+                // Always verify fresh install.
                 return true;
             }
-            // Only skip when apk is debuggable
+            // Only skip when apk is debuggable.
             return !pkgInfoLite.debuggable;
         }
-        return android.provider.Settings.Global.getInt(mPm.mContext.getContentResolver(),
-                android.provider.Settings.Global.PACKAGE_VERIFIER_INCLUDE_ADB, 1) != 0;
+
+        return true;
     }
 
     /**

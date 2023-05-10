@@ -32,7 +32,6 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.TopAppBar
@@ -43,13 +42,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.android.credentialmanager.R
 import com.android.credentialmanager.ui.theme.EntryShape
@@ -75,6 +80,7 @@ fun Entry(
     /** If true, draws a trailing lock icon. */
     isLockedAuthEntry: Boolean = false,
     enforceOneLine: Boolean = false,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
 ) {
     val iconPadding = Modifier.wrapContentSize().padding(
         // Horizontal padding should be 16dp, but the suggestion chip itself
@@ -99,7 +105,11 @@ fun Entry(
             ) {
                 // Apply weight so that the trailing icon can always show.
                 Column(modifier = Modifier.wrapContentHeight().fillMaxWidth().weight(1f)) {
-                    SmallTitleText(text = entryHeadlineText, enforceOneLine = enforceOneLine)
+                    SmallTitleText(
+                        text = entryHeadlineText,
+                        enforceOneLine = enforceOneLine,
+                        onTextLayout = onTextLayout,
+                    )
                     if (passwordValue != null) {
                         Row(
                             modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
@@ -137,10 +147,18 @@ fun Entry(
                             )
                         }
                     } else if (entrySecondLineText != null) {
-                        BodySmallText(text = entrySecondLineText, enforceOneLine = enforceOneLine)
+                        BodySmallText(
+                            text = entrySecondLineText,
+                            enforceOneLine = enforceOneLine,
+                            onTextLayout = onTextLayout,
+                        )
                     }
                     if (entryThirdLineText != null) {
-                        BodySmallText(text = entryThirdLineText, enforceOneLine = enforceOneLine)
+                        BodySmallText(
+                            text = entryThirdLineText,
+                            enforceOneLine = enforceOneLine,
+                            onTextLayout = onTextLayout,
+                        )
                     }
                 }
                 if (isLockedAuthEntry) {
@@ -150,7 +168,7 @@ fun Entry(
                             // Decorative purpose only.
                             contentDescription = null,
                             modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                         )
                     }
                 }
@@ -164,7 +182,7 @@ fun Entry(
                         Icon(
                             modifier = iconSize,
                             bitmap = iconImageBitmap,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                             // Decorative purpose only.
                             contentDescription = null,
                         )
@@ -188,7 +206,7 @@ fun Entry(
                     Icon(
                         modifier = iconSize,
                         imageVector = iconImageVector,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                         // Decorative purpose only.
                         contentDescription = null,
                     )
@@ -200,7 +218,7 @@ fun Entry(
                     Icon(
                         modifier = iconSize,
                         painter = iconPainter,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                         // Decorative purpose only.
                         contentDescription = null,
                     )
@@ -212,9 +230,8 @@ fun Entry(
         border = null,
         colors = SuggestionChipDefaults.suggestionChipColors(
             containerColor = LocalAndroidColorScheme.current.colorSurfaceContainerHigh,
-            // TODO: remove?
-            labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            iconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            labelColor = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+            iconContentColor = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
         ),
     )
 }
@@ -238,7 +255,7 @@ fun ActionEntry(
             Column(modifier = Modifier.wrapContentSize()
                 .padding(start = 16.dp, top = 16.dp, bottom = 16.dp)) {
                 SmallTitleText(entryHeadlineText)
-                if (entrySecondLineText != null) {
+                if (entrySecondLineText != null && entrySecondLineText.isNotEmpty()) {
                     BodySmallText(entrySecondLineText)
                 }
             }
@@ -277,7 +294,7 @@ fun PasskeyBenefitRow(
         Icon(
             modifier = Modifier.size(24.dp),
             painter = leadingIconPainter,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
             // Decorative purpose only.
             contentDescription = null,
         )
@@ -315,6 +332,7 @@ fun CtaButtonRow(
 fun MoreOptionTopAppBar(
     text: String,
     onNavigationIconClicked: () -> Unit,
+    bottomPadding: Dp,
 ) {
     TopAppBar(
         title = {
@@ -334,13 +352,20 @@ fun MoreOptionTopAppBar(
                         contentDescription = stringResource(
                             R.string.accessibility_back_arrow_button
                         ),
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp).autoMirrored(),
+                        tint = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
                     )
                 }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-        modifier = Modifier.padding(top = 12.dp, bottom = 8.dp)
+        modifier = Modifier.padding(top = 12.dp, bottom = bottomPadding)
     )
+}
+
+private fun Modifier.autoMirrored() = composed {
+    when (LocalLayoutDirection.current) {
+        LayoutDirection.Rtl -> graphicsLayer(scaleX = -1f)
+        else -> this
+    }
 }

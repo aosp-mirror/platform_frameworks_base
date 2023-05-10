@@ -20,9 +20,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.ApplicationInfoFlags
 import android.content.pm.ResolveInfo
 import com.android.internal.R
+import com.android.settingslib.spaprivileged.framework.common.userManager
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -33,7 +36,11 @@ import kotlinx.coroutines.runBlocking
  */
 internal interface AppListRepository {
     /** Loads the list of [ApplicationInfo]. */
-    suspend fun loadApps(userId: Int, showInstantApps: Boolean): List<ApplicationInfo>
+    suspend fun loadApps(
+        userId: Int,
+        showInstantApps: Boolean = false,
+        matchAnyUserForAdmin: Boolean = false,
+    ): List<ApplicationInfo>
 
     /** Gets the flow of predicate that could used to filter system app. */
     fun showSystemPredicate(
@@ -42,7 +49,7 @@ internal interface AppListRepository {
     ): Flow<(app: ApplicationInfo) -> Boolean>
 
     /** Gets the system app package names. */
-    fun getSystemPackageNamesBlocking(userId: Int, showInstantApps: Boolean): Set<String>
+    fun getSystemPackageNamesBlocking(userId: Int): Set<String>
 }
 
 /**
@@ -51,20 +58,18 @@ internal interface AppListRepository {
 object AppListRepositoryUtil {
     /** Gets the system app package names. */
     @JvmStatic
-    fun getSystemPackageNames(
-        context: Context,
-        userId: Int,
-        showInstantApps: Boolean,
-    ): Set<String> =
-        AppListRepositoryImpl(context).getSystemPackageNamesBlocking(userId, showInstantApps)
+    fun getSystemPackageNames(context: Context, userId: Int): Set<String> =
+        AppListRepositoryImpl(context).getSystemPackageNamesBlocking(userId)
 }
 
 internal class AppListRepositoryImpl(private val context: Context) : AppListRepository {
     private val packageManager = context.packageManager
+    private val userManager = context.userManager
 
     override suspend fun loadApps(
         userId: Int,
         showInstantApps: Boolean,
+        matchAnyUserForAdmin: Boolean,
     ): List<ApplicationInfo> = coroutineScope {
         val hiddenSystemModulesDeferred = async {
             packageManager.getInstalledModules(0)
@@ -75,17 +80,53 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
         val hideWhenDisabledPackagesDeferred = async {
             context.resources.getStringArray(R.array.config_hideWhenDisabled_packageNames)
         }
-        val flags = PackageManager.ApplicationInfoFlags.of(
-            (PackageManager.MATCH_DISABLED_COMPONENTS or
-                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
-        )
         val installedApplicationsAsUser =
-            packageManager.getInstalledApplicationsAsUser(flags, userId)
+            getInstalledApplications(userId, matchAnyUserForAdmin)
 
         val hiddenSystemModules = hiddenSystemModulesDeferred.await()
         val hideWhenDisabledPackages = hideWhenDisabledPackagesDeferred.await()
         installedApplicationsAsUser.filter { app ->
             app.isInAppList(showInstantApps, hiddenSystemModules, hideWhenDisabledPackages)
+        }
+    }
+
+    private suspend fun getInstalledApplications(
+        userId: Int,
+        matchAnyUserForAdmin: Boolean,
+    ): List<ApplicationInfo> {
+        val regularFlags = ApplicationInfoFlags.of(
+            (PackageManager.MATCH_DISABLED_COMPONENTS or
+                PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS).toLong()
+        )
+        return if (!matchAnyUserForAdmin || !userManager.getUserInfo(userId).isAdmin) {
+            packageManager.getInstalledApplicationsAsUser(regularFlags, userId)
+        } else {
+            coroutineScope {
+                val deferredPackageNamesInChildProfiles =
+                    userManager.getProfileIdsWithDisabled(userId)
+                        .filter { it != userId }
+                        .map {
+                            async {
+                                packageManager.getInstalledApplicationsAsUser(regularFlags, it)
+                                    .map { it.packageName }
+                            }
+                        }
+                val adminFlags = ApplicationInfoFlags.of(
+                    PackageManager.MATCH_ANY_USER.toLong() or regularFlags.value
+                )
+                val allInstalledApplications =
+                    packageManager.getInstalledApplicationsAsUser(adminFlags, userId)
+                val packageNamesInChildProfiles = deferredPackageNamesInChildProfiles
+                    .awaitAll()
+                    .flatten()
+                    .toSet()
+                // If an app is for a child profile and not installed on the owner, not display as
+                // 'not installed for this user' in the owner. This will prevent duplicates of work
+                // only apps showing up in the personal profile.
+                allInstalledApplications.filter {
+                    it.installed || it.packageName !in packageNamesInChildProfiles
+                }
+            }
         }
     }
 
@@ -95,12 +136,12 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
     ): Flow<(app: ApplicationInfo) -> Boolean> =
         userIdFlow.combine(showSystemFlow, ::showSystemPredicate)
 
-    override fun getSystemPackageNamesBlocking(userId: Int, showInstantApps: Boolean) =
-        runBlocking { getSystemPackageNames(userId, showInstantApps) }
+    override fun getSystemPackageNamesBlocking(userId: Int) =
+        runBlocking { getSystemPackageNames(userId) }
 
-    private suspend fun getSystemPackageNames(userId: Int, showInstantApps: Boolean): Set<String> =
+    private suspend fun getSystemPackageNames(userId: Int): Set<String> =
         coroutineScope {
-            val loadAppsDeferred = async { loadApps(userId, showInstantApps) }
+            val loadAppsDeferred = async { loadApps(userId) }
             val homeOrLauncherPackages = loadHomeOrLauncherPackages(userId)
             val showSystemPredicate =
                 { app: ApplicationInfo -> isSystemApp(app, homeOrLauncherPackages) }
@@ -139,10 +180,8 @@ internal class AppListRepositoryImpl(private val context: Context) : AppListRepo
         }
     }
 
-    private fun isSystemApp(app: ApplicationInfo, homeOrLauncherPackages: Set<String>): Boolean {
-        return !app.isUpdatedSystemApp && app.isSystemApp &&
-            !(app.packageName in homeOrLauncherPackages)
-    }
+    private fun isSystemApp(app: ApplicationInfo, homeOrLauncherPackages: Set<String>): Boolean =
+        app.isSystemApp && !app.isUpdatedSystemApp && app.packageName !in homeOrLauncherPackages
 
     companion object {
         private fun ApplicationInfo.isInAppList(

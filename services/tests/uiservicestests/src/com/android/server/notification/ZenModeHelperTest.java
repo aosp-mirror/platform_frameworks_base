@@ -55,22 +55,19 @@ import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.notNull;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AutomaticZenRule;
@@ -78,7 +75,6 @@ import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -90,7 +86,6 @@ import android.media.AudioManagerInternal;
 import android.media.AudioSystem;
 import android.media.VolumePolicy;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -98,6 +93,7 @@ import android.provider.Settings.Global;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenModeConfig.ScheduleInfo;
+import android.service.notification.ZenModeDiff;
 import android.service.notification.ZenPolicy;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -152,8 +148,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Mock PackageManager mPackageManager;
     private Resources mResources;
     private TestableLooper mTestableLooper;
-    private ZenModeHelper mZenModeHelperSpy;
-    private Context mContext;
+    private ZenModeHelper mZenModeHelper;
     private ContentResolver mContentResolver;
     @Mock AppOpsManager mAppOps;
     private WrappedSysUiStatsEvent.WrappedBuilderFactory mStatsEventBuilderFactory;
@@ -163,9 +158,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         MockitoAnnotations.initMocks(this);
 
         mTestableLooper = TestableLooper.get(this);
-        mContext = spy(getContext());
         mContentResolver = mContext.getContentResolver();
         mResources = spy(mContext.getResources());
+        String pkg = mContext.getPackageName();
         try {
             when(mResources.getXml(R.xml.default_zen_mode_config)).thenReturn(
                     getDefaultConfigParser());
@@ -180,8 +175,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mConditionProviders = new ConditionProviders(mContext, new UserProfiles(),
                 AppGlobals.getPackageManager());
         mConditionProviders.addSystemProvider(new CountdownConditionProvider());
-        mZenModeHelperSpy = spy(new ZenModeHelper(mContext, mTestableLooper.getLooper(),
-                mConditionProviders, mStatsEventBuilderFactory));
+        mConditionProviders.addSystemProvider(new ScheduleConditionProvider());
+        mZenModeHelper = new ZenModeHelper(mContext, mTestableLooper.getLooper(),
+                mConditionProviders, mStatsEventBuilderFactory);
 
         ResolveInfo ri = new ResolveInfo();
         ri.activityInfo = new ActivityInfo();
@@ -190,8 +186,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         when(mPackageManager.getPackageUidAsUser(eq(CUSTOM_PKG_NAME), anyInt()))
                 .thenReturn(CUSTOM_PKG_UID);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(
-                new String[] {getContext().getPackageName()});
-        mZenModeHelperSpy.mPm = mPackageManager;
+                new String[] {pkg});
+        mZenModeHelper.mPm = mPackageManager;
     }
 
     private XmlResourceParser getDefaultConfigParser() throws IOException, XmlPullParserException {
@@ -225,10 +221,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
-        mZenModeHelperSpy.writeXml(serializer, false, version, UserHandle.USER_ALL);
+        mZenModeHelper.writeXml(serializer, false, version, UserHandle.USER_ALL);
         serializer.endDocument();
         serializer.flush();
-        mZenModeHelperSpy.setConfig(new ZenModeConfig(), null, "writing xml");
+        mZenModeHelper.setConfig(new ZenModeConfig(), null, "writing xml");
         return baos;
     }
 
@@ -238,12 +234,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         serializer.setOutput(new BufferedOutputStream(baos), "utf-8");
         serializer.startDocument(null, true);
-        mZenModeHelperSpy.writeXml(serializer, true, version, userId);
+        mZenModeHelper.writeXml(serializer, true, version, userId);
         serializer.endDocument();
         serializer.flush();
         ZenModeConfig newConfig = new ZenModeConfig();
         newConfig.user = userId;
-        mZenModeHelperSpy.setConfig(newConfig, null, "writing xml");
+        mZenModeHelper.setConfig(newConfig, null, "writing xml");
         return baos;
     }
 
@@ -281,209 +277,209 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         return customRule;
     }
 
+    // Verify that the appropriate appOpps operations are called for the restrictions requested.
+    // Note that this method assumes that priority only DND exempt packages is set to something
+    // in order to be able to distinguish it from the null case, so callers should make sure
+    // setPriorityOnlyDndExemptPackages has been called bofre this verify statement.
+    private void verifyApplyRestrictions(boolean zenPriorityOnly, boolean mute, int usage) {
+        int expectedMode = mute ? AppOpsManager.MODE_IGNORED : AppOpsManager.MODE_ALLOWED;
+        verify(mAppOps, atLeastOnce()).setRestriction(eq(AppOpsManager.OP_VIBRATE), eq(usage),
+                eq(expectedMode), zenPriorityOnly ? notNull() : eq(null));
+        verify(mAppOps, atLeastOnce()).setRestriction(eq(AppOpsManager.OP_PLAY_AUDIO), eq(usage),
+                eq(expectedMode), zenPriorityOnly ? notNull() : eq(null));
+    }
+
     @Test
     public void testZenOff_NoMuteApplied() {
-        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_OFF;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
-                PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.mZenMode = Settings.Global.ZEN_MODE_OFF;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS
+                | PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
 
-        doNothing().when(mZenModeHelperSpy).applyRestrictions(eq(false), anyBoolean(), anyInt());
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
-                AudioAttributes.USAGE_ALARM);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
-                AudioAttributes.USAGE_MEDIA);
+        // Check that we call through to applyRestrictions with usages USAGE_ALARM and USAGE_MEDIA
+        verifyApplyRestrictions(false, false, AudioAttributes.USAGE_ALARM);
+        verifyApplyRestrictions(false, false, AudioAttributes.USAGE_MEDIA);
     }
 
     @Test
     public void testZenOn_NotificationApplied() {
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
         // The most permissive policy
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
-                PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
+        mZenModeHelper.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS
+                | PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
                 | PRIORITY_CATEGORY_CONVERSATIONS | PRIORITY_CATEGORY_CALLS
                 | PRIORITY_CATEGORY_ALARMS | PRIORITY_CATEGORY_EVENTS | PRIORITY_CATEGORY_REMINDERS
                 | PRIORITY_CATEGORY_REPEAT_CALLERS | PRIORITY_CATEGORY_SYSTEM, PRIORITY_SENDERS_ANY,
                 PRIORITY_SENDERS_ANY, 0, CONVERSATION_SENDERS_ANYONE);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.applyRestrictions();
 
-        doNothing().when(mZenModeHelperSpy).applyRestrictions(anyBoolean(), anyBoolean(), anyInt());
-        verify(mZenModeHelperSpy).applyRestrictions(true, true,
-                AudioAttributes.USAGE_NOTIFICATION);
-        verify(mZenModeHelperSpy).applyRestrictions(true, true,
-                AudioAttributes.USAGE_NOTIFICATION_EVENT);
-        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+        verifyApplyRestrictions(true, true, AudioAttributes.USAGE_NOTIFICATION);
+        verifyApplyRestrictions(true, true, AudioAttributes.USAGE_NOTIFICATION_EVENT);
+        verifyApplyRestrictions(true, true,
                 AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_DELAYED);
-        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+        verifyApplyRestrictions(true, true,
                 AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_INSTANT);
     }
 
     @Test
     public void testZenOn_StarredCallers_CallTypesBlocked() {
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
         // The most permissive policy
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
-                PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
+        mZenModeHelper.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS
+                | PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
                 | PRIORITY_CATEGORY_CONVERSATIONS | PRIORITY_CATEGORY_CALLS
                 | PRIORITY_CATEGORY_ALARMS | PRIORITY_CATEGORY_EVENTS | PRIORITY_CATEGORY_REMINDERS
                 | PRIORITY_CATEGORY_SYSTEM,
                 PRIORITY_SENDERS_STARRED,
                 PRIORITY_SENDERS_ANY, 0, CONVERSATION_SENDERS_ANYONE);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.applyRestrictions();
 
-        doNothing().when(mZenModeHelperSpy).applyRestrictions(anyBoolean(), anyBoolean(), anyInt());
-        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+        verifyApplyRestrictions(true, true,
                 AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
-        verify(mZenModeHelperSpy).applyRestrictions(true, true,
+        verifyApplyRestrictions(true, true,
                 AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST);
     }
 
     @Test
     public void testZenOn_AllCallers_CallTypesAllowed() {
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
         // The most permissive policy
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
-                PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
+        mZenModeHelper.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS
+                | PRIORITY_CATEGORY_MEDIA | PRIORITY_CATEGORY_MESSAGES
                 | PRIORITY_CATEGORY_CONVERSATIONS | PRIORITY_CATEGORY_CALLS
                 | PRIORITY_CATEGORY_ALARMS | PRIORITY_CATEGORY_EVENTS | PRIORITY_CATEGORY_REMINDERS
                 | PRIORITY_CATEGORY_REPEAT_CALLERS | PRIORITY_CATEGORY_SYSTEM,
                 PRIORITY_SENDERS_ANY,
                 PRIORITY_SENDERS_ANY, 0, CONVERSATION_SENDERS_ANYONE);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.applyRestrictions();
 
-        doNothing().when(mZenModeHelperSpy).applyRestrictions(anyBoolean(), anyBoolean(), anyInt());
-        verify(mZenModeHelperSpy).applyRestrictions(true, false,
-                AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
-        verify(mZenModeHelperSpy).applyRestrictions(true, false,
+        verifyApplyRestrictions(true, false, AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
+        verifyApplyRestrictions(true, false,
                 AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST);
     }
 
     @Test
     public void testZenOn_AllowAlarmsMedia_NoAlarmMediaMuteApplied() {
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
-                PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS
+                | PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
 
-        mZenModeHelperSpy.applyRestrictions();
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, false,
-                AudioAttributes.USAGE_ALARM);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, false,
-                AudioAttributes.USAGE_MEDIA);
+        mZenModeHelper.applyRestrictions();
+        verifyApplyRestrictions(true, false, AudioAttributes.USAGE_ALARM);
+        verifyApplyRestrictions(true, false, AudioAttributes.USAGE_MEDIA);
     }
 
     @Test
     public void testZenOn_DisallowAlarmsMedia_AlarmMediaMuteApplied() {
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, true,
-                AudioAttributes.USAGE_ALARM);
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
+        verifyApplyRestrictions(true, true, AudioAttributes.USAGE_ALARM);
 
         // Media is a catch-all that includes games
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, true,
-                AudioAttributes.USAGE_MEDIA);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, true,
-                AudioAttributes.USAGE_GAME);
+        verifyApplyRestrictions(true, true, AudioAttributes.USAGE_MEDIA);
+        verifyApplyRestrictions(true, true, AudioAttributes.USAGE_GAME);
     }
 
     @Test
     public void testTotalSilence() {
-        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
-                PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.mZenMode = Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS
+                | PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
 
         // Total silence will silence alarms, media and system noises (but not vibrations)
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
-                AudioAttributes.USAGE_ALARM);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
-                AudioAttributes.USAGE_MEDIA);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
-                AudioAttributes.USAGE_GAME);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
-                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_PLAY_AUDIO);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
-                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_VIBRATE);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
-                AudioAttributes.USAGE_UNKNOWN);
+        verifyApplyRestrictions(false, true, AudioAttributes.USAGE_ALARM);
+        verifyApplyRestrictions(false, true, AudioAttributes.USAGE_MEDIA);
+        verifyApplyRestrictions(false, true, AudioAttributes.USAGE_GAME);
+        verify(mAppOps, atLeastOnce()).setRestriction(AppOpsManager.OP_PLAY_AUDIO,
+                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.MODE_IGNORED, null);
+        verify(mAppOps, atLeastOnce()).setRestriction(AppOpsManager.OP_VIBRATE,
+                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.MODE_ALLOWED, null);
+        verifyApplyRestrictions(false, true, AudioAttributes.USAGE_UNKNOWN);
     }
 
     @Test
     public void testAlarmsOnly_alarmMediaMuteNotApplied() {
-        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
 
         // Alarms only mode will not silence alarms
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
-                AudioAttributes.USAGE_ALARM);
+        verifyApplyRestrictions(false, false, AudioAttributes.USAGE_ALARM);
 
         // Alarms only mode will not silence media
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
-                AudioAttributes.USAGE_MEDIA);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
-                AudioAttributes.USAGE_GAME);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
-                AudioAttributes.USAGE_UNKNOWN);
+        verifyApplyRestrictions(false, false, AudioAttributes.USAGE_MEDIA);
+        verifyApplyRestrictions(false, false, AudioAttributes.USAGE_GAME);
+        verifyApplyRestrictions(false, false, AudioAttributes.USAGE_UNKNOWN);
 
         // Alarms only will silence system noises (but not vibrations)
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
-                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.OP_PLAY_AUDIO);
+        verify(mAppOps, atLeastOnce()).setRestriction(AppOpsManager.OP_PLAY_AUDIO,
+                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION, AppOpsManager.MODE_IGNORED, null);
     }
 
     @Test
     public void testAlarmsOnly_callsMuteApplied() {
-        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
 
         // Alarms only mode will silence calls despite priority-mode config
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
-                AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, true,
+        verifyApplyRestrictions(false, true, AudioAttributes.USAGE_NOTIFICATION_RINGTONE);
+        verifyApplyRestrictions(false, true,
                 AudioAttributes.USAGE_NOTIFICATION_COMMUNICATION_REQUEST);
     }
 
     @Test
     public void testAlarmsOnly_allZenConfigToggledCannotBypass_alarmMuteNotApplied() {
         // Only audio attributes with SUPPRESIBLE_NEVER can bypass
-        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
 
-        verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false, false,
-                AudioAttributes.USAGE_ALARM);
+        verifyApplyRestrictions(false, false, AudioAttributes.USAGE_ALARM);
     }
 
     @Test
     public void testZenAllCannotBypass() {
         // Only audio attributes with SUPPRESIBLE_NEVER can bypass
         // with special case USAGE_ASSISTANCE_SONIFICATION
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
 
         for (int usage : AudioAttributes.SDK_USAGES) {
             if (usage == AudioAttributes.USAGE_ASSISTANCE_SONIFICATION) {
                 // only mute audio, not vibrations
-                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, true, usage,
-                        AppOpsManager.OP_PLAY_AUDIO);
-                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, false, usage,
-                        AppOpsManager.OP_VIBRATE);
+                verify(mAppOps, atLeastOnce()).setRestriction(eq(AppOpsManager.OP_PLAY_AUDIO),
+                        eq(usage), eq(AppOpsManager.MODE_IGNORED), notNull());
+                verify(mAppOps, atLeastOnce()).setRestriction(eq(AppOpsManager.OP_VIBRATE),
+                        eq(usage), eq(AppOpsManager.MODE_ALLOWED), notNull());
             } else {
                 boolean shouldMute = AudioAttributes.SUPPRESSIBLE_USAGES.get(usage)
                         != AudioAttributes.SUPPRESSIBLE_NEVER;
-                verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true, shouldMute, usage);
+                verifyApplyRestrictions(true, shouldMute, usage);
             }
         }
     }
 
     @Test
     public void testApplyRestrictions_whitelist_priorityOnlyMode() {
-        mZenModeHelperSpy.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
 
         for (int usage : AudioAttributes.SDK_USAGES) {
             verify(mAppOps).setRestriction(
@@ -495,10 +491,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Test
     public void testApplyRestrictions_whitelist_alarmsOnlyMode() {
-        mZenModeHelperSpy.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
-        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_ALARMS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_ALARMS;
+        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
 
         for (int usage : AudioAttributes.SDK_USAGES) {
             verify(mAppOps).setRestriction(
@@ -510,10 +506,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Test
     public void testApplyRestrictions_whitelist_totalSilenceMode() {
-        mZenModeHelperSpy.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
-        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_NO_INTERRUPTIONS;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.applyRestrictions();
+        mZenModeHelper.setPriorityOnlyDndExemptPackages(new String[] {PKG_O});
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_NO_INTERRUPTIONS;
+        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
+        mZenModeHelper.applyRestrictions();
 
         for (int usage : AudioAttributes.SDK_USAGES) {
             verify(mAppOps).setRestriction(
@@ -537,11 +533,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // and we're setting zen mode on
         Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 0);
-        mZenModeHelperSpy.mIsBootComplete = true;
-        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
-        mZenModeHelperSpy.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        mZenModeHelper.mIsBootComplete = true;
+        mZenModeHelper.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0, 0);
+        mZenModeHelper.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
-        verify(mZenModeHelperSpy, times(1)).createZenUpgradeNotification();
         verify(mNotificationManager, times(1)).notify(eq(ZenModeHelper.TAG),
                 eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
         assertEquals(0, Settings.Secure.getInt(mContentResolver,
@@ -553,10 +548,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // doesn't show upgrade notification if stored settings says don't show
         Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 0);
-        mZenModeHelperSpy.mIsBootComplete = true;
-        mZenModeHelperSpy.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        mZenModeHelper.mIsBootComplete = true;
+        mZenModeHelper.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
-        verify(mZenModeHelperSpy, never()).createZenUpgradeNotification();
         verify(mNotificationManager, never()).notify(eq(ZenModeHelper.TAG),
                 eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
     }
@@ -566,10 +560,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // doesn't show upgrade notification since zen was already updated
         Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 0);
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 1);
-        mZenModeHelperSpy.mIsBootComplete = true;
-        mZenModeHelperSpy.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
+        mZenModeHelper.mIsBootComplete = true;
+        mZenModeHelper.setZenModeSetting(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
-        verify(mZenModeHelperSpy, never()).createZenUpgradeNotification();
         verify(mNotificationManager, never()).notify(eq(ZenModeHelper.TAG),
                 eq(SystemMessage.NOTE_ZEN_UPGRADE), any());
     }
@@ -577,41 +570,41 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testZenSetInternalRinger_AllPriorityNotificationSoundsMuted() {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
-        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        mZenModeHelper.mAudioManager = mAudioManager;
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
                 Integer.toString(AudioManager.RINGER_MODE_NORMAL));
 
         // 1. Current ringer is normal
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         // Set zen to priority-only with all notification sounds muted (so ringer will be muted)
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.allowReminders = false;
-        mZenModeHelperSpy.mConfig.allowCalls = false;
-        mZenModeHelperSpy.mConfig.allowMessages = false;
-        mZenModeHelperSpy.mConfig.allowEvents = false;
-        mZenModeHelperSpy.mConfig.allowRepeatCallers = false;
-        mZenModeHelperSpy.mConfig.allowConversations = false;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mConfig.allowReminders = false;
+        mZenModeHelper.mConfig.allowCalls = false;
+        mZenModeHelper.mConfig.allowMessages = false;
+        mZenModeHelper.mConfig.allowEvents = false;
+        mZenModeHelper.mConfig.allowRepeatCallers = false;
+        mZenModeHelper.mConfig.allowConversations = false;
 
         // 2. apply priority only zen - verify ringer is unchanged
-        mZenModeHelperSpy.applyZenToRingerMode();
+        mZenModeHelper.applyZenToRingerMode();
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
 
         // 3. apply zen off - verify zen is set to previous ringer (normal)
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
-        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
-        mZenModeHelperSpy.applyZenToRingerMode();
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelper.applyZenToRingerMode();
         verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
     }
 
     @Test
     public void testRingerAffectedStreamsTotalSilence() {
         // in total silence:
         // ringtone, notification, system, alarm, streams, music are affected by ringer mode
-        mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
+        mZenModeHelper.mZenMode = Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
         ZenModeHelper.RingerModeDelegate ringerModeDelegate =
-                mZenModeHelperSpy.new RingerModeDelegate();
+                mZenModeHelper.new RingerModeDelegate();
         int ringerModeAffectedStreams = ringerModeDelegate.getRingerModeAffectedStreams(0);
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_RING)) != 0);
         assertTrue((ringerModeAffectedStreams & (1 << AudioSystem.STREAM_NOTIFICATION))
@@ -626,11 +619,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testRingerAffectedStreamsPriorityOnly() {
         // in priority only mode:
         // ringtone, notification and system streams are affected by ringer mode
-        mZenModeHelperSpy.mConfig.allowAlarms = true;
-        mZenModeHelperSpy.mConfig.allowReminders = true;
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mConfig.allowAlarms = true;
+        mZenModeHelper.mConfig.allowReminders = true;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         ZenModeHelper.RingerModeDelegate ringerModeDelegateRingerMuted =
-                mZenModeHelperSpy.new RingerModeDelegate();
+                mZenModeHelper.new RingerModeDelegate();
 
         int ringerModeAffectedStreams =
                 ringerModeDelegateRingerMuted.getRingerModeAffectedStreams(0);
@@ -644,15 +637,15 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // even when ringer is muted (since all ringer sounds cannot bypass DND),
         // system stream is still affected by ringer mode
-        mZenModeHelperSpy.mConfig.allowSystem = false;
-        mZenModeHelperSpy.mConfig.allowReminders = false;
-        mZenModeHelperSpy.mConfig.allowCalls = false;
-        mZenModeHelperSpy.mConfig.allowMessages = false;
-        mZenModeHelperSpy.mConfig.allowEvents = false;
-        mZenModeHelperSpy.mConfig.allowRepeatCallers = false;
-        mZenModeHelperSpy.mConfig.allowConversations = false;
+        mZenModeHelper.mConfig.allowSystem = false;
+        mZenModeHelper.mConfig.allowReminders = false;
+        mZenModeHelper.mConfig.allowCalls = false;
+        mZenModeHelper.mConfig.allowMessages = false;
+        mZenModeHelper.mConfig.allowEvents = false;
+        mZenModeHelper.mConfig.allowRepeatCallers = false;
+        mZenModeHelper.mConfig.allowConversations = false;
         ZenModeHelper.RingerModeDelegate ringerModeDelegateRingerNotMuted =
-                mZenModeHelperSpy.new RingerModeDelegate();
+                mZenModeHelper.new RingerModeDelegate();
 
         int ringerMutedRingerModeAffectedStreams =
                 ringerModeDelegateRingerNotMuted.getRingerModeAffectedStreams(0);
@@ -669,74 +662,74 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testZenSetInternalRinger_NotAllPriorityNotificationSoundsMuted_StartNormal() {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
-        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        mZenModeHelper.mAudioManager = mAudioManager;
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
                 Integer.toString(AudioManager.RINGER_MODE_NORMAL));
 
         // 1. Current ringer is normal
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.allowReminders = true;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mConfig.allowReminders = true;
 
         // 2. apply priority only zen - verify ringer is normal
-        mZenModeHelperSpy.applyZenToRingerMode();
+        mZenModeHelper.applyZenToRingerMode();
         verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
 
         // 3.  apply zen off - verify ringer remains normal
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
-        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
-        mZenModeHelperSpy.applyZenToRingerMode();
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelper.applyZenToRingerMode();
         verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
     }
 
     @Test
     public void testZenSetInternalRinger_NotAllPriorityNotificationSoundsMuted_StartSilent() {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
-        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        mZenModeHelper.mAudioManager = mAudioManager;
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
                 Integer.toString(AudioManager.RINGER_MODE_SILENT));
 
         // 1. Current ringer is silent
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.allowReminders = true;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mConfig.allowReminders = true;
 
         // 2. apply priority only zen - verify ringer is silent
-        mZenModeHelperSpy.applyZenToRingerMode();
+        mZenModeHelper.applyZenToRingerMode();
         verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
 
         // 3. apply zen-off - verify ringer is still silent
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
-        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
-        mZenModeHelperSpy.applyZenToRingerMode();
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelper.applyZenToRingerMode();
         verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
     }
 
     @Test
     public void testZenSetInternalRinger_NotAllPriorityNotificationSoundsMuted_RingerChanges() {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
-        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        mZenModeHelper.mAudioManager = mAudioManager;
         Global.putString(mContext.getContentResolver(), Global.ZEN_MODE_RINGER_LEVEL,
                 Integer.toString(AudioManager.RINGER_MODE_NORMAL));
 
         // 1. Current ringer is normal
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         // Set zen to priority-only with all notification sounds muted (so ringer will be muted)
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.allowReminders = true;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mConfig.allowReminders = true;
 
         // 2. apply priority only zen - verify zen will still be normal
-        mZenModeHelperSpy.applyZenToRingerMode();
+        mZenModeHelper.applyZenToRingerMode();
         verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
 
         // 3. change ringer from normal to silent, verify previous ringer set to new ringer (silent)
         ZenModeHelper.RingerModeDelegate ringerModeDelegate =
-                mZenModeHelperSpy.new RingerModeDelegate();
+                mZenModeHelper.new RingerModeDelegate();
         ringerModeDelegate.onSetRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 AudioManager.RINGER_MODE_SILENT, "test", AudioManager.RINGER_MODE_NORMAL,
                 VolumePolicy.DEFAULT);
@@ -745,41 +738,40 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // 4.  apply zen off - verify ringer still silenced
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
-        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
-        mZenModeHelperSpy.applyZenToRingerMode();
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelper.applyZenToRingerMode();
         verify(mAudioManager, atLeastOnce()).setRingerModeInternal(AudioManager.RINGER_MODE_SILENT,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
     }
 
     @Test
     public void testSilentRingerSavedInZenOff_startsZenOff() {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
-        mZenModeHelperSpy.mConfig = new ZenModeConfig();
-        mZenModeHelperSpy.mAudioManager = mAudioManager;
+        mZenModeHelper.mConfig = new ZenModeConfig();
+        mZenModeHelper.mAudioManager = mAudioManager;
 
         // apply zen off multiple times - verify ringer is not set to normal
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
-        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
-        mZenModeHelperSpy.mConfig = null; // will evaluate config to zen mode off
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelper.mConfig = null; // will evaluate config to zen mode off
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
-            mZenModeHelperSpy.evaluateZenMode("test", true);
+            mZenModeHelper.evaluateZenMode("test", true);
         }
-        verify(mZenModeHelperSpy, never()).applyZenToRingerMode();
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
     }
 
     @Test
     public void testSilentRingerSavedOnZenOff_startsZenOn() {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
-        mZenModeHelperSpy.mAudioManager = mAudioManager;
-        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
-        mZenModeHelperSpy.mConfig = new ZenModeConfig();
+        mZenModeHelper.mAudioManager = mAudioManager;
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelper.mConfig = new ZenModeConfig();
 
         // previously set silent ringer
         ZenModeHelper.RingerModeDelegate ringerModeDelegate =
-                mZenModeHelperSpy.new RingerModeDelegate();
+                mZenModeHelper.new RingerModeDelegate();
         ringerModeDelegate.onSetRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 AudioManager.RINGER_MODE_SILENT, "test", AudioManager.RINGER_MODE_NORMAL,
                 VolumePolicy.DEFAULT);
@@ -788,26 +780,25 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // apply zen off multiple times - verify ringer is not set to normal
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
-            mZenModeHelperSpy.evaluateZenMode("test", true);
+            mZenModeHelper.evaluateZenMode("test", true);
         }
-        verify(mZenModeHelperSpy, times(1)).applyZenToRingerMode();
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
     }
 
     @Test
     public void testVibrateRingerSavedOnZenOff_startsZenOn() {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
-        mZenModeHelperSpy.mAudioManager = mAudioManager;
-        mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
-        mZenModeHelperSpy.mConfig = new ZenModeConfig();
+        mZenModeHelper.mAudioManager = mAudioManager;
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelper.mConfig = new ZenModeConfig();
 
         // previously set silent ringer
         ZenModeHelper.RingerModeDelegate ringerModeDelegate =
-                mZenModeHelperSpy.new RingerModeDelegate();
+                mZenModeHelper.new RingerModeDelegate();
         ringerModeDelegate.onSetRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
                 AudioManager.RINGER_MODE_VIBRATE, "test", AudioManager.RINGER_MODE_NORMAL,
                 VolumePolicy.DEFAULT);
@@ -816,86 +807,115 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // apply zen off multiple times - verify ringer is not set to normal
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
-            mZenModeHelperSpy.evaluateZenMode("test", true);
+            mZenModeHelper.evaluateZenMode("test", true);
         }
-        verify(mZenModeHelperSpy, times(1)).applyZenToRingerMode();
         verify(mAudioManager, never()).setRingerModeInternal(AudioManager.RINGER_MODE_NORMAL,
-                mZenModeHelperSpy.TAG);
+                mZenModeHelper.TAG);
+    }
+
+    @Test
+    public void testSetConfig_updatesAudioEventually() {
+        AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelper.mAudioManager = mAudioManager;
+        setupZenConfig();
+
+        // Change the config a little bit, but enough that it would turn zen mode on
+        ZenModeConfig newConfig = mZenModeHelper.mConfig.copy();
+        newConfig.manualRule = new ZenModeConfig.ZenRule();
+        newConfig.manualRule.zenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        newConfig.manualRule.enabled = true;
+        mZenModeHelper.setConfig(newConfig, null, "test");
+
+        // audio manager shouldn't do anything until the handler processes its messagse
+        verify(mAudioManager, never()).updateRingerModeAffectedStreamsInternal();
+
+        // now process the looper's messages
+        mTestableLooper.processAllMessages();
+
+        // Expect calls to audio manager
+        verify(mAudioManager, times(1)).updateRingerModeAffectedStreamsInternal();
+
+        // called during applyZenToRingerMode(), which should be true since zen changed
+        verify(mAudioManager, atLeastOnce()).getRingerModeInternal();
     }
 
     @Test
     public void testParcelConfig() {
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.allowAlarms = false;
-        mZenModeHelperSpy.mConfig.allowMedia = false;
-        mZenModeHelperSpy.mConfig.allowSystem = false;
-        mZenModeHelperSpy.mConfig.allowReminders = true;
-        mZenModeHelperSpy.mConfig.allowCalls = true;
-        mZenModeHelperSpy.mConfig.allowMessages = true;
-        mZenModeHelperSpy.mConfig.allowEvents = true;
-        mZenModeHelperSpy.mConfig.allowRepeatCallers = true;
-        mZenModeHelperSpy.mConfig.allowConversations = true;
-        mZenModeHelperSpy.mConfig.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_ANYONE;
-        mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
-        mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
-        mZenModeHelperSpy.mConfig.manualRule.component = new ComponentName("a", "a");
-        mZenModeHelperSpy.mConfig.manualRule.enabled = true;
-        mZenModeHelperSpy.mConfig.manualRule.snoozing = true;
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mConfig.allowAlarms = false;
+        mZenModeHelper.mConfig.allowMedia = false;
+        mZenModeHelper.mConfig.allowSystem = false;
+        mZenModeHelper.mConfig.allowReminders = true;
+        mZenModeHelper.mConfig.allowCalls = true;
+        mZenModeHelper.mConfig.allowMessages = true;
+        mZenModeHelper.mConfig.allowEvents = true;
+        mZenModeHelper.mConfig.allowRepeatCallers = true;
+        mZenModeHelper.mConfig.allowConversations = true;
+        mZenModeHelper.mConfig.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_ANYONE;
+        mZenModeHelper.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
+        mZenModeHelper.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelper.mConfig.manualRule.component = new ComponentName("a", "a");
+        mZenModeHelper.mConfig.manualRule.enabled = true;
+        mZenModeHelper.mConfig.manualRule.snoozing = true;
 
-        ZenModeConfig actual = mZenModeHelperSpy.mConfig.copy();
+        ZenModeConfig actual = mZenModeHelper.mConfig.copy();
 
-        assertEquals(mZenModeHelperSpy.mConfig, actual);
+        assertEquals(mZenModeHelper.mConfig, actual);
     }
 
     @Test
     public void testWriteXml() throws Exception {
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.allowAlarms = false;
-        mZenModeHelperSpy.mConfig.allowMedia = false;
-        mZenModeHelperSpy.mConfig.allowSystem = false;
-        mZenModeHelperSpy.mConfig.allowReminders = true;
-        mZenModeHelperSpy.mConfig.allowCalls = true;
-        mZenModeHelperSpy.mConfig.allowMessages = true;
-        mZenModeHelperSpy.mConfig.allowEvents = true;
-        mZenModeHelperSpy.mConfig.allowRepeatCallers = true;
-        mZenModeHelperSpy.mConfig.allowConversations = true;
-        mZenModeHelperSpy.mConfig.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_ANYONE;
-        mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
-        mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
-        mZenModeHelperSpy.mConfig.manualRule.zenMode =
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        mZenModeHelper.mConfig.allowAlarms = false;
+        mZenModeHelper.mConfig.allowMedia = false;
+        mZenModeHelper.mConfig.allowSystem = false;
+        mZenModeHelper.mConfig.allowReminders = true;
+        mZenModeHelper.mConfig.allowCalls = true;
+        mZenModeHelper.mConfig.allowMessages = true;
+        mZenModeHelper.mConfig.allowEvents = true;
+        mZenModeHelper.mConfig.allowRepeatCallers = true;
+        mZenModeHelper.mConfig.allowConversations = true;
+        mZenModeHelper.mConfig.allowConversationsFrom = ZenPolicy.CONVERSATION_SENDERS_ANYONE;
+        mZenModeHelper.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
+        mZenModeHelper.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelper.mConfig.manualRule.zenMode =
                 ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.manualRule.component = new ComponentName("a", "a");
-        mZenModeHelperSpy.mConfig.manualRule.pkg = "a";
-        mZenModeHelperSpy.mConfig.manualRule.enabled = true;
+        mZenModeHelper.mConfig.manualRule.component = new ComponentName("a", "a");
+        mZenModeHelper.mConfig.manualRule.pkg = "a";
+        mZenModeHelper.mConfig.manualRule.enabled = true;
 
-        ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
+        ZenModeConfig expected = mZenModeHelper.mConfig.copy();
 
         ByteArrayOutputStream baos = writeXmlAndPurge(null);
         TypedXmlPullParser parser = getParserForByteStream(baos);
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals("Config mismatch: current vs expected: "
-                + mZenModeHelperSpy.mConfig.diff(expected), expected, mZenModeHelperSpy.mConfig);
+                + new ZenModeDiff.ConfigDiff(mZenModeHelper.mConfig, expected), expected,
+                mZenModeHelper.mConfig);
     }
 
     @Test
     public void testProto() {
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelper.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        // existence of manual rule means it should be in output
+        mZenModeHelper.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelper.mConfig.manualRule.pkg = "android";  // system
 
-        int n = mZenModeHelperSpy.mConfig.automaticRules.size();
+        int n = mZenModeHelper.mConfig.automaticRules.size();
         List<String> ids = new ArrayList<>(n);
-        for (ZenModeConfig.ZenRule rule : mZenModeHelperSpy.mConfig.automaticRules.values()) {
+        for (ZenModeConfig.ZenRule rule : mZenModeHelper.mConfig.automaticRules.values()) {
             ids.add(rule.id);
         }
-        ids.add("");
+        ids.add(ZenModeConfig.MANUAL_RULE_ID);
+        ids.add(""); // for ROOT_CONFIG, logged with empty string as id
 
         List<StatsEvent> events = new LinkedList<>();
-        mZenModeHelperSpy.pullRules(events);
-        assertEquals(n + 1, events.size());
+        mZenModeHelper.pullRules(events);
+        assertEquals(n + 2, events.size());  // automatic rules + manual rule + root config
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
             if (builder.getAtomId() == DND_MODE_RULE) {
                 if (builder.getInt(ZEN_MODE_FIELD_NUMBER) == ROOT_CONFIG) {
@@ -918,10 +938,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testProtoWithAutoRule() throws Exception {
         setupZenConfig();
         // one enabled automatic rule
-        mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules(ZEN_MODE_FOR_TESTING);
+        mZenModeHelper.mConfig.automaticRules = getCustomAutomaticRules(ZEN_MODE_FOR_TESTING);
 
         List<StatsEvent> events = new LinkedList<>();
-        mZenModeHelperSpy.pullRules(events);
+        mZenModeHelper.pullRules(events);
 
         boolean foundCustomEvent = false;
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
@@ -942,23 +962,23 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void ruleUidsCached() throws Exception {
         setupZenConfig();
         // one enabled automatic rule
-        mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
+        mZenModeHelper.mConfig.automaticRules = getCustomAutomaticRules();
         List<StatsEvent> events = new LinkedList<>();
         // first time retrieving uid:
-        mZenModeHelperSpy.pullRules(events);
+        mZenModeHelper.pullRules(events);
         verify(mPackageManager, atLeastOnce()).getPackageUidAsUser(anyString(), anyInt());
 
         // second time retrieving uid:
         reset(mPackageManager);
-        mZenModeHelperSpy.pullRules(events);
+        mZenModeHelper.pullRules(events);
         verify(mPackageManager, never()).getPackageUidAsUser(anyString(), anyInt());
 
         // new rule from same package + user added
         reset(mPackageManager);
         ZenModeConfig.ZenRule rule = createCustomAutomaticRule(ZEN_MODE_IMPORTANT_INTERRUPTIONS,
                 CUSTOM_RULE_ID + "2");
-        mZenModeHelperSpy.mConfig.automaticRules.put(rule.id, rule);
-        mZenModeHelperSpy.pullRules(events);
+        mZenModeHelper.mConfig.automaticRules.put(rule.id, rule);
+        mZenModeHelper.pullRules(events);
         verify(mPackageManager, never()).getPackageUidAsUser(anyString(), anyInt());
     }
 
@@ -969,23 +989,23 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         setupZenConfig();
         // one enabled automatic rule
-        mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
+        mZenModeHelper.mConfig.automaticRules = getCustomAutomaticRules();
         List<StatsEvent> events = new LinkedList<>();
 
-        mZenModeHelperSpy.pullRules(events);
-        mZenModeHelperSpy.removeAutomaticZenRule(CUSTOM_RULE_ID, "test");
+        mZenModeHelper.pullRules(events);
+        mZenModeHelper.removeAutomaticZenRule(CUSTOM_RULE_ID, "test");
         assertTrue(-1
-                == mZenModeHelperSpy.mRulesUidCache.getOrDefault(CUSTOM_PKG_NAME + "|" + 0, -1));
+                == mZenModeHelper.mRulesUidCache.getOrDefault(CUSTOM_PKG_NAME + "|" + 0, -1));
     }
 
     @Test
     public void testProtoRedactsIds() throws Exception {
         setupZenConfig();
         // one enabled automatic rule
-        mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
+        mZenModeHelper.mConfig.automaticRules = getCustomAutomaticRules();
 
         List<StatsEvent> events = new LinkedList<>();
-        mZenModeHelperSpy.pullRules(events);
+        mZenModeHelper.pullRules(events);
 
         boolean foundCustomEvent = false;
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
@@ -999,13 +1019,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testProtoWithManualRule() throws Exception {
         setupZenConfig();
-        mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
-        mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
-        mZenModeHelperSpy.mConfig.manualRule.enabled = true;
-        mZenModeHelperSpy.mConfig.manualRule.enabler = "com.enabler";
+        mZenModeHelper.mConfig.automaticRules = getCustomAutomaticRules();
+        mZenModeHelper.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelper.mConfig.manualRule.enabled = true;
 
         List<StatsEvent> events = new LinkedList<>();
-        mZenModeHelperSpy.pullRules(events);
+        mZenModeHelper.pullRules(events);
 
         boolean foundManualRule = false;
         for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
@@ -1021,48 +1040,50 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testWriteXml_onlyBackupsTargetUser() throws Exception {
         // Setup configs for user 10 and 11.
         setupZenConfig();
-        ZenModeConfig config10 = mZenModeHelperSpy.mConfig.copy();
+        ZenModeConfig config10 = mZenModeHelper.mConfig.copy();
         config10.user = 10;
         config10.allowAlarms = true;
         config10.allowMedia = true;
-        mZenModeHelperSpy.setConfig(config10, null, "writeXml");
-        ZenModeConfig config11 = mZenModeHelperSpy.mConfig.copy();
+        mZenModeHelper.setConfig(config10, null, "writeXml");
+        ZenModeConfig config11 = mZenModeHelper.mConfig.copy();
         config11.user = 11;
         config11.allowAlarms = false;
         config11.allowMedia = false;
-        mZenModeHelperSpy.setConfig(config11, null, "writeXml");
+        mZenModeHelper.setConfig(config11, null, "writeXml");
 
         // Backup user 10 and reset values.
         ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, 10);
         ZenModeConfig newConfig11 = new ZenModeConfig();
         newConfig11.user = 11;
-        mZenModeHelperSpy.mConfigs.put(11, newConfig11);
+        mZenModeHelper.mConfigs.put(11, newConfig11);
 
         // Parse backup data.
         TypedXmlPullParser parser = getParserForByteStream(baos);
-        mZenModeHelperSpy.readXml(parser, true, 10);
-        mZenModeHelperSpy.readXml(parser, true, 11);
+        mZenModeHelper.readXml(parser, true, 10);
+        mZenModeHelper.readXml(parser, true, 11);
 
-        ZenModeConfig actual = mZenModeHelperSpy.mConfigs.get(10);
+        ZenModeConfig actual = mZenModeHelper.mConfigs.get(10);
         assertEquals(
-                "Config mismatch: current vs expected: " + actual.diff(config10), config10, actual);
-        assertNotEquals("Expected config mismatch", config11, mZenModeHelperSpy.mConfigs.get(11));
+                "Config mismatch: current vs expected: "
+                        + new ZenModeDiff.ConfigDiff(actual, config10), config10, actual);
+        assertNotEquals("Expected config mismatch", config11, mZenModeHelper.mConfigs.get(11));
     }
 
     @Test
     public void testReadXmlRestore_forSystemUser() throws Exception {
         setupZenConfig();
         // one enabled automatic rule
-        mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
-        ZenModeConfig original = mZenModeHelperSpy.mConfig.copy();
+        mZenModeHelper.mConfig.automaticRules = getCustomAutomaticRules();
+        ZenModeConfig original = mZenModeHelper.mConfig.copy();
 
         ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
         TypedXmlPullParser parser = getParserForByteStream(baos);
-        mZenModeHelperSpy.readXml(parser, true, UserHandle.USER_SYSTEM);
+        mZenModeHelper.readXml(parser, true, UserHandle.USER_SYSTEM);
 
         assertEquals("Config mismatch: current vs original: "
-                + mZenModeHelperSpy.mConfig.diff(original), original, mZenModeHelperSpy.mConfig);
-        assertEquals(original.hashCode(), mZenModeHelperSpy.mConfig.hashCode());
+                + new ZenModeDiff.ConfigDiff(mZenModeHelper.mConfig, original),
+                original, mZenModeHelper.mConfig);
+        assertEquals(original.hashCode(), mZenModeHelper.mConfig.hashCode());
     }
 
     /** Restore should ignore the data's user id and restore for the target user. */
@@ -1070,23 +1091,24 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testReadXmlRestore_forNonSystemUser() throws Exception {
         // Setup config.
         setupZenConfig();
-        mZenModeHelperSpy.mConfig.automaticRules = getCustomAutomaticRules();
-        ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
+        mZenModeHelper.mConfig.automaticRules = getCustomAutomaticRules();
+        ZenModeConfig expected = mZenModeHelper.mConfig.copy();
 
         // Backup data for user 0.
         ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
 
         // Restore data for user 10.
         TypedXmlPullParser parser = getParserForByteStream(baos);
-        mZenModeHelperSpy.readXml(parser, true, 10);
+        mZenModeHelper.readXml(parser, true, 10);
 
-        ZenModeConfig actual = mZenModeHelperSpy.mConfigs.get(10);
+        ZenModeConfig actual = mZenModeHelper.mConfigs.get(10);
         expected.user = 10;
-        assertEquals(
-                "Config mismatch: current vs original: " + actual.diff(expected), expected, actual);
+        assertEquals("Config mismatch: current vs original: "
+                        + new ZenModeDiff.ConfigDiff(actual, expected),
+                expected, actual);
         assertEquals(expected.hashCode(), actual.hashCode());
         expected.user = 0;
-        assertNotEquals(expected, mZenModeHelperSpy.mConfig);
+        assertNotEquals(expected, mZenModeHelper.mConfig);
     }
 
     @Test
@@ -1117,19 +1139,19 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .allowReminders(false)
                 .build();
         automaticRules.put("customRule", customRule);
-        mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
+        mZenModeHelper.mConfig.automaticRules = automaticRules;
 
-        ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
+        ZenModeConfig expected = mZenModeHelper.mConfig.copy();
 
         ByteArrayOutputStream baos = writeXmlAndPurge(null);
         TypedXmlPullParser parser = Xml.newFastPullParser();
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         ZenModeConfig.ZenRule original = expected.automaticRules.get(ruleId);
-        ZenModeConfig.ZenRule current = mZenModeHelperSpy.mConfig.automaticRules.get(ruleId);
+        ZenModeConfig.ZenRule current = mZenModeHelper.mConfig.automaticRules.get(ruleId);
 
         assertEquals("Automatic rules mismatch", original, current);
     }
@@ -1158,16 +1180,16 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .allowReminders(true)
                 .build();
         automaticRules.put(ruleId, customRule);
-        mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
+        mZenModeHelper.mConfig.automaticRules = automaticRules;
 
-        ZenModeConfig expected = mZenModeHelperSpy.mConfig.copy();
+        ZenModeConfig expected = mZenModeHelper.mConfig.copy();
 
         ByteArrayOutputStream baos = writeXmlAndPurgeForUser(null, UserHandle.USER_SYSTEM);
         TypedXmlPullParser parser = getParserForByteStream(baos);
-        mZenModeHelperSpy.readXml(parser, true, UserHandle.USER_SYSTEM);
+        mZenModeHelper.readXml(parser, true, UserHandle.USER_SYSTEM);
 
         ZenModeConfig.ZenRule original = expected.automaticRules.get(ruleId);
-        ZenModeConfig.ZenRule current = mZenModeHelperSpy.mConfig.automaticRules.get(ruleId);
+        ZenModeConfig.ZenRule current = mZenModeHelper.mConfig.automaticRules.get(ruleId);
 
         assertEquals("Automatic rules mismatch", original, current);
     }
@@ -1186,7 +1208,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
         customRule.component = new ComponentName("android", "ScheduleConditionProvider");
         enabledAutoRule.put("customRule", customRule);
-        mZenModeHelperSpy.mConfig.automaticRules = enabledAutoRule;
+        mZenModeHelper.mConfig.automaticRules = enabledAutoRule;
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
@@ -1194,9 +1216,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
-        assertTrue(mZenModeHelperSpy.mConfig.automaticRules.containsKey("customRule"));
+        assertTrue(mZenModeHelper.mConfig.automaticRules.containsKey("customRule"));
         setupZenConfigMaintained();
     }
 
@@ -1214,9 +1236,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
-        assertEquals(0, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+        assertEquals(0, mZenModeHelper.mConfig.suppressedVisualEffects);
 
         xml = "<zen version=\"6\" user=\"0\">\n"
                 + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
@@ -1230,9 +1252,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
-        assertEquals(0, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+        assertEquals(0, mZenModeHelper.mConfig.suppressedVisualEffects);
     }
 
     @Test
@@ -1249,9 +1271,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
-        assertEquals(0, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+        assertEquals(0, mZenModeHelper.mConfig.suppressedVisualEffects);
     }
 
     @Test
@@ -1268,13 +1290,13 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                         | SUPPRESSED_EFFECT_LIGHTS
                         | SUPPRESSED_EFFECT_AMBIENT
                         | SUPPRESSED_EFFECT_PEEK,
-                mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+                mZenModeHelper.mConfig.suppressedVisualEffects);
 
         xml = "<zen version=\"6\" user=\"0\">\n"
                 + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
@@ -1288,9 +1310,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
-        assertEquals(SUPPRESSED_EFFECT_PEEK, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+        assertEquals(SUPPRESSED_EFFECT_PEEK, mZenModeHelper.mConfig.suppressedVisualEffects);
 
         xml = "<zen version=\"6\" user=\"0\">\n"
                 + "<allow calls=\"false\" repeatCallers=\"false\" messages=\"true\" "
@@ -1304,12 +1326,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(xml.getBytes())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
                         | SUPPRESSED_EFFECT_LIGHTS
                         | SUPPRESSED_EFFECT_AMBIENT,
-                mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+                mZenModeHelper.mConfig.suppressedVisualEffects);
     }
 
     @Test
@@ -1318,7 +1340,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // no enabled automatic zen rules and no default rules
         // so rules should be overriden by default rules
-        mZenModeHelperSpy.mConfig.automaticRules = new ArrayMap<>();
+        mZenModeHelper.mConfig.automaticRules = new ArrayMap<>();
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
@@ -1326,10 +1348,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         // check default rules
-        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;
+        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelper.mConfig.automaticRules;
         assertTrue(rules.size() != 0);
         for (String defaultId : ZenModeConfig.DEFAULT_RULE_IDS) {
             assertTrue(rules.containsKey(defaultId));
@@ -1354,7 +1376,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         customRule.conditionId = ZenModeConfig.toScheduleConditionId(weeknights);
         customRule.component = new ComponentName("android", "ScheduleConditionProvider");
         disabledAutoRule.put("customRule", customRule);
-        mZenModeHelperSpy.mConfig.automaticRules = disabledAutoRule;
+        mZenModeHelper.mConfig.automaticRules = disabledAutoRule;
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
@@ -1362,10 +1384,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         // check default rules
-        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;
+        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelper.mConfig.automaticRules;
         assertTrue(rules.size() != 0);
         for (String defaultId : ZenModeConfig.DEFAULT_RULE_IDS) {
             assertTrue(rules.containsKey(defaultId));
@@ -1406,7 +1428,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         defaultScheduleRule.id = ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID;
         automaticRules.put(ZenModeConfig.EVERY_NIGHT_DEFAULT_RULE_ID, defaultScheduleRule);
 
-        mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
+        mZenModeHelper.mConfig.automaticRules = automaticRules;
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
@@ -1414,10 +1436,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         // check default rules
-        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;
+        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelper.mConfig.automaticRules;
         assertTrue(rules.size() != 0);
         for (String defaultId : ZenModeConfig.DEFAULT_RULE_IDS) {
             assertTrue(rules.containsKey(defaultId));
@@ -1475,7 +1497,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         automaticRules.put(ZenModeConfig.EVENTS_DEFAULT_RULE_ID, defaultEventRule);
 
-        mZenModeHelperSpy.mConfig.automaticRules = automaticRules;
+        mZenModeHelper.mConfig.automaticRules = automaticRules;
 
         // set previous version
         ByteArrayOutputStream baos = writeXmlAndPurge(5);
@@ -1483,10 +1505,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         parser.setInput(new BufferedInputStream(
                 new ByteArrayInputStream(baos.toByteArray())), null);
         parser.nextTag();
-        mZenModeHelperSpy.readXml(parser, false, UserHandle.USER_ALL);
+        mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         // check default rules
-        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelperSpy.mConfig.automaticRules;
+        ArrayMap<String, ZenModeConfig.ZenRule> rules = mZenModeHelper.mConfig.automaticRules;
         assertTrue(rules.size() != 0);
         for (String defaultId : ZenModeConfig.DEFAULT_RULE_IDS) {
             assertTrue(rules.containsKey(defaultId));
@@ -1496,32 +1518,32 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         setupZenConfigMaintained();
 
         List<StatsEvent> events = new LinkedList<>();
-        mZenModeHelperSpy.pullRules(events);
+        mZenModeHelper.pullRules(events);
         assertEquals(4, events.size());
     }
 
     @Test
     public void testCountdownConditionSubscription() throws Exception {
         ZenModeConfig config = new ZenModeConfig();
-        mZenModeHelperSpy.mConfig = config;
-        mZenModeHelperSpy.mConditions.evaluateConfig(mZenModeHelperSpy.mConfig, null, true);
-        assertEquals(0, mZenModeHelperSpy.mConditions.mSubscriptions.size());
+        mZenModeHelper.mConfig = config;
+        mZenModeHelper.mConditions.evaluateConfig(mZenModeHelper.mConfig, null, true);
+        assertEquals(0, mZenModeHelper.mConditions.mSubscriptions.size());
 
-        mZenModeHelperSpy.mConfig.manualRule = new ZenModeConfig.ZenRule();
+        mZenModeHelper.mConfig.manualRule = new ZenModeConfig.ZenRule();
         Uri conditionId = ZenModeConfig.toCountdownConditionId(9000000, false);
-        mZenModeHelperSpy.mConfig.manualRule.conditionId = conditionId;
-        mZenModeHelperSpy.mConfig.manualRule.component = new ComponentName("android",
+        mZenModeHelper.mConfig.manualRule.conditionId = conditionId;
+        mZenModeHelper.mConfig.manualRule.component = new ComponentName("android",
                 CountdownConditionProvider.class.getName());
-        mZenModeHelperSpy.mConfig.manualRule.condition = new Condition(conditionId, "", "", "", 0,
+        mZenModeHelper.mConfig.manualRule.condition = new Condition(conditionId, "", "", "", 0,
                 STATE_TRUE, Condition.FLAG_RELEVANT_NOW);
-        mZenModeHelperSpy.mConfig.manualRule.enabled = true;
-        ZenModeConfig originalConfig = mZenModeHelperSpy.mConfig.copy();
+        mZenModeHelper.mConfig.manualRule.enabled = true;
+        ZenModeConfig originalConfig = mZenModeHelper.mConfig.copy();
 
-        mZenModeHelperSpy.mConditions.evaluateConfig(mZenModeHelperSpy.mConfig, null, true);
+        mZenModeHelper.mConditions.evaluateConfig(mZenModeHelper.mConfig, null, true);
 
         assertEquals(true, ZenModeConfig.isValidCountdownConditionId(conditionId));
-        assertEquals(originalConfig, mZenModeHelperSpy.mConfig);
-        assertEquals(1, mZenModeHelperSpy.mConditions.mSubscriptions.size());
+        assertEquals(originalConfig, mZenModeHelper.mConfig);
+        assertEquals(1, mZenModeHelper.mConditions.mSubscriptions.size());
     }
 
     @Test
@@ -1529,9 +1551,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         List<StatsEvent> events = new LinkedList<>();
         ZenModeConfig config = new ZenModeConfig();
         config.automaticRules = new ArrayMap<>();
-        mZenModeHelperSpy.mConfig = config;
-        mZenModeHelperSpy.updateDefaultZenRules(); // shouldn't throw null pointer
-        mZenModeHelperSpy.pullRules(events); // shouldn't throw null pointer
+        mZenModeHelper.mConfig = config;
+        mZenModeHelper.updateDefaultZenRules(); // shouldn't throw null pointer
+        mZenModeHelper.pullRules(events); // shouldn't throw null pointer
     }
 
     @Test
@@ -1553,11 +1575,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ArrayMap<String, ZenModeConfig.ZenRule> autoRules = new ArrayMap<>();
         autoRules.put(SCHEDULE_DEFAULT_RULE_ID, updatedDefaultRule);
-        mZenModeHelperSpy.mConfig.automaticRules = autoRules;
+        mZenModeHelper.mConfig.automaticRules = autoRules;
 
-        mZenModeHelperSpy.updateDefaultZenRules();
+        mZenModeHelper.updateDefaultZenRules();
         assertEquals(updatedDefaultRule,
-                mZenModeHelperSpy.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID));
+                mZenModeHelper.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID));
     }
 
     @Test
@@ -1579,11 +1601,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ArrayMap<String, ZenModeConfig.ZenRule> autoRules = new ArrayMap<>();
         autoRules.put(SCHEDULE_DEFAULT_RULE_ID, updatedDefaultRule);
-        mZenModeHelperSpy.mConfig.automaticRules = autoRules;
+        mZenModeHelper.mConfig.automaticRules = autoRules;
 
-        mZenModeHelperSpy.updateDefaultZenRules();
+        mZenModeHelper.updateDefaultZenRules();
         assertEquals(updatedDefaultRule,
-                mZenModeHelperSpy.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID));
+                mZenModeHelper.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID));
     }
 
     @Test
@@ -1606,11 +1628,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         ArrayMap<String, ZenModeConfig.ZenRule> autoRules = new ArrayMap<>();
         autoRules.put(SCHEDULE_DEFAULT_RULE_ID, customDefaultRule);
-        mZenModeHelperSpy.mConfig.automaticRules = autoRules;
+        mZenModeHelper.mConfig.automaticRules = autoRules;
 
-        mZenModeHelperSpy.updateDefaultZenRules();
+        mZenModeHelper.updateDefaultZenRules();
         ZenModeConfig.ZenRule ruleAfterUpdating =
-                mZenModeHelperSpy.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID);
+                mZenModeHelper.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID);
         assertEquals(customDefaultRule.enabled, ruleAfterUpdating.enabled);
         assertEquals(customDefaultRule.modified, ruleAfterUpdating.modified);
         assertEquals(customDefaultRule.id, ruleAfterUpdating.id);
@@ -1631,7 +1653,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
             // We need the package name to be something that's not "android" so there aren't any
             // existing rules under that package.
-            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
+            String id = mZenModeHelper.addAutomaticZenRule("pkgname", zenRule, "test");
             assertNotNull(id);
         }
         try {
@@ -1641,7 +1663,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
                     new ZenPolicy.Builder().build(),
                     NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
+            String id = mZenModeHelper.addAutomaticZenRule("pkgname", zenRule, "test");
             fail("allowed too many rules to be created");
         } catch (IllegalArgumentException e) {
             // yay
@@ -1661,7 +1683,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     ZenModeConfig.toScheduleConditionId(si),
                     new ZenPolicy.Builder().build(),
                     NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
+            String id = mZenModeHelper.addAutomaticZenRule("pkgname", zenRule, "test");
             assertNotNull(id);
         }
         try {
@@ -1671,7 +1693,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
                     new ZenPolicy.Builder().build(),
                     NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
+            String id = mZenModeHelper.addAutomaticZenRule("pkgname", zenRule, "test");
             fail("allowed too many rules to be created");
         } catch (IllegalArgumentException e) {
             // yay
@@ -1691,7 +1713,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     ZenModeConfig.toScheduleConditionId(si),
                     new ZenPolicy.Builder().build(),
                     NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
+            String id = mZenModeHelper.addAutomaticZenRule("pkgname", zenRule, "test");
             assertNotNull(id);
         }
         try {
@@ -1701,7 +1723,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                     ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
                     new ZenPolicy.Builder().build(),
                     NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-            String id = mZenModeHelperSpy.addAutomaticZenRule("pkgname", zenRule, "test");
+            String id = mZenModeHelper.addAutomaticZenRule("pkgname", zenRule, "test");
             fail("allowed too many rules to be created");
         } catch (IllegalArgumentException e) {
             // yay
@@ -1716,10 +1738,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
                 new ZenPolicy.Builder().build(),
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule, "test");
+        String id = mZenModeHelper.addAutomaticZenRule("android", zenRule, "test");
 
         assertTrue(id != null);
-        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelperSpy.mConfig.automaticRules.get(id);
+        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelper.mConfig.automaticRules.get(id);
         assertTrue(ruleInConfig != null);
         assertEquals(zenRule.isEnabled(), ruleInConfig.enabled);
         assertEquals(zenRule.isModified(), ruleInConfig.modified);
@@ -1736,10 +1758,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ComponentName("android", "ScheduleConditionProvider"),
                 ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule, "test");
+        String id = mZenModeHelper.addAutomaticZenRule("android", zenRule, "test");
 
         assertTrue(id != null);
-        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelperSpy.mConfig.automaticRules.get(id);
+        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelper.mConfig.automaticRules.get(id);
         assertTrue(ruleInConfig != null);
         assertEquals(zenRule.isEnabled(), ruleInConfig.enabled);
         assertEquals(zenRule.isModified(), ruleInConfig.modified);
@@ -1759,11 +1781,11 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ZenPolicy.Builder().build(),
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
 
-        String id = mZenModeHelperSpy.addAutomaticZenRule(null, zenRule, "test");
-        mZenModeHelperSpy.setAutomaticZenRuleState(zenRule.getConditionId(),
+        String id = mZenModeHelper.addAutomaticZenRule(null, zenRule, "test");
+        mZenModeHelper.setAutomaticZenRuleState(zenRule.getConditionId(),
                 new Condition(zenRule.getConditionId(), "", STATE_TRUE));
 
-        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelperSpy.mConfig.automaticRules.get(id);
+        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelper.mConfig.automaticRules.get(id);
         assertEquals(STATE_TRUE, ruleInConfig.condition.state);
     }
 
@@ -1776,7 +1798,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ZenPolicy.Builder().build(),
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
 
-        String id = mZenModeHelperSpy.addAutomaticZenRule(null, zenRule, "test");
+        String id = mZenModeHelper.addAutomaticZenRule(null, zenRule, "test");
 
         AutomaticZenRule zenRule2 = new AutomaticZenRule("NEW",
                 null,
@@ -1785,9 +1807,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ZenPolicy.Builder().build(),
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
 
-        mZenModeHelperSpy.updateAutomaticZenRule(id, zenRule2, "");
+        mZenModeHelper.updateAutomaticZenRule(id, zenRule2, "");
 
-        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelperSpy.mConfig.automaticRules.get(id);
+        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelper.mConfig.automaticRules.get(id);
         assertEquals("NEW", ruleInConfig.name);
     }
 
@@ -1800,15 +1822,15 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new ZenPolicy.Builder().build(),
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
 
-        String id = mZenModeHelperSpy.addAutomaticZenRule(null, zenRule, "test");
+        String id = mZenModeHelper.addAutomaticZenRule(null, zenRule, "test");
 
         assertTrue(id != null);
-        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelperSpy.mConfig.automaticRules.get(id);
+        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelper.mConfig.automaticRules.get(id);
         assertTrue(ruleInConfig != null);
         assertEquals(zenRule.getName(), ruleInConfig.name);
 
-        mZenModeHelperSpy.removeAutomaticZenRule(id, "test");
-        assertNull(mZenModeHelperSpy.mConfig.automaticRules.get(id));
+        mZenModeHelper.removeAutomaticZenRule(id, "test");
+        assertNull(mZenModeHelper.mConfig.automaticRules.get(id));
     }
 
     @Test
@@ -1819,35 +1841,39 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ZenModeConfig.toScheduleConditionId(new ScheduleInfo()),
                 new ZenPolicy.Builder().build(),
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id = mZenModeHelperSpy.addAutomaticZenRule(null, zenRule, "test");
+        String id = mZenModeHelper.addAutomaticZenRule(null, zenRule, "test");
 
         assertTrue(id != null);
-        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelperSpy.mConfig.automaticRules.get(id);
+        ZenModeConfig.ZenRule ruleInConfig = mZenModeHelper.mConfig.automaticRules.get(id);
         assertTrue(ruleInConfig != null);
         assertEquals(zenRule.getName(), ruleInConfig.name);
 
-        mZenModeHelperSpy.removeAutomaticZenRules(mContext.getPackageName(), "test");
-        assertNull(mZenModeHelperSpy.mConfig.automaticRules.get(id));
+        mZenModeHelper.removeAutomaticZenRules(mContext.getPackageName(), "test");
+        assertNull(mZenModeHelper.mConfig.automaticRules.get(id));
     }
 
     @Test
     public void testRulesWithSameUri() {
-        Uri sharedUri = ZenModeConfig.toScheduleConditionId(new ScheduleInfo());
+        // needs to be a valid schedule info object for the subscription to happen properly
+        ScheduleInfo scheduleInfo = new ScheduleInfo();
+        scheduleInfo.days = new int[]{1, 2};
+        scheduleInfo.endHour = 1;
+        Uri sharedUri = ZenModeConfig.toScheduleConditionId(scheduleInfo);
         AutomaticZenRule zenRule = new AutomaticZenRule("name",
                 new ComponentName("android", "ScheduleConditionProvider"),
                 sharedUri,
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule, "test");
+        String id = mZenModeHelper.addAutomaticZenRule("android", zenRule, "test");
         AutomaticZenRule zenRule2 = new AutomaticZenRule("name2",
                 new ComponentName("android", "ScheduleConditionProvider"),
                 sharedUri,
                 NotificationManager.INTERRUPTION_FILTER_PRIORITY, true);
-        String id2 = mZenModeHelperSpy.addAutomaticZenRule("android", zenRule2, "test");
+        String id2 = mZenModeHelper.addAutomaticZenRule("android", zenRule2, "test");
 
         Condition condition = new Condition(sharedUri, "", STATE_TRUE);
-        mZenModeHelperSpy.setAutomaticZenRuleState(sharedUri, condition);
+        mZenModeHelper.setAutomaticZenRuleState(sharedUri, condition);
 
-        for (ZenModeConfig.ZenRule rule : mZenModeHelperSpy.mConfig.automaticRules.values()) {
+        for (ZenModeConfig.ZenRule rule : mZenModeHelper.mConfig.automaticRules.values()) {
             if (rule.id.equals(id)) {
                 assertNotNull(rule.condition);
                 assertTrue(rule.condition.state == STATE_TRUE);
@@ -1859,9 +1885,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         }
 
         condition = new Condition(sharedUri, "", Condition.STATE_FALSE);
-        mZenModeHelperSpy.setAutomaticZenRuleState(sharedUri, condition);
+        mZenModeHelper.setAutomaticZenRuleState(sharedUri, condition);
 
-        for (ZenModeConfig.ZenRule rule : mZenModeHelperSpy.mConfig.automaticRules.values()) {
+        for (ZenModeConfig.ZenRule rule : mZenModeHelper.mConfig.automaticRules.values()) {
             if (rule.id.equals(id)) {
                 assertNotNull(rule.condition);
                 assertTrue(rule.condition.state == Condition.STATE_FALSE);
@@ -1873,31 +1899,46 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         }
     }
 
+    @Test
+    public void testSetManualZenMode() {
+        setupZenConfig();
+
+        // note that caller=null because that's how it comes in from NMS.setZenMode
+        mZenModeHelper.setManualZenMode(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, null, "");
+
+        // confirm that setting zen mode via setManualZenMode changed the zen mode correctly
+        assertEquals(ZEN_MODE_IMPORTANT_INTERRUPTIONS, mZenModeHelper.mZenMode);
+
+        // and also that it works to turn it back off again
+        mZenModeHelper.setManualZenMode(Global.ZEN_MODE_OFF, null, null, "");
+        assertEquals(Global.ZEN_MODE_OFF, mZenModeHelper.mZenMode);
+    }
+
     private void setupZenConfig() {
-        mZenModeHelperSpy.mZenMode = ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.allowAlarms = false;
-        mZenModeHelperSpy.mConfig.allowMedia = false;
-        mZenModeHelperSpy.mConfig.allowSystem = false;
-        mZenModeHelperSpy.mConfig.allowReminders = true;
-        mZenModeHelperSpy.mConfig.allowCalls = true;
-        mZenModeHelperSpy.mConfig.allowMessages = true;
-        mZenModeHelperSpy.mConfig.allowEvents = true;
-        mZenModeHelperSpy.mConfig.allowRepeatCallers= true;
-        mZenModeHelperSpy.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
-        mZenModeHelperSpy.mConfig.manualRule = null;
+        mZenModeHelper.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelper.mConfig.allowAlarms = false;
+        mZenModeHelper.mConfig.allowMedia = false;
+        mZenModeHelper.mConfig.allowSystem = false;
+        mZenModeHelper.mConfig.allowReminders = true;
+        mZenModeHelper.mConfig.allowCalls = true;
+        mZenModeHelper.mConfig.allowMessages = true;
+        mZenModeHelper.mConfig.allowEvents = true;
+        mZenModeHelper.mConfig.allowRepeatCallers = true;
+        mZenModeHelper.mConfig.suppressedVisualEffects = SUPPRESSED_EFFECT_BADGE;
+        mZenModeHelper.mConfig.manualRule = null;
     }
 
     private void setupZenConfigMaintained() {
         // config is still the same as when it was setup (setupZenConfig)
-        assertFalse(mZenModeHelperSpy.mConfig.allowAlarms);
-        assertFalse(mZenModeHelperSpy.mConfig.allowMedia);
-        assertFalse(mZenModeHelperSpy.mConfig.allowSystem);
-        assertTrue(mZenModeHelperSpy.mConfig.allowReminders);
-        assertTrue(mZenModeHelperSpy.mConfig.allowCalls);
-        assertTrue(mZenModeHelperSpy.mConfig.allowMessages);
-        assertTrue(mZenModeHelperSpy.mConfig.allowEvents);
-        assertTrue(mZenModeHelperSpy.mConfig.allowRepeatCallers);
-        assertEquals(SUPPRESSED_EFFECT_BADGE, mZenModeHelperSpy.mConfig.suppressedVisualEffects);
+        assertFalse(mZenModeHelper.mConfig.allowAlarms);
+        assertFalse(mZenModeHelper.mConfig.allowMedia);
+        assertFalse(mZenModeHelper.mConfig.allowSystem);
+        assertTrue(mZenModeHelper.mConfig.allowReminders);
+        assertTrue(mZenModeHelper.mConfig.allowCalls);
+        assertTrue(mZenModeHelper.mConfig.allowMessages);
+        assertTrue(mZenModeHelper.mConfig.allowEvents);
+        assertTrue(mZenModeHelper.mConfig.allowRepeatCallers);
+        assertEquals(SUPPRESSED_EFFECT_BADGE, mZenModeHelper.mConfig.suppressedVisualEffects);
     }
 
     /**

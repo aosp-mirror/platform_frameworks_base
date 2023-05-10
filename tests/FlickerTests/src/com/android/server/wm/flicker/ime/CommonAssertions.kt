@@ -18,7 +18,7 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.legacy.FlickerTest
 
 fun FlickerTest.imeLayerBecomesVisible() {

@@ -29,9 +29,6 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Describes the HDR conversion mode for a device.
  *
- * This class is used when user changes the HDR conversion mode of the device via
- * {@link DisplayManager#setHdrConversionMode(HdrConversionMode)}.
- * <p>
  * HDR conversion mode has a conversionMode and preferredHdrOutputType. </p><p>
  * The conversionMode can be one of:
  * {@link HdrConversionMode#HDR_CONVERSION_UNSUPPORTED} : HDR conversion is unsupported. In this

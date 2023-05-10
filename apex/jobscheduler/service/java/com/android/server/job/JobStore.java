@@ -49,8 +49,10 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
+import com.android.modules.expresslog.Histogram;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.IoThread;
 import com.android.server.job.JobSchedulerInternal.JobStorePersistStats;
 import com.android.server.job.controllers.JobStatus;
@@ -94,6 +96,7 @@ public final class JobStore {
 
     /** Threshold to adjust how often we want to write to the db. */
     private static final long JOB_PERSIST_DELAY = 2000L;
+    private static final long SCHEDULED_JOB_HIGH_WATER_MARK_PERIOD_MS = 30 * 60_000L;
     @VisibleForTesting
     static final String JOB_FILE_SPLIT_PREFIX = "jobs_";
     private static final int ALL_UIDS = -1;
@@ -130,6 +133,30 @@ public final class JobStore {
     private boolean mUseSplitFiles = JobSchedulerService.Constants.DEFAULT_PERSIST_IN_SPLIT_FILES;
 
     private JobStorePersistStats mPersistInfo = new JobStorePersistStats();
+
+    /**
+     * Separately updated value of the JobSet size to avoid recalculating it frequently for logging
+     * purposes. Continue to use {@link JobSet#size()} for the up-to-date and accurate value.
+     */
+    private int mCurrentJobSetSize = 0;
+    private int mScheduledJob30MinHighWaterMark = 0;
+    private static final Histogram sScheduledJob30MinHighWaterMarkLogger = new Histogram(
+            "job_scheduler.value_hist_scheduled_job_30_min_high_water_mark",
+            new Histogram.ScaledRangeOptions(15, 1, 99, 1.5f));
+    private final Runnable mScheduledJobHighWaterMarkLoggingRunnable = new Runnable() {
+        @Override
+        public void run() {
+            AppSchedulingModuleThread.getHandler().removeCallbacks(this);
+            synchronized (mLock) {
+                sScheduledJob30MinHighWaterMarkLogger.logSample(mScheduledJob30MinHighWaterMark);
+                mScheduledJob30MinHighWaterMark = mJobSet.size();
+            }
+            // The count doesn't need to be logged at exact times. Logging based on system uptime
+            // should be fine.
+            AppSchedulingModuleThread.getHandler()
+                    .postDelayed(this, SCHEDULED_JOB_HIGH_WATER_MARK_PERIOD_MS);
+        }
+    };
 
     /** Used by the {@link JobSchedulerService} to instantiate the JobStore. */
     static JobStore get(JobSchedulerService jobManagerService) {
@@ -183,6 +210,9 @@ public final class JobStore {
         mXmlTimestamp = mJobsFile.exists()
                 ? mJobsFile.getLastModifiedTime() : mJobFileDirectory.lastModified();
         mRtcGood = (sSystemClock.millis() > mXmlTimestamp);
+
+        AppSchedulingModuleThread.getHandler().postDelayed(
+                mScheduledJobHighWaterMarkLoggingRunnable, SCHEDULED_JOB_HIGH_WATER_MARK_PERIOD_MS);
     }
 
     private void init() {
@@ -236,7 +266,8 @@ public final class JobStore {
                         convertRtcBoundsToElapsed(utcTimes, elapsedNow);
                 JobStatus newJob = new JobStatus(job,
                         elapsedRuntimes.first, elapsedRuntimes.second,
-                        0, 0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime());
+                        0, 0, job.getLastSuccessfulRunTime(), job.getLastFailedRunTime(),
+                        job.getCumulativeExecutionTimeMs());
                 newJob.prepareLocked();
                 toAdd.add(newJob);
                 toRemove.add(job);
@@ -251,7 +282,10 @@ public final class JobStore {
      * @param jobStatus Job to add.
      */
     public void add(JobStatus jobStatus) {
-        mJobSet.add(jobStatus);
+        if (mJobSet.add(jobStatus)) {
+            mCurrentJobSetSize++;
+            maybeUpdateHighWaterMark();
+        }
         if (jobStatus.isPersisted()) {
             mPendingJobWriteUids.put(jobStatus.getUid(), true);
             maybeWriteStatusToDiskAsync();
@@ -266,7 +300,10 @@ public final class JobStore {
      */
     @VisibleForTesting
     public void addForTesting(JobStatus jobStatus) {
-        mJobSet.add(jobStatus);
+        if (mJobSet.add(jobStatus)) {
+            mCurrentJobSetSize++;
+            maybeUpdateHighWaterMark();
+        }
         if (jobStatus.isPersisted()) {
             mPendingJobWriteUids.put(jobStatus.getUid(), true);
         }
@@ -302,6 +339,7 @@ public final class JobStore {
             }
             return false;
         }
+        mCurrentJobSetSize--;
         if (removeFromPersisted && jobStatus.isPersisted()) {
             mPendingJobWriteUids.put(jobStatus.getUid(), true);
             maybeWriteStatusToDiskAsync();
@@ -314,7 +352,9 @@ public final class JobStore {
      */
     @VisibleForTesting
     public void removeForTesting(JobStatus jobStatus) {
-        mJobSet.remove(jobStatus);
+        if (mJobSet.remove(jobStatus)) {
+            mCurrentJobSetSize--;
+        }
         if (jobStatus.isPersisted()) {
             mPendingJobWriteUids.put(jobStatus.getUid(), true);
         }
@@ -326,6 +366,7 @@ public final class JobStore {
      */
     public void removeJobsOfUnlistedUsers(int[] keepUserIds) {
         mJobSet.removeJobsOfUnlistedUsers(keepUserIds);
+        mCurrentJobSetSize = mJobSet.size();
     }
 
     /** Note a change in the specified JobStatus that necessitates writing job state to disk. */
@@ -341,6 +382,7 @@ public final class JobStore {
     public void clear() {
         mJobSet.clear();
         mPendingJobWriteUids.put(ALL_UIDS, true);
+        mCurrentJobSetSize = 0;
         maybeWriteStatusToDiskAsync();
     }
 
@@ -351,6 +393,7 @@ public final class JobStore {
     public void clearForTesting() {
         mJobSet.clear();
         mPendingJobWriteUids.put(ALL_UIDS, true);
+        mCurrentJobSetSize = 0;
     }
 
     void setUseSplitFiles(boolean useSplitFiles) {
@@ -439,6 +482,12 @@ public final class JobStore {
 
     public void forEachJobForSourceUid(int sourceUid, Consumer<JobStatus> functor) {
         mJobSet.forEachJobForSourceUid(sourceUid, functor);
+    }
+
+    private void maybeUpdateHighWaterMark() {
+        if (mScheduledJob30MinHighWaterMark < mCurrentJobSetSize) {
+            mScheduledJob30MinHighWaterMark = mCurrentJobSetSize;
+        }
     }
 
     /** Version of the db schema. */
@@ -786,7 +835,7 @@ public final class JobStore {
          * Write out a tag with data comprising the required fields and bias of this job and
          * its client.
          */
-        private void addAttributesToJobTag(XmlSerializer out, JobStatus jobStatus)
+        private void addAttributesToJobTag(TypedXmlSerializer out, JobStatus jobStatus)
                 throws IOException {
             out.attribute(null, "jobid", Integer.toString(jobStatus.getJobId()));
             out.attribute(null, "package", jobStatus.getServiceComponent().getPackageName());
@@ -813,6 +862,9 @@ public final class JobStore {
                     String.valueOf(jobStatus.getLastSuccessfulRunTime()));
             out.attribute(null, "lastFailedRunTime",
                     String.valueOf(jobStatus.getLastFailedRunTime()));
+
+            out.attributeLong(null, "cumulativeExecutionTime",
+                    jobStatus.getCumulativeExecutionTimeMs());
         }
 
         private void writeBundleToXml(PersistableBundle extras, XmlSerializer out)
@@ -882,6 +934,15 @@ public final class JobStore {
             }
             if (job.isRequireStorageNotLow()) {
                 out.attribute(null, "storage-not-low", Boolean.toString(true));
+            }
+            if (job.isPreferBatteryNotLow()) {
+                out.attributeBoolean(null, "prefer-battery-not-low", true);
+            }
+            if (job.isPreferCharging()) {
+                out.attributeBoolean(null, "prefer-charging", true);
+            }
+            if (job.isPreferDeviceIdle()) {
+                out.attributeBoolean(null, "prefer-idle", true);
             }
             out.endTag(null, XML_TAG_PARAMS_CONSTRAINTS);
         }
@@ -1112,6 +1173,12 @@ public final class JobStore {
             if (needFileMigration) {
                 migrateJobFilesAsync();
             }
+
+            // Log the count immediately after loading from boot.
+            mCurrentJobSetSize = numJobs;
+            mScheduledJob30MinHighWaterMark = mCurrentJobSetSize;
+            mScheduledJobHighWaterMarkLoggingRunnable.run();
+
             if (mCompletionLatch != null) {
                 mCompletionLatch.countDown();
             }
@@ -1181,6 +1248,7 @@ public final class JobStore {
             int uid, sourceUserId;
             long lastSuccessfulRunTime;
             long lastFailedRunTime;
+            long cumulativeExecutionTime;
             int internalFlags = 0;
 
             // Read out job identifier attributes and bias.
@@ -1221,6 +1289,9 @@ public final class JobStore {
 
                 val = parser.getAttributeValue(null, "lastFailedRunTime");
                 lastFailedRunTime = val == null ? 0 : Long.parseLong(val);
+
+                cumulativeExecutionTime =
+                        parser.getAttributeLong(null, "cumulativeExecutionTime", 0);
             } catch (NumberFormatException e) {
                 Slog.e(TAG, "Error parsing job's required fields, skipping");
                 return null;
@@ -1393,7 +1464,7 @@ public final class JobStore {
                     builtJob, uid, sourcePackageName, sourceUserId,
                     appBucket, namespace, sourceTag,
                     elapsedRuntimes.first, elapsedRuntimes.second,
-                    lastSuccessfulRunTime, lastFailedRunTime,
+                    lastSuccessfulRunTime, lastFailedRunTime, cumulativeExecutionTime,
                     (rtcIsGood) ? null : rtcRuntimes, internalFlags, /* dynamicConstraints */ 0);
             if (jobWorkItems != null) {
                 for (int i = 0; i < jobWorkItems.size(); ++i) {
@@ -1538,6 +1609,13 @@ public final class JobStore {
             if (val != null) {
                 jobBuilder.setRequiresStorageNotLow(true);
             }
+
+            jobBuilder.setPrefersBatteryNotLow(
+                    parser.getAttributeBoolean(null, "prefer-battery-not-low", false));
+            jobBuilder.setPrefersCharging(
+                    parser.getAttributeBoolean(null, "prefer-charging", false));
+            jobBuilder.setPrefersDeviceIdle(
+                    parser.getAttributeBoolean(null, "prefer-idle", false));
         }
 
         /**

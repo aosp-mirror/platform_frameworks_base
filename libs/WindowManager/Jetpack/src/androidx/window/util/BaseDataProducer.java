@@ -51,10 +51,10 @@ public abstract class BaseDataProducer<T> implements DataProducer<T>,
     public final void addDataChangedCallback(@NonNull Consumer<T> callback) {
         synchronized (mLock) {
             mCallbacks.add(callback);
-            Optional<T> currentData = getCurrentData();
-            currentData.ifPresent(callback);
-            onListenersChanged(mCallbacks);
         }
+        Optional<T> currentData = getCurrentData();
+        currentData.ifPresent(callback);
+        onListenersChanged();
     }
 
     /**
@@ -67,11 +67,22 @@ public abstract class BaseDataProducer<T> implements DataProducer<T>,
     public final void removeDataChangedCallback(@NonNull Consumer<T> callback) {
         synchronized (mLock) {
             mCallbacks.remove(callback);
-            onListenersChanged(mCallbacks);
+        }
+        onListenersChanged();
+    }
+
+    /**
+     * Returns {@code true} if there are any registered callbacks {@code false} if there are no
+     * registered callbacks.
+     */
+    // TODO(b/278132889) Improve the structure of BaseDataProdcuer while avoiding known issues.
+    public final boolean hasListeners() {
+        synchronized (mLock) {
+            return !mCallbacks.isEmpty();
         }
     }
 
-    protected void onListenersChanged(Set<Consumer<T>> callbacks) {}
+    protected void onListenersChanged() {}
 
     /**
      * @return the current data if available and {@code Optional.empty()} otherwise.

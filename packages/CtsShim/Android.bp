@@ -44,6 +44,9 @@ android_app_import {
         arm64: {
             apk: "apk/arm/CtsShimPriv.apk",
         },
+        riscv64: {
+            apk: "apk/riscv64/CtsShimPriv.apk",
+        },
         x86: {
             apk: "apk/x86/CtsShimPriv.apk",
         },
@@ -81,6 +84,9 @@ android_app_import {
         },
         arm64: {
             apk: "apk/arm/CtsShim.apk",
+        },
+        riscv64: {
+            apk: "apk/riscv64/CtsShim.apk",
         },
         x86: {
             apk: "apk/x86/CtsShim.apk",

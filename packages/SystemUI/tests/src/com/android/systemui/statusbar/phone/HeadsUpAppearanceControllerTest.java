@@ -34,11 +34,10 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeHeadsUpTracker;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -64,8 +63,9 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
 
     private final NotificationStackScrollLayoutController mStackScrollerController =
             mock(NotificationStackScrollLayoutController.class);
-    private final NotificationPanelViewController mPanelView =
-            mock(NotificationPanelViewController.class);
+    private final ShadeViewController mShadeViewController =
+            mock(ShadeViewController.class);
+    private final ShadeHeadsUpTracker mShadeHeadsUpTracker = mock(ShadeHeadsUpTracker.class);
     private final DarkIconDispatcher mDarkIconDispatcher = mock(DarkIconDispatcher.class);
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private NotificationTestHelper mTestHelper;
@@ -80,7 +80,6 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     private KeyguardStateController mKeyguardStateController;
     private CommandQueue mCommandQueue;
     private NotificationRoundnessManager mNotificationRoundnessManager;
-    private FeatureFlags mFeatureFlag;
 
     @Before
     public void setUp() throws Exception {
@@ -101,8 +100,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mKeyguardStateController = mock(KeyguardStateController.class);
         mCommandQueue = mock(CommandQueue.class);
         mNotificationRoundnessManager = mock(NotificationRoundnessManager.class);
-        mFeatureFlag = mock(FeatureFlags.class);
-        when(mFeatureFlag.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES)).thenReturn(true);
+        when(mShadeViewController.getShadeHeadsUpTracker()).thenReturn(mShadeHeadsUpTracker);
         mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                 mock(NotificationIconAreaController.class),
                 mHeadsUpManager,
@@ -113,9 +111,8 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mCommandQueue,
                 mStackScrollerController,
-                mPanelView,
+                mShadeViewController,
                 mNotificationRoundnessManager,
-                mFeatureFlag,
                 mHeadsUpStatusBarView,
                 new Clock(mContext, null),
                 Optional.of(mOperatorNameView));
@@ -197,9 +194,8 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mKeyguardStateController,
                 mCommandQueue,
                 mStackScrollerController,
-                mPanelView,
+                mShadeViewController,
                 mNotificationRoundnessManager,
-                mFeatureFlag,
                 mHeadsUpStatusBarView,
                 new Clock(mContext, null),
                 Optional.empty());
@@ -212,15 +208,15 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     public void testDestroy() {
         reset(mHeadsUpManager);
         reset(mDarkIconDispatcher);
-        reset(mPanelView);
+        reset(mShadeHeadsUpTracker);
         reset(mStackScrollerController);
 
         mHeadsUpAppearanceController.onViewDetached();
 
         verify(mHeadsUpManager).removeListener(any());
         verify(mDarkIconDispatcher).removeDarkReceiver((DarkIconDispatcher.DarkReceiver) any());
-        verify(mPanelView).removeTrackingHeadsUpListener(any());
-        verify(mPanelView).setHeadsUpAppearanceController(isNull());
+        verify(mShadeHeadsUpTracker).removeTrackingHeadsUpListener(any());
+        verify(mShadeHeadsUpTracker).setHeadsUpAppearanceController(isNull());
         verify(mStackScrollerController).removeOnExpandedHeightChangedListener(any());
     }
 

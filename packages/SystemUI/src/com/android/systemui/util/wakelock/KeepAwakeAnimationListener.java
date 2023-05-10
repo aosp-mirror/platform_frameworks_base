@@ -33,7 +33,7 @@ public class KeepAwakeAnimationListener extends AnimatorListenerAdapter
     public KeepAwakeAnimationListener(Context context) {
         Assert.isMainThread();
         if (sWakeLock == null) {
-            sWakeLock = WakeLock.createPartial(context, "animation");
+            sWakeLock = WakeLock.createPartial(context, null, "animation");
         }
     }
 

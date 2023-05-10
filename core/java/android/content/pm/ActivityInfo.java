@@ -1083,8 +1083,23 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION =
             254631730L; // buganizer id
+
+    /**
+     * This change id enables compat policy that ignores app requested orientation in
+     * response to an app calling {@link android.app.Activity#setRequestedOrientation} more
+     * than twice in one second if an activity is not letterboxed for fixed orientation.
+     * See com.android.server.wm.LetterboxUiController#shouldIgnoreRequestedOrientation
+     * for details.
+     * @hide
+     */
+    @ChangeId
+    @Overridable
+    @Disabled
+    public static final long OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED =
+            273509367L; // buganizer id
 
     /**
      * This change id forces the packages it is applied to never have Display API sandboxing
@@ -1128,6 +1143,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION =
             263959004L; // buganizer id
 
@@ -1140,6 +1156,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH = 264304459L; // buganizer id
 
     /**
@@ -1152,6 +1169,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Overridable
     @Disabled
+    @TestApi
     public static final long OVERRIDE_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE =
             264301586L; // buganizer id
 
@@ -1278,6 +1296,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS = 263259275L;
 
     // Compat framework that per-app overrides rely on only supports booleans. That's why we have
@@ -1293,6 +1312,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT = 265452344L;
 
     /**
@@ -1304,6 +1324,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR = 265451093L;
 
     /**
@@ -1317,6 +1338,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE = 266124927L;
 
     /**
@@ -1363,6 +1385,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     @ChangeId
     @Disabled
     @Overridable
+    @TestApi
     public static final long OVERRIDE_USE_DISPLAY_LANDSCAPE_NATURAL_ORIENTATION = 255940284L;
 
     /**

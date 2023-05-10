@@ -122,8 +122,9 @@ public class UiTranslationController implements Dumpable {
             Log.i(TAG, "Cannot update " + stateToString(state) + " for destroyed " + mActivity);
             return;
         }
+        boolean isLoggable = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG);
         Log.i(TAG, "updateUiTranslationState state: " + stateToString(state)
-                + (DEBUG ? (", views: " + views + ", spec: " + uiTranslationSpec) : ""));
+                + (isLoggable ? (", views: " + views + ", spec: " + uiTranslationSpec) : ""));
         synchronized (mLock) {
             mCurrentState = state;
             if (views != null) {
@@ -237,7 +238,7 @@ public class UiTranslationController implements Dumpable {
             }
             pw.print(outerPrefix); pw.print("padded views: "); pw.println(mViewsToPadContent);
         }
-        if (DEBUG) {
+        if (Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG)) {
             dumpViewByTraversal(outerPrefix, pw);
         }
     }
@@ -345,6 +346,7 @@ public class UiTranslationController implements Dumpable {
      */
     private void onVirtualViewTranslationCompleted(
             SparseArray<LongSparseArray<ViewTranslationResponse>> translatedResult) {
+        boolean isLoggable = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG);
         if (mActivity.isDestroyed()) {
             Log.v(TAG, "onTranslationCompleted:" + mActivity + "is destroyed.");
             return;
@@ -369,7 +371,7 @@ public class UiTranslationController implements Dumpable {
                 }
                 final LongSparseArray<ViewTranslationResponse> virtualChildResponse =
                         translatedResult.valueAt(i);
-                if (DEBUG) {
+                if (isLoggable) {
                     Log.v(TAG, "onVirtualViewTranslationCompleted: received response for "
                             + "AutofillId " + autofillId);
                 }
@@ -379,7 +381,7 @@ public class UiTranslationController implements Dumpable {
                 }
                 mActivity.runOnUiThread(() -> {
                     if (view.getViewTranslationCallback() == null) {
-                        if (DEBUG) {
+                        if (isLoggable) {
                             Log.d(TAG, view + " doesn't support showing translation because of "
                                     + "null ViewTranslationCallback.");
                         }
@@ -397,12 +399,13 @@ public class UiTranslationController implements Dumpable {
      * The method is used to handle the translation result for non-vertual views.
      */
     private void onTranslationCompleted(SparseArray<ViewTranslationResponse> translatedResult) {
+        boolean isLoggable = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG);
         if (mActivity.isDestroyed()) {
             Log.v(TAG, "onTranslationCompleted:" + mActivity + "is destroyed.");
             return;
         }
         final int resultCount = translatedResult.size();
-        if (DEBUG) {
+        if (isLoggable) {
             Log.v(TAG, "onTranslationCompleted: receive " + resultCount + " responses.");
         }
         synchronized (mLock) {
@@ -413,7 +416,7 @@ public class UiTranslationController implements Dumpable {
             }
             for (int i = 0; i < resultCount; i++) {
                 final ViewTranslationResponse response = translatedResult.valueAt(i);
-                if (DEBUG) {
+                if (isLoggable) {
                     Log.v(TAG, "onTranslationCompleted: "
                             + sanitizedViewTranslationResponse(response));
                 }
@@ -443,7 +446,7 @@ public class UiTranslationController implements Dumpable {
                                     (TextViewTranslationCallback) callback;
                             if (textViewCallback.isShowingTranslation()
                                     || textViewCallback.isAnimationRunning()) {
-                                if (DEBUG) {
+                                if (isLoggable) {
                                     Log.d(TAG, "Duplicate ViewTranslationResponse for " + autofillId
                                             + ". Ignoring.");
                                 }
@@ -458,7 +461,7 @@ public class UiTranslationController implements Dumpable {
                             callback = new TextViewTranslationCallback();
                             view.setViewTranslationCallback(callback);
                         } else {
-                            if (DEBUG) {
+                            if (isLoggable) {
                                 Log.d(TAG, view + " doesn't support showing translation because of "
                                         + "null ViewTranslationCallback.");
                             }
@@ -506,7 +509,7 @@ public class UiTranslationController implements Dumpable {
         final TranslationRequest request = new TranslationRequest.Builder()
                 .setViewTranslationRequests(requests)
                 .build();
-        if (DEBUG) {
+        if (Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG)) {
             StringBuilder msg = new StringBuilder("sendTranslationRequest:{requests=[");
             for (ViewTranslationRequest viewRequest: requests) {
                 msg.append("{request=")
@@ -636,6 +639,7 @@ public class UiTranslationController implements Dumpable {
 
     private void runForEachView(BiConsumer<View, ViewTranslationCallback> action) {
         synchronized (mLock) {
+            boolean isLoggable = Log.isLoggable(UiTranslationManager.LOG_TAG, Log.DEBUG);
             final ArrayMap<AutofillId, WeakReference<View>> views = new ArrayMap<>(mViews);
             if (views.size() == 0) {
                 Log.w(TAG, "No views can be excuted for runForEachView.");
@@ -644,12 +648,12 @@ public class UiTranslationController implements Dumpable {
                 final int viewCounts = views.size();
                 for (int i = 0; i < viewCounts; i++) {
                     final View view = views.valueAt(i).get();
-                    if (DEBUG) {
+                    if (isLoggable) {
                         Log.d(TAG, "runForEachView for autofillId = " + (view != null
                                 ? view.getAutofillId() : " null"));
                     }
                     if (view == null || view.getViewTranslationCallback() == null) {
-                        if (DEBUG) {
+                        if (isLoggable) {
                             Log.d(TAG, "View was gone or ViewTranslationCallback for autofillId "
                                     + "= " + views.keyAt(i));
                         }

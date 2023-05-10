@@ -1106,6 +1106,16 @@ public class DynamicLayout extends Layout {
                     mTransformedTextUpdate.before = before;
                     mTransformedTextUpdate.after = after;
                 }
+                // When there is a transformed text, we have to reflow the DynamicLayout based on
+                // the transformed indices instead of the range in base text.
+                // For example,
+                //   base text:         abcd    >   abce
+                //   updated range:     where = 3, before = 1, after = 1
+                //   transformed text:  abxxcd  >   abxxce
+                //   updated range:     where = 5, before = 1, after = 1
+                //
+                // Because the transformedText is udapted simultaneously with the base text,
+                // the range must be transformed before the base text changes.
                 transformedText.originalToTransformed(mTransformedTextUpdate);
             }
         }
@@ -1113,9 +1123,20 @@ public class DynamicLayout extends Layout {
         public void onTextChanged(CharSequence s, int where, int before, int after) {
             final DynamicLayout dynamicLayout = mLayout.get();
             if (dynamicLayout != null && dynamicLayout.mDisplay instanceof OffsetMapping) {
-                where = mTransformedTextUpdate.where;
-                before = mTransformedTextUpdate.before;
-                after = mTransformedTextUpdate.after;
+                if (mTransformedTextUpdate != null && mTransformedTextUpdate.where >= 0) {
+                    where = mTransformedTextUpdate.where;
+                    before = mTransformedTextUpdate.before;
+                    after = mTransformedTextUpdate.after;
+                    // Set where to -1 so that we know if beforeTextChanged is called.
+                    mTransformedTextUpdate.where = -1;
+                } else {
+                    // onTextChanged is called without beforeTextChanged. Reflow the entire text.
+                    where = 0;
+                    // We can't get the before length from the text, use the line end of the
+                    // last line instead.
+                    before = dynamicLayout.getLineEnd(dynamicLayout.getLineCount() - 1);
+                    after = dynamicLayout.mDisplay.length();
+                }
             }
             reflow(s, where, before, after);
         }

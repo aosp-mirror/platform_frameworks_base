@@ -18,6 +18,7 @@ package com.android.systemui.animation
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.fonts.Font
+import android.graphics.fonts.FontVariationAxis
 import android.graphics.text.PositionedGlyphs
 import android.text.Layout
 import android.text.TextPaint
@@ -27,13 +28,17 @@ import com.android.internal.graphics.ColorUtils
 import java.lang.Math.max
 
 /** Provide text style linear interpolation for plain text. */
-class TextInterpolator(layout: Layout) {
-
+class TextInterpolator(
+    layout: Layout,
+    var typefaceCache: TypefaceVariantCache,
+) {
     /**
      * Returns base paint used for interpolation.
      *
      * Once you modified the style parameters, you have to call reshapeText to recalculate base text
      * layout.
+     *
+     * Do not bypass the cache and update the typeface or font variation directly.
      *
      * @return a paint object
      */
@@ -44,6 +49,8 @@ class TextInterpolator(layout: Layout) {
      *
      * Once you modified the style parameters, you have to call reshapeText to recalculate target
      * text layout.
+     *
+     * Do not bypass the cache and update the typeface or font variation directly.
      *
      * @return a paint object
      */
@@ -211,8 +218,11 @@ class TextInterpolator(layout: Layout) {
                     run.baseX[i] = MathUtils.lerp(run.baseX[i], run.targetX[i], progress)
                     run.baseY[i] = MathUtils.lerp(run.baseY[i], run.targetY[i], progress)
                 }
-                run.fontRuns.forEach {
-                    it.baseFont = fontInterpolator.lerp(it.baseFont, it.targetFont, progress)
+                run.fontRuns.forEach { fontRun ->
+                    fontRun.baseFont =
+                        fontInterpolator.lerp(fontRun.baseFont, fontRun.targetFont, progress)
+                    val fvar = FontVariationAxis.toFontVariationSettings(fontRun.baseFont.axes)
+                    basePaint.typeface = typefaceCache.getTypefaceForVariant(fvar)
                 }
             }
         }
@@ -473,6 +483,7 @@ class TextInterpolator(layout: Layout) {
         // TODO(172943390): Add other interpolation or support custom interpolator.
         out.textSize = MathUtils.lerp(from.textSize, to.textSize, progress)
         out.color = ColorUtils.blendARGB(from.color, to.color, progress)
+        out.strokeWidth = MathUtils.lerp(from.strokeWidth, to.strokeWidth, progress)
     }
 
     // Shape the text and stores the result to out argument.

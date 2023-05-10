@@ -60,6 +60,7 @@ public class SlicePurchaseActivity extends Activity {
     @NonNull private Intent mIntent;
     @NonNull private URL mUrl;
     @TelephonyManager.PremiumCapability protected int mCapability;
+    private boolean mIsUserTriggeredFinish;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,6 +72,7 @@ public class SlicePurchaseActivity extends Activity {
                 SlicePurchaseController.PREMIUM_CAPABILITY_INVALID);
         String url = mIntent.getStringExtra(SlicePurchaseController.EXTRA_PURCHASE_URL);
         mApplicationContext = getApplicationContext();
+        mIsUserTriggeredFinish = true;
         logd("onCreate: subId=" + subId + ", capability="
                 + TelephonyManager.convertPremiumCapabilityToString(mCapability) + ", url=" + url);
 
@@ -153,10 +155,18 @@ public class SlicePurchaseActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        logd("onDestroy: User canceled the purchase by closing the application.");
-        SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
-                mIntent, SlicePurchaseController.EXTRA_INTENT_CANCELED);
+        if (mIsUserTriggeredFinish) {
+            logd("onDestroy: User canceled the purchase by closing the application.");
+            SlicePurchaseBroadcastReceiver.sendSlicePurchaseAppResponse(
+                    mIntent, SlicePurchaseController.EXTRA_INTENT_CANCELED);
+        }
         super.onDestroy();
+    }
+
+    @Override
+    public void finishAndRemoveTask() {
+        mIsUserTriggeredFinish = false;
+        super.finishAndRemoveTask();
     }
 
     private void setupWebView() {

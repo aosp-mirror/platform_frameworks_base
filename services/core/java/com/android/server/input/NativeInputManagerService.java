@@ -28,6 +28,7 @@ import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.PointerIcon;
 import android.view.VerifiedInputEvent;
+import android.view.ViewConfiguration;
 
 import java.util.List;
 
@@ -198,8 +199,6 @@ interface NativeInputManagerService {
 
     void changeKeyboardLayoutAssociation();
 
-    void notifyPointerDisplayIdChanged();
-
     void setDisplayEligibilityForPointerCapture(int displayId, boolean enabled);
 
     void setMotionClassifierEnabled(boolean enabled);
@@ -223,6 +222,34 @@ interface NativeInputManagerService {
 
     /** Set whether stylus button reporting through motion events should be enabled. */
     void setStylusButtonMotionEventsEnabled(boolean enabled);
+
+    /**
+     * Get the current position of the mouse cursor.
+     *
+     * If the mouse cursor is not currently shown, the coordinate values will be NaN-s.
+     *
+     * NOTE: This will grab the PointerController's lock, so we must be careful about calling this
+     * from the InputReader or Display threads, which may result in a deadlock.
+     */
+    float[] getMouseCursorPosition();
+
+    /** Set whether showing a pointer icon for styluses is enabled. */
+    void setStylusPointerIconEnabled(boolean enabled);
+
+    /**
+     * Report sysfs node changes. This may result in recreation of the corresponding InputDevice.
+     * The recreated device may contain new associated peripheral devices like Light, Battery, etc.
+     */
+    void sysfsNodeChanged(String sysfsNodePath);
+
+    /**
+     * Notify there is a change in any of the key gesture timeouts, such as the key
+     * repeat timeout or key repeat delay.
+     *
+     * @see ViewConfiguration#getKeyRepeatTimeout()
+     * @see ViewConfiguration#getKeyRepeatDelay()
+     */
+    void notifyKeyGestureTimeoutsChanged();
 
     /** The native implementation of InputManagerService methods. */
     class NativeImpl implements NativeInputManagerService {
@@ -433,9 +460,6 @@ interface NativeInputManagerService {
         public native void changeKeyboardLayoutAssociation();
 
         @Override
-        public native void notifyPointerDisplayIdChanged();
-
-        @Override
         public native void setDisplayEligibilityForPointerCapture(int displayId, boolean enabled);
 
         @Override
@@ -465,5 +489,17 @@ interface NativeInputManagerService {
 
         @Override
         public native void setStylusButtonMotionEventsEnabled(boolean enabled);
+
+        @Override
+        public native float[] getMouseCursorPosition();
+
+        @Override
+        public native void setStylusPointerIconEnabled(boolean enabled);
+
+        @Override
+        public native void sysfsNodeChanged(String sysfsNodePath);
+
+        @Override
+        public native void notifyKeyGestureTimeoutsChanged();
     }
 }

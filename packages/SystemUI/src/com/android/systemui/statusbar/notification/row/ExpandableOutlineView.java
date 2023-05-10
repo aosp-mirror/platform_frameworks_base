@@ -352,7 +352,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         IndentingPrintWriter pw = DumpUtilsKt.asIndenting(pwOriginal);
         super.dump(pw, args);
         DumpUtilsKt.withIncreasedIndent(pw, () -> {
-            pw.println("Roundness: " + getRoundableState().debugString());
+            pw.println(getRoundableState().debugString());
             if (DUMP_VERBOSE) {
                 pw.println("mCustomOutline: " + mCustomOutline + " mOutlineRect: " + mOutlineRect);
                 pw.println("mOutlineAlpha: " + mOutlineAlpha);

@@ -30,7 +30,6 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
-import android.os.Build;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -43,7 +42,6 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.compat.CompatChange;
 import com.android.server.compat.PlatformCompat;
 
 import java.io.PrintWriter;
@@ -52,26 +50,11 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * Manages and handles component aliases, which is an experimental feature.
+ * @deprecated This feature is no longer used. Delete this class.
  *
- * NOTE: THIS CLASS IS PURELY EXPERIMENTAL AND WILL BE REMOVED IN FUTURE ANDROID VERSIONS.
- * DO NOT USE IT.
- *
- * "Component alias" allows an android manifest component (for now only broadcasts and services)
- * to be defined in one android package while having the implementation in a different package.
- *
- * When/if this becomes a real feature, it will be most likely implemented very differently,
- * which is why this shouldn't be used.
- *
- * For now, because this is an experimental feature to evaluate feasibility, the implementation is
- * "quick & dirty". For example, to define aliases, we use a regular intent filter and meta-data
- * in the manifest, instead of adding proper tags/attributes to AndroidManifest.xml.
- *
- * This feature is disabled by default.
- *
- * Also, for now, aliases can be defined across packages with different certificates, but
- * in a final version this will most likely be tightened.
+ * Also delete Intnt.(set|get)OriginalIntent.
  */
+@Deprecated
 public class ComponentAliasResolver {
     private static final String TAG = "ComponentAliasResolver";
     private static final boolean DEBUG = true;
@@ -149,11 +132,6 @@ public class ComponentAliasResolver {
         }
     };
 
-    private final CompatChange.ChangeListener mCompatChangeListener = (packageName) -> {
-        if (DEBUG) Slog.d(TAG, "USE_EXPERIMENTAL_COMPONENT_ALIAS changed.");
-        BackgroundThread.getHandler().post(this::refresh);
-    };
-
     /**
      * Call this on systemRead().
      */
@@ -161,8 +139,6 @@ public class ComponentAliasResolver {
         synchronized (mLock) {
             mPlatformCompat = (PlatformCompat) ServiceManager.getService(
                     Context.PLATFORM_COMPAT_SERVICE);
-            mPlatformCompat.registerListener(USE_EXPERIMENTAL_COMPONENT_ALIAS,
-                    mCompatChangeListener);
         }
         if (DEBUG) Slog.d(TAG, "Compat listener set.");
         update(enabledByDeviceConfig, overrides);
@@ -176,10 +152,8 @@ public class ComponentAliasResolver {
             if (mPlatformCompat == null) {
                 return; // System not ready.
             }
-            final boolean enabled = Build.isDebuggable()
-                    && (enabledByDeviceConfig
-                        || mPlatformCompat.isChangeEnabledByPackageName(
-                        USE_EXPERIMENTAL_COMPONENT_ALIAS, "android", UserHandle.USER_SYSTEM));
+            // Never enable it.
+            final boolean enabled = false;
             if (enabled != mEnabled) {
                 Slog.i(TAG, (enabled ? "Enabling" : "Disabling") + " component aliases...");
                 FgThread.getHandler().post(() -> {

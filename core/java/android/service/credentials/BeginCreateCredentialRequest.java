@@ -18,7 +18,6 @@ package android.service.credentials;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -29,14 +28,8 @@ import com.android.internal.util.Preconditions;
  * Request for beginning a create credential request.
  *
  * See {@link BeginCreateCredentialResponse} for the counterpart response
- *
- * <p>Any class that derives this class must only add extra field values to the {@code slice}
- * object passed into the constructor. Any other field will not be parceled through. If the
- * derived class has custom parceling implementation, this class will not be able to unpack
- * the parcel without having access to that implementation.
  */
-@SuppressLint("ParcelNotFinal")
-public class BeginCreateCredentialRequest implements Parcelable {
+public final class BeginCreateCredentialRequest implements Parcelable {
     private final @Nullable CallingAppInfo mCallingAppInfo;
     private final @NonNull String mType;
     private final @NonNull Bundle mData;

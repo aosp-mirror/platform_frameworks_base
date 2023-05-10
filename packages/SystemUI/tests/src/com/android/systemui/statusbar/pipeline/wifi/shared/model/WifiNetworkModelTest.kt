@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.pipeline.wifi.shared.model
 
+import android.net.wifi.WifiManager.UNKNOWN_SSID
 import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -48,6 +49,42 @@ class WifiNetworkModelTest : SysuiTestCase() {
     @Test(expected = IllegalArgumentException::class)
     fun carrierMerged_invalidSubId_exceptionThrown() {
         WifiNetworkModel.CarrierMerged(NETWORK_ID, INVALID_SUBSCRIPTION_ID, 1)
+    }
+
+    @Test
+    fun active_hasValidSsid_nullSsid_false() {
+        val network =
+            WifiNetworkModel.Active(
+                NETWORK_ID,
+                level = MAX_VALID_LEVEL,
+                ssid = null,
+            )
+
+        assertThat(network.hasValidSsid()).isFalse()
+    }
+
+    @Test
+    fun active_hasValidSsid_unknownSsid_false() {
+        val network =
+            WifiNetworkModel.Active(
+                NETWORK_ID,
+                level = MAX_VALID_LEVEL,
+                ssid = UNKNOWN_SSID,
+            )
+
+        assertThat(network.hasValidSsid()).isFalse()
+    }
+
+    @Test
+    fun active_hasValidSsid_validSsid_true() {
+        val network =
+            WifiNetworkModel.Active(
+                NETWORK_ID,
+                level = MAX_VALID_LEVEL,
+                ssid = "FakeSsid",
+            )
+
+        assertThat(network.hasValidSsid()).isTrue()
     }
 
     // Non-exhaustive logDiffs test -- just want to make sure the logging logic isn't totally broken

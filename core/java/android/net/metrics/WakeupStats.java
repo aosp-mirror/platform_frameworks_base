@@ -80,18 +80,20 @@ public class WakeupStats {
                 break;
         }
 
-        switch (ev.dstHwAddr.getAddressType()) {
-            case MacAddress.TYPE_UNICAST:
-                l2UnicastCount++;
-                break;
-            case MacAddress.TYPE_MULTICAST:
-                l2MulticastCount++;
-                break;
-            case MacAddress.TYPE_BROADCAST:
-                l2BroadcastCount++;
-                break;
-            default:
-                break;
+        if (ev.dstHwAddr != null) {
+            switch (ev.dstHwAddr.getAddressType()) {
+                case MacAddress.TYPE_UNICAST:
+                    l2UnicastCount++;
+                    break;
+                case MacAddress.TYPE_MULTICAST:
+                    l2MulticastCount++;
+                    break;
+                case MacAddress.TYPE_BROADCAST:
+                    l2BroadcastCount++;
+                    break;
+                default:
+                    break;
+            }
         }
 
         increment(ethertypes, ev.ethertype);

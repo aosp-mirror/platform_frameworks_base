@@ -321,6 +321,34 @@ class EnforcePermissionDetectorTest : LintDetectorTest() {
             )
     }
 
+    fun testDoesDetectIssuesShortStringsNotAllowed() {
+        lint().files(java(
+            """
+            package test.pkg;
+            import android.annotation.EnforcePermission;
+            public class TestClass121 extends IFooMethod.Stub {
+                @Override
+                @EnforcePermission(anyOf={"INTERNET", "READ_PHONE_STATE"})
+                public void testMethodAnyLiteral() {}
+            }
+            """).indented(),
+            *stubs
+        )
+            .run()
+            .expect(
+                """
+                src/test/pkg/TestClass121.java:6: Error: The method \
+                TestClass121.testMethodAnyLiteral is annotated with @EnforcePermission(anyOf={"INTERNET", "READ_PHONE_STATE"}) \
+                which differs from the overridden method Stub.testMethodAnyLiteral: \
+                @android.annotation.EnforcePermission(anyOf={android.Manifest.permission.INTERNET, "android.permission.READ_PHONE_STATE"}). \
+                The same annotation must be used for both methods. [MismatchingEnforcePermissionAnnotation]
+                    public void testMethodAnyLiteral() {}
+                                ~~~~~~~~~~~~~~~~~~~~
+                1 errors, 0 warnings
+                """.addLineContinuation()
+            )
+    }
+
     /* Stubs */
 
     // A service with permission annotation on the method.

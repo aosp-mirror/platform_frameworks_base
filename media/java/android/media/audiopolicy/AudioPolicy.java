@@ -75,11 +75,13 @@ public class AudioPolicy {
      */
     public static final int POLICY_STATUS_REGISTERED = 2;
 
+    @GuardedBy("mLock")
     private int mStatus;
+    @GuardedBy("mLock")
     private String mRegistrationId;
-    private AudioPolicyStatusListener mStatusListener;
-    private boolean mIsFocusPolicy;
-    private boolean mIsTestFocusPolicy;
+    private final AudioPolicyStatusListener mStatusListener;
+    private final boolean mIsFocusPolicy;
+    private final boolean mIsTestFocusPolicy;
 
     /**
      * The list of AudioTrack instances created to inject audio into the associated mixes
@@ -115,6 +117,7 @@ public class AudioPolicy {
 
     private Context mContext;
 
+    @GuardedBy("mLock")
     private AudioPolicyConfig mConfig;
 
     private final MediaProjection mProjection;
@@ -552,7 +555,6 @@ public class AudioPolicy {
     /** @hide */
     public void reset() {
         setRegistration(null);
-        mConfig.reset();
     }
 
     public void setRegistration(String regId) {
@@ -563,6 +565,7 @@ public class AudioPolicy {
                 mStatus = POLICY_STATUS_REGISTERED;
             } else {
                 mStatus = POLICY_STATUS_UNREGISTERED;
+                mConfig.reset();
             }
         }
         sendMsg(MSG_POLICY_STATUS_CHANGE);
@@ -940,14 +943,9 @@ public class AudioPolicy {
     }
 
     private void onPolicyStatusChange() {
-        AudioPolicyStatusListener l;
-        synchronized (mLock) {
-            if (mStatusListener == null) {
-                return;
-            }
-            l = mStatusListener;
+        if (mStatusListener != null) {
+            mStatusListener.onStatusChange();
         }
-        l.onStatusChange();
     }
 
     //==================================================

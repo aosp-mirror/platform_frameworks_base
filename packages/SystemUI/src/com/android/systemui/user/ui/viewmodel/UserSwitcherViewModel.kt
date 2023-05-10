@@ -17,12 +17,10 @@
 
 package com.android.systemui.user.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import com.android.systemui.R
 import com.android.systemui.common.shared.model.Text
 import com.android.systemui.common.ui.drawable.CircularDrawable
-import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.user.domain.interactor.GuestUserInteractor
 import com.android.systemui.user.domain.interactor.UserInteractor
 import com.android.systemui.user.legacyhelper.ui.LegacyUserUiHelper
@@ -36,12 +34,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 /** Models UI state for the user switcher feature. */
+@SysUISingleton
 class UserSwitcherViewModel
-private constructor(
+@Inject
+constructor(
     private val userInteractor: UserInteractor,
     private val guestUserInteractor: GuestUserInteractor,
-    private val powerInteractor: PowerInteractor,
-) : ViewModel() {
+) {
 
     /** On-device users. */
     val users: Flow<List<UserViewModel>> =
@@ -112,34 +111,15 @@ private constructor(
         }
     }
 
-    private fun createFinishRequestedFlow(): Flow<Boolean> {
-        var mostRecentSelectedUserId: Int? = null
-        var mostRecentIsInteractive: Boolean? = null
-
-        return combine(
-            // When the user is switched, we should finish.
-            userInteractor.selectedUser
-                .map { it.id }
-                .map {
-                    val selectedUserChanged =
-                        mostRecentSelectedUserId != null && mostRecentSelectedUserId != it
-                    mostRecentSelectedUserId = it
-                    selectedUserChanged
-                },
-            // When the screen turns off, we should finish.
-            powerInteractor.isInteractive.map {
-                val screenTurnedOff = mostRecentIsInteractive == true && !it
-                mostRecentIsInteractive = it
-                screenTurnedOff
-            },
+    private fun createFinishRequestedFlow(): Flow<Boolean> =
+        combine(
             // When the cancel button is clicked, we should finish.
             hasCancelButtonBeenClicked,
             // If an executed action told us to finish, we should finish,
             isFinishRequiredDueToExecutedAction,
-        ) { selectedUserChanged, screenTurnedOff, cancelButtonClicked, executedActionFinish ->
-            selectedUserChanged || screenTurnedOff || cancelButtonClicked || executedActionFinish
+        ) { cancelButtonClicked, executedActionFinish ->
+            cancelButtonClicked || executedActionFinish
         }
-    }
 
     private fun toViewModel(
         model: UserModel,
@@ -208,24 +188,6 @@ private constructor(
             null
         } else {
             { userInteractor.selectUser(model.id) }
-        }
-    }
-
-    class Factory
-    @Inject
-    constructor(
-        private val userInteractor: UserInteractor,
-        private val guestUserInteractor: GuestUserInteractor,
-        private val powerInteractor: PowerInteractor,
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            @Suppress("UNCHECKED_CAST")
-            return UserSwitcherViewModel(
-                userInteractor = userInteractor,
-                guestUserInteractor = guestUserInteractor,
-                powerInteractor = powerInteractor,
-            )
-                as T
         }
     }
 }

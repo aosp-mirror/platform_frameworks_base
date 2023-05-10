@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.util.ColorUtilKt.hexColorString;
+
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
@@ -26,6 +28,9 @@ import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.util.AttributeSet;
 import android.view.View;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.systemui.Dumpable;
@@ -44,6 +49,7 @@ public class NotificationBackgroundView extends View implements Dumpable {
     private int mClipTopAmount;
     private int mClipBottomAmount;
     private int mTintColor;
+    @Nullable private Integer mRippleColor;
     private final float[] mCornerRadii = new float[8];
     private boolean mBottomIsRounded;
     private boolean mBottomAmountClips = true;
@@ -127,6 +133,7 @@ public class NotificationBackgroundView extends View implements Dumpable {
             unscheduleDrawable(mBackground);
         }
         mBackground = background;
+        mRippleColor = null;
         mBackground.mutate();
         if (mBackground != null) {
             mBackground.setCallback(this);
@@ -215,6 +222,9 @@ public class NotificationBackgroundView extends View implements Dumpable {
         if (mBackground instanceof RippleDrawable) {
             RippleDrawable ripple = (RippleDrawable) mBackground;
             ripple.setColor(ColorStateList.valueOf(color));
+            mRippleColor = color;
+        } else {
+            mRippleColor = null;
         }
     }
 
@@ -290,7 +300,7 @@ public class NotificationBackgroundView extends View implements Dumpable {
     }
 
     @Override
-    public void dump(PrintWriter pw, String[] args) {
+    public void dump(PrintWriter pw, @NonNull String[] args) {
         pw.println("mDontModifyCorners: " + mDontModifyCorners);
         pw.println("mClipTopAmount: " + mClipTopAmount);
         pw.println("mClipBottomAmount: " + mClipBottomAmount);
@@ -299,5 +309,8 @@ public class NotificationBackgroundView extends View implements Dumpable {
         pw.println("mBottomAmountClips: " + mBottomAmountClips);
         pw.println("mActualWidth: " + mActualWidth);
         pw.println("mActualHeight: " + mActualHeight);
+        pw.println("mTintColor: " + hexColorString(mTintColor));
+        pw.println("mRippleColor: " + hexColorString(mRippleColor));
+        pw.println("mBackground: " + mBackground);
     }
 }

@@ -19,8 +19,8 @@ package com.android.server.wm;
 import android.util.ArraySet;
 import android.util.SparseArray;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 final class WindowProcessControllerMap {
 
@@ -67,6 +67,7 @@ final class WindowProcessControllerMap {
             mPidMap.remove(pid);
             // remove process from mUidMap
             removeProcessFromUidMap(proc);
+            proc.destroy();
         }
     }
 

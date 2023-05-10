@@ -117,9 +117,6 @@ public final class LockPatternChecker {
             @Override
             protected void onPostExecute(Boolean result) {
                 callback.onChecked(result, mThrottleTimeout);
-                if (LockPatternUtils.isAutoPinConfirmFeatureAvailable()) {
-                    utils.setPinLength(userId, credentialCopy.size());
-                }
                 credentialCopy.zeroize();
             }
 

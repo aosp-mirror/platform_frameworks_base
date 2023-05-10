@@ -17,6 +17,7 @@
 package com.android.companiondevicemanager;
 
 import static com.android.companiondevicemanager.Utils.getIcon;
+import static com.android.companiondevicemanager.Utils.getImageColor;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -65,6 +66,10 @@ class DeviceListAdapter extends RecyclerView.Adapter<DeviceListAdapter.ViewHolde
             viewHolder.mImageView.setImageDrawable(
                     getIcon(mContext, android.R.drawable.stat_sys_data_bluetooth));
         }
+
+        viewHolder.mImageView.setColorFilter(
+                mContext.getResources().getColor(getImageColor(mContext), /* Theme= */null));
+
         return viewHolder;
     }
 

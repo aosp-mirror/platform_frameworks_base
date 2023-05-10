@@ -42,6 +42,9 @@
   ],
   "imports": [
     {
+      "path": "cts/tests/surfacecontrol"
+    },
+    {
       "path": "cts/tests/tests/uirendering"
     }
   ]

@@ -50,4 +50,8 @@ sealed class ShowDialogRequestModel(
     data class ShowUserSwitcherDialog(
         override val expandable: Expandable?,
     ) : ShowDialogRequestModel()
+
+    data class ShowUserSwitcherFullscreenDialog(
+        override val expandable: Expandable?,
+    ) : ShowDialogRequestModel()
 }

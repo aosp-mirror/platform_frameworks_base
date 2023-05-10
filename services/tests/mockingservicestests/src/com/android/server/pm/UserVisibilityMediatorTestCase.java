@@ -139,6 +139,13 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
     }
 
     @Test
+    public void testInvalidMode() {
+        assertThrows(IllegalArgumentException.class, () -> new UserVisibilityMediator(
+                /* visibleBackgroundUsersOnDisplaysEnabled= */ false,
+                /* visibleBackgroundUserOnDefaultDisplayAllowed= */ true, mHandler));
+    }
+
+    @Test
     public final void testAssignUserToDisplayOnStart_invalidUserIds() {
         assertThrows(IllegalArgumentException.class, () -> mMediator
                 .assignUserToDisplayOnStart(USER_NULL, USER_ID, FG, DEFAULT_DISPLAY));
@@ -589,6 +596,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
                 .that(mMediator.assignUserToExtraDisplay(userId, displayId))
                 .isTrue();
         expectUserIsVisibleOnDisplay(userId, displayId);
+        expectDisplaysAssignedToUserContainsDisplayId(userId, displayId);
 
         if (unassign) {
             Log.d(TAG, "Calling unassignUserFromExtraDisplay(" + userId + ", " + displayId + ")");
@@ -596,6 +604,7 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
                     .that(mMediator.unassignUserFromExtraDisplay(userId, displayId))
                     .isTrue();
             expectUserIsNotVisibleOnDisplay(userId, displayId);
+            expectDisplaysAssignedToUserDoesNotContainDisplayId(userId, displayId);
         }
     }
 
@@ -661,16 +670,35 @@ abstract class UserVisibilityMediatorTestCase extends ExpectableTestCase {
         expectUserIsNotVisibleOnDisplay(userId, INVALID_DISPLAY);
         expectUserIsNotVisibleOnDisplay(userId, SECONDARY_DISPLAY_ID);
         expectUserIsNotVisibleOnDisplay(userId, OTHER_SECONDARY_DISPLAY_ID);
+        expectDisplaysAssignedToUserIsEmpty(userId);
     }
 
     protected void expectDisplayAssignedToUser(@UserIdInt int userId, int displayId) {
-        expectWithMessage("getDisplayAssignedToUser(%s)", userId)
-                .that(mMediator.getDisplayAssignedToUser(userId)).isEqualTo(displayId);
+        expectWithMessage("getMainDisplayAssignedToUser(%s)", userId)
+                .that(mMediator.getMainDisplayAssignedToUser(userId)).isEqualTo(displayId);
     }
 
     protected void expectNoDisplayAssignedToUser(@UserIdInt int userId) {
-        expectWithMessage("getDisplayAssignedToUser(%s)", userId)
-                .that(mMediator.getDisplayAssignedToUser(userId)).isEqualTo(INVALID_DISPLAY);
+        expectWithMessage("getMainDisplayAssignedToUser(%s)", userId)
+                .that(mMediator.getMainDisplayAssignedToUser(userId)).isEqualTo(INVALID_DISPLAY);
+    }
+
+    protected void expectDisplaysAssignedToUserContainsDisplayId(
+            @UserIdInt int userId, int displayId) {
+        expectWithMessage("getDisplaysAssignedToUser(%s)", userId)
+                .that(mMediator.getDisplaysAssignedToUser(userId)).asList().contains(displayId);
+    }
+
+    protected void expectDisplaysAssignedToUserDoesNotContainDisplayId(
+            @UserIdInt int userId, int displayId) {
+        expectWithMessage("getDisplaysAssignedToUser(%s)", userId)
+                .that(mMediator.getDisplaysAssignedToUser(userId)).asList()
+                .doesNotContain(displayId);
+    }
+
+    protected void expectDisplaysAssignedToUserIsEmpty(@UserIdInt int userId) {
+        expectWithMessage("getDisplaysAssignedToUser(%s)", userId)
+                .that(mMediator.getDisplaysAssignedToUser(userId)).isNull();
     }
 
     protected void expectUserCannotBeUnassignedFromDisplay(@UserIdInt int userId, int displayId) {

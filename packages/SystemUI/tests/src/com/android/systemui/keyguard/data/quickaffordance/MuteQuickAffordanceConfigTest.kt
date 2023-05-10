@@ -19,7 +19,9 @@ package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.Context
 import android.media.AudioManager
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
@@ -37,7 +39,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.Mock
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
@@ -45,7 +46,8 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(JUnit4::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 class MuteQuickAffordanceConfigTest : SysuiTestCase() {
 
     private lateinit var underTest: MuteQuickAffordanceConfig
@@ -85,7 +87,7 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `picker state - volume fixed - not available`() = testScope.runTest {
+    fun pickerState_volumeFixed_notAvailable() = testScope.runTest {
         //given
         whenever(audioManager.isVolumeFixed).thenReturn(true)
 
@@ -97,7 +99,7 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `picker state - volume not fixed - available`() = testScope.runTest {
+    fun pickerState_volumeNotFixed_available() = testScope.runTest {
         //given
         whenever(audioManager.isVolumeFixed).thenReturn(false)
 
@@ -109,7 +111,7 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `triggered - state was previously NORMAL - currently SILENT - move to previous state`() = testScope.runTest {
+    fun triggered_stateWasPreviouslyNORMAL_currentlySILENT_moveToPreviousState() = testScope.runTest {
         //given
         val ringerModeCapture = argumentCaptor<Int>()
         whenever(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)
@@ -127,7 +129,7 @@ class MuteQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `triggered - state is not SILENT - move to SILENT ringer`() = testScope.runTest {
+    fun triggered_stateIsNotSILENT_moveToSILENTringer() = testScope.runTest {
         //given
         val ringerModeCapture = argumentCaptor<Int>()
         whenever(audioManager.ringerModeInternal).thenReturn(AudioManager.RINGER_MODE_NORMAL)

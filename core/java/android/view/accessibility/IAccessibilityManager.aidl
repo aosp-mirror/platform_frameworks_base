@@ -62,7 +62,7 @@ interface IAccessibilityManager {
             in IAccessibilityInteractionConnection connection);
 
     void registerUiTestAutomationService(IBinder owner, IAccessibilityServiceClient client,
-        in AccessibilityServiceInfo info, int flags);
+        in AccessibilityServiceInfo info, int userId, int flags);
 
     void unregisterUiTestAutomationService(IAccessibilityServiceClient client);
 
@@ -123,6 +123,9 @@ interface IAccessibilityManager {
     boolean startFlashNotificationSequence(String opPkg, int reason, IBinder token);
     boolean stopFlashNotificationSequence(String opPkg);
     boolean startFlashNotificationEvent(String opPkg, int reason, String reasonPkg);
+
+    boolean isAccessibilityTargetAllowed(String packageName, int uid, int userId);
+    boolean sendRestrictedDialogIntent(String packageName, int uid, int userId);
 
     parcelable WindowTransformationSpec {
         float[] transformationMatrix;

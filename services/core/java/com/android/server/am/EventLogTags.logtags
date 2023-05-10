@@ -53,7 +53,7 @@ option java_package com.android.server.am
 30037 am_process_start_timeout (User|1|5),(PID|1|5),(UID|1|5),(Process Name|3)
 
 # Unhandled exception
-30039 am_crash (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Exception|3),(Message|3),(File|3),(Line|1|5)
+30039 am_crash (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Exception|3),(Message|3),(File|3),(Line|1|5),(Recoverable|1|5)
 # Log.wtf() called
 30040 am_wtf (User|1|5),(PID|1|5),(Process Name|3),(Flags|1|5),(Tag|3),(Message|3)
 
@@ -121,10 +121,11 @@ option java_package com.android.server.am
 # Similarly, tags below are used by UserManagerService
 30091 um_user_visibility_changed (userId|1|5),(visible|1)
 
-# Foreground service start/stop events.
+# Foreground service start/stop/denied/timed_out events.
 30100 am_foreground_service_start (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
 30101 am_foreground_service_denied (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
 30102 am_foreground_service_stop (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
+30103 am_foreground_service_timed_out (User|1|5),(Component Name|3),(allowWhileInUse|1),(startReasonCode|3),(targetSdk|1|1),(callerTargetSdk|1|1),(notificationWasDeferred|1),(notificationShown|1),(durationMs|1|3),(startForegroundCount|1|1),(stopReason|3),(fgsType|1)
 
 # Intent Sender redirect for UserHandle.USER_CURRENT
 30110 am_intent_sender_redirect_user (userId|1|5)

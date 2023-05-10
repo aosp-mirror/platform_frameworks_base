@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.TRANSIT_OLD_KEYGUARD_UNOCCLUDE;
+
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_REMOTE_ANIMATIONS;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
 import static com.android.server.wm.RemoteAnimationAdapterWrapperProto.TARGET;
@@ -195,6 +197,13 @@ class RemoteAnimationController implements DeathRecipient {
                                 + " transit=%s, apps=%d, wallpapers=%d, nonApps=%d",
                         AppTransition.appTransitionOldToString(transit), appTargets.length,
                         wallpaperTargets.length, nonAppTargets.length);
+                if (AppTransition.isKeyguardOccludeTransitOld(transit)) {
+                    EventLogTags.writeWmSetKeyguardOccluded(
+                            transit == TRANSIT_OLD_KEYGUARD_UNOCCLUDE ? 0 : 1,
+                            1 /* animate */,
+                            transit,
+                            "onAnimationStart");
+                }
                 mRemoteAnimationAdapter.getRunner().onAnimationStart(transit, appTargets,
                         wallpaperTargets, nonAppTargets, mFinishedCallback);
             } catch (RemoteException e) {
@@ -353,10 +362,8 @@ class RemoteAnimationController implements DeathRecipient {
 
     private void invokeAnimationCancelled(String reason) {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "cancelAnimation(): reason=%s", reason);
-        final boolean isKeyguardOccluded = mDisplayContent.isKeyguardOccluded();
-
         try {
-            mRemoteAnimationAdapter.getRunner().onAnimationCancelled(isKeyguardOccluded);
+            mRemoteAnimationAdapter.getRunner().onAnimationCancelled();
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to notify cancel", e);
         }

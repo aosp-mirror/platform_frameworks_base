@@ -21,11 +21,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.keyguard.KeyguardSecurityModel
 import com.android.keyguard.KeyguardUpdateMonitor
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
+import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
@@ -41,9 +44,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class KeyguardBouncerViewModelTest : SysuiTestCase() {
@@ -75,7 +80,8 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
                 dismissCallbackRegistry,
                 context,
                 keyguardUpdateMonitor,
-                keyguardBypassController,
+                Mockito.mock(TrustRepository::class.java),
+                FakeFeatureFlags(),
             )
         underTest = KeyguardBouncerViewModel(bouncerView, bouncerInteractor)
     }
@@ -93,10 +99,22 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun shouldUpdateSideFps() = runTest {
+    fun shouldUpdateSideFps_show() = runTest {
         var count = 0
         val job = underTest.shouldUpdateSideFps.onEach { count++ }.launchIn(this)
-        repository.setPrimaryVisible(true)
+        repository.setPrimaryShow(true)
+        // Run the tasks that are pending at this point of virtual time.
+        runCurrent()
+        assertThat(count).isEqualTo(1)
+        job.cancel()
+    }
+
+    @Test
+    fun shouldUpdateSideFps_hide() = runTest {
+        repository.setPrimaryShow(true)
+        var count = 0
+        val job = underTest.shouldUpdateSideFps.onEach { count++ }.launchIn(this)
+        repository.setPrimaryShow(false)
         // Run the tasks that are pending at this point of virtual time.
         runCurrent()
         assertThat(count).isEqualTo(1)
@@ -111,6 +129,28 @@ class KeyguardBouncerViewModelTest : SysuiTestCase() {
         // Run the tasks that are pending at this point of virtual time.
         runCurrent()
         assertThat(sideFpsIsShowing).isEqualTo(true)
+        job.cancel()
+    }
+
+    @Test
+    fun isShowing() = runTest {
+        var isShowing: Boolean? = null
+        val job = underTest.isShowing.onEach { isShowing = it }.launchIn(this)
+        repository.setPrimaryShow(true)
+        // Run the tasks that are pending at this point of virtual time.
+        runCurrent()
+        assertThat(isShowing).isEqualTo(true)
+        job.cancel()
+    }
+
+    @Test
+    fun isNotShowing() = runTest {
+        var isShowing: Boolean? = null
+        val job = underTest.isShowing.onEach { isShowing = it }.launchIn(this)
+        repository.setPrimaryShow(false)
+        // Run the tasks that are pending at this point of virtual time.
+        runCurrent()
+        assertThat(isShowing).isEqualTo(false)
         job.cancel()
     }
 }

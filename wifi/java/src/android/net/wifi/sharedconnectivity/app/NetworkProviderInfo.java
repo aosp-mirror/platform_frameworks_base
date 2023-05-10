@@ -21,6 +21,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.net.wifi.sharedconnectivity.service.SharedConnectivityService;
+import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -83,12 +84,19 @@ public final class NetworkProviderInfo implements Parcelable {
     public @interface DeviceType {
     }
 
+    /**
+     * Key in extras bundle indicating that the device battery is charging.
+     * @hide
+     */
+    public static final String EXTRA_KEY_IS_BATTERY_CHARGING = "is_battery_charging";
+
     @DeviceType
     private final int mDeviceType;
     private final String mDeviceName;
     private final String mModelName;
     private final int mBatteryPercentage;
     private final int mConnectionStrength;
+    private final Bundle mExtras;
 
     /**
      * Builder class for {@link NetworkProviderInfo}.
@@ -99,6 +107,7 @@ public final class NetworkProviderInfo implements Parcelable {
         private String mModelName;
         private int mBatteryPercentage;
         private int mConnectionStrength;
+        private Bundle mExtras = Bundle.EMPTY;
 
         public Builder(@NonNull String deviceName, @NonNull String modelName) {
             Objects.requireNonNull(deviceName);
@@ -160,12 +169,24 @@ public final class NetworkProviderInfo implements Parcelable {
         /**
          * Sets the displayed connection strength of the remote device to the internet.
          *
-         * @param connectionStrength Connection strength in range 0 to 3.
+         * @param connectionStrength Connection strength in range 0 to 4.
          * @return Returns the Builder object.
          */
         @NonNull
-        public Builder setConnectionStrength(@IntRange(from = 0, to = 3) int connectionStrength) {
+        public Builder setConnectionStrength(@IntRange(from = 0, to = 4) int connectionStrength) {
             mConnectionStrength = connectionStrength;
+            return this;
+        }
+
+        /**
+         * Sets the extras bundle
+         *
+         * @return Returns the Builder object.
+         */
+        @NonNull
+        public Builder setExtras(@NonNull Bundle extras) {
+            Objects.requireNonNull(extras);
+            mExtras = extras;
             return this;
         }
 
@@ -177,7 +198,7 @@ public final class NetworkProviderInfo implements Parcelable {
         @NonNull
         public NetworkProviderInfo build() {
             return new NetworkProviderInfo(mDeviceType, mDeviceName, mModelName, mBatteryPercentage,
-                    mConnectionStrength);
+                    mConnectionStrength, mExtras);
         }
     }
 
@@ -191,19 +212,21 @@ public final class NetworkProviderInfo implements Parcelable {
         if (batteryPercentage < 0 || batteryPercentage > 100) {
             throw new IllegalArgumentException("BatteryPercentage must be in range 0-100");
         }
-        if (connectionStrength < 0 || connectionStrength > 3) {
-            throw new IllegalArgumentException("ConnectionStrength must be in range 0-3");
+        if (connectionStrength < 0 || connectionStrength > 4) {
+            throw new IllegalArgumentException("ConnectionStrength must be in range 0-4");
         }
     }
 
     private NetworkProviderInfo(@DeviceType int deviceType, @NonNull String deviceName,
-            @NonNull String modelName, int batteryPercentage, int connectionStrength) {
+            @NonNull String modelName, int batteryPercentage, int connectionStrength,
+            @NonNull Bundle extras) {
         validate(deviceType, deviceName, modelName, batteryPercentage, connectionStrength);
         mDeviceType = deviceType;
         mDeviceName = deviceName;
         mModelName = modelName;
         mBatteryPercentage = batteryPercentage;
         mConnectionStrength = connectionStrength;
+        mExtras = extras;
     }
 
     /**
@@ -249,11 +272,21 @@ public final class NetworkProviderInfo implements Parcelable {
     /**
      * Gets the displayed connection strength of the remote device to the internet.
      *
-     * @return Returns the connection strength in range 0 to 3.
+     * @return Returns the connection strength in range 0 to 4.
      */
-    @IntRange(from = 0, to = 3)
+    @IntRange(from = 0, to = 4)
     public int getConnectionStrength() {
         return mConnectionStrength;
+    }
+
+    /**
+     * Gets the extras Bundle.
+     *
+     * @return Returns a Bundle object.
+     */
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras;
     }
 
     @Override
@@ -280,6 +313,7 @@ public final class NetworkProviderInfo implements Parcelable {
         dest.writeString(mModelName);
         dest.writeInt(mBatteryPercentage);
         dest.writeInt(mConnectionStrength);
+        dest.writeBundle(mExtras);
     }
 
     @Override
@@ -295,7 +329,7 @@ public final class NetworkProviderInfo implements Parcelable {
     @NonNull
     public static NetworkProviderInfo readFromParcel(@NonNull Parcel in) {
         return new NetworkProviderInfo(in.readInt(), in.readString(), in.readString(), in.readInt(),
-                in.readInt());
+                in.readInt(), in.readBundle());
     }
 
     @NonNull
@@ -319,6 +353,7 @@ public final class NetworkProviderInfo implements Parcelable {
                 .append(", modelName=").append(mModelName)
                 .append(", batteryPercentage=").append(mBatteryPercentage)
                 .append(", connectionStrength=").append(mConnectionStrength)
+                .append(", extras=").append(mExtras.toString())
                 .append("]").toString();
     }
 }

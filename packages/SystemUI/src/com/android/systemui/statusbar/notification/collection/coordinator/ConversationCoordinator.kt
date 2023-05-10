@@ -24,6 +24,7 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifComparator
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
+import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.dagger.PeopleHeader
 import com.android.systemui.statusbar.notification.icon.ConversationIconManager
@@ -40,27 +41,28 @@ import javax.inject.Inject
  */
 @CoordinatorScope
 class ConversationCoordinator @Inject constructor(
-    private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
-    private val conversationIconManager: ConversationIconManager,
-    @PeopleHeader peopleHeaderController: NodeController
+        private val peopleNotificationIdentifier: PeopleNotificationIdentifier,
+        private val conversationIconManager: ConversationIconManager,
+        private val highPriorityProvider: HighPriorityProvider,
+        @PeopleHeader private val peopleHeaderController: NodeController,
 ) : Coordinator {
 
     private val promotedEntriesToSummaryOfSameChannel =
-        mutableMapOf<NotificationEntry, NotificationEntry>()
+            mutableMapOf<NotificationEntry, NotificationEntry>()
 
     private val onBeforeRenderListListener = OnBeforeRenderListListener { _ ->
         val unimportantSummaries = promotedEntriesToSummaryOfSameChannel
-            .mapNotNull { (promoted, summary) ->
-                val originalGroup = summary.parent
-                when {
-                    originalGroup == null -> null
-                    originalGroup == promoted.parent -> null
-                    originalGroup.parent == null -> null
-                    originalGroup.summary != summary -> null
-                    originalGroup.children.any { it.channel == summary.channel } -> null
-                    else -> summary.key
+                .mapNotNull { (promoted, summary) ->
+                    val originalGroup = summary.parent
+                    when {
+                        originalGroup == null -> null
+                        originalGroup == promoted.parent -> null
+                        originalGroup.parent == null -> null
+                        originalGroup.summary != summary -> null
+                        originalGroup.children.any { it.channel == summary.channel } -> null
+                        else -> summary.key
+                    }
                 }
-            }
         conversationIconManager.setUnimportantConversations(unimportantSummaries)
         promotedEntriesToSummaryOfSameChannel.clear()
     }
@@ -78,21 +80,23 @@ class ConversationCoordinator @Inject constructor(
         }
     }
 
-    val sectioner = object : NotifSectioner("People", BUCKET_PEOPLE) {
+    val peopleAlertingSectioner = object : NotifSectioner("People(alerting)", BUCKET_PEOPLE) {
         override fun isInSection(entry: ListEntry): Boolean =
-                isConversation(entry)
+               highPriorityProvider.isHighPriorityConversation(entry)
 
-        override fun getComparator() = object : NotifComparator("People") {
-            override fun compare(entry1: ListEntry, entry2: ListEntry): Int {
-                val type1 = getPeopleType(entry1)
-                val type2 = getPeopleType(entry2)
-                return type2.compareTo(type1)
-            }
-        }
+        override fun getComparator(): NotifComparator = notifComparator
 
-        override fun getHeaderNodeController() =
-                // TODO: remove SHOW_ALL_SECTIONS, this redundant method, and peopleHeaderController
-                if (RankingCoordinator.SHOW_ALL_SECTIONS) peopleHeaderController else null
+        override fun getHeaderNodeController(): NodeController? = conversationHeaderNodeController
+    }
+
+    val peopleSilentSectioner = object : NotifSectioner("People(silent)", BUCKET_PEOPLE) {
+        // Because the peopleAlertingSectioner is above this one, it will claim all conversations that are alerting.
+        // All remaining conversations must be silent.
+        override fun isInSection(entry: ListEntry): Boolean = isConversation(entry)
+
+        override fun getComparator(): NotifComparator = notifComparator
+
+        override fun getHeaderNodeController(): NodeController? = conversationHeaderNodeController
     }
 
     override fun attach(pipeline: NotifPipeline) {
@@ -101,15 +105,27 @@ class ConversationCoordinator @Inject constructor(
     }
 
     private fun isConversation(entry: ListEntry): Boolean =
-        getPeopleType(entry) != TYPE_NON_PERSON
+            getPeopleType(entry) != TYPE_NON_PERSON
 
     @PeopleNotificationType
     private fun getPeopleType(entry: ListEntry): Int =
-        entry.representativeEntry?.let {
-            peopleNotificationIdentifier.getPeopleNotificationType(it)
-        } ?: TYPE_NON_PERSON
+            entry.representativeEntry?.let {
+                peopleNotificationIdentifier.getPeopleNotificationType(it)
+            } ?: TYPE_NON_PERSON
 
-    companion object {
+    private val notifComparator: NotifComparator = object : NotifComparator("People") {
+        override fun compare(entry1: ListEntry, entry2: ListEntry): Int {
+            val type1 = getPeopleType(entry1)
+            val type2 = getPeopleType(entry2)
+            return type2.compareTo(type1)
+        }
+    }
+
+    // TODO: remove SHOW_ALL_SECTIONS, this redundant method, and peopleHeaderController
+    private val conversationHeaderNodeController: NodeController? =
+            if (RankingCoordinator.SHOW_ALL_SECTIONS) peopleHeaderController else null
+
+    private companion object {
         private const val TAG = "ConversationCoordinator"
     }
 }

@@ -23,6 +23,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import android.app.ActivityManager;
+
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -121,6 +123,34 @@ public class ProcessStatsTest extends TestCase {
                         eq(0),
                         eq(0),
                         eq(0),
+                        eq(0),
+                        eq(0),
+                        eq(0),
+                        eq(0));
+    }
+
+    @SmallTest
+    public void testDumpBoundFgsDuration() throws Exception {
+        ProcessStats processStats = new ProcessStats();
+        ProcessState processState =
+                processStats.getProcessStateLocked(
+                        APP_1_PACKAGE_NAME, APP_1_UID, APP_1_VERSION, APP_1_PROCESS_NAME);
+        processState.setState(ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE,
+                ProcessStats.ADJ_MEM_FACTOR_NORMAL, NOW_MS, /* pkgList */ null);
+        processState.commitStateTime(NOW_MS + TimeUnit.SECONDS.toMillis(DURATION_SECS));
+        processStats.dumpProcessState(FrameworkStatsLog.PROCESS_STATE, mStatsEventOutput);
+        verify(mStatsEventOutput)
+                .write(
+                        eq(FrameworkStatsLog.PROCESS_STATE),
+                        eq(APP_1_UID),
+                        eq(APP_1_PROCESS_NAME),
+                        anyInt(),
+                        anyInt(),
+                        eq(0),
+                        eq(0),
+                        eq(0),
+                        eq(0),
+                        eq(DURATION_SECS),
                         eq(0),
                         eq(0),
                         eq(0),

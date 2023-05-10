@@ -146,8 +146,6 @@ public class RecentsAnimationController implements DeathRecipient {
 
     @VisibleForTesting
     boolean mIsAddingTaskToTargets;
-    @VisibleForTesting
-    boolean mShouldAttachNavBarToAppDuringTransition;
     private boolean mNavigationBarAttachedToApp;
     private ActivityRecord mNavBarAttachedApp;
 
@@ -379,8 +377,6 @@ public class RecentsAnimationController implements DeathRecipient {
         mDisplayId = displayId;
         mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
         mDisplayContent = service.mRoot.getDisplayContent(displayId);
-        mShouldAttachNavBarToAppDuringTransition =
-                mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition();
     }
 
     /**
@@ -577,7 +573,7 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     private void attachNavigationBarToApp() {
-        if (!mShouldAttachNavBarToAppDuringTransition
+        if (!mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                 // Skip the case where the nav bar is controlled by fade rotation.
                 || mDisplayContent.getAsyncRotationController() != null) {
             return;
@@ -652,7 +648,7 @@ public class RecentsAnimationController implements DeathRecipient {
     }
 
     void animateNavigationBarForAppLaunch(long duration) {
-        if (!mShouldAttachNavBarToAppDuringTransition
+        if (!mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition()
                 // Skip the case where the nav bar is controlled by fade rotation.
                 || mDisplayContent.getAsyncRotationController() != null
                 || mNavigationBarAttachedToApp

@@ -244,6 +244,15 @@ public final class WakelockControllerTest {
         verifyZeroInteractions(mDisplayPowerCallbacks);
     }
 
+    @Test
+    public void testReleaseAll() throws Exception {
+        // Use WAKE_LOCK_MAX to verify it has been correctly set and used in releaseAll().
+        verifyWakelockAcquisition(WakelockController.WAKE_LOCK_MAX,
+                () -> mWakelockController.hasUnfinishedBusiness());
+        mWakelockController.releaseAll();
+        assertFalse(mWakelockController.hasUnfinishedBusiness());
+    }
+
     private void verifyWakelockAcquisitionAndReaquisition(int wakelockId,
             Callable<Boolean> isWakelockAcquiredCallable)
             throws Exception {
@@ -284,6 +293,4 @@ public final class WakelockControllerTest {
         assertFalse(mWakelockController.releaseWakelock(wakelockId));
         assertFalse(isWakelockAcquiredCallable.call());
     }
-
-
 }

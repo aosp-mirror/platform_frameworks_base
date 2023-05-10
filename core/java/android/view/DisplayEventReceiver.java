@@ -146,12 +146,16 @@ public abstract class DisplayEventReceiver {
         mMessageQueue = null;
     }
 
-    static final class VsyncEventData {
-        // The amount of frame timeline choices.
-        // Must be in sync with VsyncEventData::kFrameTimelinesLength in
-        // frameworks/native/libs/gui/include/gui/VsyncEventData.h. If they do not match, a runtime
-        // assertion is thrown when Choreographer is processing VsyncEventData.
-        static final int FRAME_TIMELINES_LENGTH = 7;
+    /**
+     * Class to capture all inputs required for syncing events data.
+     *
+     * @hide
+     */
+    public static final class VsyncEventData {
+        // The max capacity of frame timeline choices.
+        // Must be in sync with VsyncEventData::kFrameTimelinesCapacity in
+        // frameworks/native/libs/gui/include/gui/VsyncEventData.h
+        static final int FRAME_TIMELINES_CAPACITY = 7;
 
         public static class FrameTimeline {
             FrameTimeline() {}
@@ -162,6 +166,12 @@ public abstract class DisplayEventReceiver {
                 this.vsyncId = vsyncId;
                 this.expectedPresentationTime = expectedPresentationTime;
                 this.deadline = deadline;
+            }
+
+            void copyFrom(FrameTimeline other) {
+                vsyncId = other.vsyncId;
+                expectedPresentationTime = other.expectedPresentationTime;
+                deadline = other.deadline;
             }
 
             // The frame timeline vsync id, used to correlate a frame
@@ -187,8 +197,10 @@ public abstract class DisplayEventReceiver {
 
         public int preferredFrameTimelineIndex = 0;
 
+        public int frameTimelinesLength = 0;
+
         VsyncEventData() {
-            frameTimelines = new FrameTimeline[FRAME_TIMELINES_LENGTH];
+            frameTimelines = new FrameTimeline[FRAME_TIMELINES_CAPACITY];
             for (int i = 0; i < frameTimelines.length; i++) {
                 frameTimelines[i] = new FrameTimeline();
             }
@@ -197,10 +209,20 @@ public abstract class DisplayEventReceiver {
         // Called from native code.
         @SuppressWarnings("unused")
         VsyncEventData(FrameTimeline[] frameTimelines, int preferredFrameTimelineIndex,
-                long frameInterval) {
+                int frameTimelinesLength, long frameInterval) {
             this.frameTimelines = frameTimelines;
             this.preferredFrameTimelineIndex = preferredFrameTimelineIndex;
+            this.frameTimelinesLength = frameTimelinesLength;
             this.frameInterval = frameInterval;
+        }
+
+        void copyFrom(VsyncEventData other) {
+            preferredFrameTimelineIndex = other.preferredFrameTimelineIndex;
+            frameTimelinesLength = other.frameTimelinesLength;
+            frameInterval = other.frameInterval;
+            for (int i = 0; i < frameTimelines.length; i++) {
+                frameTimelines[i].copyFrom(other.frameTimelines[i]);
+            }
         }
 
         public FrameTimeline preferredFrameTimeline() {

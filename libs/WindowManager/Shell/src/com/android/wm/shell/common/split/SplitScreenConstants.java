@@ -59,4 +59,17 @@ public class SplitScreenConstants {
 
     /** Flag applied to a transition change to identify it as a divider bar for animation. */
     public static final int FLAG_IS_DIVIDER_BAR = FLAG_FIRST_CUSTOM;
+
+    public static final String splitPositionToString(@SplitPosition int pos) {
+        switch (pos) {
+            case SPLIT_POSITION_UNDEFINED:
+                return "SPLIT_POSITION_UNDEFINED";
+            case SPLIT_POSITION_TOP_OR_LEFT:
+                return "SPLIT_POSITION_TOP_OR_LEFT";
+            case SPLIT_POSITION_BOTTOM_OR_RIGHT:
+                return "SPLIT_POSITION_BOTTOM_OR_RIGHT";
+            default:
+                return "UNKNOWN";
+        }
+    }
 }

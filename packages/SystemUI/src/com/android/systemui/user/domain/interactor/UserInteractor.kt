@@ -26,6 +26,7 @@ import android.content.IntentFilter
 import android.content.pm.UserInfo
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
 import android.os.RemoteException
 import android.os.UserHandle
 import android.os.UserManager
@@ -49,7 +50,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
-import com.android.systemui.user.UserSwitcherActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -513,24 +513,12 @@ constructor(
         }
     }
 
-    fun showUserSwitcher(context: Context, expandable: Expandable) {
-        if (!featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+    fun showUserSwitcher(expandable: Expandable) {
+        if (featureFlags.isEnabled(Flags.FULL_SCREEN_USER_SWITCHER)) {
+            showDialog(ShowDialogRequestModel.ShowUserSwitcherFullscreenDialog(expandable))
+        } else {
             showDialog(ShowDialogRequestModel.ShowUserSwitcherDialog(expandable))
-            return
         }
-
-        val intent =
-            Intent(context, UserSwitcherActivity::class.java).apply {
-                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            }
-
-        activityStarter.startActivity(
-            intent,
-            true /* dismissShade */,
-            expandable.activityLaunchController(),
-            true /* showOverlockscreenwhenlocked */,
-            UserHandle.SYSTEM,
-        )
     }
 
     private fun showDialog(request: ShowDialogRequestModel) {
@@ -775,8 +763,18 @@ constructor(
         }
 
         // TODO(b/246631653): cache the bitmaps to avoid the background work to fetch them.
-        // TODO(b/246631653): downscale the bitmaps to R.dimen.max_avatar_size if requested.
-        val userIcon = withContext(backgroundDispatcher) { manager.getUserIcon(userId) }
+        val userIcon = withContext(backgroundDispatcher) {
+            manager.getUserIcon(userId)
+                ?.let { bitmap ->
+                    val iconSize =
+                        applicationContext
+                            .resources
+                            .getDimensionPixelSize(R.dimen.bouncer_user_switcher_icon_size)
+                    Icon.scaleDownIfNecessary(bitmap, iconSize, iconSize)
+                }
+        }
+
+
         if (userIcon != null) {
             return BitmapDrawable(userIcon)
         }

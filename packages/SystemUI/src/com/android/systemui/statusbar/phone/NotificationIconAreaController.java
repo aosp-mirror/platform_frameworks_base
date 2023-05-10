@@ -15,14 +15,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.collection.ArrayMap;
 
+import com.android.app.animation.Interpolators;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.plugins.DarkIconDispatcher;
 import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -92,6 +93,8 @@ public class NotificationIconAreaController implements
 
     private final DemoModeController mDemoModeController;
 
+    private final FeatureFlags mFeatureFlags;
+
     private int mAodIconAppearTranslation;
 
     private boolean mAnimationsEnabled;
@@ -122,11 +125,12 @@ public class NotificationIconAreaController implements
             Optional<Bubbles> bubblesOptional,
             DemoModeController demoModeController,
             DarkIconDispatcher darkIconDispatcher,
-            StatusBarWindowController statusBarWindowController,
+            FeatureFlags featureFlags, StatusBarWindowController statusBarWindowController,
             ScreenOffAnimationController screenOffAnimationController) {
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mStatusBarStateController = statusBarStateController;
+        mFeatureFlags = featureFlags;
         mStatusBarStateController.addCallback(this);
         mMediaManager = notificationMediaManager;
         mDozeParameters = dozeParameters;
@@ -192,8 +196,14 @@ public class NotificationIconAreaController implements
     }
 
     public void setupShelf(NotificationShelfController notificationShelfController) {
+        NotificationShelfController.assertRefactorFlagDisabled(mFeatureFlags);
         mShelfIcons = notificationShelfController.getShelfIcons();
-        notificationShelfController.setCollapsedIcons(mNotificationIcons);
+    }
+
+    public void setShelfIcons(NotificationIconContainer icons) {
+        if (NotificationShelfController.checkRefactorFlagEnabled(mFeatureFlags)) {
+            mShelfIcons = icons;
+        }
     }
 
     public void onDensityOrFontScaleChanged(Context context) {
@@ -594,6 +604,7 @@ public class NotificationIconAreaController implements
         }
         updateAodIconsVisibility(animate, false /* force */);
         updateAodNotificationIcons();
+        updateAodIconColors();
     }
 
     @Override

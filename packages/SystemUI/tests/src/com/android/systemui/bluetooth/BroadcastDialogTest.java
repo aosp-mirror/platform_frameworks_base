@@ -18,7 +18,11 @@ package com.android.systemui.bluetooth;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -29,7 +33,11 @@ import android.widget.TextView;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast;
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.settingslib.bluetooth.LocalBluetoothProfileManager;
 import com.android.systemui.R;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 
@@ -47,6 +55,12 @@ public class BroadcastDialogTest extends SysuiTestCase {
     private static final String CURRENT_BROADCAST_APP = "Music";
     private static final String SWITCH_APP = "System UI";
     private static final String TEST_PACKAGE = "com.android.systemui";
+    private final LocalBluetoothManager mLocalBluetoothManager = mock(LocalBluetoothManager.class);
+    private final LocalBluetoothProfileManager mLocalBluetoothProfileManager = mock(
+            LocalBluetoothProfileManager.class);
+    private final LocalBluetoothLeBroadcast mLocalBluetoothLeBroadcast = mock(
+            LocalBluetoothLeBroadcast.class);
+    private final BroadcastSender mBroadcastSender = mock(BroadcastSender.class);
     private BroadcastDialog mBroadcastDialog;
     private View mDialogView;
     private TextView mTitle;
@@ -57,9 +71,11 @@ public class BroadcastDialogTest extends SysuiTestCase {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(mLocalBluetoothManager.getProfileManager()).thenReturn(mLocalBluetoothProfileManager);
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(null);
         mBroadcastDialog = new BroadcastDialog(mContext, mock(MediaOutputDialogFactory.class),
-                CURRENT_BROADCAST_APP, TEST_PACKAGE, mock(UiEventLogger.class));
-
+                mLocalBluetoothManager, CURRENT_BROADCAST_APP, TEST_PACKAGE,
+                mock(UiEventLogger.class), mBroadcastSender);
         mBroadcastDialog.show();
         mDialogView = mBroadcastDialog.mDialogView;
     }
@@ -97,6 +113,63 @@ public class BroadcastDialogTest extends SysuiTestCase {
     public void onClick_withChangeOutput_dismissBroadcastDialog() {
         mChangeOutputButton = mDialogView.requireViewById(R.id.change_output);
         mChangeOutputButton.performClick();
+
+        assertThat(mBroadcastDialog.isShowing()).isFalse();
+    }
+
+    @Test
+    public void onClick_withSwitchBroadcast_stopCurrentBroadcast() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+        mSwitchBroadcastAppButton = mDialogView.requireViewById(R.id.switch_broadcast);
+        mSwitchBroadcastAppButton.performClick();
+
+        verify(mLocalBluetoothLeBroadcast).stopLatestBroadcast();
+    }
+
+    @Test
+    public void onClick_withSwitchBroadcast_stopCurrentBroadcastFailed() {
+        mSwitchBroadcastAppButton = mDialogView.requireViewById(R.id.switch_broadcast);
+        mSwitchBroadcastAppButton.performClick();
+
+        assertThat(mSwitchBroadcastAppButton.getText().toString()).isEqualTo(
+                mContext.getString(R.string.bt_le_audio_broadcast_dialog_switch_app, SWITCH_APP));
+    }
+
+    @Test
+    public void handleLeBroadcastStopped_withBroadcastProfileNull_doRefreshButton() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(null);
+        mSwitchBroadcastAppButton = mDialogView.requireViewById(R.id.switch_broadcast);
+
+        mBroadcastDialog.handleLeBroadcastStopped();
+
+        assertThat(mSwitchBroadcastAppButton.getText().toString()).isEqualTo(
+                mContext.getString(R.string.bt_le_audio_broadcast_dialog_switch_app, SWITCH_APP));
+    }
+
+    @Test
+    public void handleLeBroadcastStopped_withBroadcastProfile_doStartBroadcast() {
+        when(mLocalBluetoothProfileManager.getLeAudioBroadcastProfile()).thenReturn(
+                mLocalBluetoothLeBroadcast);
+
+        mBroadcastDialog.handleLeBroadcastStopped();
+
+        verify(mLocalBluetoothLeBroadcast).startBroadcast(eq(SWITCH_APP), any());
+    }
+
+    @Test
+    public void handleLeBroadcastMetadataChanged_withNotLaunchFlag_doNotDismissDialog() {
+
+        mBroadcastDialog.handleLeBroadcastMetadataChanged();
+
+        assertThat(mBroadcastDialog.isShowing()).isTrue();
+    }
+
+    @Test
+    public void handleLeBroadcastMetadataChanged_withLaunchFlag_dismissDialog() {
+
+        mBroadcastDialog.handleLeBroadcastStarted();
+        mBroadcastDialog.handleLeBroadcastMetadataChanged();
 
         assertThat(mBroadcastDialog.isShowing()).isFalse();
     }

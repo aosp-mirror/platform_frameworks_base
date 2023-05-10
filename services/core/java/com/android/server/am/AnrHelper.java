@@ -22,6 +22,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import android.content.pm.ApplicationInfo;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -29,8 +30,12 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.TimeoutRecord;
 import com.android.server.wm.WindowProcessController;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -59,13 +64,19 @@ class AnrHelper {
     /**
      * The keep alive time for the threads in the helper threadpool executor
     */
-    private static final int AUX_THREAD_KEEP_ALIVE_SECOND = 10;
+    private static final int DEFAULT_THREAD_KEEP_ALIVE_SECOND = 10;
 
     private static final ThreadFactory sDefaultThreadFactory =  r ->
             new Thread(r, "AnrAuxiliaryTaskExecutor");
+    private static final ThreadFactory sMainProcessDumpThreadFactory =  r ->
+            new Thread(r, "AnrMainProcessDumpThread");
 
     @GuardedBy("mAnrRecords")
     private final ArrayList<AnrRecord> mAnrRecords = new ArrayList<>();
+
+    private final Set<Integer> mTempDumpedPids =
+            Collections.synchronizedSet(new ArraySet<Integer>());
+
     private final AtomicBoolean mRunning = new AtomicBoolean(false);
 
     private final ActivityManagerService mService;
@@ -80,17 +91,21 @@ class AnrHelper {
     private int mProcessingPid = -1;
 
     private final ExecutorService mAuxiliaryTaskExecutor;
+    private final ExecutorService mEarlyDumpExecutor;
 
     AnrHelper(final ActivityManagerService service) {
-        this(service, new ThreadPoolExecutor(/* corePoolSize= */ 0, /* maximumPoolSize= */ 1,
-                /* keepAliveTime= */ AUX_THREAD_KEEP_ALIVE_SECOND, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(), sDefaultThreadFactory));
+        // All the ANR threads need to expire after a period of inactivity, given the
+        // ephemeral nature of ANRs and how infrequent they are.
+        this(service, makeExpiringThreadPoolWithSize(1, sDefaultThreadFactory),
+                makeExpiringThreadPoolWithSize(2, sMainProcessDumpThreadFactory));
     }
 
     @VisibleForTesting
-    AnrHelper(ActivityManagerService service, ExecutorService auxExecutor) {
+    AnrHelper(ActivityManagerService service, ExecutorService auxExecutor,
+            ExecutorService earlyDumpExecutor) {
         mService = service;
         mAuxiliaryTaskExecutor = auxExecutor;
+        mEarlyDumpExecutor = earlyDumpExecutor;
     }
 
     void appNotResponding(ProcessRecord anrProcess, TimeoutRecord timeoutRecord) {
@@ -121,6 +136,12 @@ class AnrHelper {
                             + timeoutRecord.mReason);
                     return;
                 }
+                if (!mTempDumpedPids.add(incomingPid)) {
+                    Slog.i(TAG,
+                            "Skip ANR being predumped, pid=" + incomingPid + " "
+                            + timeoutRecord.mReason);
+                    return;
+                }
                 for (int i = mAnrRecords.size() - 1; i >= 0; i--) {
                     if (mAnrRecords.get(i).mPid == incomingPid) {
                         Slog.i(TAG,
@@ -129,10 +150,24 @@ class AnrHelper {
                         return;
                     }
                 }
+                // We dump the main process as soon as we can on a different thread,
+                // this is done as the main process's dump can go stale in a few hundred
+                // milliseconds and the average full ANR dump takes a few seconds.
+                timeoutRecord.mLatencyTracker.earlyDumpRequestSubmittedWithSize(
+                        mTempDumpedPids.size());
+                Future<File> firstPidDumpPromise = mEarlyDumpExecutor.submit(() -> {
+                    // the class AnrLatencyTracker is not generally thread safe but the values
+                    // recorded/touched by the Temporary dump thread(s) are all volatile/atomic.
+                    File tracesFile = StackTracesDumpHelper.dumpStackTracesTempFile(incomingPid,
+                            timeoutRecord.mLatencyTracker);
+                    mTempDumpedPids.remove(incomingPid);
+                    return tracesFile;
+                });
+
                 timeoutRecord.mLatencyTracker.anrRecordPlacingOnQueueWithSize(mAnrRecords.size());
                 mAnrRecords.add(new AnrRecord(anrProcess, activityShortComponentName, aInfo,
-                        parentShortComponentName, parentProcess, aboveSystem,
-                        mAuxiliaryTaskExecutor, timeoutRecord, isContinuousAnr));
+                        parentShortComponentName, parentProcess, aboveSystem, timeoutRecord,
+                        isContinuousAnr, firstPidDumpPromise));
             }
             startAnrConsumerIfNeeded();
         } finally {
@@ -145,6 +180,16 @@ class AnrHelper {
         if (mRunning.compareAndSet(false, true)) {
             new AnrConsumerThread().start();
         }
+    }
+
+    private static ThreadPoolExecutor makeExpiringThreadPoolWithSize(int size,
+            ThreadFactory factory) {
+        ThreadPoolExecutor pool = new ThreadPoolExecutor(/* corePoolSize= */ size,
+                /* maximumPoolSize= */ size, /* keepAliveTime= */ DEFAULT_THREAD_KEEP_ALIVE_SECOND,
+                TimeUnit.SECONDS, new LinkedBlockingQueue<>(), factory);
+        // We allow the core threads to expire after the keepAliveTime.
+        pool.allowCoreThreadTimeOut(true);
+        return pool;
     }
 
     /**
@@ -219,7 +264,7 @@ class AnrHelper {
         }
     }
 
-    private static class AnrRecord {
+    private class AnrRecord {
         final ProcessRecord mApp;
         final int mPid;
         final String mActivityShortComponentName;
@@ -228,14 +273,14 @@ class AnrHelper {
         final ApplicationInfo mAppInfo;
         final WindowProcessController mParentProcess;
         final boolean mAboveSystem;
-        final ExecutorService mAuxiliaryTaskExecutor;
         final long mTimestamp = SystemClock.uptimeMillis();
         final boolean mIsContinuousAnr;
+        final Future<File> mFirstPidFilePromise;
         AnrRecord(ProcessRecord anrProcess, String activityShortComponentName,
                 ApplicationInfo aInfo, String parentShortComponentName,
                 WindowProcessController parentProcess, boolean aboveSystem,
-                ExecutorService auxiliaryTaskExecutor, TimeoutRecord timeoutRecord,
-                boolean isContinuousAnr) {
+                TimeoutRecord timeoutRecord, boolean isContinuousAnr,
+                Future<File> firstPidFilePromise) {
             mApp = anrProcess;
             mPid = anrProcess.mPid;
             mActivityShortComponentName = activityShortComponentName;
@@ -244,8 +289,8 @@ class AnrHelper {
             mAppInfo = aInfo;
             mParentProcess = parentProcess;
             mAboveSystem = aboveSystem;
-            mAuxiliaryTaskExecutor = auxiliaryTaskExecutor;
             mIsContinuousAnr = isContinuousAnr;
+            mFirstPidFilePromise = firstPidFilePromise;
         }
 
         void appNotResponding(boolean onlyDumpSelf) {
@@ -254,7 +299,7 @@ class AnrHelper {
                 mApp.mErrorState.appNotResponding(mActivityShortComponentName, mAppInfo,
                         mParentShortComponentName, mParentProcess, mAboveSystem,
                         mTimeoutRecord, mAuxiliaryTaskExecutor, onlyDumpSelf,
-                        mIsContinuousAnr);
+                        mIsContinuousAnr, mFirstPidFilePromise);
             } finally {
                 mTimeoutRecord.mLatencyTracker.anrProcessingEnded();
             }

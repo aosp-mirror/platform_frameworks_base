@@ -719,7 +719,7 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     root->InsertChild(0, std::move(uses_sdk));
   }
 
-  if (options_.compile_sdk_version) {
+  if (!options_.no_compile_sdk_metadata && options_.compile_sdk_version) {
     xml::Attribute* attr = root->FindOrCreateAttribute(xml::kSchemaAndroid, "compileSdkVersion");
 
     // Make sure we un-compile the value if it was set to something else.
@@ -731,10 +731,9 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     // Make sure we un-compile the value if it was set to something else.
     attr->compiled_value = {};
     attr->value = options_.compile_sdk_version.value();
-
   }
 
-  if (options_.compile_sdk_version_codename) {
+  if (!options_.no_compile_sdk_metadata && options_.compile_sdk_version_codename) {
     xml::Attribute* attr =
         root->FindOrCreateAttribute(xml::kSchemaAndroid, "compileSdkVersionCodename");
 
@@ -747,6 +746,23 @@ bool ManifestFixer::Consume(IAaptContext* context, xml::XmlResource* doc) {
     // Make sure we un-compile the value if it was set to something else.
     attr->compiled_value = {};
     attr->value = options_.compile_sdk_version_codename.value();
+  }
+
+  if (!options_.fingerprint_prefixes.empty()) {
+    xml::Element* install_constraints_el = root->FindChild({}, "install-constraints");
+    if (install_constraints_el == nullptr) {
+      std::unique_ptr<xml::Element> install_constraints = std::make_unique<xml::Element>();
+      install_constraints->name = "install-constraints";
+      install_constraints_el = install_constraints.get();
+      root->AppendChild(std::move(install_constraints));
+    }
+    for (const std::string& prefix : options_.fingerprint_prefixes) {
+      std::unique_ptr<xml::Element> prefix_el = std::make_unique<xml::Element>();
+      prefix_el->name = "fingerprint-prefix";
+      xml::Attribute* attr = prefix_el->FindOrCreateAttribute(xml::kSchemaAndroid, "value");
+      attr->value = prefix;
+      install_constraints_el->AppendChild(std::move(prefix_el));
+    }
   }
 
   xml::XmlActionExecutor executor;

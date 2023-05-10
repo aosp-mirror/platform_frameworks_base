@@ -25,6 +25,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.sharedconnectivity.app.HotspotNetwork;
@@ -40,8 +41,12 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.util.Log;
 
+import com.android.internal.R;
+
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 
 
 /**
@@ -64,9 +69,7 @@ public abstract class SharedConnectivityService extends Service {
             new RemoteCallbackList<>();
     private List<HotspotNetwork> mHotspotNetworks = Collections.emptyList();
     private List<KnownNetwork> mKnownNetworks = Collections.emptyList();
-    private SharedConnectivitySettingsState mSettingsState =
-            new SharedConnectivitySettingsState.Builder().setInstantTetherEnabled(false)
-                    .setExtras(Bundle.EMPTY).build();
+    private SharedConnectivitySettingsState mSettingsState = null;
     private HotspotNetworkConnectionStatus mHotspotNetworkConnectionStatus =
             new HotspotNetworkConnectionStatus.Builder()
                     .setStatus(HotspotNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
@@ -75,6 +78,8 @@ public abstract class SharedConnectivityService extends Service {
             new KnownNetworkConnectionStatus.Builder()
                     .setStatus(KnownNetworkConnectionStatus.CONNECTION_STATUS_UNKNOWN)
                     .setExtras(Bundle.EMPTY).build();
+    // Used for testing
+    private CountDownLatch mCountDownLatch;
 
     @Override
     @Nullable
@@ -198,6 +203,13 @@ public abstract class SharedConnectivityService extends Service {
             @Override
             public SharedConnectivitySettingsState getSettingsState() {
                 checkPermissions();
+                // Done lazily since creating it needs a context.
+                if (mSettingsState == null) {
+                    mSettingsState = new SharedConnectivitySettingsState
+                            .Builder()
+                            .setInstantTetherEnabled(false)
+                            .setExtras(Bundle.EMPTY).build();
+                }
                 return mSettingsState;
             }
 
@@ -256,12 +268,24 @@ public abstract class SharedConnectivityService extends Service {
     public void onBind() {
     }
 
+    /** @hide */
+    @TestApi
+    public final void setCountdownLatch(@Nullable CountDownLatch latch) {
+        mCountDownLatch = latch;
+    }
+
     private void onRegisterCallback(ISharedConnectivityCallback callback) {
         mRemoteCallbackList.register(callback);
+        if (mCountDownLatch != null) {
+            mCountDownLatch.countDown();
+        }
     }
 
     private void onUnregisterCallback(ISharedConnectivityCallback callback) {
         mRemoteCallbackList.unregister(callback);
+        if (mCountDownLatch != null) {
+            mCountDownLatch.countDown();
+        }
     }
 
     /**
@@ -379,6 +403,30 @@ public abstract class SharedConnectivityService extends Service {
             }
         }
         mRemoteCallbackList.finishBroadcast();
+    }
+
+    /**
+     * System and settings UI support on the device for instant tether.
+     * @return True if the UI can display Instant Tether network data. False otherwise.
+     */
+    public static boolean areHotspotNetworksEnabledForService(@NonNull Context context) {
+        String servicePackage = context.getResources()
+                .getString(R.string.config_sharedConnectivityServicePackage);
+        return Objects.equals(context.getPackageName(), servicePackage)
+                && context.getResources()
+                        .getBoolean(R.bool.config_hotspotNetworksEnabledForService);
+    }
+
+    /**
+     * System and settings UI support on the device for known networks.
+     * @return True if the UI can display known networks data. False otherwise.
+     */
+    public static boolean areKnownNetworksEnabledForService(@NonNull Context context) {
+        String servicePackage = context.getResources()
+                .getString(R.string.config_sharedConnectivityServicePackage);
+        return Objects.equals(context.getPackageName(), servicePackage)
+                && context.getResources()
+                        .getBoolean(R.bool.config_knownNetworksEnabledForService);
     }
 
     /**

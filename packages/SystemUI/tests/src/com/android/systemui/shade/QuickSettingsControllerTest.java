@@ -32,6 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -61,12 +62,14 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -77,36 +80,42 @@ import com.android.systemui.statusbar.StatusBarStateControllerImpl;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import dagger.Lazy;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import dagger.Lazy;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class QuickSettingsControllerTest extends SysuiTestCase {
 
-    private static final int SPLIT_SHADE_FULL_TRANSITION_DISTANCE = 400;
     private static final float QS_FRAME_START_X = 0f;
     private static final int QS_FRAME_WIDTH = 1000;
     private static final int QS_FRAME_TOP = 0;
     private static final int QS_FRAME_BOTTOM = 1000;
-
+    private static final int DEFAULT_HEIGHT = 1000;
+    // In split shade min = max
+    private static final int DEFAULT_MIN_HEIGHT_SPLIT_SHADE = DEFAULT_HEIGHT;
+    private static final int DEFAULT_MIN_HEIGHT = 300;
 
     private QuickSettingsController mQsController;
 
@@ -115,7 +124,6 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private KeyguardStatusBarView mKeyguardStatusBar;
     @Mock private QS mQs;
     @Mock private QSFragment mQSFragment;
-
     @Mock private Lazy<NotificationPanelViewController> mPanelViewControllerLazy;
     @Mock private NotificationPanelViewController mNotificationPanelViewController;
     @Mock private NotificationPanelView mPanelView;
@@ -126,6 +134,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
     @Mock private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock private LightBarController mLightBarController;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
@@ -147,11 +156,9 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private FeatureFlags mFeatureFlags;
     @Mock private InteractionJankMonitor mInteractionJankMonitor;
     @Mock private ShadeLogger mShadeLogger;
-
     @Mock private DumpManager mDumpManager;
-
-    @Mock private HeadsUpManagerPhone mHeadsUpManager;
     @Mock private UiEventLogger mUiEventLogger;
+    @Mock private CastController mCastController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
 
@@ -173,6 +180,8 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
         KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
         keyguardStatusView.setId(R.id.keyguard_status_view);
 
+        when(mResources.getDimensionPixelSize(
+                R.dimen.lockscreen_shade_qs_transition_distance)).thenReturn(DEFAULT_HEIGHT);
         when(mPanelView.getResources()).thenReturn(mResources);
         when(mPanelView.getContext()).thenReturn(getContext());
         when(mPanelView.findViewById(R.id.keyguard_header)).thenReturn(mKeyguardStatusBar);
@@ -216,6 +225,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mNotificationRemoteInputManager,
                 mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
+                mLightBarController,
                 mNotificationStackScrollLayoutController,
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
@@ -236,7 +246,10 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mMetricsLogger,
                 mFeatureFlags,
                 mInteractionJankMonitor,
-                mShadeLogger
+                mShadeLogger,
+                mock(KeyguardFaceAuthInteractor.class),
+                mock(ShadeRepository.class),
+                mCastController
         );
 
         mFragmentListener = mQsController.getQsFragmentListener();
@@ -272,9 +285,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
 
     @Test
     public void testPanelStaysOpenWhenClosingQs() {
-        mShadeExpansionStateManager.onPanelExpansionChanged(/* fraction= */ 1,
-                /* expanded= */ true, /* tracking= */ false, /* dragDownPxAmount= */ 0);
-        mQsController.setShadeExpandedHeight(1);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
 
         float shadeExpandedHeight = mQsController.getShadeExpandedHeight();
         mQsController.animateCloseQs(false);
@@ -286,7 +297,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     public void interceptTouchEvent_withinQs_shadeExpanded_startsQsTracking() {
         mQsController.setQs(mQs);
 
-        mQsController.setShadeExpandedHeight(1f);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
         mQsController.onIntercept(
                 createMotionEvent(0, 0, ACTION_DOWN));
         mQsController.onIntercept(
@@ -300,7 +311,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
         enableSplitShade(true);
         mQsController.setQs(mQs);
 
-        mQsController.setShadeExpandedHeight(1f);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
         mQsController.onIntercept(
                 createMotionEvent(0, 0, ACTION_DOWN));
         mQsController.onIntercept(
@@ -339,13 +350,8 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     public void handleTouch_downActionInQsArea() {
         mQsController.setQs(mQs);
         mQsController.setBarState(SHADE);
-        mQsController.onPanelExpansionChanged(
-                new ShadeExpansionChangeEvent(
-                        0.5f,
-                        true,
-                        true,
-                        0
-                ));
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 0.5f);
+
         MotionEvent event =
                 createMotionEvent(QS_FRAME_WIDTH / 2, QS_FRAME_BOTTOM / 2, ACTION_DOWN);
         mQsController.handleTouch(event, false, false);
@@ -382,7 +388,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Test
     public void handleTouch_isConflictingExpansionGestureSet() {
         assertThat(mQsController.isConflictingExpansionGesture()).isFalse();
-        mShadeExpansionStateManager.onPanelExpansionChanged(1f, true, false, 0f);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
         mQsController.handleTouch(MotionEvent.obtain(0L /* downTime */,
                 0L /* eventTime */, ACTION_DOWN, 0f /* x */, 0f /* y */,
                 0 /* metaState */), false, false);
@@ -391,7 +397,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
 
     @Test
     public void handleTouch_isConflictingExpansionGestureSet_cancel() {
-        mShadeExpansionStateManager.onPanelExpansionChanged(1f, true, false, 0f);
+        mQsController.setShadeExpansion(/* shadeExpandedHeight= */ 1, /* expandedFraction=*/ 1);
         mQsController.handleTouch(createMotionEvent(0, 0, ACTION_DOWN), false, false);
         assertThat(mQsController.isConflictingExpansionGesture()).isTrue();
         mQsController.handleTouch(createMotionEvent(0, 0, ACTION_UP), true, true);
@@ -529,6 +535,88 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
         assertThat(mQsController.isOpenQsEvent(event)).isTrue();
     }
 
+    @Test
+    public void shadeClosed_onLockscreen_inSplitShade_setsQsNotVisible() {
+        mQsController.setQs(mQs);
+        enableSplitShade(true);
+        lockScreen();
+
+        closeLockedQS();
+
+        assertQsVisible(false);
+    }
+
+    @Test
+    public void shadeOpened_onLockscreen_inSplitShade_setsQsVisible() {
+        mQsController.setQs(mQs);
+        enableSplitShade(true);
+        lockScreen();
+
+        openLockedQS();
+
+        assertQsVisible(true);
+    }
+
+    @Test
+    public void shadeClosed_onLockscreen_inSingleShade_setsQsNotVisible() {
+        mQsController.setQs(mQs);
+        enableSplitShade(false);
+        lockScreen();
+
+        closeLockedQS();
+
+        verify(mQs).setQsVisible(false);
+    }
+
+    @Test
+    public void shadeOpened_onLockscreen_inSingleShade_setsQsVisible() {
+        mQsController.setQs(mQs);
+        enableSplitShade(false);
+        lockScreen();
+
+        openLockedQS();
+
+        verify(mQs).setQsVisible(true);
+    }
+
+    private void lockScreen() {
+        mQsController.setBarState(KEYGUARD);
+    }
+
+    private void openLockedQS() {
+        when(mLockscreenShadeTransitionController.getQSDragProgress())
+                .thenReturn((float) DEFAULT_HEIGHT);
+        mLockscreenShadeTransitionCallback.setTransitionToFullShadeAmount(
+                /* pxAmount= */ DEFAULT_HEIGHT,
+                /* animate=*/ false,
+                /* delay= */ 0
+        );
+    }
+
+    private void closeLockedQS() {
+        when(mLockscreenShadeTransitionController.getQSDragProgress()).thenReturn(0f);
+        mLockscreenShadeTransitionCallback.setTransitionToFullShadeAmount(
+                /* pxAmount= */ 0,
+                /* animate=*/ false,
+                /* delay= */ 0
+        );
+    }
+
+    private void setSplitShadeHeightProperties() {
+        // In split shade, min = max
+        when(mQs.getQsMinExpansionHeight()).thenReturn(DEFAULT_MIN_HEIGHT_SPLIT_SHADE);
+        when(mQs.getDesiredHeight()).thenReturn(DEFAULT_HEIGHT);
+        mQsController.updateMinHeight();
+        mQsController.onHeightChanged();
+    }
+
+    private void setDefaultHeightProperties() {
+        when(mQs.getQsMinExpansionHeight()).thenReturn(DEFAULT_MIN_HEIGHT);
+        when(mQs.getDesiredHeight()).thenReturn(DEFAULT_HEIGHT);
+        mQsController.updateMinHeight();
+        mQsController.onHeightChanged();
+    }
+
     private static MotionEvent createMotionEvent(int x, int y, int action) {
         return MotionEvent.obtain(0, 0, action, x, y, 0);
     }
@@ -549,6 +637,11 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     private void enableSplitShade(boolean enabled) {
         when(mResources.getBoolean(R.bool.config_use_split_notification_shade)).thenReturn(enabled);
         mQsController.updateResources();
+        if (enabled) {
+            setSplitShadeHeightProperties();
+        } else {
+            setDefaultHeightProperties();
+        }
     }
 
     private void setIsFullWidth(boolean fullWidth) {
@@ -561,5 +654,11 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
         mQsController.handleShadeLayoutChanged(oldMaxHeight);
     }
 
-
+    private void assertQsVisible(boolean visible) {
+        ArgumentCaptor<Boolean> visibilityCaptor = ArgumentCaptor.forClass(Boolean.class);
+        verify(mQs, atLeastOnce()).setQsVisible(visibilityCaptor.capture());
+        List<Boolean> allVisibilities = visibilityCaptor.getAllValues();
+        boolean lastVisibility = allVisibilities.get(allVisibilities.size() - 1);
+        assertThat(lastVisibility).isEqualTo(visible);
+    }
 }

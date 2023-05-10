@@ -134,6 +134,15 @@ static inline JNIEnv* GetOrAttachJNIEnvironment(JavaVM* jvm, jint version = JNI_
     return env;
 }
 
+static inline void DieIfException(JNIEnv* env, const char* message) {
+    if (env->ExceptionCheck()) {
+        jnihelp::ExpandableString summary;
+        jnihelp::ExpandableStringInitialize(&summary);
+        jnihelp::GetStackTraceOrSummary(env, nullptr, &summary);
+        LOG_ALWAYS_FATAL("%s\n%s", message, summary.data);
+    }
+}
+
 }  // namespace android
 
 #endif  // CORE_JNI_HELPERS

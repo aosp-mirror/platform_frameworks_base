@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.ui
 
+import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -24,7 +25,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastSender
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
-import com.android.wm.shell.TaskView
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
+import com.android.wm.shell.taskview.TaskView
+import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -67,6 +71,25 @@ class DetailDialogTest : SysuiTestCase() {
 
         // THEN the PendingIntent used to call startActivity is unmodified by systemui
         verify(taskView).startActivity(eq(pendingIntent), any(), any(), any())
+    }
+
+    @Test
+    fun testActivityOptionsAllowBal() {
+        // GIVEN the dialog is created with a PendingIntent
+        val dialog = createDialog(pendingIntent)
+
+        // WHEN the TaskView is initialized
+        dialog.stateCallback.onInitialized()
+
+        val optionsCaptor = argumentCaptor<ActivityOptions>()
+
+        // THEN the ActivityOptions have the correct flags
+        verify(taskView).startActivity(any(), any(), capture(optionsCaptor), any())
+
+        assertThat(optionsCaptor.value.pendingIntentBackgroundActivityStartMode)
+            .isEqualTo(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+        assertThat(optionsCaptor.value.isPendingIntentBackgroundActivityLaunchAllowedByPermission)
+            .isTrue()
     }
 
     private fun createDialog(pendingIntent: PendingIntent): DetailDialog {

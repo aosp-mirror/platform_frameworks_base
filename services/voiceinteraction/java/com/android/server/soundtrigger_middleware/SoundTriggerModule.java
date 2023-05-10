@@ -19,16 +19,16 @@ package com.android.server.soundtrigger_middleware;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.media.soundtrigger.ModelParameterRange;
-import android.media.soundtrigger.PhraseRecognitionEvent;
 import android.media.soundtrigger.PhraseSoundModel;
 import android.media.soundtrigger.Properties;
 import android.media.soundtrigger.RecognitionConfig;
-import android.media.soundtrigger.RecognitionEvent;
 import android.media.soundtrigger.SoundModel;
-import android.media.soundtrigger.SoundModelType;
 import android.media.soundtrigger.Status;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
+import android.media.soundtrigger_middleware.PhraseRecognitionEventSys;
+import android.media.soundtrigger_middleware.RecognitionEventSys;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -92,13 +93,14 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
     /**
      * Ctor.
      *
-     * @param halFactory A factory for the underlying HAL driver.
+     * @param halFactory - A factory for the underlying HAL driver.
+     * @param audioSessionProvider - Creates a session token + device id/port pair used to
+     * associate recognition events with the audio stream used to access data.
      */
     SoundTriggerModule(@NonNull HalFactory halFactory,
             @NonNull SoundTriggerMiddlewareImpl.AudioSessionProvider audioSessionProvider) {
-        assert halFactory != null;
-        mHalFactory = halFactory;
-        mAudioSessionProvider = audioSessionProvider;
+        mHalFactory = Objects.requireNonNull(halFactory);
+        mAudioSessionProvider = Objects.requireNonNull(audioSessionProvider);
 
         attachToHal();
     }
@@ -167,7 +169,8 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
      */
     private void attachToHal() {
         mHalService = new SoundTriggerHalEnforcer(
-                new SoundTriggerHalWatchdog(mHalFactory.create()));
+                new SoundTriggerHalWatchdog(
+                    new SoundTriggerDuplicateModelHandler(mHalFactory.create())));
         mHalService.linkToDeath(this);
         mHalService.registerCallback(this);
         mProperties = mHalService.getProperties();
@@ -218,6 +221,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
      */
     private class Session implements ISoundTriggerModule {
         private ISoundTriggerCallback mCallback;
+        private final IBinder mToken = new Binder();
         private final Map<Integer, Model> mLoadedModels = new HashMap<>();
 
         /**
@@ -227,6 +231,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
          */
         private Session(@NonNull ISoundTriggerCallback callback) {
             mCallback = callback;
+            mHalService.clientAttached(mToken);
         }
 
         @Override
@@ -237,6 +242,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                 }
                 removeSession(this);
                 mCallback = null;
+                mHalService.clientDetached(mToken);
             }
         }
 
@@ -297,10 +303,10 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
         }
 
         @Override
-        public void startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
+        public IBinder startRecognition(int modelHandle, @NonNull RecognitionConfig config) {
             synchronized (SoundTriggerModule.this) {
                 checkValid();
-                mLoadedModels.get(modelHandle).startRecognition(config);
+                return mLoadedModels.get(modelHandle).startRecognition(config);
             }
         }
 
@@ -378,8 +384,9 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
         private class Model implements ISoundTriggerHal.ModelCallback {
             public int mHandle;
             private ModelState mState = ModelState.INIT;
-            private int mType = SoundModelType.INVALID;
             private SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession mSession;
+            private IBinder mRecognitionToken = null;
+            private boolean mIsStopping = false;
 
             private @NonNull
             ModelState getState() {
@@ -395,7 +402,6 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
                 mSession = audioSession;
                 mHandle = mHalService.loadSoundModel(model, this);
-                mType = SoundModelType.GENERIC;
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
@@ -405,7 +411,7 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                     SoundTriggerMiddlewareImpl.AudioSessionProvider.AudioSession audioSession) {
                 mSession = audioSession;
                 mHandle = mHalService.loadPhraseSoundModel(model, this);
-                mType = SoundModelType.KEYPHRASE;
+
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
@@ -421,10 +427,15 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                 return mSession.mSessionHandle;
             }
 
-            private void startRecognition(@NonNull RecognitionConfig config) {
+            private IBinder startRecognition(@NonNull RecognitionConfig config) {
+                if (mIsStopping == true) {
+                    throw new RecoverableException(Status.INTERNAL_ERROR, "Race occurred");
+                }
                 mHalService.startRecognition(mHandle, mSession.mDeviceHandle,
                         mSession.mIoHandle, config);
+                mRecognitionToken = new Binder();
                 setState(ModelState.ACTIVE);
+                return mRecognitionToken;
             }
 
             private void stopRecognition() {
@@ -433,35 +444,13 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
                         // This call is idempotent in order to avoid races.
                         return;
                     }
+                    mRecognitionToken = null;
+                    mIsStopping = true;
                 }
-                // This must be invoked outside the lock.
                 mHalService.stopRecognition(mHandle);
-
-                // No more callbacks for this model after this point.
                 synchronized (SoundTriggerModule.this) {
-                    // Generate an abortion callback to the client if the model is still active.
-                    if (getState() == ModelState.ACTIVE) {
-                        if (mCallback != null) {
-                            try {
-                                switch (mType) {
-                                    case SoundModelType.GENERIC:
-                                        mCallback.onRecognition(mHandle, AidlUtil.newAbortEvent(),
-                                                mSession.mSessionHandle);
-                                        break;
-                                    case SoundModelType.KEYPHRASE:
-                                        mCallback.onPhraseRecognition(mHandle,
-                                                AidlUtil.newAbortPhraseEvent(),
-                                                mSession.mSessionHandle);
-                                        break;
-                                    default:
-                                        throw new RuntimeException(
-                                                "Unexpected model type: " + mType);
-                                }
-                            } catch (RemoteException e) {
-                            }
-                        }
-                        setState(ModelState.LOADED);
-                    }
+                    mIsStopping = false;
+                    setState(ModelState.LOADED);
                 }
             }
 
@@ -492,18 +481,23 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
 
             @Override
             public void recognitionCallback(int modelHandle,
-                    @NonNull RecognitionEvent recognitionEvent) {
+                    @NonNull RecognitionEventSys event) {
                 ISoundTriggerCallback callback;
                 synchronized (SoundTriggerModule.this) {
-                    if (!recognitionEvent.recognitionStillActive) {
+                    if (mRecognitionToken == null) {
+                        return;
+                    }
+                    event.token = mRecognitionToken;
+                    if (!event.recognitionEvent.recognitionStillActive) {
                         setState(ModelState.LOADED);
+                        mRecognitionToken = null;
                     }
                     callback = mCallback;
                 }
                 // The callback must be invoked outside of the lock.
                 try {
                     if (callback != null) {
-                        callback.onRecognition(mHandle, recognitionEvent, mSession.mSessionHandle);
+                        callback.onRecognition(mHandle, event, mSession.mSessionHandle);
                     }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
@@ -513,20 +507,23 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
 
             @Override
             public void phraseRecognitionCallback(int modelHandle,
-                    @NonNull PhraseRecognitionEvent phraseRecognitionEvent) {
+                    @NonNull PhraseRecognitionEventSys event) {
                 ISoundTriggerCallback callback;
                 synchronized (SoundTriggerModule.this) {
-                    if (!phraseRecognitionEvent.common.recognitionStillActive) {
+                    if (mRecognitionToken == null) {
+                        return;
+                    }
+                    event.token = mRecognitionToken;
+                    if (!event.phraseRecognitionEvent.common.recognitionStillActive) {
                         setState(ModelState.LOADED);
+                        mRecognitionToken = null;
                     }
                     callback = mCallback;
                 }
-
                 // The callback must be invoked outside of the lock.
                 try {
                     if (callback != null) {
-                        mCallback.onPhraseRecognition(mHandle, phraseRecognitionEvent,
-                                mSession.mSessionHandle);
+                        mCallback.onPhraseRecognition(mHandle, event, mSession.mSessionHandle);
                     }
                 } catch (RemoteException e) {
                     // We're not expecting any exceptions here.
@@ -553,5 +550,4 @@ class SoundTriggerModule implements IBinder.DeathRecipient, ISoundTriggerHal.Glo
             }
         }
     }
-
 }

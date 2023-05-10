@@ -16,7 +16,7 @@ import android.util.AttributeSet
 import android.util.MathUtils.lerp
 import android.view.View
 import android.view.animation.PathInterpolator
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
 import com.android.systemui.statusbar.LightRevealEffect.Companion.getPercentPastThreshold
 import com.android.systemui.util.getColorWithAlpha
 import com.android.systemui.util.leak.RotationUtils

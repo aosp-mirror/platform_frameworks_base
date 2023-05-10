@@ -19,10 +19,12 @@ package com.android.keyguard;
 import static java.util.Collections.emptySet;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Trace;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewPropertyAnimator;
 import android.widget.GridLayout;
 
 import com.android.systemui.R;
@@ -118,9 +120,46 @@ public class KeyguardStatusView extends GridLayout {
     }
 
     @Override
+    public ViewPropertyAnimator animate() {
+        if (Build.IS_DEBUGGABLE) {
+            throw new IllegalArgumentException(
+                    "KeyguardStatusView does not support ViewPropertyAnimator. "
+                            + "Use PropertyAnimator instead.");
+        }
+        return super.animate();
+    }
+
+    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Trace.beginSection("KeyguardStatusView#onMeasure");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         Trace.endSection();
+    }
+
+    /**
+     * Clock content will be clipped when goes beyond bounds,
+     * so we setAlpha for all views except clock
+     */
+    public void setAlpha(float alpha, boolean excludeClock) {
+        if (!excludeClock) {
+            setAlpha(alpha);
+            return;
+        }
+        if (alpha == 1 || alpha == 0) {
+            setAlpha(alpha);
+        }
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child == mStatusViewContainer) {
+                for (int j = 0; j < mStatusViewContainer.getChildCount(); j++) {
+                    View innerChild = mStatusViewContainer.getChildAt(j);
+                    if (innerChild != mClockView) {
+                        innerChild.setAlpha(alpha);
+                    }
+                }
+            } else {
+                child.setAlpha(alpha);
+            }
+        }
     }
 }

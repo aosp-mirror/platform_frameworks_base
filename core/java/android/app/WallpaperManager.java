@@ -16,6 +16,11 @@
 
 package android.app;
 
+import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
+import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
+
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -28,6 +33,9 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -84,6 +92,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -108,15 +117,30 @@ import java.util.concurrent.TimeUnit;
  */
 @SystemService(Context.WALLPAPER_SERVICE)
 public class WallpaperManager {
+
     private static String TAG = "WallpaperManager";
     private static final boolean DEBUG = false;
+
+    /**
+     * Trying to read the wallpaper file or bitmap in T will return
+     * the default wallpaper bitmap/file instead of throwing a SecurityException.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    static final long RETURN_DEFAULT_ON_SECURITY_EXCEPTION = 239784307L;
+
+    /**
+     * In U and later, attempting to read the wallpaper file or bitmap will throw an exception,
+     * (except with the READ_WALLPAPER_INTERNAL permission).
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long THROW_ON_SECURITY_EXCEPTION = 237508058L;
+
     private float mWallpaperXStep = -1;
     private float mWallpaperYStep = -1;
     private static final @NonNull RectF LOCAL_COLOR_BOUNDS =
             new RectF(0, 0, 1, 1);
-
-    /** Temporary feature flag for project b/197814683 */
-    private final boolean mLockscreenLiveWallpaper;
 
     /** {@hide} */
     private static final String PROP_WALLPAPER = "ro.config.wallpaper";
@@ -207,6 +231,16 @@ public class WallpaperManager {
     public static final String COMMAND_WAKING_UP = "android.wallpaper.wakingup";
 
     /**
+     * Command for {@link #sendWallpaperCommand}: reported by System UI when the device keyguard
+     * starts going away.
+     * This command is triggered by {@link android.app.IActivityTaskManager#keyguardGoingAway(int)}.
+     *
+     * @hide
+     */
+    public static final String COMMAND_KEYGUARD_GOING_AWAY =
+            "android.wallpaper.keyguardgoingaway";
+
+    /**
      * Command for {@link #sendWallpaperCommand}: reported by System UI when the device is going to
      * sleep. The x and y arguments are a location (possibly very roughly) corresponding to the
      * action that caused the device to go to sleep. For example, if the power button was pressed,
@@ -279,6 +313,7 @@ public class WallpaperManager {
     private final Context mContext;
     private final boolean mWcgEnabled;
     private final ColorManagementProxy mCmProxy;
+    private static Boolean sIsLockscreenLiveWallpaperEnabled = null;
 
     /**
      * Special drawable that draws a wallpaper as fast as possible.  Assumes
@@ -585,7 +620,8 @@ public class WallpaperManager {
                 }
             }
             synchronized (this) {
-                if (mCachedWallpaper != null && mCachedWallpaper.isValid(userId, which)) {
+                if (mCachedWallpaper != null && mCachedWallpaper.isValid(userId, which) && context
+                        .checkSelfPermission(READ_WALLPAPER_INTERNAL) == PERMISSION_GRANTED) {
                     return mCachedWallpaper.mCachedWallpaper;
                 }
                 mCachedWallpaper = null;
@@ -596,6 +632,19 @@ public class WallpaperManager {
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "Out of memory loading the current wallpaper: " + e);
                 } catch (SecurityException e) {
+                    /*
+                     * Apps with target SDK <= S can still access the wallpaper through
+                     * READ_EXTERNAL_STORAGE. In T however, app that previously had access to the
+                     * wallpaper via READ_EXTERNAL_STORAGE will get a SecurityException here.
+                     * Thus, in T specifically, return the default wallpaper instead of crashing.
+                     */
+                    if (CompatChanges.isChangeEnabled(RETURN_DEFAULT_ON_SECURITY_EXCEPTION)
+                            && !CompatChanges.isChangeEnabled(THROW_ON_SECURITY_EXCEPTION)) {
+                        Log.w(TAG, "No permission to access wallpaper, returning default"
+                                + " wallpaper to avoid crashing legacy app.");
+                        return getDefaultWallpaper(context, FLAG_SYSTEM);
+                    }
+
                     if (context.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.O_MR1) {
                         Log.w(TAG, "No permission to access wallpaper, suppressing"
                                 + " exception to avoid crashing legacy app.");
@@ -609,15 +658,8 @@ public class WallpaperManager {
                     return currentWallpaper;
                 }
             }
-            if (returnDefault) {
-                Bitmap defaultWallpaper = mDefaultWallpaper;
-                if (defaultWallpaper == null || defaultWallpaper.isRecycled()) {
-                    defaultWallpaper = getDefaultWallpaper(context, which);
-                    synchronized (this) {
-                        mDefaultWallpaper = defaultWallpaper;
-                    }
-                }
-                return defaultWallpaper;
+            if (returnDefault || (which == FLAG_LOCK && isStaticWallpaper(FLAG_LOCK))) {
+                return getDefaultWallpaper(context, which);
             }
             return null;
         }
@@ -656,7 +698,7 @@ public class WallpaperManager {
             }
             // If user wallpaper is unavailable, may be the default one instead.
             if ((dimensions == null || dimensions.width() == 0 || dimensions.height() == 0)
-                    && returnDefault) {
+                    && (returnDefault || (which == FLAG_LOCK && isStaticWallpaper(FLAG_LOCK)))) {
                 InputStream is = openDefaultWallpaper(context, which);
                 if (is != null) {
                     try {
@@ -720,18 +762,39 @@ public class WallpaperManager {
         }
 
         private Bitmap getDefaultWallpaper(Context context, @SetWallpaperFlags int which) {
-            InputStream is = openDefaultWallpaper(context, which);
-            if (is != null) {
-                try {
-                    BitmapFactory.Options options = new BitmapFactory.Options();
-                    return BitmapFactory.decodeStream(is, null, options);
-                } catch (OutOfMemoryError e) {
+            Bitmap defaultWallpaper = mDefaultWallpaper;
+            if (defaultWallpaper == null || defaultWallpaper.isRecycled()) {
+                defaultWallpaper = null;
+                try (InputStream is = openDefaultWallpaper(context, which)) {
+                    if (is != null) {
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        defaultWallpaper = BitmapFactory.decodeStream(is, null, options);
+                    }
+                } catch (OutOfMemoryError | IOException e) {
                     Log.w(TAG, "Can't decode stream", e);
-                } finally {
-                    IoUtils.closeQuietly(is);
                 }
             }
-            return null;
+            synchronized (this) {
+                mDefaultWallpaper = defaultWallpaper;
+            }
+            return defaultWallpaper;
+        }
+
+        /**
+         * Return true if there is a static wallpaper on the specified screen.
+         * With {@code which=}{@link #FLAG_LOCK}, always return false if the lockscreen doesn't run
+         * its own wallpaper engine.
+         */
+        private boolean isStaticWallpaper(@SetWallpaperFlags int which) {
+            if (mService == null) {
+                Log.w(TAG, "WallpaperService not running");
+                throw new RuntimeException(new DeadSystemException());
+            }
+            try {
+                return mService.isStaticWallpaper(which);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -753,8 +816,6 @@ public class WallpaperManager {
         mWcgEnabled = context.getResources().getConfiguration().isScreenWideColorGamut()
                 && context.getResources().getBoolean(R.bool.config_enableWcgMode);
         mCmProxy = new ColorManagementProxy(context);
-        mLockscreenLiveWallpaper = context.getResources()
-                .getBoolean(R.bool.config_independentLockscreenLiveWallpaper);
     }
 
     // no-op constructor called just by DisabledWallpaperManager
@@ -762,7 +823,6 @@ public class WallpaperManager {
         mContext = null;
         mCmProxy = null;
         mWcgEnabled = false;
-        mLockscreenLiveWallpaper = false;
     }
 
     /**
@@ -786,7 +846,23 @@ public class WallpaperManager {
      */
     @TestApi
     public boolean isLockscreenLiveWallpaperEnabled() {
-        return mLockscreenLiveWallpaper;
+        return isLockscreenLiveWallpaperEnabledHelper();
+    }
+
+    private static boolean isLockscreenLiveWallpaperEnabledHelper() {
+        if (sGlobals == null) {
+            sIsLockscreenLiveWallpaperEnabled = SystemProperties.getBoolean(
+                    "persist.wm.debug.lockscreen_live_wallpaper", false);
+        }
+        if (sIsLockscreenLiveWallpaperEnabled == null) {
+            try {
+                sIsLockscreenLiveWallpaperEnabled =
+                        sGlobals.mService.isLockscreenLiveWallpaperEnabled();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return sIsLockscreenLiveWallpaperEnabled;
     }
 
     /**
@@ -808,48 +884,80 @@ public class WallpaperManager {
     }
 
     /**
-     * Retrieve the current system wallpaper; if
-     * no wallpaper is set, the system built-in static wallpaper is returned.
-     * This is returned as an
-     * abstract Drawable that you can install in a View to display whatever
-     * wallpaper the user has currently set.
-     * <p>
-     * This method can return null if there is no system wallpaper available, if
-     * wallpapers are not supported in the current user, or if the calling app is not
-     * permitted to access the system wallpaper.
+     * <strong> Important note: </strong>
+     * <ul>
+     *     <li>Up to version S, this method requires the
+     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
+     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     instead the default system wallpaper is returned
+     *     (some versions of T may throw a {@code SecurityException}).</li>
+     *     <li>From version U, this method should not be used
+     *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
+     * </ul>
      *
-     * @return Returns a Drawable object that will draw the system wallpaper,
-     *     or {@code null} if no system wallpaper exists or if the calling application
-     *     is not able to access the wallpaper.
+     * <p>
+     * Equivalent to {@link #getDrawable(int)} with {@code which=}{@link #FLAG_SYSTEM}.
+     * </p>
+     *
+     * @return A Drawable object for the requested wallpaper.
+     *
+     * @see #getDrawable(int)
+     *
+     * @throws SecurityException as described in the note
      */
-    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
+    @RequiresPermission(anyOf = {MANAGE_EXTERNAL_STORAGE, READ_WALLPAPER_INTERNAL})
     public Drawable getDrawable() {
         return getDrawable(FLAG_SYSTEM);
     }
 
     /**
-     * Retrieve the requested wallpaper; if
-     * no wallpaper is set, the requested built-in static wallpaper is returned.
-     * This is returned as an
-     * abstract Drawable that you can install in a View to display whatever
-     * wallpaper the user has currently set.
-     * <p>
-     * This method can return null if the requested wallpaper is not available, if
-     * wallpapers are not supported in the current user, or if the calling app is not
-     * permitted to access the requested wallpaper.
+     * <strong> Important note: </strong>
+     * <ul>
+     *     <li>Up to version S, this method requires the
+     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
+     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     instead the default system wallpaper is returned
+     *     (some versions of T may throw a {@code SecurityException}).</li>
+     *     <li>From version U, this method should not be used
+     *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
+     * </ul>
      *
-     * @param which The {@code FLAG_*} identifier of a valid wallpaper type.  Throws
+     * <p>
+     * Retrieve the requested wallpaper for the specified wallpaper type if the wallpaper is not
+     * a live wallpaper. This method should not be used to display the user wallpaper on an app:
+     * {@link android.view.WindowManager.LayoutParams#FLAG_SHOW_WALLPAPER} should be used instead.
+     * </p>
+     * <p>
+     * When called with {@code which=}{@link #FLAG_SYSTEM},
+     * if there is a live wallpaper on home screen, the built-in default wallpaper is returned.
+     * </p>
+     * <p>
+     * When called with {@code which=}{@link #FLAG_LOCK}, if there is a live wallpaper
+     * on lock screen, or if the lock screen and home screen share the same wallpaper engine,
+     * {@code null} is returned.
+     * </p>
+     * <p>
+     * {@link #getWallpaperInfo(int)} can be used to determine whether there is a live wallpaper
+     * on a specified screen type.
+     * </p>
+     *
+     * @param which The {@code FLAG_*} identifier of a valid wallpaper type. Throws
      *     IllegalArgumentException if an invalid wallpaper is requested.
-     * @return Returns a Drawable object that will draw the requested wallpaper,
-     *     or {@code null} if the requested wallpaper does not exist or if the calling application
-     *     is not able to access the wallpaper.
+     * @return A Drawable object for the requested wallpaper.
+     *
+     * @throws SecurityException as described in the note
      */
-    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
+    @RequiresPermission(anyOf = {MANAGE_EXTERNAL_STORAGE, READ_WALLPAPER_INTERNAL})
     public Drawable getDrawable(@SetWallpaperFlags int which) {
         final ColorManagementProxy cmProxy = getColorManagementProxy();
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, which, cmProxy);
+        boolean returnDefault = which != FLAG_LOCK;
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, returnDefault, which, cmProxy);
         if (bm != null) {
             Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
             dr.setDither(false);
@@ -1069,62 +1177,112 @@ public class WallpaperManager {
     }
 
     /**
-     * Retrieve the current system wallpaper; if there is no wallpaper set,
-     * a null pointer is returned. This is returned as an
-     * abstract Drawable that you can install in a View to display whatever
-     * wallpaper the user has currently set.
+     * <strong> Important note: </strong>
+     * <ul>
+     *     <li>Up to version S, this method requires the
+     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
+     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     instead the default system wallpaper is returned
+     *     (some versions of T may throw a {@code SecurityException}).</li>
+     *     <li>From version U, this method should not be used
+     *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
+     * </ul>
      *
-     * @return Returns a Drawable object that will draw the wallpaper or a
-     * null pointer if wallpaper is unset.
+     * <p>
+     * Equivalent to {@link #getDrawable()}.
+     * </p>
+     *
+     * @return A Drawable object for the requested wallpaper.
+     *
+     * @see #getDrawable()
+     *
+     * @throws SecurityException as described in the note
      */
     @Nullable
+    @RequiresPermission(anyOf = {MANAGE_EXTERNAL_STORAGE, READ_WALLPAPER_INTERNAL})
     public Drawable peekDrawable() {
         return peekDrawable(FLAG_SYSTEM);
     }
 
     /**
-     * Retrieve the requested wallpaper; if there is no wallpaper set,
-     * a null pointer is returned. This is returned as an
-     * abstract Drawable that you can install in a View to display whatever
-     * wallpaper the user has currently set.
+     * <strong> Important note: </strong>
+     * <ul>
+     *     <li>Up to version S, this method requires the
+     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
+     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     instead the default system wallpaper is returned
+     *     (some versions of T may throw a {@code SecurityException}).</li>
+     *     <li>From version U, this method should not be used
+     *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
+     * </ul>
      *
-     * @param which The {@code FLAG_*} identifier of a valid wallpaper type.  Throws
+     * <p>
+     * Equivalent to {@link #getDrawable(int)}.
+     * </p>
+     *
+     * @param which The {@code FLAG_*} identifier of a valid wallpaper type. Throws
      *     IllegalArgumentException if an invalid wallpaper is requested.
-     * @return Returns a Drawable object that will draw the wallpaper or a null pointer if
-     * wallpaper is unset.
+     * @return A Drawable object for the requested wallpaper.
+     *
+     * @see #getDrawable(int)
+     *
+     * @throws SecurityException as described in the note
      */
     @Nullable
+    @RequiresPermission(anyOf = {MANAGE_EXTERNAL_STORAGE, READ_WALLPAPER_INTERNAL})
     public Drawable peekDrawable(@SetWallpaperFlags int which) {
-        final ColorManagementProxy cmProxy = getColorManagementProxy();
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, which, cmProxy);
-        if (bm != null) {
-            Drawable dr = new BitmapDrawable(mContext.getResources(), bm);
-            dr.setDither(false);
-            return dr;
-        }
-        return null;
+        return getDrawable(which);
     }
 
     /**
-     * Like {@link #getDrawable()}, but the returned Drawable has a number
-     * of limitations to reduce its overhead as much as possible. It will
-     * never scale the wallpaper (only centering it if the requested bounds
-     * do match the bitmap bounds, which should not be typical), doesn't
-     * allow setting an alpha, color filter, or other attributes, etc.  The
-     * bounds of the returned drawable will be initialized to the same bounds
-     * as the wallpaper, so normally you will not need to touch it.  The
-     * drawable also assumes that it will be used in a context running in
-     * the same density as the screen (not in density compatibility mode).
+     * <strong> Important note: </strong>
+     * <ul>
+     *     <li>Up to version S, this method requires the
+     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
+     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     instead the default wallpaper is returned
+     *     (some versions of T may throw a {@code SecurityException}).</li>
+     *     <li>From version U, this method should not be used
+     *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
+     * </ul>
      *
-     * @return Returns a Drawable object that will draw the wallpaper.
+     * <p>
+     * Equivalent to {@link #getFastDrawable(int)} with {@code which=}{@link #FLAG_SYSTEM}.
+     * </p>
+     *
+     * @return A Drawable object for the requested wallpaper.
+     *
+     * @see #getFastDrawable(int)
+     *
+     * @throws SecurityException as described in the note
      */
-    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
+    @RequiresPermission(anyOf = {MANAGE_EXTERNAL_STORAGE, READ_WALLPAPER_INTERNAL})
     public Drawable getFastDrawable() {
         return getFastDrawable(FLAG_SYSTEM);
     }
 
     /**
+     * <strong> Important note: </strong>
+     * <ul>
+     *     <li>Up to version S, this method requires the
+     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
+     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     instead the default system wallpaper is returned
+     *     (some versions of T may throw a {@code SecurityException}).</li>
+     *     <li>From version U, this method should not be used
+     *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
+     * </ul>
+     * <br>
+     *
      * Like {@link #getDrawable(int)}, but the returned Drawable has a number
      * of limitations to reduce its overhead as much as possible. It will
      * never scale the wallpaper (only centering it if the requested bounds
@@ -1137,13 +1295,17 @@ public class WallpaperManager {
      *
      * @param which The {@code FLAG_*} identifier of a valid wallpaper type.  Throws
      *     IllegalArgumentException if an invalid wallpaper is requested.
-     * @return Returns a Drawable object that will draw the wallpaper.
+     * @return An optimized Drawable object for the requested wallpaper, or {@code null}
+     *     in some cases as specified in {@link #getDrawable(int)}.
+     *
+     * @throws SecurityException as described in the note
      */
-    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
+    @RequiresPermission(anyOf = {MANAGE_EXTERNAL_STORAGE, READ_WALLPAPER_INTERNAL})
     public Drawable getFastDrawable(@SetWallpaperFlags int which) {
         final ColorManagementProxy cmProxy = getColorManagementProxy();
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, which, cmProxy);
+        boolean returnDefault = which != FLAG_LOCK;
+        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, returnDefault, which, cmProxy);
         if (bm != null) {
             return new FastBitmapDrawable(bm);
         }
@@ -1151,40 +1313,71 @@ public class WallpaperManager {
     }
 
     /**
-     * Like {@link #getFastDrawable()}, but if there is no wallpaper set,
-     * a null pointer is returned.
+     * <strong> Important note: </strong>
+     * <ul>
+     *     <li>Up to version S, this method requires the
+     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
+     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     instead the default system wallpaper is returned
+     *     (some versions of T may throw a {@code SecurityException}).</li>
+     *     <li>From version U, this method should not be used
+     *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
+     * </ul>
      *
-     * @return Returns an optimized Drawable object that will draw the
-     * wallpaper or a null pointer if these is none.
+     * <p>
+     * Equivalent to {@link #getFastDrawable()}.
+     * </p>
+     *
+     * @return An optimized Drawable object for the requested wallpaper.
+     *
+     * @see #getFastDrawable()
+     *
+     * @throws SecurityException as described in the note
      */
-    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
+    @RequiresPermission(anyOf = {MANAGE_EXTERNAL_STORAGE, READ_WALLPAPER_INTERNAL})
     public Drawable peekFastDrawable() {
         return peekFastDrawable(FLAG_SYSTEM);
     }
 
     /**
-     * Like {@link #getFastDrawable()}, but if there is no wallpaper set,
-     * a null pointer is returned.
+     * <strong> Important note: </strong>
+     * <ul>
+     *     <li>Up to version S, this method requires the
+     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
+     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     instead the default system wallpaper is returned
+     *     (some versions of T may throw a {@code SecurityException}).</li>
+     *     <li>From version U, this method should not be used
+     *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
+     * </ul>
+     *
+     * <p>
+     * Equivalent to {@link #getFastDrawable(int)}.
+     * </p>
      *
      * @param which The {@code FLAG_*} identifier of a valid wallpaper type.  Throws
      *     IllegalArgumentException if an invalid wallpaper is requested.
-     * @return Returns an optimized Drawable object that will draw the
-     * wallpaper or a null pointer if these is none.
+     * @return An optimized Drawable object for the requested wallpaper.
+     *
+     * @throws SecurityException as described in the note
      */
-    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     @Nullable
+    @RequiresPermission(anyOf = {MANAGE_EXTERNAL_STORAGE, READ_WALLPAPER_INTERNAL})
     public Drawable peekFastDrawable(@SetWallpaperFlags int which) {
-        final ColorManagementProxy cmProxy = getColorManagementProxy();
-        Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, which, cmProxy);
-        if (bm != null) {
-            return new FastBitmapDrawable(bm);
-        }
-        return null;
+        return getFastDrawable(which);
     }
 
     /**
-     * Whether the wallpaper supports Wide Color Gamut or not.
+     * Whether the wallpaper supports Wide Color Gamut or not. This is only meant to be used by
+     * ImageWallpaper, and will always return false if the wallpaper for the specified screen
+     * is not an ImageWallpaper. This will also return false when called with {@link #FLAG_LOCK} if
+     * the lock and home screen share the same wallpaper engine.
+     *
      * @param which The wallpaper whose image file is to be retrieved. Must be a single
      *     defined kind of wallpaper, either {@link #FLAG_SYSTEM} or {@link #FLAG_LOCK}.
      * @return true when supported.
@@ -1194,7 +1387,6 @@ public class WallpaperManager {
      * @hide
      */
     @TestApi
-    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public boolean wallpaperSupportsWcg(int which) {
         if (!shouldEnableWideColorGamut()) {
             return false;
@@ -1231,7 +1423,7 @@ public class WallpaperManager {
     }
 
     /**
-     * Like {@link #getDrawable()} but returns a Bitmap.
+     * Like {@link #getDrawable(int)} but returns a Bitmap.
      *
      * @param hardware Asks for a hardware backed bitmap.
      * @param which Specifies home or lock screen
@@ -1254,7 +1446,7 @@ public class WallpaperManager {
     }
 
     /**
-     * Like {@link #getDrawable()} but returns a Bitmap for the provided user.
+     * Like {@link #getDrawable(int)} but returns a Bitmap for the provided user.
      *
      * @param which Specifies home or lock screen
      * @hide
@@ -1262,12 +1454,29 @@ public class WallpaperManager {
     @TestApi
     @Nullable
     public Bitmap getBitmapAsUser(int userId, boolean hardware, @SetWallpaperFlags int which) {
+        boolean returnDefault = which != FLAG_LOCK;
+        return getBitmapAsUser(userId, hardware, which, returnDefault);
+    }
+
+    /**
+     * Overload of {@link #getBitmapAsUser(int, boolean, int)} with a returnDefault argument.
+     *
+     * @param returnDefault If true, return the default static wallpaper if no custom static
+     *                      wallpaper is set on the specified screen.
+     *                      If false, return {@code null} in that case.
+     * @hide
+     */
+    @Nullable
+    public Bitmap getBitmapAsUser(int userId, boolean hardware,
+            @SetWallpaperFlags int which, boolean returnDefault) {
         final ColorManagementProxy cmProxy = getColorManagementProxy();
-        return sGlobals.peekWallpaperBitmap(mContext, true, which, userId, hardware, cmProxy);
+        return sGlobals.peekWallpaperBitmap(mContext, returnDefault,
+                which, userId, hardware, cmProxy);
     }
 
     /**
      * Peek the dimensions of system wallpaper of the user without decoding it.
+     * Equivalent to {@link #peekBitmapDimensions(int)} with {@code which=}{@link #FLAG_SYSTEM}.
      *
      * @return the dimensions of system wallpaper
      * @hide
@@ -1281,20 +1490,63 @@ public class WallpaperManager {
     /**
      * Peek the dimensions of given wallpaper of the user without decoding it.
      *
-     * @param which Wallpaper type. Must be either {@link #FLAG_SYSTEM} or
-     *     {@link #FLAG_LOCK}.
-     * @return the dimensions of system wallpaper
+     * <p>
+     * When called with {@code which=}{@link #FLAG_SYSTEM}, if there is a live wallpaper on
+     * home screen, the built-in default wallpaper dimensions are returned.
+     * </p>
+     * <p>
+     * When called with {@code which=}{@link #FLAG_LOCK}, if there is a live wallpaper
+     * on lock screen, or if the lock screen and home screen share the same wallpaper engine,
+     * {@code null} is returned.
+     * </p>
+     * <p>
+     * {@link #getWallpaperInfo(int)} can be used to determine whether there is a live wallpaper
+     * on a specified screen type.
+     * </p>
+     *
+     * @param which Wallpaper type. Must be either {@link #FLAG_SYSTEM} or {@link #FLAG_LOCK}.
+     * @return the dimensions of specified wallpaper
      * @hide
      */
     @TestApi
     @Nullable
     public Rect peekBitmapDimensions(@SetWallpaperFlags int which) {
+        boolean returnDefault = which != FLAG_LOCK;
+        return peekBitmapDimensions(which, returnDefault);
+    }
+
+    /**
+     * Overload of {@link #peekBitmapDimensions(int)} with a returnDefault argument.
+     *
+     * @param which Wallpaper type. Must be either {@link #FLAG_SYSTEM} or {@link #FLAG_LOCK}.
+     * @param returnDefault If true, always return the default static wallpaper dimensions
+     *                      if no custom static wallpaper is set on the specified screen.
+     *                      If false, always return {@code null} in that case.
+     * @return the dimensions of specified wallpaper
+     * @hide
+     */
+    @Nullable
+    public Rect peekBitmapDimensions(@SetWallpaperFlags int which, boolean returnDefault) {
         checkExactlyOneWallpaperFlagSet(which);
-        return sGlobals.peekWallpaperDimensions(mContext, true /* returnDefault */, which,
+        return sGlobals.peekWallpaperDimensions(mContext, returnDefault, which,
                 mContext.getUserId());
     }
 
     /**
+     * <strong> Important note: </strong>
+     * <ul>
+     *     <li>Up to version S, this method requires the
+     *     {@link android.Manifest.permission#READ_EXTERNAL_STORAGE} permission.</li>
+     *     <li>Starting in T, directly accessing the wallpaper is not possible anymore,
+     *     instead the default system wallpaper is returned
+     *     (some versions of T may throw a {@code SecurityException}).</li>
+     *     <li>From version U, this method should not be used
+     *     and will always throw a @code SecurityException}.</li>
+     *     <li> Apps with {@link android.Manifest.permission#MANAGE_EXTERNAL_STORAGE}
+     *     can still access the real wallpaper on all versions. </li>
+     * </ul>
+     * <br>
+     *
      * Get an open, readable file descriptor to the given wallpaper image file.
      * The caller is responsible for closing the file descriptor when done ingesting the file.
      *
@@ -1305,14 +1557,17 @@ public class WallpaperManager {
      * @param which The wallpaper whose image file is to be retrieved.  Must be a single
      *     defined kind of wallpaper, either {@link #FLAG_SYSTEM} or
      *     {@link #FLAG_LOCK}.
-     * @return An open, readable file desriptor to the requested wallpaper image file;
+     * @return An open, readable file descriptor to the requested wallpaper image file;
      *     or {@code null} if no such wallpaper is configured or if the calling app does
      *     not have permission to read the current wallpaper.
      *
      * @see #FLAG_LOCK
      * @see #FLAG_SYSTEM
+     *
+     * @throws SecurityException as described in the note
      */
-    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+    @Nullable
+    @RequiresPermission(anyOf = {MANAGE_EXTERNAL_STORAGE, READ_WALLPAPER_INTERNAL})
     public ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which) {
         return getWallpaperFile(which, mContext.getUserId());
     }
@@ -1475,13 +1730,18 @@ public class WallpaperManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             } catch (SecurityException e) {
+                if (CompatChanges.isChangeEnabled(RETURN_DEFAULT_ON_SECURITY_EXCEPTION)
+                        && !CompatChanges.isChangeEnabled(THROW_ON_SECURITY_EXCEPTION)) {
+                    Log.w(TAG, "No permission to access wallpaper, returning default"
+                            + " wallpaper file to avoid crashing legacy app.");
+                    return getDefaultSystemWallpaperFile();
+                }
                 if (mContext.getApplicationInfo().targetSdkVersion < Build.VERSION_CODES.O_MR1) {
                     Log.w(TAG, "No permission to access wallpaper, suppressing"
                             + " exception to avoid crashing legacy app.");
                     return null;
-                } else {
-                    throw e;
                 }
+                throw e;
             }
         }
     }
@@ -2558,7 +2818,7 @@ public class WallpaperManager {
     public static InputStream openDefaultWallpaper(Context context, @SetWallpaperFlags int which) {
         final String whichProp;
         final int defaultResId;
-        if (which == FLAG_LOCK) {
+        if (which == FLAG_LOCK && !isLockscreenLiveWallpaperEnabledHelper()) {
             /* Factory-default lock wallpapers are not yet supported
             whichProp = PROP_LOCK_WALLPAPER;
             defaultResId = com.android.internal.R.drawable.default_lock_wallpaper;
@@ -2586,6 +2846,24 @@ public class WallpaperManager {
         return null;
     }
 
+    /**
+     * util used in T to return a default system wallpaper file
+     * when third party apps attempt to read the wallpaper with {@link #getWallpaperFile}
+     */
+    private static ParcelFileDescriptor getDefaultSystemWallpaperFile() {
+        for (String path: getDefaultSystemWallpaperPaths()) {
+            File file = new File(path);
+            if (file.exists()) {
+                try {
+                    return ParcelFileDescriptor.open(file, MODE_READ_ONLY);
+                } catch (FileNotFoundException e) {
+                    // continue; default wallpaper file not found on this path
+                }
+            }
+        }
+        return null;
+    }
+
     private static InputStream getWallpaperInputStream(String path) {
         if (!TextUtils.isEmpty(path)) {
             final File file = new File(path);
@@ -2598,6 +2876,14 @@ public class WallpaperManager {
             }
         }
         return null;
+    }
+
+    /**
+     * @return a list of paths to the system default wallpapers, in order of priority:
+     * if the file exists for the first path of this list, the first path should be used.
+     */
+    private static List<String> getDefaultSystemWallpaperPaths() {
+        return List.of(SystemProperties.get(PROP_WALLPAPER), getCmfWallpaperPath());
     }
 
     private static String getCmfWallpaperPath() {
@@ -2626,19 +2912,60 @@ public class WallpaperManager {
             }
         }
 
-        // Check if the package exists
-        if (cn != null) {
-            try {
-                final PackageManager packageManager = context.getPackageManager();
-                packageManager.getPackageInfo(cn.getPackageName(),
-                        PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
-            } catch (PackageManager.NameNotFoundException e) {
-                cn = null;
-            }
+        if (!isComponentExist(context, cn)) {
+            cn = null;
         }
 
         return cn;
+    }
+
+    /**
+     * Return {@link ComponentName} of the CMF default wallpaper, or
+     * {@link #getDefaultWallpaperComponent(Context)} if none is defined.
+     *
+     * @hide
+     */
+    public static ComponentName getCmfDefaultWallpaperComponent(Context context) {
+        ComponentName cn = null;
+        String[] cmfWallpaperMap = context.getResources().getStringArray(
+                com.android.internal.R.array.cmf_default_wallpaper_component);
+        if (cmfWallpaperMap == null || cmfWallpaperMap.length == 0) {
+            Log.d(TAG, "No CMF wallpaper config");
+            return getDefaultWallpaperComponent(context);
+        }
+
+        for (String entry : cmfWallpaperMap) {
+            String[] cmfWallpaper;
+            if (!TextUtils.isEmpty(entry)) {
+                cmfWallpaper = entry.split(",");
+                if (cmfWallpaper != null && cmfWallpaper.length == 2 && VALUE_CMF_COLOR.equals(
+                        cmfWallpaper[0]) && !TextUtils.isEmpty(cmfWallpaper[1])) {
+                    cn = ComponentName.unflattenFromString(cmfWallpaper[1]);
+                    break;
+                }
+            }
+        }
+
+        if (!isComponentExist(context, cn)) {
+            cn = null;
+        }
+
+        return cn;
+    }
+
+    private static boolean isComponentExist(Context context, ComponentName cn) {
+        if (cn == null) {
+            return false;
+        }
+        try {
+            final PackageManager packageManager = context.getPackageManager();
+            packageManager.getPackageInfo(cn.getPackageName(),
+                    PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
     /**

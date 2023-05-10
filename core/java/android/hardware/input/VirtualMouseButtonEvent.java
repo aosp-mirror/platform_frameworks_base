@@ -21,6 +21,8 @@ import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
+import android.view.InputEvent;
 import android.view.MotionEvent;
 
 import java.lang.annotation.Retention;
@@ -81,21 +83,26 @@ public final class VirtualMouseButtonEvent implements Parcelable {
 
     private final @Action int mAction;
     private final @Button int mButtonCode;
+    private final long mEventTimeNanos;
 
-    private VirtualMouseButtonEvent(@Action int action, @Button int buttonCode) {
+    private VirtualMouseButtonEvent(@Action int action, @Button int buttonCode,
+            long eventTimeNanos) {
         mAction = action;
         mButtonCode = buttonCode;
+        mEventTimeNanos = eventTimeNanos;
     }
 
     private VirtualMouseButtonEvent(@NonNull Parcel parcel) {
         mAction = parcel.readInt();
         mButtonCode = parcel.readInt();
+        mEventTimeNanos = parcel.readLong();
     }
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int parcelableFlags) {
         parcel.writeInt(mAction);
         parcel.writeInt(mButtonCode);
+        parcel.writeLong(mEventTimeNanos);
     }
 
     @Override
@@ -118,12 +125,23 @@ public final class VirtualMouseButtonEvent implements Parcelable {
     }
 
     /**
+     * Returns the time this event occurred, in the {@link SystemClock#uptimeMillis()} time base but
+     * with nanosecond (instead of millisecond) precision.
+     *
+     * @see InputEvent#getEventTime()
+     */
+    public long getEventTimeNanos() {
+        return mEventTimeNanos;
+    }
+
+    /**
      * Builder for {@link VirtualMouseButtonEvent}.
      */
     public static final class Builder {
 
         private @Action int mAction = ACTION_UNKNOWN;
         private @Button int mButtonCode = -1;
+        private long mEventTimeNanos = 0L;
 
         /**
          * Creates a {@link VirtualMouseButtonEvent} object with the current builder configuration.
@@ -133,7 +151,7 @@ public final class VirtualMouseButtonEvent implements Parcelable {
                 throw new IllegalArgumentException(
                         "Cannot build virtual mouse button event with unset fields");
             }
-            return new VirtualMouseButtonEvent(mAction, mButtonCode);
+            return new VirtualMouseButtonEvent(mAction, mButtonCode, mEventTimeNanos);
         }
 
         /**
@@ -163,6 +181,23 @@ public final class VirtualMouseButtonEvent implements Parcelable {
                 throw new IllegalArgumentException("Unsupported mouse button action type");
             }
             mAction = action;
+            return this;
+        }
+
+        /**
+         * Sets the time (in nanoseconds) when this specific event was generated. This may be
+         * obtained from {@link SystemClock#uptimeMillis()} (with nanosecond precision instead of
+         * millisecond), but can be different depending on the use case.
+         * This field is optional and can be omitted.
+         *
+         * @return this builder, to allow for chaining of calls
+         * @see InputEvent#getEventTime()
+         */
+        public @NonNull Builder setEventTimeNanos(long eventTimeNanos) {
+            if (eventTimeNanos < 0L) {
+                throw new IllegalArgumentException("Event time cannot be negative");
+            }
+            this.mEventTimeNanos = eventTimeNanos;
             return this;
         }
     }

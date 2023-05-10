@@ -238,7 +238,7 @@ public abstract class PolicyUpdateReceiver extends BroadcastReceiver {
      *                               needed.
      * @param targetUser The {@link TargetUser} which this policy relates to.
      * @param policyUpdateResult Indicates whether the policy has been set successfully
-     *                           ({@link PolicyUpdateResult#RESULT_SUCCESS}) or the reason it
+     *                           ({@link PolicyUpdateResult#RESULT_POLICY_SET}) or the reason it
      *                           failed to apply (e.g.
      *                           {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY},
      *                           etc).
@@ -271,8 +271,8 @@ public abstract class PolicyUpdateReceiver extends BroadcastReceiver {
      *                               needed.
      * @param targetUser The {@link TargetUser} which this policy relates to.
      * @param policyUpdateResult Indicates the reason the policy value has changed
-     *                           (e.g. {@link PolicyUpdateResult#RESULT_SUCCESS} if the policy has
-     *                           changed to the value set by the admin,
+     *                           (e.g. {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy
+     *                           has changed to the value set by the admin,
      *                           {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY}
      *                           if the policy has changed because another admin has set a
      *                           conflicting policy, etc)

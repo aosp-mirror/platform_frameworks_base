@@ -25,8 +25,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Point;
 import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
@@ -41,8 +43,10 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.keyguard.domain.interactor.BurnInInteractor;
+import com.android.systemui.keyguard.domain.interactor.DozeInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -87,12 +91,14 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private NotificationIconAreaController mNotificationIconAreaController;
     @Mock private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    @Mock private NotificationPanelViewController mNotificationPanel;
+    @Mock private ShadeViewController mShadeViewController;
     @Mock private View mAmbientIndicationContainer;
     @Mock private BiometricUnlockController mBiometricUnlockController;
     @Mock private AuthController mAuthController;
     @Mock private DozeHost.Callback mCallback;
+    @Mock private BurnInInteractor mBurnInInteractor;
 
+    @Mock private DozeInteractor mDozeInteractor;
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
@@ -102,13 +108,14 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
-                mAuthController, mNotificationIconAreaController);
+                mAuthController, mNotificationIconAreaController, mDozeInteractor,
+                mBurnInInteractor);
 
         mDozeServiceHost.initialize(
                 mCentralSurfaces,
                 mStatusBarKeyguardViewManager,
                 mNotificationShadeWindowViewController,
-                mNotificationPanel,
+                mShadeViewController,
                 mAmbientIndicationContainer);
     }
 
@@ -212,5 +219,26 @@ public class DozeServiceHostTest extends SysuiTestCase {
         // THEN isPendingPulse=false, pulseOutNow is called
         assertFalse(mDozeServiceHost.isPulsePending());
         verify(mDozeScrimController).pulseOutNow();
+    }
+
+    @Test
+    public void onSlpiTap_calls_DozeInteractor() {
+        mDozeServiceHost.onSlpiTap(100, 200);
+        verify(mDozeInteractor).setLastTapToWakePosition(new Point(100, 200));
+    }
+
+    @Test
+    public void onSlpiTap_doesnt_pass_negative_values() {
+        mDozeServiceHost.onSlpiTap(-1, 200);
+        mDozeServiceHost.onSlpiTap(100, -2);
+        verifyZeroInteractions(mDozeInteractor);
+    }
+    @Test
+    public void dozeTimeTickSentTBurnInInteractor() {
+        // WHEN dozeTimeTick
+        mDozeServiceHost.dozeTimeTick();
+
+        // THEN burnInInteractor's dozeTimeTick is updated
+        verify(mBurnInInteractor).dozeTimeTick();
     }
 }

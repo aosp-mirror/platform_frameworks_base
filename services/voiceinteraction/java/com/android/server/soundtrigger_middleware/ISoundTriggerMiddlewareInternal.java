@@ -38,7 +38,10 @@ public interface ISoundTriggerMiddlewareInternal {
      *
      * listModules() must be called prior to calling this method and the provided handle must be
      * one of the handles from the returned list.
+     * @param isTrusted - {@code true} if this service should not note AppOps for recognitions,
+     * and should delegate these checks to the **trusted** client.
      */
     public ISoundTriggerModule attach(int handle,
-            ISoundTriggerCallback callback);
+            ISoundTriggerCallback callback,
+            boolean isTrusted);
 }

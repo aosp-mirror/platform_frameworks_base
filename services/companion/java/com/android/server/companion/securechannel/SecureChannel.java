@@ -28,7 +28,6 @@ import com.google.security.cryptauth.lib.securegcm.CryptoException;
 import com.google.security.cryptauth.lib.securegcm.D2DConnectionContextV1;
 import com.google.security.cryptauth.lib.securegcm.D2DHandshakeContext;
 import com.google.security.cryptauth.lib.securegcm.D2DHandshakeContext.Role;
-import com.google.security.cryptauth.lib.securegcm.DefaultUkey2Logger;
 import com.google.security.cryptauth.lib.securegcm.HandshakeException;
 
 import libcore.io.IoUtils;
@@ -128,6 +127,9 @@ public class SecureChannel {
      * Start listening for incoming messages.
      */
     public void start() {
+        if (DEBUG) {
+            Slog.d(TAG, "Starting secure channel.");
+        }
         new Thread(() -> {
             try {
                 // 1. Wait for the next handshake message and process it.
@@ -151,14 +153,14 @@ public class SecureChannel {
                 // TODO: Handle different types errors.
 
                 Slog.e(TAG, "Secure channel encountered an error.", e);
-                stop();
+                close();
                 mCallback.onError(e);
             }
         }).start();
     }
 
     /**
-     * Stop listening to incoming messages and close the channel.
+     * Stop listening to incoming messages.
      */
     public void stop() {
         if (DEBUG) {
@@ -166,7 +168,17 @@ public class SecureChannel {
         }
         mStopped = true;
         mInProgress = false;
+    }
 
+    /**
+     * Stop listening to incoming messages and close the channel.
+     */
+    public void close() {
+        stop();
+
+        if (DEBUG) {
+            Slog.d(TAG, "Closing secure channel.");
+        }
         IoUtils.closeQuietly(mInput);
         IoUtils.closeQuietly(mOutput);
         KeyStoreUtils.cleanUp(mAlias);
@@ -240,60 +252,64 @@ public class SecureChannel {
             if (isSecured()) {
                 Slog.d(TAG, "Waiting to receive next secure message.");
             } else {
-                Slog.d(TAG, "Waiting to receive next message.");
+                Slog.d(TAG, "Waiting to receive next " + expected + " message.");
             }
         }
 
         // TODO: Handle message timeout
 
-        // Header is _not_ encrypted, but will be covered by MAC
-        final byte[] headerBytes = new byte[HEADER_LENGTH];
-        Streams.readFully(mInput, headerBytes);
-        final ByteBuffer header = ByteBuffer.wrap(headerBytes);
-        final int version = header.getInt();
-        final short type = header.getShort();
+        synchronized (mInput) {
+            // Header is _not_ encrypted, but will be covered by MAC
+            final byte[] headerBytes = new byte[HEADER_LENGTH];
+            Streams.readFully(mInput, headerBytes);
+            final ByteBuffer header = ByteBuffer.wrap(headerBytes);
+            final int version = header.getInt();
+            final short type = header.getShort();
 
-        if (version != VERSION) {
-            Streams.skipByReading(mInput, Long.MAX_VALUE);
-            throw new SecureChannelException("Secure channel version mismatch. "
-                    + "Currently on version " + VERSION + ". Skipping rest of data.");
+            if (version != VERSION) {
+                Streams.skipByReading(mInput, Long.MAX_VALUE);
+                throw new SecureChannelException("Secure channel version mismatch. "
+                        + "Currently on version " + VERSION + ". Skipping rest of data.");
+            }
+
+            if (type != expected.mValue) {
+                Streams.skipByReading(mInput, Long.MAX_VALUE);
+                throw new SecureChannelException(
+                        "Unexpected message type. Expected " + expected.name()
+                                + "; Found " + MessageType.from(type).name()
+                                + ". Skipping rest of data.");
+            }
+
+            // Length of attached data is prepended as plaintext
+            final byte[] lengthBytes = new byte[4];
+            Streams.readFully(mInput, lengthBytes);
+            final int length = ByteBuffer.wrap(lengthBytes).getInt();
+
+            // Read data based on the length
+            final byte[] data;
+            try {
+                data = new byte[length];
+            } catch (OutOfMemoryError error) {
+                throw new SecureChannelException("Payload is too large.", error);
+            }
+
+            Streams.readFully(mInput, data);
+            if (!MessageType.shouldEncrypt(expected)) {
+                return data;
+            }
+
+            return mConnectionContext.decodeMessageFromPeer(data, headerBytes);
         }
-
-        if (type != expected.mValue) {
-            Streams.skipByReading(mInput, Long.MAX_VALUE);
-            throw new SecureChannelException("Unexpected message type. Expected " + expected.name()
-                    + "; Found " + MessageType.from(type).name() + ". Skipping rest of data.");
-        }
-
-        // Length of attached data is prepended as plaintext
-        final byte[] lengthBytes = new byte[4];
-        Streams.readFully(mInput, lengthBytes);
-        final int length = ByteBuffer.wrap(lengthBytes).getInt();
-
-        // Read data based on the length
-        final byte[] data;
-        try {
-            data = new byte[length];
-        } catch (OutOfMemoryError error) {
-            throw new SecureChannelException("Payload is too large.", error);
-        }
-
-        Streams.readFully(mInput, data);
-        if (!MessageType.shouldEncrypt(expected)) {
-            return data;
-        }
-
-        return mConnectionContext.decodeMessageFromPeer(data, headerBytes);
     }
 
-    private void sendMessage(MessageType messageType, byte[] payload)
+    private void sendMessage(MessageType messageType, final byte[] payload)
             throws IOException, BadHandleException {
         synchronized (mOutput) {
-            byte[] header = ByteBuffer.allocate(HEADER_LENGTH)
+            final byte[] header = ByteBuffer.allocate(HEADER_LENGTH)
                     .putInt(VERSION)
                     .putShort(messageType.mValue)
                     .array();
-            byte[] data = MessageType.shouldEncrypt(messageType)
+            final byte[] data = MessageType.shouldEncrypt(messageType)
                     ? mConnectionContext.encodeMessageToPeer(payload, header)
                     : payload;
             mOutput.write(header);
@@ -312,7 +328,7 @@ public class SecureChannel {
         }
 
         mRole = Role.Initiator;
-        mHandshakeContext = D2DHandshakeContext.forInitiator(DefaultUkey2Logger.INSTANCE);
+        mHandshakeContext = D2DHandshakeContext.forInitiator();
 
         // Send Client Init
         if (DEBUG) {
@@ -333,7 +349,7 @@ public class SecureChannel {
 
         if (mHandshakeContext == null) { // Server-side logic
             mRole = Role.Responder;
-            mHandshakeContext = D2DHandshakeContext.forResponder(DefaultUkey2Logger.INSTANCE);
+            mHandshakeContext = D2DHandshakeContext.forResponder();
 
             // Receive Client Init
             if (DEBUG) {

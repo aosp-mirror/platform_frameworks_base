@@ -104,7 +104,7 @@ public class RecoverableKeyStoreDbHelperTest {
     @Before
     public void setUp() throws Exception {
         Context context = InstrumentationRegistry.getTargetContext();
-        mDatabaseHelper = new RecoverableKeyStoreDbHelper(context, 7);
+        mDatabaseHelper = new RecoverableKeyStoreDbHelper(context);
         mDatabase = SQLiteDatabase.create(null);
     }
 
@@ -154,6 +154,20 @@ public class RecoverableKeyStoreDbHelperTest {
         checkAllColumns_v4();
 
         mDatabaseHelper.onUpgrade(mDatabase, /*oldVersion=*/ 4, /*newVersion=*/ 7);
+        checkAllColumns_latest();
+    }
+
+    @Test
+    public void onUpgradeToV7_ignoresDuplicateColumnError() throws Exception {
+        mDatabaseHelper.onCreate(mDatabase);
+        mDatabaseHelper.onUpgrade(mDatabase, 6, 7);
+        checkAllColumns_latest();
+    }
+
+    @Test
+    public void onUpgradeToV7_recreatesDatabaseAfterFailure() throws Exception {
+        mDatabaseHelper.onCreate(mDatabase);
+        mDatabaseHelper.onUpgrade(mDatabase, 1, 7);
         checkAllColumns_latest();
     }
 

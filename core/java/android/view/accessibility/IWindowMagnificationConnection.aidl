@@ -103,6 +103,13 @@ oneway interface IWindowMagnificationConnection {
     void removeMagnificationButton(int displayId);
 
     /**
+     * Requests System UI remove magnification settings panel on the specified display.
+     *
+     * @param displayId the logical display id.
+     */
+    void removeMagnificationSettingsPanel(int displayId);
+
+    /**
      * Sets {@link IWindowMagnificationConnectionCallback} to receive the request or the callback.
      *
      * @param callback the interface to be called.

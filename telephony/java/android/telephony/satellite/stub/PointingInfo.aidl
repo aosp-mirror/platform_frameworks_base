@@ -29,21 +29,4 @@ parcelable PointingInfo {
      * Satellite elevation in degrees.
      */
     float satelliteElevation;
-
-    /**
-     * Antenna azimuth in degrees.
-     */
-    float antennaAzimuth;
-
-    /**
-     * Angle of rotation about the x axis. This value represents the angle between a plane
-     * parallel to the device's screen and a plane parallel to the ground.
-     */
-    float antennaPitch;
-
-    /**
-     * Angle of rotation about the y axis. This value represents the angle between a plane
-     * perpendicular to the device's screen and a plane parallel to the ground.
-     */
-    float antennaRoll;
 }

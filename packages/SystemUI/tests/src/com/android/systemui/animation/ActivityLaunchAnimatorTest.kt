@@ -159,22 +159,11 @@ class ActivityLaunchAnimatorTest : SysuiTestCase() {
     @Test
     fun doesNotStartIfAnimationIsCancelled() {
         val runner = activityLaunchAnimator.createRunner(controller)
-        runner.onAnimationCancelled(false /* isKeyguardOccluded */)
+        runner.onAnimationCancelled()
         runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
-        verify(controller).onLaunchAnimationCancelled(false /* newKeyguardOccludedState */)
-        verify(controller, never()).onLaunchAnimationStart(anyBoolean())
-    }
-
-    @Test
-    fun passesOccludedStateToLaunchAnimationCancelled_ifTrue() {
-        val runner = activityLaunchAnimator.createRunner(controller)
-        runner.onAnimationCancelled(true /* isKeyguardOccluded */)
-        runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
-
-        waitForIdleSync()
-        verify(controller).onLaunchAnimationCancelled(true /* newKeyguardOccludedState */)
+        verify(controller).onLaunchAnimationCancelled()
         verify(controller, never()).onLaunchAnimationStart(anyBoolean())
     }
 

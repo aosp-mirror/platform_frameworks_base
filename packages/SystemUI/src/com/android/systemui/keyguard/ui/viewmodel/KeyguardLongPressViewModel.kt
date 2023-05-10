@@ -17,15 +17,13 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.R
-import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.common.shared.model.Text
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.KeyguardLongPressInteractor
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 
 /** Models UI state to support the lock screen long-press feature. */
+@SysUISingleton
 class KeyguardLongPressViewModel
 @Inject
 constructor(
@@ -35,35 +33,16 @@ constructor(
     /** Whether the long-press handling feature should be enabled. */
     val isLongPressHandlingEnabled: Flow<Boolean> = interactor.isLongPressHandlingEnabled
 
-    /** View-model for a menu that should be shown; `null` when no menu should be shown. */
-    val menu: Flow<KeyguardSettingsPopupMenuViewModel?> =
-        interactor.menu.map { model ->
-            model?.let {
-                KeyguardSettingsPopupMenuViewModel(
-                    icon =
-                        Icon.Resource(
-                            res = R.drawable.ic_settings,
-                            contentDescription = null,
-                        ),
-                    text =
-                        Text.Resource(
-                            res = R.string.lock_screen_settings,
-                        ),
-                    position = model.position,
-                    onClicked = model.onClicked,
-                    onDismissed = model.onDismissed,
-                )
-            }
-        }
-
     /** Notifies that the user has long-pressed on the lock screen. */
-    fun onLongPress(
-        x: Int,
-        y: Int,
-    ) {
-        interactor.onLongPress(
-            x = x,
-            y = y,
-        )
+    fun onLongPress() {
+        interactor.onLongPress()
+    }
+
+    /**
+     * Notifies that some input gesture has started somewhere outside of the lock screen settings
+     * menu item pop-up.
+     */
+    fun onTouchedOutside() {
+        interactor.onTouchedOutside()
     }
 }

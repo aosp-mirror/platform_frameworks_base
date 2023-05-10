@@ -133,7 +133,9 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
-import android.hardware.input.InputManager;
+import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.input.InputManagerGlobal;
+import android.hardware.input.InputSettings;
 import android.media.AudioManager;
 import android.os.Binder;
 import android.os.Build;
@@ -198,8 +200,10 @@ import android.view.contentcapture.MainContentCaptureSession;
 import android.view.inputmethod.ImeTracker;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Scroller;
+import android.window.BackEvent;
 import android.window.ClientWindowFrames;
 import android.window.CompatOnBackInvokedCallback;
+import android.window.OnBackAnimationCallback;
 import android.window.OnBackInvokedCallback;
 import android.window.OnBackInvokedDispatcher;
 import android.window.ScreenCapture;
@@ -265,6 +269,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final boolean DEBUG_KEEP_SCREEN_ON = false || LOCAL_LOGV;
     private static final boolean DEBUG_CONTENT_CAPTURE = false || LOCAL_LOGV;
     private static final boolean DEBUG_SCROLL_CAPTURE = false || LOCAL_LOGV;
+    private static final boolean DEBUG_TOUCH_NAVIGATION = false || LOCAL_LOGV;
     private static final boolean DEBUG_BLAST = false || LOCAL_LOGV;
     private static final int LOGTAG_INPUT_FOCUS = 62001;
 
@@ -296,6 +301,14 @@ public final class ViewRootImpl implements ViewParent,
      */
     public static final boolean CAPTION_ON_SHELL =
             SystemProperties.getBoolean("persist.wm.debug.caption_on_shell", true);
+
+    /**
+     * Whether the client (system UI) is handling the transient gesture and the corresponding
+     * animation.
+     * @hide
+     */
+    public static final boolean CLIENT_TRANSIENT =
+            SystemProperties.getBoolean("persist.wm.debug.client_transient", false);
 
     /**
      * Whether the client should compute the window frame on its own.
@@ -417,7 +430,8 @@ public final class ViewRootImpl implements ViewParent,
     private boolean mUseBLASTAdapter;
     private boolean mForceDisableBLAST;
 
-    private boolean mFastScrollSoundEffectsEnabled;
+    /** lazily-initialized in getAudioManager() */
+    private boolean mFastScrollSoundEffectsEnabled = false;
 
     /**
      * Signals that compatibility booleans have been initialized according to
@@ -441,9 +455,7 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     final IWindowSession mWindowSession;
     @NonNull Display mDisplay;
-    final DisplayManager mDisplayManager;
     final String mBasePackageName;
-    final InputManager mInputManager;
 
     final int[] mTmpLocation = new int[2];
 
@@ -548,6 +560,9 @@ public final class ViewRootImpl implements ViewParent,
     // Whether to draw this surface as DISPLAY_DECORATION.
     boolean mDisplayDecorationCached = false;
 
+    // Is the stylus pointer icon enabled
+    private final boolean mIsStylusPointerIconEnabled;
+
     /**
      * Update the Choreographer's FrameInfo object with the timing information for the current
      * ViewRootImpl instance. Erase the data in the current ViewFrameInfo to prepare for the next
@@ -642,11 +657,18 @@ public final class ViewRootImpl implements ViewParent,
     boolean mForceNextWindowRelayout;
     CountDownLatch mWindowDrawCountDown;
 
-    // Whether we have used applyTransactionOnDraw to schedule an RT
-    // frame callback consuming a passed in transaction. In this case
-    // we also need to schedule a commit callback so we can observe
-    // if the draw was skipped, and the BBQ pending transactions.
+    /**
+     * Value to indicate whether someone has called {@link #applyTransactionOnDraw}before the
+     * traversal. This is used to determine whether a RT frame callback needs to be registered to
+     * merge the transaction with the next frame. The value is cleared after the VRI has run a
+     * traversal pass.
+     */
     boolean mHasPendingTransactions;
+    /**
+     * The combined transactions passed in from {@link #applyTransactionOnDraw}
+     */
+    private Transaction mPendingTransaction = new Transaction();
+
 
     boolean mIsDrawing;
     int mLastSystemUiVisibility;
@@ -880,6 +902,16 @@ public final class ViewRootImpl implements ViewParent,
      */
     private SurfaceSyncGroup mActiveSurfaceSyncGroup;
 
+
+    private final Object mPreviousSyncSafeguardLock = new Object();
+
+    /**
+     * Wraps the TransactionCommitted callback for the previous SSG so it can be added to the next
+     * SSG if started before previous has completed.
+     */
+    @GuardedBy("mPreviousSyncSafeguardLock")
+    private SurfaceSyncGroup mPreviousSyncSafeguard;
+
     private static final Object sSyncProgressLock = new Object();
     // The count needs to be static since it's used to enable or disable RT animations which is
     // done at a global level per process. If any VRI syncs are in progress, we can't enable RT
@@ -939,12 +971,20 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 sAnrReported = true;
+                // If we're making an in-process call to ActivityManagerService
+                // and the previous binder call on this thread was oneway, the
+                // calling PID will be 0. Clearing the calling identity fixes
+                // this and ensures ActivityManager gets the correct calling
+                // pid.
+                final long identityToken = Binder.clearCallingIdentity();
                 try {
                     ActivityManager.getService().appNotResponding(reason);
                 } catch (RemoteException e) {
                     // We asked the system to crash us, but the system
                     // already crashed. Unfortunately things may be
                     // out of control.
+                } finally {
+                    Binder.restoreCallingIdentity(identityToken);
                 }
             }
         };
@@ -992,14 +1032,14 @@ public final class ViewRootImpl implements ViewParent,
         mFallbackEventHandler = new PhoneFallbackEventHandler(context);
         // TODO(b/222696368): remove getSfInstance usage and use vsyncId for transactions
         mChoreographer = Choreographer.getInstance();
-        mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
-        mInputManager = context.getSystemService(InputManager.class);
         mInsetsController = new InsetsController(new ViewRootInsetsControllerHost(this));
         mHandwritingInitiator = new HandwritingInitiator(
                 mViewConfiguration,
                 mContext.getSystemService(InputMethodManager.class));
 
         mViewBoundsSandboxingEnabled = getViewBoundsSandboxingEnabled();
+        mIsStylusPointerIconEnabled =
+                InputSettings.isStylusPointerIconEnabled(mContext);
 
         String processorOverrideName = context.getResources().getString(
                                     R.string.config_inputEventCompatProcessorOverrideClassName);
@@ -1028,8 +1068,6 @@ public final class ViewRootImpl implements ViewParent,
 
         loadSystemProperties();
         mImeFocusController = new ImeFocusController(this);
-        AudioManager audioManager = mContext.getSystemService(AudioManager.class);
-        mFastScrollSoundEffectsEnabled = audioManager.areNavigationRepeatSoundEffectsEnabled();
 
         mScrollCaptureRequestTimeout = SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS;
         mOnBackInvokedDispatcher = new WindowOnBackInvokedDispatcher(context);
@@ -1488,7 +1526,14 @@ public final class ViewRootImpl implements ViewParent,
                 mAccessibilityInteractionConnectionManager, mHandler);
         mAccessibilityManager.addHighTextContrastStateChangeListener(
                 mHighContrastTextManager, mHandler);
-        mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
+        DisplayManagerGlobal
+                .getInstance()
+                .registerDisplayListener(
+                        mDisplayListener,
+                        mHandler,
+                        DisplayManager.EVENT_FLAG_DISPLAY_ADDED
+                        | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
+                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
     }
 
     /**
@@ -1499,7 +1544,9 @@ public final class ViewRootImpl implements ViewParent,
                 mAccessibilityInteractionConnectionManager);
         mAccessibilityManager.removeHighTextContrastStateChangeListener(
                 mHighContrastTextManager);
-        mDisplayManager.unregisterDisplayListener(mDisplayListener);
+        DisplayManagerGlobal
+                .getInstance()
+                .unregisterDisplayListener(mDisplayListener);
     }
 
     private void setTag() {
@@ -3735,6 +3782,16 @@ public final class ViewRootImpl implements ViewParent,
             createSyncIfNeeded();
             notifyDrawStarted(isInWMSRequestedSync());
             mDrewOnceForSync = true;
+
+            // If the active SSG is also requesting to sync a buffer, the following needs to happen
+            // 1. Ensure we keep track of the number of active syncs to know when to disable RT
+            //    RT animations that conflict with syncing a buffer.
+            // 2. Add a safeguard SSG to prevent multiple SSG that sync buffers from being submitted
+            //    out of order.
+            if (mActiveSurfaceSyncGroup != null && mSyncBuffer) {
+                updateSyncInProgressCount(mActiveSurfaceSyncGroup);
+                safeguardOverlappingSyncs(mActiveSurfaceSyncGroup);
+            }
         }
 
         if (!isViewVisible) {
@@ -3799,14 +3856,11 @@ public final class ViewRootImpl implements ViewParent,
             mWmsRequestSyncGroupState = WMS_SYNC_MERGED;
             reportDrawFinished(t, seqId);
         });
-        Trace.traceBegin(Trace.TRACE_TAG_VIEW,
-                "create WMS Sync group=" + mWmsRequestSyncGroup.getName());
         if (DEBUG_BLAST) {
             Log.d(mTag, "Setup new sync=" + mWmsRequestSyncGroup.getName());
         }
 
         mWmsRequestSyncGroup.add(this, null /* runnable */);
-        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
     }
 
     private void notifyContentCaptureEvents() {
@@ -4467,6 +4521,9 @@ public final class ViewRootImpl implements ViewParent,
             Log.d(mTag, "reportDrawFinished");
         }
 
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
+            Trace.instant(Trace.TRACE_TAG_VIEW, "reportDrawFinished " + mTag + " seqId=" + seqId);
+        }
         try {
             mWindowSession.finishDrawing(mWindow, t, seqId);
         } catch (RemoteException e) {
@@ -4526,9 +4583,13 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private void registerCallbackForPendingTransactions() {
+        Transaction t = new Transaction();
+        t.merge(mPendingTransaction);
+
         registerRtFrameCallback(new FrameDrawingCallback() {
             @Override
             public HardwareRenderer.FrameCommitCallback onFrameDraw(int syncResult, long frame) {
+                mergeWithNextTransaction(t, frame);
                 if ((syncResult
                         & (SYNC_LOST_SURFACE_REWARD_IF_FOUND | SYNC_CONTEXT_IS_STOPPED)) != 0) {
                     mBlastBufferQueue.applyPendingTransactions(frame);
@@ -5382,7 +5443,9 @@ public final class ViewRootImpl implements ViewParent,
             Log.e(mTag, "No input channel to request Pointer Capture.");
             return;
         }
-        mInputManager.requestPointerCapture(inputToken, enabled);
+        InputManagerGlobal
+                .getInstance()
+                .requestPointerCapture(inputToken, enabled);
     }
 
     private void handlePointerCaptureChanged(boolean hasCapture) {
@@ -5718,7 +5781,7 @@ public final class ViewRootImpl implements ViewParent,
     private static final int MSG_WINDOW_TOUCH_MODE_CHANGED = 34;
     private static final int MSG_KEEP_CLEAR_RECTS_CHANGED = 35;
     private static final int MSG_REPORT_KEEP_CLEAR_RECTS = 36;
-
+    private static final int MSG_PAUSED_FOR_SYNC_TIMEOUT = 37;
 
     final class ViewRootHandler extends Handler {
         @Override
@@ -6005,6 +6068,11 @@ public final class ViewRootImpl implements ViewParent,
                 }   break;
                 case MSG_REQUEST_SCROLL_CAPTURE:
                     handleScrollCaptureRequest((IScrollCaptureResponseListener) msg.obj);
+                    break;
+                case MSG_PAUSED_FOR_SYNC_TIMEOUT:
+                    Log.e(mTag, "Timedout waiting to unpause for sync");
+                    mNumPausedForSync = 0;
+                    scheduleTraversals();
                     break;
             }
         }
@@ -6460,6 +6528,7 @@ public final class ViewRootImpl implements ViewParent,
      */
     final class NativePreImeInputStage extends AsyncInputStage
             implements InputQueue.FinishedInputEventCallback {
+
         public NativePreImeInputStage(InputStage next, String traceCounter) {
             super(next, traceCounter);
         }
@@ -6467,32 +6536,62 @@ public final class ViewRootImpl implements ViewParent,
         @Override
         protected int onProcess(QueuedInputEvent q) {
             if (q.mEvent instanceof KeyEvent) {
-                final KeyEvent event = (KeyEvent) q.mEvent;
+                final KeyEvent keyEvent = (KeyEvent) q.mEvent;
 
                 // If the new back dispatch is enabled, intercept KEYCODE_BACK before it reaches the
                 // view tree or IME, and invoke the appropriate {@link OnBackInvokedCallback}.
-                if (isBack(event)
+                if (isBack(keyEvent)
                         && mContext != null
                         && mOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled()) {
-                    OnBackInvokedCallback topCallback =
-                            getOnBackInvokedDispatcher().getTopCallback();
-                    if (event.getAction() == KeyEvent.ACTION_UP) {
-                        if (topCallback != null) {
+                    return doOnBackKeyEvent(keyEvent);
+                }
+
+                if (mInputQueue != null) {
+                    mInputQueue.sendInputEvent(q.mEvent, q, true, this);
+                    return DEFER;
+                }
+            }
+            return FORWARD;
+        }
+
+        private int doOnBackKeyEvent(KeyEvent keyEvent) {
+            OnBackInvokedCallback topCallback = getOnBackInvokedDispatcher().getTopCallback();
+            if (topCallback instanceof OnBackAnimationCallback) {
+                final OnBackAnimationCallback animationCallback =
+                        (OnBackAnimationCallback) topCallback;
+                switch (keyEvent.getAction()) {
+                    case KeyEvent.ACTION_DOWN:
+                        // ACTION_DOWN is emitted twice: once when the user presses the button,
+                        // and again a few milliseconds later.
+                        // Based on the result of `keyEvent.getRepeatCount()` we have:
+                        // - 0 means the button was pressed.
+                        // - 1 means the button continues to be pressed (long press).
+                        if (keyEvent.getRepeatCount() == 0) {
+                            animationCallback.onBackStarted(
+                                    new BackEvent(0, 0, 0f, BackEvent.EDGE_LEFT));
+                        }
+                        break;
+                    case KeyEvent.ACTION_UP:
+                        if (keyEvent.isCanceled()) {
+                            animationCallback.onBackCancelled();
+                        } else {
                             topCallback.onBackInvoked();
                             return FINISH_HANDLED;
                         }
+                        break;
+                }
+            } else if (topCallback != null) {
+                if (keyEvent.getAction() == KeyEvent.ACTION_UP) {
+                    if (!keyEvent.isCanceled()) {
+                        topCallback.onBackInvoked();
+                        return FINISH_HANDLED;
                     } else {
-                        // Drop other actions such as {@link KeyEvent.ACTION_DOWN}.
-                        return FINISH_NOT_HANDLED;
+                        Log.d(mTag, "Skip onBackInvoked(), reason: keyEvent.isCanceled=true");
                     }
                 }
             }
 
-            if (mInputQueue != null && q.mEvent instanceof KeyEvent) {
-                mInputQueue.sendInputEvent(q.mEvent, q, true, this);
-                return DEFER;
-            }
-            return FORWARD;
+            return FINISH_NOT_HANDLED;
         }
 
         @Override
@@ -6941,7 +7040,8 @@ public final class ViewRootImpl implements ViewParent,
                 return;
             }
             final boolean needsStylusPointerIcon = event.isStylusPointer()
-                    && mInputManager.isStylusPointerIconEnabled();
+                    && event.isHoverEvent()
+                    && mIsStylusPointerIconEnabled;
             if (needsStylusPointerIcon || event.isFromSource(InputDevice.SOURCE_MOUSE)) {
                 if (event.getActionMasked() == MotionEvent.ACTION_HOVER_ENTER
                         || event.getActionMasked() == MotionEvent.ACTION_HOVER_EXIT) {
@@ -7012,8 +7112,7 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         PointerIcon pointerIcon = null;
-
-        if (event.isStylusPointer() && mInputManager.isStylusPointerIconEnabled()) {
+        if (event.isStylusPointer() && mIsStylusPointerIconEnabled) {
             pointerIcon = mHandwritingInitiator.onResolvePointerIcon(mContext, event);
         }
 
@@ -7028,14 +7127,18 @@ public final class ViewRootImpl implements ViewParent,
             mPointerIconType = pointerType;
             mCustomPointerIcon = null;
             if (mPointerIconType != PointerIcon.TYPE_CUSTOM) {
-                mInputManager.setPointerIconType(pointerType);
+                InputManagerGlobal
+                    .getInstance()
+                    .setPointerIconType(pointerType);
                 return true;
             }
         }
         if (mPointerIconType == PointerIcon.TYPE_CUSTOM &&
                 !pointerIcon.equals(mCustomPointerIcon)) {
             mCustomPointerIcon = pointerIcon;
-            mInputManager.setCustomPointerIcon(mCustomPointerIcon);
+            InputManagerGlobal
+                    .getInstance()
+                    .setCustomPointerIcon(mCustomPointerIcon);
         }
         return true;
     }
@@ -7118,7 +7221,8 @@ public final class ViewRootImpl implements ViewParent,
                         mJoystick.cancel();
                     } else if ((source & InputDevice.SOURCE_TOUCH_NAVIGATION)
                             == InputDevice.SOURCE_TOUCH_NAVIGATION) {
-                        mTouchNavigation.cancel(event);
+                        // Touch navigation events cannot be cancelled since they are dispatched
+                        // immediately.
                     }
                 }
             }
@@ -7637,392 +7741,109 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     /**
-     * Creates dpad events from unhandled touch navigation movements.
+     * Creates DPAD events from unhandled touch navigation movements.
      */
     final class SyntheticTouchNavigationHandler extends Handler {
         private static final String LOCAL_TAG = "SyntheticTouchNavigationHandler";
-        private static final boolean LOCAL_DEBUG = false;
 
-        // Assumed nominal width and height in millimeters of a touch navigation pad,
-        // if no resolution information is available from the input system.
-        private static final float DEFAULT_WIDTH_MILLIMETERS = 48;
-        private static final float DEFAULT_HEIGHT_MILLIMETERS = 48;
-
-        /* TODO: These constants should eventually be moved to ViewConfiguration. */
-
-        // The nominal distance traveled to move by one unit.
-        private static final int TICK_DISTANCE_MILLIMETERS = 12;
-
-        // Minimum and maximum fling velocity in ticks per second.
-        // The minimum velocity should be set such that we perform enough ticks per
-        // second that the fling appears to be fluid.  For example, if we set the minimum
-        // to 2 ticks per second, then there may be up to half a second delay between the next
-        // to last and last ticks which is noticeably discrete and jerky.  This value should
-        // probably not be set to anything less than about 4.
-        // If fling accuracy is a problem then consider tuning the tick distance instead.
-        private static final float MIN_FLING_VELOCITY_TICKS_PER_SECOND = 6f;
-        private static final float MAX_FLING_VELOCITY_TICKS_PER_SECOND = 20f;
-
-        // Fling velocity decay factor applied after each new key is emitted.
-        // This parameter controls the deceleration and overall duration of the fling.
-        // The fling stops automatically when its velocity drops below the minimum
-        // fling velocity defined above.
-        private static final float FLING_TICK_DECAY = 0.8f;
-
-        /* The input device that we are tracking. */
-
+        // The id of the input device that is being tracked.
         private int mCurrentDeviceId = -1;
         private int mCurrentSource;
-        private boolean mCurrentDeviceSupported;
 
-        /* Configuration for the current input device. */
-
-        // The scaled tick distance.  A movement of this amount should generally translate
-        // into a single dpad event in a given direction.
-        private float mConfigTickDistance;
-
-        // The minimum and maximum scaled fling velocity.
-        private float mConfigMinFlingVelocity;
-        private float mConfigMaxFlingVelocity;
-
-        /* Tracking state. */
-
-        // The velocity tracker for detecting flings.
-        private VelocityTracker mVelocityTracker;
-
-        // The active pointer id, or -1 if none.
-        private int mActivePointerId = -1;
-
-        // Location where tracking started.
-        private float mStartX;
-        private float mStartY;
-
-        // Most recently observed position.
-        private float mLastX;
-        private float mLastY;
-
-        // Accumulated movement delta since the last direction key was sent.
-        private float mAccumulatedX;
-        private float mAccumulatedY;
-
-        // Set to true if any movement was delivered to the app.
-        // Implies that tap slop was exceeded.
-        private boolean mConsumedMovement;
-
-        // The most recently sent key down event.
-        // The keycode remains set until the direction changes or a fling ends
-        // so that repeated key events may be generated as required.
-        private long mPendingKeyDownTime;
-        private int mPendingKeyCode = KeyEvent.KEYCODE_UNKNOWN;
-        private int mPendingKeyRepeatCount;
         private int mPendingKeyMetaState;
 
-        // The current fling velocity while a fling is in progress.
-        private boolean mFlinging;
-        private float mFlingVelocity;
+        private final GestureDetector mGestureDetector = new GestureDetector(mContext,
+                new GestureDetector.OnGestureListener() {
+                    @Override
+                    public boolean onDown(@NonNull MotionEvent e) {
+                        // This can be ignored since it's not clear what KeyEvent this will
+                        // belong to.
+                        return true;
+                    }
 
-        public SyntheticTouchNavigationHandler() {
+                    @Override
+                    public void onShowPress(@NonNull MotionEvent e) {
+
+                    }
+
+                    @Override
+                    public boolean onSingleTapUp(@NonNull MotionEvent e) {
+                        dispatchTap(e.getEventTime());
+                        return true;
+                    }
+
+                    @Override
+                    public boolean onScroll(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
+                            float distanceX, float distanceY) {
+                        // Scroll doesn't translate to DPAD events so should be ignored.
+                        return true;
+                    }
+
+                    @Override
+                    public void onLongPress(@NonNull MotionEvent e) {
+                        // Long presses don't translate to DPAD events so should be ignored.
+                    }
+
+                    @Override
+                    public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2,
+                            float velocityX, float velocityY) {
+                        dispatchFling(velocityX, velocityY, e2.getEventTime());
+                        return true;
+                    }
+                });
+
+        SyntheticTouchNavigationHandler() {
             super(true);
         }
 
         public void process(MotionEvent event) {
+            if (event.getDevice() == null) {
+                // The current device is not supported.
+                if (DEBUG_TOUCH_NAVIGATION) {
+                    Log.d(LOCAL_TAG,
+                            "Current device not supported so motion event is not processed");
+                }
+                return;
+            }
+            mPendingKeyMetaState = event.getMetaState();
             // Update the current device information.
-            final long time = event.getEventTime();
             final int deviceId = event.getDeviceId();
             final int source = event.getSource();
             if (mCurrentDeviceId != deviceId || mCurrentSource != source) {
-                finishKeys(time);
-                finishTracking(time);
                 mCurrentDeviceId = deviceId;
                 mCurrentSource = source;
-                mCurrentDeviceSupported = false;
-                InputDevice device = event.getDevice();
-                if (device != null) {
-                    // In order to support an input device, we must know certain
-                    // characteristics about it, such as its size and resolution.
-                    InputDevice.MotionRange xRange = device.getMotionRange(MotionEvent.AXIS_X);
-                    InputDevice.MotionRange yRange = device.getMotionRange(MotionEvent.AXIS_Y);
-                    if (xRange != null && yRange != null) {
-                        mCurrentDeviceSupported = true;
-
-                        // Infer the resolution if it not actually known.
-                        float xRes = xRange.getResolution();
-                        if (xRes <= 0) {
-                            xRes = xRange.getRange() / DEFAULT_WIDTH_MILLIMETERS;
-                        }
-                        float yRes = yRange.getResolution();
-                        if (yRes <= 0) {
-                            yRes = yRange.getRange() / DEFAULT_HEIGHT_MILLIMETERS;
-                        }
-                        float nominalRes = (xRes + yRes) * 0.5f;
-
-                        // Precompute all of the configuration thresholds we will need.
-                        mConfigTickDistance = TICK_DISTANCE_MILLIMETERS * nominalRes;
-                        mConfigMinFlingVelocity =
-                                MIN_FLING_VELOCITY_TICKS_PER_SECOND * mConfigTickDistance;
-                        mConfigMaxFlingVelocity =
-                                MAX_FLING_VELOCITY_TICKS_PER_SECOND * mConfigTickDistance;
-
-                        if (LOCAL_DEBUG) {
-                            Log.d(LOCAL_TAG, "Configured device " + mCurrentDeviceId
-                                    + " (" + Integer.toHexString(mCurrentSource) + "): "
-                                    + ", mConfigTickDistance=" + mConfigTickDistance
-                                    + ", mConfigMinFlingVelocity=" + mConfigMinFlingVelocity
-                                    + ", mConfigMaxFlingVelocity=" + mConfigMaxFlingVelocity);
-                        }
-                    }
-                }
-            }
-            if (!mCurrentDeviceSupported) {
-                return;
             }
 
-            // Handle the event.
-            final int action = event.getActionMasked();
-            switch (action) {
-                case MotionEvent.ACTION_DOWN: {
-                    boolean caughtFling = mFlinging;
-                    finishKeys(time);
-                    finishTracking(time);
-                    mActivePointerId = event.getPointerId(0);
-                    mVelocityTracker = VelocityTracker.obtain();
-                    mVelocityTracker.addMovement(event);
-                    mStartX = event.getX();
-                    mStartY = event.getY();
-                    mLastX = mStartX;
-                    mLastY = mStartY;
-                    mAccumulatedX = 0;
-                    mAccumulatedY = 0;
-
-                    // If we caught a fling, then pretend that the tap slop has already
-                    // been exceeded to suppress taps whose only purpose is to stop the fling.
-                    mConsumedMovement = caughtFling;
-                    break;
-                }
-
-                case MotionEvent.ACTION_MOVE:
-                case MotionEvent.ACTION_UP: {
-                    if (mActivePointerId < 0) {
-                        break;
-                    }
-                    final int index = event.findPointerIndex(mActivePointerId);
-                    if (index < 0) {
-                        finishKeys(time);
-                        finishTracking(time);
-                        break;
-                    }
-
-                    mVelocityTracker.addMovement(event);
-                    final float x = event.getX(index);
-                    final float y = event.getY(index);
-                    mAccumulatedX += x - mLastX;
-                    mAccumulatedY += y - mLastY;
-                    mLastX = x;
-                    mLastY = y;
-
-                    // Consume any accumulated movement so far.
-                    final int metaState = event.getMetaState();
-                    consumeAccumulatedMovement(time, metaState);
-
-                    // Detect taps and flings.
-                    if (action == MotionEvent.ACTION_UP) {
-                        if (mConsumedMovement && mPendingKeyCode != KeyEvent.KEYCODE_UNKNOWN) {
-                            // It might be a fling.
-                            mVelocityTracker.computeCurrentVelocity(1000, mConfigMaxFlingVelocity);
-                            final float vx = mVelocityTracker.getXVelocity(mActivePointerId);
-                            final float vy = mVelocityTracker.getYVelocity(mActivePointerId);
-                            if (!startFling(time, vx, vy)) {
-                                finishKeys(time);
-                            }
-                        }
-                        finishTracking(time);
-                    }
-                    break;
-                }
-
-                case MotionEvent.ACTION_CANCEL: {
-                    finishKeys(time);
-                    finishTracking(time);
-                    break;
-                }
-            }
+            // Interpret the event.
+            mGestureDetector.onTouchEvent(event);
         }
 
-        public void cancel(MotionEvent event) {
-            if (mCurrentDeviceId == event.getDeviceId()
-                    && mCurrentSource == event.getSource()) {
-                final long time = event.getEventTime();
-                finishKeys(time);
-                finishTracking(time);
-            }
+        private void dispatchTap(long time) {
+            dispatchEvent(time, KeyEvent.KEYCODE_DPAD_CENTER);
         }
 
-        private void finishKeys(long time) {
-            cancelFling();
-            sendKeyUp(time);
-        }
-
-        private void finishTracking(long time) {
-            if (mActivePointerId >= 0) {
-                mActivePointerId = -1;
-                mVelocityTracker.recycle();
-                mVelocityTracker = null;
-            }
-        }
-
-        private void consumeAccumulatedMovement(long time, int metaState) {
-            final float absX = Math.abs(mAccumulatedX);
-            final float absY = Math.abs(mAccumulatedY);
-            if (absX >= absY) {
-                if (absX >= mConfigTickDistance) {
-                    mAccumulatedX = consumeAccumulatedMovement(time, metaState, mAccumulatedX,
-                            KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_RIGHT);
-                    mAccumulatedY = 0;
-                    mConsumedMovement = true;
-                }
+        private void dispatchFling(float x, float y, long time) {
+            if (Math.abs(x) > Math.abs(y)) {
+                dispatchEvent(time,
+                        x > 0 ? KeyEvent.KEYCODE_DPAD_RIGHT : KeyEvent.KEYCODE_DPAD_LEFT);
             } else {
-                if (absY >= mConfigTickDistance) {
-                    mAccumulatedY = consumeAccumulatedMovement(time, metaState, mAccumulatedY,
-                            KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_DPAD_DOWN);
-                    mAccumulatedX = 0;
-                    mConsumedMovement = true;
-                }
+                dispatchEvent(time, y > 0 ? KeyEvent.KEYCODE_DPAD_DOWN : KeyEvent.KEYCODE_DPAD_UP);
             }
         }
 
-        private float consumeAccumulatedMovement(long time, int metaState,
-                float accumulator, int negativeKeyCode, int positiveKeyCode) {
-            while (accumulator <= -mConfigTickDistance) {
-                sendKeyDownOrRepeat(time, negativeKeyCode, metaState);
-                accumulator += mConfigTickDistance;
+        private void dispatchEvent(long time, int keyCode) {
+            if (DEBUG_TOUCH_NAVIGATION) {
+                Log.d(LOCAL_TAG, "Dispatching DPAD events DOWN and UP with keycode " + keyCode);
             }
-            while (accumulator >= mConfigTickDistance) {
-                sendKeyDownOrRepeat(time, positiveKeyCode, metaState);
-                accumulator -= mConfigTickDistance;
-            }
-            return accumulator;
+            enqueueInputEvent(new KeyEvent(time, time,
+                    KeyEvent.ACTION_DOWN, keyCode, /* repeat= */ 0, mPendingKeyMetaState,
+                    mCurrentDeviceId, /* scancode= */ 0, KeyEvent.FLAG_FALLBACK,
+                    mCurrentSource));
+            enqueueInputEvent(new KeyEvent(time, time,
+                    KeyEvent.ACTION_UP, keyCode, /* repeat= */ 0, mPendingKeyMetaState,
+                    mCurrentDeviceId, /* scancode= */ 0, KeyEvent.FLAG_FALLBACK,
+                    mCurrentSource));
         }
-
-        private void sendKeyDownOrRepeat(long time, int keyCode, int metaState) {
-            if (mPendingKeyCode != keyCode) {
-                sendKeyUp(time);
-                mPendingKeyDownTime = time;
-                mPendingKeyCode = keyCode;
-                mPendingKeyRepeatCount = 0;
-            } else {
-                mPendingKeyRepeatCount += 1;
-            }
-            mPendingKeyMetaState = metaState;
-
-            // Note: Normally we would pass FLAG_LONG_PRESS when the repeat count is 1
-            // but it doesn't quite make sense when simulating the events in this way.
-            if (LOCAL_DEBUG) {
-                Log.d(LOCAL_TAG, "Sending key down: keyCode=" + mPendingKeyCode
-                        + ", repeatCount=" + mPendingKeyRepeatCount
-                        + ", metaState=" + Integer.toHexString(mPendingKeyMetaState));
-            }
-            enqueueInputEvent(new KeyEvent(mPendingKeyDownTime, time,
-                    KeyEvent.ACTION_DOWN, mPendingKeyCode, mPendingKeyRepeatCount,
-                    mPendingKeyMetaState, mCurrentDeviceId,
-                    KeyEvent.FLAG_FALLBACK, mCurrentSource));
-        }
-
-        private void sendKeyUp(long time) {
-            if (mPendingKeyCode != KeyEvent.KEYCODE_UNKNOWN) {
-                if (LOCAL_DEBUG) {
-                    Log.d(LOCAL_TAG, "Sending key up: keyCode=" + mPendingKeyCode
-                            + ", metaState=" + Integer.toHexString(mPendingKeyMetaState));
-                }
-                enqueueInputEvent(new KeyEvent(mPendingKeyDownTime, time,
-                        KeyEvent.ACTION_UP, mPendingKeyCode, 0, mPendingKeyMetaState,
-                        mCurrentDeviceId, 0, KeyEvent.FLAG_FALLBACK,
-                        mCurrentSource));
-                mPendingKeyCode = KeyEvent.KEYCODE_UNKNOWN;
-            }
-        }
-
-        private boolean startFling(long time, float vx, float vy) {
-            if (LOCAL_DEBUG) {
-                Log.d(LOCAL_TAG, "Considering fling: vx=" + vx + ", vy=" + vy
-                        + ", min=" + mConfigMinFlingVelocity);
-            }
-
-            // Flings must be oriented in the same direction as the preceding movements.
-            switch (mPendingKeyCode) {
-                case KeyEvent.KEYCODE_DPAD_LEFT:
-                    if (-vx >= mConfigMinFlingVelocity
-                            && Math.abs(vy) < mConfigMinFlingVelocity) {
-                        mFlingVelocity = -vx;
-                        break;
-                    }
-                    return false;
-
-                case KeyEvent.KEYCODE_DPAD_RIGHT:
-                    if (vx >= mConfigMinFlingVelocity
-                            && Math.abs(vy) < mConfigMinFlingVelocity) {
-                        mFlingVelocity = vx;
-                        break;
-                    }
-                    return false;
-
-                case KeyEvent.KEYCODE_DPAD_UP:
-                    if (-vy >= mConfigMinFlingVelocity
-                            && Math.abs(vx) < mConfigMinFlingVelocity) {
-                        mFlingVelocity = -vy;
-                        break;
-                    }
-                    return false;
-
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                    if (vy >= mConfigMinFlingVelocity
-                            && Math.abs(vx) < mConfigMinFlingVelocity) {
-                        mFlingVelocity = vy;
-                        break;
-                    }
-                    return false;
-            }
-
-            // Post the first fling event.
-            mFlinging = postFling(time);
-            return mFlinging;
-        }
-
-        private boolean postFling(long time) {
-            // The idea here is to estimate the time when the pointer would have
-            // traveled one tick distance unit given the current fling velocity.
-            // This effect creates continuity of motion.
-            if (mFlingVelocity >= mConfigMinFlingVelocity) {
-                long delay = (long)(mConfigTickDistance / mFlingVelocity * 1000);
-                postAtTime(mFlingRunnable, time + delay);
-                if (LOCAL_DEBUG) {
-                    Log.d(LOCAL_TAG, "Posted fling: velocity="
-                            + mFlingVelocity + ", delay=" + delay
-                            + ", keyCode=" + mPendingKeyCode);
-                }
-                return true;
-            }
-            return false;
-        }
-
-        private void cancelFling() {
-            if (mFlinging) {
-                removeCallbacks(mFlingRunnable);
-                mFlinging = false;
-            }
-        }
-
-        private final Runnable mFlingRunnable = new Runnable() {
-            @Override
-            public void run() {
-                final long time = SystemClock.uptimeMillis();
-                sendKeyDownOrRepeat(time, mPendingKeyCode, mPendingKeyMetaState);
-                mFlingVelocity *= FLING_TICK_DECAY;
-                if (!postFling(time)) {
-                    mFlinging = false;
-                    finishKeys(time);
-                }
-            }
-        };
     }
 
     final class SyntheticKeyboardHandler {
@@ -8335,6 +8156,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         if (mAudioManager == null) {
             mAudioManager = (AudioManager) mView.getContext().getSystemService(Context.AUDIO_SERVICE);
+            mFastScrollSoundEffectsEnabled = mAudioManager.areNavigationRepeatSoundEffectsEnabled();
         }
         return mAudioManager;
     }
@@ -9028,6 +8850,9 @@ public final class ViewRootImpl implements ViewParent,
             mActiveSurfaceSyncGroup.markSyncReady();
             mActiveSurfaceSyncGroup = null;
         }
+        if (mHasPendingTransactions) {
+            mPendingTransaction.apply();
+        }
         WindowManagerGlobal.getInstance().doRemoveView(this);
     }
 
@@ -9166,7 +8991,7 @@ public final class ViewRootImpl implements ViewParent,
      * Represents a pending input event that is waiting in a queue.
      *
      * Input events are processed in serial order by the timestamp specified by
-     * {@link InputEvent#getEventTimeNano()}.  In general, the input dispatcher delivers
+     * {@link InputEvent#getEventTimeNanos()}.  In general, the input dispatcher delivers
      * one input event to the application at a time and waits for the application
      * to finish handling it before delivering the next one.
      *
@@ -9267,7 +9092,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    void enqueueInputEvent(InputEvent event) {
+    public void enqueueInputEvent(InputEvent event) {
         enqueueInputEvent(event, null, 0, false);
     }
 
@@ -9356,7 +9181,7 @@ public final class ViewRootImpl implements ViewParent,
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "deliverInputEvent src=0x"
                     + Integer.toHexString(q.mEvent.getSource()) + " eventTimeNano="
-                    + q.mEvent.getEventTimeNano() + " id=0x"
+                    + q.mEvent.getEventTimeNanos() + " id=0x"
                     + Integer.toHexString(q.mEvent.getId()));
         }
         try {
@@ -11360,10 +11185,13 @@ public final class ViewRootImpl implements ViewParent,
         if (mRemoved || !isHardwareEnabled()) {
             t.apply();
         } else {
+            // Copy and clear the passed in transaction for thread safety. The new transaction is
+            // accessed on the render thread.
+            mPendingTransaction.merge(t);
             mHasPendingTransactions = true;
-            registerRtFrameCallback(frame -> {
-                mergeWithNextTransaction(t, frame);
-            });
+            // Schedule the traversal to ensure there's an attempt to draw a frame and apply the
+            // pending transactions. This is also where the registerFrameCallback will be scheduled.
+            scheduleTraversals();
         }
         return true;
     }
@@ -11504,6 +11332,10 @@ public final class ViewRootImpl implements ViewParent,
         if (DEBUG_BLAST) {
             Log.d(mTag, "registerCallbacksForSync syncBuffer=" + syncBuffer);
         }
+
+        Transaction t = new Transaction();
+        t.merge(mPendingTransaction);
+
         mAttachInfo.mThreadedRenderer.registerRtFrameCallback(new FrameDrawingCallback() {
             @Override
             public void onFrameDraw(long frame) {
@@ -11517,6 +11349,7 @@ public final class ViewRootImpl implements ViewParent,
                                     + frame + ".");
                 }
 
+                mergeWithNextTransaction(t, frame);
                 // If the syncResults are SYNC_LOST_SURFACE_REWARD_IF_FOUND or
                 // SYNC_CONTEXT_IS_STOPPED it means nothing will draw. There's no need to set up
                 // any blast sync or commit callback, and the code should directly call
@@ -11534,13 +11367,19 @@ public final class ViewRootImpl implements ViewParent,
                 }
 
                 if (syncBuffer) {
-                    mBlastBufferQueue.syncNextTransaction(new Consumer<Transaction>() {
-                        @Override
-                        public void accept(Transaction transaction) {
-                            surfaceSyncGroup.addTransaction(transaction);
-                            surfaceSyncGroup.markSyncReady();
-                        }
+                    boolean result = mBlastBufferQueue.syncNextTransaction(transaction -> {
+                        surfaceSyncGroup.addTransaction(transaction);
+                        surfaceSyncGroup.markSyncReady();
                     });
+                    if (!result) {
+                        // syncNextTransaction can only return false if something is already trying
+                        // to sync the same frame in the same BBQ. That shouldn't be possible, but
+                        // if it did happen, invoke markSyncReady so the active SSG doesn't get
+                        // stuck.
+                        Log.w(mTag, "Unable to syncNextTransaction. Possibly something else is"
+                                + " trying to sync?");
+                        surfaceSyncGroup.markSyncReady();
+                    }
                 }
 
                 return didProduceBuffer -> {
@@ -11554,7 +11393,7 @@ public final class ViewRootImpl implements ViewParent,
                     // the next draw attempt. The next transaction and transaction complete callback
                     // were only set for the current draw attempt.
                     if (!didProduceBuffer) {
-                        mBlastBufferQueue.syncNextTransaction(null);
+                        mBlastBufferQueue.clearSyncTransaction();
 
                         // Gather the transactions that were sent to mergeWithNextTransaction
                         // since the frame didn't draw on this vsync. It's possible the frame will
@@ -11577,6 +11416,61 @@ public final class ViewRootImpl implements ViewParent,
         });
     }
 
+    /**
+     * This code will ensure that if multiple SurfaceSyncGroups are created for the same
+     * ViewRootImpl the SurfaceSyncGroups will maintain an order. The scenario that could occur
+     * is the following:
+     * <p>
+     * 1. SSG1 is created that includes the target VRI. There could be other VRIs in SSG1
+     * 2. The target VRI draws its frame and marks its own active SSG as ready, but SSG1 is still
+     *    waiting on other things in the SSG
+     * 3. Another SSG2 is created for the target VRI. The second frame renders and marks its own
+     *    second SSG as complete. SSG2 has nothing else to wait on, so it will apply at this point,
+     *    even though SSG1 has not finished.
+     * 4. Frame2 will get to SF first and Frame1 will later get to SF when SSG1 completes.
+     * <p>
+     * The code below ensures the SSGs that contains the VRI maintain an order. We create a new SSG
+     * that's a safeguard SSG. Its only job is to prevent the next active SSG from completing.
+     * The current active SSG for VRI will add a transaction committed callback and when that's
+     * invoked, it will mark the safeguard SSG as ready. If a new request to create a SSG comes
+     * in and the safeguard SSG is not null, it's added as part of the new active SSG. A new
+     * safeguard SSG is created to correspond to the new active SSG. This creates a chain to
+     * ensure the latter SSG always waits for the former SSG's transaction to get to SF.
+     */
+    private void safeguardOverlappingSyncs(SurfaceSyncGroup activeSurfaceSyncGroup) {
+        SurfaceSyncGroup safeguardSsg = new SurfaceSyncGroup("Safeguard-" + mTag);
+        // Always disable timeout on the safeguard sync
+        safeguardSsg.toggleTimeout(false /* enable */);
+        synchronized (mPreviousSyncSafeguardLock) {
+            if (mPreviousSyncSafeguard != null) {
+                activeSurfaceSyncGroup.add(mPreviousSyncSafeguard, null /* runnable */);
+                // Temporarily disable the timeout on the SSG that will contain the buffer. This
+                // is to ensure we don't timeout the active SSG before the previous one completes to
+                // ensure the order is maintained. The previous SSG has a timeout on its own SSG
+                // so it's guaranteed to complete.
+                activeSurfaceSyncGroup.toggleTimeout(false /* enable */);
+                mPreviousSyncSafeguard.addSyncCompleteCallback(mSimpleExecutor, () -> {
+                    // Once we receive that the previous sync guard has been invoked, we can re-add
+                    // the timeout on the active sync to ensure we eventually complete so it's not
+                    // stuck permanently.
+                    activeSurfaceSyncGroup.toggleTimeout(true /*enable */);
+                });
+            }
+            mPreviousSyncSafeguard = safeguardSsg;
+        }
+
+        Transaction t = new Transaction();
+        t.addTransactionCommittedListener(mSimpleExecutor, () -> {
+            safeguardSsg.markSyncReady();
+            synchronized (mPreviousSyncSafeguardLock) {
+                if (mPreviousSyncSafeguard == safeguardSsg) {
+                    mPreviousSyncSafeguard = null;
+                }
+            }
+        });
+        activeSurfaceSyncGroup.addTransaction(t);
+    }
+
     @Override
     public SurfaceSyncGroup getOrCreateSurfaceSyncGroup() {
         boolean newSyncGroup = false;
@@ -11584,9 +11478,16 @@ public final class ViewRootImpl implements ViewParent,
             mActiveSurfaceSyncGroup = new SurfaceSyncGroup(mTag);
             mActiveSurfaceSyncGroup.setAddedToSyncListener(() -> {
                 Runnable runnable = () -> {
-                    mNumPausedForSync--;
-                    if (!mIsInTraversal && mNumPausedForSync == 0) {
-                        scheduleTraversals();
+                    // Check if it's already 0 because the timeout could have reset the count to
+                    // 0 and we don't want to go negative.
+                    if (mNumPausedForSync > 0) {
+                        mNumPausedForSync--;
+                    }
+                    if (mNumPausedForSync == 0) {
+                        mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
+                        if (!mIsInTraversal) {
+                            scheduleTraversals();
+                        }
                     }
                 };
 
@@ -11596,7 +11497,6 @@ public final class ViewRootImpl implements ViewParent,
                     mHandler.post(runnable);
                 }
             });
-            updateSyncInProgressCount(mActiveSurfaceSyncGroup);
             newSyncGroup = true;
         }
 
@@ -11613,6 +11513,9 @@ public final class ViewRootImpl implements ViewParent,
         }
 
         mNumPausedForSync++;
+        mHandler.removeMessages(MSG_PAUSED_FOR_SYNC_TIMEOUT);
+        mHandler.sendEmptyMessageDelayed(MSG_PAUSED_FOR_SYNC_TIMEOUT,
+                1000 * Build.HW_TIMEOUT_MULTIPLIER);
         return mActiveSurfaceSyncGroup;
     };
 

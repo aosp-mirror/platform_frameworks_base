@@ -34,7 +34,6 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.SourceType;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -75,7 +74,6 @@ public class StackScrollAlgorithm {
     private float mQuickQsOffsetHeight;
     private float mSmallCornerRadius;
     private float mLargeCornerRadius;
-    private boolean mUseRoundnessSourceTypes;
 
     public StackScrollAlgorithm(
             Context context,
@@ -126,7 +124,7 @@ public class StackScrollAlgorithm {
         updateHeadsUpStates(algorithmState, ambientState);
         updatePulsingStates(algorithmState, ambientState);
 
-        updateDimmedActivatedHideSensitive(ambientState, algorithmState);
+        updateDimmedAndHideSensitive(ambientState, algorithmState);
         updateClipping(algorithmState, ambientState);
         updateSpeedBumpState(algorithmState, speedBumpIndex);
         updateShelfState(algorithmState, ambientState);
@@ -341,25 +339,17 @@ public class StackScrollAlgorithm {
         }
     }
 
-    /**
-     * Updates the dimmed, activated and hiding sensitive states of the children.
-     */
-    private void updateDimmedActivatedHideSensitive(AmbientState ambientState,
-                                                    StackScrollAlgorithmState algorithmState) {
+    /** Updates the dimmed and hiding sensitive states of the children. */
+    private void updateDimmedAndHideSensitive(AmbientState ambientState,
+            StackScrollAlgorithmState algorithmState) {
         boolean dimmed = ambientState.isDimmed();
         boolean hideSensitive = ambientState.isHideSensitive();
-        View activatedChild = ambientState.getActivatedChild();
         int childCount = algorithmState.visibleChildren.size();
         for (int i = 0; i < childCount; i++) {
             ExpandableView child = algorithmState.visibleChildren.get(i);
             ExpandableViewState childViewState = child.getViewState();
             childViewState.dimmed = dimmed;
             childViewState.hideSensitive = hideSensitive;
-            boolean isActivatedChild = activatedChild == child;
-            if (dimmed && isActivatedChild) {
-                childViewState.setZTranslation(childViewState.getZTranslation()
-                        + 2.0f * ambientState.getZDistanceBetweenElements());
-            }
         }
     }
 
@@ -763,7 +753,7 @@ public class StackScrollAlgorithm {
             float unmodifiedEndLocation = childState.getYTranslation() + childState.height;
             if (mIsExpanded) {
                 if (row.mustStayOnScreen() && !childState.headsUpIsVisible
-                        && !row.showingPulsing()) {
+                        && !row.showingPulsing() && !ambientState.isOnKeyguard()) {
                     // Ensure that the heads up is always visible even when scrolled off
                     clampHunToTop(mQuickQsOffsetHeight, ambientState.getStackTranslation(),
                             row.getCollapsedHeight(), childState);
@@ -844,12 +834,8 @@ public class StackScrollAlgorithm {
                 row.isLastInSection() ? 1f : (mSmallCornerRadius / mLargeCornerRadius);
         final float bottomValue = computeCornerRoundnessForPinnedHun(mHostView.getHeight(),
                 ambientState.getStackY(), getMaxAllowedChildHeight(row), originalCornerRadius);
-        if (mUseRoundnessSourceTypes) {
-            row.requestBottomRoundness(bottomValue, STACK_SCROLL_ALGO);
-            row.addOnDetachResetRoundness(STACK_SCROLL_ALGO);
-        } else {
-            row.requestBottomRoundness(bottomValue, LegacySourceType.OnScroll);
-        }
+        row.requestBottomRoundness(bottomValue, STACK_SCROLL_ALGO);
+        row.addOnDetachResetRoundness(STACK_SCROLL_ALGO);
     }
 
     @VisibleForTesting
@@ -985,14 +971,6 @@ public class StackScrollAlgorithm {
 
     public void setIsExpanded(boolean isExpanded) {
         this.mIsExpanded = isExpanded;
-    }
-
-    /**
-     * Enable the support for rounded corner based on the SourceType
-     * @param enabled true if is supported
-     */
-    public void useRoundnessSourceTypes(boolean enabled) {
-        mUseRoundnessSourceTypes = enabled;
     }
 
     public static class StackScrollAlgorithmState {

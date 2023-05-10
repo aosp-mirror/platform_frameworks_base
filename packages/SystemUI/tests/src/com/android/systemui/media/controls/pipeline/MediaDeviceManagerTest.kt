@@ -468,7 +468,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun audioInfoChanged() {
+    fun audioInfoPlaybackTypeChanged() {
         whenever(playbackInfo.getPlaybackType()).thenReturn(PlaybackInfo.PLAYBACK_TYPE_LOCAL)
         whenever(controller.getPlaybackInfo()).thenReturn(playbackInfo)
         // GIVEN a controller with local playback type
@@ -478,6 +478,25 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         reset(mr2)
         // WHEN onAudioInfoChanged fires with remote playback type
         whenever(playbackInfo.getPlaybackType()).thenReturn(PlaybackInfo.PLAYBACK_TYPE_REMOTE)
+        val captor = ArgumentCaptor.forClass(MediaController.Callback::class.java)
+        verify(controller).registerCallback(captor.capture())
+        captor.value.onAudioInfoChanged(playbackInfo)
+        // THEN the route is checked
+        verify(mr2).getRoutingSessionForMediaController(eq(controller))
+    }
+
+    @Test
+    fun audioInfoVolumeControlIdChanged() {
+        whenever(playbackInfo.getPlaybackType()).thenReturn(PlaybackInfo.PLAYBACK_TYPE_LOCAL)
+        whenever(playbackInfo.getVolumeControlId()).thenReturn(null)
+        whenever(controller.getPlaybackInfo()).thenReturn(playbackInfo)
+        // GIVEN a controller with local playback type
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        fakeBgExecutor.runAllReady()
+        fakeFgExecutor.runAllReady()
+        reset(mr2)
+        // WHEN onAudioInfoChanged fires with a volume control id change
+        whenever(playbackInfo.getVolumeControlId()).thenReturn("placeholder id")
         val captor = ArgumentCaptor.forClass(MediaController.Callback::class.java)
         verify(controller).registerCallback(captor.capture())
         captor.value.onAudioInfoChanged(playbackInfo)

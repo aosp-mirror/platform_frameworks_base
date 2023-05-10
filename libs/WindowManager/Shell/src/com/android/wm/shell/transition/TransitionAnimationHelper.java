@@ -18,7 +18,6 @@ package com.android.wm.shell.transition;
 
 import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_NONE;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
@@ -63,7 +62,7 @@ public class TransitionAnimationHelper {
     @Nullable
     public static Animation loadAttributeAnimation(@NonNull TransitionInfo info,
             @NonNull TransitionInfo.Change change, int wallpaperTransit,
-            @NonNull TransitionAnimation transitionAnimation) {
+            @NonNull TransitionAnimation transitionAnimation, boolean isDreamTransition) {
         final int type = info.getType();
         final int changeMode = change.getMode();
         final int changeFlags = change.getFlags();
@@ -71,11 +70,9 @@ public class TransitionAnimationHelper {
         final boolean isTask = change.getTaskInfo() != null;
         final TransitionInfo.AnimationOptions options = info.getAnimationOptions();
         final int overrideType = options != null ? options.getType() : ANIM_NONE;
-        final boolean isDream =
-                isTask && change.getTaskInfo().topActivityType == ACTIVITY_TYPE_DREAM;
         int animAttr = 0;
         boolean translucent = false;
-        if (isDream) {
+        if (isDreamTransition) {
             if (type == TRANSIT_OPEN) {
                 animAttr = enter
                         ? R.styleable.WindowAnimation_dreamActivityOpenEnterAnimation
@@ -122,14 +119,14 @@ public class TransitionAnimationHelper {
                     ? R.styleable.WindowAnimation_taskToFrontEnterAnimation
                     : R.styleable.WindowAnimation_taskToFrontExitAnimation;
         } else if (type == TRANSIT_CLOSE) {
-            if (isTask) {
+            if ((changeFlags & FLAG_TRANSLUCENT) != 0 && !enter) {
+                translucent = true;
+            }
+            if (isTask && !translucent) {
                 animAttr = enter
                         ? R.styleable.WindowAnimation_taskCloseEnterAnimation
                         : R.styleable.WindowAnimation_taskCloseExitAnimation;
             } else {
-                if ((changeFlags & FLAG_TRANSLUCENT) != 0 && !enter) {
-                    translucent = true;
-                }
                 animAttr = enter
                         ? R.styleable.WindowAnimation_activityCloseEnterAnimation
                         : R.styleable.WindowAnimation_activityCloseExitAnimation;

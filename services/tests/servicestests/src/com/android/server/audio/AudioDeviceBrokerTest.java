@@ -74,7 +74,7 @@ public class AudioDeviceBrokerTest {
         mSpyDevInventory = spy(new AudioDeviceInventory(mSpyAudioSystem));
         mSpySystemServer = spy(new NoOpSystemServerAdapter());
         mAudioDeviceBroker = new AudioDeviceBroker(mContext, mMockAudioService, mSpyDevInventory,
-                mSpySystemServer);
+                mSpySystemServer, mSpyAudioSystem);
         mSpyDevInventory.setDeviceBroker(mAudioDeviceBroker);
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();

@@ -135,7 +135,7 @@ public class AuthSessionCoordinatorTest {
     }
 
     @Test
-    public void testUserCanAuthDuringLockoutOfSameSession() {
+    public void testUserLockedDuringLockoutOfSameSession() {
         mCoordinator.resetLockoutFor(PRIMARY_USER, BIOMETRIC_STRONG, 0 /* requestId */);
 
         assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
@@ -151,10 +151,10 @@ public class AuthSessionCoordinatorTest {
                 0 /* requestId */);
 
         assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
-                LockoutTracker.LOCKOUT_NONE);
+                LockoutTracker.LOCKOUT_PERMANENT);
         assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
-                LockoutTracker.LOCKOUT_NONE);
-        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
                 LockoutTracker.LOCKOUT_NONE);
     }
 
@@ -191,10 +191,10 @@ public class AuthSessionCoordinatorTest {
                 0 /* requestId */);
 
         assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_CONVENIENCE)).isEqualTo(
-                LockoutTracker.LOCKOUT_NONE);
+                LockoutTracker.LOCKOUT_PERMANENT);
         assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
-                LockoutTracker.LOCKOUT_NONE);
-        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_WEAK)).isEqualTo(
+                LockoutTracker.LOCKOUT_PERMANENT);
+        assertThat(mCoordinator.getLockoutStateFor(PRIMARY_USER, BIOMETRIC_STRONG)).isEqualTo(
                 LockoutTracker.LOCKOUT_NONE);
 
         assertThat(

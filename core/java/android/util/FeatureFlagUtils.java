@@ -128,6 +128,12 @@ public class FeatureFlagUtils {
      */
     public static final String SETTINGS_ENABLE_SPA_PHASE2 = "settings_enable_spa_phase2";
 
+    /**
+     * Enable the SPA metrics writing.
+     * @hide
+     */
+    public static final String SETTINGS_ENABLE_SPA_METRICS = "settings_enable_spa_metrics";
+
     /** Flag to enable/disable adb log metrics
      *  @hide
      */
@@ -220,22 +226,23 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_APP_ALLOW_DARK_THEME_ACTIVATION_AT_BEDTIME, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEED_CONNECTED_BLE_DEVICE_FOR_BROADCAST, "true");
         DEFAULT_FLAGS.put(SETTINGS_AUTO_TEXT_WRAPPING, "false");
-        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "false");
-        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY, "false");
-        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "false");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_UI, "true");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_MODIFIER_KEY, "true");
+        DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD, "true");
         DEFAULT_FLAGS.put(SETTINGS_NEW_KEYBOARD_TRACKPAD_GESTURE, "false");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA, "true");
         DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_PHASE2, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_SPA_METRICS, "false");
         DEFAULT_FLAGS.put(SETTINGS_ADB_METRICS_WRITER, "false");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_STYLUS_PREFERENCES, "true");
         DEFAULT_FLAGS.put(SETTINGS_BIOMETRICS2_ENROLLMENT, "false");
-        DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ACCESSIBILITY_HEARING_AID_PAGE, "true");
         DEFAULT_FLAGS.put(SETTINGS_PREFER_ACCESSIBILITY_MENU_IN_SYSTEM, "false");
-        DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "false");
+        DEFAULT_FLAGS.put(SETTINGS_AUDIO_ROUTING, "true");
         DEFAULT_FLAGS.put(SETTINGS_FLASH_NOTIFICATIONS, "true");
         DEFAULT_FLAGS.put(SETTINGS_SHOW_UDFPS_ENROLL_IN_SETTINGS, "true");
-        DEFAULT_FLAGS.put(SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API, "false");
-        DEFAULT_FLAGS.put(SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, "false");
+        DEFAULT_FLAGS.put(SETTINGS_ENABLE_LOCKSCREEN_TRANSFER_API, "true");
+        DEFAULT_FLAGS.put(SETTINGS_REMOTE_DEVICE_CREDENTIAL_VALIDATION, "true");
     }
 
     private static final Set<String> PERSISTENT_FLAGS;

@@ -171,10 +171,15 @@ public class DpmMockContext extends MockContext {
     public ApplicationInfo applicationInfo = null;
 
     public DpmMockContext(MockSystemServices mockSystemServices, Context context) {
+        this(mockSystemServices, context, new MockBinder());
+    }
+
+    public DpmMockContext(MockSystemServices mockSystemServices, Context context,
+            @NonNull MockBinder mockBinder) {
         mMockSystemServices = mockSystemServices;
         realTestContext = context;
+        binder = mockBinder;
 
-        binder = new MockBinder();
         resources = mock(Resources.class);
         spiedContext = mock(Context.class);
 

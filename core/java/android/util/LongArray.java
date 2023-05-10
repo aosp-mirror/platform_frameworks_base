@@ -48,7 +48,7 @@ public class LongArray implements Cloneable {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public LongArray() {
-        this(10);
+        this(0);
     }
 
     /**

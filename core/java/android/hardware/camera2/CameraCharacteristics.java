@@ -41,9 +41,12 @@ import java.util.Set;
  * <p>The properties describing a
  * {@link CameraDevice CameraDevice}.</p>
  *
- * <p>These properties are fixed for a given CameraDevice, and can be queried
+ * <p>These properties are primarily fixed for a given CameraDevice, and can be queried
  * through the {@link CameraManager CameraManager}
- * interface with {@link CameraManager#getCameraCharacteristics}.</p>
+ * interface with {@link CameraManager#getCameraCharacteristics}. Beginning with API level 32, some
+ * properties such as {@link #SENSOR_ORIENTATION} may change dynamically based on the state of the
+ * device. For information on whether a specific value is fixed, see the documentation for its key.
+ * </p>
  *
  * <p>When obtained by a client that does not hold the CAMERA permission, some metadata values are
  * not included. The list of keys that require the permission is given by
@@ -280,9 +283,6 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *
      * <p>The field definitions can be
      * found in {@link CameraCharacteristics}.</p>
-     *
-     * <p>Querying the value for the same key more than once will return a value
-     * which is equal to the previous queried value.</p>
      *
      * @throws IllegalArgumentException if the key was not valid
      *
@@ -651,7 +651,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @param metadataClass The subclass of CameraMetadata that you want to get the keys for.
      * @param keyClass The class of the metadata key, e.g. CaptureRequest.Key.class
      * @param filterTags An array of tags to be used for filtering
-     * @param includeSynthetic Include public syntethic tag by default.
+     * @param includeSynthetic Include public synthetic tag by default.
      *
      * @return List of keys supported by this CameraDevice for metadataClass.
      *
@@ -2550,41 +2550,15 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <ul>
      *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_UNSPECIFIED UNSPECIFIED}</li>
      *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SRGB SRGB}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_SRGB LINEAR_SRGB}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_EXTENDED_SRGB EXTENDED_SRGB}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_EXTENDED_SRGB LINEAR_EXTENDED_SRGB}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT709 BT709}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT2020 BT2020}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DCI_P3 DCI_P3}</li>
      *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DISPLAY_P3 DISPLAY_P3}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_NTSC_1953 NTSC_1953}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SMPTE_C SMPTE_C}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ADOBE_RGB ADOBE_RGB}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_PRO_PHOTO_RGB PRO_PHOTO_RGB}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACES ACES}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACESCG ACESCG}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_XYZ CIE_XYZ}</li>
-     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_LAB CIE_LAB}</li>
+     *   <li>{@link #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT2020_HLG BT2020_HLG}</li>
      * </ul>
      *
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_UNSPECIFIED
      * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SRGB
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_SRGB
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_EXTENDED_SRGB
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_LINEAR_EXTENDED_SRGB
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT709
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT2020
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DCI_P3
      * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_DISPLAY_P3
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_NTSC_1953
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_SMPTE_C
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ADOBE_RGB
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_PRO_PHOTO_RGB
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACES
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_ACESCG
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_XYZ
-     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_CIE_LAB
+     * @see #REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP_BT2020_HLG
      * @hide
      */
     public static final Key<long[]> REQUEST_AVAILABLE_COLOR_SPACE_PROFILES_MAP =
@@ -4123,7 +4097,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * counterparts.
      * This key will only be present for devices which advertise the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * capability.</p>
+     * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
      * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
@@ -4148,7 +4123,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.
      * This key will only be present for devices which advertise the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * capability.</p>
+     * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
      * <p><b>Units</b>: Pixels</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
@@ -4172,7 +4148,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.
      * This key will only be present for devices which advertise the
      * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * capability.</p>
+     * capability or devices where {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     * lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}</p>
      * <p><b>Units</b>: Pixel coordinates on the image sensor</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
      *
@@ -4192,14 +4169,29 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * to improve various aspects of imaging such as noise reduction, low light
      * performance etc. These groups can be of various sizes such as 2X2 (quad bayer),
      * 3X3 (nona-bayer). This key specifies the length and width of the pixels grouped under
-     * the same color filter.</p>
-     * <p>This key will not be present if REMOSAIC_REPROCESSING is not supported, since RAW images
-     * will have a regular bayer pattern.</p>
-     * <p>This key will not be present for sensors which don't have the
-     * {@link android.hardware.camera2.CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
-     * capability.</p>
+     * the same color filter.
+     * In case the device has the
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability :</p>
+     * <ul>
+     * <li>This key will not be present if REMOSAIC_REPROCESSING is not supported, since RAW
+     *   images will have a regular bayer pattern.</li>
+     * </ul>
+     * <p>In case the device does not have the
+     * {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_ULTRA_HIGH_RESOLUTION_SENSOR }
+     * capability :</p>
+     * <ul>
+     * <li>This key will be present if
+     *   {@link CameraCharacteristics#getAvailableCaptureRequestKeys }
+     *   lists {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}}, since RAW
+     *   images may not necessarily have a regular bayer pattern when
+     *   {@link CaptureRequest#SENSOR_PIXEL_MODE {@link CaptureRequest#SENSOR_PIXEL_MODE android.sensor.pixelMode}} is set to
+     *   {@link android.hardware.camera2.CameraMetadata#SENSOR_PIXEL_MODE_MAXIMUM_RESOLUTION }.</li>
+     * </ul>
      * <p><b>Units</b>: Pixels</p>
      * <p><b>Optional</b> - The value for this key may be {@code null} on some devices.</p>
+     *
+     * @see CaptureRequest#SENSOR_PIXEL_MODE
      */
     @PublicKey
     @NonNull

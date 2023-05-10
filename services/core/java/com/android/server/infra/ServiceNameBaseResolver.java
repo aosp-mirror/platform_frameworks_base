@@ -268,7 +268,7 @@ public abstract class ServiceNameBaseResolver implements ServiceNameResolver {
             }
             if (enabled) {
                 Slog.i(TAG, "disabling default service for user " + userId);
-                mDefaultServicesDisabled.removeAt(userId);
+                mDefaultServicesDisabled.delete(userId);
             } else {
                 Slog.i(TAG, "enabling default service for user " + userId);
                 mDefaultServicesDisabled.put(userId, true);

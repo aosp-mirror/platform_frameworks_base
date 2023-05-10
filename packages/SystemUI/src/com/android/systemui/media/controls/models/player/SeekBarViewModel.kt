@@ -20,12 +20,14 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.PlaybackState
 import android.os.SystemClock
+import android.os.Trace
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.SeekBar
 import androidx.annotation.AnyThread
+import androidx.annotation.VisibleForTesting
 import androidx.annotation.WorkerThread
 import androidx.core.view.GestureDetectorCompat
 import androidx.lifecycle.LiveData
@@ -36,9 +38,12 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.util.concurrency.RepeatableExecutor
 import javax.inject.Inject
+import kotlin.math.abs
 
 private const val POSITION_UPDATE_INTERVAL_MILLIS = 100L
 private const val MIN_FLING_VELOCITY_SCALE_FACTOR = 10
+
+private const val TRACE_POSITION_NAME = "SeekBarPollingPosition"
 
 private fun PlaybackState.isInMotion(): Boolean {
     return this.state == PlaybackState.STATE_PLAYING ||
@@ -295,14 +300,20 @@ constructor(
     @WorkerThread
     private fun checkIfPollingNeeded() {
         val needed = listening && !scrubbing && playbackState?.isInMotion() ?: false
+        val traceCookie = controller?.sessionToken.hashCode()
         if (needed) {
             if (cancel == null) {
-                cancel =
+                Trace.beginAsyncSection(TRACE_POSITION_NAME, traceCookie)
+                val cancelPolling =
                     bgExecutor.executeRepeatedly(
                         this::checkPlaybackPosition,
                         0L,
                         POSITION_UPDATE_INTERVAL_MILLIS
                     )
+                cancel = Runnable {
+                    cancelPolling.run()
+                    Trace.endAsyncSection(TRACE_POSITION_NAME, traceCookie)
+                }
             }
         } else {
             cancel?.run()
@@ -315,6 +326,10 @@ constructor(
         get() {
             return SeekBarChangeListener(this, falsingManager)
         }
+
+    /** first and last motion events of seekbar grab. */
+    @VisibleForTesting var firstMotionEvent: MotionEvent? = null
+    @VisibleForTesting var lastMotionEvent: MotionEvent? = null
 
     /** Attach touch handlers to the seek bar view. */
     fun attachTouchHandlers(bar: SeekBar) {
@@ -342,6 +357,23 @@ constructor(
         }
     }
 
+    /**
+     * This method specifies if user made a bad seekbar grab or not. If the vertical distance from
+     * first touch on seekbar is more than the horizontal distance, this means that the seekbar grab
+     * is more vertical and should be rejected. Seekbar accepts horizontal grabs only.
+     *
+     * Single tap has the same first and last motion event, it is counted as a valid grab.
+     *
+     * @return whether the touch on seekbar is valid.
+     */
+    private fun isValidSeekbarGrab(): Boolean {
+        if (firstMotionEvent == null || lastMotionEvent == null) {
+            return true
+        }
+        return abs(firstMotionEvent!!.x - lastMotionEvent!!.x) >=
+            abs(firstMotionEvent!!.y - lastMotionEvent!!.y)
+    }
+
     /** Listener interface to be notified when the user starts or stops scrubbing. */
     interface ScrubbingChangeListener {
         fun onScrubbingChanged(scrubbing: Boolean)
@@ -367,7 +399,7 @@ constructor(
         }
 
         override fun onStopTrackingTouch(bar: SeekBar) {
-            if (falsingManager.isFalseTouch(MEDIA_SEEKBAR)) {
+            if (!viewModel.isValidSeekbarGrab() || falsingManager.isFalseTouch(MEDIA_SEEKBAR)) {
                 viewModel.onSeekFalse()
             }
             viewModel.onSeek(bar.progress.toLong())
@@ -415,6 +447,8 @@ constructor(
                 return false
             }
             detector.onTouchEvent(event)
+            // Store the last motion event done on seekbar.
+            viewModel.lastMotionEvent = event.copy()
             return !shouldGoToSeekBar
         }
 
@@ -459,6 +493,8 @@ constructor(
             if (shouldGoToSeekBar) {
                 bar.parent?.requestDisallowInterceptTouchEvent(true)
             }
+            // Store the first motion event done on seekbar.
+            viewModel.firstMotionEvent = event.copy()
             return shouldGoToSeekBar
         }
 

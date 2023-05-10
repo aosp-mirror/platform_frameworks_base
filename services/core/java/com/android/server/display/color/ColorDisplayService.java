@@ -180,6 +180,8 @@ public final class ColorDisplayService extends SystemService {
      */
     private SparseIntArray mColorModeCompositionColorSpaces = null;
 
+    private final Object mCctTintApplierLock = new Object();
+
     public ColorDisplayService(Context context) {
         super(context);
         mHandler = new TintHandler(DisplayThread.get().getLooper());
@@ -698,6 +700,79 @@ public final class ColorDisplayService extends SystemService {
         }
     }
 
+    private void applyTintByCct(ColorTemperatureTintController tintController, boolean immediate) {
+        synchronized (mCctTintApplierLock) {
+            tintController.cancelAnimator();
+
+            final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+            final int from = tintController.getAppliedCct();
+            final int to = tintController.isActivated() ? tintController.getTargetCct()
+                    : tintController.getDisabledCct();
+
+            if (immediate) {
+                Slog.d(TAG, tintController.getClass().getSimpleName()
+                        + " applied immediately: toCct=" + to + " fromCct=" + from);
+                dtm.setColorMatrix(tintController.getLevel(),
+                        tintController.computeMatrixForCct(to));
+                tintController.setAppliedCct(to);
+            } else {
+                Slog.d(TAG, tintController.getClass().getSimpleName() + " animation started: toCct="
+                        + to + " fromCct=" + from);
+                ValueAnimator valueAnimator = ValueAnimator.ofInt(from, to);
+                tintController.setAnimator(valueAnimator);
+                final CctEvaluator evaluator = tintController.getEvaluator();
+                if (evaluator != null) {
+                    valueAnimator.setEvaluator(evaluator);
+                }
+                valueAnimator.setDuration(tintController.getTransitionDurationMilliseconds());
+                valueAnimator.setInterpolator(AnimationUtils.loadInterpolator(
+                        getContext(), android.R.interpolator.linear));
+                valueAnimator.addUpdateListener((ValueAnimator animator) -> {
+                    synchronized (mCctTintApplierLock) {
+                        final int value = (int) animator.getAnimatedValue();
+                        if (value != tintController.getAppliedCct()) {
+                            dtm.setColorMatrix(tintController.getLevel(),
+                                    tintController.computeMatrixForCct(value));
+                            tintController.setAppliedCct(value);
+                        }
+                    }
+                });
+                valueAnimator.addListener(new AnimatorListenerAdapter() {
+
+                    private boolean mIsCancelled;
+
+                    @Override
+                    public void onAnimationCancel(Animator animator) {
+                        Slog.d(TAG, tintController.getClass().getSimpleName()
+                                + " animation cancelled");
+                        mIsCancelled = true;
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animator) {
+                        synchronized (mCctTintApplierLock) {
+                            Slog.d(TAG, tintController.getClass().getSimpleName()
+                                    + " animation ended: wasCancelled=" + mIsCancelled
+                                    + " toCct=" + to
+                                    + " fromCct=" + from);
+                            if (!mIsCancelled) {
+                                // Ensure final color matrix is set at the end of the animation.
+                                // If the animation is cancelled then don't set the final color
+                                // matrix so the new animator can pick up from where this one left
+                                // off.
+                                dtm.setColorMatrix(tintController.getLevel(),
+                                        tintController.computeMatrixForCct(to));
+                                tintController.setAppliedCct(to);
+                            }
+                            tintController.setAnimator(null);
+                        }
+                    }
+                });
+                valueAnimator.start();
+            }
+        }
+    }
+
     /**
      * Returns the first date time corresponding to the local time that occurs before the provided
      * date time.
@@ -747,7 +822,7 @@ public final class ColorDisplayService extends SystemService {
 
         // If disabled, clear the tint. If enabled, do nothing more here and let the next
         // temperature update set the correct tint.
-        if (!activated) {
+        if (oldActivated && !activated) {
             mHandler.sendEmptyMessage(MSG_APPLY_DISPLAY_WHITE_BALANCE);
         }
     }
@@ -1452,7 +1527,7 @@ public final class ColorDisplayService extends SystemService {
     public class ColorDisplayServiceInternal {
 
         /** Sets whether DWB should be allowed in the current state. */
-        public void setDisplayWhiteBalanceAllowed(boolean allowed)  {
+        public void setDisplayWhiteBalanceAllowed(boolean allowed) {
             mDisplayWhiteBalanceTintController.setAllowed(allowed);
             updateDisplayWhiteBalanceStatus();
         }
@@ -1464,8 +1539,8 @@ public final class ColorDisplayService extends SystemService {
          * @param cct the color temperature in Kelvin.
          */
         public boolean setDisplayWhiteBalanceColorTemperature(int cct) {
-            // Update the transform matrix even if it can't be applied.
-            mDisplayWhiteBalanceTintController.setMatrix(cct);
+            // Update the transform target CCT even if it can't be applied.
+            mDisplayWhiteBalanceTintController.setTargetCct(cct);
 
             if (mDisplayWhiteBalanceTintController.isActivated()) {
                 mHandler.sendEmptyMessage(MSG_APPLY_DISPLAY_WHITE_BALANCE);
@@ -1601,7 +1676,7 @@ public final class ColorDisplayService extends SystemService {
                     applyTint(mNightDisplayTintController, false);
                     break;
                 case MSG_APPLY_DISPLAY_WHITE_BALANCE:
-                    applyTint(mDisplayWhiteBalanceTintController, false);
+                    applyTintByCct(mDisplayWhiteBalanceTintController, false);
                     break;
             }
         }

@@ -81,7 +81,7 @@ public:
     virtual PointerIconStyle getDefaultPointerIconId() = 0;
     virtual PointerIconStyle getDefaultStylusIconId() = 0;
     virtual PointerIconStyle getCustomPointerIconId() = 0;
-    virtual void onPointerDisplayIdChanged(int32_t displayId, float xPos, float yPos) = 0;
+    virtual void onPointerDisplayIdChanged(int32_t displayId, const FloatPoint& position) = 0;
 };
 
 /*

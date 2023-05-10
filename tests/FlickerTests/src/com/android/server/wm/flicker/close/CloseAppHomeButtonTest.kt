@@ -40,20 +40,27 @@ import org.junit.runners.Parameterized
  *     Launch an app [testApp] and wait animation to complete
  *     Press home button
  * ```
+ *
  * To run only the presubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Presubmit`
  * ```
+ *
  * To run only the postsubmit assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:exclude-annotation:androidx.test.filters.FlakyTest
  *      --module-arg FlickerTests:include-annotation:android.platform.test.annotations.Postsubmit`
  * ```
+ *
  * To run only the flaky assertions add: `--
+ *
  * ```
  *      --module-arg FlickerTests:include-annotation:androidx.test.filters.FlakyTest`
  * ```
+ *
  * Notes:
  * ```
  *     1. Some default assertions (e.g., nav bar, status bar and screen covered)

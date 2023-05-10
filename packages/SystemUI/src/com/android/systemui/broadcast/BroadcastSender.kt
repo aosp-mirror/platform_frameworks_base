@@ -24,16 +24,13 @@ class BroadcastSender @Inject constructor(
     @Background private val bgExecutor: Executor
 ) {
 
-    private val WAKE_LOCK_TAG = "SysUI:BroadcastSender"
-    private val WAKE_LOCK_SEND_REASON = "sendInBackground"
-
     /**
      * Sends broadcast via [Context.sendBroadcast] on background thread to avoid blocking
      * synchronous binder call.
      */
     @AnyThread
     fun sendBroadcast(intent: Intent) {
-        sendInBackground {
+        sendInBackground("$intent") {
             context.sendBroadcast(intent)
         }
     }
@@ -44,7 +41,7 @@ class BroadcastSender @Inject constructor(
      */
     @AnyThread
     fun sendBroadcast(intent: Intent, receiverPermission: String?) {
-        sendInBackground {
+        sendInBackground("$intent") {
             context.sendBroadcast(intent, receiverPermission)
         }
     }
@@ -55,7 +52,7 @@ class BroadcastSender @Inject constructor(
      */
     @AnyThread
     fun sendBroadcastAsUser(intent: Intent, userHandle: UserHandle) {
-        sendInBackground {
+        sendInBackground("$intent") {
             context.sendBroadcastAsUser(intent, userHandle)
         }
     }
@@ -66,7 +63,7 @@ class BroadcastSender @Inject constructor(
      */
     @AnyThread
     fun sendBroadcastAsUser(intent: Intent, userHandle: UserHandle, receiverPermission: String?) {
-        sendInBackground {
+        sendInBackground("$intent") {
             context.sendBroadcastAsUser(intent, userHandle, receiverPermission)
         }
     }
@@ -82,7 +79,7 @@ class BroadcastSender @Inject constructor(
         receiverPermission: String?,
         options: Bundle?
     ) {
-        sendInBackground {
+        sendInBackground("$intent") {
             context.sendBroadcastAsUser(intent, userHandle, receiverPermission, options)
         }
     }
@@ -98,7 +95,7 @@ class BroadcastSender @Inject constructor(
         receiverPermission: String?,
         appOp: Int
     ) {
-        sendInBackground {
+        sendInBackground("$intent") {
             context.sendBroadcastAsUser(intent, userHandle, receiverPermission, appOp)
         }
     }
@@ -108,25 +105,29 @@ class BroadcastSender @Inject constructor(
      */
     @AnyThread
     fun closeSystemDialogs() {
-        sendInBackground {
-            context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
+        sendInBackground("closeSystemDialogs") {
+            context.closeSystemDialogs()
         }
     }
 
     /**
      * Dispatches parameter on background executor while holding a wakelock.
      */
-    private fun sendInBackground(callable: () -> Unit) {
+    private fun sendInBackground(reason: String, callable: () -> Unit) {
         val broadcastWakelock = wakeLockBuilder.setTag(WAKE_LOCK_TAG)
                                 .setMaxTimeout(5000)
                                 .build()
-        broadcastWakelock.acquire(WAKE_LOCK_SEND_REASON)
+        broadcastWakelock.acquire(reason)
         bgExecutor.execute {
             try {
                 callable.invoke()
             } finally {
-                broadcastWakelock.release(WAKE_LOCK_SEND_REASON)
+                broadcastWakelock.release(reason)
             }
         }
+    }
+
+    companion object {
+        private const val WAKE_LOCK_TAG = "SysUI:BroadcastSender"
     }
 }

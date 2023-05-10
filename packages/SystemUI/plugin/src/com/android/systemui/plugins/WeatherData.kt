@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.annotation.VisibleForTesting
 
 class WeatherData
-private constructor(
+constructor(
     val description: String,
     val state: WeatherStateIcon,
     val useCelsius: Boolean,
@@ -47,6 +47,7 @@ private constructor(
             }
     }
 
+    // Values for WeatherStateIcon must stay in sync with go/g3-WeatherStateIcon
     enum class WeatherStateIcon(val id: Int) {
         UNKNOWN_ICON(0),
 

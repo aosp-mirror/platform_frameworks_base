@@ -47,7 +47,6 @@ public abstract class Transport {
     protected static final boolean DEBUG = Build.IS_DEBUGGABLE;
 
     static final int MESSAGE_REQUEST_PING = 0x63807378; // ?PIN
-    public static final int MESSAGE_REQUEST_PLATFORM_INFO = 0x63807073; // ?PFI
     public static final int MESSAGE_REQUEST_CONTEXT_SYNC = 0x63678883; // ?CXS
     public static final int MESSAGE_REQUEST_PERMISSION_RESTORE = 0x63826983; // ?RES
 
@@ -110,13 +109,26 @@ public abstract class Transport {
         return mFd;
     }
 
-    public abstract void start();
-    public abstract void stop();
+    /**
+     * Start listening to messages.
+     */
+    abstract void start();
+
+    /**
+     * Soft stop listening to the incoming data without closing the streams.
+     */
+    abstract void stop();
+
+    /**
+     * Stop listening to the incoming data and close the streams.
+     */
+    abstract void close();
+
     protected abstract void sendMessage(int message, int sequence, @NonNull byte[] data)
             throws IOException;
 
     /**
-     * Send a message
+     * Send a message.
      */
     public void sendMessage(int message, @NonNull byte[] data) throws IOException {
         sendMessage(message, mNextSequence.incrementAndGet(), data);
@@ -170,7 +182,6 @@ public abstract class Transport {
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, data);
                 break;
             }
-            case MESSAGE_REQUEST_PLATFORM_INFO:
             case MESSAGE_REQUEST_CONTEXT_SYNC: {
                 callback(message, data);
                 sendMessage(MESSAGE_RESPONSE_SUCCESS, sequence, EmptyArray.BYTE);

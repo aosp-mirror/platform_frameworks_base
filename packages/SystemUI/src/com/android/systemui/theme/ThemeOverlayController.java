@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package com.android.systemui.theme;
 
 import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
@@ -623,6 +624,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         FabricatedOverlay overlay = newFabricatedOverlay("dynamic");
         assignDynamicPaletteToOverlay(overlay, true /* isDark */);
         assignDynamicPaletteToOverlay(overlay, false /* isDark */);
+        assignFixedColorsToOverlay(overlay);
         return overlay;
     }
 
@@ -632,6 +634,15 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         DynamicColors.ALL_DYNAMIC_COLORS_MAPPED.forEach(p -> {
             String resourceName = "android:color/system_" + p.first + "_" + suffix;
             int colorValue = p.second.getArgb(scheme);
+            overlay.setResourceValue(resourceName, TYPE_INT_COLOR_ARGB8, colorValue,
+                    null /* configuration */);
+        });
+    }
+
+    private void assignFixedColorsToOverlay(FabricatedOverlay overlay) {
+        DynamicColors.FIXED_COLORS_MAPPED.forEach(p -> {
+            String resourceName = "android:color/system_" + p.first;
+            int colorValue = p.second.getArgb(mDynamicSchemeLight);
             overlay.setResourceValue(resourceName, TYPE_INT_COLOR_ARGB8, colorValue,
                     null /* configuration */);
         });
@@ -658,10 +669,16 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                     == mColorScheme.getNeutral1().getS500()
                     && res.getColor(android.R.color.system_neutral2_500, theme)
                     == mColorScheme.getNeutral2().getS500()
+                    && res.getColor(android.R.color.system_outline_variant_dark, theme)
+                    == MaterialDynamicColors.outlineVariant().getArgb(mDynamicSchemeDark)
+                    && res.getColor(android.R.color.system_outline_variant_light, theme)
+                    == MaterialDynamicColors.outlineVariant().getArgb(mDynamicSchemeLight)
                     && res.getColor(android.R.color.system_primary_container_dark, theme)
-                    == MaterialDynamicColors.primaryContainer.getArgb(mDynamicSchemeDark)
+                    == MaterialDynamicColors.primaryContainer().getArgb(mDynamicSchemeDark)
                     && res.getColor(android.R.color.system_primary_container_light, theme)
-                    == MaterialDynamicColors.primaryContainer.getArgb(mDynamicSchemeLight))) {
+                    == MaterialDynamicColors.primaryContainer().getArgb(mDynamicSchemeLight)
+                    && res.getColor(android.R.color.system_primary_fixed, theme)
+                    == MaterialDynamicColors.primaryFixed().getArgb(mDynamicSchemeLight))) {
                 return false;
             }
         }

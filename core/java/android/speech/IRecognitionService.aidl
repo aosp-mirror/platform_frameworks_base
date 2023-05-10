@@ -78,23 +78,10 @@ oneway interface IRecognitionService {
      * information see {@link #checkRecognitionSupport},  {@link #startListening} and
      * {@link RecognizerIntent}.
      *
-     * Progress can be monitord by calling {@link #setModelDownloadListener} before a trigger.
+     * Progress updates can be received via {@link #IModelDownloadListener}.
      */
-    void triggerModelDownload(in Intent recognizerIntent, in AttributionSource attributionSource);
-
-    /**
-     * Sets listener to received download progress updates. Clients still have to call
-     * {@link #triggerModelDownload} to trigger a model download.
-     */
-    void setModelDownloadListener(
+    void triggerModelDownload(
         in Intent recognizerIntent,
         in AttributionSource attributionSource,
         in IModelDownloadListener listener);
-
-    /**
-     * Clears the listener for model download events attached to a recognitionIntent if any.
-     */
-    void clearModelDownloadListener(
-        in Intent recognizerIntent,
-        in AttributionSource attributionSource);
 }

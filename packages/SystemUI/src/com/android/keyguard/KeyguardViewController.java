@@ -23,8 +23,8 @@ import android.view.ViewRootImpl;
 import androidx.annotation.Nullable;
 
 import com.android.systemui.keyguard.KeyguardViewMediator;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeExpansionStateManager;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -168,7 +168,7 @@ public interface KeyguardViewController {
     /**
      * Stop showing the alternate bouncer, if showing.
      */
-    void hideAlternateBouncer(boolean forceUpdateScrim);
+    void hideAlternateBouncer(boolean updateScrim);
 
     // TODO: Deprecate registerStatusBar in KeyguardViewController interface. It is currently
     //  only used for testing purposes in StatusBarKeyguardViewManager, and it prevents us from
@@ -178,7 +178,7 @@ public interface KeyguardViewController {
      * Registers the CentralSurfaces to which this Keyguard View is mounted.
      */
     void registerCentralSurfaces(CentralSurfaces centralSurfaces,
-            NotificationPanelViewController notificationPanelViewController,
+            ShadeViewController shadeViewController,
             @Nullable ShadeExpansionStateManager shadeExpansionStateManager,
             BiometricUnlockController biometricUnlockController,
             View notificationContainer,

@@ -16,23 +16,23 @@
 
 package com.android.server.credentials.metrics;
 
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_CLIENT_CANCELED;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_FAILURE;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_SUCCESS;
-import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_USER_CANCELED;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED__API_STATUS__API_STATUS_CLIENT_CANCELED;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED__API_STATUS__API_STATUS_FAILURE;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED__API_STATUS__API_STATUS_SUCCESS;
+import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED__API_STATUS__API_STATUS_USER_CANCELED;
 
 public enum ApiStatus {
-    SUCCESS(CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_SUCCESS),
-    FAILURE(CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_FAILURE),
+    SUCCESS(CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED__API_STATUS__API_STATUS_SUCCESS),
+    FAILURE(CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED__API_STATUS__API_STATUS_FAILURE),
     CLIENT_CANCELED(
-            CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_CLIENT_CANCELED),
+            CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED__API_STATUS__API_STATUS_CLIENT_CANCELED),
     USER_CANCELED(
-            CREDENTIAL_MANAGER_API_CALLED__API_STATUS__API_STATUS_USER_CANCELED);
+            CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED__API_STATUS__API_STATUS_USER_CANCELED);
 
     private final int mInnerMetricCode;
 
     ApiStatus(int innerMetricCode) {
-        this.mInnerMetricCode = innerMetricCode;
+        mInnerMetricCode = innerMetricCode;
     }
 
     /**
@@ -41,6 +41,6 @@ public enum ApiStatus {
      * @return a code corresponding to the west world metric name
      */
     public int getMetricCode() {
-        return this.mInnerMetricCode;
+        return mInnerMetricCode;
     }
 }

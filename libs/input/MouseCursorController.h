@@ -43,12 +43,10 @@ public:
     MouseCursorController(PointerControllerContext& context);
     ~MouseCursorController();
 
-    bool getBounds(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
+    std::optional<FloatRect> getBounds() const;
     void move(float deltaX, float deltaY);
-    void setButtonState(int32_t buttonState);
-    int32_t getButtonState() const;
     void setPosition(float x, float y);
-    void getPosition(float* outX, float* outY) const;
+    FloatPoint getPosition() const;
     int32_t getDisplayId() const;
     void fade(PointerControllerInterface::Transition transition);
     void unfade(PointerControllerInterface::Transition transition);
@@ -96,13 +94,11 @@ private:
         PointerIconStyle requestedPointerType;
         PointerIconStyle resolvedPointerType;
 
-        int32_t buttonState;
-
         bool animating{false};
 
     } mLocked GUARDED_BY(mLock);
 
-    bool getBoundsLocked(float* outMinX, float* outMinY, float* outMaxX, float* outMaxY) const;
+    std::optional<FloatRect> getBoundsLocked() const;
     void setPositionLocked(float x, float y);
 
     void updatePointerLocked();

@@ -19,12 +19,13 @@ package com.android.systemui.dreams;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamAlphaScaledExpansion;
 import static com.android.keyguard.BouncerPanelExpansionCalculator.getDreamYPositionScaledExpansion;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_BOTTOM;
+import static com.android.systemui.complication.ComplicationLayoutParams.POSITION_TOP;
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
-import static com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_BOTTOM;
-import static com.android.systemui.dreams.complication.ComplicationLayoutParams.POSITION_TOP;
 
 import android.animation.Animator;
 import android.content.res.Resources;
+import android.graphics.Region;
 import android.os.Handler;
 import android.util.MathUtils;
 import android.view.View;
@@ -32,11 +33,11 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 
+import com.android.app.animation.Interpolators;
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.systemui.R;
-import com.android.systemui.animation.Interpolators;
+import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.dreams.dagger.DreamOverlayModule;
 import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
@@ -223,6 +224,9 @@ public class DreamOverlayContainerViewController extends
         mJitterStartTimeMillis = System.currentTimeMillis();
         mHandler.postDelayed(this::updateBurnInOffsets, mBurnInProtectionUpdateInterval);
         mPrimaryBouncerCallbackInteractor.addBouncerExpansionCallback(mBouncerExpansionCallback);
+        final Region emptyRegion = Region.obtain();
+        mView.getRootSurfaceControl().setTouchableRegion(emptyRegion);
+        emptyRegion.recycle();
 
         // Start dream entry animations. Skip animations for low light clock.
         if (!mStateController.isLowLightActive()) {

@@ -92,7 +92,7 @@ public class MediaOutputDialogReceiverTest extends SysuiTestCase {
 
         verify(mMockMediaOutputDialogFactory, never()).create(any(), anyBoolean(), any());
         verify(mMockMediaOutputBroadcastDialogFactory, times(1))
-                .create(getContext().getPackageName(), false, null);
+                .create(getContext().getPackageName(), true, null);
     }
 
     @Test

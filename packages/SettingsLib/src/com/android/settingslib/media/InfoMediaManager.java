@@ -31,7 +31,6 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
 import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
 
@@ -51,6 +50,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.DoNotInline;
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -542,13 +542,6 @@ public class InfoMediaManager extends MediaManager {
                 //TODO(b/148765806): use correct device type once api is ready.
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
                         mPackageName, mPreferenceItemMap.get(route.getId()));
-                if (!TextUtils.isEmpty(mPackageName)
-                        && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
-                    mediaDevice.setState(STATE_SELECTED);
-                    if (mCurrentConnectedDevice == null) {
-                        mCurrentConnectedDevice = mediaDevice;
-                    }
-                }
                 break;
             case TYPE_BUILTIN_SPEAKER:
             case TYPE_USB_DEVICE:
@@ -581,7 +574,13 @@ public class InfoMediaManager extends MediaManager {
                 break;
 
         }
-
+        if (mediaDevice != null && !TextUtils.isEmpty(mPackageName)
+                && getRoutingSessionInfo().getSelectedRoutes().contains(route.getId())) {
+            mediaDevice.setState(STATE_SELECTED);
+            if (mCurrentConnectedDevice == null) {
+                mCurrentConnectedDevice = mediaDevice;
+            }
+        }
         if (mediaDevice != null) {
             mMediaDevices.add(mediaDevice);
         }
@@ -621,9 +620,11 @@ public class InfoMediaManager extends MediaManager {
             dispatchConnectedDeviceChanged(id);
         }
 
+        /**
+         * Ignore callback here since we'll also receive {@link onRequestFailed} with reason code.
+         */
         @Override
         public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
-            dispatchOnRequestFailed(REASON_UNKNOWN_ERROR);
         }
 
         @Override
@@ -633,6 +634,11 @@ public class InfoMediaManager extends MediaManager {
 
         @Override
         public void onSessionUpdated(RoutingSessionInfo sessionInfo) {
+            refreshDevices();
+        }
+
+        @Override
+        public void onSessionReleased(@NonNull RoutingSessionInfo session) {
             refreshDevices();
         }
 

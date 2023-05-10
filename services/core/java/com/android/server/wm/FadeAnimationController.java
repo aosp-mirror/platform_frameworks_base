@@ -57,14 +57,21 @@ public class FadeAnimationController {
         return AnimationUtils.loadAnimation(mContext, R.anim.fade_out);
     }
 
+    /** Run the fade in/out animation for a window token. */
+    public void fadeWindowToken(boolean show, WindowToken windowToken, int animationType) {
+        fadeWindowToken(show, windowToken, animationType, null);
+    }
+
     /**
      * Run the fade in/out animation for a window token.
      *
      * @param show true for fade-in, otherwise for fade-out.
      * @param windowToken the window token to run the animation.
      * @param animationType the animation type defined in SurfaceAnimator.
+     * @param finishedCallback the callback after the animation finished.
      */
-    public void fadeWindowToken(boolean show, WindowToken windowToken, int animationType) {
+    public void fadeWindowToken(boolean show, WindowToken windowToken, int animationType,
+            SurfaceAnimator.OnAnimationFinishedCallback finishedCallback) {
         if (windowToken == null || windowToken.getParent() == null) {
             return;
         }
@@ -75,9 +82,8 @@ public class FadeAnimationController {
         if (animationAdapter == null) {
             return;
         }
-
         windowToken.startAnimation(windowToken.getPendingTransaction(), animationAdapter,
-                show /* hidden */, animationType, null /* finishedCallback */);
+                show /* hidden */, animationType, finishedCallback);
     }
 
     protected FadeAnimationAdapter createAdapter(LocalAnimationAdapter.AnimationSpec animationSpec,

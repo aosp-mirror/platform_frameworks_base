@@ -25,15 +25,12 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.StatusBarManager;
-import android.metrics.LogMaker;
-import android.support.test.metricshelper.MetricsAsserts;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.logging.testing.FakeMetricsLogger;
 import com.android.systemui.ForegroundServiceNotificationListener;
 import com.android.systemui.InitController;
@@ -41,10 +38,11 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.settings.FakeDisplayTracker;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.NotificationShadeWindowView;
 import com.android.systemui.shade.QuickSettingsController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeNotificationPresenter;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -60,7 +58,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntryB
 import com.android.systemui.statusbar.notification.collection.render.NotifShadeEventSource;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider;
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptSuppressor;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
@@ -110,9 +107,12 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
                 mock(NotificationStackScrollLayout.class));
         when(notificationShadeWindowView.getResources()).thenReturn(mContext.getResources());
 
+        ShadeViewController shadeViewController = mock(ShadeViewController.class);
+        when(shadeViewController.getShadeNotificationPresenter())
+                .thenReturn(mock(ShadeNotificationPresenter.class));
         mStatusBarNotificationPresenter = new StatusBarNotificationPresenter(
                 mContext,
-                mock(NotificationPanelViewController.class),
+                shadeViewController,
                 mock(QuickSettingsController.class),
                 mock(HeadsUpManagerPhone.class),
                 notificationShadeWindowView,
@@ -194,46 +194,7 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testNoSuppressHeadsUp_FSI_occludedKeygaurd() {
-        when(mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()).thenReturn(false);
-        Notification n = new Notification.Builder(getContext(), "a")
-                .setFullScreenIntent(mock(PendingIntent.class), true)
-                .build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(true);
-        when(mCentralSurfaces.isOccluded()).thenReturn(true);
-        assertFalse(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
-    }
-
-    @Test
-    public void testSuppressHeadsUp_FSI_nonOccludedKeygaurd() {
-        when(mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()).thenReturn(false);
-        Notification n = new Notification.Builder(getContext(), "a")
-                .setFullScreenIntent(mock(PendingIntent.class), true)
-                .build();
-        NotificationEntry entry = new NotificationEntryBuilder()
-                .setPkg("a")
-                .setOpPkg("a")
-                .setTag("a")
-                .setNotification(n)
-                .build();
-
-        when(mKeyguardStateController.isShowing()).thenReturn(true);
-        when(mKeyguardStateController.isOccluded()).thenReturn(false);
-        when(mCentralSurfaces.isOccluded()).thenReturn(false);
-        assertTrue(mInterruptSuppressor.suppressAwakeHeadsUp(entry));
-    }
-
-    @Test
-    public void testNoSuppressHeadsUp_FSI_nonOccludedKeygaurd_withNewFlag() {
-        when(mNotifPipelineFlags.fullScreenIntentRequiresKeyguard()).thenReturn(true);
+    public void testNoSuppressHeadsUp_FSI_nonOccludedKeyguard() {
         Notification n = new Notification.Builder(getContext(), "a")
                 .setFullScreenIntent(mock(PendingIntent.class), true)
                 .build();
@@ -278,16 +239,5 @@ public class StatusBarNotificationPresenterTest extends SysuiTestCase {
 
         assertTrue("CentralSurfaces alerts disabled shouldn't allow interruptions",
                 mInterruptSuppressor.suppressInterruptions(entry));
-    }
-
-    @Test
-    public void onActivatedMetrics() {
-        ActivatableNotificationView view =  mock(ActivatableNotificationView.class);
-        mStatusBarNotificationPresenter.onActivated(view);
-
-        MetricsAsserts.assertHasLog("missing lockscreen note tap log",
-                mMetricsLogger.getLogs(),
-                new LogMaker(MetricsEvent.ACTION_LS_NOTE)
-                        .setType(MetricsEvent.TYPE_ACTION));
     }
 }

@@ -16,7 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.os.Looper
+import android.hardware.biometrics.BiometricSourceType
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.TestableResources
@@ -28,18 +28,20 @@ import com.android.systemui.DejankUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.DismissCallbackRegistry
 import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.BouncerViewDelegate
+import com.android.systemui.keyguard.data.repository.FakeTrustRepository
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_VISIBLE
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
-import com.android.systemui.keyguard.shared.model.KeyguardBouncerModel
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -48,10 +50,10 @@ import org.junit.runner.RunWith
 import org.mockito.Answers
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
@@ -67,16 +69,23 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     @Mock private lateinit var mPrimaryBouncerCallbackInteractor: PrimaryBouncerCallbackInteractor
     @Mock private lateinit var falsingCollector: FalsingCollector
     @Mock private lateinit var dismissCallbackRegistry: DismissCallbackRegistry
-    @Mock private lateinit var keyguardBypassController: KeyguardBypassController
     @Mock private lateinit var keyguardUpdateMonitor: KeyguardUpdateMonitor
-    private val mainHandler = FakeHandler(Looper.getMainLooper())
+    private lateinit var mainHandler: FakeHandler
     private lateinit var underTest: PrimaryBouncerInteractor
     private lateinit var resources: TestableResources
+    private lateinit var trustRepository: FakeTrustRepository
+    private lateinit var featureFlags: FakeFeatureFlags
 
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        whenever(keyguardSecurityModel.getSecurityMode(anyInt()))
+            .thenReturn(KeyguardSecurityModel.SecurityMode.PIN)
+
         DejankUtils.setImmediate(true)
+        mainHandler = FakeHandler(android.os.Looper.getMainLooper())
+        trustRepository = FakeTrustRepository()
+        featureFlags = FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, false) }
         underTest =
             PrimaryBouncerInteractor(
                 repository,
@@ -89,11 +98,12 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
                 dismissCallbackRegistry,
                 context,
                 keyguardUpdateMonitor,
-                keyguardBypassController,
+                trustRepository,
+                featureFlags,
             )
-        `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
-        `when`(repository.primaryBouncerShow.value).thenReturn(null)
-        `when`(bouncerView.delegate).thenReturn(bouncerViewDelegate)
+        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
+        whenever(repository.primaryBouncerShow.value).thenReturn(false)
+        whenever(bouncerView.delegate).thenReturn(bouncerViewDelegate)
         resources = context.orCreateTestableResources
     }
 
@@ -101,15 +111,13 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     fun testShow_isScrimmed() {
         underTest.show(true)
         verify(repository).setKeyguardAuthenticated(null)
-        verify(repository).setPrimaryHide(false)
         verify(repository).setPrimaryStartingToHide(false)
         verify(repository).setPrimaryScrimmed(true)
         verify(repository).setPanelExpansion(EXPANSION_VISIBLE)
         verify(repository).setPrimaryShowingSoon(true)
         verify(keyguardStateController).notifyPrimaryBouncerShowing(true)
         verify(mPrimaryBouncerCallbackInteractor).dispatchStartingToShow()
-        verify(repository).setPrimaryVisible(true)
-        verify(repository).setPrimaryShow(any(KeyguardBouncerModel::class.java))
+        verify(repository).setPrimaryShow(true)
         verify(repository).setPrimaryShowingSoon(false)
         verify(mPrimaryBouncerCallbackInteractor).dispatchVisibilityChanged(View.VISIBLE)
     }
@@ -121,9 +129,20 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testShow_keyguardIsDone() {
-        `when`(bouncerView.delegate?.showNextSecurityScreenOrFinish()).thenReturn(true)
+        whenever(bouncerView.delegate?.showNextSecurityScreenOrFinish()).thenReturn(true)
         verify(keyguardStateController, never()).notifyPrimaryBouncerShowing(true)
         verify(mPrimaryBouncerCallbackInteractor, never()).dispatchStartingToShow()
+    }
+
+    @Test
+    fun testShow_isResumed() {
+        whenever(repository.primaryBouncerShow.value).thenReturn(true)
+        whenever(keyguardSecurityModel.getSecurityMode(anyInt()))
+            .thenReturn(KeyguardSecurityModel.SecurityMode.SimPuk)
+
+        underTest.show(true)
+        verify(repository).setPrimaryShow(false)
+        verify(repository).setPrimaryShow(true)
     }
 
     @Test
@@ -132,15 +151,14 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(falsingCollector).onBouncerHidden()
         verify(keyguardStateController).notifyPrimaryBouncerShowing(false)
         verify(repository).setPrimaryShowingSoon(false)
-        verify(repository).setPrimaryVisible(false)
-        verify(repository).setPrimaryHide(true)
-        verify(repository).setPrimaryShow(null)
+        verify(repository).setPrimaryShow(false)
         verify(mPrimaryBouncerCallbackInteractor).dispatchVisibilityChanged(View.INVISIBLE)
+        verify(repository).setPrimaryStartDisappearAnimation(null)
     }
 
     @Test
     fun testExpansion() {
-        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
+        whenever(repository.panelExpansionAmount.value).thenReturn(0.5f)
         underTest.setPanelExpansion(0.6f)
         verify(repository).setPanelExpansion(0.6f)
         verify(mPrimaryBouncerCallbackInteractor).dispatchExpansionChanged(0.6f)
@@ -148,8 +166,8 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testExpansion_fullyShown() {
-        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
-        `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
+        whenever(repository.panelExpansionAmount.value).thenReturn(0.5f)
+        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         underTest.setPanelExpansion(EXPANSION_VISIBLE)
         verify(falsingCollector).onBouncerShown()
         verify(mPrimaryBouncerCallbackInteractor).dispatchFullyShown()
@@ -157,12 +175,10 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testExpansion_fullyHidden() {
-        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
-        `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
+        whenever(repository.panelExpansionAmount.value).thenReturn(0.5f)
+        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         underTest.setPanelExpansion(EXPANSION_HIDDEN)
-        verify(repository).setPrimaryVisible(false)
-        verify(repository).setPrimaryShow(null)
-        verify(repository).setPrimaryHide(true)
+        verify(repository).setPrimaryShow(false)
         verify(falsingCollector).onBouncerHidden()
         verify(mPrimaryBouncerCallbackInteractor).dispatchReset()
         verify(mPrimaryBouncerCallbackInteractor).dispatchFullyHidden()
@@ -170,7 +186,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testExpansion_startingToHide() {
-        `when`(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
+        whenever(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
         underTest.setPanelExpansion(0.1f)
         verify(repository).setPrimaryStartingToHide(true)
         verify(mPrimaryBouncerCallbackInteractor).dispatchStartingToHide()
@@ -235,7 +251,21 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun testStartDisappearAnimation() {
+    fun testStartDisappearAnimation_willRunDismissFromKeyguard() {
+        whenever(bouncerViewDelegate.willRunDismissFromKeyguard()).thenReturn(true)
+
+        val runnable = mock(Runnable::class.java)
+        underTest.startDisappearAnimation(runnable)
+        // End runnable should run immediately
+        verify(runnable).run()
+        // ... while the disappear animation should never be run
+        verify(repository, never()).setPrimaryStartDisappearAnimation(any(Runnable::class.java))
+    }
+
+    @Test
+    fun testStartDisappearAnimation_willNotRunDismissFromKeyguard_() {
+        whenever(bouncerViewDelegate.willRunDismissFromKeyguard()).thenReturn(false)
+
         val runnable = mock(Runnable::class.java)
         underTest.startDisappearAnimation(runnable)
         verify(repository).setPrimaryStartDisappearAnimation(any(Runnable::class.java))
@@ -243,45 +273,45 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun testIsFullShowing() {
-        `when`(repository.primaryBouncerVisible.value).thenReturn(true)
-        `when`(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
-        `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
+        whenever(repository.primaryBouncerShow.value).thenReturn(true)
+        whenever(repository.panelExpansionAmount.value).thenReturn(EXPANSION_VISIBLE)
+        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         assertThat(underTest.isFullyShowing()).isTrue()
-        `when`(repository.primaryBouncerVisible.value).thenReturn(false)
+        whenever(repository.primaryBouncerShow.value).thenReturn(false)
         assertThat(underTest.isFullyShowing()).isFalse()
     }
 
     @Test
     fun testIsScrimmed() {
-        `when`(repository.primaryBouncerScrimmed.value).thenReturn(true)
+        whenever(repository.primaryBouncerScrimmed.value).thenReturn(true)
         assertThat(underTest.isScrimmed()).isTrue()
-        `when`(repository.primaryBouncerScrimmed.value).thenReturn(false)
+        whenever(repository.primaryBouncerScrimmed.value).thenReturn(false)
         assertThat(underTest.isScrimmed()).isFalse()
     }
 
     @Test
     fun testIsInTransit() {
-        `when`(repository.primaryBouncerShowingSoon.value).thenReturn(true)
+        whenever(repository.primaryBouncerShowingSoon.value).thenReturn(true)
         assertThat(underTest.isInTransit()).isTrue()
-        `when`(repository.primaryBouncerShowingSoon.value).thenReturn(false)
+        whenever(repository.primaryBouncerShowingSoon.value).thenReturn(false)
         assertThat(underTest.isInTransit()).isFalse()
-        `when`(repository.panelExpansionAmount.value).thenReturn(0.5f)
+        whenever(repository.panelExpansionAmount.value).thenReturn(0.5f)
         assertThat(underTest.isInTransit()).isTrue()
     }
 
     @Test
     fun testIsAnimatingAway() {
-        `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(Runnable {})
+        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(Runnable {})
         assertThat(underTest.isAnimatingAway()).isTrue()
-        `when`(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
+        whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         assertThat(underTest.isAnimatingAway()).isFalse()
     }
 
     @Test
     fun testWillDismissWithAction() {
-        `when`(bouncerViewDelegate.willDismissWithActions()).thenReturn(true)
+        whenever(bouncerViewDelegate.willDismissWithActions()).thenReturn(true)
         assertThat(underTest.willDismissWithAction()).isTrue()
-        `when`(bouncerViewDelegate.willDismissWithActions()).thenReturn(false)
+        whenever(bouncerViewDelegate.willDismissWithActions()).thenReturn(false)
         assertThat(underTest.willDismissWithAction()).isFalse()
     }
 
@@ -363,6 +393,55 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         verify(repository).setSideFpsShowing(false)
     }
 
+    @Test
+    fun delayBouncerWhenFaceAuthPossible() {
+        mainHandler.setMode(FakeHandler.Mode.QUEUEING)
+
+        // GIVEN bouncer should be delayed due to face auth
+        featureFlags.apply { set(Flags.DELAY_BOUNCER, true) }
+        whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
+        whenever(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
+            .thenReturn(true)
+
+        // WHEN bouncer show is requested
+        underTest.show(true)
+
+        // THEN primary show & primary showing soon aren't updated immediately
+        verify(repository, never()).setPrimaryShow(true)
+        verify(repository, never()).setPrimaryShowingSoon(false)
+
+        // WHEN all queued messages are dispatched
+        mainHandler.dispatchQueuedMessages()
+
+        // THEN primary show & primary showing soon are updated
+        verify(repository).setPrimaryShow(true)
+        verify(repository).setPrimaryShowingSoon(false)
+    }
+
+    @Test
+    fun delayBouncerWhenActiveUnlockPossible() {
+        mainHandler.setMode(FakeHandler.Mode.QUEUEING)
+
+        // GIVEN bouncer should be delayed due to active unlock
+        featureFlags.apply { set(Flags.DELAY_BOUNCER, true) }
+        trustRepository.setCurrentUserActiveUnlockAvailable(true)
+        whenever(keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState()).thenReturn(true)
+
+        // WHEN bouncer show is requested
+        underTest.show(true)
+
+        // THEN primary show & primary showing soon were scheduled to update
+        verify(repository, never()).setPrimaryShow(true)
+        verify(repository, never()).setPrimaryShowingSoon(false)
+
+        // WHEN all queued messages are dispatched
+        mainHandler.dispatchQueuedMessages()
+
+        // THEN primary show & primary showing soon are updated
+        verify(repository).setPrimaryShow(true)
+        verify(repository).setPrimaryShowingSoon(false)
+    }
+
     private fun updateSideFpsVisibilityParameters(
         isVisible: Boolean,
         sfpsEnabled: Boolean,
@@ -370,12 +449,13 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         isUnlockingWithFpAllowed: Boolean,
         isAnimatingAway: Boolean
     ) {
-        `when`(repository.primaryBouncerVisible.value).thenReturn(isVisible)
+        whenever(repository.primaryBouncerShow.value).thenReturn(isVisible)
         resources.addOverride(R.bool.config_show_sidefps_hint_on_bouncer, sfpsEnabled)
-        `when`(keyguardUpdateMonitor.isFingerprintDetectionRunning).thenReturn(fpsDetectionRunning)
-        `when`(keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed)
+        whenever(keyguardUpdateMonitor.isFingerprintDetectionRunning)
+            .thenReturn(fpsDetectionRunning)
+        whenever(keyguardUpdateMonitor.isUnlockingWithFingerprintAllowed)
             .thenReturn(isUnlockingWithFpAllowed)
-        `when`(repository.primaryBouncerStartingDisappearAnimation.value)
+        whenever(repository.primaryBouncerStartingDisappearAnimation.value)
             .thenReturn(if (isAnimatingAway) Runnable {} else null)
     }
 }

@@ -33,10 +33,12 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Process.SYSTEM_UID;
+import static android.view.MotionEvent.CLASSIFICATION_MULTI_FINGER_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_TASKS;
+import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
@@ -208,7 +210,8 @@ class RecentTasks {
     private final PointerEventListener mListener = new PointerEventListener() {
         @Override
         public void onPointerEvent(MotionEvent ev) {
-            if (!mFreezeTaskListReordering || ev.getAction() != MotionEvent.ACTION_DOWN) {
+            if (!mFreezeTaskListReordering || ev.getAction() != MotionEvent.ACTION_DOWN
+                    || ev.getClassification() == CLASSIFICATION_MULTI_FINGER_SWIPE) {
                 // Skip if we aren't freezing or starting a gesture
                 return;
             }
@@ -337,7 +340,8 @@ class RecentTasks {
         synchronized (mService.mGlobalLock) {
             final Task focusedStack = mService.getTopDisplayFocusedRootTask();
             final Task topTask = focusedStack != null ? focusedStack.getTopMostTask() : null;
-            resetFreezeTaskListReordering(topTask);
+            final Task reorderToEndTask = topTask != null && topTask.hasChild() ? topTask : null;
+            resetFreezeTaskListReordering(reorderToEndTask);
         }
     }
 
@@ -681,10 +685,8 @@ class RecentTasks {
     void removeTasksByPackageName(String packageName, int userId) {
         for (int i = mTasks.size() - 1; i >= 0; --i) {
             final Task task = mTasks.get(i);
-            final String taskPackageName =
-                    task.getBaseIntent().getComponent().getPackageName();
             if (task.mUserId != userId) continue;
-            if (!taskPackageName.equals(packageName)) continue;
+            if (!task.getBasePackageName().equals(packageName)) continue;
 
             mSupervisor.removeTask(task, true, REMOVE_FROM_RECENTS, "remove-package-task");
         }
@@ -858,8 +860,7 @@ class RecentTasks {
             if (task.effectiveUid != callingUid) {
                 continue;
             }
-            Intent intent = task.getBaseIntent();
-            if (intent == null || !callingPackage.equals(intent.getComponent().getPackageName())) {
+            if (!callingPackage.equals(task.getBasePackageName())) {
                 continue;
             }
             AppTaskImpl taskImpl = new AppTaskImpl(mService, task.mTaskId, callingUid);
@@ -978,9 +979,10 @@ class RecentTasks {
 
             if (!task.mUserSetupComplete) {
                 // Don't include task launched while user is not done setting-up.
-                if (DEBUG_RECENTS) {
-                    Slog.d(TAG_RECENTS, "Skipping, user setup not complete: " + task);
-                }
+
+                // NOTE: not guarding with DEBUG_RECENTS as it's not frequent enough to spam logcat,
+                // but is useful when running CTS.
+                Slog.d(TAG_RECENTS, "Skipping, user setup not complete: " + task);
                 continue;
             }
 
@@ -1221,7 +1223,7 @@ class RecentTasks {
     void onActivityIdle(ActivityRecord r) {
         // Clean up the hidden tasks when going to home because the user may not be unable to return
         // to the task from recents.
-        if (!mHiddenTasks.isEmpty() && r.isActivityTypeHome()) {
+        if (!mHiddenTasks.isEmpty() && r.isActivityTypeHome() && r.isState(RESUMED)) {
             removeUnreachableHiddenTasks(r.getWindowingMode());
         }
         if (mCheckTrimmableTasksOnIdle) {
@@ -1512,7 +1514,7 @@ class RecentTasks {
         // callbacks here.
         final Task removedTask = mTasks.remove(removeIndex);
         if (removedTask != task) {
-            if (removedTask.hasChild()) {
+            if (removedTask.hasChild() && !removedTask.isActivityTypeHome()) {
                 Slog.i(TAG, "Add " + removedTask + " to hidden list because adding " + task);
                 // A non-empty task is replaced by a new task. Because the removed task is no longer
                 // managed by the recent tasks list, add it to the hidden list to prevent the task

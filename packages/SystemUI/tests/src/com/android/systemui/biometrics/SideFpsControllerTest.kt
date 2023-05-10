@@ -34,7 +34,6 @@ import android.hardware.fingerprint.FingerprintSensorProperties
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.hardware.fingerprint.ISidefpsController
 import android.os.Handler
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.Display
 import android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS
@@ -49,25 +48,30 @@ import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
 import android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
 import android.view.WindowMetrics
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.LottieAnimationView
-import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.SysuiTestableContext
+import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractor
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.flags.FakeFeatureFlags
-import com.android.systemui.flags.Flags.MODERN_ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.data.repository.FakeBiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.FakeDeviceEntryFingerprintAuthRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor
+import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.recents.OverviewProxyService
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.TestScope
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -91,14 +95,16 @@ import org.mockito.junit.MockitoJUnit
 private const val DISPLAY_ID = 2
 private const val SENSOR_ID = 1
 
+private const val REAR_DISPLAY_MODE_DEVICE_STATE = 3
+
 @SmallTest
-@RunWith(AndroidTestingRunner::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 class SideFpsControllerTest : SysuiTestCase() {
 
     @JvmField @Rule var rule = MockitoJUnit.rule()
 
-    @Mock lateinit var keyguardStateController: KeyguardStateController
     @Mock lateinit var layoutInflater: LayoutInflater
     @Mock lateinit var fingerprintManager: FingerprintManager
     @Mock lateinit var windowManager: WindowManager
@@ -113,8 +119,12 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     private lateinit var keyguardBouncerRepository: FakeKeyguardBouncerRepository
     private lateinit var alternateBouncerInteractor: AlternateBouncerInteractor
-    private val featureFlags = FakeFeatureFlags()
+    private lateinit var displayStateInteractor: DisplayStateInteractor
+
     private val executor = FakeExecutor(FakeSystemClock())
+    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
+    private val testScope = TestScope(StandardTestDispatcher())
+
     private lateinit var overlayController: ISidefpsController
     private lateinit var sideFpsController: SideFpsController
 
@@ -134,17 +144,22 @@ class SideFpsControllerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        featureFlags.set(MODERN_ALTERNATE_BOUNCER, true)
         keyguardBouncerRepository = FakeKeyguardBouncerRepository()
         alternateBouncerInteractor =
             AlternateBouncerInteractor(
-                keyguardStateController,
+                mock(StatusBarStateController::class.java),
+                mock(KeyguardStateController::class.java),
                 keyguardBouncerRepository,
                 FakeBiometricSettingsRepository(),
                 FakeDeviceEntryFingerprintAuthRepository(),
                 FakeSystemClock(),
-                mock(KeyguardUpdateMonitor::class.java),
-                featureFlags,
+            )
+        displayStateInteractor =
+            DisplayStateInteractorImpl(
+                testScope.backgroundScope,
+                context,
+                executor,
+                rearDisplayStateRepository
             )
 
         context.addMockSystemService(DisplayManager::class.java, displayManager)
@@ -233,7 +248,8 @@ class SideFpsControllerTest : SysuiTestCase() {
             isReverseDefaultRotation
         )
 
-        val rearDisplayDeviceStates = if (inRearDisplayMode) intArrayOf(3) else intArrayOf()
+        val rearDisplayDeviceStates =
+            if (inRearDisplayMode) intArrayOf(REAR_DISPLAY_MODE_DEVICE_STATE) else intArrayOf()
         sideFpsControllerContext.orCreateTestableResources.addOverride(
             com.android.internal.R.array.config_rearDisplayDeviceStates,
             rearDisplayDeviceStates
@@ -248,13 +264,14 @@ class SideFpsControllerTest : SysuiTestCase() {
                 activityTaskManager,
                 overviewProxyService,
                 displayManager,
+                displayStateInteractor,
                 executor,
                 handler,
                 alternateBouncerInteractor,
                 TestCoroutineScope(),
-                featureFlags,
-                dumpManager,
+                dumpManager
             )
+        rearDisplayStateRepository.setIsInRearDisplayMode(inRearDisplayMode)
 
         overlayController =
             ArgumentCaptor.forClass(ISidefpsController::class.java)

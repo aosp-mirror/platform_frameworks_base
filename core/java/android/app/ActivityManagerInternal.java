@@ -18,6 +18,7 @@ package android.app;
 
 import static android.app.ActivityManager.StopUserOnSwitch;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.PermissionMethod;
@@ -44,9 +45,12 @@ import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.StatsEvent;
 
 import com.android.internal.os.TimeoutRecord;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -340,7 +344,170 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean hasRunningActivity(int uid, @Nullable String packageName);
 
-    public abstract void updateOomAdj();
+    /**
+     * Oom Adj Reason: none - internal use only, do not use it.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_NONE = 0;
+
+    /**
+     * Oom Adj Reason: activity changes.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_ACTIVITY = 1;
+
+    /**
+     * Oom Adj Reason: finishing a broadcast receiver.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_FINISH_RECEIVER = 2;
+
+    /**
+     * Oom Adj Reason: starting a broadcast receiver.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_START_RECEIVER = 3;
+
+    /**
+     * Oom Adj Reason: binding to a service.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_BIND_SERVICE = 4;
+
+    /**
+     * Oom Adj Reason: unbinding from a service.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_UNBIND_SERVICE = 5;
+
+    /**
+     * Oom Adj Reason: starting a service.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_START_SERVICE = 6;
+
+    /**
+     * Oom Adj Reason: connecting to a content provider.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_GET_PROVIDER = 7;
+
+    /**
+     * Oom Adj Reason: disconnecting from a content provider.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_REMOVE_PROVIDER = 8;
+
+    /**
+     * Oom Adj Reason: UI visibility changes.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_UI_VISIBILITY = 9;
+
+    /**
+     * Oom Adj Reason: device power allowlist changes.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_ALLOWLIST = 10;
+
+    /**
+     * Oom Adj Reason: starting a process.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_PROCESS_BEGIN = 11;
+
+    /**
+     * Oom Adj Reason: ending a process.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_PROCESS_END = 12;
+
+    /**
+     * Oom Adj Reason: short FGS timeout.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_SHORT_FGS_TIMEOUT = 13;
+
+    /**
+     * Oom Adj Reason: system initialization.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_SYSTEM_INIT = 14;
+
+    /**
+     * Oom Adj Reason: backup/restore.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_BACKUP = 15;
+
+    /**
+     * Oom Adj Reason: instrumented by the SHELL.
+     * @hide
+     */
+    public static final int OOM_ADJ_REASON_SHELL = 16;
+
+    /**
+     * Oom Adj Reason: task stack is being removed.
+     */
+    public static final int OOM_ADJ_REASON_REMOVE_TASK = 17;
+
+    /**
+     * Oom Adj Reason: uid idle.
+     */
+    public static final int OOM_ADJ_REASON_UID_IDLE = 18;
+
+    /**
+     * Oom Adj Reason: stop service.
+     */
+    public static final int OOM_ADJ_REASON_STOP_SERVICE = 19;
+
+    /**
+     * Oom Adj Reason: executing service.
+     */
+    public static final int OOM_ADJ_REASON_EXECUTING_SERVICE = 20;
+
+    /**
+     * Oom Adj Reason: background restriction changes.
+     */
+    public static final int OOM_ADJ_REASON_RESTRICTION_CHANGE = 21;
+
+    /**
+     * Oom Adj Reason: A package or its component is disabled.
+     */
+    public static final int OOM_ADJ_REASON_COMPONENT_DISABLED = 22;
+
+    @IntDef(prefix = {"OOM_ADJ_REASON_"}, value = {
+        OOM_ADJ_REASON_NONE,
+        OOM_ADJ_REASON_ACTIVITY,
+        OOM_ADJ_REASON_FINISH_RECEIVER,
+        OOM_ADJ_REASON_START_RECEIVER,
+        OOM_ADJ_REASON_BIND_SERVICE,
+        OOM_ADJ_REASON_UNBIND_SERVICE,
+        OOM_ADJ_REASON_START_SERVICE,
+        OOM_ADJ_REASON_GET_PROVIDER,
+        OOM_ADJ_REASON_REMOVE_PROVIDER,
+        OOM_ADJ_REASON_UI_VISIBILITY,
+        OOM_ADJ_REASON_ALLOWLIST,
+        OOM_ADJ_REASON_PROCESS_BEGIN,
+        OOM_ADJ_REASON_PROCESS_END,
+        OOM_ADJ_REASON_SHORT_FGS_TIMEOUT,
+        OOM_ADJ_REASON_SYSTEM_INIT,
+        OOM_ADJ_REASON_BACKUP,
+        OOM_ADJ_REASON_SHELL,
+        OOM_ADJ_REASON_REMOVE_TASK,
+        OOM_ADJ_REASON_UID_IDLE,
+        OOM_ADJ_REASON_STOP_SERVICE,
+        OOM_ADJ_REASON_EXECUTING_SERVICE,
+        OOM_ADJ_REASON_RESTRICTION_CHANGE,
+        OOM_ADJ_REASON_COMPONENT_DISABLED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OomAdjReason {}
+
+    /**
+     * Request to update oom adj.
+     */
+    public abstract void updateOomAdj(@OomAdjReason int oomAdjReason);
     public abstract void updateCpuStats();
 
     /**
@@ -470,6 +637,12 @@ public abstract class ActivityManagerInternal {
     @NonNull
     public abstract BackgroundStartPrivileges getBackgroundStartPrivileges(int uid);
     public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
+
+    /**
+     * Returns whether the app is in a state where it is allowed to schedule a
+     * {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job}.
+     */
+    public abstract boolean canScheduleUserInitiatedJobs(int uid, int pid, String pkgName);
 
     /** @see com.android.server.am.ActivityManagerService#monitor */
     public abstract void monitor();
@@ -991,4 +1164,64 @@ public abstract class ActivityManagerInternal {
      */
     public abstract void logFgsApiEnd(int apiType, int uid, int pid);
 
+     /**
+     * Temporarily allow foreground service started by an uid to have while-in-use permission
+     * for durationMs.
+     *
+     * @param uid The UID of the app that starts the foreground service.
+     * @param durationMs elapsedRealTime duration in milliseconds.
+     * @hide
+     */
+    public abstract void tempAllowWhileInUsePermissionInFgs(int uid, long durationMs);
+
+    /**
+     * The list of the events about the {@link android.media.projection.IMediaProjection} itself.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+        MEDIA_PROJECTION_TOKEN_EVENT_CREATED,
+        MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED,
+    })
+    public @interface MediaProjectionTokenEvent{};
+
+    /**
+     * An instance of {@link android.media.projection.IMediaProjection} has been created
+     * by the system.
+     *
+     * @hide
+     */
+    public static final @MediaProjectionTokenEvent int MEDIA_PROJECTION_TOKEN_EVENT_CREATED = 0;
+
+    /**
+     * An instance of {@link android.media.projection.IMediaProjection} has been destroyed
+     * by the system.
+     *
+     * @hide
+     */
+    public static final @MediaProjectionTokenEvent int MEDIA_PROJECTION_TOKEN_EVENT_DESTROYED = 1;
+
+    /**
+     * Called after the system created/destroyed a media projection for an app, if the user
+     * has granted the permission to start a media projection from this app.
+     *
+     * <p>This API is specifically for the use case of enforcing the FGS type
+     * {@code android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION},
+     * where the app who is starting this type of FGS must have been granted with the permission
+     * to start the projection via the {@link android.media.projection.MediaProjection} APIs.
+     *
+     * @param uid The uid of the app which the system created/destroyed a media projection for.
+     * @param projectionToken The {@link android.media.projection.IMediaProjection} token that
+     *                        the system created/destroyed.
+     * @param event The actual event happening to the given {@code projectionToken}.
+     */
+    public abstract void notifyMediaProjectionEvent(int uid, @NonNull IBinder projectionToken,
+            @MediaProjectionTokenEvent int event);
+
+    /**
+     * @return The stats event for the cached apps high watermark since last pull.
+     */
+    @NonNull
+    public abstract StatsEvent getCachedAppsHighWatermarkStats(int atomTag, boolean resetAfterPull);
 }

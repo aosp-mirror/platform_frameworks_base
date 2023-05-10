@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
@@ -52,6 +53,8 @@ import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_M
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
@@ -116,7 +119,6 @@ import android.hardware.HardwareBuffer;
 import android.hardware.display.VirtualDisplay;
 import android.metrics.LogMaker;
 import android.os.Binder;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
@@ -1062,6 +1064,51 @@ public class DisplayContentTests extends WindowTestsBase {
         rootTask.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         freeformRootTask.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
+    }
+
+    private void updateAllDisplayContentAndRotation(DisplayContent dc) {
+        // NB updateOrientation will not revert the user orientation until a settings change
+        // takes effect.
+        dc.updateOrientation();
+        dc.onDisplayChanged(dc);
+        dc.mWmService.updateRotation(true /* alwaysSendConfiguration */,
+                false /* forceRelayout */);
+        waitUntilHandlersIdle();
+    }
+
+    @Test
+    public void testNoSensorRevert() {
+        final DisplayContent dc = mDisplayContent;
+        spyOn(dc);
+        doReturn(true).when(dc).getIgnoreOrientationRequest();
+        final DisplayRotation dr = dc.getDisplayRotation();
+        spyOn(dr);
+        doReturn(false).when(dr).useDefaultSettingsProvider();
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        app.setOrientation(SCREEN_ORIENTATION_LANDSCAPE, app);
+
+        assertFalse(dc.getRotationReversionController().isAnyOverrideActive());
+        dc.getDisplayRotation().setUserRotation(WindowManagerPolicy.USER_ROTATION_LOCKED,
+                ROTATION_90);
+        updateAllDisplayContentAndRotation(dc);
+        assertEquals(ROTATION_90, dc.getDisplayRotation()
+                .rotationForOrientation(SCREEN_ORIENTATION_UNSPECIFIED, ROTATION_90));
+
+        app.setOrientation(SCREEN_ORIENTATION_NOSENSOR);
+        updateAllDisplayContentAndRotation(dc);
+        assertTrue(dc.getRotationReversionController().isAnyOverrideActive());
+        assertEquals(ROTATION_0, dc.getRotation());
+
+        app.setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+        updateAllDisplayContentAndRotation(dc);
+        assertFalse(dc.getRotationReversionController().isAnyOverrideActive());
+        assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED,
+                dc.getDisplayRotation().getUserRotationMode());
+        assertEquals(ROTATION_90, dc.getDisplayRotation().getUserRotation());
+        assertEquals(ROTATION_90, dc.getDisplayRotation()
+                .rotationForOrientation(SCREEN_ORIENTATION_UNSPECIFIED, ROTATION_0));
+        dc.getDisplayRotation().setUserRotation(WindowManagerPolicy.USER_ROTATION_FREE,
+                ROTATION_0);
     }
 
     @Test
@@ -2630,7 +2677,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testVirtualDisplayContent_withoutSurface() {
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
-        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
+        setUpDefaultTaskDisplayAreaWindowToken();
 
         // GIVEN SurfaceControl does not mirror a null surface.
         Point surfaceSize = new Point(
@@ -2645,8 +2692,8 @@ public class DisplayContentTests extends WindowTestsBase {
         // WHEN getting the DisplayContent for the new virtual display.
         DisplayContent actualDC = mWm.mRoot.getDisplayContent(displayId);
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                tokenToMirror);
-        session.setDisplayId(displayId);
+                DEFAULT_DISPLAY);
+        session.setVirtualDisplayId(displayId);
         mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
         actualDC.updateRecording();
 
@@ -2660,7 +2707,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testVirtualDisplayContent_withSurface() {
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
-        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
+        setUpDefaultTaskDisplayAreaWindowToken();
 
         // GIVEN SurfaceControl can successfully mirror the provided surface.
         Point surfaceSize = new Point(
@@ -2674,8 +2721,8 @@ public class DisplayContentTests extends WindowTestsBase {
 
         // GIVEN a session for this display.
         ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
-                tokenToMirror);
-        session.setDisplayId(displayId);
+                DEFAULT_DISPLAY);
+        session.setVirtualDisplayId(displayId);
         mWm.mContentRecordingController.setContentRecordingSessionLocked(session, mWm);
         mWm.mRoot.onDisplayAdded(displayId);
 
@@ -2693,7 +2740,7 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testVirtualDisplayContent_displayMirroring() {
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // mirror.
-        final IBinder tokenToMirror = setUpDefaultTaskDisplayAreaWindowToken();
+        setUpDefaultTaskDisplayAreaWindowToken();
 
         // GIVEN SurfaceControl can successfully mirror the provided surface.
         Point surfaceSize = new Point(
@@ -2726,22 +2773,15 @@ public class DisplayContentTests extends WindowTestsBase {
         display.release();
     }
 
-    private static class MirroringTestToken extends Binder {
-    }
-
     /**
      * Creates a WindowToken associated with the default task DisplayArea, in order for that
      * DisplayArea to be mirrored.
      */
-    private IBinder setUpDefaultTaskDisplayAreaWindowToken() {
-        // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
-        // mirror.
-        final IBinder tokenToMirror = new MirroringTestToken();
+    private void setUpDefaultTaskDisplayAreaWindowToken() {
         // GIVEN the default task display area is represented by the WindowToken.
         spyOn(mWm.mWindowContextListenerController);
         doReturn(mDefaultDisplay.getDefaultTaskDisplayArea()).when(
                 mWm.mWindowContextListenerController).getContainer(any());
-        return tokenToMirror;
     }
 
     /**
@@ -2787,6 +2827,26 @@ public class DisplayContentTests extends WindowTestsBase {
         // The returned keep-clear areas contain the areas from all visible windows
         assertEquals(new ArraySet(Arrays.asList(rect1, rect2)),
                 mDisplayContent.getKeepClearAreas());
+    }
+
+    @Test
+    public void testMayImeShowOnLaunchingActivity_negativeWhenSoftInputModeHidden() {
+        final ActivityRecord app = createActivityRecord(mDisplayContent);
+        final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, app, "appWin");
+        createWindow(null, TYPE_APPLICATION_STARTING, app, "startingWin");
+        app.mStartingData = mock(SnapshotStartingData.class);
+        // Assume the app has shown IME before and warm launching with a snapshot window.
+        doReturn(true).when(app.mStartingData).hasImeSurface();
+
+        // Expect true when this IME focusable activity will show IME during launching.
+        assertTrue(WindowManager.LayoutParams.mayUseInputMethod(appWin.mAttrs.flags));
+        assertTrue(mDisplayContent.mayImeShowOnLaunchingActivity(app));
+
+        // Not expect IME will be shown during launching if the app's softInputMode is hidden.
+        appWin.mAttrs.softInputMode = SOFT_INPUT_STATE_ALWAYS_HIDDEN;
+        assertFalse(mDisplayContent.mayImeShowOnLaunchingActivity(app));
+        appWin.mAttrs.softInputMode = SOFT_INPUT_STATE_HIDDEN;
+        assertFalse(mDisplayContent.mayImeShowOnLaunchingActivity(app));
     }
 
     private void removeRootTaskTests(Runnable runnable) {

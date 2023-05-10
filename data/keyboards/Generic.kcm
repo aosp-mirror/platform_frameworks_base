@@ -42,9 +42,10 @@ key C {
     label:                              'C'
     base:                               'c'
     shift, capslock:                    'C'
-    alt:                                '\u00e7'
-    shift+alt:                          '\u00c7'
     shift+capslock:                     'c'
+    alt:                                '\u00e7'
+    shift+alt, capslock+alt:            '\u00c7'
+    shift+capslock+alt:                 '\u00e7'
 }
 
 key D {
@@ -58,8 +59,8 @@ key E {
     label:                              'E'
     base:                               'e'
     shift, capslock:                    'E'
-    alt:                                '\u0301'
     shift+capslock:                     'e'
+    alt:                                '\u0301'
 }
 
 key F {
@@ -87,8 +88,8 @@ key I {
     label:                              'I'
     base:                               'i'
     shift, capslock:                    'I'
-    alt:                                '\u0302'
     shift+capslock:                     'i'
+    alt:                                '\u0302'
 }
 
 key J {
@@ -123,8 +124,8 @@ key N {
     label:                              'N'
     base:                               'n'
     shift, capslock:                    'N'
-    alt:                                '\u0303'
     shift+capslock:                     'n'
+    alt:                                '\u0303'
 }
 
 key O {
@@ -159,8 +160,8 @@ key S {
     label:                              'S'
     base:                               's'
     shift, capslock:                    'S'
-    alt:                                '\u00df'
     shift+capslock:                     's'
+    alt:                                '\u00df'
 }
 
 key T {
@@ -174,8 +175,8 @@ key U {
     label:                              'U'
     base:                               'u'
     shift, capslock:                    'U'
-    alt:                                '\u0308'
     shift+capslock:                     'u'
+    alt:                                '\u0308'
 }
 
 key V {

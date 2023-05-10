@@ -17,20 +17,20 @@
 package com.android.wm.shell.flicker.splitscreen
 
 import android.platform.test.annotations.FlakyTest
-import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.appWindowBecomesVisible
 import com.android.wm.shell.flicker.layerBecomesVisible
 import com.android.wm.shell.flicker.layerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitAppLayerBoundsBecomesVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerBecomesVisible
-import com.android.wm.shell.flicker.splitScreenEntered
+import com.android.wm.shell.flicker.splitscreen.benchmark.EnterSplitScreenFromOverviewBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -46,30 +46,14 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class EnterSplitScreenFromOverview(flicker: FlickerTest) : SplitScreenBase(flicker) {
+class EnterSplitScreenFromOverview(override val flicker: FlickerTest) :
+    EnterSplitScreenFromOverviewBenchmark(flicker), ICommonAssertions {
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-            setup {
-                primaryApp.launchViaIntent(wmHelper)
-                secondaryApp.launchViaIntent(wmHelper)
-                tapl.goHome()
-                wmHelper
-                    .StateSyncBuilder()
-                    .withAppTransitionIdle()
-                    .withHomeActivityVisible()
-                    .waitForAndVerify()
-            }
-            transitions {
-                SplitScreenUtils.splitFromOverview(tapl, device)
-                SplitScreenUtils.waitForSplitComplete(wmHelper, primaryApp, secondaryApp)
-            }
+            defaultSetup(this)
+            defaultTeardown(this)
+            thisTransition(this)
         }
-
-    @IwTest(focusArea = "sysui")
-    @Presubmit
-    @Test
-    fun cujCompleted() = flicker.splitScreenEntered(primaryApp, secondaryApp, fromOtherApp = true)
 
     @Presubmit
     @Test

@@ -1,1 +1,3 @@
-file:/packages/SystemUI/OWNERS
+# Bug component: 324112
+
+include platform/packages/modules/IntentResolver:/OWNERS

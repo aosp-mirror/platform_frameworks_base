@@ -22,6 +22,7 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.MotionEvent
 import android.widget.SeekBar
 import androidx.arch.core.executor.ArchTaskExecutor
 import androidx.arch.core.executor.TaskExecutor
@@ -466,18 +467,60 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         whenever(mockController.getTransportControls()).thenReturn(mockTransport)
         whenever(falsingManager.isFalseTouch(Classifier.MEDIA_SEEKBAR)).thenReturn(true)
         whenever(falsingManager.isFalseTap(anyInt())).thenReturn(true)
-        viewModel.updateController(mockController)
-        val pos = 169
 
-        viewModel.attachTouchHandlers(mockBar)
+        viewModel.updateController(mockController)
+        val pos = 40
+        val bar = SeekBar(context).apply { progress = pos }
         with(viewModel.seekBarListener) {
-            onStartTrackingTouch(mockBar)
-            onProgressChanged(mockBar, pos, true)
-            onStopTrackingTouch(mockBar)
+            onStartTrackingTouch(bar)
+            onStopTrackingTouch(bar)
         }
+        fakeExecutor.runAllReady()
 
         // THEN transport controls should not be used
         verify(mockTransport, never()).seekTo(pos.toLong())
+    }
+
+    @Test
+    fun onSeekbarGrabInvalidTouch() {
+        whenever(mockController.getTransportControls()).thenReturn(mockTransport)
+        viewModel.firstMotionEvent =
+            MotionEvent.obtain(12L, 13L, MotionEvent.ACTION_DOWN, 76F, 0F, 0)
+        viewModel.lastMotionEvent = MotionEvent.obtain(12L, 14L, MotionEvent.ACTION_UP, 78F, 4F, 0)
+        val pos = 78
+
+        viewModel.updateController(mockController)
+        // WHEN user ends drag
+        val bar = SeekBar(context).apply { progress = pos }
+        with(viewModel.seekBarListener) {
+            onStartTrackingTouch(bar)
+            onStopTrackingTouch(bar)
+        }
+        fakeExecutor.runAllReady()
+
+        // THEN transport controls should not be used
+        verify(mockTransport, never()).seekTo(pos.toLong())
+    }
+
+    @Test
+    fun onSeekbarGrabValidTouch() {
+        whenever(mockController.transportControls).thenReturn(mockTransport)
+        viewModel.firstMotionEvent =
+            MotionEvent.obtain(12L, 13L, MotionEvent.ACTION_DOWN, 36F, 0F, 0)
+        viewModel.lastMotionEvent = MotionEvent.obtain(12L, 14L, MotionEvent.ACTION_UP, 40F, 1F, 0)
+        val pos = 40
+
+        viewModel.updateController(mockController)
+        // WHEN user ends drag
+        val bar = SeekBar(context).apply { progress = pos }
+        with(viewModel.seekBarListener) {
+            onStartTrackingTouch(bar)
+            onStopTrackingTouch(bar)
+        }
+        fakeExecutor.runAllReady()
+
+        // THEN transport controls should be used
+        verify(mockTransport).seekTo(pos.toLong())
     }
 
     @Test

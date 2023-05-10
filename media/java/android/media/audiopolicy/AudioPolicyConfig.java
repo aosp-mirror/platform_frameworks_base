@@ -42,9 +42,7 @@ public class AudioPolicyConfig implements Parcelable {
 
     private String mRegistrationId = null;
 
-    /** counter for the mixes that are / have been in the list of AudioMix
-     *  e.g. register 4 mixes (counter is 3), remove 1 (counter is 3), add 1 (counter is 4)
-     */
+    // Corresponds to id of next mix to be registered.
     private int mMixCounter = 0;
 
     protected AudioPolicyConfig(AudioPolicyConfig conf) {
@@ -286,7 +284,7 @@ public class AudioPolicyConfig implements Parcelable {
             if ((mix.getRouteFlags() & AudioMix.ROUTE_FLAG_LOOP_BACK) ==
                     AudioMix.ROUTE_FLAG_LOOP_BACK) {
                 mix.setRegistration(mRegistrationId + "mix" + mixTypeId(mix.getMixType()) + ":"
-                        + mMixCounter);
+                        + mMixCounter++);
             } else if ((mix.getRouteFlags() & AudioMix.ROUTE_FLAG_RENDER) ==
                     AudioMix.ROUTE_FLAG_RENDER) {
                 mix.setRegistration(mix.mDeviceAddress);
@@ -294,7 +292,6 @@ public class AudioPolicyConfig implements Parcelable {
         } else {
             mix.setRegistration("");
         }
-        mMixCounter++;
     }
 
     @GuardedBy("mMixes")

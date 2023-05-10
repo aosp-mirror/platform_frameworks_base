@@ -73,11 +73,17 @@ interface ITaskOrganizerController {
 
     /**
      * Controls whether ignore orientation request logic in {@link
-     * com.android.server.wm.DisplayArea} is disabled at runtime.
+     * com.android.server.wm.DisplayArea} is disabled at runtime and how to optionally map some
+     * requested orientations to others.
      *
      * @param isDisabled when {@code true}, the system always ignores the value of {@link
      *                   com.android.server.wm.DisplayArea#getIgnoreOrientationRequest} and app
      *                   requested orientation is respected.
+     * @param fromOrientations The orientations we want to map to the correspondent orientations
+     *                        in toOrientation.
+     * @param toOrientations The orientations we map to the ones in fromOrientations at the same
+     *                       index
      */
-     void setIsIgnoreOrientationRequestDisabled(boolean isDisabled);
+     void setOrientationRequestPolicy(boolean isIgnoreOrientationRequestDisabled,
+            in int[] fromOrientations, in int[] toOrientations);
 }

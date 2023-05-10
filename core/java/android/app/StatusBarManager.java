@@ -46,6 +46,7 @@ import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Pair;
 import android.util.Slog;
+import android.view.KeyEvent;
 import android.view.View;
 
 import com.android.internal.statusbar.AppClipsServiceConnector;
@@ -740,7 +741,7 @@ public class StatusBarManager {
      */
     @RequiresPermission(android.Manifest.permission.STATUS_BAR)
     @TestApi
-    public void handleSystemKey(int key) {
+    public void handleSystemKey(@NonNull KeyEvent key) {
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
@@ -749,6 +750,29 @@ public class StatusBarManager {
         } catch (RemoteException ex) {
             throw ex.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Gets the last handled system key. A system key is a KeyEvent that the
+     * {@link com.android.server.policy.PhoneWindowManager} sends directly to the
+     * status bar, rather than forwarding to apps. If a key has never been sent to the
+     * status bar, will return -1.
+     *
+     * @return the keycode of the last KeyEvent that has been sent to the system.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.STATUS_BAR)
+    @TestApi
+    public int getLastSystemKey() {
+        try {
+            final IStatusBarService svc = getService();
+            if (svc != null) {
+                return svc.getLastSystemKey();
+            }
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+        return -1;
     }
 
     /**

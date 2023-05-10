@@ -90,6 +90,7 @@ public class NavigationBarController implements
     private final DisplayTracker mDisplayTracker;
     private final DisplayManager mDisplayManager;
     private final TaskbarDelegate mTaskbarDelegate;
+    private final NavBarHelper mNavBarHelper;
     private int mNavMode;
     @VisibleForTesting boolean mIsLargeScreen;
 
@@ -133,6 +134,7 @@ public class NavigationBarController implements
         configurationController.addCallback(this);
         mConfigChanges.applyNewConfig(mContext.getResources());
         mNavMode = navigationModeController.addListener(this);
+        mNavBarHelper = navBarHelper;
         mTaskbarDelegate = taskbarDelegate;
         mTaskbarDelegate.setDependencies(commandQueue, overviewProxyService,
                 navBarHelper, navigationModeController, sysUiFlagsContainer,
@@ -224,6 +226,18 @@ public class NavigationBarController implements
         }
     }
 
+    private boolean shouldCreateNavBarAndTaskBar(int displayId) {
+        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
+
+        try {
+            return wms.hasNavigationBar(displayId);
+        } catch (RemoteException e) {
+            // Cannot get wms, just return false with warning message.
+            Log.w(TAG, "Cannot get WindowManager.");
+            return false;
+        }
+    }
+
     /** @see #initializeTaskbarIfNecessary() */
     private boolean updateNavbarForTaskbar() {
         boolean taskbarShown = initializeTaskbarIfNecessary();
@@ -236,15 +250,20 @@ public class NavigationBarController implements
     /** @return {@code true} if taskbar is enabled, false otherwise */
     private boolean initializeTaskbarIfNecessary() {
         // Enable for large screens or (phone AND flag is set); assuming phone = !mIsLargeScreen
-        boolean taskbarEnabled = mIsLargeScreen || mFeatureFlags.isEnabled(
-                Flags.HIDE_NAVBAR_WINDOW);
+        boolean taskbarEnabled = (mIsLargeScreen || mFeatureFlags.isEnabled(
+                Flags.HIDE_NAVBAR_WINDOW)) && shouldCreateNavBarAndTaskBar(mContext.getDisplayId());
 
         if (taskbarEnabled) {
             Trace.beginSection("NavigationBarController#initializeTaskbarIfNecessary");
+            final int displayId = mContext.getDisplayId();
+            // Hint to NavBarHelper if we are replacing an existing bar to skip extra work
+            mNavBarHelper.setTogglingNavbarTaskbar(mNavigationBars.contains(displayId));
             // Remove navigation bar when taskbar is showing
-            removeNavigationBar(mContext.getDisplayId());
-            mTaskbarDelegate.init(mContext.getDisplayId());
+            removeNavigationBar(displayId);
+            mTaskbarDelegate.init(displayId);
+            mNavBarHelper.setTogglingNavbarTaskbar(false);
             Trace.endSection();
+
         } else {
             mTaskbarDelegate.destroy();
         }
@@ -324,23 +343,16 @@ public class NavigationBarController implements
         final int displayId = display.getDisplayId();
         final boolean isOnDefaultDisplay = displayId == mDisplayTracker.getDefaultDisplayId();
 
+        if (!shouldCreateNavBarAndTaskBar(displayId)) {
+            return;
+        }
+
         // We may show TaskBar on the default display for large screen device. Don't need to create
         // navigation bar for this case.
         if (isOnDefaultDisplay && initializeTaskbarIfNecessary()) {
             return;
         }
 
-        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
-
-        try {
-            if (!wms.hasNavigationBar(displayId)) {
-                return;
-            }
-        } catch (RemoteException e) {
-            // Cannot get wms, just return with warning message.
-            Log.w(TAG, "Cannot get WindowManager.");
-            return;
-        }
         final Context context = isOnDefaultDisplay
                 ? mContext
                 : mContext.createDisplayContext(display);

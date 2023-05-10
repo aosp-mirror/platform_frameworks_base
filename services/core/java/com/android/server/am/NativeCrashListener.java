@@ -64,12 +64,15 @@ final class NativeCrashListener extends Thread {
     class NativeCrashReporter extends Thread {
         ProcessRecord mApp;
         int mSignal;
+        boolean mGwpAsanRecoverableCrash;
         String mCrashReport;
 
-        NativeCrashReporter(ProcessRecord app, int signal, String report) {
+        NativeCrashReporter(ProcessRecord app, int signal, boolean gwpAsanRecoverableCrash,
+                            String report) {
             super("NativeCrashReport");
             mApp = app;
             mSignal = signal;
+            mGwpAsanRecoverableCrash = gwpAsanRecoverableCrash;
             mCrashReport = report;
         }
 
@@ -85,7 +88,9 @@ final class NativeCrashListener extends Thread {
                 ci.stackTrace = mCrashReport;
 
                 if (DEBUG) Slog.v(TAG, "Calling handleApplicationCrash()");
-                mAm.handleApplicationCrashInner("native_crash", mApp, mApp.processName, ci);
+                mAm.handleApplicationCrashInner(
+                        mGwpAsanRecoverableCrash ? "native_recoverable_crash" : "native_crash",
+                        mApp, mApp.processName, ci);
                 if (DEBUG) Slog.v(TAG, "<-- handleApplicationCrash() returned");
             } catch (Exception e) {
                 Slog.e(TAG, "Unable to report native crash", e);
@@ -207,9 +212,14 @@ final class NativeCrashListener extends Thread {
             // permits crash_dump to connect to it. This allows us to trust the
             // received values.
 
-            // first, the pid and signal number
-            int headerBytes = readExactly(fd, buf, 0, 8);
-            if (headerBytes != 8) {
+            // Activity Manager protocol:
+            //  - 32-bit network-byte-order: pid
+            //  - 32-bit network-byte-order: signal number
+            //  - byte: gwpAsanRecoverableCrash
+            //  - bytes: raw text of the dump
+            //  - null terminator
+            int headerBytes = readExactly(fd, buf, 0, 9);
+            if (headerBytes != 9) {
                 // protocol failure; give up
                 Slog.e(TAG, "Unable to read from debuggerd");
                 return;
@@ -217,69 +227,76 @@ final class NativeCrashListener extends Thread {
 
             int pid = unpackInt(buf, 0);
             int signal = unpackInt(buf, 4);
+            boolean gwpAsanRecoverableCrash = buf[8] != 0;
             if (DEBUG) {
-                Slog.v(TAG, "Read pid=" + pid + " signal=" + signal);
+                Slog.v(TAG, "Read pid=" + pid + " signal=" + signal
+                        + " recoverable=" + gwpAsanRecoverableCrash);
+            }
+            if (pid < 0) {
+                Slog.e(TAG, "Bogus pid!");
+                return;
             }
 
             // now the text of the dump
-            if (pid > 0) {
-                final ProcessRecord pr;
-                synchronized (mAm.mPidsSelfLocked) {
-                    pr = mAm.mPidsSelfLocked.get(pid);
-                }
-                if (pr != null) {
-                    // Don't attempt crash reporting for persistent apps
-                    if (pr.isPersistent()) {
-                        if (DEBUG) {
-                            Slog.v(TAG, "Skipping report for persistent app " + pr);
-                        }
-                        return;
-                    }
-
-                    int bytes;
-                    do {
-                        // get some data
-                        bytes = Os.read(fd, buf, 0, buf.length);
-                        if (bytes > 0) {
-                            if (MORE_DEBUG) {
-                                String s = new String(buf, 0, bytes, "UTF-8");
-                                Slog.v(TAG, "READ=" + bytes + "> " + s);
-                            }
-                            // did we just get the EOD null byte?
-                            if (buf[bytes-1] == 0) {
-                                os.write(buf, 0, bytes-1);  // exclude the EOD token
-                                break;
-                            }
-                            // no EOD, so collect it and read more
-                            os.write(buf, 0, bytes);
-                        }
-                    } while (bytes > 0);
-
-                    // Okay, we've got the report.
-                    if (DEBUG) Slog.v(TAG, "processing");
-
-                    // Mark the process record as being a native crash so that the
-                    // cleanup mechanism knows we're still submitting the report
-                    // even though the process will vanish as soon as we let
-                    // debuggerd proceed.
-                    synchronized (mAm) {
-                        synchronized (mAm.mProcLock) {
-                            pr.mErrorState.setCrashing(true);
-                            pr.mErrorState.setForceCrashReport(true);
-                        }
-                    }
-
-                    // Crash reporting is synchronous but we want to let debuggerd
-                    // go about it business right away, so we spin off the actual
-                    // reporting logic on a thread and let it take it's time.
-                    final String reportString = new String(os.toByteArray(), "UTF-8");
-                    (new NativeCrashReporter(pr, signal, reportString)).start();
-                } else {
-                    Slog.w(TAG, "Couldn't find ProcessRecord for pid " + pid);
-                }
-            } else {
-                Slog.e(TAG, "Bogus pid!");
+            final ProcessRecord pr;
+            synchronized (mAm.mPidsSelfLocked) {
+                pr = mAm.mPidsSelfLocked.get(pid);
             }
+            if (pr == null) {
+                Slog.w(TAG, "Couldn't find ProcessRecord for pid " + pid);
+                return;
+            }
+
+            // Don't attempt crash reporting for persistent apps
+            if (pr.isPersistent()) {
+                if (DEBUG) {
+                    Slog.v(TAG, "Skipping report for persistent app " + pr);
+                }
+                return;
+            }
+
+            int bytes;
+            do {
+                // get some data
+                bytes = Os.read(fd, buf, 0, buf.length);
+                if (bytes > 0) {
+                    if (MORE_DEBUG) {
+                        String s = new String(buf, 0, bytes, "UTF-8");
+                        Slog.v(TAG, "READ=" + bytes + "> " + s);
+                    }
+                    // did we just get the EOD null byte?
+                    if (buf[bytes - 1] == 0) {
+                        os.write(buf, 0, bytes - 1); // exclude the EOD token
+                        break;
+                    }
+                    // no EOD, so collect it and read more
+                    os.write(buf, 0, bytes);
+                }
+            } while (bytes > 0);
+
+            // Okay, we've got the report.
+            if (DEBUG) Slog.v(TAG, "processing");
+
+            // Mark the process record as being a native crash so that the
+            // cleanup mechanism knows we're still submitting the report even
+            // though the process will vanish as soon as we let debuggerd
+            // proceed. This isn't relevant for recoverable crashes, as we don't
+            // show the user an "app crashed" dialogue because the app (by
+            // design) didn't crash.
+            if (!gwpAsanRecoverableCrash) {
+                synchronized (mAm) {
+                    synchronized (mAm.mProcLock) {
+                        pr.mErrorState.setCrashing(true);
+                        pr.mErrorState.setForceCrashReport(true);
+                    }
+                }
+            }
+
+            // Crash reporting is synchronous but we want to let debuggerd
+            // go about it business right away, so we spin off the actual
+            // reporting logic on a thread and let it take it's time.
+            final String reportString = new String(os.toByteArray(), "UTF-8");
+            (new NativeCrashReporter(pr, signal, gwpAsanRecoverableCrash, reportString)).start();
         } catch (Exception e) {
             Slog.e(TAG, "Exception dealing with report", e);
             // ugh, fail.

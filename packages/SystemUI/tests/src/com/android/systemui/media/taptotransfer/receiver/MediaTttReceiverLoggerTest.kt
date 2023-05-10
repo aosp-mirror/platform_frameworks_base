@@ -19,9 +19,9 @@ package com.android.systemui.media.taptotransfer.receiver
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogcatEchoTracker
+import com.android.systemui.log.LogcatEchoTracker
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter

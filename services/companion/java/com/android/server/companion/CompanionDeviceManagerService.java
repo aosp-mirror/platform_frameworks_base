@@ -19,6 +19,7 @@ package com.android.server.companion;
 
 import static android.Manifest.permission.MANAGE_COMPANION_DEVICES;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE;
+import static android.companion.AssociationRequest.DEVICE_PROFILE_AUTOMOTIVE_PROJECTION;
 import static android.content.pm.PackageManager.CERT_INPUT_SHA256;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
@@ -53,6 +54,7 @@ import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothDevice;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
 import android.companion.DeviceNotAssociatedException;
@@ -106,6 +108,9 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.companion.datatransfer.SystemDataTransferProcessor;
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
+import com.android.server.companion.datatransfer.contextsync.CrossDeviceCall;
+import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
+import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncControllerCallback;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 import com.android.server.companion.transport.CompanionTransportManager;
 import com.android.server.pm.UserManagerInternal;
@@ -115,6 +120,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -198,6 +204,8 @@ public class CompanionDeviceManagerService extends SystemService {
     private final RemoteCallbackList<IOnAssociationsChangedListener> mListeners =
             new RemoteCallbackList<>();
 
+    private CrossDeviceSyncController mCrossDeviceSyncController;
+
     public CompanionDeviceManagerService(Context context) {
         super(context);
 
@@ -227,7 +235,7 @@ public class CompanionDeviceManagerService extends SystemService {
         loadAssociationsFromDisk();
         mAssociationStore.registerListener(mAssociationStoreChangeListener);
 
-        mDevicePresenceMonitor = new CompanionDevicePresenceMonitor(
+        mDevicePresenceMonitor = new CompanionDevicePresenceMonitor(mUserManager,
                 mAssociationStore, mDevicePresenceCallback);
 
         mAssociationRequestsProcessor = new AssociationRequestsProcessor(
@@ -237,6 +245,8 @@ public class CompanionDeviceManagerService extends SystemService {
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
+        // TODO(b/279663946): move context sync to a dedicated system service
+        mCrossDeviceSyncController = new CrossDeviceSyncController(getContext(), mTransportManager);
 
         // Publish "binder" service.
         final CompanionDeviceManagerImpl impl = new CompanionDeviceManagerImpl();
@@ -311,6 +321,23 @@ public class CompanionDeviceManagerService extends SystemService {
         BackgroundThread.getHandler().sendMessageDelayed(
                 obtainMessage(CompanionDeviceManagerService::maybeGrantAutoRevokeExemptions, this),
                 MINUTES.toMillis(10));
+    }
+
+    @Override
+    public void onUserUnlocked(@NonNull TargetUser user) {
+        // Notify and bind the app after the phone is unlocked.
+        final int userId = user.getUserIdentifier();
+        final Set<BluetoothDevice> blueToothDevices =
+                mDevicePresenceMonitor.getPendingConnectedDevices().get(userId);
+        if (blueToothDevices != null) {
+            for (BluetoothDevice bluetoothDevice : blueToothDevices) {
+                for (AssociationInfo ai:
+                        mAssociationStore.getAssociationsByAddress(bluetoothDevice.getAddress())) {
+                    Slog.i(TAG, "onUserUnlocked, device id( " + ai.getId() + " ) is connected");
+                    mDevicePresenceMonitor.onBluetoothCompanionDeviceConnected(ai.getId());
+                }
+            }
+        }
     }
 
     @NonNull
@@ -603,25 +630,21 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void addOnTransportsChangedListener(IOnTransportsChangedListener listener) {
             mTransportManager.addListener(listener);
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void removeOnTransportsChangedListener(IOnTransportsChangedListener listener) {
             mTransportManager.removeListener(listener);
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void sendMessage(int messageType, byte[] data, int[] associationIds) {
             mTransportManager.sendMessage(messageType, data, associationIds);
         }
 
         @Override
-        @GuardedBy("CompanionDeviceManagerService.this.mTransportManager.mTransports")
         public void addOnMessageReceivedListener(int messageType,
                 IOnMessageReceivedListener listener) {
             mTransportManager.addListener(messageType, listener);
@@ -898,12 +921,10 @@ public class CompanionDeviceManagerService extends SystemService {
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver)
                 throws RemoteException {
-            enforceCallerCanManageCompanionDevice(getContext(), "onShellCommand");
-            final CompanionDeviceShellCommand cmd = new CompanionDeviceShellCommand(
-                    CompanionDeviceManagerService.this,
-                    mAssociationStore,
-                    mDevicePresenceMonitor);
-            cmd.exec(this, in, out, err, args, callback, resultReceiver);
+            new CompanionDeviceShellCommand(CompanionDeviceManagerService.this, mAssociationStore,
+                    mDevicePresenceMonitor, mTransportManager, mSystemDataTransferRequestStore,
+                    mAssociationRequestsProcessor)
+                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override
@@ -1064,6 +1085,10 @@ public class CompanionDeviceManagerService extends SystemService {
         final String deviceProfile = association.getDeviceProfile();
         if (deviceProfile == null) {
             // No role was granted to for this association, there is nothing else we need to here.
+            return true;
+        }
+        // Do not need to remove the system role since it was pre-granted by the system.
+        if (deviceProfile.equals(DEVICE_PROFILE_AUTOMOTIVE_PROJECTION)) {
             return true;
         }
 
@@ -1354,6 +1379,39 @@ public class CompanionDeviceManagerService extends SystemService {
         @Override
         public void removeInactiveSelfManagedAssociations() {
             CompanionDeviceManagerService.this.removeInactiveSelfManagedAssociations();
+        }
+
+        @Override
+        public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.registerCallMetadataSyncCallback(callback);
+            }
+        }
+
+        @Override
+        public void crossDeviceSync(int userId, Collection<CrossDeviceCall> calls) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.syncToAllDevicesForUserId(userId, calls);
+            }
+        }
+
+        @Override
+        public void crossDeviceSync(AssociationInfo associationInfo,
+                Collection<CrossDeviceCall> calls) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.syncToSingleDevice(associationInfo, calls);
+            }
+        }
+
+        @Override
+        public void sendCrossDeviceSyncMessage(int associationId, byte[] message) {
+            if (CompanionDeviceConfig.isEnabled(
+                    CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+                mCrossDeviceSyncController.syncMessageToDevice(associationId, message);
+            }
         }
     }
 

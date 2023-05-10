@@ -18,10 +18,10 @@ package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
 import android.tools.common.Rotation
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.common.datatypes.component.IComponentMatcher
 import android.tools.common.traces.Condition
 import android.tools.common.traces.DeviceStateDump
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.common.traces.component.IComponentMatcher
 import android.tools.device.helpers.FIND_TIMEOUT
 import android.tools.device.helpers.IME_PACKAGE
 import android.tools.device.traces.parsers.WindowManagerStateHelper

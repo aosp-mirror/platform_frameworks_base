@@ -16,10 +16,9 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -80,7 +79,7 @@ open class CloseImeToAppOnPressBackTest(flicker: FlickerTest) : BaseTest(flicker
         flicker.navBarLayerPositionAtStartAndEnd()
     }
 
-    @FlakyTest
+    @Presubmit
     @Test
     fun navBarLayerPositionAtStartAndEndLandscapeOrSeascapeAtStart() {
         Assume.assumeFalse(flicker.scenario.isTablet)

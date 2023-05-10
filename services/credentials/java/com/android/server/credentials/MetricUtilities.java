@@ -19,27 +19,46 @@ package com.android.server.credentials;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
-import com.android.server.credentials.metrics.CandidateProviderMetric;
-import com.android.server.credentials.metrics.ChosenProviderMetric;
+import com.android.server.credentials.metrics.CandidateAggregateMetric;
+import com.android.server.credentials.metrics.CandidateBrowsingPhaseMetric;
+import com.android.server.credentials.metrics.CandidatePhaseMetric;
+import com.android.server.credentials.metrics.ChosenProviderFinalPhaseMetric;
+import com.android.server.credentials.metrics.EntryEnum;
+import com.android.server.credentials.metrics.InitialPhaseMetric;
 
+import java.security.SecureRandom;
+import java.util.List;
 import java.util.Map;
 
 /**
  * For all future metric additions, this will contain their names for local usage after importing
  * from {@link com.android.internal.util.FrameworkStatsLog}.
+ * TODO(b/271135048) - Emit all atoms, including all V4 atoms (specifically the rest of track 1).
  */
 public class MetricUtilities {
+    private static final boolean LOG_FLAG = true;
 
     private static final String TAG = "MetricUtilities";
+    public static final String USER_CANCELED_SUBSTRING = "TYPE_USER_CANCELED";
 
     public static final int DEFAULT_INT_32 = -1;
+    public static final String DEFAULT_STRING = "";
     public static final int[] DEFAULT_REPEATED_INT_32 = new int[0];
-
+    public static final String[] DEFAULT_REPEATED_STR = new String[0];
+    public static final boolean[] DEFAULT_REPEATED_BOOL = new boolean[0];
+    // Used for single count metric emits, such as singular amounts of various types
+    public static final int UNIT = 1;
+    // Used for zero count metric emits, such as zero amounts of various types
+    public static final int ZERO = 0;
+    // The number of characters at the end of the string to use as a key
+    public static final int DELTA_RESPONSES_CUT = 20;
+    // The cut for exception strings from the end - used to keep metrics small
+    public static final int DELTA_EXCEPTION_CUT = 30;
 
     /**
      * This retrieves the uid of any package name, given a context and a component name for the
@@ -56,9 +75,18 @@ public class MetricUtilities {
                     componentName.getPackageName(),
                     PackageManager.ApplicationInfoFlags.of(0)).uid;
         } catch (Throwable t) {
-            Log.i(TAG, "Couldn't find required uid");
+            Slog.i(TAG, "Couldn't find required uid");
         }
         return sessUid;
+    }
+
+    /**
+     * Used to help generate random sequences for local sessions, in the time-scale of credential
+     * manager flows.
+     * @return a high entropy int useful to use in reasonable time-frame sessions.
+     */
+    public static int getHighlyUniqueInteger() {
+        return new SecureRandom().nextInt();
     }
 
     /**
@@ -77,74 +105,370 @@ public class MetricUtilities {
     }
 
     /**
-     * The most common logging helper, handles the overall status of the API request with the
-     * provider status and latencies. Other versions of this method may be more useful depending
-     * on the situation, as this is geared towards the logging of {@link ProviderSession} types.
+     * Given the current design, we can designate how the strings in the backend should appear.
+     * This helper method lets us cut strings for our class types.
      *
-     * @param apiName              the api type to log
-     * @param apiStatus            the api status to log
-     * @param providers            a map with known providers
-     * @param callingUid           the calling UID of the client app
-     * @param chosenProviderMetric the metric data type of the final chosen provider
+     * @param classtype the classtype string we want to cut to generate a key
+     * @param deltaFromEnd the starting point from the end of the string we wish to begin at
+     * @return the cut up string key we want to use for metric logs
      */
-    protected static void logApiCalled(ApiName apiName, ApiStatus apiStatus,
-            Map<String, ProviderSession> providers, int callingUid,
-            ChosenProviderMetric chosenProviderMetric) {
-        var providerSessions = providers.values();
-        int providerSize = providerSessions.size();
-        int[] candidateUidList = new int[providerSize];
-        int[] candidateQueryRoundTripTimeList = new int[providerSize];
-        int[] candidateStatusList = new int[providerSize];
-        int index = 0;
-        for (var session : providerSessions) {
-            CandidateProviderMetric metric = session.mCandidateProviderMetric;
-            candidateUidList[index] = metric.getCandidateUid();
-            candidateQueryRoundTripTimeList[index] = metric.getQueryLatencyMicroseconds();
-            candidateStatusList[index] = metric.getProviderQueryStatus();
-            index++;
-        }
-        FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
-                /* api_name */apiName.getMetricCode(),
-                /* caller_uid */ callingUid,
-                /* api_status */ apiStatus.getMetricCode(),
-                /* repeated_candidate_provider_uid */ candidateUidList,
-                /* repeated_candidate_provider_round_trip_time_query_microseconds */
-                candidateQueryRoundTripTimeList,
-                /* repeated_candidate_provider_status */ candidateStatusList,
-                /* chosen_provider_uid */ chosenProviderMetric.getChosenUid(),
-                /* chosen_provider_round_trip_time_overall_microseconds */
-                chosenProviderMetric.getEntireProviderLatencyMicroseconds(),
-                /* chosen_provider_final_phase_microseconds (backwards compat only) */
-                DEFAULT_INT_32,
-                /* chosen_provider_status */ chosenProviderMetric.getChosenProviderStatus());
+    public static String generateMetricKey(String classtype, int deltaFromEnd) {
+        return classtype.substring(classtype.length() - deltaFromEnd);
     }
 
     /**
-     * This is useful just to record an API calls' final event, and for no other purpose. It will
-     * contain default values for all other optional parameters.
+     * A logging utility used primarily for the final phase of the current metric setup.
      *
-     * TODO(b/271135048) - given space requirements, this may be a good candidate for another atom
+     * @param finalPhaseMetric     the coalesced data of the chosen provider
+     * @param browsingPhaseMetrics the coalesced data of the browsing phase
+     * @param apiStatus            the final status of this particular api call
+     * @param emitSequenceId       an emitted sequence id for the current session
+     */
+    public static void logApiCalledFinalPhase(ChosenProviderFinalPhaseMetric finalPhaseMetric,
+            List<CandidateBrowsingPhaseMetric> browsingPhaseMetrics, int apiStatus,
+            int emitSequenceId) {
+        try {
+            if (!LOG_FLAG) {
+                return;
+            }
+            int browsedSize = browsingPhaseMetrics.size();
+            int[] browsedClickedEntries = new int[browsedSize];
+            int[] browsedProviderUid = new int[browsedSize];
+            int index = 0;
+            for (CandidateBrowsingPhaseMetric metric : browsingPhaseMetrics) {
+                browsedClickedEntries[index] = metric.getEntryEnum();
+                browsedProviderUid[index] = metric.getProviderUid();
+                index++;
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINAL_PHASE_REPORTED,
+                    /* session_id */ finalPhaseMetric.getSessionIdProvider(),
+                    /* sequence_num */ emitSequenceId,
+                    /* ui_returned_final_start */ finalPhaseMetric.isUiReturned(),
+                    /* chosen_provider_uid */ finalPhaseMetric.getChosenUid(),
+                    /* chosen_provider_query_start_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getQueryStartTimeNanoseconds()),
+                    /* chosen_provider_query_end_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getQueryEndTimeNanoseconds()),
+                    /* chosen_provider_ui_invoked_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getUiCallStartTimeNanoseconds()),
+                    /* chosen_provider_ui_finished_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getUiCallEndTimeNanoseconds()),
+                    /* chosen_provider_finished_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getFinalFinishTimeNanoseconds()),
+                    /* chosen_provider_status */ finalPhaseMetric.getChosenProviderStatus(),
+                    /* chosen_provider_has_exception */ finalPhaseMetric.isHasException(),
+                    /* chosen_provider_available_entries (deprecated) */ DEFAULT_REPEATED_INT_32,
+                    /* chosen_provider_action_entry_count (deprecated) */ DEFAULT_INT_32,
+                    /* chosen_provider_credential_entry_count (deprecated)*/DEFAULT_INT_32,
+                    /* chosen_provider_credential_entry_type_count (deprecated) */ DEFAULT_INT_32,
+                    /* chosen_provider_remote_entry_count (deprecated) */ DEFAULT_INT_32,
+                    /* chosen_provider_authentication_entry_count (deprecated) */ DEFAULT_INT_32,
+                    /* clicked_entries */ browsedClickedEntries,
+                    /* provider_of_clicked_entry */ browsedProviderUid,
+                    /* api_status */ apiStatus,
+                    /* unique_entries */
+                    finalPhaseMetric.getResponseCollective().getUniqueEntries(),
+                    /* per_entry_counts */
+                    finalPhaseMetric.getResponseCollective().getUniqueEntryCounts(),
+                    /* unique_response_classtypes */
+                    finalPhaseMetric.getResponseCollective().getUniqueResponseStrings(),
+                    /* per_classtype_counts */
+                    finalPhaseMetric.getResponseCollective().getUniqueResponseCounts(),
+                    /* framework_exception_unique_classtype */
+                    finalPhaseMetric.getFrameworkException(),
+                    /* primary_indicated */ false
+            );
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during final provider uid emit: " + e);
+        }
+    }
+
+    /**
+     * A logging utility used primarily for the candidate phase of the current metric setup. This
+     * will primarily focus on track 2, where the session id is associated with known providers,
+     * but NOT the calling app.
+     *
+     * @param providers      a map with known providers and their held metric objects
+     * @param emitSequenceId an emitted sequence id for the current session
+     * @param initialPhaseMetric contains initial phase data to avoid repetition for candidate
+     *                           phase, track 2, logging
+     */
+    public static void logApiCalledCandidatePhase(Map<String, ProviderSession> providers,
+            int emitSequenceId, InitialPhaseMetric initialPhaseMetric) {
+        try {
+            if (!LOG_FLAG) {
+                return;
+            }
+            var providerSessions = providers.values();
+            int providerSize = providerSessions.size();
+            int sessionId = -1;
+            boolean queryReturned = false;
+            int[] candidateUidList = new int[providerSize];
+            int[] candidateQueryStartTimeStampList = new int[providerSize];
+            int[] candidateQueryEndTimeStampList = new int[providerSize];
+            int[] candidateStatusList = new int[providerSize];
+            boolean[] candidateHasExceptionList = new boolean[providerSize];
+            int[] candidateTotalEntryCountList = new int[providerSize];
+            int[] candidateCredentialEntryCountList = new int[providerSize];
+            int[] candidateCredentialTypeCountList = new int[providerSize];
+            int[] candidateActionEntryCountList = new int[providerSize];
+            int[] candidateAuthEntryCountList = new int[providerSize];
+            int[] candidateRemoteEntryCountList = new int[providerSize];
+            String[] frameworkExceptionList = new String[providerSize];
+            int index = 0;
+            for (var session : providerSessions) {
+                CandidatePhaseMetric metric = session.mProviderSessionMetric
+                        .getCandidatePhasePerProviderMetric();
+                if (sessionId == -1) {
+                    sessionId = metric.getSessionIdProvider();
+                }
+                if (!queryReturned) {
+                    queryReturned = metric.isQueryReturned();
+                }
+                candidateUidList[index] = metric.getCandidateUid();
+                candidateQueryStartTimeStampList[index] =
+                        metric.getTimestampFromReferenceStartMicroseconds(
+                                metric.getStartQueryTimeNanoseconds());
+                candidateQueryEndTimeStampList[index] =
+                        metric.getTimestampFromReferenceStartMicroseconds(
+                                metric.getQueryFinishTimeNanoseconds());
+                candidateStatusList[index] = metric.getProviderQueryStatus();
+                candidateHasExceptionList[index] = metric.isHasException();
+                candidateTotalEntryCountList[index] = metric.getResponseCollective()
+                        .getNumEntriesTotal();
+                candidateCredentialEntryCountList[index] = metric.getResponseCollective()
+                        .getCountForEntry(EntryEnum.CREDENTIAL_ENTRY);
+                candidateCredentialTypeCountList[index] = metric.getResponseCollective()
+                        .getUniqueResponseStrings().length;
+                candidateActionEntryCountList[index] = metric.getResponseCollective()
+                        .getCountForEntry(EntryEnum.ACTION_ENTRY);
+                candidateAuthEntryCountList[index] = metric.getResponseCollective()
+                        .getCountForEntry(EntryEnum.AUTHENTICATION_ENTRY);
+                candidateRemoteEntryCountList[index] = metric.getResponseCollective()
+                        .getCountForEntry(EntryEnum.REMOTE_ENTRY);
+                frameworkExceptionList[index] = metric.getFrameworkException();
+                index++;
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_CANDIDATE_PHASE_REPORTED,
+                    /* session_id */ sessionId,
+                    /* sequence_num */ emitSequenceId,
+                    /* query_returned */ queryReturned,
+                    /* candidate_provider_uid_list */ candidateUidList,
+                    /* candidate_provider_query_start_timestamp_microseconds */
+                    candidateQueryStartTimeStampList,
+                    /* candidate_provider_query_end_timestamp_microseconds */
+                    candidateQueryEndTimeStampList,
+                    /* candidate_provider_status */ candidateStatusList,
+                    /* candidate_provider_has_exception */ candidateHasExceptionList,
+                    /* candidate_provider_num_entries */ candidateTotalEntryCountList,
+                    /* candidate_provider_action_entry_count */ candidateActionEntryCountList,
+                    /* candidate_provider_credential_entry_count */
+                    candidateCredentialEntryCountList,
+                    /* candidate_provider_credential_entry_type_count */
+                    candidateCredentialTypeCountList,
+                    /* candidate_provider_remote_entry_count */ candidateRemoteEntryCountList,
+                    /* candidate_provider_authentication_entry_count */
+                    candidateAuthEntryCountList,
+                    /* framework_exception_per_provider */
+                    frameworkExceptionList,
+                    /* origin_specified originSpecified */
+                    initialPhaseMetric.isOriginSpecified(),
+                    /* request_unique_classtypes */
+                    initialPhaseMetric.getUniqueRequestStrings(),
+                    /* per_classtype_counts */
+                    initialPhaseMetric.getUniqueRequestCounts(),
+                    /* api_name */
+                    initialPhaseMetric.getApiName(),
+                    /* primary_candidates_indicated */
+                    DEFAULT_REPEATED_BOOL
+            );
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during candidate provider uid metric emit: " + e);
+        }
+    }
+
+    /**
+     * This is useful just to record an API calls' final event, and for no other purpose.
      *
      * @param apiName    the api name to log
      * @param apiStatus  the status to log
      * @param callingUid the calling uid
      */
-    protected static void logApiCalled(ApiName apiName, ApiStatus apiStatus,
+    public static void logApiCalledSimpleV2(ApiName apiName, ApiStatus apiStatus,
             int callingUid) {
-        FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_API_CALLED,
-                /* api_name */apiName.getMetricCode(),
-                /* caller_uid */ callingUid,
-                /* api_status */ apiStatus.getMetricCode(),
-                /* repeated_candidate_provider_uid */  DEFAULT_REPEATED_INT_32,
-                /* repeated_candidate_provider_round_trip_time_query_microseconds */
-                DEFAULT_REPEATED_INT_32,
-                /* repeated_candidate_provider_status */ DEFAULT_REPEATED_INT_32,
-                /* chosen_provider_uid */ DEFAULT_INT_32,
-                /* chosen_provider_round_trip_time_overall_microseconds */
-                DEFAULT_INT_32,
-                /* chosen_provider_final_phase_microseconds */
-                DEFAULT_INT_32,
-                /* chosen_provider_status */ DEFAULT_INT_32);
+        try {
+            if (!LOG_FLAG) {
+                return;
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_APIV2_CALLED,
+                    /* api_name */apiName.getMetricCode(),
+                    /* caller_uid */ callingUid,
+                    /* api_status */ apiStatus.getMetricCode());
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+        }
+    }
+
+    /**
+     * Handles the metric emit for the initial phase.
+     *
+     * @param initialPhaseMetric contains all the data for this emit
+     * @param sequenceNum        the sequence number for this api call session emit
+     */
+    public static void logApiCalledInitialPhase(InitialPhaseMetric initialPhaseMetric,
+            int sequenceNum) {
+        try {
+            if (!LOG_FLAG) {
+                return;
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_INIT_PHASE_REPORTED,
+                    /* api_name */ initialPhaseMetric.getApiName(),
+                    /* caller_uid */ initialPhaseMetric.getCallerUid(),
+                    /* session_id */ initialPhaseMetric.getSessionIdCaller(),
+                    /* sequence_num */ sequenceNum,
+                    /* initial_timestamp_reference_nanoseconds */
+                    initialPhaseMetric.getCredentialServiceStartedTimeNanoseconds(),
+                    /* count_credential_request_classtypes */
+                    initialPhaseMetric.getCountRequestClassType(),
+                    /* request_unique_classtypes */
+                    initialPhaseMetric.getUniqueRequestStrings(),
+                    /* per_classtype_counts */
+                    initialPhaseMetric.getUniqueRequestCounts(),
+                    /* origin_specified */
+                    initialPhaseMetric.isOriginSpecified()
+            );
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during initial metric emit: " + e);
+        }
+    }
+
+    /**
+     * A logging utility focused on track 1, where the calling app is known. This captures all
+     * aggregate information for the candidate phase.
+     *
+     * @param candidateAggregateMetric the aggregate candidate metric information collected
+     * @param sequenceNum the sequence number for this api call session emit
+     */
+    public static void logApiCalledAggregateCandidate(
+            CandidateAggregateMetric candidateAggregateMetric,
+            int sequenceNum) {
+        try {
+            if (!LOG_FLAG) {
+                FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_TOTAL_REPORTED,
+                        /*session_id*/ candidateAggregateMetric.getSessionIdProvider(),
+                        /*sequence_num*/ sequenceNum,
+                        /*query_returned*/ candidateAggregateMetric.isQueryReturned(),
+                        /*num_providers*/ candidateAggregateMetric.getNumProviders(),
+                        /*min_query_start_timestamp_microseconds*/
+                        DEFAULT_INT_32,
+                        /*max_query_end_timestamp_microseconds*/
+                        DEFAULT_INT_32,
+                        /*query_response_unique_classtypes*/
+                        DEFAULT_REPEATED_STR,
+                        /*query_per_classtype_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*query_unique_entries*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*query_per_entry_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*query_total_candidate_failure*/
+                        DEFAULT_INT_32,
+                        /*query_framework_exception_unique_classtypes*/
+                        DEFAULT_REPEATED_STR,
+                        /*query_per_exception_classtype_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*auth_response_unique_classtypes*/
+                        DEFAULT_REPEATED_STR,
+                        /*auth_per_classtype_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*auth_unique_entries*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*auth_per_entry_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*auth_total_candidate_failure*/
+                        DEFAULT_INT_32,
+                        /*auth_framework_exception_unique_classtypes*/
+                        DEFAULT_REPEATED_STR,
+                        /*auth_per_exception_classtype_counts*/
+                        DEFAULT_REPEATED_INT_32,
+                        /*num_auth_clicks*/
+                        DEFAULT_INT_32,
+                        /*auth_returned*/ false
+                );
+            }
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+        }
+    }
+
+    /**
+     * A logging utility used primarily for the final phase of the current metric setup for track 1.
+     *
+     * @param finalPhaseMetric     the coalesced data of the chosen provider
+     * @param browsingPhaseMetrics the coalesced data of the browsing phase
+     * @param apiStatus            the final status of this particular api call
+     * @param emitSequenceId       an emitted sequence id for the current session
+     */
+    public static void logApiCalledNoUidFinal(ChosenProviderFinalPhaseMetric finalPhaseMetric,
+            List<CandidateBrowsingPhaseMetric> browsingPhaseMetrics, int apiStatus,
+            int emitSequenceId) {
+        try {
+            if (!LOG_FLAG) {
+                return;
+            }
+            int browsedSize = browsingPhaseMetrics.size();
+            int[] browsedClickedEntries = new int[browsedSize];
+            int[] browsedProviderUid = new int[browsedSize];
+            int index = 0;
+            for (CandidateBrowsingPhaseMetric metric : browsingPhaseMetrics) {
+                browsedClickedEntries[index] = metric.getEntryEnum();
+                browsedProviderUid[index] = metric.getProviderUid();
+                index++;
+            }
+            FrameworkStatsLog.write(FrameworkStatsLog.CREDENTIAL_MANAGER_FINALNOUID_REPORTED,
+                    /* session_id */ finalPhaseMetric.getSessionIdCaller(),
+                    /* sequence_num */ emitSequenceId,
+                    /* ui_returned_final_start */ finalPhaseMetric.isUiReturned(),
+                    /* chosen_provider_query_start_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getQueryStartTimeNanoseconds()),
+                    /* chosen_provider_query_end_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getQueryEndTimeNanoseconds()),
+                    /* chosen_provider_ui_invoked_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getUiCallStartTimeNanoseconds()),
+                    /* chosen_provider_ui_finished_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getUiCallEndTimeNanoseconds()),
+                    /* chosen_provider_finished_timestamp_microseconds */
+                    finalPhaseMetric.getTimestampFromReferenceStartMicroseconds(finalPhaseMetric
+                            .getFinalFinishTimeNanoseconds()),
+                    /* chosen_provider_status */ finalPhaseMetric.getChosenProviderStatus(),
+                    /* chosen_provider_has_exception */ finalPhaseMetric.isHasException(),
+                    /* unique_entries */
+                    finalPhaseMetric.getResponseCollective().getUniqueEntries(),
+                    /* per_entry_counts */
+                    finalPhaseMetric.getResponseCollective().getUniqueEntryCounts(),
+                    /* unique_response_classtypes */
+                    finalPhaseMetric.getResponseCollective().getUniqueResponseStrings(),
+                    /* per_classtype_counts */
+                    finalPhaseMetric.getResponseCollective().getUniqueResponseCounts(),
+                    /* framework_exception_unique_classtype */
+                    finalPhaseMetric.getFrameworkException(),
+                    /* clicked_entries */ browsedClickedEntries,
+                    /* provider_of_clicked_entry */ browsedProviderUid,
+                    /* api_status */ apiStatus,
+                    /* primary_indicated */ false
+            );
+        } catch (Exception e) {
+            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+        }
     }
 
 }

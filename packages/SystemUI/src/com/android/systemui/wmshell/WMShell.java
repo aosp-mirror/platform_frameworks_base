@@ -33,6 +33,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
+import android.view.Display;
 import android.view.KeyEvent;
 
 import androidx.annotation.NonNull;
@@ -295,8 +296,8 @@ public final class WMShell implements
             @Override
             public void notifyExpandNotification() {
                 mSysUiMainExecutor.execute(
-                        () -> mCommandQueue.handleSystemKey(
-                                KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN));
+                        () -> mCommandQueue.handleSystemKey(new KeyEvent(KeyEvent.ACTION_DOWN,
+                                KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN)));
             }
         });
 
@@ -345,20 +346,22 @@ public final class WMShell implements
     }
 
     void initDesktopMode(DesktopMode desktopMode) {
-        desktopMode.addListener(new DesktopModeTaskRepository.VisibleTasksListener() {
-            @Override
-            public void onVisibilityChanged(boolean hasFreeformTasks) {
-                mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE, hasFreeformTasks)
-                        .commitUpdate(mDisplayTracker.getDefaultDisplayId());
-            }
-        }, mSysUiMainExecutor);
+        desktopMode.addVisibleTasksListener(
+                new DesktopModeTaskRepository.VisibleTasksListener() {
+                    @Override
+                    public void onVisibilityChanged(int displayId, boolean hasFreeformTasks) {
+                        if (displayId == Display.DEFAULT_DISPLAY) {
+                            mSysUiState.setFlag(SYSUI_STATE_FREEFORM_ACTIVE_IN_DESKTOP_MODE,
+                                            hasFreeformTasks)
+                                    .commitUpdate(mDisplayTracker.getDefaultDisplayId());
+                        }
+                        // TODO(b/278084491): update sysui state for changes on other displays
+                    }
+                }, mSysUiMainExecutor);
     }
 
     @Override
     public void writeToProto(SystemUiTraceProto proto) {
-        if (proto.wmShell == null) {
-            proto.wmShell = new WmShellTraceProto();
-        }
         // Dump to WMShell proto here
         // TODO: Figure out how we want to synchronize while dumping to proto
     }

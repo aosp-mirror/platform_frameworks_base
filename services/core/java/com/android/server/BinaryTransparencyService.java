@@ -80,7 +80,7 @@ import android.util.apk.ApkSignatureVerifier;
 import android.util.apk.ApkSigningBlockUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.expresslog.Histogram;
+import com.android.modules.expresslog.Histogram;
 import com.android.internal.os.IBinaryTransparencyService;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.pm.ApexManager;

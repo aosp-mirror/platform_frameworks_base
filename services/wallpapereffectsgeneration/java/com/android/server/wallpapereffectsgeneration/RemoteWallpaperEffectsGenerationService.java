@@ -40,6 +40,8 @@ public class RemoteWallpaperEffectsGenerationService extends
 
     private static final long TIMEOUT_REMOTE_REQUEST_MILLIS = 2 * DateUtils.SECOND_IN_MILLIS;
 
+    private static final long TIMEOUT_IDLE_BIND_MILLIS = 120 * DateUtils.SECOND_IN_MILLIS;
+
     private final RemoteWallpaperEffectsGenerationServiceCallback mCallback;
 
     public RemoteWallpaperEffectsGenerationService(Context context,
@@ -62,7 +64,7 @@ public class RemoteWallpaperEffectsGenerationService extends
 
     @Override
     protected long getTimeoutIdleBindMillis() {
-        return PERMANENT_BOUND_TIMEOUT_MS;
+        return TIMEOUT_IDLE_BIND_MILLIS;
     }
 
     @Override

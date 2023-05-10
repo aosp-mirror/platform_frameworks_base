@@ -74,6 +74,7 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
+import android.text.TextFlags;
 import android.text.TextUtils;
 import android.text.method.InsertModeTransformationMethod;
 import android.text.method.KeyListener;
@@ -168,9 +169,6 @@ import java.util.Objects;
 public class Editor {
     private static final String TAG = "Editor";
     private static final boolean DEBUG_UNDO = false;
-
-    // TODO(nona): Make this configurable.
-    private static final boolean FLAG_USE_NEW_CONTEXT_MENU = false;
 
     // Specifies whether to use the magnifier when pressing the insertion or selection handles.
     private static final boolean FLAG_USE_MAGNIFIER = true;
@@ -470,6 +468,7 @@ public class Editor {
     private static final int LINE_CHANGE_SLOP_MIN_DP = 8;
     private int mLineChangeSlopMax;
     private int mLineChangeSlopMin;
+    private boolean mUseNewContextMenu;
 
     private final AccessibilitySmartActions mA11ySmartActions;
     private InsertModeController mInsertModeController;
@@ -500,6 +499,9 @@ public class Editor {
         mLineSlopRatio = AppGlobals.getFloatCoreSetting(
                 WidgetFlags.KEY_LINE_SLOP_RATIO,
                 WidgetFlags.LINE_SLOP_RATIO_DEFAULT);
+        mUseNewContextMenu = AppGlobals.getIntCoreSetting(
+                TextFlags.KEY_ENABLE_NEW_CONTEXT_MENU,
+                TextFlags.ENABLE_NEW_CONTEXT_MENU_DEFAULT ? 1 : 0) != 0;
         if (TextView.DEBUG_CURSOR) {
             logCursor("Editor", "Cursor drag from anywhere is %s.",
                     mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
@@ -722,7 +724,10 @@ public class Editor {
         }
 
         getPositionListener().addSubscriber(mCursorAnchorInfoNotifier, true);
-        makeBlink();
+        // Call resumeBlink here instead of makeBlink to ensure that if mBlink is not null the
+        // Blink object is uncancelled.  This ensures when a view is removed and added back the
+        // cursor will resume blinking.
+        resumeBlink();
     }
 
     void onDetachedFromWindow() {
@@ -1092,8 +1097,10 @@ public class Editor {
     private void resumeBlink() {
         if (mBlink != null) {
             mBlink.uncancel();
-            makeBlink();
         }
+        // Moving makeBlink outside of the null check block ensures that mBlink object gets
+        // instantiated when the view is added to the window if mBlink is still null.
+        makeBlink();
     }
 
     void adjustInputType(boolean password, boolean passwordInputType,
@@ -2919,6 +2926,9 @@ public class Editor {
         if (shouldBlink()) {
             mShowCursor = SystemClock.uptimeMillis();
             if (mBlink == null) mBlink = new Blink();
+            // Call uncancel as mBlink could have previously been cancelled and cursor will not
+            // resume blinking unless uncancelled.
+            mBlink.uncancel();
             mTextView.removeCallbacks(mBlink);
             mTextView.postDelayed(mBlink, BLINK);
         } else {
@@ -3171,7 +3181,7 @@ public class Editor {
         final int menuItemOrderSelectAll;
         final int menuItemOrderShare;
         final int menuItemOrderAutofill;
-        if (FLAG_USE_NEW_CONTEXT_MENU) {
+        if (mUseNewContextMenu) {
             menuItemOrderPasteAsPlainText = 7;
             menuItemOrderSelectAll = 8;
             menuItemOrderShare = 9;
@@ -3191,47 +3201,66 @@ public class Editor {
             menuItemOrderPasteAsPlainText = 11;
         }
 
+        final TypedArray a = mTextView.getContext().obtainStyledAttributes(new int[] {
+                // TODO: Make Undo/Redo be public attribute.
+                com.android.internal.R.attr.actionModeUndoDrawable,
+                com.android.internal.R.attr.actionModeRedoDrawable,
+                android.R.attr.actionModeCutDrawable,
+                android.R.attr.actionModeCopyDrawable,
+                android.R.attr.actionModePasteDrawable,
+                android.R.attr.actionModeSelectAllDrawable,
+                android.R.attr.actionModeShareDrawable,
+        });
+
         menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_UNDO, menuItemOrderUndo,
                 com.android.internal.R.string.undo)
                 .setAlphabeticShortcut('z')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                .setIcon(a.getDrawable(0))
                 .setEnabled(mTextView.canUndo());
         menu.add(CONTEXT_MENU_GROUP_UNDO_REDO, TextView.ID_REDO, menuItemOrderRedo,
                 com.android.internal.R.string.redo)
                 .setAlphabeticShortcut('z', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                .setIcon(a.getDrawable(1))
                 .setEnabled(mTextView.canRedo());
 
         menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_CUT, menuItemOrderCut,
                 com.android.internal.R.string.cut)
                 .setAlphabeticShortcut('x')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                .setIcon(a.getDrawable(2))
                 .setEnabled(mTextView.canCut());
         menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_COPY, menuItemOrderCopy,
                 com.android.internal.R.string.copy)
                 .setAlphabeticShortcut('c')
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener)
+                .setIcon(a.getDrawable(3))
                 .setEnabled(mTextView.canCopy());
         menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE, menuItemOrderPaste,
                 com.android.internal.R.string.paste)
                 .setAlphabeticShortcut('v')
                 .setEnabled(mTextView.canPaste())
+                .setIcon(a.getDrawable(4))
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
         menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_PASTE_AS_PLAIN_TEXT,
                         menuItemOrderPasteAsPlainText,
                 com.android.internal.R.string.paste_as_plain_text)
                 .setAlphabeticShortcut('v', KeyEvent.META_CTRL_ON | KeyEvent.META_SHIFT_ON)
                 .setEnabled(mTextView.canPasteAsPlainText())
+                .setIcon(a.getDrawable(4))
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
         menu.add(CONTEXT_MENU_GROUP_CLIPBOARD, TextView.ID_SELECT_ALL,
                         menuItemOrderSelectAll, com.android.internal.R.string.selectAll)
                 .setAlphabeticShortcut('a')
                 .setEnabled(mTextView.canSelectAllText())
+                .setIcon(a.getDrawable(5))
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
 
         menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_SHARE, menuItemOrderShare,
                 com.android.internal.R.string.share)
                 .setEnabled(mTextView.canShare())
+                .setIcon(a.getDrawable(6))
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
         menu.add(CONTEXT_MENU_GROUP_MISC, TextView.ID_AUTOFILL, menuItemOrderAutofill,
                 android.R.string.autofill)
@@ -3239,6 +3268,7 @@ public class Editor {
                 .setOnMenuItemClickListener(mOnContextMenuItemClickListener);
 
         mPreserveSelection = true;
+        a.recycle();
 
         // No-op for the old context menu because it doesn't have icons.
         adjustIconSpacing(menu);
@@ -8073,12 +8103,14 @@ public class Editor {
         private boolean mIsInsertModeActive;
         private InsertModeTransformationMethod mInsertModeTransformationMethod;
         private final Paint mHighlightPaint;
+        private final Path mHighlightPath;
 
         InsertModeController(@NonNull TextView textView) {
             mTextView = Objects.requireNonNull(textView);
             mIsInsertModeActive = false;
             mInsertModeTransformationMethod = null;
             mHighlightPaint = new Paint();
+            mHighlightPath = new Path();
 
             // The highlight color is supposed to be 12% of the color primary40. We can't
             // directly access Material 3 theme. But because Material 3 sets the colorPrimary to
@@ -8146,10 +8178,8 @@ public class Editor {
                         ((InsertModeTransformationMethod.TransformedText) transformedText);
                 final int highlightStart = insertModeTransformedText.getHighlightStart();
                 final int highlightEnd = insertModeTransformedText.getHighlightEnd();
-                final Layout.SelectionRectangleConsumer consumer =
-                        (left, top, right, bottom, textSelectionLayout) ->
-                                canvas.drawRect(left, top, right, bottom, mHighlightPaint);
-                layout.getSelection(highlightStart, highlightEnd, consumer);
+                layout.getSelectionPath(highlightStart, highlightEnd, mHighlightPath);
+                canvas.drawPath(mHighlightPath, mHighlightPaint);
             }
         }
 

@@ -22,7 +22,6 @@
 
     <target_preparer class="com.android.tradefed.targetprep.RootTargetPreparer" />
     <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
-        <option name="cleanup" value="false" />
         <option name="remount-system" value="true" />
         <option name="push"
                 value="SharedLibraryLoadingTests_StandardSharedLibrary.apk->/product/app/SharedLibraryLoadingTests_StandardSharedLibrary.apk" />

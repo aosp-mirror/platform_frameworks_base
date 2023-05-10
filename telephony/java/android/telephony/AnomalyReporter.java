@@ -105,6 +105,8 @@ public final class AnomalyReporter {
      * @param carrierId the carrier of the id associated with this event.
      */
     public static void reportAnomaly(@NonNull UUID eventId, String description, int carrierId) {
+        Rlog.i(TAG, "reportAnomaly: Received anomaly event report with eventId= " + eventId
+                + " and description= " + description);
         if (sContext == null) {
             Rlog.w(TAG, "AnomalyReporter not yet initialized, dropping event=" + eventId);
             return;

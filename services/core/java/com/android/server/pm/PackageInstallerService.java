@@ -19,6 +19,8 @@ package com.android.server.pm;
 import static android.app.admin.DevicePolicyResources.Strings.Core.PACKAGE_DELETED_BY_DO;
 import static android.os.Process.INVALID_UID;
 
+import static com.android.server.pm.PackageManagerService.SHELL_PACKAGE_NAME;
+
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
 
@@ -675,11 +677,12 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 ? params.installerPackageName : installerPackageName;
 
         if (PackageManagerServiceUtils.isRootOrShell(callingUid)
-                || PackageInstallerSession.isSystemDataLoaderInstallation(params)) {
+                || PackageInstallerSession.isSystemDataLoaderInstallation(params)
+                || PackageManagerServiceUtils.isAdoptedShell(callingUid, mContext)) {
             params.installFlags |= PackageManager.INSTALL_FROM_ADB;
             // adb installs can override the installingPackageName, but not the
             // initiatingPackageName
-            installerPackageName = null;
+            installerPackageName = SHELL_PACKAGE_NAME;
         } else {
             if (callingUid != Process.SYSTEM_UID) {
                 // The supplied installerPackageName must always belong to the calling app.
@@ -721,7 +724,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
         } else {
             params.installFlags &= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
-            params.installFlags &= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
         }
 
         if (mDisableVerificationForUid != INVALID_UID) {
@@ -1314,6 +1316,11 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
 
         final var snapshot = mPm.snapshotComputer();
         final int callingUid = Binder.getCallingUid();
+        final var callingPackageName = snapshot.getNameForUid(callingUid);
+        if (!TextUtils.equals(callingPackageName, installerPackageName)) {
+            throw new SecurityException("The installerPackageName set by the caller doesn't match "
+                    + "the caller's own package name.");
+        }
         if (!PackageManagerServiceUtils.isSystemOrRootOrShell(callingUid)) {
             for (var packageName : packageNames) {
                 var ps = snapshot.getPackageStateInternal(packageName);
@@ -1818,6 +1825,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             pw.decreaseIndent();
         }
         mSilentUpdatePolicy.dump(pw);
+        mGentleUpdateHelper.dump(pw);
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)

@@ -45,10 +45,6 @@ data class SignalIconModel(
     }
 
     companion object {
-        /** Creates a [SignalIconModel] representing an empty and invalidated state. */
-        fun createEmptyState(numberOfLevels: Int) =
-            SignalIconModel(level = 0, numberOfLevels, showExclamationMark = true)
-
         private const val COL_LEVEL = "level"
         private const val COL_NUM_LEVELS = "numLevels"
         private const val COL_SHOW_EXCLAMATION = "showExclamation"

@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.camera.CameraGestureHelper
 import com.android.systemui.settings.UserTracker
@@ -42,6 +43,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class CameraQuickAffordanceConfigTest : SysuiTestCase() {
 
@@ -73,7 +75,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `affordance triggered -- camera launch called`() {
+    fun affordanceTriggered_cameraLaunchCalled() {
         // When
         val result = underTest.onTriggered(null)
 
@@ -84,7 +86,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `getPickerScreenState - default when launchable`() =
+    fun getPickerScreenState_defaultWhenLaunchable() =
         testScope.runTest {
             setLaunchable(true)
 
@@ -93,7 +95,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when camera app not installed`() =
+    fun getPickerScreenState_unavailableWhenCameraAppNotInstalled() =
         testScope.runTest {
             setLaunchable(isCameraAppInstalled = false)
 
@@ -102,7 +104,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when camera disabled by admin`() =
+    fun getPickerScreenState_unavailableWhenCameraDisabledByAdmin() =
         testScope.runTest {
             setLaunchable(isCameraDisabledByDeviceAdmin = true)
 
@@ -111,7 +113,7 @@ class CameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when secure camera disabled by admin`() =
+    fun getPickerScreenState_unavailableWhenSecureCameraDisabledByAdmin() =
         testScope.runTest {
             setLaunchable(isSecureCameraDisabledByDeviceAdmin = true)
 

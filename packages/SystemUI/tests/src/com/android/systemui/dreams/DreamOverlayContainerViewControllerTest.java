@@ -26,8 +26,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Resources;
+import android.graphics.Region;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
+import android.view.AttachedSurfaceControl;
 import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
@@ -37,7 +39,7 @@ import androidx.test.filters.SmallTest;
 import com.android.dream.lowlight.LowLightTransitionCoordinator;
 import com.android.keyguard.BouncerPanelExpansionCalculator;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.dreams.complication.ComplicationHostViewController;
+import com.android.systemui.complication.ComplicationHostViewController;
 import com.android.systemui.dreams.touch.scrim.BouncerlessScrimController;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerCallbackInteractor.PrimaryBouncerExpansionCallback;
@@ -76,6 +78,9 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
     ComplicationHostViewController mComplicationHostViewController;
 
     @Mock
+    AttachedSurfaceControl mAttachedSurfaceControl;
+
+    @Mock
     ViewGroup mDreamOverlayContentView;
 
     @Mock
@@ -108,6 +113,8 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
         when(mDreamOverlayContainerView.getResources()).thenReturn(mResources);
         when(mDreamOverlayContainerView.getViewTreeObserver()).thenReturn(mViewTreeObserver);
         when(mDreamOverlayContainerView.getViewRootImpl()).thenReturn(mViewRoot);
+        when(mDreamOverlayContainerView.getRootSurfaceControl())
+                .thenReturn(mAttachedSurfaceControl);
 
         mController = new DreamOverlayContainerViewController(
                 mDreamOverlayContainerView,
@@ -125,6 +132,12 @@ public class DreamOverlayContainerViewControllerTest extends SysuiTestCase {
                 mAnimationsController,
                 mStateController,
                 mBouncerlessScrimController);
+    }
+
+    @Test
+    public void testRootSurfaceControlInsetSetOnAttach() {
+        mController.onViewAttached();
+        verify(mAttachedSurfaceControl).setTouchableRegion(eq(Region.obtain()));
     }
 
     @Test

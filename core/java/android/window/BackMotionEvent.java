@@ -34,6 +34,8 @@ public final class BackMotionEvent implements Parcelable {
     private final float mTouchX;
     private final float mTouchY;
     private final float mProgress;
+    private final float mVelocityX;
+    private final float mVelocityY;
 
     @BackEvent.SwipeEdge
     private final int mSwipeEdge;
@@ -43,19 +45,32 @@ public final class BackMotionEvent implements Parcelable {
     /**
      * Creates a new {@link BackMotionEvent} instance.
      *
+     * <p>Note: Velocity is only computed for last event, for performance reasons.</p>
+     *
      * @param touchX Absolute X location of the touch point of this event.
      * @param touchY Absolute Y location of the touch point of this event.
      * @param progress Value between 0 and 1 on how far along the back gesture is.
+     * @param velocityX X velocity computed from the touch point of this event.
+     *                  Value in pixels/second. {@link Float#NaN} if was not computed.
+     * @param velocityY Y velocity computed from the touch point of this event.
+     *                  Value in pixels/second. {@link Float#NaN} if was not computed.
      * @param swipeEdge Indicates which edge the swipe starts from.
      * @param departingAnimationTarget The remote animation target of the departing
      *                                 application window.
      */
-    public BackMotionEvent(float touchX, float touchY, float progress,
+    public BackMotionEvent(
+            float touchX,
+            float touchY,
+            float progress,
+            float velocityX,
+            float velocityY,
             @BackEvent.SwipeEdge int swipeEdge,
             @Nullable RemoteAnimationTarget departingAnimationTarget) {
         mTouchX = touchX;
         mTouchY = touchY;
         mProgress = progress;
+        mVelocityX = velocityX;
+        mVelocityY = velocityY;
         mSwipeEdge = swipeEdge;
         mDepartingAnimationTarget = departingAnimationTarget;
     }
@@ -64,6 +79,8 @@ public final class BackMotionEvent implements Parcelable {
         mTouchX = in.readFloat();
         mTouchY = in.readFloat();
         mProgress = in.readFloat();
+        mVelocityX = in.readFloat();
+        mVelocityY = in.readFloat();
         mSwipeEdge = in.readInt();
         mDepartingAnimationTarget = in.readTypedObject(RemoteAnimationTarget.CREATOR);
     }
@@ -91,18 +108,10 @@ public final class BackMotionEvent implements Parcelable {
         dest.writeFloat(mTouchX);
         dest.writeFloat(mTouchY);
         dest.writeFloat(mProgress);
+        dest.writeFloat(mVelocityX);
+        dest.writeFloat(mVelocityY);
         dest.writeInt(mSwipeEdge);
         dest.writeTypedObject(mDepartingAnimationTarget, flags);
-    }
-
-    /**
-     * Returns the progress of a {@link BackEvent}.
-     *
-     * @see BackEvent#getProgress()
-     */
-    @FloatRange(from = 0, to = 1)
-    public float getProgress() {
-        return mProgress;
     }
 
     /**
@@ -117,6 +126,34 @@ public final class BackMotionEvent implements Parcelable {
      */
     public float getTouchY() {
         return mTouchY;
+    }
+
+    /**
+     * Returns the progress of a {@link BackEvent}.
+     *
+     * @see BackEvent#getProgress()
+     */
+    @FloatRange(from = 0, to = 1)
+    public float getProgress() {
+        return mProgress;
+    }
+
+    /**
+     * Returns the X velocity computed from the touch point.
+     *
+     * @return value in pixels/second or {@link Float#NaN} if was not computed.
+     */
+    public float getVelocityX() {
+        return mVelocityX;
+    }
+
+    /**
+     * Returns the Y velocity computed from the touch point.
+     *
+     * @return value in pixels/second or {@link Float#NaN} if was not computed.
+     */
+    public float getVelocityY() {
+        return mVelocityY;
     }
 
     /**
@@ -143,6 +180,8 @@ public final class BackMotionEvent implements Parcelable {
                 + "mTouchX=" + mTouchX
                 + ", mTouchY=" + mTouchY
                 + ", mProgress=" + mProgress
+                + ", mVelocityX=" + mVelocityX
+                + ", mVelocityY=" + mVelocityY
                 + ", mSwipeEdge" + mSwipeEdge
                 + ", mDepartingAnimationTarget" + mDepartingAnimationTarget
                 + "}";

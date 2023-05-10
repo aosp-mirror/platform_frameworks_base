@@ -19,9 +19,11 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.OP_COARSE_LOCATION;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
+import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_READ_SMS;
 import static android.app.AppOpsManager.OP_WIFI_SCAN;
 import static android.app.AppOpsManager.OP_WRITE_SMS;
+import static android.os.UserHandle.getUserId;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -33,12 +35,15 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 
+import android.app.AppOpsManager;
 import android.app.AppOpsManager.OpEntry;
 import android.app.AppOpsManager.PackageOps;
 import android.content.ContentResolver;
@@ -48,14 +53,19 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Process;
 import android.provider.Settings;
+import android.util.ArrayMap;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
+import com.android.server.pm.PackageManagerLocal;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.pkg.AndroidPackage;
+import com.android.server.pm.pkg.PackageState;
 import com.android.server.pm.pkg.PackageStateInternal;
 
 import org.junit.After;
@@ -67,6 +77,7 @@ import org.mockito.quality.Strictness;
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Unit tests for AppOpsService. Covers functionality that is difficult to test using CTS tests
@@ -133,6 +144,7 @@ public class AppOpsServiceTest {
         mMockingSession = mockitoSession()
                 .strictness(Strictness.LENIENT)
                 .spyStatic(LocalServices.class)
+                .spyStatic(LocalManagerRegistry.class)
                 .spyStatic(Settings.Global.class)
                 .startMocking();
 
@@ -151,6 +163,23 @@ public class AppOpsServiceTest {
         when(mockPackageManagerInternal.getPackage(sMyPackageName)).thenReturn(mockMyPkg);
         doReturn(mockPackageManagerInternal).when(
                 () -> LocalServices.getService(PackageManagerInternal.class));
+
+        PackageManagerLocal mockPackageManagerLocal = mock(PackageManagerLocal.class);
+        PackageManagerLocal.UnfilteredSnapshot mockUnfilteredSnapshot =
+                mock(PackageManagerLocal.UnfilteredSnapshot.class);
+        PackageState mockMyPS = mock(PackageState.class);
+        ArrayMap<String, PackageState> packageStates = new ArrayMap<>();
+        packageStates.put(sMyPackageName, mockMyPS);
+        when(mockMyPS.getAppId()).thenReturn(mMyUid);
+        when(mockUnfilteredSnapshot.getPackageStates()).thenReturn(packageStates);
+        when(mockPackageManagerLocal.withUnfilteredSnapshot()).thenReturn(mockUnfilteredSnapshot);
+        doReturn(mockPackageManagerLocal).when(
+                () -> LocalManagerRegistry.getManager(PackageManagerLocal.class));
+
+        UserManagerInternal mockUserManagerInternal = mock(UserManagerInternal.class);
+        when(mockUserManagerInternal.getUserIds()).thenReturn(new int[] {getUserId(mMyUid)});
+        doReturn(mockUserManagerInternal).when(
+                () -> LocalServices.getService(UserManagerInternal.class));
 
         // Mock behavior to use specific Settings.Global.APPOP_HISTORY_PARAMETERS
         doReturn(null).when(() -> Settings.Global.getString(any(ContentResolver.class),
@@ -335,6 +364,25 @@ public class AppOpsServiceTest {
 
         mAppOpsService.uidRemoved(mMyUid);
         assertThat(getLoggedOps()).isNull();
+    }
+
+    @Test
+    public void testUidStateInitializationDoesntClearState() throws InterruptedException {
+        mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
+        mAppOpsService.initializeUidStates();
+        List<PackageOps> ops = mAppOpsService.getOpsForPackage(mMyUid, sMyPackageName,
+                new int[]{OP_READ_SMS});
+        assertNotNull(ops);
+        for (int i = 0; i < ops.size(); i++) {
+            List<OpEntry> opEntries = ops.get(i).getOps();
+            for (int j = 0; j < opEntries.size(); j++) {
+                Map<String, AppOpsManager.AttributedOpEntry> attributedOpEntries = opEntries.get(
+                        j).getAttributedOpEntries();
+                assertNotEquals(-1, attributedOpEntries.get(null)
+                        .getLastAccessTime(OP_FLAG_SELF));
+            }
+        }
     }
 
     private List<PackageOps> getLoggedOps() {

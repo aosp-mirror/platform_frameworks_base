@@ -25,6 +25,7 @@ import android.util.IntProperty
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Interpolator
+import com.android.app.animation.Interpolators
 import kotlin.math.max
 import kotlin.math.min
 

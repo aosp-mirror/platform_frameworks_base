@@ -17,7 +17,7 @@
 package android.telephony.satellite.stub;
 
 import android.telephony.satellite.stub.NTRadioTechnology;
-
+import android.telephony.satellite.AntennaPosition;
 /**
  * {@hide}
  */
@@ -28,18 +28,22 @@ parcelable SatelliteCapabilities {
     NTRadioTechnology[] supportedRadioTechnologies;
 
     /**
-     * Whether satellite modem is always on.
-     * This indicates the power impact of keeping it on is very minimal.
-     */
-    boolean isAlwaysOn;
-
-    /**
      * Whether UE needs to point to a satellite to send and receive data.
      */
-    boolean needsPointingToSatellite;
+    boolean isPointingRequired;
 
     /**
-     * Whether UE needs a separate SIM profile to communicate with the satellite network.
+     * The maximum number of bytes per datagram that can be sent over satellite.
      */
-    boolean needsSeparateSimProfile;
+    int maxBytesPerOutgoingDatagram;
+
+    /**
+     * Keys which are used to fill mAntennaPositionMap.
+     */
+    int[] antennaPositionKeys;
+
+    /**
+     * Antenna Position for different display modes received from satellite modem.
+     */
+    AntennaPosition[] antennaPositionValues;
 }

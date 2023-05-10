@@ -56,6 +56,7 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.ZygoteConnectionConstants;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.am.ActivityManagerService;
+import com.android.server.am.StackTracesDumpHelper;
 import com.android.server.am.TraceErrorLogger;
 import com.android.server.criticalevents.CriticalEventLog;
 import com.android.server.wm.SurfaceAnimationThread;
@@ -880,7 +881,8 @@ public class Watchdog implements Dumpable {
                 CriticalEventLog.getInstance().logLinesForSystemServerTraceFile();
         final UUID errorId = mTraceErrorLogger.generateErrorId();
         if (mTraceErrorLogger.isAddErrorIdEnabled()) {
-            mTraceErrorLogger.addErrorIdToTrace("system_server", errorId);
+            mTraceErrorLogger.addProcessInfoAndErrorIdToTrace("system_server", Process.myPid(),
+                    errorId);
             mTraceErrorLogger.addSubjectToTrace(subject, errorId);
         }
 
@@ -904,7 +906,7 @@ public class Watchdog implements Dumpable {
         report.append(ResourcePressureUtil.currentPsiState());
         ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(false);
         StringWriter tracesFileException = new StringWriter();
-        final File stack = ActivityManagerService.dumpStackTraces(
+        final File stack = StackTracesDumpHelper.dumpStackTraces(
                 pids, processCpuTracker, new SparseBooleanArray(),
                 CompletableFuture.completedFuture(getInterestingNativePids()), tracesFileException,
                 subject, criticalEvents, Runnable::run, /* latencyTracker= */null);

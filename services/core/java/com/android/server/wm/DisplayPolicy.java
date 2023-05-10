@@ -17,9 +17,12 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.view.Display.TYPE_INTERNAL;
+import static android.view.InsetsFrameProvider.SOURCE_ARBITRARY_RECTANGLE;
+import static android.view.InsetsFrameProvider.SOURCE_CONTAINER_BOUNDS;
+import static android.view.InsetsFrameProvider.SOURCE_DISPLAY;
 import static android.view.InsetsFrameProvider.SOURCE_FRAME;
+import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
@@ -36,6 +39,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_UNRESTRICTED_GESTURE_EXCLUSION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -124,7 +128,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.util.ScreenshotRequest;
-import com.android.internal.util.function.TriConsumer;
+import com.android.internal.util.function.TriFunction;
 import com.android.internal.view.AppearanceRegion;
 import com.android.internal.widget.PointerLocationView;
 import com.android.server.LocalServices;
@@ -168,6 +172,8 @@ public class DisplayPolicy {
     private static final int SHOW_TYPES_FOR_SWIPE = Type.statusBars() | Type.navigationBars();
     private static final int SHOW_TYPES_FOR_PANIC = Type.navigationBars();
 
+    private static final int INSETS_OVERRIDE_INDEX_INVALID = -1;
+
     private final WindowManagerService mService;
     private final Context mContext;
     private final Context mUiContext;
@@ -208,7 +214,8 @@ public class DisplayPolicy {
         }
     }
 
-    private final SystemGesturesPointerEventListener mSystemGestures;
+    // Will be null in client transient mode.
+    private SystemGesturesPointerEventListener mSystemGestures;
 
     final DecorInsets mDecorInsets;
 
@@ -403,158 +410,162 @@ public class DisplayPolicy {
         final Looper looper = UiThread.getHandler().getLooper();
         mHandler = new PolicyHandler(looper);
         // TODO(b/181821798) Migrate SystemGesturesPointerEventListener to use window context.
-        mSystemGestures = new SystemGesturesPointerEventListener(mUiContext, mHandler,
-                new SystemGesturesPointerEventListener.Callbacks() {
+        if (!CLIENT_TRANSIENT) {
+            SystemGesturesPointerEventListener.Callbacks gesturesPointerEventCallbacks =
+                    new SystemGesturesPointerEventListener.Callbacks() {
 
-                    private static final long MOUSE_GESTURE_DELAY_MS = 500;
+                private static final long MOUSE_GESTURE_DELAY_MS = 500;
 
-                    private Runnable mOnSwipeFromLeft = this::onSwipeFromLeft;
-                    private Runnable mOnSwipeFromTop = this::onSwipeFromTop;
-                    private Runnable mOnSwipeFromRight = this::onSwipeFromRight;
-                    private Runnable mOnSwipeFromBottom = this::onSwipeFromBottom;
+                private Runnable mOnSwipeFromLeft = this::onSwipeFromLeft;
+                private Runnable mOnSwipeFromTop = this::onSwipeFromTop;
+                private Runnable mOnSwipeFromRight = this::onSwipeFromRight;
+                private Runnable mOnSwipeFromBottom = this::onSwipeFromBottom;
 
-                    private Insets getControllableInsets(WindowState win) {
-                        if (win == null) {
-                            return Insets.NONE;
-                        }
-                        final InsetsSourceProvider provider = win.getControllableInsetProvider();
-                        if (provider == null) {
-                            return  Insets.NONE;
-                        }
-                        return provider.getSource().calculateInsets(win.getBounds(),
-                                true /* ignoreVisibility */);
+                private Insets getControllableInsets(WindowState win) {
+                    if (win == null) {
+                        return Insets.NONE;
                     }
-
-                    @Override
-                    public void onSwipeFromTop() {
-                        synchronized (mLock) {
-                            requestTransientBars(mTopGestureHost,
-                                    getControllableInsets(mTopGestureHost).top > 0);
-                        }
+                    final InsetsSourceProvider provider = win.getControllableInsetProvider();
+                    if (provider == null) {
+                        return Insets.NONE;
                     }
+                    return provider.getSource().calculateInsets(win.getBounds(),
+                            true /* ignoreVisibility */);
+                }
 
-                    @Override
-                    public void onSwipeFromBottom() {
-                        synchronized (mLock) {
-                            requestTransientBars(mBottomGestureHost,
-                                    getControllableInsets(mBottomGestureHost).bottom > 0);
-                        }
+                @Override
+                public void onSwipeFromTop() {
+                    synchronized (mLock) {
+                        requestTransientBars(mTopGestureHost,
+                                getControllableInsets(mTopGestureHost).top > 0);
                     }
+                }
 
-                    private boolean allowsSideSwipe(Region excludedRegion) {
-                        return mNavigationBarAlwaysShowOnSideGesture
-                                && !mSystemGestures.currentGestureStartedInRegion(excludedRegion);
+                @Override
+                public void onSwipeFromBottom() {
+                    synchronized (mLock) {
+                        requestTransientBars(mBottomGestureHost,
+                                getControllableInsets(mBottomGestureHost).bottom > 0);
                     }
+                }
 
-                    @Override
-                    public void onSwipeFromRight() {
-                        final Region excludedRegion = Region.obtain();
-                        synchronized (mLock) {
-                            mDisplayContent.calculateSystemGestureExclusion(
-                                    excludedRegion, null /* outUnrestricted */);
-                            final boolean hasWindow =
-                                    getControllableInsets(mRightGestureHost).right > 0;
-                            if (hasWindow || allowsSideSwipe(excludedRegion)) {
-                                requestTransientBars(mRightGestureHost, hasWindow);
-                            }
-                        }
-                        excludedRegion.recycle();
-                    }
+                private boolean allowsSideSwipe(Region excludedRegion) {
+                    return mNavigationBarAlwaysShowOnSideGesture
+                            && !mSystemGestures.currentGestureStartedInRegion(excludedRegion);
+                }
 
-                    @Override
-                    public void onSwipeFromLeft() {
-                        final Region excludedRegion = Region.obtain();
-                        synchronized (mLock) {
-                            mDisplayContent.calculateSystemGestureExclusion(
-                                    excludedRegion, null /* outUnrestricted */);
-                            final boolean hasWindow =
-                                    getControllableInsets(mLeftGestureHost).left > 0;
-                            if (hasWindow || allowsSideSwipe(excludedRegion)) {
-                                requestTransientBars(mLeftGestureHost, hasWindow);
-                            }
-                        }
-                        excludedRegion.recycle();
-                    }
-
-                    @Override
-                    public void onFling(int duration) {
-                        if (mService.mPowerManagerInternal != null) {
-                            mService.mPowerManagerInternal.setPowerBoost(
-                                    Boost.INTERACTION, duration);
+                @Override
+                public void onSwipeFromRight() {
+                    final Region excludedRegion = Region.obtain();
+                    synchronized (mLock) {
+                        mDisplayContent.calculateSystemGestureExclusion(
+                                excludedRegion, null /* outUnrestricted */);
+                        final boolean hasWindow =
+                                getControllableInsets(mRightGestureHost).right > 0;
+                        if (hasWindow || allowsSideSwipe(excludedRegion)) {
+                            requestTransientBars(mRightGestureHost, hasWindow);
                         }
                     }
+                    excludedRegion.recycle();
+                }
 
-                    @Override
-                    public void onDebug() {
-                        // no-op
-                    }
-
-                    private WindowOrientationListener getOrientationListener() {
-                        final DisplayRotation rotation = mDisplayContent.getDisplayRotation();
-                        return rotation != null ? rotation.getOrientationListener() : null;
-                    }
-
-                    @Override
-                    public void onDown() {
-                        final WindowOrientationListener listener = getOrientationListener();
-                        if (listener != null) {
-                            listener.onTouchStart();
+                @Override
+                public void onSwipeFromLeft() {
+                    final Region excludedRegion = Region.obtain();
+                    synchronized (mLock) {
+                        mDisplayContent.calculateSystemGestureExclusion(
+                                excludedRegion, null /* outUnrestricted */);
+                        final boolean hasWindow =
+                                getControllableInsets(mLeftGestureHost).left > 0;
+                        if (hasWindow || allowsSideSwipe(excludedRegion)) {
+                            requestTransientBars(mLeftGestureHost, hasWindow);
                         }
                     }
+                    excludedRegion.recycle();
+                }
 
-                    @Override
-                    public void onUpOrCancel() {
-                        final WindowOrientationListener listener = getOrientationListener();
-                        if (listener != null) {
-                            listener.onTouchEnd();
-                        }
+                @Override
+                public void onFling(int duration) {
+                    if (mService.mPowerManagerInternal != null) {
+                        mService.mPowerManagerInternal.setPowerBoost(
+                                Boost.INTERACTION, duration);
                     }
+                }
 
-                    @Override
-                    public void onMouseHoverAtLeft() {
-                        mHandler.removeCallbacks(mOnSwipeFromLeft);
-                        mHandler.postDelayed(mOnSwipeFromLeft, MOUSE_GESTURE_DELAY_MS);
-                    }
+                @Override
+                public void onDebug() {
+                    // no-op
+                }
 
-                    @Override
-                    public void onMouseHoverAtTop() {
-                        mHandler.removeCallbacks(mOnSwipeFromTop);
-                        mHandler.postDelayed(mOnSwipeFromTop, MOUSE_GESTURE_DELAY_MS);
-                    }
+                private WindowOrientationListener getOrientationListener() {
+                    final DisplayRotation rotation = mDisplayContent.getDisplayRotation();
+                    return rotation != null ? rotation.getOrientationListener() : null;
+                }
 
-                    @Override
-                    public void onMouseHoverAtRight() {
-                        mHandler.removeCallbacks(mOnSwipeFromRight);
-                        mHandler.postDelayed(mOnSwipeFromRight, MOUSE_GESTURE_DELAY_MS);
+                @Override
+                public void onDown() {
+                    final WindowOrientationListener listener = getOrientationListener();
+                    if (listener != null) {
+                        listener.onTouchStart();
                     }
+                }
 
-                    @Override
-                    public void onMouseHoverAtBottom() {
-                        mHandler.removeCallbacks(mOnSwipeFromBottom);
-                        mHandler.postDelayed(mOnSwipeFromBottom, MOUSE_GESTURE_DELAY_MS);
+                @Override
+                public void onUpOrCancel() {
+                    final WindowOrientationListener listener = getOrientationListener();
+                    if (listener != null) {
+                        listener.onTouchEnd();
                     }
+                }
 
-                    @Override
-                    public void onMouseLeaveFromLeft() {
-                        mHandler.removeCallbacks(mOnSwipeFromLeft);
-                    }
+                @Override
+                public void onMouseHoverAtLeft() {
+                    mHandler.removeCallbacks(mOnSwipeFromLeft);
+                    mHandler.postDelayed(mOnSwipeFromLeft, MOUSE_GESTURE_DELAY_MS);
+                }
 
-                    @Override
-                    public void onMouseLeaveFromTop() {
-                        mHandler.removeCallbacks(mOnSwipeFromTop);
-                    }
+                @Override
+                public void onMouseHoverAtTop() {
+                    mHandler.removeCallbacks(mOnSwipeFromTop);
+                    mHandler.postDelayed(mOnSwipeFromTop, MOUSE_GESTURE_DELAY_MS);
+                }
 
-                    @Override
-                    public void onMouseLeaveFromRight() {
-                        mHandler.removeCallbacks(mOnSwipeFromRight);
-                    }
+                @Override
+                public void onMouseHoverAtRight() {
+                    mHandler.removeCallbacks(mOnSwipeFromRight);
+                    mHandler.postDelayed(mOnSwipeFromRight, MOUSE_GESTURE_DELAY_MS);
+                }
 
-                    @Override
-                    public void onMouseLeaveFromBottom() {
-                        mHandler.removeCallbacks(mOnSwipeFromBottom);
-                    }
-                });
-        displayContent.registerPointerEventListener(mSystemGestures);
+                @Override
+                public void onMouseHoverAtBottom() {
+                    mHandler.removeCallbacks(mOnSwipeFromBottom);
+                    mHandler.postDelayed(mOnSwipeFromBottom, MOUSE_GESTURE_DELAY_MS);
+                }
+
+                @Override
+                public void onMouseLeaveFromLeft() {
+                    mHandler.removeCallbacks(mOnSwipeFromLeft);
+                }
+
+                @Override
+                public void onMouseLeaveFromTop() {
+                    mHandler.removeCallbacks(mOnSwipeFromTop);
+                }
+
+                @Override
+                public void onMouseLeaveFromRight() {
+                    mHandler.removeCallbacks(mOnSwipeFromRight);
+                }
+
+                @Override
+                public void onMouseLeaveFromBottom() {
+                    mHandler.removeCallbacks(mOnSwipeFromBottom);
+                }
+            };
+            mSystemGestures = new SystemGesturesPointerEventListener(mUiContext, mHandler,
+                    gesturesPointerEventCallbacks);
+            displayContent.registerPointerEventListener(mSystemGestures);
+        }
         mAppTransitionListener = new WindowManagerInternal.AppTransitionListener() {
 
             private Runnable mAppTransitionPending = () -> {
@@ -640,7 +651,9 @@ public class DisplayPolicy {
                 mContext, () -> {
             synchronized (mLock) {
                 onConfigurationChanged();
-                mSystemGestures.onConfigurationChanged();
+                if (!CLIENT_TRANSIENT) {
+                    mSystemGestures.onConfigurationChanged();
+                }
                 mDisplayContent.updateSystemGestureExclusion();
             }
         });
@@ -662,7 +675,9 @@ public class DisplayPolicy {
     }
 
     void systemReady() {
-        mSystemGestures.systemReady();
+        if (!CLIENT_TRANSIENT) {
+            mSystemGestures.systemReady();
+        }
         if (mService.mPointerLocationEnabled) {
             setPointerLocationEnabled(true);
         }
@@ -1068,63 +1083,104 @@ public class DisplayPolicy {
                 // The index of the provider and corresponding insets types cannot change at
                 // runtime as ensured in WMS. Make use of the index in the provider directly
                 // to access the latest provided size at runtime.
-                final TriConsumer<DisplayFrames, WindowContainer, Rect> frameProvider =
-                        getFrameProvider(win, provider, i);
+                final TriFunction<DisplayFrames, WindowContainer, Rect, Integer> frameProvider =
+                        getFrameProvider(win, i, INSETS_OVERRIDE_INDEX_INVALID);
                 final InsetsFrameProvider.InsetsSizeOverride[] overrides =
                         provider.getInsetsSizeOverrides();
-                final SparseArray<TriConsumer<DisplayFrames, WindowContainer, Rect>>
+                final SparseArray<TriFunction<DisplayFrames, WindowContainer, Rect, Integer>>
                         overrideProviders;
                 if (overrides != null) {
                     overrideProviders = new SparseArray<>();
                     for (int j = overrides.length - 1; j >= 0; j--) {
-                        final TriConsumer<DisplayFrames, WindowContainer, Rect>
-                                overrideFrameProvider =
-                                getOverrideFrameProvider(win, i, j);
-                        overrideProviders.put(overrides[j].getWindowType(), overrideFrameProvider);
+                        overrideProviders.put(
+                                overrides[j].getWindowType(), getFrameProvider(win, i, j));
                     }
                 } else {
                     overrideProviders = null;
                 }
-                final @InsetsType int type = provider.getType();
-                final int id = InsetsSource.createId(
-                        provider.getOwner(), provider.getIndex(), type);
-                mDisplayContent.getInsetsStateController().getOrCreateSourceProvider(id, type)
-                        .setWindowContainer(win, frameProvider, overrideProviders);
+                mDisplayContent.getInsetsStateController().getOrCreateSourceProvider(
+                        provider.getId(), provider.getType()).setWindowContainer(
+                                win, frameProvider, overrideProviders);
                 mInsetsSourceWindowsExceptIme.add(win);
             }
         }
     }
 
-    @Nullable
-    private TriConsumer<DisplayFrames, WindowContainer, Rect> getFrameProvider(WindowState win,
-            InsetsFrameProvider provider, int index) {
-        if (provider.getInsetsSize() == null && provider.getSource() == SOURCE_FRAME) {
-            return null;
-        }
-        return (displayFrames, windowContainer, inOutFrame) -> {
-            final LayoutParams lp = win.mAttrs.forRotation(displayFrames.mRotation);
-            final InsetsFrameProvider ifp = lp.providedInsets[index];
-            InsetsFrameProvider.calculateInsetsFrame(displayFrames.mUnrestricted,
-                    windowContainer.getBounds(), displayFrames.mDisplayCutoutSafe, inOutFrame,
-                    ifp.getSource(), ifp.getInsetsSize(), lp.privateFlags,
-                    ifp.getMinimalInsetsSizeInDisplayCutoutSafe());
-        };
-    }
-
-    @NonNull
-    private TriConsumer<DisplayFrames, WindowContainer, Rect> getOverrideFrameProvider(
+    private static TriFunction<DisplayFrames, WindowContainer, Rect, Integer> getFrameProvider(
             WindowState win, int index, int overrideIndex) {
         return (displayFrames, windowContainer, inOutFrame) -> {
             final LayoutParams lp = win.mAttrs.forRotation(displayFrames.mRotation);
             final InsetsFrameProvider ifp = lp.providedInsets[index];
-            InsetsFrameProvider.calculateInsetsFrame(displayFrames.mUnrestricted,
-                    windowContainer.getBounds(), displayFrames.mDisplayCutoutSafe, inOutFrame,
-                    ifp.getSource(), ifp.getInsetsSizeOverrides()[overrideIndex].getInsetsSize(),
-                    lp.privateFlags, null /* displayCutoutSafeInsetsSize */);
+            final Rect displayFrame = displayFrames.mUnrestricted;
+            final Rect safe = displayFrames.mDisplayCutoutSafe;
+            boolean extendByCutout = false;
+            switch (ifp.getSource()) {
+                case SOURCE_DISPLAY:
+                    inOutFrame.set(displayFrame);
+                    break;
+                case SOURCE_CONTAINER_BOUNDS:
+                    inOutFrame.set(windowContainer.getBounds());
+                    break;
+                case SOURCE_FRAME:
+                    extendByCutout =
+                            (lp.privateFlags & PRIVATE_FLAG_LAYOUT_SIZE_EXTENDED_BY_CUTOUT) != 0;
+                    break;
+                case SOURCE_ARBITRARY_RECTANGLE:
+                    inOutFrame.set(ifp.getArbitraryRectangle());
+                    break;
+            }
+            final Insets insetsSize = overrideIndex == INSETS_OVERRIDE_INDEX_INVALID
+                    ? ifp.getInsetsSize()
+                    : ifp.getInsetsSizeOverrides()[overrideIndex].getInsetsSize();
+
+            if (ifp.getMinimalInsetsSizeInDisplayCutoutSafe() != null) {
+                sTmpRect2.set(inOutFrame);
+            }
+            calculateInsetsFrame(inOutFrame, insetsSize);
+
+            if (extendByCutout && insetsSize != null) {
+                WindowLayout.extendFrameByCutout(safe, displayFrame, inOutFrame, sTmpRect);
+            }
+
+            if (ifp.getMinimalInsetsSizeInDisplayCutoutSafe() != null) {
+                // The insets is at least with the given size within the display cutout safe area.
+                // Calculate the smallest size.
+                calculateInsetsFrame(sTmpRect2, ifp.getMinimalInsetsSizeInDisplayCutoutSafe());
+                WindowLayout.extendFrameByCutout(safe, displayFrame, sTmpRect2, sTmpRect);
+                // If it's larger than previous calculation, use it.
+                if (sTmpRect2.contains(inOutFrame)) {
+                    inOutFrame.set(sTmpRect2);
+                }
+            }
+            return ifp.getFlags();
         };
     }
 
-    TriConsumer<DisplayFrames, WindowContainer, Rect> getImeSourceFrameProvider() {
+    /**
+     * Calculate the insets frame given the insets size and the source frame.
+     * @param inOutFrame the source frame.
+     * @param insetsSize the insets size. Only the first non-zero value will be taken.
+     */
+    private static void calculateInsetsFrame(Rect inOutFrame, Insets insetsSize) {
+        if (insetsSize == null) {
+            return;
+        }
+        // Only one side of the provider shall be applied. Check in the order of left - top -
+        // right - bottom, only the first non-zero value will be applied.
+        if (insetsSize.left != 0) {
+            inOutFrame.right = inOutFrame.left + insetsSize.left;
+        } else if (insetsSize.top != 0) {
+            inOutFrame.bottom = inOutFrame.top + insetsSize.top;
+        } else if (insetsSize.right != 0) {
+            inOutFrame.left = inOutFrame.right - insetsSize.right;
+        } else if (insetsSize.bottom != 0) {
+            inOutFrame.top = inOutFrame.bottom - insetsSize.bottom;
+        } else {
+            inOutFrame.setEmpty();
+        }
+    }
+
+    TriFunction<DisplayFrames, WindowContainer, Rect, Integer> getImeSourceFrameProvider() {
         return (displayFrames, windowContainer, inOutFrame) -> {
             WindowState windowState = windowContainer.asWindowState();
             if (windowState == null) {
@@ -1143,6 +1199,7 @@ public class DisplayPolicy {
             } else {
                 inOutFrame.inset(windowState.mGivenContentInsets);
             }
+            return 0;
         };
     }
 
@@ -1261,7 +1318,9 @@ public class DisplayPolicy {
     }
 
     void onDisplayInfoChanged(DisplayInfo info) {
-        mSystemGestures.onDisplayInfoChanged(info);
+        if (!CLIENT_TRANSIENT) {
+            mSystemGestures.onDisplayInfoChanged(info);
+        }
     }
 
     /**
@@ -1634,7 +1693,9 @@ public class DisplayPolicy {
         // Update the latest display size, cutout.
         mDisplayContent.updateDisplayInfo();
         onConfigurationChanged();
-        mSystemGestures.onConfigurationChanged();
+        if (!CLIENT_TRANSIENT) {
+            mSystemGestures.onConfigurationChanged();
+        }
     }
 
     /**
@@ -1826,6 +1887,12 @@ public class DisplayPolicy {
 
         static final int DECOR_TYPES = Type.displayCutout() | Type.navigationBars();
 
+        /**
+         * The types that may affect display configuration. This excludes cutout because it is
+         * known from display info.
+         */
+        static final int CONFIG_TYPES = Type.statusBars() | Type.navigationBars();
+
         private final DisplayContent mDisplayContent;
         private final Info[] mInfoForRotation = new Info[4];
         final Info mTmpInfo = new Info();
@@ -1865,7 +1932,7 @@ public class DisplayPolicy {
         final DecorInsets.Info newInfo = mDecorInsets.mTmpInfo;
         newInfo.update(mDisplayContent, rotation, dw, dh);
         final DecorInsets.Info currentInfo = getDecorInsetsInfo(rotation, dw, dh);
-        if (newInfo.mNonDecorFrame.equals(currentInfo.mNonDecorFrame)) {
+        if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)) {
             return false;
         }
         mDecorInsets.invalidate();
@@ -1907,6 +1974,9 @@ public class DisplayPolicy {
 
     @VisibleForTesting
     void requestTransientBars(WindowState swipeTarget, boolean isGestureOnSystemBar) {
+        if (CLIENT_TRANSIENT) {
+            return;
+        }
         if (swipeTarget == null || !mService.mPolicy.isUserSetupComplete()) {
             // Swipe-up for navigation bar is disabled during setup
             return;
@@ -1923,6 +1993,14 @@ public class DisplayPolicy {
         if (controlTarget == null || controlTarget == getNotificationShade()) {
             // No transient mode on lockscreen (in notification shade window).
             return;
+        }
+
+        if (controlTarget != null) {
+            final WindowState win = controlTarget.getWindow();
+
+            if (win != null && win.isActivityTypeDream()) {
+                return;
+            }
         }
 
         final @InsetsType int restorePositionTypes = (Type.statusBars() | Type.navigationBars())
@@ -2143,16 +2221,15 @@ public class DisplayPolicy {
 
     private int updateSystemBarsLw(WindowState win, int disableFlags) {
         final TaskDisplayArea defaultTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
-        final boolean multiWindowTaskVisible =
+        final boolean adjacentTasksVisible =
                 defaultTaskDisplayArea.getRootTask(task -> task.isVisible()
-                        && task.getTopLeafTask().getWindowingMode() == WINDOWING_MODE_MULTI_WINDOW)
+                        && task.getTopLeafTask().getAdjacentTask() != null)
                         != null;
         final boolean freeformRootTaskVisible =
                 defaultTaskDisplayArea.isRootTaskVisible(WINDOWING_MODE_FREEFORM);
 
-        // We need to force showing system bars when the multi-window or freeform root task is
-        // visible.
-        mForceShowSystemBars = multiWindowTaskVisible || freeformRootTaskVisible;
+        // We need to force showing system bars when adjacent tasks or freeform roots visible.
+        mForceShowSystemBars = adjacentTasksVisible || freeformRootTaskVisible;
         // We need to force the consumption of the system bars if they are force shown or if they
         // are controlled by a remote insets controller.
         mForceConsumeSystemBars = mForceShowSystemBars
@@ -2173,7 +2250,7 @@ public class DisplayPolicy {
 
         int appearance = APPEARANCE_OPAQUE_NAVIGATION_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
         appearance = configureStatusBarOpacity(appearance);
-        appearance = configureNavBarOpacity(appearance, multiWindowTaskVisible,
+        appearance = configureNavBarOpacity(appearance, adjacentTasksVisible,
                 freeformRootTaskVisible);
 
         // Show immersive mode confirmation if needed.
@@ -2548,7 +2625,9 @@ public class DisplayPolicy {
             final DecorInsets.Info info = mDecorInsets.mInfoForRotation[rotation];
             pw.println(prefixInner + Surface.rotationToString(rotation) + "=" + info);
         }
-        mSystemGestures.dump(pw, prefix);
+        if (!CLIENT_TRANSIENT) {
+            mSystemGestures.dump(pw, prefix);
+        }
 
         pw.print(prefix); pw.println("Looper state:");
         mHandler.getLooper().dump(new PrintWriterPrinter(pw), prefix + "  ");

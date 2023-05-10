@@ -92,6 +92,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManagerGlobal;
+import android.hardware.input.InputManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -142,7 +143,6 @@ import android.view.accessibility.AccessibilityWindowInfo;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Transformation;
-import android.view.autofill.AutofillFeatureFlags;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
@@ -5414,7 +5414,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * The pointer icon when the mouse hovers on this view. The default is null.
      */
-    private PointerIcon mPointerIcon;
+    private PointerIcon mMousePointerIcon;
 
     /**
      * @hide
@@ -8324,6 +8324,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             onFocusLost();
         } else if (hasWindowFocus()) {
             notifyFocusChangeToImeFocusController(true /* hasFocus */);
+
+            if (mIsHandwritingDelegate) {
+                ViewRootImpl viewRoot = getViewRootImpl();
+                if (viewRoot != null) {
+                    viewRoot.getHandwritingInitiator().onDelegateViewFocused(this);
+                }
+            }
         }
 
         invalidate(true);
@@ -9838,10 +9845,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p><b>Note:</b> Setting the mode as {@link #IMPORTANT_FOR_AUTOFILL_NO} or
      * {@link #IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS} does not guarantee the view (and its
-     * children) will be always be considered not important; for example, when the user explicitly
-     * makes an autofill request, all views are considered important. See
-     * {@link #isImportantForAutofill()} for more details about how the View's importance for
-     * autofill is used.
+     * children) will not be used for autofill purpose; for example, when the user explicitly
+     * makes an autofill request, all views are included in the ViewStructure, and starting in
+     * {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} the system uses other factors along
+     * with importance to determine the autofill behavior. See {@link #isImportantForAutofill()}
+     * for more details about how the View's importance for autofill is used.
      *
      * @param mode {@link #IMPORTANT_FOR_AUTOFILL_AUTO}, {@link #IMPORTANT_FOR_AUTOFILL_YES},
      * {@link #IMPORTANT_FOR_AUTOFILL_NO}, {@link #IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS},
@@ -9887,21 +9895,36 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *   <li>otherwise, it returns {@code false}.
      * </ol>
      *
-     * <p>When a view is considered important for autofill:
-     * <ul>
-     *   <li>The view might automatically trigger an autofill request when focused on.
-     *   <li>The contents of the view are included in the {@link ViewStructure} used in an autofill
-     *       request.
-     * </ul>
-     *
-     * <p>On the other hand, when a view is considered not important for autofill:
-     * <ul>
-     *   <li>The view never automatically triggers autofill requests, but it can trigger a manual
-     *       request through {@link AutofillManager#requestAutofill(View)}.
-     *   <li>The contents of the view are not included in the {@link ViewStructure} used in an
-     *       autofill request, unless the request has the
-     *       {@link #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS} flag.
-     * </ul>
+     * <p> The behavior of importances depends on Android version:
+     * <ol>
+     *   <li>For {@link android.os.Build.VERSION_CODES#TIRAMISU} and below:
+     *     <ol>
+     *       <li>When a view is considered important for autofill:
+     *          <ol>
+     *            <li>The view might automatically trigger an autofill request when focused on.
+     *            <li>The contents of the view are included in the {@link ViewStructure} used in an
+     *                autofill request.
+     *          </ol>
+     *        <li>On the other hand, when a view is considered not important for autofill:
+     *          <ol>
+     *            <li>The view never automatically triggers autofill requests, but it can trigger a
+     *                manual request through {@link AutofillManager#requestAutofill(View)}.
+     *            <li>The contents of the view are not included in the {@link ViewStructure} used in
+     *                an autofill request, unless the request has the
+     *                {@link #AUTOFILL_FLAG_INCLUDE_NOT_IMPORTANT_VIEWS} flag.
+     *          </ol>
+     *      </ol>
+     *  <li>For {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} and above:
+     *    <ol>
+     *      <li>The system uses importance, along with other view properties and other optimization
+     *          factors, to determine if a view should trigger autofill on focus.
+     *      <li>The contents of {@link #IMPORTANT_FOR_AUTOFILL_AUTO},
+     *        {@link #IMPORTANT_FOR_AUTOFILL_YES}, {@link #IMPORTANT_FOR_AUTOFILL_NO},
+     *        {@link #IMPORTANT_FOR_AUTOFILL_YES_EXCLUDE_DESCENDANTS}, and
+     *        {@link #IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS} views will be included in the
+     *        {@link ViewStructure} used in an autofill request.
+     *    </ol>
+     * </ol>
      *
      * @return whether the view is considered important for autofill.
      *
@@ -10340,52 +10363,65 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Check whether current activity / package is in denylist.If it's in the denylist,
-     * then the views marked as not important for autofill are not eligible for autofill.
+     * Check whether current activity / package is in autofill denylist.
+     *
+     * Called by viewGroup#populateChildrenForAutofill() to determine whether to include view in
+     * assist structure
      */
     final boolean isActivityDeniedForAutofillForUnimportantView() {
         final AutofillManager afm = getAutofillManager();
-        // keep behavior same with denylist feature not enabled
-        if (afm == null) return true;
-        return afm.isActivityDeniedForAutofillForUnimportantView();
+        if (afm == null) return false;
+        return afm.isActivityDeniedForAutofill();
     }
 
     /**
      * Check whether current view matches autofillable heuristics
+     *
+     * Called by viewGroup#populateChildrenForAutofill() to determine whether to include view in
+     * assist structure
      */
     final boolean isMatchingAutofillableHeuristics() {
         final AutofillManager afm = getAutofillManager();
-        // keep default behavior
         if (afm == null) return false;
-        return afm.isMatchingAutofillableHeuristics(this);
+        // check the flag to see if trigger fill request on not important views is enabled
+        return afm.isTriggerFillRequestOnUnimportantViewEnabled()
+            ? afm.isAutofillable(this) : false;
     }
 
     private boolean isAutofillable() {
         if (getAutofillType() == AUTOFILL_TYPE_NONE) return false;
 
-        // Disable triggering autofill if the view is integrated with CredentialManager.
-        if (AutofillFeatureFlags.shouldIgnoreCredentialViews()
-                && isCredential()) return false;
-
-        if (!isImportantForAutofill()) {
-            // If view matches heuristics and is not denied, it will be treated same as view that's
-            // important for autofill
-            if (isMatchingAutofillableHeuristics()
-                    && !isActivityDeniedForAutofillForUnimportantView()) {
-                return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
-            }
-            // View is not important for "regular" autofill, so we must check if Augmented Autofill
-            // is enabled for the activity
-            final AutofillOptions options = mContext.getAutofillOptions();
-            if (options == null || !options.isAugmentedAutofillEnabled(mContext)) {
-                return false;
-            }
-            final AutofillManager afm = getAutofillManager();
-            if (afm == null) return false;
-            afm.notifyViewEnteredForAugmentedAutofill(this);
+        final AutofillManager afm = getAutofillManager();
+        if (afm == null) {
+            return false;
         }
 
-        return getAutofillViewId() > LAST_APP_AUTOFILL_ID;
+        // Check whether view is not part of an activity. If it's not, return false.
+        if (getAutofillViewId() <= LAST_APP_AUTOFILL_ID) {
+            return false;
+        }
+
+        // If view is important and filter important view flag is turned on, or view is not
+        // important and trigger fill request on not important view flag is turned on, then use
+        // AutofillManager.isAutofillable() to decide whether view is autofillable instead.
+        if ((isImportantForAutofill() && afm.isTriggerFillRequestOnFilteredImportantViewsEnabled())
+                || (!isImportantForAutofill()
+                    && afm.isTriggerFillRequestOnUnimportantViewEnabled())) {
+            return afm.isAutofillable(this) ? true : notifyAugmentedAutofillIfNeeded(afm);
+        }
+
+        // If the previous condition is not met, fall back to the previous way to trigger fill
+        // request based on autofill importance instead.
+        return isImportantForAutofill() ? true : notifyAugmentedAutofillIfNeeded(afm);
+    }
+
+    private boolean notifyAugmentedAutofillIfNeeded(AutofillManager afm) {
+        final AutofillOptions options = mContext.getAutofillOptions();
+        if (options == null || !options.isAugmentedAutofillEnabled(mContext)) {
+            return false;
+        }
+        afm.notifyViewEnteredForAugmentedAutofill(this);
+        return true;
     }
 
     /** @hide */
@@ -25054,7 +25090,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         int viewStateIndex = 0;
         if ((privateFlags & PFLAG_PRESSED) != 0) viewStateIndex |= StateSet.VIEW_STATE_PRESSED;
         if ((mViewFlags & ENABLED_MASK) == ENABLED) viewStateIndex |= StateSet.VIEW_STATE_ENABLED;
-        if (isFocused() && hasWindowFocus()) viewStateIndex |= StateSet.VIEW_STATE_FOCUSED;
+        if (isFocused()) viewStateIndex |= StateSet.VIEW_STATE_FOCUSED;
         if ((privateFlags & PFLAG_SELECTED) != 0) viewStateIndex |= StateSet.VIEW_STATE_SELECTED;
         if (hasWindowFocus()) viewStateIndex |= StateSet.VIEW_STATE_WINDOW_FOCUSED;
         if ((privateFlags & PFLAG_ACTIVATED) != 0) viewStateIndex |= StateSet.VIEW_STATE_ACTIVATED;
@@ -29482,30 +29518,71 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns the pointer icon for the motion event, or null if it doesn't specify the icon.
-     * The default implementation does not care the location or event types, but some subclasses
-     * may use it (such as WebViews).
-     * @param event The MotionEvent from a mouse
-     * @param pointerIndex The index of the pointer for which to retrieve the {@link PointerIcon}.
-     *                     This will be between 0 and {@link MotionEvent#getPointerCount()}.
+     * Resolve the pointer icon that should be used for specified pointer in the motion event.
+     *
+     * The default implementation will resolve the pointer icon to one set using
+     * {@link #setPointerIcon(PointerIcon)} for mouse devices. Subclasses may override this to
+     * customize the icon for the given pointer.
+     *
+     * For example, the pointer icon for a stylus pointer can be resolved in the following way:
+     * <code><pre>
+     * &#64;Override
+     * public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
+     *     final int toolType = event.getToolType(pointerIndex);
+     *     if (!event.isFromSource(InputDevice.SOURCE_MOUSE)
+     *             && event.isFromSource(InputDevice.SOURCE_STYLUS)
+     *             && (toolType == MotionEvent.TOOL_TYPE_STYLUS
+     *                     || toolType == MotionEvent.TOOL_TYPE_ERASER)) {
+     *         // Show this pointer icon only if this pointer is a stylus.
+     *         return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_WAIT);
+     *     }
+     *     // Use the default logic for determining the pointer icon for other non-stylus pointers,
+     *     // like for the mouse cursor.
+     *     return super.onResolvePointerIcon(event, pointerIndex);
+     * }
+     * </pre></code>
+     *
+     * @param event The {@link MotionEvent} that requires a pointer icon to be resolved for one of
+     *              pointers.
+     * @param pointerIndex The index of the pointer in {@code event} for which to retrieve the
+     *     {@link PointerIcon}. This will be between 0 and {@link MotionEvent#getPointerCount()}.
+     * @return the pointer icon to use for specified pointer, or {@code null} if a pointer icon
+     *     is not specified and the default icon should be used.
      * @see PointerIcon
+     * @see InputManager#isStylusPointerIconEnabled()
      */
     public PointerIcon onResolvePointerIcon(MotionEvent event, int pointerIndex) {
         final float x = event.getX(pointerIndex);
         final float y = event.getY(pointerIndex);
         if (isDraggingScrollBar() || isOnScrollbarThumb(x, y)) {
-            return PointerIcon.getSystemIcon(mContext, PointerIcon.TYPE_ARROW);
+            // Use the default pointer icon.
+            return null;
         }
-        return mPointerIcon;
+
+        // Note: A drawing tablet will have both SOURCE_MOUSE and SOURCE_STYLUS, but it would use
+        // TOOL_TYPE_STYLUS. For now, treat drawing tablets the same way as a mouse or touchpad.
+        if (event.isFromSource(InputDevice.SOURCE_MOUSE)) {
+            return mMousePointerIcon;
+        }
+
+        return null;
     }
 
     /**
-     * Set the pointer icon for the current view.
+     * Set the pointer icon to be used for a mouse pointer in the current view.
+     *
      * Passing {@code null} will restore the pointer icon to its default value.
+     * Note that setting the pointer icon using this method will only set it for events coming from
+     * a mouse device (i.e. with source {@link InputDevice#SOURCE_MOUSE}). To resolve
+     * the pointer icon for other device types like styluses, override
+     * {@link #onResolvePointerIcon(MotionEvent, int)}.
+     *
      * @param pointerIcon A PointerIcon instance which will be shown when the mouse hovers.
+     * @see #onResolvePointerIcon(MotionEvent, int)
+     * @see PointerIcon
      */
     public void setPointerIcon(PointerIcon pointerIcon) {
-        mPointerIcon = pointerIcon;
+        mMousePointerIcon = pointerIcon;
         if (mAttachInfo == null || mAttachInfo.mHandlingPointerEvent) {
             return;
         }
@@ -29516,11 +29593,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Gets the pointer icon for the current view.
+     * Gets the mouse pointer icon for the current view.
+     *
+     * @see #setPointerIcon(PointerIcon)
      */
     @InspectableProperty
     public PointerIcon getPointerIcon() {
-        return mPointerIcon;
+        return mMousePointerIcon;
     }
 
     /**

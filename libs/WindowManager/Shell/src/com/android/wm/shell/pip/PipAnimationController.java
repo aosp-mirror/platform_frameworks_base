@@ -30,13 +30,17 @@ import android.app.TaskInfo;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
+import android.os.SystemClock;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
+import com.android.internal.protolog.common.ProtoLog;
+import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.transition.Transitions;
 
 import java.lang.annotation.Retention;
@@ -48,7 +52,7 @@ import java.util.Objects;
  */
 public class PipAnimationController {
     static final float FRACTION_START = 0f;
-    private static final float FRACTION_END = 1f;
+    static final float FRACTION_END = 1f;
 
     public static final int ANIM_TYPE_BOUNDS = 0;
     public static final int ANIM_TYPE_ALPHA = 1;
@@ -59,6 +63,14 @@ public class PipAnimationController {
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AnimationType {}
+
+    /**
+     * The alpha type is set for swiping to home. But the swiped task may not enter PiP. And if
+     * another task enters PiP by non-swipe ways, e.g. call API in foreground or switch to 3-button
+     * navigation, then the alpha type is unexpected. So use a timeout to avoid applying wrong
+     * animation style to an unrelated task.
+     */
+    private static final int ONE_SHOT_ALPHA_ANIMATION_TIMEOUT_MS = 800;
 
     public static final int TRANSITION_DIRECTION_NONE = 0;
     public static final int TRANSITION_DIRECTION_SAME = 1;
@@ -108,6 +120,9 @@ public class PipAnimationController {
             });
 
     private PipTransitionAnimator mCurrentAnimator;
+    @AnimationType
+    private int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
+    private long mLastOneShotAlphaAnimationTime;
 
     public PipAnimationController(PipSurfaceTransactionHelper helper) {
         mSurfaceTransactionHelper = helper;
@@ -187,6 +202,11 @@ public class PipAnimationController {
         return mCurrentAnimator;
     }
 
+    /** Reset animator state to prevent it from being used after its lifetime. */
+    public void resetAnimatorState() {
+        mCurrentAnimator = null;
+    }
+
     private PipTransitionAnimator setupPipTransitionAnimator(PipTransitionAnimator animator) {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
         animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
@@ -209,10 +229,41 @@ public class PipAnimationController {
     /**
      * Quietly cancel the animator by removing the listeners first.
      */
-    public static void quietCancel(@NonNull ValueAnimator animator) {
+    static void quietCancel(@NonNull ValueAnimator animator) {
         animator.removeAllUpdateListeners();
         animator.removeAllListeners();
         animator.cancel();
+    }
+
+    /**
+     * Sets the preferred enter animation type for one time. This is typically used to set the
+     * animation type to {@link PipAnimationController#ANIM_TYPE_ALPHA}.
+     * <p>
+     * For example, gesture navigation would first fade out the PiP activity, and the transition
+     * should be responsible to animate in (such as fade in) the PiP.
+     */
+    public void setOneShotEnterAnimationType(@AnimationType int animationType) {
+        mOneShotAnimationType = animationType;
+        if (animationType == ANIM_TYPE_ALPHA) {
+            mLastOneShotAlphaAnimationTime = SystemClock.uptimeMillis();
+        }
+    }
+
+    /** Returns the preferred animation type and consumes the one-shot type if needed. */
+    @AnimationType
+    public int takeOneShotEnterAnimationType() {
+        final int type = mOneShotAnimationType;
+        if (type == ANIM_TYPE_ALPHA) {
+            // Restore to default type.
+            mOneShotAnimationType = ANIM_TYPE_BOUNDS;
+            if (SystemClock.uptimeMillis() - mLastOneShotAlphaAnimationTime
+                    > ONE_SHOT_ALPHA_ANIMATION_TIMEOUT_MS) {
+                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                        "Alpha animation is expired. Use bounds animation.");
+                return ANIM_TYPE_BOUNDS;
+            }
+        }
+        return type;
     }
 
     /**
@@ -249,7 +300,7 @@ public class PipAnimationController {
          * @return true if handled by the handler, false otherwise.
          */
         public boolean handlePipTransaction(SurfaceControl leash, SurfaceControl.Transaction tx,
-                Rect destinationBounds) {
+                Rect destinationBounds, float alpha) {
             return false;
         }
     }
@@ -350,9 +401,10 @@ public class PipAnimationController {
         }
 
         boolean handlePipTransaction(SurfaceControl leash, SurfaceControl.Transaction tx,
-                Rect destinationBounds) {
+                Rect destinationBounds, float alpha) {
             if (mPipTransactionHandler != null) {
-                return mPipTransactionHandler.handlePipTransaction(leash, tx, destinationBounds);
+                return mPipTransactionHandler.handlePipTransaction(
+                        leash, tx, destinationBounds, alpha);
             }
             return false;
         }
@@ -370,9 +422,11 @@ public class PipAnimationController {
                     new PipContentOverlay.PipSnapshotOverlay(snapshot, sourceRectHint));
         }
 
-        void setAppIconContentOverlay(Context context, Rect bounds, ActivityInfo activityInfo) {
+        void setAppIconContentOverlay(Context context, Rect bounds, ActivityInfo activityInfo,
+                int appIconSizePx) {
             reattachContentOverlay(
-                    new PipContentOverlay.PipAppIconOverlay(context, bounds, activityInfo));
+                    new PipContentOverlay.PipAppIconOverlay(context, bounds,
+                            new IconProvider(context).getIcon(activityInfo), appIconSizePx));
         }
 
         private void reattachContentOverlay(PipContentOverlay overlay) {
@@ -495,7 +549,9 @@ public class PipAnimationController {
                     getSurfaceTransactionHelper().alpha(tx, leash, alpha)
                             .round(tx, leash, shouldApplyCornerRadius())
                             .shadow(tx, leash, shouldApplyShadowRadius());
-                    tx.apply();
+                    if (!handlePipTransaction(leash, tx, destinationBounds, alpha)) {
+                        tx.apply();
+                    }
                 }
 
                 @Override
@@ -610,7 +666,7 @@ public class PipAnimationController {
                                     .shadow(tx, leash, shouldApplyShadowRadius());
                         }
                     }
-                    if (!handlePipTransaction(leash, tx, bounds)) {
+                    if (!handlePipTransaction(leash, tx, bounds, /* alpha= */ 1f)) {
                         tx.apply();
                     }
                 }
@@ -662,7 +718,9 @@ public class PipAnimationController {
                                 .round(tx, leash, sourceBounds, bounds)
                                 .shadow(tx, leash, shouldApplyShadowRadius());
                     }
-                    tx.apply();
+                    if (!handlePipTransaction(leash, tx, bounds, 1f /* alpha */)) {
+                        tx.apply();
+                    }
                 }
 
                 private Rect computeInsets(float fraction) {

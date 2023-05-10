@@ -36,7 +36,9 @@ import android.view.Surface
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.RegionInterceptingFrameLayout.RegionInterceptableView
-import com.android.systemui.animation.Interpolators
+import com.android.app.animation.Interpolators
+import com.android.systemui.util.asIndenting
+import java.io.PrintWriter
 
 /**
  *  A class that handles common actions of display cutout view.
@@ -323,5 +325,19 @@ open class DisplayCutoutBaseView : View, RegionInterceptableView {
                 else -> throw IllegalArgumentException("Unknown rotation: $rotation")
             }
         }
+    }
+
+    open fun dump(pw: PrintWriter) {
+        val ipw = pw.asIndenting()
+        ipw.increaseIndent()
+        ipw.println("DisplayCutoutBaseView:")
+        ipw.increaseIndent()
+        ipw.println("shouldDrawCutout=$shouldDrawCutout")
+        ipw.println("cutout=${displayInfo.displayCutout}")
+        ipw.println("cameraProtectionProgress=$cameraProtectionProgress")
+        ipw.println("protectionRect=$protectionRect")
+        ipw.println("protectionRectOrig=$protectionRectOrig")
+        ipw.decreaseIndent()
+        ipw.decreaseIndent()
     }
 }

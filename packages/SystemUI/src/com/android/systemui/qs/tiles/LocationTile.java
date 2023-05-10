@@ -37,7 +37,9 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile.BooleanState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -52,11 +54,13 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
     private final LocationController mController;
     private final KeyguardStateController mKeyguard;
+    private final PanelInteractor mPanelInteractor;
     private final Callback mCallback = new Callback();
 
     @Inject
     public LocationTile(
             QSHost host,
+            QsEventLogger uiEventLogger,
             @Background Looper backgroundLooper,
             @Main Handler mainHandler,
             FalsingManager falsingManager,
@@ -65,12 +69,14 @@ public class LocationTile extends QSTileImpl<BooleanState> {
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             LocationController locationController,
-            KeyguardStateController keyguardStateController
+            KeyguardStateController keyguardStateController,
+            PanelInteractor panelInteractor
     ) {
-        super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+        super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
         mController = locationController;
         mKeyguard = keyguardStateController;
+        mPanelInteractor = panelInteractor;
         mController.observe(this, mCallback);
         mKeyguard.observe(this, mCallback);
     }
@@ -90,7 +96,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
         if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 final boolean wasEnabled = mState.value;
-                mHost.openPanels();
+                mPanelInteractor.openPanels();
                 mController.setLocationEnabled(!wasEnabled);
             });
             return;

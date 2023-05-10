@@ -152,7 +152,7 @@ public abstract class CameraOfflineSession extends CameraCaptureSession {
      *
      * <p>Closing a session is idempotent; closing more than once has no effect.</p>
      *
-     * @throws IllegalStateException if the offline sesion is not ready.
+     * @throws IllegalStateException if the offline session is not ready.
      */
     @Override
     public abstract void close();

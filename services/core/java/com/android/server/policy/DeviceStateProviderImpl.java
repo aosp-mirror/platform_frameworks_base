@@ -21,7 +21,10 @@ import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STA
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -101,8 +104,10 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final String FLAG_EMULATED_ONLY = "FLAG_EMULATED_ONLY";
     private static final String FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP =
             "FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP";
-    private static final String FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL =
-            "FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL";
+    private static final String FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL =
+            "FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL";
+    private static final String FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE =
+            "FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE";
 
     /** Interface that allows reading the device state configuration. */
     interface ReadableConfig {
@@ -162,9 +167,12 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                                 case FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP:
                                     flags |= DeviceState.FLAG_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
                                     break;
-                                case FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL:
-                                    flags |= DeviceState.FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL;
+                                case FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL:
+                                    flags |= DeviceState
+                                            .FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL;
                                     break;
+                                case FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE:
+                                    flags |= DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE;
                                 default:
                                     Slog.w(TAG, "Parsed unknown flag with name: "
                                             + configFlagString);
@@ -210,6 +218,9 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     @GuardedBy("mLock")
     private @PowerManager.ThermalStatus int mThermalStatus = PowerManager.THERMAL_STATUS_NONE;
 
+    @GuardedBy("mLock")
+    private boolean mPowerSaveModeEnabled;
+
     private DeviceStateProviderImpl(@NonNull Context context,
             @NonNull List<DeviceState> deviceStates,
             @NonNull List<Conditions> stateConditions) {
@@ -224,13 +235,31 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
         setStateConditions(deviceStates, stateConditions);
 
-        // If any of the device states are thermal sensitive, i.e. it should be disabled when the
-        // device is overheating, then we will update the list of supported states when thermal
-        // status changes.
-        if (hasThermalSensitiveState(deviceStates)) {
-            PowerManager powerManager = context.getSystemService(PowerManager.class);
-            if (powerManager != null) {
+        PowerManager powerManager = context.getSystemService(PowerManager.class);
+        if (powerManager != null) {
+            // If any of the device states are thermal sensitive, i.e. it should be disabled when
+            // the device is overheating, then we will update the list of supported states when
+            // thermal status changes.
+            if (hasThermalSensitiveState(deviceStates)) {
                 powerManager.addThermalStatusListener(this);
+            }
+
+            // If any of the device states are power sensitive, i.e. it should be disabled when
+            // power save mode is enabled, then we will update the list of supported states when
+            // power save mode is toggled.
+            if (hasPowerSaveSensitiveState(deviceStates)) {
+                IntentFilter filter = new IntentFilter(
+                        PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL);
+                BroadcastReceiver receiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        if (PowerManager.ACTION_POWER_SAVE_MODE_CHANGED_INTERNAL.equals(
+                                intent.getAction())) {
+                            onPowerSaveModeChanged(powerManager.isPowerSaveMode());
+                        }
+                    }
+                };
+                mContext.registerReceiver(receiver, filter);
             }
         }
     }
@@ -382,7 +411,11 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             for (DeviceState deviceState : mOrderedStates) {
                 if (isThermalStatusCriticalOrAbove(mThermalStatus)
                         && deviceState.hasFlag(
-                                DeviceState.FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL)) {
+                                DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL)) {
+                    continue;
+                }
+                if (mPowerSaveModeEnabled && deviceState.hasFlag(
+                        DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE)) {
                     continue;
                 }
                 supportedStates.add(deviceState);
@@ -674,6 +707,18 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         }
     }
 
+    @VisibleForTesting
+    void onPowerSaveModeChanged(boolean isPowerSaveModeEnabled) {
+        synchronized (mLock) {
+            if (mPowerSaveModeEnabled != isPowerSaveModeEnabled) {
+                mPowerSaveModeEnabled = isPowerSaveModeEnabled;
+                notifySupportedStatesChanged(
+                        isPowerSaveModeEnabled ? SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_ENABLED
+                                : SUPPORTED_DEVICE_STATES_CHANGED_POWER_SAVE_DISABLED);
+            }
+        }
+    }
+
     @Override
     public void onThermalStatusChanged(@PowerManager.ThermalStatus int thermalStatus) {
         int previousThermalStatus;
@@ -709,7 +754,16 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
     private static boolean hasThermalSensitiveState(List<DeviceState> deviceStates) {
         for (DeviceState state : deviceStates) {
-            if (state.hasFlag(DeviceState.FLAG_DISABLE_WHEN_THERMAL_STATUS_CRITICAL)) {
+            if (state.hasFlag(DeviceState.FLAG_UNSUPPORTED_WHEN_THERMAL_STATUS_CRITICAL)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean hasPowerSaveSensitiveState(List<DeviceState> deviceStates) {
+        for (int i = 0; i < deviceStates.size(); i++) {
+            if (deviceStates.get(i).hasFlag(DeviceState.FLAG_UNSUPPORTED_WHEN_POWER_SAVE_MODE)) {
                 return true;
             }
         }

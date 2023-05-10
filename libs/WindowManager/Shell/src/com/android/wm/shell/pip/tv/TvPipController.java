@@ -51,11 +51,11 @@ import com.android.wm.shell.pip.PinnedStackListenerForwarder;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipAppOpsListener;
+import com.android.wm.shell.pip.PipDisplayLayoutState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipParamsChangedForwarder;
 import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipTransitionController;
-import com.android.wm.shell.pip.phone.PipSizeSpecHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellController;
@@ -119,7 +119,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
 
     private final ShellController mShellController;
     private final TvPipBoundsState mTvPipBoundsState;
-    private final PipSizeSpecHandler mPipSizeSpecHandler;
+    private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final TvPipBoundsAlgorithm mTvPipBoundsAlgorithm;
     private final TvPipBoundsController mTvPipBoundsController;
     private final PipAppOpsListener mAppOpsListener;
@@ -154,7 +154,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
+            PipDisplayLayoutState pipDisplayLayoutState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
             PipAppOpsListener pipAppOpsListener,
@@ -174,7 +174,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 shellInit,
                 shellController,
                 tvPipBoundsState,
-                pipSizeSpecHandler,
+                pipDisplayLayoutState,
                 tvPipBoundsAlgorithm,
                 tvPipBoundsController,
                 pipAppOpsListener,
@@ -196,7 +196,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ShellInit shellInit,
             ShellController shellController,
             TvPipBoundsState tvPipBoundsState,
-            PipSizeSpecHandler pipSizeSpecHandler,
+            PipDisplayLayoutState pipDisplayLayoutState,
             TvPipBoundsAlgorithm tvPipBoundsAlgorithm,
             TvPipBoundsController tvPipBoundsController,
             PipAppOpsListener pipAppOpsListener,
@@ -220,10 +220,11 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
         DisplayLayout layout = new DisplayLayout(context, context.getDisplay());
 
         mTvPipBoundsState = tvPipBoundsState;
-        mTvPipBoundsState.setDisplayLayout(layout);
-        mTvPipBoundsState.setDisplayId(context.getDisplayId());
-        mPipSizeSpecHandler = pipSizeSpecHandler;
-        mPipSizeSpecHandler.setDisplayLayout(layout);
+
+        mPipDisplayLayoutState = pipDisplayLayoutState;
+        mPipDisplayLayoutState.setDisplayLayout(layout);
+        mPipDisplayLayoutState.setDisplayId(context.getDisplayId());
+
         mTvPipBoundsAlgorithm = tvPipBoundsAlgorithm;
         mTvPipBoundsController = tvPipBoundsController;
         mTvPipBoundsController.setListener(this);
@@ -392,7 +393,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
     @Override
     public void onKeepClearAreasChanged(int displayId, Set<Rect> restricted,
             Set<Rect> unrestricted) {
-        if (mTvPipBoundsState.getDisplayId() == displayId) {
+        if (mPipDisplayLayoutState.getDisplayId() == displayId) {
             boolean unrestrictedAreasChanged = !Objects.equals(unrestricted,
                     mTvPipBoundsState.getUnrestrictedKeepClearAreas());
             mTvPipBoundsState.setKeepClearAreas(restricted, unrestricted);
@@ -445,7 +446,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                     "%s: PiP has already been closed by custom close action", TAG);
             return;
         }
-        removeTask(mPinnedTaskId);
+        mPipTaskOrganizer.removePip();
         onPipDisappeared();
     }
 
@@ -501,7 +502,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 "%s: onPipTransition_Canceled(), state=%s", TAG, stateToName(mState));
         mTvPipMenuController.onPipTransitionFinished(
                 PipAnimationController.isInPipDirection(direction));
-        mTvPipActionsProvider.onPipExpansionToggled(mTvPipBoundsState.isTvPipExpanded());
+        mTvPipActionsProvider.updatePipExpansionState(mTvPipBoundsState.isTvPipExpanded());
     }
 
     @Override
@@ -514,7 +515,7 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
                 "%s: onPipTransition_Finished(), state=%s, direction=%d",
                 TAG, stateToName(mState), direction);
         mTvPipMenuController.onPipTransitionFinished(enterPipTransition);
-        mTvPipActionsProvider.onPipExpansionToggled(mTvPipBoundsState.isTvPipExpanded());
+        mTvPipActionsProvider.updatePipExpansionState(mTvPipBoundsState.isTvPipExpanded());
     }
 
     private void updateExpansionState() {
@@ -669,17 +670,6 @@ public class TvPipController implements PipTransitionController.PipTransitionCal
             ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                     "%s: getRootTaskInfo() failed, %s", TAG, e);
             return null;
-        }
-    }
-
-    private static void removeTask(int taskId) {
-        ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                "%s: removeTask(), taskId=%d", TAG, taskId);
-        try {
-            ActivityTaskManager.getService().removeTask(taskId);
-        } catch (Exception e) {
-            ProtoLog.e(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                    "%s: Atm.removeTask() failed, %s", TAG, e);
         }
     }
 

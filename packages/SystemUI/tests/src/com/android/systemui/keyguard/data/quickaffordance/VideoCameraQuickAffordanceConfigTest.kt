@@ -21,6 +21,7 @@ import android.app.admin.DevicePolicyManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.ActivityIntentHelper
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.camera.CameraIntentsWrapper
 import com.android.systemui.coroutines.collectLastValue
@@ -44,6 +45,7 @@ import org.mockito.MockitoAnnotations
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
+@RoboPilotTest
 @RunWith(AndroidJUnit4::class)
 class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
 
@@ -73,7 +75,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
     }
 
     @Test
-    fun `lockScreenState - visible when launchable`() =
+    fun lockScreenState_visibleWhenLaunchable() =
         testScope.runTest {
             setLaunchable()
 
@@ -84,7 +86,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `lockScreenState - hidden when app not installed on device`() =
+    fun lockScreenState_hiddenWhenAppNotInstalledOnDevice() =
         testScope.runTest {
             setLaunchable(isVideoCameraAppInstalled = false)
 
@@ -95,7 +97,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `lockScreenState - hidden when camera disabled by admin`() =
+    fun lockScreenState_hiddenWhenCameraDisabledByAdmin() =
         testScope.runTest {
             setLaunchable(isCameraDisabledByAdmin = true)
 
@@ -106,7 +108,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - default when launchable`() =
+    fun getPickerScreenState_defaultWhenLaunchable() =
         testScope.runTest {
             setLaunchable()
 
@@ -115,7 +117,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when app not installed on device`() =
+    fun getPickerScreenState_unavailableWhenAppNotInstalledOnDevice() =
         testScope.runTest {
             setLaunchable(isVideoCameraAppInstalled = false)
 
@@ -124,7 +126,7 @@ class VideoCameraQuickAffordanceConfigTest : SysuiTestCase() {
         }
 
     @Test
-    fun `getPickerScreenState - unavailable when camera disabled by admin`() =
+    fun getPickerScreenState_unavailableWhenCameraDisabledByAdmin() =
         testScope.runTest {
             setLaunchable(isCameraDisabledByAdmin = true)
 

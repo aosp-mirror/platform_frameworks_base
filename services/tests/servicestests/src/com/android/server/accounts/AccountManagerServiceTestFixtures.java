@@ -17,9 +17,6 @@ package com.android.server.accounts;
 
 import android.accounts.Account;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Constants shared between test AccountAuthenticators and AccountManagerServiceTest.
  */
@@ -31,6 +28,8 @@ public final class AccountManagerServiceTestFixtures {
             "account_manager_service_test:account_status_token_key";
     public static final String KEY_ACCOUNT_PASSWORD =
             "account_manager_service_test:account_password_key";
+    public static final String KEY_INTENT_FLAGS =
+            "account_manager_service_test:intent_flags_key";
     public static final String KEY_OPTIONS_BUNDLE =
             "account_manager_service_test:option_bundle_key";
     public static final String ACCOUNT_NAME_SUCCESS = "success_on_return@fixture.com";

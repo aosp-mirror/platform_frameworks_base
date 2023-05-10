@@ -477,15 +477,15 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
         }
 
         @Override
-        public void removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
+        public boolean removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
             if (mRootView == null) {
-                return;
+                return true;
             }
             if (mSplashView == null) {
                 // shouldn't happen, the app window may be drawn earlier than starting window?
                 Slog.e(TAG, "Found empty splash screen, remove!");
                 removeWindowInner(mRootView, false);
-                return;
+                return true;
             }
             clearSystemBarColor();
             if (immediately
@@ -503,6 +503,7 @@ class SplashscreenWindowCreator extends AbsSplashWindowCreator {
                     removeWindowInner(mRootView, true);
                 }
             }
+            return true;
         }
     }
 }

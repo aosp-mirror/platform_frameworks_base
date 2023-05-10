@@ -23,11 +23,14 @@ import static android.app.admin.PolicyUpdateReceiver.EXTRA_POLICY_KEY;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
+import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 
@@ -44,11 +47,16 @@ import java.util.Objects;
  */
 @SystemApi
 public final class IntentFilterPolicyKey extends PolicyKey {
+
+    private static final String TAG = "IntentFilterPolicyKey";
+
+    private static final String TAG_INTENT_FILTER_ENTRY = "filter";
     private final IntentFilter mFilter;
 
     /**
      * @hide
      */
+    @TestApi
     public IntentFilterPolicyKey(@NonNull String identifier, @NonNull IntentFilter filter) {
         super(identifier);
         mFilter = Objects.requireNonNull(filter);
@@ -81,7 +89,9 @@ public final class IntentFilterPolicyKey extends PolicyKey {
     @Override
     public void saveToXml(TypedXmlSerializer serializer) throws IOException {
         serializer.attribute(/* namespace= */ null, ATTR_POLICY_IDENTIFIER, getIdentifier());
+        serializer.startTag(/* namespace= */ null, TAG_INTENT_FILTER_ENTRY);
         mFilter.writeToXml(serializer);
+        serializer.endTag(/* namespace= */ null, TAG_INTENT_FILTER_ENTRY);
     }
 
     /**
@@ -91,9 +101,25 @@ public final class IntentFilterPolicyKey extends PolicyKey {
     public IntentFilterPolicyKey readFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException, IOException {
         String identifier = parser.getAttributeValue(/* namespace= */ null, ATTR_POLICY_IDENTIFIER);
-        IntentFilter filter = new IntentFilter();
-        filter.readFromXml(parser);
+        IntentFilter filter = readIntentFilterFromXml(parser);
         return new IntentFilterPolicyKey(identifier, filter);
+    }
+
+    @Nullable
+    private IntentFilter readIntentFilterFromXml(TypedXmlPullParser parser)
+            throws XmlPullParserException, IOException {
+        int outerDepth = parser.getDepth();
+        while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+            String tag = parser.getName();
+            if (tag.equals(TAG_INTENT_FILTER_ENTRY)) {
+                IntentFilter filter = new IntentFilter();
+                filter.readFromXml(parser);
+                return filter;
+            }
+            Log.e(TAG, "Unknown tag: " + tag);
+        }
+        Log.e(TAG, "Error parsing IntentFilterPolicyKey, IntentFilter not found");
+        return null;
     }
 
     /**

@@ -63,7 +63,7 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (mTransition != transition) return false;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Using registered One-shot remote"
-                + " transition %s for %s.", mRemote, transition);
+                + " transition %s for #%d.", mRemote, info.getDebugId());
 
         final IBinder.DeathRecipient remoteDied = () -> {
             Log.e(Transitions.TAG, "Remote transition died, finishing");
@@ -113,9 +113,6 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
     public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Using registered One-shot remote"
-                + " transition %s for %s.", mRemote, transition);
-
         IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
             public void onTransitionFinished(WindowContainerTransaction wct,
@@ -153,5 +150,11 @@ public class OneShotRemoteHandler implements Transitions.TransitionHandler {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "RemoteTransition directly requested"
                 + " for %s: %s", transition, remote);
         return new WindowContainerTransaction();
+    }
+
+    @Override
+    public String toString() {
+        return "OneShotRemoteHandler:" + mRemote.getDebugName() + ":"
+                + mRemote.getRemoteTransition();
     }
 }

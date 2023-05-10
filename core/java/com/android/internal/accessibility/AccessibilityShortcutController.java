@@ -87,6 +87,8 @@ public class AccessibilityShortcutController {
             new ComponentName("com.android.server.accessibility", "OneHandedMode");
     public static final ComponentName REDUCE_BRIGHT_COLORS_COMPONENT_NAME =
             new ComponentName("com.android.server.accessibility", "ReduceBrightColors");
+    public static final ComponentName FONT_SIZE_COMPONENT_NAME =
+            new ComponentName("com.android.server.accessibility", "FontSize");
 
     // The component name for the sub setting of Accessibility button in Accessibility settings
     public static final ComponentName ACCESSIBILITY_BUTTON_COMPONENT_NAME =

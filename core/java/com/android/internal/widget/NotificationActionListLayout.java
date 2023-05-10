@@ -50,6 +50,8 @@ public class NotificationActionListLayout extends LinearLayout {
     private boolean mEmphasizedMode;
     private int mDefaultPaddingBottom;
     private int mDefaultPaddingTop;
+    private int mEmphasizedPaddingTop;
+    private int mEmphasizedPaddingBottom;
     private int mEmphasizedHeight;
     private int mRegularHeight;
     @DimenRes private int mCollapsibleIndentDimen = R.dimen.notification_actions_padding_start;
@@ -322,13 +324,16 @@ public class NotificationActionListLayout extends LinearLayout {
     }
 
     private void updateHeights() {
-        int paddingTop = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin);
+        int inset = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.button_inset_vertical_material);
+        mEmphasizedPaddingTop = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin) - inset;
         // same padding on bottom and at end
-        int paddingBottom = getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin_end);
-        mEmphasizedHeight = paddingBottom + paddingTop + getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_action_emphasized_height);
+        mEmphasizedPaddingBottom = getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin_end) - inset;
+        mEmphasizedHeight = mEmphasizedPaddingTop + mEmphasizedPaddingBottom
+                + getResources().getDimensionPixelSize(
+                        com.android.internal.R.dimen.notification_action_emphasized_height);
         mRegularHeight = getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.notification_action_list_height);
     }
@@ -356,18 +361,12 @@ public class NotificationActionListLayout extends LinearLayout {
         mEmphasizedMode = emphasizedMode;
         int height;
         if (emphasizedMode) {
-            int paddingTop = getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.notification_content_margin);
-            // same padding on bottom and at end
-            int paddingBottom = getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.notification_content_margin_end);
-            height = mEmphasizedHeight;
-            int buttonPaddingInternal = getResources().getDimensionPixelSize(
-                    com.android.internal.R.dimen.button_inset_vertical_material);
             setPaddingRelative(getPaddingStart(),
-                    paddingTop - buttonPaddingInternal,
+                    mEmphasizedPaddingTop,
                     getPaddingEnd(),
-                    paddingBottom - buttonPaddingInternal);
+                    mEmphasizedPaddingBottom);
+            setMinimumHeight(mEmphasizedHeight);
+            height = ViewGroup.LayoutParams.WRAP_CONTENT;
         } else {
             setPaddingRelative(getPaddingStart(),
                     mDefaultPaddingTop,

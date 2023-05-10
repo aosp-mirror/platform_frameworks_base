@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -100,6 +101,7 @@ public abstract class InputEvent implements Parcelable {
      * @return The display id associated with the event.
      * @hide
      */
+    @TestApi
     public abstract int getDisplayId();
 
     /**
@@ -107,6 +109,7 @@ public abstract class InputEvent implements Parcelable {
      * @param displayId
      * @hide
      */
+    @TestApi
     public abstract void setDisplayId(int displayId);
     /**
      * Copies the event.
@@ -207,7 +210,7 @@ public abstract class InputEvent implements Parcelable {
      *
      * @hide
      */
-    public abstract long getEventTimeNano();
+    public abstract long getEventTimeNanos();
 
     /**
      * Marks the input event as being canceled.

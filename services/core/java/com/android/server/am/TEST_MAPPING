@@ -3,9 +3,11 @@
     {
       "name": "CtsAppTestCases",
       "options": [
-        {
-          "include-filter": "android.app.cts.TaskDescriptionTest"
-        },
+        { "include-filter": "android.app.cts.TaskDescriptionTest" },
+        { "include-filter": "android.app.cts.ActivityManagerTest" },
+        { "include-filter": "android.app.cts.ActivityManagerProcessStateTest" },
+        { "include-filter": "android.app.cts.ServiceTest" },
+        { "include-filter": "android.app.cts.ActivityManagerFgsBgStartTest" },
         {
           "include-annotation": "android.platform.test.annotations.Presubmit"
         },
@@ -14,7 +16,8 @@
         },
         {
           "exclude-annotation": "androidx.test.filters.FlakyTest"
-        }
+        },
+        { "exclude-annotation": "org.junit.Ignore" }
       ]
     },
     {
@@ -147,6 +150,16 @@
         {
           "include-filter": "android.appsecurity.cts.AppDataIsolationTests"
         }
+      ]
+    },
+    {
+      "name": "CtsAppTestCases",
+      "options": [
+        { "include-filter": "android.app.cts.TaskDescriptionTest" },
+        { "include-filter": "android.app.cts.ActivityManagerTest" },
+        { "include-filter": "android.app.cts.ActivityManagerProcessStateTest" },
+        { "include-filter": "android.app.cts.ServiceTest" },
+        { "include-filter": "android.app.cts.ActivityManagerFgsBgStartTest" }
       ]
     }
   ]

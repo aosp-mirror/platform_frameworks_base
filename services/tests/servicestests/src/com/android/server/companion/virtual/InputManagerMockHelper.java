@@ -25,7 +25,7 @@ import static org.mockito.Mockito.when;
 
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
-import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.os.RemoteException;
 import android.testing.TestableLooper;
 import android.view.InputDevice;
@@ -38,7 +38,8 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 /**
- * A test utility class used to share the logic for setting up {@link InputManager}'s callback for
+ * A test utility class used to share the logic for setting up
+ * {@link  android.hardware.input.InputManager}'s callback for
  * when a virtual input device being added.
  */
 class InputManagerMockHelper {
@@ -76,7 +77,7 @@ class InputManagerMockHelper {
 
         // Set a new instance of InputManager for testing that uses the IInputManager mock as the
         // interface to the server.
-        InputManager.resetInstance(mIInputManagerMock);
+        InputManagerGlobal.resetInstance(mIInputManagerMock);
     }
 
     private long handleNativeOpenInputDevice(InvocationOnMock inv) {

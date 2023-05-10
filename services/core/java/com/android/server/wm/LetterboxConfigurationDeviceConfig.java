@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.provider.DeviceConfig;
 import android.util.ArraySet;
 
-
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.Map;

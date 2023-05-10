@@ -39,6 +39,7 @@ import static com.android.companiondevicemanager.CompanionDeviceResources.TITLES
 import static com.android.companiondevicemanager.Utils.getApplicationLabel;
 import static com.android.companiondevicemanager.Utils.getHtmlFromResources;
 import static com.android.companiondevicemanager.Utils.getIcon;
+import static com.android.companiondevicemanager.Utils.getImageColor;
 import static com.android.companiondevicemanager.Utils.getVendorHeaderIcon;
 import static com.android.companiondevicemanager.Utils.getVendorHeaderName;
 import static com.android.companiondevicemanager.Utils.hasVendorIcon;
@@ -56,7 +57,6 @@ import android.companion.CompanionDeviceManager;
 import android.companion.IAssociationRequestCallback;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.BlendMode;
 import android.graphics.BlendModeColorFilter;
 import android.graphics.Color;
@@ -156,6 +156,9 @@ public class CompanionDeviceActivity extends FragmentActivity implements
     private ConstraintLayout mConstraintList;
     // Only present for self-managed association requests.
     private RelativeLayout mVendorHeader;
+    // A linearLayout for mButtonNotAllowMultipleDevices, user will press this layout instead
+    // of the button for accessibility.
+    private LinearLayout mNotAllowMultipleDevicesLayout;
 
     // The recycler view is only shown for multiple-device regular association request, after
     // at least one matching device is found.
@@ -327,10 +330,11 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mButtonAllow = findViewById(R.id.btn_positive);
         mButtonNotAllow = findViewById(R.id.btn_negative);
         mButtonNotAllowMultipleDevices = findViewById(R.id.btn_negative_multiple_devices);
+        mNotAllowMultipleDevicesLayout = findViewById(R.id.negative_multiple_devices_layout);
 
         mButtonAllow.setOnClickListener(this::onPositiveButtonClick);
         mButtonNotAllow.setOnClickListener(this::onNegativeButtonClick);
-        mButtonNotAllowMultipleDevices.setOnClickListener(this::onNegativeButtonClick);
+        mNotAllowMultipleDevicesLayout.setOnClickListener(this::onNegativeButtonClick);
 
         mVendorHeaderButton.setOnClickListener(this::onShowHelperDialog);
 
@@ -459,8 +463,6 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         final Drawable vendorIcon;
         final CharSequence vendorName;
         final Spanned title;
-        int nightModeFlags = getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK;
 
         if (!SUPPORTED_SELF_MANAGED_PROFILES.contains(deviceProfile)) {
             throw new RuntimeException("Unsupported profile " + deviceProfile);
@@ -473,8 +475,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             vendorName = getVendorHeaderName(this, packageName, userId);
             mVendorHeaderImage.setImageDrawable(vendorIcon);
             if (hasVendorIcon(this, packageName, userId)) {
-                int color = nightModeFlags == Configuration.UI_MODE_NIGHT_YES
-                        ? android.R.color.system_accent1_200 : android.R.color.system_accent1_600;
+                int color = getImageColor(this);
                 mVendorHeaderImage.setColorFilter(getResources().getColor(color, /* Theme= */null));
             }
         } catch (PackageManager.NameNotFoundException e) {
@@ -550,8 +551,8 @@ public class CompanionDeviceActivity extends FragmentActivity implements
             summary = getHtmlFromResources(this, SUMMARIES.get(null), deviceName);
             mConstraintList.setVisibility(View.GONE);
         } else {
-            summary = getHtmlFromResources(this, SUMMARIES.get(deviceProfile),
-                    getString(PROFILES_NAME.get(deviceProfile)), appLabel);
+            summary = getHtmlFromResources(
+                    this, SUMMARIES.get(deviceProfile), getString(R.string.device_type));
             mPermissionTypes.addAll(PERMISSION_TYPES.get(deviceProfile));
             setupPermissionList();
         }
@@ -617,6 +618,7 @@ public class CompanionDeviceActivity extends FragmentActivity implements
         mButtonNotAllow.setVisibility(View.GONE);
         mDeviceListRecyclerView.setVisibility(View.VISIBLE);
         mButtonNotAllowMultipleDevices.setVisibility(View.VISIBLE);
+        mNotAllowMultipleDevicesLayout.setVisibility(View.VISIBLE);
         mConstraintList.setVisibility(View.VISIBLE);
         mMultipleDeviceSpinner.setVisibility(View.VISIBLE);
     }

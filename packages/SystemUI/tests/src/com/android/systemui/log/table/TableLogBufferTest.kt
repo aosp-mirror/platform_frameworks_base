@@ -18,31 +18,68 @@ package com.android.systemui.log.table
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.log.LogLevel
+import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.log.table.TableChange.Companion.IS_INITIAL_PREFIX
+import com.android.systemui.log.table.TableChange.Companion.MAX_STRING_LENGTH
+import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.eq
+import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.StringWriter
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Before
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class TableLogBufferTest : SysuiTestCase() {
     private lateinit var underTest: TableLogBuffer
 
     private lateinit var systemClock: FakeSystemClock
     private lateinit var outputWriter: StringWriter
+    private lateinit var logcatEchoTracker: LogcatEchoTracker
+    private lateinit var localLogcat: FakeLogProxy
+
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setup() {
+        localLogcat = FakeLogProxy()
+        logcatEchoTracker = mock()
         systemClock = FakeSystemClock()
         outputWriter = StringWriter()
 
-        underTest = TableLogBuffer(MAX_SIZE, NAME, systemClock)
+        underTest =
+            TableLogBuffer(
+                MAX_SIZE,
+                NAME,
+                systemClock,
+                logcatEchoTracker,
+                testDispatcher,
+                testScope.backgroundScope,
+                localLogcat = localLogcat,
+            )
+        underTest.init()
     }
 
     @Test(expected = IllegalArgumentException::class)
     fun maxSizeZero_throwsException() {
-        TableLogBuffer(maxSize = 0, "name", systemClock)
+        TableLogBuffer(
+            maxSize = 0,
+            "name",
+            systemClock,
+            logcatEchoTracker,
+            testDispatcher,
+            testScope.backgroundScope,
+            localLogcat = localLogcat,
+        )
     }
 
     @Test
@@ -353,10 +390,10 @@ class TableLogBufferTest : SysuiTestCase() {
     }
 
     @Test
-    fun logChange_rowInitializer_dumpsCorrectly() {
+    fun logChange_rowInitializer_notIsInitial_dumpsCorrectly() {
         systemClock.setCurrentTimeMillis(100L)
 
-        underTest.logChange("") { row ->
+        underTest.logChange(columnPrefix = "", isInitial = false) { row ->
             row.logChange("column1", "val1")
             row.logChange("column2", 2)
             row.logChange("column3", true)
@@ -371,6 +408,131 @@ class TableLogBufferTest : SysuiTestCase() {
         assertThat(dumpedString).contains(expected1)
         assertThat(dumpedString).contains(expected2)
         assertThat(dumpedString).contains(expected3)
+    }
+
+    @Test
+    fun logChange_rowInitializer_isInitial_dumpsCorrectly() {
+        systemClock.setCurrentTimeMillis(100L)
+
+        underTest.logChange(columnPrefix = "", isInitial = true) { row ->
+            row.logChange("column1", "val1")
+            row.logChange("column2", 2)
+            row.logChange("column3", true)
+        }
+
+        val dumpedString = dumpChanges()
+
+        val timestamp = TABLE_LOG_DATE_FORMAT.format(100L)
+        val expected1 = timestamp + SEPARATOR + "column1" + SEPARATOR + IS_INITIAL_PREFIX + "val1"
+        val expected2 = timestamp + SEPARATOR + "column2" + SEPARATOR + IS_INITIAL_PREFIX + "2"
+        val expected3 = timestamp + SEPARATOR + "column3" + SEPARATOR + IS_INITIAL_PREFIX + "true"
+        assertThat(dumpedString).contains(expected1)
+        assertThat(dumpedString).contains(expected2)
+        assertThat(dumpedString).contains(expected3)
+    }
+
+    @Test
+    fun logChange_rowInitializer_isInitialThenNotInitial_dumpsCorrectly() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(columnPrefix = "", isInitial = true) { row ->
+            row.logChange("column1", "val1")
+            row.logChange("column2", 2)
+            row.logChange("column3", true)
+        }
+
+        systemClock.setCurrentTimeMillis(200L)
+        underTest.logChange(columnPrefix = "", isInitial = false) { row ->
+            row.logChange("column1", "val11")
+            row.logChange("column2", 22)
+            row.logChange("column3", false)
+        }
+
+        val dumpedString = dumpChanges()
+
+        val timestamp = TABLE_LOG_DATE_FORMAT.format(100L)
+        val expected1 = timestamp + SEPARATOR + "column1" + SEPARATOR + IS_INITIAL_PREFIX + "val1"
+        val expected2 = timestamp + SEPARATOR + "column2" + SEPARATOR + IS_INITIAL_PREFIX + "2"
+        val expected3 = timestamp + SEPARATOR + "column3" + SEPARATOR + IS_INITIAL_PREFIX + "true"
+        val timestamp2 = TABLE_LOG_DATE_FORMAT.format(200L)
+        val expected4 = timestamp2 + SEPARATOR + "column1" + SEPARATOR + "val11"
+        val expected5 = timestamp2 + SEPARATOR + "column2" + SEPARATOR + "22"
+        val expected6 = timestamp2 + SEPARATOR + "column3" + SEPARATOR + "false"
+        assertThat(dumpedString).contains(expected1)
+        assertThat(dumpedString).contains(expected2)
+        assertThat(dumpedString).contains(expected3)
+        assertThat(dumpedString).contains(expected4)
+        assertThat(dumpedString).contains(expected5)
+        assertThat(dumpedString).contains(expected6)
+    }
+
+    @Test
+    fun logDiffs_neverInitial() {
+        systemClock.setCurrentTimeMillis(100L)
+
+        val prevDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    row.logChange("stringValChange", "prevStringVal")
+                }
+            }
+        val nextDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    row.logChange("stringValChange", "newStringVal")
+                }
+            }
+
+        underTest.logDiffs("prefix", prevDiffable, nextDiffable)
+
+        val dumpedString = dumpChanges()
+
+        assertThat(dumpedString).doesNotContain(IS_INITIAL_PREFIX)
+    }
+
+    @Test
+    fun logChange_variousPrimitiveValues_isInitialAlwaysUpdated() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "", columnName = "first", value = "val1", isInitial = true)
+        systemClock.setCurrentTimeMillis(200L)
+        underTest.logChange(prefix = "", columnName = "second", value = "val2", isInitial = true)
+        systemClock.setCurrentTimeMillis(300L)
+        underTest.logChange(prefix = "", columnName = "first", value = 11, isInitial = false)
+        systemClock.setCurrentTimeMillis(400L)
+        underTest.logChange(prefix = "", columnName = "first", value = false, isInitial = false)
+        systemClock.setCurrentTimeMillis(500L)
+        underTest.logChange(prefix = "", columnName = "third", value = 33, isInitial = true)
+
+        val dumpedString = dumpChanges()
+
+        val expected1 =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "first" +
+                SEPARATOR +
+                IS_INITIAL_PREFIX +
+                "val1"
+        val expected2 =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "second" +
+                SEPARATOR +
+                IS_INITIAL_PREFIX +
+                "val2"
+        val expected3 = TABLE_LOG_DATE_FORMAT.format(300L) + SEPARATOR + "first" + SEPARATOR + "11"
+        val expected4 =
+            TABLE_LOG_DATE_FORMAT.format(400L) + SEPARATOR + "first" + SEPARATOR + "false"
+        val expected5 =
+            TABLE_LOG_DATE_FORMAT.format(500L) +
+                SEPARATOR +
+                "third" +
+                SEPARATOR +
+                IS_INITIAL_PREFIX +
+                "33"
+        assertThat(dumpedString).contains(expected1)
+        assertThat(dumpedString).contains(expected2)
+        assertThat(dumpedString).contains(expected3)
+        assertThat(dumpedString).contains(expected4)
+        assertThat(dumpedString).contains(expected5)
     }
 
     @Test
@@ -415,6 +577,112 @@ class TableLogBufferTest : SysuiTestCase() {
     }
 
     @Test
+    fun dumpChanges_tooLongColumnPrefix_viaLogChange_truncated() {
+        underTest.logChange(
+            prefix = "P".repeat(MAX_STRING_LENGTH + 10),
+            columnName = "name",
+            value = true,
+        )
+
+        val dumpedString = dumpChanges()
+
+        assertThat(dumpedString).contains("P".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("P".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongColumnPrefix_viaLogDiffs_truncated() {
+        val prevDiffable = object : TestDiffable() {}
+        val nextDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    row.logChange("status", "value")
+                }
+            }
+
+        // WHEN the column prefix is too large
+        underTest.logDiffs(
+            columnPrefix = "P".repeat(MAX_STRING_LENGTH + 10),
+            prevDiffable,
+            nextDiffable,
+        )
+
+        val dumpedString = dumpChanges()
+
+        // THEN it's truncated to the max length
+        assertThat(dumpedString).contains("P".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("P".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongColumnName_viaLogChange_truncated() {
+        underTest.logChange(
+            prefix = "prefix",
+            columnName = "N".repeat(MAX_STRING_LENGTH + 10),
+            value = 10,
+        )
+
+        val dumpedString = dumpChanges()
+
+        assertThat(dumpedString).contains("N".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("N".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongColumnName_viaLogDiffs_truncated() {
+        val prevDiffable = object : TestDiffable() {}
+        val nextDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    // WHEN the column name is too large
+                    row.logChange(columnName = "N".repeat(MAX_STRING_LENGTH + 10), "value")
+                }
+            }
+
+        underTest.logDiffs(columnPrefix = "prefix", prevDiffable, nextDiffable)
+
+        val dumpedString = dumpChanges()
+
+        // THEN it's truncated to the max length
+        assertThat(dumpedString).contains("N".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("N".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongValue_viaLogChange_truncated() {
+        underTest.logChange(
+            prefix = "prefix",
+            columnName = "name",
+            value = "V".repeat(MAX_STRING_LENGTH + 10),
+        )
+
+        val dumpedString = dumpChanges()
+
+        assertThat(dumpedString).contains("V".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("V".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
+    fun dumpChanges_tooLongValue_viaLogDiffs_truncated() {
+        val prevDiffable = object : TestDiffable() {}
+        val nextDiffable =
+            object : TestDiffable() {
+                override fun logDiffs(prevVal: TestDiffable, row: TableRowLogger) {
+                    // WHEN the value is too large
+                    row.logChange("columnName", value = "V".repeat(MAX_STRING_LENGTH + 10))
+                }
+            }
+
+        underTest.logDiffs(columnPrefix = "prefix", prevDiffable, nextDiffable)
+
+        val dumpedString = dumpChanges()
+
+        // THEN it's truncated to the max length
+        assertThat(dumpedString).contains("V".repeat(MAX_STRING_LENGTH))
+        assertThat(dumpedString).doesNotContain("V".repeat(MAX_STRING_LENGTH + 1))
+    }
+
+    @Test
     fun dumpChanges_rotatesIfBufferIsFull() {
         lateinit var valToDump: String
 
@@ -435,9 +703,340 @@ class TableLogBufferTest : SysuiTestCase() {
 
         assertThat(dumpedString).doesNotContain("testString[0]")
         assertThat(dumpedString).doesNotContain("testString[1]")
-        assertThat(dumpedString).doesNotContain("testString[2]")
+        // The buffer should contain [MAX_SIZE + 1] entries since we also save the most recently
+        // evicted value.
+        assertThat(dumpedString).contains("testString[2]")
         assertThat(dumpedString).contains("testString[3]")
         assertThat(dumpedString).contains("testString[${MAX_SIZE + 2}]")
+    }
+
+    @Test
+    fun columnEvicted_lastKnownColumnValueInDump() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvicted", value = "evictedValue")
+
+        // Exactly fill the buffer so that "willBeEvicted" is evicted
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we'll have both the evicted column entry...
+        val evictedColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "willBeEvicted" +
+                SEPARATOR +
+                "evictedValue"
+        assertThat(dumpedString).contains(evictedColumnLog)
+
+        // ... *and* all of the fillingColumn entries.
+        val firstFillingColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "fillingColumn" +
+                SEPARATOR +
+                "fillString[0]"
+        val lastFillingColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(1100L) +
+                SEPARATOR +
+                "fillingColumn" +
+                SEPARATOR +
+                "fillString[9]"
+        assertThat(dumpedString).contains(firstFillingColumnLog)
+        assertThat(dumpedString).contains(lastFillingColumnLog)
+    }
+
+    @Test
+    fun multipleColumnsEvicted_allColumnsInDump() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedString", value = "evictedValue")
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedInt", value = 45)
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedBool", value = true)
+
+        // Exactly fill the buffer so that all the above columns will be evicted
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we'll have all the evicted column entries...
+        val evictedColumnLogString =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "willBeEvictedString" +
+                SEPARATOR +
+                "evictedValue"
+        val evictedColumnLogInt =
+            TABLE_LOG_DATE_FORMAT.format(200L) + SEPARATOR + "willBeEvictedInt" + SEPARATOR + "45"
+        val evictedColumnLogBool =
+            TABLE_LOG_DATE_FORMAT.format(300L) +
+                SEPARATOR +
+                "willBeEvictedBool" +
+                SEPARATOR +
+                "true"
+        assertThat(dumpedString).contains(evictedColumnLogString)
+        assertThat(dumpedString).contains(evictedColumnLogInt)
+        assertThat(dumpedString).contains(evictedColumnLogBool)
+
+        // ... *and* all of the fillingColumn entries.
+        val firstFillingColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(400) +
+                SEPARATOR +
+                "fillingColumn" +
+                SEPARATOR +
+                "fillString[0]"
+        val lastFillingColumnLog =
+            TABLE_LOG_DATE_FORMAT.format(1300) +
+                SEPARATOR +
+                "fillingColumn" +
+                SEPARATOR +
+                "fillString[9]"
+        assertThat(dumpedString).contains(firstFillingColumnLog)
+        assertThat(dumpedString).contains(lastFillingColumnLog)
+    }
+
+    @Test
+    fun multipleColumnsEvicted_differentPrefixSameName_allColumnsInDump() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "prefix1", columnName = "sameName", value = "value1")
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "prefix2", columnName = "sameName", value = "value2")
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "prefix3", columnName = "sameName", value = "value3")
+
+        // Exactly fill the buffer so that all the above columns will be evicted
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we'll have all the evicted column entries
+        val evictedColumn1 =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "prefix1.sameName" +
+                SEPARATOR +
+                "value1"
+        val evictedColumn2 =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "prefix2.sameName" +
+                SEPARATOR +
+                "value2"
+        val evictedColumn3 =
+            TABLE_LOG_DATE_FORMAT.format(300L) +
+                SEPARATOR +
+                "prefix3.sameName" +
+                SEPARATOR +
+                "value3"
+        assertThat(dumpedString).contains(evictedColumn1)
+        assertThat(dumpedString).contains(evictedColumn2)
+        assertThat(dumpedString).contains(evictedColumn3)
+    }
+
+    @Test
+    fun multipleColumnsEvicted_dumpSortedByTimestamp() {
+        systemClock.setCurrentTimeMillis(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedFirst", value = "evictedValue")
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedSecond", value = 45)
+        systemClock.advanceTime(100L)
+        underTest.logChange(prefix = "", columnName = "willBeEvictedThird", value = true)
+
+        // Exactly fill the buffer with so that all the above columns will be evicted
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we'll have all the evicted column entries in timestamp order
+        val firstEvictedLog =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "willBeEvictedFirst" +
+                SEPARATOR +
+                "evictedValue"
+        val secondEvictedLog =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "willBeEvictedSecond" +
+                SEPARATOR +
+                "45"
+        val thirdEvictedLog =
+            TABLE_LOG_DATE_FORMAT.format(300L) +
+                SEPARATOR +
+                "willBeEvictedThird" +
+                SEPARATOR +
+                "true"
+        assertThat(dumpedString).contains(firstEvictedLog)
+        val stringAfterFirst = dumpedString.substringAfter(firstEvictedLog)
+        assertThat(stringAfterFirst).contains(secondEvictedLog)
+        val stringAfterSecond = stringAfterFirst.substringAfter(secondEvictedLog)
+        assertThat(stringAfterSecond).contains(thirdEvictedLog)
+    }
+
+    @Test
+    fun sameColumnEvictedMultipleTimes_onlyLastEvictionInDump() {
+        systemClock.setCurrentTimeMillis(0L)
+
+        for (i in 1 until 4) {
+            systemClock.advanceTime(100L)
+            val dumpString = "evicted[$i]"
+            underTest.logChange(prefix = "", columnName = "evictedColumn", value = dumpString)
+        }
+
+        // Exactly fill the buffer so that all the entries for "evictedColumn" will be evicted.
+        for (i in 0 until MAX_SIZE) {
+            systemClock.advanceTime(100L)
+            val dumpString = "fillString[$i]"
+            underTest.logChange(prefix = "", columnName = "fillingColumn", value = dumpString)
+        }
+
+        val dumpedString = dumpChanges()
+
+        // Expect that we only have the most recent evicted column entry
+        val evictedColumnLog1 =
+            TABLE_LOG_DATE_FORMAT.format(100L) +
+                SEPARATOR +
+                "evictedColumn" +
+                SEPARATOR +
+                "evicted[1]"
+        val evictedColumnLog2 =
+            TABLE_LOG_DATE_FORMAT.format(200L) +
+                SEPARATOR +
+                "evictedColumn" +
+                SEPARATOR +
+                "evicted[2]"
+        val evictedColumnLog3 =
+            TABLE_LOG_DATE_FORMAT.format(300L) +
+                SEPARATOR +
+                "evictedColumn" +
+                SEPARATOR +
+                "evicted[3]"
+        assertThat(dumpedString).doesNotContain(evictedColumnLog1)
+        assertThat(dumpedString).doesNotContain(evictedColumnLog2)
+        assertThat(dumpedString).contains(evictedColumnLog3)
+    }
+
+    @Test
+    fun logcat_bufferNotLoggable_tagNotLoggable_noEcho() {
+        whenever(logcatEchoTracker.isBufferLoggable(eq(NAME), any())).thenReturn(false)
+        whenever(logcatEchoTracker.isTagLoggable(eq("columnName"), any())).thenReturn(false)
+
+        underTest.logChange("prefix", "columnName", true)
+
+        assertThat(localLogcat.logs).isEmpty()
+    }
+
+    @Test
+    fun logcat_bufferIsLoggable_tagNotLoggable_echoes() {
+        whenever(logcatEchoTracker.isBufferLoggable(eq(NAME), any())).thenReturn(true)
+        whenever(logcatEchoTracker.isTagLoggable(eq("columnName"), any())).thenReturn(false)
+
+        underTest.logChange("prefix", "columnName", true)
+
+        assertThat(localLogcat.logs).hasSize(1)
+    }
+
+    @Test
+    fun logcat_bufferNotLoggable_tagIsLoggable_echoes() {
+        whenever(logcatEchoTracker.isBufferLoggable(eq(NAME), any())).thenReturn(false)
+        whenever(logcatEchoTracker.isTagLoggable(eq("columnName"), any())).thenReturn(true)
+
+        underTest.logChange("prefix", "columnName", true)
+
+        assertThat(localLogcat.logs).hasSize(1)
+    }
+
+    @Test
+    fun logcat_echoesDebugLogs_debugDisabled_noEcho() {
+        // Allow any log other than debug
+        whenever(logcatEchoTracker.isBufferLoggable(eq(NAME), any())).thenAnswer { invocation ->
+            (invocation.getArgument(1) as LogLevel) != LogLevel.DEBUG
+        }
+
+        underTest.logChange("prefix", "columnName", true)
+
+        assertThat(localLogcat.logs).isEmpty()
+    }
+
+    @Test
+    fun logcat_echoesDebugLogs_debugEnabled_echoes() {
+        // Only allow debug logs
+        whenever(logcatEchoTracker.isBufferLoggable(eq(NAME), eq(LogLevel.DEBUG))).thenReturn(true)
+
+        underTest.logChange("prefix", "columnName", true)
+
+        assertThat(localLogcat.logs).hasSize(1)
+    }
+
+    @Test
+    fun logcat_bufferNotLoggable_tagIsLoggable_usesColNameForTagCheck() {
+        systemClock.setCurrentTimeMillis(1000L)
+
+        val nonLoggingTag = "nonLoggingColName"
+        val loggingTag = "loggingColName"
+
+        whenever(logcatEchoTracker.isBufferLoggable(eq(NAME), any())).thenReturn(false)
+        whenever(logcatEchoTracker.isTagLoggable(eq(loggingTag), eq(LogLevel.DEBUG)))
+            .thenReturn(true)
+        whenever(logcatEchoTracker.isTagLoggable(eq(nonLoggingTag), eq(LogLevel.DEBUG)))
+            .thenReturn(false)
+
+        underTest.logChange("", nonLoggingTag, true)
+        underTest.logChange("", loggingTag, true)
+
+        assertThat(localLogcat.logs).hasSize(1)
+
+        val timestamp = TABLE_LOG_DATE_FORMAT.format(1000L)
+        val expectedMessage = "${timestamp}${SEPARATOR}${loggingTag}${SEPARATOR}true"
+        val expectedLine = "D $NAME: $expectedMessage"
+
+        assertThat(localLogcat.logs[0]).isEqualTo(expectedLine)
+    }
+
+    @Test
+    fun logcat_bufferLoggable_multipleMessagesAreEchoed() {
+        systemClock.setCurrentTimeMillis(1000L)
+        whenever(logcatEchoTracker.isBufferLoggable(eq(NAME), any())).thenReturn(true)
+
+        val col1 = "column1"
+        val col2 = "column2"
+
+        // Log a couple of columns that flip bits
+        underTest.logChange("", col1, true)
+        underTest.logChange("", col2, false)
+        underTest.logChange("", col1, false)
+        underTest.logChange("", col2, true)
+
+        assertThat(localLogcat.logs).hasSize(4)
+
+        val timestamp = TABLE_LOG_DATE_FORMAT.format(1000L)
+        val msg1 = "${timestamp}${SEPARATOR}${col1}${SEPARATOR}true"
+        val msg2 = "${timestamp}${SEPARATOR}${col2}${SEPARATOR}false"
+        val msg3 = "${timestamp}${SEPARATOR}${col1}${SEPARATOR}false"
+        val msg4 = "${timestamp}${SEPARATOR}${col2}${SEPARATOR}true"
+        val expected = listOf(msg1, msg2, msg3, msg4).map { "D $NAME: $it" }
+
+        // Logs use the same bg dispatcher for writing to logcat, they should be in order
+        for ((msg, logLine) in expected zip localLogcat.logs) {
+            assertThat(logLine).isEqualTo(msg)
+        }
     }
 
     private fun dumpChanges(): String {

@@ -19,7 +19,8 @@ package com.android.systemui.statusbar.pipeline.mobile.domain.interactor
 import android.telephony.CellSignalStrength
 import android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN
 import androidx.test.filters.SmallTest
-import com.android.settingslib.SignalIcon.MobileIconGroup
+import com.android.settingslib.mobile.MobileIconCarrierIdOverrides
+import com.android.settingslib.mobile.MobileIconCarrierIdOverridesImpl
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
@@ -31,18 +32,24 @@ import com.android.systemui.statusbar.pipeline.mobile.data.repository.FakeMobile
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FIVE_G_OVERRIDE
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.FOUR_G
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.FakeMobileIconsInteractor.Companion.THREE_G
+import com.android.systemui.statusbar.pipeline.mobile.domain.model.NetworkTypeIconModel
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
+import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.ArgumentMatchers.anyString
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 class MobileIconInteractorTest : SysuiTestCase() {
     private lateinit var underTest: MobileIconInteractor
@@ -50,29 +57,17 @@ class MobileIconInteractorTest : SysuiTestCase() {
     private val mobileIconsInteractor = FakeMobileIconsInteractor(mobileMappingsProxy, mock())
     private val connectionRepository = FakeMobileConnectionRepository(SUB_1_ID, mock())
 
-    private val scope = CoroutineScope(IMMEDIATE)
+    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testScope = TestScope(testDispatcher)
 
     @Before
     fun setUp() {
-        underTest =
-            MobileIconInteractorImpl(
-                scope,
-                mobileIconsInteractor.activeDataConnectionHasDataEnabled,
-                mobileIconsInteractor.alwaysShowDataRatIcon,
-                mobileIconsInteractor.alwaysUseCdmaLevel,
-                mobileIconsInteractor.defaultMobileNetworkConnectivity,
-                mobileIconsInteractor.defaultMobileIconMapping,
-                mobileIconsInteractor.defaultMobileIconGroup,
-                mobileIconsInteractor.defaultDataSubId,
-                mobileIconsInteractor.isDefaultConnectionFailed,
-                mobileIconsInteractor.isForceHidden,
-                connectionRepository,
-            )
+        underTest = createInteractor()
     }
 
     @Test
     fun gsm_level_default_unknown() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.isGsm.value = true
 
             var latest: Int? = null
@@ -85,7 +80,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun gsm_usesGsmLevel() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.isGsm.value = true
             connectionRepository.primaryLevel.value = GSM_LEVEL
             connectionRepository.cdmaLevel.value = CDMA_LEVEL
@@ -100,7 +95,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun gsm_alwaysShowCdmaTrue_stillUsesGsmLevel() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.isGsm.value = true
             connectionRepository.primaryLevel.value = GSM_LEVEL
             connectionRepository.cdmaLevel.value = CDMA_LEVEL
@@ -116,7 +111,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun notGsm_level_default_unknown() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.isGsm.value = false
 
             var latest: Int? = null
@@ -128,7 +123,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun notGsm_alwaysShowCdmaTrue_usesCdmaLevel() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.isGsm.value = false
             connectionRepository.primaryLevel.value = GSM_LEVEL
             connectionRepository.cdmaLevel.value = CDMA_LEVEL
@@ -144,7 +139,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun notGsm_alwaysShowCdmaFalse_usesPrimaryLevel() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.isGsm.value = false
             connectionRepository.primaryLevel.value = GSM_LEVEL
             connectionRepository.cdmaLevel.value = CDMA_LEVEL
@@ -160,7 +155,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun numberOfLevels_comesFromRepo() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Int? = null
             val job = underTest.numberOfLevels.onEach { latest = it }.launchIn(this)
 
@@ -175,101 +170,106 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun iconGroup_three_g() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.resolvedNetworkType.value =
                 DefaultNetworkType(mobileMappingsProxy.toIconKey(THREE_G))
 
-            var latest: MobileIconGroup? = null
+            var latest: NetworkTypeIconModel? = null
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
-            assertThat(latest).isEqualTo(TelephonyIcons.THREE_G)
+            assertThat(latest).isEqualTo(NetworkTypeIconModel.DefaultIcon(TelephonyIcons.THREE_G))
 
             job.cancel()
         }
 
     @Test
     fun iconGroup_updates_on_change() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.resolvedNetworkType.value =
                 DefaultNetworkType(mobileMappingsProxy.toIconKey(THREE_G))
 
-            var latest: MobileIconGroup? = null
+            var latest: NetworkTypeIconModel? = null
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
             connectionRepository.resolvedNetworkType.value =
                 DefaultNetworkType(mobileMappingsProxy.toIconKey(FOUR_G))
-            yield()
 
-            assertThat(latest).isEqualTo(TelephonyIcons.FOUR_G)
+            assertThat(latest).isEqualTo(NetworkTypeIconModel.DefaultIcon(TelephonyIcons.FOUR_G))
 
             job.cancel()
         }
 
     @Test
     fun iconGroup_5g_override_type() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.resolvedNetworkType.value =
                 OverrideNetworkType(mobileMappingsProxy.toIconKeyOverride(FIVE_G_OVERRIDE))
 
-            var latest: MobileIconGroup? = null
+            var latest: NetworkTypeIconModel? = null
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
-            assertThat(latest).isEqualTo(TelephonyIcons.NR_5G)
+            assertThat(latest).isEqualTo(NetworkTypeIconModel.DefaultIcon(TelephonyIcons.NR_5G))
 
             job.cancel()
         }
 
     @Test
     fun iconGroup_default_if_no_lookup() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.resolvedNetworkType.value =
                 DefaultNetworkType(mobileMappingsProxy.toIconKey(NETWORK_TYPE_UNKNOWN))
 
-            var latest: MobileIconGroup? = null
+            var latest: NetworkTypeIconModel? = null
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
-            assertThat(latest).isEqualTo(FakeMobileIconsInteractor.DEFAULT_ICON)
+            assertThat(latest)
+                .isEqualTo(NetworkTypeIconModel.DefaultIcon(FakeMobileIconsInteractor.DEFAULT_ICON))
 
             job.cancel()
         }
 
     @Test
     fun iconGroup_carrierMerged_usesOverride() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             connectionRepository.resolvedNetworkType.value = CarrierMergedNetworkType
 
-            var latest: MobileIconGroup? = null
+            var latest: NetworkTypeIconModel? = null
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
-            assertThat(latest).isEqualTo(CarrierMergedNetworkType.iconGroupOverride)
+            assertThat(latest)
+                .isEqualTo(
+                    NetworkTypeIconModel.DefaultIcon(CarrierMergedNetworkType.iconGroupOverride)
+                )
 
             job.cancel()
         }
 
     @Test
-    fun `icon group - checks default data`() =
-        runBlocking(IMMEDIATE) {
-            mobileIconsInteractor.defaultDataSubId.value = SUB_1_ID
+    fun overrideIcon_usesCarrierIdOverride() =
+        testScope.runTest {
+            val overrides =
+                mock<MobileIconCarrierIdOverrides>().also {
+                    whenever(it.carrierIdEntryExists(anyInt())).thenReturn(true)
+                    whenever(it.getOverrideFor(anyInt(), anyString(), any())).thenReturn(1234)
+                }
+
+            underTest = createInteractor(overrides)
+
             connectionRepository.resolvedNetworkType.value =
                 DefaultNetworkType(mobileMappingsProxy.toIconKey(THREE_G))
 
-            var latest: MobileIconGroup? = null
+            var latest: NetworkTypeIconModel? = null
             val job = underTest.networkTypeIconGroup.onEach { latest = it }.launchIn(this)
 
-            assertThat(latest).isEqualTo(TelephonyIcons.THREE_G)
-
-            // Default data sub id changes to something else
-            mobileIconsInteractor.defaultDataSubId.value = 123
-            yield()
-
-            assertThat(latest).isEqualTo(TelephonyIcons.NOT_DEFAULT_DATA)
+            assertThat(latest)
+                .isEqualTo(NetworkTypeIconModel.OverriddenIcon(TelephonyIcons.THREE_G, 1234))
 
             job.cancel()
         }
 
     @Test
     fun alwaysShowDataRatIcon_matchesParent() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.alwaysShowDataRatIcon.onEach { latest = it }.launchIn(this)
 
@@ -284,7 +284,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun alwaysUseCdmaLevel_matchesParent() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.alwaysUseCdmaLevel.onEach { latest = it }.launchIn(this)
 
@@ -299,7 +299,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun test_isDefaultDataEnabled_matchesParent() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isDefaultDataEnabled.onEach { latest = it }.launchIn(this)
 
@@ -314,7 +314,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun test_isDefaultConnectionFailed_matchedParent() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             val job = underTest.isDefaultConnectionFailed.launchIn(this)
 
             mobileIconsInteractor.isDefaultConnectionFailed.value = false
@@ -328,12 +328,11 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun dataState_connected() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isDataConnected.onEach { latest = it }.launchIn(this)
 
             connectionRepository.dataConnectionState.value = DataConnectionState.Connected
-            yield()
 
             assertThat(latest).isTrue()
 
@@ -342,7 +341,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun dataState_notConnected() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isDataConnected.onEach { latest = it }.launchIn(this)
 
@@ -354,8 +353,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `isInService - uses repository value`() =
-        runBlocking(IMMEDIATE) {
+    fun isInService_usesRepositoryValue() =
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isInService.onEach { latest = it }.launchIn(this)
 
@@ -371,20 +370,18 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `roaming - is gsm - uses connection model`() =
-        runBlocking(IMMEDIATE) {
+    fun roaming_isGsm_usesConnectionModel() =
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
 
             connectionRepository.cdmaRoaming.value = true
             connectionRepository.isGsm.value = true
             connectionRepository.isRoaming.value = false
-            yield()
 
             assertThat(latest).isFalse()
 
             connectionRepository.isRoaming.value = true
-            yield()
 
             assertThat(latest).isTrue()
 
@@ -392,22 +389,20 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `roaming - is cdma - uses cdma roaming bit`() =
-        runBlocking(IMMEDIATE) {
+    fun roaming_isCdma_usesCdmaRoamingBit() =
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
 
             connectionRepository.cdmaRoaming.value = false
             connectionRepository.isGsm.value = false
             connectionRepository.isRoaming.value = true
-            yield()
 
             assertThat(latest).isFalse()
 
             connectionRepository.cdmaRoaming.value = true
             connectionRepository.isGsm.value = false
             connectionRepository.isRoaming.value = false
-            yield()
 
             assertThat(latest).isTrue()
 
@@ -415,8 +410,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `roaming - false while carrierNetworkChangeActive`() =
-        runBlocking(IMMEDIATE) {
+    fun roaming_falseWhileCarrierNetworkChangeActive() =
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isRoaming.onEach { latest = it }.launchIn(this)
 
@@ -424,13 +419,11 @@ class MobileIconInteractorTest : SysuiTestCase() {
             connectionRepository.isGsm.value = false
             connectionRepository.isRoaming.value = true
             connectionRepository.carrierNetworkChangeActive.value = true
-            yield()
 
             assertThat(latest).isFalse()
 
             connectionRepository.cdmaRoaming.value = true
             connectionRepository.isGsm.value = true
-            yield()
 
             assertThat(latest).isFalse()
 
@@ -438,8 +431,8 @@ class MobileIconInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun `network name - uses operatorAlphaShot when non null and repo is default`() =
-        runBlocking(IMMEDIATE) {
+    fun networkName_usesOperatorAlphaShotWhenNonNullAndRepoIsDefault() =
+        testScope.runTest {
             var latest: NetworkNameModel? = null
             val job = underTest.networkName.onEach { latest = it }.launchIn(this)
 
@@ -448,20 +441,17 @@ class MobileIconInteractorTest : SysuiTestCase() {
             // Default network name, operator name is non-null, uses the operator name
             connectionRepository.networkName.value = DEFAULT_NAME
             connectionRepository.operatorAlphaShort.value = testOperatorName
-            yield()
 
             assertThat(latest).isEqualTo(NetworkNameModel.IntentDerived(testOperatorName))
 
             // Default network name, operator name is null, uses the default
             connectionRepository.operatorAlphaShort.value = null
-            yield()
 
             assertThat(latest).isEqualTo(DEFAULT_NAME)
 
             // Derived network name, operator name non-null, uses the derived name
             connectionRepository.networkName.value = DERIVED_NAME
             connectionRepository.operatorAlphaShort.value = testOperatorName
-            yield()
 
             assertThat(latest).isEqualTo(DERIVED_NAME)
 
@@ -470,7 +460,7 @@ class MobileIconInteractorTest : SysuiTestCase() {
 
     @Test
     fun isForceHidden_matchesParent() =
-        runBlocking(IMMEDIATE) {
+        testScope.runTest {
             var latest: Boolean? = null
             val job = underTest.isForceHidden.onEach { latest = it }.launchIn(this)
 
@@ -483,9 +473,25 @@ class MobileIconInteractorTest : SysuiTestCase() {
             job.cancel()
         }
 
-    companion object {
-        private val IMMEDIATE = Dispatchers.Main.immediate
+    private fun createInteractor(
+        overrides: MobileIconCarrierIdOverrides = MobileIconCarrierIdOverridesImpl()
+    ) =
+        MobileIconInteractorImpl(
+            testScope.backgroundScope,
+            mobileIconsInteractor.activeDataConnectionHasDataEnabled,
+            mobileIconsInteractor.alwaysShowDataRatIcon,
+            mobileIconsInteractor.alwaysUseCdmaLevel,
+            mobileIconsInteractor.mobileIsDefault,
+            mobileIconsInteractor.defaultMobileIconMapping,
+            mobileIconsInteractor.defaultMobileIconGroup,
+            mobileIconsInteractor.isDefaultConnectionFailed,
+            mobileIconsInteractor.isForceHidden,
+            connectionRepository,
+            context,
+            overrides,
+        )
 
+    companion object {
         private const val GSM_LEVEL = 1
         private const val CDMA_LEVEL = 2
 

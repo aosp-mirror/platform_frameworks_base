@@ -35,18 +35,23 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SystemSettings
+import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
 
 class FontScalingTile
 @Inject
 constructor(
     host: QSHost,
+    uiEventLogger: QsEventLogger,
     @Background backgroundLooper: Looper,
-    @Main mainHandler: Handler,
+    @Main private val mainHandler: Handler,
     falsingManager: FalsingManager,
     metricsLogger: MetricsLogger,
     statusBarStateController: StatusBarStateController,
@@ -54,10 +59,14 @@ constructor(
     qsLogger: QSLogger,
     private val dialogLaunchAnimator: DialogLaunchAnimator,
     private val systemSettings: SystemSettings,
-    private val featureFlags: FeatureFlags
+    private val secureSettings: SecureSettings,
+    private val systemClock: SystemClock,
+    private val featureFlags: FeatureFlags,
+    @Background private val backgroundDelayableExecutor: DelayableExecutor
 ) :
     QSTileImpl<QSTile.State?>(
         host,
+        uiEventLogger,
         backgroundLooper,
         mainHandler,
         falsingManager,
@@ -78,7 +87,15 @@ constructor(
 
     override fun handleClick(view: View?) {
         mUiHandler.post {
-            val dialog: SystemUIDialog = FontScalingDialog(mContext, systemSettings)
+            val dialog: SystemUIDialog =
+                FontScalingDialog(
+                    mContext,
+                    systemSettings,
+                    secureSettings,
+                    systemClock,
+                    mainHandler,
+                    backgroundDelayableExecutor
+                )
             if (view != null) {
                 dialogLaunchAnimator.showFromView(
                     dialog,

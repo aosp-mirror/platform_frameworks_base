@@ -17,10 +17,12 @@
 package com.android.server.wm;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.Display.STATE_ON;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
@@ -28,6 +30,7 @@ import static com.android.server.wm.ContentRecorder.KEY_RECORD_TASK_FEATURE;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -40,15 +43,12 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.hardware.display.VirtualDisplay;
-import android.os.Binder;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
-import android.util.DisplayMetrics;
 import android.view.ContentRecordingSession;
+import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.Surface;
 import android.view.SurfaceControl;
 
 import androidx.annotation.NonNull;
@@ -75,11 +75,10 @@ import java.util.concurrent.CountDownLatch;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ContentRecorderTests extends WindowTestsBase {
-    private static final IBinder TEST_TOKEN = new RecordingTestToken();
     private static IBinder sTaskWindowContainerToken;
     private Task mTask;
     private final ContentRecordingSession mDisplaySession =
-            ContentRecordingSession.createDisplaySession(TEST_TOKEN);
+            ContentRecordingSession.createDisplaySession(DEFAULT_DISPLAY);
     private ContentRecordingSession mTaskSession;
     private static Point sSurfaceSize;
     private ContentRecorder mContentRecorder;
@@ -88,8 +87,6 @@ public class ContentRecorderTests extends WindowTestsBase {
     // Handle feature flag.
     private ConfigListener mConfigListener;
     private CountDownLatch mLatch;
-
-    private VirtualDisplay mVirtualDisplay;
 
     @Before public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -103,25 +100,25 @@ public class ContentRecorderTests extends WindowTestsBase {
         doReturn(INVALID_DISPLAY).when(mWm.mDisplayManagerInternal).getDisplayIdToMirror(anyInt());
 
         // GIVEN the VirtualDisplay associated with the session (so the display has state ON).
-        mVirtualDisplay = mWm.mDisplayManager.createVirtualDisplay("VirtualDisplay",
-                sSurfaceSize.x, sSurfaceSize.y,
-                DisplayMetrics.DENSITY_140, new Surface(), VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR);
-        final int displayId = mVirtualDisplay.getDisplay().getDisplayId();
-        mWm.mRoot.onDisplayAdded(displayId);
-        final DisplayContent virtualDisplayContent = mWm.mRoot.getDisplayContent(displayId);
+        DisplayInfo displayInfo = mDisplayInfo;
+        displayInfo.logicalWidth = sSurfaceSize.x;
+        displayInfo.logicalHeight = sSurfaceSize.y;
+        displayInfo.state = STATE_ON;
+        final DisplayContent virtualDisplayContent = createNewDisplay(displayInfo);
+        final int displayId = virtualDisplayContent.getDisplayId();
         mContentRecorder = new ContentRecorder(virtualDisplayContent,
                 mMediaProjectionManagerWrapper);
         spyOn(virtualDisplayContent);
 
         // GIVEN MediaProjection has already initialized the WindowToken of the DisplayArea to
         // record.
-        setUpDefaultTaskDisplayAreaWindowToken();
-        mDisplaySession.setDisplayId(displayId);
+        mDisplaySession.setVirtualDisplayId(displayId);
+        mDisplaySession.setDisplayToRecord(mDefaultDisplay.mDisplayId);
 
         // GIVEN there is a window token associated with a task to record.
         sTaskWindowContainerToken = setUpTaskWindowContainerToken(virtualDisplayContent);
         mTaskSession = ContentRecordingSession.createTaskSession(sTaskWindowContainerToken);
-        mTaskSession.setDisplayId(displayId);
+        mTaskSession.setVirtualDisplayId(displayId);
 
         mConfigListener = new ConfigListener();
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_WINDOW_MANAGER,
@@ -129,13 +126,15 @@ public class ContentRecorderTests extends WindowTestsBase {
         mLatch = new CountDownLatch(1);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_WINDOW_MANAGER, KEY_RECORD_TASK_FEATURE,
                 "true", true);
+
+        // Skip unnecessary operations of relayout.
+        spyOn(mWm.mWindowPlacerLocked);
+        doNothing().when(mWm.mWindowPlacerLocked).performSurfacePlacement(anyBoolean());
     }
 
     @After
     public void teardown() {
         DeviceConfig.removeOnPropertiesChangedListener(mConfigListener);
-        mVirtualDisplay.release();
-        mWm.mRoot.onDisplayRemoved(mVirtualDisplay.getDisplay().getDisplayId());
     }
 
     @Test
@@ -154,19 +153,18 @@ public class ContentRecorderTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUpdateRecording_display_nullToken() {
-        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(TEST_TOKEN);
-        session.setDisplayId(mDisplaySession.getDisplayId());
-        session.setTokenToRecord(null);
+    public void testUpdateRecording_display_invalidDisplayIdToMirror() {
+        ContentRecordingSession session = ContentRecordingSession.createDisplaySession(
+                INVALID_DISPLAY);
         mContentRecorder.setContentRecordingSession(session);
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
     }
 
     @Test
-    public void testUpdateRecording_display_noWindowContainer() {
+    public void testUpdateRecording_display_noDisplayContentToMirror() {
         doReturn(null).when(
-                mWm.mWindowContextListenerController).getContainer(any());
+                mWm.mRoot).getDisplayContent(anyInt());
         mContentRecorder.setContentRecordingSession(mDisplaySession);
         mContentRecorder.updateRecording();
         assertThat(mContentRecorder.isCurrentlyRecording()).isFalse();
@@ -192,9 +190,8 @@ public class ContentRecorderTests extends WindowTestsBase {
 
     @Test
     public void testUpdateRecording_task_nullToken() {
-        ContentRecordingSession session = ContentRecordingSession.createTaskSession(
-                sTaskWindowContainerToken);
-        session.setDisplayId(mDisplaySession.getDisplayId());
+        ContentRecordingSession session = mTaskSession;
+        session.setVirtualDisplayId(mDisplaySession.getVirtualDisplayId());
         session.setTokenToRecord(null);
         mContentRecorder.setContentRecordingSession(session);
         mContentRecorder.updateRecording();
@@ -268,8 +265,8 @@ public class ContentRecorderTests extends WindowTestsBase {
 
         final ActivityInfo info = new ActivityInfo();
         info.windowLayout = new ActivityInfo.WindowLayout(-1 /* width */,
-                        -1 /* widthFraction */, -1 /* height */, -1 /* heightFraction */,
-                        Gravity.NO_GRAVITY, recordedWidth, recordedHeight);
+                -1 /* widthFraction */, -1 /* height */, -1 /* heightFraction */,
+                Gravity.NO_GRAVITY, recordedWidth, recordedHeight);
         mTask.setMinDimensions(info);
 
         // WHEN a recording is ongoing.
@@ -278,7 +275,11 @@ public class ContentRecorderTests extends WindowTestsBase {
         assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
 
         // WHEN a configuration change arrives, and the recorded content is a different size.
-        mTask.setBounds(new Rect(0, 0, recordedWidth, recordedHeight));
+        Configuration configuration = mTask.getConfiguration();
+        configuration.windowConfiguration.setBounds(new Rect(0, 0, recordedWidth, recordedHeight));
+        configuration.windowConfiguration.setAppBounds(
+                new Rect(0, 0, recordedWidth, recordedHeight));
+        mTask.onConfigurationChanged(configuration);
         assertThat(mContentRecorder.isCurrentlyRecording()).isTrue();
 
         // THEN content in the captured DisplayArea is scaled to fit the surface size.
@@ -432,20 +433,6 @@ public class ContentRecorderTests extends WindowTestsBase {
         // THEN the resize callback is notified.
         verify(mMediaProjectionManagerWrapper).notifyActiveProjectionCapturedContentResized(
                 displayAreaBounds.width(), displayAreaBounds.height());
-    }
-
-    private static class RecordingTestToken extends Binder {
-    }
-
-    /**
-     * Creates a WindowToken associated with the default task DisplayArea, in order for that
-     * DisplayArea to be mirrored.
-     */
-    private void setUpDefaultTaskDisplayAreaWindowToken() {
-        // GIVEN the default task display area is represented by the WindowToken.
-        spyOn(mWm.mWindowContextListenerController);
-        doReturn(mDefaultDisplay.getDefaultTaskDisplayArea()).when(
-                mWm.mWindowContextListenerController).getContainer(any());
     }
 
     /**

@@ -121,6 +121,11 @@ class LockSettingsStorage {
     }
 
     @VisibleForTesting
+    public boolean isAutoPinConfirmSettingEnabled(int userId) {
+        return getBoolean(LockPatternUtils.AUTO_PIN_CONFIRM, false, userId);
+    }
+
+    @VisibleForTesting
     public void writeKeyValue(SQLiteDatabase db, String key, String value, int userId) {
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_KEY, key);

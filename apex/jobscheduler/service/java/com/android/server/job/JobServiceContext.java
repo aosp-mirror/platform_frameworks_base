@@ -20,10 +20,13 @@ import static android.app.job.JobInfo.getPriorityString;
 
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
+import static com.android.server.job.JobSchedulerService.safelyScaleBytesToKBForHistogram;
 
+import android.Manifest;
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.Notification;
 import android.app.compat.CompatChanges;
@@ -35,11 +38,11 @@ import android.app.job.JobProtoEnums;
 import android.app.job.JobWorkItem;
 import android.app.usage.UsageStatsManagerInternal;
 import android.compat.annotation.ChangeId;
-import android.compat.annotation.Disabled;
 import android.compat.annotation.EnabledAfter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.PermissionChecker;
 import android.content.ServiceConnection;
 import android.net.Network;
 import android.net.Uri;
@@ -64,6 +67,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.modules.expresslog.Counter;
+import com.android.modules.expresslog.Histogram;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.job.controllers.JobStatus;
@@ -97,9 +102,7 @@ public final class JobServiceContext implements ServiceConnection {
      * Whether to trigger an ANR when apps are slow to respond on pre-UDC APIs and functionality.
      */
     @ChangeId
-    @Disabled
-    // TODO(258236856): Enable after test is fixed
-    // @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     private static final long ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES = 258236856L;
 
     private static final String TAG = "JobServiceContext";
@@ -109,6 +112,23 @@ public final class JobServiceContext implements ServiceConnection {
     private static final long OP_TIMEOUT_MILLIS = 8 * 1000 * Build.HW_TIMEOUT_MULTIPLIER;
     /** Amount of time the JobScheduler will wait for a job to provide a required notification. */
     private static final long NOTIFICATION_TIMEOUT_MILLIS = 10_000L * Build.HW_TIMEOUT_MULTIPLIER;
+    private static final long EXECUTION_DURATION_STAMP_PERIOD_MILLIS = 5 * 60_000L;
+
+    private static final Histogram sEnqueuedJwiAtJobStart = new Histogram(
+            "job_scheduler.value_hist_w_uid_enqueued_work_items_at_job_start",
+            new Histogram.ScaledRangeOptions(20, 1, 3, 1.4f));
+    private static final Histogram sTransferredNetworkDownloadKBHighWaterMarkLogger = new Histogram(
+            "job_scheduler.value_hist_transferred_network_download_kilobytes_high_water_mark",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sTransferredNetworkUploadKBHighWaterMarkLogger = new Histogram(
+            "job_scheduler.value_hist_transferred_network_upload_kilobytes_high_water_mark",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sUpdatedEstimatedNetworkDownloadKBLogger = new Histogram(
+            "job_scheduler.value_hist_updated_estimated_network_download_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
+    private static final Histogram sUpdatedEstimatedNetworkUploadKBLogger = new Histogram(
+            "job_scheduler.value_hist_updated_estimated_network_upload_kilobytes",
+            new Histogram.ScaledRangeOptions(50, 0, 32 /* 32 KB */, 1.31f));
 
     private static final String[] VERB_STRINGS = {
             "VERB_BINDING", "VERB_STARTING", "VERB_EXECUTING", "VERB_STOPPING", "VERB_FINISHED"
@@ -194,6 +214,8 @@ public final class JobServiceContext implements ServiceConnection {
     private long mMaxExecutionTimeMillis;
     /** Whether this job is required to provide a notification and we're still waiting for it. */
     private boolean mAwaitingNotification;
+    /** The last time we updated the job's execution duration, in the elapsed realtime timebase. */
+    private long mLastExecutionDurationStampTimeElapsed;
 
     private long mEstimatedDownloadBytes;
     private long mEstimatedUploadBytes;
@@ -339,13 +361,15 @@ public final class JobServiceContext implements ServiceConnection {
                 job.changedAuthorities.toArray(triggeredAuthorities);
             }
             final JobInfo ji = job.getJob();
+            final Network passedNetwork = canGetNetworkInformation(job) ? job.network : null;
             mParams = new JobParameters(mRunningCallback, job.getNamespace(), job.getJobId(),
                     ji.getExtras(),
                     ji.getTransientExtras(), ji.getClipData(), ji.getClipGrantFlags(),
                     isDeadlineExpired, job.shouldTreatAsExpeditedJob(),
                     job.shouldTreatAsUserInitiatedJob(), triggeredUris, triggeredAuthorities,
-                    job.network);
+                    passedNetwork);
             mExecutionStartTimeElapsed = sElapsedRealtimeClock.millis();
+            mLastExecutionDurationStampTimeElapsed = mExecutionStartTimeElapsed;
             mMinExecutionGuaranteeMillis = mService.getMinJobExecutionGuaranteeMs(job);
             mMaxExecutionTimeMillis =
                     Math.max(mService.getMaxJobExecutionTimeMs(job), mMinExecutionGuaranteeMillis);
@@ -390,23 +414,27 @@ public final class JobServiceContext implements ServiceConnection {
                     .setFlags(Intent.FLAG_FROM_BACKGROUND);
             boolean binding = false;
             try {
-                final int bindFlags;
+                final Context.BindServiceFlags bindFlags;
                 if (job.shouldTreatAsUserInitiatedJob()) {
-                    // TODO (191785864, 261999509): add an appropriate flag so user-initiated jobs
-                    //    can bypass data saver
-                    bindFlags = Context.BIND_AUTO_CREATE
-                            | Context.BIND_ALMOST_PERCEPTIBLE
-                            | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
-                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
+                    bindFlags = Context.BindServiceFlags.of(
+                            Context.BIND_AUTO_CREATE
+                                    | Context.BIND_ALMOST_PERCEPTIBLE
+                                    | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
+                                    | Context.BIND_BYPASS_USER_NETWORK_RESTRICTIONS
+                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
                 } else if (job.shouldTreatAsExpeditedJob()) {
-                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                            | Context.BIND_ALMOST_PERCEPTIBLE
-                            | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
-                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
+                    bindFlags = Context.BindServiceFlags.of(
+                            Context.BIND_AUTO_CREATE
+                                    | Context.BIND_NOT_FOREGROUND
+                                    | Context.BIND_ALMOST_PERCEPTIBLE
+                                    | Context.BIND_BYPASS_POWER_NETWORK_RESTRICTIONS
+                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
                 } else {
-                    bindFlags = Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
-                            | Context.BIND_NOT_PERCEPTIBLE
-                            | Context.BIND_NOT_APP_COMPONENT_USAGE;
+                    bindFlags = Context.BindServiceFlags.of(
+                            Context.BIND_AUTO_CREATE
+                                    | Context.BIND_NOT_FOREGROUND
+                                    | Context.BIND_NOT_PERCEPTIBLE
+                                    | Context.BIND_NOT_APP_COMPONENT_USAGE);
                 }
                 binding = mContext.bindServiceAsUser(intent, this, bindFlags,
                         UserHandle.of(job.getUserId()));
@@ -462,23 +490,46 @@ public final class JobServiceContext implements ServiceConnection {
                     job.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
                     job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
                     job.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
-                    mExecutionStartTimeElapsed - job.enqueueTime);
+                    mExecutionStartTimeElapsed - job.enqueueTime,
+                    job.getJob().isUserInitiated(),
+                    job.shouldTreatAsUserInitiatedJob(),
+                    job.getJob().isPeriodic(),
+                    job.getJob().getMinLatencyMillis(),
+                    job.getEstimatedNetworkDownloadBytes(),
+                    job.getEstimatedNetworkUploadBytes(),
+                    job.getWorkCount(),
+                    ActivityManager.processStateAmToProto(mService.getUidProcState(job.getUid())));
+            sEnqueuedJwiAtJobStart.logSampleWithUid(job.getUid(), job.getWorkCount());
+            final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
+                final String componentPackage = job.getServiceComponent().getPackageName();
+                String traceTag = "*job*<" + job.getSourceUid() + ">" + sourcePackage;
+                if (!sourcePackage.equals(componentPackage)) {
+                    traceTag += ":" + componentPackage;
+                }
+                traceTag += "/" + job.getServiceComponent().getShortClassName();
+                if (!componentPackage.equals(job.serviceProcessName)) {
+                    traceTag += "$" + job.serviceProcessName;
+                }
+                if (job.getNamespace() != null) {
+                    traceTag += "@" + job.getNamespace();
+                }
+                traceTag += "#" + job.getJobId();
+
                 // Use the context's ID to distinguish traces since there'll only be one job
                 // running per context.
                 Trace.asyncTraceForTrackBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
-                        job.getTag(), getId());
+                        traceTag, getId());
             }
             try {
                 mBatteryStats.noteJobStart(job.getBatteryName(), job.getSourceUid());
             } catch (RemoteException e) {
                 // Whatever.
             }
-            final String jobPackage = job.getSourcePackageName();
             final int jobUserId = job.getSourceUserId();
             UsageStatsManagerInternal usageStats =
                     LocalServices.getService(UsageStatsManagerInternal.class);
-            usageStats.setLastJobRunTime(jobPackage, jobUserId, mExecutionStartTimeElapsed);
+            usageStats.setLastJobRunTime(sourcePackage, jobUserId, mExecutionStartTimeElapsed);
             mAvailable = false;
             mStoppedReason = null;
             mStoppedTime = 0;
@@ -486,6 +537,37 @@ public final class JobServiceContext implements ServiceConnection {
             job.startedAsUserInitiatedJob = job.shouldTreatAsUserInitiatedJob();
             return true;
         }
+    }
+
+    private boolean canGetNetworkInformation(@NonNull JobStatus job) {
+        if (job.getJob().getRequiredNetwork() == null) {
+            // The job never had a network constraint, so we're not going to give it a network
+            // object. Add this check as an early return to avoid wasting cycles doing permission
+            // checks for this job.
+            return false;
+        }
+        // The calling app is doing the work, so use its UID, not the source UID.
+        final int uid = job.getUid();
+        if (CompatChanges.isChangeEnabled(
+                JobSchedulerService.REQUIRE_NETWORK_PERMISSIONS_FOR_CONNECTIVITY_JOBS, uid)) {
+            final String pkgName = job.getServiceComponent().getPackageName();
+            if (!hasPermissionForDelivery(uid, pkgName, Manifest.permission.INTERNET)) {
+                return false;
+            }
+            if (!hasPermissionForDelivery(uid, pkgName, Manifest.permission.ACCESS_NETWORK_STATE)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean hasPermissionForDelivery(int uid, @NonNull String pkgName,
+            @NonNull String permission) {
+        final int result = PermissionChecker.checkPermissionForDataDelivery(mContext, permission,
+                PermissionChecker.PID_UNKNOWN, uid, pkgName, /* attributionTag */ null,
+                "network info via JS");
+        return result == PermissionChecker.PERMISSION_GRANTED;
     }
 
     @EconomicPolicy.AppAction
@@ -587,6 +669,15 @@ public final class JobServiceContext implements ServiceConnection {
     }
 
     void informOfNetworkChangeLocked(Network newNetwork) {
+        if (newNetwork != null && mRunningJob != null && !canGetNetworkInformation(mRunningJob)) {
+            // The app can't get network information, so there's no point informing it of network
+            // changes. This case may happen if an app had scheduled network job and then
+            // started targeting U+ without requesting the required network permissions.
+            if (DEBUG) {
+                Slog.d(TAG, "Skipping network change call because of missing permissions");
+            }
+            return;
+        }
         if (mVerb != VERB_EXECUTING) {
             Slog.w(TAG, "Sending onNetworkChanged for a job that isn't started. " + mRunningJob);
             if (mVerb == VERB_BINDING || mVerb == VERB_STARTING) {
@@ -745,6 +836,41 @@ public final class JobServiceContext implements ServiceConnection {
             if (!verifyCallerLocked(cb)) {
                 return;
             }
+            Counter.logIncrementWithUid(
+                    "job_scheduler.value_cntr_w_uid_estimated_network_bytes_updated",
+                    mRunningJob.getUid());
+            sUpdatedEstimatedNetworkDownloadKBLogger.logSample(
+                    safelyScaleBytesToKBForHistogram(downloadBytes));
+            sUpdatedEstimatedNetworkUploadKBLogger.logSample(
+                    safelyScaleBytesToKBForHistogram(uploadBytes));
+            if (mEstimatedDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN
+                    && downloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                if (mEstimatedDownloadBytes < downloadBytes) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler."
+                                    + "value_cntr_w_uid_estimated_network_download_bytes_increased",
+                            mRunningJob.getUid());
+                } else if (mEstimatedDownloadBytes > downloadBytes) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler."
+                                    + "value_cntr_w_uid_estimated_network_download_bytes_decreased",
+                            mRunningJob.getUid());
+                }
+            }
+            if (mEstimatedUploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN
+                    && uploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                if (mEstimatedUploadBytes < uploadBytes) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler"
+                                    + ".value_cntr_w_uid_estimated_network_upload_bytes_increased",
+                            mRunningJob.getUid());
+                } else if (mEstimatedUploadBytes > uploadBytes) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler"
+                                    + ".value_cntr_w_uid_estimated_network_upload_bytes_decreased",
+                            mRunningJob.getUid());
+                }
+            }
             mEstimatedDownloadBytes = downloadBytes;
             mEstimatedUploadBytes = uploadBytes;
         }
@@ -756,6 +882,41 @@ public final class JobServiceContext implements ServiceConnection {
         synchronized (mLock) {
             if (!verifyCallerLocked(cb)) {
                 return;
+            }
+            Counter.logIncrementWithUid(
+                    "job_scheduler.value_cntr_w_uid_transferred_network_bytes_updated",
+                    mRunningJob.getUid());
+            sTransferredNetworkDownloadKBHighWaterMarkLogger.logSample(
+                    safelyScaleBytesToKBForHistogram(downloadBytes));
+            sTransferredNetworkUploadKBHighWaterMarkLogger.logSample(
+                    safelyScaleBytesToKBForHistogram(uploadBytes));
+            if (mTransferredDownloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN
+                    && downloadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                if (mTransferredDownloadBytes < downloadBytes) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler."
+                                    + "value_cntr_w_uid_transferred_network_download_bytes_increased",
+                            mRunningJob.getUid());
+                } else if (mTransferredDownloadBytes > downloadBytes) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler."
+                                    + "value_cntr_w_uid_transferred_network_download_bytes_decreased",
+                            mRunningJob.getUid());
+                }
+            }
+            if (mTransferredUploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN
+                    && uploadBytes != JobInfo.NETWORK_BYTES_UNKNOWN) {
+                if (mTransferredUploadBytes < uploadBytes) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler."
+                                    + "value_cntr_w_uid_transferred_network_upload_bytes_increased",
+                            mRunningJob.getUid());
+                } else if (mTransferredUploadBytes > uploadBytes) {
+                    Counter.logIncrementWithUid(
+                            "job_scheduler."
+                                    + "value_cntr_w_uid_transferred_network_upload_bytes_decreased",
+                            mRunningJob.getUid());
+                }
             }
             mTransferredDownloadBytes = downloadBytes;
             mTransferredUploadBytes = uploadBytes;
@@ -827,6 +988,11 @@ public final class JobServiceContext implements ServiceConnection {
                 // Use that as the stop reason for logging/debugging purposes.
                 mParams.setStopReason(
                         mDeathMarkStopReason, mDeathMarkInternalStopReason, mDeathMarkDebugReason);
+            } else if (mRunningJob != null) {
+                Counter.logIncrementWithUid(
+                        "job_scheduler.value_cntr_w_uid_unexpected_service_disconnects",
+                        // Use the calling UID since that's the one this context was connected to.
+                        mRunningJob.getUid());
             }
             closeAndCleanupJobLocked(true /* needsReschedule */, "unexpectedly disconnected");
         }
@@ -1153,6 +1319,8 @@ public final class JobServiceContext implements ServiceConnection {
         switch (mVerb) {
             case VERB_BINDING:
                 onSlowAppResponseLocked(/* reschedule */ false, /* updateStopReasons */ true,
+                        /* texCounterMetricId */
+                        "job_scheduler.value_cntr_w_uid_slow_app_response_binding",
                         /* debugReason */ "timed out while binding",
                         /* anrMessage */ "Timed out while trying to bind",
                         CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
@@ -1163,6 +1331,8 @@ public final class JobServiceContext implements ServiceConnection {
                 // know what happened so let's log it and notify the JobScheduler
                 // FINISHED/NO-RETRY.
                 onSlowAppResponseLocked(/* reschedule */ false, /* updateStopReasons */ true,
+                        /* texCounterMetricId */
+                        "job_scheduler.value_cntr_w_uid_slow_app_response_onStartJob",
                         /* debugReason */ "timed out while starting",
                         /* anrMessage */ "No response to onStartJob",
                         CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
@@ -1173,6 +1343,8 @@ public final class JobServiceContext implements ServiceConnection {
                 // Don't update the stop reasons since we were already stopping the job for some
                 // other reason.
                 onSlowAppResponseLocked(/* reschedule */ true, /* updateStopReasons */ false,
+                        /* texCounterMetricId */
+                        "job_scheduler.value_cntr_w_uid_slow_app_response_onStopJob",
                         /* debugReason */ "timed out while stopping",
                         /* anrMessage */ "No response to onStopJob",
                         CompatChanges.isChangeEnabled(ANR_PRE_UDC_APIS_ON_SLOW_RESPONSES,
@@ -1228,11 +1400,21 @@ public final class JobServiceContext implements ServiceConnection {
                     }
                 } else if (mAwaitingNotification) {
                     onSlowAppResponseLocked(/* reschedule */ true, /* updateStopReasons */ true,
+                            /* texCounterMetricId */
+                            "job_scheduler.value_cntr_w_uid_slow_app_response_setNotification",
                             /* debugReason */ "timed out while stopping",
                             /* anrMessage */ "required notification not provided",
                             /* triggerAnr */ true);
                 } else {
-                    Slog.e(TAG, "Unexpected op timeout while EXECUTING");
+                    final long timeSinceDurationStampTimeMs =
+                            nowElapsed - mLastExecutionDurationStampTimeElapsed;
+                    if (timeSinceDurationStampTimeMs < EXECUTION_DURATION_STAMP_PERIOD_MILLIS) {
+                        Slog.e(TAG, "Unexpected op timeout while EXECUTING");
+                    }
+                    // Update the execution time even if this wasn't the pre-set time.
+                    mRunningJob.incrementCumulativeExecutionTime(timeSinceDurationStampTimeMs);
+                    mService.mJobs.touchJob(mRunningJob);
+                    mLastExecutionDurationStampTimeElapsed = nowElapsed;
                     scheduleOpTimeOutLocked();
                 }
                 break;
@@ -1269,8 +1451,11 @@ public final class JobServiceContext implements ServiceConnection {
 
     @GuardedBy("mLock")
     private void onSlowAppResponseLocked(boolean reschedule, boolean updateStopReasons,
+            @NonNull String texCounterMetricId,
             @NonNull String debugReason, @NonNull String anrMessage, boolean triggerAnr) {
         Slog.w(TAG, anrMessage + " for " + getRunningJobNameLocked());
+        // Use the calling UID since that's the one this context was connected to.
+        Counter.logIncrementWithUid(texCounterMetricId, mRunningJob.getUid());
         if (updateStopReasons) {
             mParams.setStopReason(
                     JobParameters.STOP_REASON_UNDEFINED,
@@ -1301,8 +1486,11 @@ public final class JobServiceContext implements ServiceConnection {
             Slog.d(TAG, "Cleaning up " + mRunningJob.toShortString()
                     + " reschedule=" + reschedule + " reason=" + loggingDebugReason);
         }
+        final long nowElapsed = sElapsedRealtimeClock.millis();
         applyStoppedReasonLocked(loggingDebugReason);
         completedJob = mRunningJob;
+        completedJob.incrementCumulativeExecutionTime(
+                nowElapsed - mLastExecutionDurationStampTimeElapsed);
         // Use the JobParameters stop reasons for logging and metric purposes,
         // but if the job was marked for death, use that reason for rescheduling purposes.
         // The discrepancy could happen if a job ends up stopping for some reason
@@ -1329,7 +1517,7 @@ public final class JobServiceContext implements ServiceConnection {
         mPreviousJobHadSuccessfulFinish =
                 (loggingInternalStopReason == JobParameters.INTERNAL_STOP_REASON_SUCCESSFUL_FINISH);
         if (!mPreviousJobHadSuccessfulFinish) {
-            mLastUnsuccessfulFinishElapsed = sElapsedRealtimeClock.millis();
+            mLastUnsuccessfulFinishElapsed = nowElapsed;
         }
         mJobPackageTracker.noteInactive(completedJob,
                 loggingInternalStopReason, loggingDebugReason);
@@ -1361,7 +1549,16 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.isConstraintSatisfied(JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE),
                 completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY),
                 completedJob.isConstraintSatisfied(JobStatus.CONSTRAINT_CONTENT_TRIGGER),
-                0);
+                mExecutionStartTimeElapsed - completedJob.enqueueTime,
+                completedJob.getJob().isUserInitiated(),
+                completedJob.startedAsUserInitiatedJob,
+                completedJob.getJob().isPeriodic(),
+                completedJob.getJob().getMinLatencyMillis(),
+                completedJob.getEstimatedNetworkDownloadBytes(),
+                completedJob.getEstimatedNetworkUploadBytes(),
+                completedJob.getWorkCount(),
+                ActivityManager
+                        .processStateAmToProto(mService.getUidProcState(completedJob.getUid())));
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER, "JobScheduler",
                     getId());
@@ -1378,7 +1575,8 @@ public final class JobServiceContext implements ServiceConnection {
                     JobSchedulerEconomicPolicy.ACTION_JOB_TIMEOUT,
                     String.valueOf(mRunningJob.getJobId()));
         }
-        mNotificationCoordinator.removeNotificationAssociation(this, reschedulingStopReason);
+        mNotificationCoordinator.removeNotificationAssociation(this,
+                reschedulingStopReason, completedJob);
         if (mWakeLock != null) {
             mWakeLock.release();
         }
@@ -1396,6 +1594,7 @@ public final class JobServiceContext implements ServiceConnection {
         mDeathMarkStopReason = JobParameters.STOP_REASON_UNDEFINED;
         mDeathMarkInternalStopReason = 0;
         mDeathMarkDebugReason = null;
+        mLastExecutionDurationStampTimeElapsed = 0;
         mPendingStopReason = JobParameters.STOP_REASON_UNDEFINED;
         mPendingInternalStopReason = 0;
         mPendingDebugStopReason = null;
@@ -1445,6 +1644,7 @@ public final class JobServiceContext implements ServiceConnection {
                 if (mAwaitingNotification) {
                     minTimeout = Math.min(minTimeout, NOTIFICATION_TIMEOUT_MILLIS);
                 }
+                minTimeout = Math.min(minTimeout, EXECUTION_DURATION_STAMP_PERIOD_MILLIS);
                 timeoutMillis = minTimeout;
                 break;
 

@@ -23,10 +23,11 @@ import android.hardware.biometrics.SensorLocationInternal;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.testing.AndroidTestingRunner;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Test;
@@ -35,8 +36,9 @@ import org.junit.runner.RunWith;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(AndroidTestingRunner.class)
+@RunWith(AndroidJUnit4.class)
 @SmallTest
+@RoboPilotTest
 public class UdfpsDialogMeasureAdapterTest extends SysuiTestCase {
     @Test
     public void testUdfpsBottomSpacerHeightForPortrait() {

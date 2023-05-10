@@ -37,7 +37,7 @@ public final class DefaultCrossProfileIntentFilter {
             Direction.TO_PROFILE
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface Direction {
+    public @interface Direction {
         int TO_PARENT = 0;
         int TO_PROFILE = 1;
     }

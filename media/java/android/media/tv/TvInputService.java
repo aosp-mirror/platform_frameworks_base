@@ -1030,9 +1030,15 @@ public abstract class TvInputService extends Service {
          *
          * @param type The of message that was sent, such as
          * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
-         * @param data The data sent with the message.
+         * @param data The raw data of the message. The bundle keys are:
+         *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+         *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+         *             how to parse this data.
          */
-        public void notifyTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+        public void notifyTvMessage(@TvInputManager.TvMessageType int type,
                 @NonNull Bundle data) {
             executeOrPostRunnableOnMainThread(new Runnable() {
                 @MainThread
@@ -1351,7 +1357,7 @@ public abstract class TvInputService extends Service {
          *
          * @param buffer The {@link AdBuffer} that became ready for playback.
          */
-        public void onAdBuffer(@NonNull AdBuffer buffer) {
+        public void onAdBufferReady(@NonNull AdBuffer buffer) {
         }
 
         /**
@@ -1486,11 +1492,12 @@ public abstract class TvInputService extends Service {
         /**
          * Called when the application enables or disables the detection of the specified message
          * type.
-         * @param type The {@link TvInputManager.TvMessageType} of message that was sent.
+         * @param type The type of message received, such as
+         *             {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
          * @param enabled {@code true} if TV message detection is enabled,
          *                {@code false} otherwise.
          */
-        public void onSetTvMessageEnabled(@NonNull @TvInputManager.TvMessageType String type,
+        public void onSetTvMessageEnabled(@TvInputManager.TvMessageType int type,
                 boolean enabled) {
         }
 
@@ -1499,9 +1506,15 @@ public abstract class TvInputService extends Service {
          *
          * @param type The type of message received, such as
          * {@link TvInputManager#TV_MESSAGE_TYPE_WATERMARK}
-         * @param data The raw data of the message
+         * @param data The raw data of the message. The bundle keys are:
+         *             {@link TvInputManager#TV_MESSAGE_KEY_STREAM_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_GROUP_ID},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE},
+         *             {@link TvInputManager#TV_MESSAGE_KEY_RAW_DATA}.
+         *             See {@link TvInputManager#TV_MESSAGE_KEY_SUBTYPE} for more information on
+         *             how to parse this data.
          */
-        public void onTvMessage(@NonNull @TvInputManager.TvMessageType String type,
+        public void onTvMessage(@TvInputManager.TvMessageType int type,
                 @NonNull Bundle data) {
         }
 
@@ -1856,9 +1869,9 @@ public abstract class TvInputService extends Service {
         }
 
         /**
-         * Calls {@link #onSetTvMessageEnabled(String, boolean)}.
+         * Calls {@link #onSetTvMessageEnabled(int, boolean)}.
          */
-        void setTvMessageEnabled(String type, boolean enabled) {
+        void setTvMessageEnabled(int type, boolean enabled) {
             onSetTvMessageEnabled(type, enabled);
         }
 
@@ -2050,11 +2063,11 @@ public abstract class TvInputService extends Service {
             onRequestAd(request);
         }
 
-        void notifyAdBuffer(AdBuffer buffer) {
-            onAdBuffer(buffer);
+        void notifyAdBufferReady(AdBuffer buffer) {
+            onAdBufferReady(buffer);
         }
 
-        void onTvMessageReceived(String type, Bundle data) {
+        void onTvMessageReceived(int type, Bundle data) {
             onTvMessage(type, data);
         }
 

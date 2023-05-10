@@ -19,6 +19,7 @@ package com.android.systemui.accessibility.accessibilitymenu;
 import android.Manifest;
 import android.accessibilityservice.AccessibilityButtonController;
 import android.accessibilityservice.AccessibilityService;
+import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -35,6 +36,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -56,6 +58,8 @@ public class AccessibilityMenuService extends AccessibilityService
     public static final String PACKAGE_NAME = AccessibilityMenuService.class.getPackageName();
     public static final String INTENT_TOGGLE_MENU = ".toggle_menu";
     public static final String INTENT_HIDE_MENU = ".hide_menu";
+    public static final String INTENT_GLOBAL_ACTION = ".global_action";
+    public static final String INTENT_GLOBAL_ACTION_EXTRA = "GLOBAL_ACTION";
 
     private static final String TAG = "A11yMenuService";
     private static final long BUFFER_MILLISECONDS_TO_PREVENT_UPDATE_FAILURE = 100L;
@@ -79,6 +83,9 @@ public class AccessibilityMenuService extends AccessibilityService
 
     // TODO(b/136716947): Support multi-display once a11y framework side is ready.
     private DisplayManager mDisplayManager;
+
+    private KeyguardManager mKeyguardManager;
+
     private final DisplayManager.DisplayListener mDisplayListener =
             new DisplayManager.DisplayListener() {
         int mRotation;
@@ -111,7 +118,7 @@ public class AccessibilityMenuService extends AccessibilityService
     private final BroadcastReceiver mToggleMenuReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            mA11yMenuLayout.toggleVisibility();
+            toggleVisibility();
         }
     };
 
@@ -156,10 +163,7 @@ public class AccessibilityMenuService extends AccessibilityService
                      */
                     @Override
                     public void onClicked(AccessibilityButtonController controller) {
-                        if (SystemClock.uptimeMillis() - mLastTimeTouchedOutside
-                                > BUTTON_CLICK_TIMEOUT) {
-                            mA11yMenuLayout.toggleVisibility();
-                        }
+                        toggleVisibility();
                     }
 
                     /**
@@ -206,6 +210,7 @@ public class AccessibilityMenuService extends AccessibilityService
         mDisplayManager = getSystemService(DisplayManager.class);
         mDisplayManager.registerDisplayListener(mDisplayListener, null);
         mAudioManager = getSystemService(AudioManager.class);
+        mKeyguardManager = getSystemService(KeyguardManager.class);
 
         sInitialized = true;
     }
@@ -231,6 +236,22 @@ public class AccessibilityMenuService extends AccessibilityService
     }
 
     /**
+     * Performs global action and broadcasts an intent indicating the action was performed.
+     * This is unnecessary for any current functionality, but is used for testing.
+     * Refer to {@code performGlobalAction()}.
+     *
+     * @param globalAction Global action to be performed.
+     * @return {@code true} if successful, {@code false} otherwise.
+     */
+    private boolean performGlobalActionInternal(int globalAction) {
+        Intent intent = new Intent(PACKAGE_NAME + INTENT_GLOBAL_ACTION);
+        intent.putExtra(INTENT_GLOBAL_ACTION_EXTRA, globalAction);
+        sendBroadcast(intent);
+        Log.i("A11yMenuService", "Broadcasting global action " + globalAction);
+        return performGlobalAction(globalAction);
+    }
+
+    /**
      * Handles click events of shortcuts.
      *
      * @param view the shortcut button being clicked.
@@ -249,17 +270,17 @@ public class AccessibilityMenuService extends AccessibilityService
                     new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS),
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         } else if (viewTag == ShortcutId.ID_POWER_VALUE.ordinal()) {
-            performGlobalAction(GLOBAL_ACTION_POWER_DIALOG);
+            performGlobalActionInternal(GLOBAL_ACTION_POWER_DIALOG);
         } else if (viewTag == ShortcutId.ID_RECENT_VALUE.ordinal()) {
-            performGlobalAction(GLOBAL_ACTION_RECENTS);
+            performGlobalActionInternal(GLOBAL_ACTION_RECENTS);
         } else if (viewTag == ShortcutId.ID_LOCKSCREEN_VALUE.ordinal()) {
-            performGlobalAction(GLOBAL_ACTION_LOCK_SCREEN);
+            performGlobalActionInternal(GLOBAL_ACTION_LOCK_SCREEN);
         } else if (viewTag == ShortcutId.ID_QUICKSETTING_VALUE.ordinal()) {
-            performGlobalAction(GLOBAL_ACTION_QUICK_SETTINGS);
+            performGlobalActionInternal(GLOBAL_ACTION_QUICK_SETTINGS);
         } else if (viewTag == ShortcutId.ID_NOTIFICATION_VALUE.ordinal()) {
-            performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS);
+            performGlobalActionInternal(GLOBAL_ACTION_NOTIFICATIONS);
         } else if (viewTag == ShortcutId.ID_SCREENSHOT_VALUE.ordinal()) {
-            performGlobalAction(GLOBAL_ACTION_TAKE_SCREENSHOT);
+            performGlobalActionInternal(GLOBAL_ACTION_TAKE_SCREENSHOT);
         } else if (viewTag == ShortcutId.ID_BRIGHTNESS_UP_VALUE.ordinal()) {
             adjustBrightness(BRIGHTNESS_UP_INCREMENT_GAMMA);
             return;
@@ -359,5 +380,13 @@ public class AccessibilityMenuService extends AccessibilityService
             }
         }
         return false;
+    }
+
+    private void toggleVisibility() {
+        boolean locked = mKeyguardManager != null && mKeyguardManager.isKeyguardLocked();
+        if (!locked && SystemClock.uptimeMillis() - mLastTimeTouchedOutside
+                        > BUTTON_CLICK_TIMEOUT) {
+            mA11yMenuLayout.toggleVisibility();
+        }
     }
 }

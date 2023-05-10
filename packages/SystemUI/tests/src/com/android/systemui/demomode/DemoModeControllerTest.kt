@@ -74,7 +74,7 @@ class DemoModeControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun `demo command flow - returns args`() =
+    fun demoCommandFlow_returnsArgs() =
         testScope.runTest {
             var latest: Bundle? = null
             val flow = underTest.demoFlowForCommand(TEST_COMMAND)

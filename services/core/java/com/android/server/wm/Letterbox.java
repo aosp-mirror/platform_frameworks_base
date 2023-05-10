@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.SurfaceControl.HIDDEN;
+import static android.window.TaskConstants.TASK_CHILD_LAYER_LETTERBOX_BACKGROUND;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -361,7 +362,8 @@ public class Letterbox {
                     .setCallsite("LetterboxSurface.createSurface")
                     .build();
 
-            t.setLayer(mSurface, -1).setColorSpaceAgnostic(mSurface, true);
+            t.setLayer(mSurface, TASK_CHILD_LAYER_LETTERBOX_BACKGROUND)
+                    .setColorSpaceAgnostic(mSurface, true);
         }
 
         void attachInput(WindowState win) {

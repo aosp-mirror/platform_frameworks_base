@@ -398,7 +398,11 @@ public class ImsService extends Service {
                     ImsService.this.disableImsForSubscription(slotId, subId), "disableIms");
         }
 
-
+        @Override
+        public void resetIms(int slotId, int subId) {
+            executeMethodAsync(() ->
+                    ImsService.this.resetImsInternal(slotId, subId), "resetIms");
+        }
     };
 
     private final IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
@@ -634,6 +638,14 @@ public class ImsService extends Service {
         }
     }
 
+    private void resetImsInternal(int slotId, int subId) {
+        try {
+            resetIms(slotId);
+        } catch (UnsupportedOperationException e) {
+            disableImsForSubscription(slotId, subId);
+        }
+    }
+
     /**
      * When called, provide the {@link ImsFeatureConfiguration} that this {@link ImsService}
      * currently supports. This will trigger the framework to set up the {@link ImsFeature}s that
@@ -748,6 +760,19 @@ public class ImsService extends Service {
      */
     @Deprecated
     public void disableIms(int slotId) {
+    }
+
+    /**
+     * The framework has reset IMS for the slot specified. The ImsService must deregister
+     * and release all resources for IMS. After resetIms is called, either
+     * {@link #enableImsForSubscription(int, int)} or {@link #disableImsForSubscription(int, int)}
+     * will be called for the same slotId.
+     *
+     * @param slotId The slot ID that IMS will be reset for.
+     * @hide
+     */
+    public void resetIms(int slotId) {
+        throw new UnsupportedOperationException();
     }
 
     /**

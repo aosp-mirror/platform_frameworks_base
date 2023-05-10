@@ -122,6 +122,7 @@ applications that come with the platform
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <permission name="android.permission.BIND_CELL_BROADCAST_SERVICE"/>
         <permission name="android.permission.BIND_IMS_SERVICE"/>
+        <permission name="android.permission.BIND_SATELLITE_GATEWAY_SERVICE"/>
         <permission name="android.permission.BIND_SATELLITE_SERVICE"/>
         <permission name="android.permission.BIND_TELEPHONY_DATA_SERVICE"/>
         <permission name="android.permission.BIND_VISUAL_VOICEMAIL_SERVICE"/>
@@ -165,6 +166,7 @@ applications that come with the platform
         <permission name="com.android.voicemail.permission.WRITE_VOICEMAIL"/>
         <permission name="android.permission.LOG_COMPAT_CHANGE"/>
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
+        <permission name="android.permission.UWB_PRIVILEGED"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.calendar">
@@ -275,6 +277,7 @@ applications that come with the platform
         <!-- Permission required to test onPermissionsChangedListener -->
         <permission name="android.permission.OBSERVE_GRANT_REVOKE_PERMISSIONS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.QUERY_USERS"/>
         <permission name="android.permission.LOCAL_MAC_ADDRESS"/>
         <permission name="android.permission.MANAGE_ACCESSIBILITY"/>
         <permission name="android.permission.MANAGE_DEVICE_ADMINS"/>
@@ -320,6 +323,7 @@ applications that come with the platform
         <permission name="android.permission.REGISTER_CONNECTION_MANAGER"/>
         <permission name="android.permission.REGISTER_SIM_SUBSCRIPTION"/>
         <permission name="android.permission.RETRIEVE_WINDOW_CONTENT"/>
+        <permission name="android.permission.SCHEDULE_EXACT_ALARM"/>
         <permission name="android.permission.SET_ALWAYS_FINISH"/>
         <permission name="android.permission.SET_ANIMATION_SCALE"/>
         <permission name="android.permission.SET_DEBUG_APP"/>
@@ -511,6 +515,16 @@ applications that come with the platform
         <permission name="android.permission.WRITE_APN_SETTINGS"/>
         <!-- Permission required for GTS test - GtsStatsdHostTestCases -->
         <permission name="android.permission.READ_RESTRICTED_STATS"/>
+        <!-- Permission required for CTS test -->
+        <permission name="android.permission.LOG_FOREGROUND_RESOURCE_USE"/>
+        <!-- Permission required for CTS test - CtsVoiceInteractionTestCases -->
+        <permission name="android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER"/>
+        <!-- Permission required for CTS test - SatelliteManagerTest -->
+        <permission name="android.permission.SATELLITE_COMMUNICATION"/>
+        <!-- Permission required for GTS test - GtsAttestationVerificationDeviceSideTestCases -->
+        <permission name="android.permission.USE_ATTESTATION_VERIFICATION_SERVICE" />
+        <!-- Permission required for GTS test - GtsCredentialsTestCases -->
+        <permission name="android.permission.LAUNCH_CREDENTIAL_SELECTOR"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

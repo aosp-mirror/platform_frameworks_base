@@ -16,6 +16,8 @@
 
 package android.window;
 
+import android.annotation.AnimRes;
+import android.annotation.ColorInt;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -92,26 +94,29 @@ public final class BackNavigationInfo implements Parcelable {
     @Nullable
     private final IOnBackInvokedCallback mOnBackInvokedCallback;
     private final boolean mPrepareRemoteAnimation;
+    private final boolean mAnimationCallback;
     @Nullable
     private final CustomAnimationInfo mCustomAnimationInfo;
 
     /**
      * Create a new {@link BackNavigationInfo} instance.
      *
-     * @param type                    The {@link BackTargetType} of the destination (what will be
-     * @param onBackNavigationDone    The callback to be called once the client is done with the
-     *                                back preview.
-     * @param onBackInvokedCallback   The back callback registered by the current top level window.
+     * @param type                  The {@link BackTargetType} of the destination (what will be
+     * @param onBackNavigationDone  The callback to be called once the client is done with the
+     *                              back preview.
+     * @param onBackInvokedCallback The back callback registered by the current top level window.
      */
     private BackNavigationInfo(@BackTargetType int type,
             @Nullable RemoteCallback onBackNavigationDone,
             @Nullable IOnBackInvokedCallback onBackInvokedCallback,
             boolean isPrepareRemoteAnimation,
+            boolean isAnimationCallback,
             @Nullable CustomAnimationInfo customAnimationInfo) {
         mType = type;
         mOnBackNavigationDone = onBackNavigationDone;
         mOnBackInvokedCallback = onBackInvokedCallback;
         mPrepareRemoteAnimation = isPrepareRemoteAnimation;
+        mAnimationCallback = isAnimationCallback;
         mCustomAnimationInfo = customAnimationInfo;
     }
 
@@ -120,6 +125,7 @@ public final class BackNavigationInfo implements Parcelable {
         mOnBackNavigationDone = in.readTypedObject(RemoteCallback.CREATOR);
         mOnBackInvokedCallback = IOnBackInvokedCallback.Stub.asInterface(in.readStrongBinder());
         mPrepareRemoteAnimation = in.readBoolean();
+        mAnimationCallback = in.readBoolean();
         mCustomAnimationInfo = in.readTypedObject(CustomAnimationInfo.CREATOR);
     }
 
@@ -130,6 +136,7 @@ public final class BackNavigationInfo implements Parcelable {
         dest.writeTypedObject(mOnBackNavigationDone, flags);
         dest.writeStrongInterface(mOnBackInvokedCallback);
         dest.writeBoolean(mPrepareRemoteAnimation);
+        dest.writeBoolean(mAnimationCallback);
         dest.writeTypedObject(mCustomAnimationInfo, flags);
     }
 
@@ -157,11 +164,19 @@ public final class BackNavigationInfo implements Parcelable {
     }
 
     /**
-     * Return true if the core is preparing a back gesture nimation.
+     * Return true if the core is preparing a back gesture animation.
      * @hide
      */
     public boolean isPrepareRemoteAnimation() {
         return mPrepareRemoteAnimation;
+    }
+
+    /**
+     * Return true if the callback is {@link OnBackAnimationCallback}.
+     * @hide
+     */
+    public boolean isAnimationCallback() {
+        return mAnimationCallback;
     }
 
     /**
@@ -212,6 +227,8 @@ public final class BackNavigationInfo implements Parcelable {
                 + "mType=" + typeToString(mType) + " (" + mType + ")"
                 + ", mOnBackNavigationDone=" + mOnBackNavigationDone
                 + ", mOnBackInvokedCallback=" + mOnBackInvokedCallback
+                + ", mPrepareRemoteAnimation=" + mPrepareRemoteAnimation
+                + ", mAnimationCallback=" + mAnimationCallback
                 + ", mCustomizeAnimationInfo=" + mCustomAnimationInfo
                 + '}';
     }
@@ -245,6 +262,9 @@ public final class BackNavigationInfo implements Parcelable {
     public static final class CustomAnimationInfo implements Parcelable {
         private final String mPackageName;
         private int mWindowAnimations;
+        @AnimRes private int mCustomExitAnim;
+        @AnimRes private int mCustomEnterAnim;
+        @ColorInt private int mCustomBackground;
 
         /**
          * The package name of the windowAnimations.
@@ -261,6 +281,27 @@ public final class BackNavigationInfo implements Parcelable {
             return mWindowAnimations;
         }
 
+        /**
+         * The exit animation resource Id of customize activity transition.
+         */
+        public int getCustomExitAnim() {
+            return mCustomExitAnim;
+        }
+
+        /**
+         * The entering animation resource Id of customize activity transition.
+         */
+        public int getCustomEnterAnim() {
+            return mCustomEnterAnim;
+        }
+
+        /**
+         * The background color of customize activity transition.
+         */
+        public int getCustomBackground() {
+            return mCustomBackground;
+        }
+
         public CustomAnimationInfo(@NonNull String packageName) {
             this.mPackageName = packageName;
         }
@@ -274,11 +315,17 @@ public final class BackNavigationInfo implements Parcelable {
         public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeString8(mPackageName);
             dest.writeInt(mWindowAnimations);
+            dest.writeInt(mCustomEnterAnim);
+            dest.writeInt(mCustomExitAnim);
+            dest.writeInt(mCustomBackground);
         }
 
         private CustomAnimationInfo(@NonNull Parcel in) {
             mPackageName = in.readString8();
             mWindowAnimations = in.readInt();
+            mCustomEnterAnim = in.readInt();
+            mCustomExitAnim = in.readInt();
+            mCustomBackground = in.readInt();
         }
 
         @Override
@@ -311,6 +358,7 @@ public final class BackNavigationInfo implements Parcelable {
         private IOnBackInvokedCallback mOnBackInvokedCallback = null;
         private boolean mPrepareRemoteAnimation;
         private CustomAnimationInfo mCustomAnimationInfo;
+        private boolean mAnimationCallback = false;
 
         /**
          * @see BackNavigationInfo#getType()
@@ -349,8 +397,32 @@ public final class BackNavigationInfo implements Parcelable {
          * Set windowAnimations for customize animation.
          */
         public Builder setWindowAnimations(String packageName, int windowAnimations) {
-            mCustomAnimationInfo = new CustomAnimationInfo(packageName);
+            if (mCustomAnimationInfo == null) {
+                mCustomAnimationInfo = new CustomAnimationInfo(packageName);
+            }
             mCustomAnimationInfo.mWindowAnimations = windowAnimations;
+            return this;
+        }
+
+        /**
+         * Set resources ids for customize activity animation.
+         */
+        public Builder setCustomAnimation(String packageName, @AnimRes int enterResId,
+                @AnimRes int exitResId, @ColorInt int backgroundColor) {
+            if (mCustomAnimationInfo == null) {
+                mCustomAnimationInfo = new CustomAnimationInfo(packageName);
+            }
+            mCustomAnimationInfo.mCustomExitAnim = exitResId;
+            mCustomAnimationInfo.mCustomEnterAnim = enterResId;
+            mCustomAnimationInfo.mCustomBackground = backgroundColor;
+            return this;
+        }
+
+        /**
+         * @param isAnimationCallback whether the callback is {@link OnBackAnimationCallback}
+         */
+        public Builder setAnimationCallback(boolean isAnimationCallback) {
+            mAnimationCallback = isAnimationCallback;
             return this;
         }
 
@@ -361,6 +433,7 @@ public final class BackNavigationInfo implements Parcelable {
             return new BackNavigationInfo(mType, mOnBackNavigationDone,
                     mOnBackInvokedCallback,
                     mPrepareRemoteAnimation,
+                    mAnimationCallback,
                     mCustomAnimationInfo);
         }
     }

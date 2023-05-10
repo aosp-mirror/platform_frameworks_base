@@ -47,7 +47,7 @@ android_test {
         "truth-prebuilt",
         "testables",
         "platform-test-annotations",
-        "frameworks-base-testutils",
+        "servicestests-utils",
     ],
 
     libs: [
@@ -68,6 +68,8 @@ android_test {
     optimize: {
         enabled: false,
     },
+
+    test_suites: ["device-tests"],
 
     platform_apis: true,
     certificate: "platform",

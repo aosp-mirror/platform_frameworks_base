@@ -98,7 +98,6 @@ public class SurfaceAnimationRunnerTest {
         mFinishCallbackLatch.countDown();
     }
 
-    @FlakyTest(bugId = 144611135)
     @Test
     public void testAnimation() throws Exception {
         mSurfaceAnimationRunner

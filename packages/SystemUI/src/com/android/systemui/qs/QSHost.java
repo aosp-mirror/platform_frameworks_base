@@ -20,8 +20,6 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.provider.Settings;
 
-import com.android.internal.logging.InstanceId;
-import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTile;
@@ -39,13 +37,12 @@ public interface QSHost {
 
     /**
      * Returns the default QS tiles for the context.
-     * @param context the context to obtain the resources from
+     * @param res the resources to use to determine the default tiles
      * @return a list of specs of the default tiles
      */
-    static List<String> getDefaultSpecs(Context context) {
+    static List<String> getDefaultSpecs(Resources res) {
         final ArrayList<String> tiles = new ArrayList();
 
-        final Resources res = context.getResources();
         final String defaultTileList = res.getString(R.string.quick_settings_tiles_default);
 
         tiles.addAll(Arrays.asList(defaultTileList.split(",")));
@@ -56,14 +53,9 @@ public interface QSHost {
         return tiles;
     }
 
-    void warn(String message, Throwable t);
-    void collapsePanels();
-    void forceCollapsePanels();
-    void openPanels();
     Context getContext();
     Context getUserContext();
     int getUserId();
-    UiEventLogger getUiEventLogger();
     Collection<QSTile> getTiles();
     void addCallback(Callback callback);
     void removeCallback(Callback callback);
@@ -77,7 +69,11 @@ public interface QSHost {
      * @see QSFactory#createTileView
      */
     QSTileView createTileView(Context themedContext, QSTile tile, boolean collapsedView);
-    /** Create a {@link QSTile} of a {@code tileSpec} type. */
+    /** Create a {@link QSTile} of a {@code tileSpec} type.
+     *
+     * This should only be called by classes that need to create one-off instances of tiles.
+     * Do not use to create {@code custom} tiles without explicitly taking care of its lifecycle.
+     */
     QSTile createTile(String tileSpec);
 
     /**
@@ -105,12 +101,7 @@ public interface QSHost {
     void removeTileByUser(ComponentName tile);
     void changeTilesByUser(List<String> previousTiles, List<String> newTiles);
 
-    boolean isTileAdded(ComponentName componentName, int userId);
-    void setTileAdded(ComponentName componentName, int userId, boolean added);
-
     int indexOf(String tileSpec);
-
-    InstanceId getNewInstanceId();
 
     interface Callback {
         void onTilesChanged();

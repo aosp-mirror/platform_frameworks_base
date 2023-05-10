@@ -227,6 +227,12 @@
     <string-array name="device_state_notification_thermal_contents">
         <item>@string/concurrent_display_notification_thermal_content</item>
     </string-array>
+    <string-array name="device_state_notification_power_save_titles">
+        <item>@string/concurrent_display_notification_power_save_title</item>
+    </string-array>
+    <string-array name="device_state_notification_power_save_contents">
+        <item>@string/concurrent_display_notification_power_save_content</item>
+    </string-array>
 
     <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner of the
          demo device provisioning permissions. -->

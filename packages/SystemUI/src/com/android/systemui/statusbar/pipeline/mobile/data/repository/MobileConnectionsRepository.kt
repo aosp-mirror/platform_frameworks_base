@@ -21,7 +21,6 @@ import android.telephony.SubscriptionManager
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.MobileMappings
 import com.android.settingslib.mobile.MobileMappings.Config
-import com.android.systemui.statusbar.pipeline.mobile.data.model.MobileConnectivityModel
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,8 +51,24 @@ interface MobileConnectionsRepository {
     /** Tracks [SubscriptionManager.getDefaultDataSubscriptionId] */
     val defaultDataSubId: StateFlow<Int>
 
-    /** The current connectivity status for the default mobile network connection */
-    val defaultMobileNetworkConnectivity: StateFlow<MobileConnectivityModel>
+    /**
+     * True if the default network connection is a mobile-like connection and false otherwise.
+     *
+     * This is typically shown by having [android.net.NetworkCapabilities.TRANSPORT_CELLULAR], but
+     * there are edge cases (like carrier merged wifi) that could also result in the default
+     * connection being mobile-like.
+     */
+    val mobileIsDefault: StateFlow<Boolean>
+
+    /**
+     * True if the device currently has a carrier merged connection.
+     *
+     * See [CarrierMergedConnectionRepository] for more info.
+     */
+    val hasCarrierMergedConnection: Flow<Boolean>
+
+    /** True if the default network connection is validated and false otherwise. */
+    val defaultConnectionIsValidated: StateFlow<Boolean>
 
     /** Get or create a repository for the line of service for the given subscription ID */
     fun getRepoForSubId(subId: Int): MobileConnectionRepository

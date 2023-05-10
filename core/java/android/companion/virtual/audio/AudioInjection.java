@@ -65,12 +65,12 @@ public final class AudioInjection {
 
     /**
      * Sets the {@link AudioTrack} to handle audio injection.
-     * Callers may call this multiple times with different audio tracks to change
-     * the underlying {@link AudioTrack} without stopping and re-starting injection.
      *
-     * @param audioTrack The underlying {@link AudioTrack} to use for injection,
-     * or null if no audio (i.e. silence) should be injected while still keeping the
-     * record in a playing state.
+     * <p>Callers may call this multiple times with different audio tracks to change the underlying
+     * {@link AudioTrack} without stopping and re-starting injection.
+     *
+     * @param audioTrack The underlying {@link AudioTrack} to use for injection, or null if no audio
+     *   (i.e. silence) should be injected while still keeping the record in a playing state.
      */
     void setAudioTrack(@Nullable AudioTrack audioTrack) {
         Log.d(TAG, "set AudioTrack with " + audioTrack);

@@ -25,6 +25,8 @@ import android.annotation.Nullable;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.CancellationSignalBeamer;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.view.KeyEvent;
@@ -59,6 +61,7 @@ final class IRemoteInputConnectionInvoker {
     @NonNull
     private final IRemoteInputConnection mConnection;
     private final int mSessionId;
+    private CancellationSignalBeamer.Sender mBeamer;
 
     private IRemoteInputConnectionInvoker(@NonNull IRemoteInputConnection inputConnection,
             int sessionId) {
@@ -681,7 +684,7 @@ final class IRemoteInputConnectionInvoker {
      * InputConnectionCommandHeader, ParcelableHandwritingGesture, ResultReceiver)}.
      */
     @AnyThread
-    public void performHandwritingGesture(@NonNull ParcelableHandwritingGesture gesture,
+    public void performHandwritingGesture(@NonNull HandwritingGesture gesture,
             @Nullable @CallbackExecutor Executor executor, @Nullable IntConsumer consumer) {
         ResultReceiver resultReceiver = null;
         if (consumer != null) {
@@ -689,7 +692,11 @@ final class IRemoteInputConnectionInvoker {
             resultReceiver = new IntResultReceiver(executor, consumer);
         }
         try {
-            mConnection.performHandwritingGesture(createHeader(), gesture, resultReceiver);
+            try (var ignored = getCancellationSignalBeamer().beamScopeIfNeeded(gesture)) {
+                mConnection.performHandwritingGesture(createHeader(),
+                        ParcelableHandwritingGesture.of(gesture),
+                        resultReceiver);
+            }
         } catch (RemoteException e) {
             if (consumer != null && executor != null) {
                 executor.execute(() -> consumer.accept(
@@ -700,23 +707,57 @@ final class IRemoteInputConnectionInvoker {
 
     /**
      * Invokes one of {@link IRemoteInputConnection#previewHandwritingGesture(
-     * InputConnectionCommandHeader, ParcelableHandwritingGesture, CancellationSignal)}
+     * InputConnectionCommandHeader, HandwritingGesture, IBinder)}
      */
     @AnyThread
     public boolean previewHandwritingGesture(
-            @NonNull ParcelableHandwritingGesture gesture,
+            @NonNull HandwritingGesture gesture,
             @Nullable CancellationSignal cancellationSignal) {
-        if (cancellationSignal != null && cancellationSignal.isCanceled()) {
-            return false; // cancelled.
-        }
-
-        // TODO(b/254727073): Implement CancellationSignal
         try {
-            mConnection.previewHandwritingGesture(createHeader(), gesture, null);
+            try (var csToken = beam(cancellationSignal)) {
+                mConnection.previewHandwritingGesture(createHeader(),
+                        ParcelableHandwritingGesture.of(gesture),
+                        csToken);
+            }
             return true;
         } catch (RemoteException e) {
             return false;
         }
+    }
+
+    @Nullable
+    CancellationSignalBeamer.Sender.CloseableToken beam(CancellationSignal cs) {
+        if (cs == null) {
+            return null;
+        }
+        return getCancellationSignalBeamer().beam(cs);
+    }
+
+    private CancellationSignalBeamer.Sender getCancellationSignalBeamer() {
+        if (mBeamer != null) {
+            return mBeamer;
+        }
+        mBeamer = new CancellationSignalBeamer.Sender() {
+            @Override
+            public void onCancel(IBinder token) {
+                try {
+                    mConnection.cancelCancellationSignal(token);
+                } catch (RemoteException e) {
+                    // Remote process likely died, ignore.
+                }
+            }
+
+            @Override
+            public void onForget(IBinder token) {
+                try {
+                    mConnection.forgetCancellationSignal(token);
+                } catch (RemoteException e) {
+                    // Remote process likely died, ignore.
+                }
+            }
+        };
+
+        return mBeamer;
     }
 
     /**

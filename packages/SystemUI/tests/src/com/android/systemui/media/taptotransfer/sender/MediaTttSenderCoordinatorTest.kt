@@ -107,6 +107,7 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
     private lateinit var fakeExecutor: FakeExecutor
     private lateinit var uiEventLoggerFake: UiEventLoggerFake
     private lateinit var uiEventLogger: MediaTttSenderUiEventLogger
+    private val defaultTimeout = context.resources.getInteger(R.integer.heads_up_notification_decay)
 
     @Before
     fun setUp() {
@@ -1354,6 +1355,92 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
                 ChipStateSender.TRANSFER_TO_THIS_DEVICE_TRIGGERED.getExpectedStateText("New Name")
             )
         assertThat(chipbarView.getLoadingIcon().visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    fun almostClose_hasLongTimeout_eventuallyTimesOut() {
+        whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenAnswer {
+            it.arguments[0]
+        }
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_ALMOST_CLOSE_TO_START_CAST,
+            routeInfo,
+            null,
+        )
+
+        // WHEN the default timeout has passed
+        fakeClock.advanceTime(defaultTimeout + 1L)
+
+        // THEN the view is still on-screen because it has a long timeout
+        verify(windowManager, never()).removeView(any())
+
+        // WHEN a very long amount of time has passed
+        fakeClock.advanceTime(5L * defaultTimeout)
+
+        // THEN the view does time out
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun loading_hasLongTimeout_eventuallyTimesOut() {
+        whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenAnswer {
+            it.arguments[0]
+        }
+
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_TRIGGERED,
+            routeInfo,
+            null,
+        )
+
+        // WHEN the default timeout has passed
+        fakeClock.advanceTime(defaultTimeout + 1L)
+
+        // THEN the view is still on-screen because it has a long timeout
+        verify(windowManager, never()).removeView(any())
+
+        // WHEN a very long amount of time has passed
+        fakeClock.advanceTime(5L * defaultTimeout)
+
+        // THEN the view does time out
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun succeeded_hasDefaultTimeout() {
+        whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenAnswer {
+            it.arguments[0]
+        }
+
+        displayReceiverTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_RECEIVER_SUCCEEDED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(defaultTimeout + 1L)
+
+        verify(windowManager).removeView(any())
+    }
+
+    @Test
+    fun failed_hasDefaultTimeout() {
+        whenever(accessibilityManager.getRecommendedTimeoutMillis(any(), any())).thenAnswer {
+            it.arguments[0]
+        }
+
+        displayThisDeviceTriggered()
+        commandQueueCallback.updateMediaTapToTransferSenderDisplay(
+            StatusBarManager.MEDIA_TRANSFER_SENDER_STATE_TRANSFER_TO_THIS_DEVICE_FAILED,
+            routeInfo,
+            null,
+        )
+
+        fakeClock.advanceTime(defaultTimeout + 1L)
+
+        verify(windowManager).removeView(any())
     }
 
     private fun getChipbarView(): ViewGroup {

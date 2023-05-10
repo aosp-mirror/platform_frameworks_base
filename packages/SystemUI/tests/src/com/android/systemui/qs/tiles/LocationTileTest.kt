@@ -22,7 +22,6 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
@@ -30,16 +29,21 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
 import com.android.systemui.qs.tileimpl.QSTileImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.LocationController
+import com.android.systemui.util.mockito.argumentCaptor
+import com.android.systemui.util.mockito.capture
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
@@ -65,8 +69,11 @@ class LocationTileTest : SysuiTestCase() {
     private lateinit var locationController: LocationController
     @Mock
     private lateinit var keyguardStateController: KeyguardStateController
+    @Mock
+    private lateinit var panelInteractor: PanelInteractor
+    @Mock
+    private lateinit var uiEventLogger: QsEventLogger
 
-    private val uiEventLogger = UiEventLoggerFake()
     private lateinit var testableLooper: TestableLooper
     private lateinit var tile: LocationTile
 
@@ -74,10 +81,11 @@ class LocationTileTest : SysuiTestCase() {
     fun setUp() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
         `when`(qsHost.context).thenReturn(mockContext)
 
-        tile = LocationTile(qsHost,
+        tile = LocationTile(
+            qsHost,
+            uiEventLogger,
             testableLooper.looper,
             Handler(testableLooper.looper),
             falsingManager,
@@ -86,7 +94,9 @@ class LocationTileTest : SysuiTestCase() {
             activityStarter,
             qsLogger,
             locationController,
-            keyguardStateController)
+            keyguardStateController,
+            panelInteractor,
+        )
     }
 
     @After
@@ -115,5 +125,19 @@ class LocationTileTest : SysuiTestCase() {
 
         assertThat(state.icon)
             .isEqualTo(QSTileImpl.ResourceIcon.get(R.drawable.qs_location_icon_on))
+    }
+
+    @Test
+    fun testClickWhenLockedWillCallOpenPanels() {
+        `when`(keyguardStateController.isMethodSecure).thenReturn(true)
+        `when`(keyguardStateController.isShowing).thenReturn(true)
+
+        tile.handleClick(null)
+
+        val captor = argumentCaptor<Runnable>()
+        verify(activityStarter).postQSRunnableDismissingKeyguard(capture(captor))
+        captor.value.run()
+
+        verify(panelInteractor).openPanels()
     }
 }

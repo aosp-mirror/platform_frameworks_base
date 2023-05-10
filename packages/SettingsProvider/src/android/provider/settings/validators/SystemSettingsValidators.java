@@ -52,6 +52,7 @@ public class SystemSettingsValidators {
                                 || (val == BatteryManager.BATTERY_PLUGGED_AC)
                                 || (val == BatteryManager.BATTERY_PLUGGED_USB)
                                 || (val == BatteryManager.BATTERY_PLUGGED_WIRELESS)
+                                || (val == BatteryManager.BATTERY_PLUGGED_DOCK)
                                 || (val
                                         == (BatteryManager.BATTERY_PLUGGED_AC
                                                 | BatteryManager.BATTERY_PLUGGED_USB))
@@ -64,7 +65,13 @@ public class SystemSettingsValidators {
                                 || (val
                                         == (BatteryManager.BATTERY_PLUGGED_AC
                                                 | BatteryManager.BATTERY_PLUGGED_USB
-                                                | BatteryManager.BATTERY_PLUGGED_WIRELESS));
+                                                | BatteryManager.BATTERY_PLUGGED_WIRELESS))
+                                || (val
+                                        == (BatteryManager.BATTERY_PLUGGED_AC
+                                                | BatteryManager.BATTERY_PLUGGED_DOCK))
+                                || (val
+                                        == (BatteryManager.BATTERY_PLUGGED_USB
+                                                | BatteryManager.BATTERY_PLUGGED_DOCK));
                     } catch (NumberFormatException e) {
                         return false;
                     }
@@ -176,6 +183,7 @@ public class SystemSettingsValidators {
         VALIDATORS.put(System.NOTIFICATION_LIGHT_PULSE, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.POINTER_LOCATION, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.SHOW_TOUCHES, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(System.SHOW_KEY_PRESSES, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.WINDOW_ORIENTATION_LISTENER_LOG, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.LOCKSCREEN_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(System.LOCKSCREEN_DISABLED, BOOLEAN_VALIDATOR);

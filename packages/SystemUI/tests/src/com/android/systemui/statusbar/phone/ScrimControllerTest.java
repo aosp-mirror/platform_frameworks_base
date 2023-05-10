@@ -25,6 +25,7 @@ import static com.android.systemui.statusbar.phone.ScrimState.SHADE_LOCKED;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -71,7 +72,6 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.shade.transition.LinearLargeScreenShadeInterpolator;
-import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.policy.FakeConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -134,7 +134,6 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Mock private PrimaryBouncerToGoneTransitionViewModel mPrimaryBouncerToGoneTransitionViewModel;
     @Mock private KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     @Mock private CoroutineDispatcher mMainDispatcher;
-    @Mock private SysuiStatusBarStateController mSysuiStatusBarStateController;
 
     // TODO(b/204991468): Use a real PanelExpansionStateManager object once this bug is fixed. (The
     //   event-dispatch-on-registration pattern caused some of these unit tests to fail.)
@@ -249,7 +248,7 @@ public class ScrimControllerTest extends SysuiTestCase {
 
         when(mKeyguardTransitionInteractor.getPrimaryBouncerToGoneTransition())
                 .thenReturn(emptyFlow());
-        when(mPrimaryBouncerToGoneTransitionViewModel.getScrimBehindAlpha())
+        when(mPrimaryBouncerToGoneTransitionViewModel.getScrimAlpha())
                 .thenReturn(emptyFlow());
 
         mScrimController = new ScrimController(
@@ -268,7 +267,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
-                mSysuiStatusBarStateController,
                 mMainDispatcher,
                 mLinearLargeScreenShadeInterpolator,
                 mFeatureFlags);
@@ -984,7 +982,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mStatusBarKeyguardViewManager,
                 mPrimaryBouncerToGoneTransitionViewModel,
                 mKeyguardTransitionInteractor,
-                mSysuiStatusBarStateController,
                 mMainDispatcher,
                 mLinearLargeScreenShadeInterpolator,
                 mFeatureFlags);
@@ -1167,8 +1164,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void testScrimFocus() {
         mScrimController.transitionTo(ScrimState.AOD);
-        Assert.assertFalse("Should not be focusable on AOD", mScrimBehind.isFocusable());
-        Assert.assertFalse("Should not be focusable on AOD", mScrimInFront.isFocusable());
+        assertFalse("Should not be focusable on AOD", mScrimBehind.isFocusable());
+        assertFalse("Should not be focusable on AOD", mScrimInFront.isFocusable());
 
         mScrimController.transitionTo(ScrimState.KEYGUARD);
         Assert.assertTrue("Should be focusable on keyguard", mScrimBehind.isFocusable());
@@ -1228,7 +1225,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     public void testAnimatesTransitionToAod() {
         when(mDozeParameters.shouldControlScreenOff()).thenReturn(false);
         ScrimState.AOD.prepare(ScrimState.KEYGUARD);
-        Assert.assertFalse("No animation when ColorFade kicks in",
+        assertFalse("No animation when ColorFade kicks in",
                 ScrimState.AOD.getAnimateChange());
 
         reset(mDozeParameters);
@@ -1240,9 +1237,9 @@ public class ScrimControllerTest extends SysuiTestCase {
 
     @Test
     public void testViewsDontHaveFocusHighlight() {
-        Assert.assertFalse("Scrim shouldn't have focus highlight",
+        assertFalse("Scrim shouldn't have focus highlight",
                 mScrimInFront.getDefaultFocusHighlightEnabled());
-        Assert.assertFalse("Scrim shouldn't have focus highlight",
+        assertFalse("Scrim shouldn't have focus highlight",
                 mScrimBehind.getDefaultFocusHighlightEnabled());
     }
 
@@ -1742,7 +1739,7 @@ public class ScrimControllerTest extends SysuiTestCase {
     @Test
     public void aodStateSetsFrontScrimToNotBlend() {
         mScrimController.transitionTo(ScrimState.AOD);
-        Assert.assertFalse("Front scrim should not blend with main color",
+        assertFalse("Front scrim should not blend with main color",
                 mScrimInFront.shouldBlendWithMainColor());
     }
 
@@ -1775,6 +1772,14 @@ public class ScrimControllerTest extends SysuiTestCase {
                         TransitionState.FINISHED, "ScrimControllerTest"));
 
         verify(mStatusBarKeyguardViewManager).onKeyguardFadedAway();
+    }
+
+    @Test
+    public void testDoNotAnimateChangeIfOccludeAnimationPlaying() {
+        mScrimController.setOccludeAnimationPlaying(true);
+        mScrimController.transitionTo(ScrimState.UNLOCKED);
+
+        assertFalse(ScrimState.UNLOCKED.mAnimateChange);
     }
 
     private void assertAlphaAfterExpansion(ScrimView scrim, float expectedAlpha, float expansion) {

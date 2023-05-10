@@ -481,6 +481,10 @@ public class JobParameters implements Parcelable {
      * such as allowing a {@link JobInfo#NETWORK_TYPE_UNMETERED} job to run over
      * a metered network when there is a surplus of metered data available.
      *
+     * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
+     * this will return {@code null} if the app does not hold the permissions specified in
+     * {@link JobInfo.Builder#setRequiredNetwork(NetworkRequest)}.
+     *
      * @return the network that should be used to perform any network requests
      *         for this job, or {@code null} if this job didn't set any required
      *         network type or if the job executed when there was no available network to use.

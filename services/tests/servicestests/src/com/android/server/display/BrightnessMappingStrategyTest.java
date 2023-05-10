@@ -287,25 +287,37 @@ public class BrightnessMappingStrategyTest {
             adjustedNits50p[i] = DISPLAY_RANGE_NITS[i] * 0.5f;
         }
 
-        // Default is unadjusted
+        // Default
         assertEquals(DISPLAY_RANGE_NITS[0], strategy.convertToNits(BACKLIGHT_RANGE_ZERO_TO_ONE[0]),
-                0.0001f /* tolerance */);
+                TOLERANCE);
         assertEquals(DISPLAY_RANGE_NITS[1], strategy.convertToNits(BACKLIGHT_RANGE_ZERO_TO_ONE[1]),
-                0.0001f /* tolerance */);
+                TOLERANCE);
+        assertEquals(DISPLAY_RANGE_NITS[0],
+                strategy.convertToAdjustedNits(BACKLIGHT_RANGE_ZERO_TO_ONE[0]), TOLERANCE);
+        assertEquals(DISPLAY_RANGE_NITS[1],
+                strategy.convertToAdjustedNits(BACKLIGHT_RANGE_ZERO_TO_ONE[1]), TOLERANCE);
 
-        // When adjustment is turned on, adjustment array is used
+        // Adjustment is turned on
         strategy.recalculateSplines(true, adjustedNits50p);
+        assertEquals(DISPLAY_RANGE_NITS[0], strategy.convertToNits(BACKLIGHT_RANGE_ZERO_TO_ONE[0]),
+                TOLERANCE);
+        assertEquals(DISPLAY_RANGE_NITS[1], strategy.convertToNits(BACKLIGHT_RANGE_ZERO_TO_ONE[1]),
+                TOLERANCE);
         assertEquals(DISPLAY_RANGE_NITS[0] / 2,
-                strategy.convertToNits(BACKLIGHT_RANGE_ZERO_TO_ONE[0]), 0.0001f /* tolerance */);
+                strategy.convertToAdjustedNits(BACKLIGHT_RANGE_ZERO_TO_ONE[0]), TOLERANCE);
         assertEquals(DISPLAY_RANGE_NITS[1] / 2,
-                strategy.convertToNits(BACKLIGHT_RANGE_ZERO_TO_ONE[1]), 0.0001f /* tolerance */);
+                strategy.convertToAdjustedNits(BACKLIGHT_RANGE_ZERO_TO_ONE[1]), TOLERANCE);
 
-        // When adjustment is turned off, adjustment array is ignored
+        // Adjustment is turned off
         strategy.recalculateSplines(false, adjustedNits50p);
         assertEquals(DISPLAY_RANGE_NITS[0], strategy.convertToNits(BACKLIGHT_RANGE_ZERO_TO_ONE[0]),
-                0.0001f /* tolerance */);
+                TOLERANCE);
         assertEquals(DISPLAY_RANGE_NITS[1], strategy.convertToNits(BACKLIGHT_RANGE_ZERO_TO_ONE[1]),
-                0.0001f /* tolerance */);
+                TOLERANCE);
+        assertEquals(DISPLAY_RANGE_NITS[0],
+                strategy.convertToAdjustedNits(BACKLIGHT_RANGE_ZERO_TO_ONE[0]), TOLERANCE);
+        assertEquals(DISPLAY_RANGE_NITS[1],
+                strategy.convertToAdjustedNits(BACKLIGHT_RANGE_ZERO_TO_ONE[1]), TOLERANCE);
     }
 
     @Test

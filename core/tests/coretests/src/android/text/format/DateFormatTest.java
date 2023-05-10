@@ -156,8 +156,8 @@ public class DateFormatTest {
     @DisableCompatChanges({DateFormat.DISALLOW_DUPLICATE_FIELD_IN_SKELETON})
     public void testGetBestDateTimePattern_enableDuplicateField() {
         // en-US uses 12-hour format by default.
-        assertEquals("h:mm\u202fa", DateFormat.getBestDateTimePattern(Locale.US, "jmma"));
-        assertEquals("h:mm\u202fa", DateFormat.getBestDateTimePattern(Locale.US, "ahmma"));
+        assertEquals("h:mm a", DateFormat.getBestDateTimePattern(Locale.US, "jmma"));
+        assertEquals("h:mm a", DateFormat.getBestDateTimePattern(Locale.US, "ahmma"));
     }
 
     private static void assertIllegalArgumentException(Locale l, String skeleton) {

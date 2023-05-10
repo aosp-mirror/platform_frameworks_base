@@ -356,6 +356,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Test
     fun ignoreShadeBlurUntilHidden_schedulesFrame() {
         notificationShadeDepthController.blursDisabledForAppLaunch = true
+        verify(blurUtils).prepareBlur(any(), anyInt())
         verify(choreographer)
             .postFrameCallback(eq(notificationShadeDepthController.updateBlurCallback))
     }
@@ -419,6 +420,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
         verify(notificationShadeWindowController).setBackgroundBlurRadius(eq(0))
         verify(wallpaperController).setNotificationShadeZoom(eq(1f))
+        verify(blurUtils).prepareBlur(any(), eq(0))
         verify(blurUtils).applyBlur(eq(viewRootImpl), eq(0), eq(false))
     }
 

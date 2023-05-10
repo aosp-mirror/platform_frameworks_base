@@ -96,7 +96,11 @@ public abstract class InputManagerInternal {
      */
     public abstract int getVirtualMousePointerDisplayId();
 
-    /** Gets the current position of the mouse cursor. */
+    /**
+     * Gets the current position of the mouse cursor.
+     *
+     * Returns NaN-s as the coordinates if the cursor is not available.
+     */
     public abstract PointF getCursorPosition();
 
     /**

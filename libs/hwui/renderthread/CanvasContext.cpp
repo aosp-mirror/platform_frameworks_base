@@ -236,7 +236,6 @@ void CanvasContext::setupPipelineSurface() {
 
     if (mNativeSurface && !mNativeSurface->didSetExtraBuffers()) {
         setBufferCount(mNativeSurface->getNativeWindow());
-
     }
 
     mFrameNumber = 0;
@@ -301,17 +300,13 @@ void CanvasContext::setOpaque(bool opaque) {
 
 float CanvasContext::setColorMode(ColorMode mode) {
     if (mode != mColorMode) {
-        const bool isHdr = mode == ColorMode::Hdr || mode == ColorMode::Hdr10;
-        if (isHdr && !mRenderPipeline->supportsExtendedRangeHdr()) {
-            mode = ColorMode::WideColorGamut;
-        }
         mColorMode = mode;
         mRenderPipeline->setSurfaceColorProperties(mode);
         setupPipelineSurface();
     }
     switch (mColorMode) {
         case ColorMode::Hdr:
-            return 3.f;  // TODO: Refine this number
+            return Properties::maxHdrHeadroomOn8bit;
         case ColorMode::Hdr10:
             return 10.f;
         default:
@@ -528,6 +523,14 @@ void CanvasContext::notifyFramePending() {
     sendLoadResetHint();
 }
 
+Frame CanvasContext::getFrame() {
+    if (mHardwareBuffer != nullptr) {
+        return {mBufferParams.getLogicalWidth(), mBufferParams.getLogicalHeight(), 0};
+    } else {
+        return mRenderPipeline->getFrame();
+    }
+}
+
 void CanvasContext::draw() {
     if (auto grContext = getGrContext()) {
         if (grContext->abandoned()) {
@@ -569,7 +572,8 @@ void CanvasContext::draw() {
 
     mCurrentFrameInfo->markIssueDrawCommandsStart();
 
-    Frame frame = mRenderPipeline->getFrame();
+    Frame frame = getFrame();
+
     SkRect windowDirty = computeDirtyRect(frame, &dirty);
 
     ATRACE_FORMAT("Drawing " RECT_STRING, SK_RECT_ARGS(dirty));
@@ -860,6 +864,10 @@ SkISize CanvasContext::getNextFrameSize() const {
     size.fHeight = ANativeWindow_getHeight(anw);
     mRenderThread.cacheManager().notifyNextFrameSize(size.fWidth, size.fHeight);
     return size;
+}
+
+const SkM44& CanvasContext::getPixelSnapMatrix() const {
+    return mRenderPipeline->getPixelSnapMatrix();
 }
 
 void CanvasContext::prepareAndDraw(RenderNode* node) {

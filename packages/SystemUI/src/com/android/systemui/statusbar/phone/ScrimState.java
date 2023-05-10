@@ -243,7 +243,12 @@ public enum ScrimState {
                     : CentralSurfaces.FADE_KEYGUARD_DURATION;
 
             boolean fromAod = previousState == AOD || previousState == PULSING;
-            mAnimateChange = !mLaunchingAffordanceWithPreview && !fromAod;
+            // If launch/occlude animations were playing, they already animated the scrim
+            // alpha to 0f as part of the animation. If we animate it now, we'll set it back
+            // to 1f and animate it back to 0f, causing an unwanted scrim flash.
+            mAnimateChange = !mLaunchingAffordanceWithPreview
+                    && !mOccludeAnimationPlaying
+                    && !fromAod;
 
             mFrontTint = Color.TRANSPARENT;
             mBehindTint = Color.BLACK;
@@ -308,6 +313,7 @@ public enum ScrimState {
     boolean mWallpaperSupportsAmbientMode;
     boolean mHasBackdrop;
     boolean mLaunchingAffordanceWithPreview;
+    boolean mOccludeAnimationPlaying;
     boolean mWakeLockScreenSensorActive;
     boolean mKeyguardFadingAway;
     long mKeyguardFadingAwayDuration;
@@ -409,6 +415,10 @@ public enum ScrimState {
 
     public void setLaunchingAffordanceWithPreview(boolean launchingAffordanceWithPreview) {
         mLaunchingAffordanceWithPreview = launchingAffordanceWithPreview;
+    }
+
+    public void setOccludeAnimationPlaying(boolean occludeAnimationPlaying) {
+        mOccludeAnimationPlaying = occludeAnimationPlaying;
     }
 
     public boolean isLowPowerState() {

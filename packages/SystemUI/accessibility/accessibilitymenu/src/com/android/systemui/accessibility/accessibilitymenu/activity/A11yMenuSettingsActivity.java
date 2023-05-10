@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.accessibilitymenu.activity;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -24,7 +25,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Browser;
 import android.provider.Settings;
+import android.widget.TextView;
+import android.view.View;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
@@ -44,6 +48,13 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
                 .beginTransaction()
                 .replace(android.R.id.content, new A11yMenuPreferenceFragment())
                 .commit();
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setDisplayShowCustomEnabled(true);
+        actionBar.setCustomView(R.layout.preferences_action_bar);
+        ((TextView) findViewById(R.id.action_bar_title)).setText(
+                getResources().getString(R.string.accessibility_menu_settings_name)
+        );
     }
 
     /**
@@ -54,6 +65,13 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
         public void onCreatePreferences(Bundle bundle, String s) {
             setPreferencesFromResource(R.xml.accessibilitymenu_preferences, s);
             initializeHelpAndFeedbackPreference();
+        }
+
+        @Override
+        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+            super.onViewCreated(view, savedInstanceState);
+            view.setLayoutDirection(
+                    view.getResources().getConfiguration().getLayoutDirection());
         }
 
         /**
@@ -71,8 +89,6 @@ public class A11yMenuSettingsActivity extends FragmentActivity {
         private void initializeHelpAndFeedbackPreference() {
             final Preference prefHelp = findPreference(getString(R.string.pref_help));
             if (prefHelp != null) {
-                prefHelp.setTitle(R.string.pref_help_title);
-
                 // Do not allow access to web during setup.
                 if (Settings.Secure.getInt(
                         getContext().getContentResolver(),

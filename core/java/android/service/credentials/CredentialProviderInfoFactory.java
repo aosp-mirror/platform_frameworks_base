@@ -33,14 +33,25 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
+import android.content.res.XmlResourceParser;
 import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Log;
+import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Slog;
+import android.util.Xml;
 
+import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -55,6 +66,11 @@ import java.util.Set;
  */
 public final class CredentialProviderInfoFactory {
     private static final String TAG = "CredentialProviderInfoFactory";
+
+    private static final String TAG_CREDENTIAL_PROVIDER = "credential-provider";
+    private static final String TAG_CAPABILITIES = "capabilities";
+    private static final String TAG_CAPABILITY = "capability";
+    private static final String ATTR_NAME = "name";
 
     /**
      * Constructs an information instance of the credential provider.
@@ -77,7 +93,8 @@ public final class CredentialProviderInfoFactory {
                 getServiceInfoOrThrow(serviceComponent, userId),
                 isSystemProvider,
                 /* disableSystemAppVerificationForTests= */ false,
-                /* isEnabled= */ false);
+                /* isEnabled= */ false,
+                /* isPrimary= */ false);
     }
 
     /**
@@ -97,7 +114,8 @@ public final class CredentialProviderInfoFactory {
             @NonNull ServiceInfo serviceInfo,
             boolean isSystemProvider,
             boolean disableSystemAppVerificationForTests,
-            boolean isEnabled)
+            boolean isEnabled,
+            boolean isPrimary)
             throws SecurityException {
         verifyProviderPermission(serviceInfo);
         if (isSystemProvider) {
@@ -112,6 +130,26 @@ public final class CredentialProviderInfoFactory {
         return populateMetadata(context, serviceInfo)
                 .setSystemProvider(isSystemProvider)
                 .setEnabled(isEnabled)
+                .setPrimary(isPrimary)
+                .build();
+    }
+
+    /**
+     * Constructs an information instance of the credential provider for testing purposes. Does not
+     * run any verifications and passes parameters as is.
+     */
+    @VisibleForTesting
+    public static CredentialProviderInfo createForTests(
+            @NonNull ServiceInfo serviceInfo,
+            @NonNull CharSequence overrideLabel,
+            boolean isSystemProvider,
+            boolean isEnabled,
+            @NonNull List<String> capabilities) {
+        return new CredentialProviderInfo.Builder(serviceInfo)
+                .setEnabled(isEnabled)
+                .setOverrideLabel(overrideLabel)
+                .setSystemProvider(isSystemProvider)
+                .addCapabilities(capabilities)
                 .build();
     }
 
@@ -126,28 +164,14 @@ public final class CredentialProviderInfoFactory {
 
     private static boolean isSystemProviderWithValidPermission(
             ServiceInfo serviceInfo, Context context) {
-        requireNonNull(context, "context must not be null");
-
-        final String permission = Manifest.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE;
-        try {
-            ApplicationInfo appInfo =
-                    context.getPackageManager()
-                            .getApplicationInfo(
-                                    serviceInfo.packageName,
-                                    PackageManager.ApplicationInfoFlags.of(
-                                            PackageManager.MATCH_SYSTEM_ONLY));
-            if (appInfo != null
-                    && context.checkPermission(permission, /* pid= */ -1, appInfo.uid)
-                            == PackageManager.PERMISSION_GRANTED) {
-                Slog.i(TAG, "SYS permission granted for: " + serviceInfo.packageName);
-                return true;
-            } else {
-                Slog.i(TAG, "SYS permission failed for: " + serviceInfo.packageName);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
+        if (context == null) {
+            Slog.w(TAG, "Context is null in isSystemProviderWithValidPermission");
+            return false;
         }
-        return false;
+        return PermissionUtils.hasPermission(
+                context,
+                serviceInfo.packageName,
+                Manifest.permission.PROVIDE_DEFAULT_ENABLED_CREDENTIAL_SERVICE);
     }
 
     private static boolean isValidSystemProvider(
@@ -159,7 +183,11 @@ public final class CredentialProviderInfoFactory {
         if (disableSystemAppVerificationForTests) {
             Bundle metadata = serviceInfo.metaData;
             if (metadata == null) {
-                Slog.e(TAG, "isValidSystemProvider - metadata is null: " + serviceInfo);
+                Slog.w(
+                        TAG,
+                        "metadata is null while reading "
+                                + "TEST_SYSTEM_PROVIDER_META_DATA_KEY: "
+                                + serviceInfo);
                 return false;
             }
             return metadata.getBoolean(
@@ -172,61 +200,131 @@ public final class CredentialProviderInfoFactory {
     private static CredentialProviderInfo.Builder populateMetadata(
             @NonNull Context context, ServiceInfo serviceInfo) {
         requireNonNull(context, "context must not be null");
-
-        final CredentialProviderInfo.Builder builder =
-                new CredentialProviderInfo.Builder(serviceInfo);
         final PackageManager pm = context.getPackageManager();
+        CredentialProviderInfo.Builder builder = new CredentialProviderInfo.Builder(serviceInfo);
 
         // 1. Get the metadata for the service.
         final Bundle metadata = serviceInfo.metaData;
         if (metadata == null) {
-            Log.i(TAG, "populateMetadata - metadata is null");
+            Slog.w(TAG, "Metadata is null for provider: " + serviceInfo.getComponentName());
             return builder;
         }
 
-        // 2. Extract the capabilities from the bundle.
+        // 2. Get the resources for the application.
+        Resources resources = null;
         try {
-            Resources resources = pm.getResourcesForApplication(serviceInfo.applicationInfo);
-            if (metadata == null || resources == null) {
-                Log.i(TAG, "populateMetadata - resources is null");
-                return builder;
-            }
-
-            builder.addCapabilities(populateProviderCapabilities(resources, metadata, serviceInfo));
+            resources = pm.getResourcesForApplication(serviceInfo.applicationInfo);
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, e.getMessage());
+            Slog.e(TAG, "Failed to get app resources", e);
+        }
+
+        // 3. Stop if we are missing data.
+        if (resources == null) {
+            Slog.w(
+                    TAG,
+                    "Resources are null for the serviceInfo being processed: "
+                            + serviceInfo.getComponentName());
+            return builder;
+        }
+
+        // 4. Extract the XML metadata.
+        try {
+            builder = extractXmlMetadata(context, builder, serviceInfo, pm, resources);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to get XML metadata", e);
         }
 
         return builder;
     }
 
-    private static List<String> populateProviderCapabilities(
-            Resources resources, Bundle metadata, ServiceInfo serviceInfo) {
-        List<String> output = new ArrayList<>();
-        String[] capabilities = new String[0];
+    private static CredentialProviderInfo.Builder extractXmlMetadata(
+            @NonNull Context context,
+            @NonNull CredentialProviderInfo.Builder builder,
+            @NonNull ServiceInfo serviceInfo,
+            @NonNull PackageManager pm,
+            @NonNull Resources resources) {
+        final XmlResourceParser parser =
+                serviceInfo.loadXmlMetaData(pm, CredentialProviderService.SERVICE_META_DATA);
+        if (parser == null) {
+            return builder;
+        }
 
         try {
-            capabilities =
-                    resources.getStringArray(
-                            metadata.getInt(CredentialProviderService.CAPABILITY_META_DATA_KEY));
-        } catch (Resources.NotFoundException e) {
-            Slog.e(TAG, "Failed to get capabilities: " + e.getMessage());
+            int type = 0;
+            while (type != XmlPullParser.END_DOCUMENT && type != XmlPullParser.START_TAG) {
+                type = parser.next();
+            }
+
+            // This is matching a <credential-provider /> tag in the XML.
+            if (TAG_CREDENTIAL_PROVIDER.equals(parser.getName())) {
+                final AttributeSet allAttributes = Xml.asAttributeSet(parser);
+                TypedArray afsAttributes = null;
+                try {
+                    afsAttributes =
+                            resources.obtainAttributes(
+                                    allAttributes,
+                                    com.android.internal.R.styleable.CredentialProvider);
+                    builder.setSettingsSubtitle(
+                            afsAttributes.getString(
+                                    R.styleable.CredentialProvider_settingsSubtitle));
+                } catch (Exception e) {
+                    Slog.e(TAG, "Failed to get XML attr", e);
+                } finally {
+                    if (afsAttributes != null) {
+                        afsAttributes.recycle();
+                    }
+                }
+                builder.addCapabilities(parseXmlProviderOuterCapabilities(parser, resources));
+            } else {
+                Slog.w(TAG, "Meta-data does not start with credential-provider-service tag");
+            }
+        } catch (IOException | XmlPullParserException e) {
+            Slog.e(TAG, "Error parsing credential provider service meta-data", e);
         }
 
-        if (capabilities == null || capabilities.length == 0) {
-            Slog.e(TAG, "No capabilities found for provider:" + serviceInfo.packageName);
-            return output;
-        }
+        return builder;
+    }
 
-        for (String capability : capabilities) {
-            if (capability.isEmpty()) {
-                Slog.e(TAG, "Skipping empty capability");
+    private static Set<String> parseXmlProviderOuterCapabilities(
+            XmlPullParser parser, Resources resources) throws IOException, XmlPullParserException {
+        final Set<String> capabilities = new HashSet<>();
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
                 continue;
             }
-            Slog.e(TAG, "Capabilities found for provider: " + capability);
-            output.add(capability);
+
+            if (TAG_CAPABILITIES.equals(parser.getName())) {
+                capabilities.addAll(parseXmlProviderInnerCapabilities(parser, resources));
+            }
         }
-        return output;
+
+        return capabilities;
+    }
+
+    private static List<String> parseXmlProviderInnerCapabilities(
+            XmlPullParser parser, Resources resources) throws IOException, XmlPullParserException {
+        List<String> capabilities = new ArrayList<>();
+
+        final int outerDepth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
+                continue;
+            }
+
+            if (TAG_CAPABILITY.equals(parser.getName())) {
+                String name = parser.getAttributeValue(null, ATTR_NAME);
+                if (name != null && !TextUtils.isEmpty(name)) {
+                    capabilities.add(name);
+                }
+            }
+        }
+
+        return capabilities;
     }
 
     private static ServiceInfo getServiceInfoOrThrow(
@@ -240,7 +338,7 @@ public final class CredentialProviderInfoFactory {
                 return si;
             }
         } catch (RemoteException e) {
-            Slog.v(TAG, e.getMessage());
+            Slog.e(TAG, "Unable to get serviceInfo", e);
         }
         throw new PackageManager.NameNotFoundException(serviceComponent.toString());
     }
@@ -286,12 +384,9 @@ public final class CredentialProviderInfoFactory {
                 if (appInfo == null || serviceInfo == null) {
                     continue;
                 }
-
                 services.add(serviceInfo);
-            } catch (SecurityException e) {
-                Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
-            } catch (PackageManager.NameNotFoundException e) {
-                Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
+            } catch (SecurityException | PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "Error getting info for " + serviceInfo, e);
             }
         }
         return services;
@@ -306,7 +401,7 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             @UserIdInt int userId,
             boolean disableSystemAppVerificationForTests,
-            Set<ServiceInfo> enabledServices) {
+            Set<ComponentName> enabledServices) {
         requireNonNull(context, "context must not be null");
 
         final List<CredentialProviderInfo> providerInfos = new ArrayList<>();
@@ -320,7 +415,7 @@ public final class CredentialProviderInfoFactory {
                                 si,
                                 /* isSystemProvider= */ true,
                                 disableSystemAppVerificationForTests,
-                                enabledServices.contains(si));
+                                enabledServices.contains(si.getComponentName()), false);
                 if (cpi.isSystemProvider()) {
                     providerInfos.add(cpi);
                 } else {
@@ -339,10 +434,11 @@ public final class CredentialProviderInfoFactory {
 
         try {
             DevicePolicyManager dpm = newContext.getSystemService(DevicePolicyManager.class);
-            return dpm.getCredentialManagerPolicy();
+            PackagePolicy pp = dpm.getCredentialManagerPolicy();
+            return pp;
         } catch (SecurityException e) {
             // If the current user is not enrolled in DPM then this can throw a security error.
-            Log.e(TAG, "Failed to get device policy: " + e);
+            Slog.e(TAG, "Failed to get device policy: " + e);
         }
 
         return null;
@@ -357,7 +453,8 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             int userId,
             int providerFilter,
-            Set<ServiceInfo> enabledServices) {
+            Set<ComponentName> enabledServices,
+            Set<String> primaryServices) {
         requireNonNull(context, "context must not be null");
 
         // Get the device policy.
@@ -370,7 +467,11 @@ public final class CredentialProviderInfoFactory {
                         context, pp, disableSystemAppVerificationForTests, providerFilter);
         generator.addUserProviders(
                 getUserProviders(
-                        context, userId, disableSystemAppVerificationForTests, enabledServices));
+                        context,
+                        userId,
+                        disableSystemAppVerificationForTests,
+                        enabledServices,
+                        primaryServices));
         generator.addSystemProviders(
                 getAvailableSystemServices(
                         context, userId, disableSystemAppVerificationForTests, enabledServices));
@@ -386,7 +487,8 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             int userId,
             int providerFilter,
-            Set<ServiceInfo> enabledServices) {
+            Set<ComponentName> enabledServices,
+            Set<String> primaryServices) {
         requireNonNull(context, "context must not be null");
 
         // Get the device policy.
@@ -399,7 +501,11 @@ public final class CredentialProviderInfoFactory {
                         context, pp, disableSystemAppVerificationForTests, providerFilter);
         generator.addUserProviders(
                 getUserProviders(
-                        context, userId, disableSystemAppVerificationForTests, enabledServices));
+                        context,
+                        userId,
+                        disableSystemAppVerificationForTests,
+                        enabledServices,
+                        primaryServices));
         generator.addSystemProviders(
                 getAvailableSystemServices(
                         context, userId, disableSystemAppVerificationForTests, enabledServices));
@@ -492,7 +598,8 @@ public final class CredentialProviderInfoFactory {
             @NonNull Context context,
             @UserIdInt int userId,
             boolean disableSystemAppVerificationForTests,
-            Set<ServiceInfo> enabledServices) {
+            Set<ComponentName> enabledServices,
+            Set<String> primaryServices) {
         final List<CredentialProviderInfo> services = new ArrayList<>();
         final List<ResolveInfo> resolveInfos =
                 context.getPackageManager()
@@ -502,6 +609,11 @@ public final class CredentialProviderInfoFactory {
                                 userId);
         for (ResolveInfo resolveInfo : resolveInfos) {
             final ServiceInfo serviceInfo = resolveInfo.serviceInfo;
+            if (serviceInfo == null) {
+                Slog.d(TAG, "No serviceInfo found for resolveInfo, so skipping provider");
+                continue;
+            }
+
             try {
                 CredentialProviderInfo cpi =
                         CredentialProviderInfoFactory.create(
@@ -509,14 +621,14 @@ public final class CredentialProviderInfoFactory {
                                 serviceInfo,
                                 /* isSystemProvider= */ false,
                                 disableSystemAppVerificationForTests,
-                                enabledServices.contains(serviceInfo));
+                                enabledServices.contains(serviceInfo.getComponentName()),
+                                primaryServices.contains(
+                                        serviceInfo.getComponentName().flattenToString()));
                 if (!cpi.isSystemProvider()) {
                     services.add(cpi);
                 }
-            } catch (SecurityException e) {
-                Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
             } catch (Exception e) {
-                Slog.e(TAG, "Error getting info for " + serviceInfo + ": " + e);
+                Slog.e(TAG, "Error getting info for " + serviceInfo, e);
             }
         }
         return services;

@@ -41,23 +41,6 @@ bootstrap_go_package {
 }
 
 python_binary_host {
-    name: "api_versions_trimmer",
-    srcs: ["api_versions_trimmer.py"],
-}
-
-python_test_host {
-    name: "api_versions_trimmer_unittests",
-    main: "api_versions_trimmer_unittests.py",
-    srcs: [
-        "api_versions_trimmer_unittests.py",
-        "api_versions_trimmer.py",
-    ],
-    test_options: {
-        unit_test: true,
-    },
-}
-
-python_binary_host {
     name: "merge_annotation_zips",
     srcs: ["merge_annotation_zips.py"],
 }

@@ -338,7 +338,7 @@ public class FingerprintAuthenticationClientTest {
         assertThat(opContext).isSameInstanceAs(
                 mOperationContextCaptor.getValue().toAidlContext());
         mContextInjector.getValue().accept(opContext);
-        verify(mHal).onContextChanged(eq(opContext));
+        verify(mHal).onContextChanged(same(opContext));
 
         client.stopHalOperation();
         verify(mBiometricContext).unsubscribe(same(mOperationContextCaptor.getValue()));

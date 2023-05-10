@@ -19,6 +19,7 @@ package com.android.systemui.testing.screenshot
 import android.app.Activity
 import android.app.Dialog
 import android.graphics.Bitmap
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
@@ -26,6 +27,7 @@ import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.activity.ComponentActivity
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import java.util.concurrent.TimeUnit
 import org.junit.Assert.assertEquals
 import org.junit.rules.RuleChain
 import org.junit.rules.TestRule
@@ -39,14 +41,14 @@ import platform.test.screenshot.getEmulatedDevicePathConfig
 import platform.test.screenshot.matchers.BitmapMatcher
 
 /** A rule for View screenshot diff unit tests. */
-class ViewScreenshotTestRule(
+open class ViewScreenshotTestRule(
     emulationSpec: DeviceEmulationSpec,
     private val matcher: BitmapMatcher = UnitTestBitmapMatcher,
     assetsPathRelativeToBuildRoot: String
 ) : TestRule {
     private val colorsRule = MaterialYouColorsRule()
     private val deviceEmulationRule = DeviceEmulationRule(emulationSpec)
-    private val screenshotRule =
+    protected val screenshotRule =
         ScreenshotTestRule(
             SystemUIGoldenImagePathManager(
                 getEmulatedDevicePathConfig(emulationSpec),
@@ -54,25 +56,20 @@ class ViewScreenshotTestRule(
             )
         )
     private val activityRule = ActivityScenarioRule(ScreenshotActivity::class.java)
-    private val delegateRule =
-        RuleChain.outerRule(colorsRule)
-            .around(deviceEmulationRule)
-            .around(screenshotRule)
-            .around(activityRule)
+    private val roboRule =
+        RuleChain.outerRule(deviceEmulationRule).around(screenshotRule).around(activityRule)
+    private val delegateRule = RuleChain.outerRule(colorsRule).around(roboRule)
+    private val isRobolectric = if (Build.FINGERPRINT.contains("robolectric")) true else false
 
     override fun apply(base: Statement, description: Description): Statement {
-        return delegateRule.apply(base, description)
+        val ruleToApply = if (isRobolectric) roboRule else delegateRule
+        return ruleToApply.apply(base, description)
     }
 
-    /**
-     * Compare the content of the view provided by [viewProvider] with the golden image identified
-     * by [goldenIdentifier] in the context of [emulationSpec].
-     */
-    fun screenshotTest(
-        goldenIdentifier: String,
+    protected fun takeScreenshot(
         mode: Mode = Mode.WrapContent,
         viewProvider: (ComponentActivity) -> View,
-    ) {
+    ): Bitmap {
         activityRule.scenario.onActivity { activity ->
             // Make sure that the activity draws full screen and fits the whole display instead of
             // the system bars.
@@ -99,7 +96,24 @@ class ViewScreenshotTestRule(
             contentView = content.getChildAt(0)
         }
 
-        val bitmap = contentView?.toBitmap() ?: error("contentView is null")
+        return if (isRobolectric) {
+            contentView?.captureToBitmap()?.get(10, TimeUnit.SECONDS)
+                ?: error("timeout while trying to capture view to bitmap")
+        } else {
+            contentView?.toBitmap() ?: error("contentView is null")
+        }
+    }
+
+    /**
+     * Compare the content of the view provided by [viewProvider] with the golden image identified
+     * by [goldenIdentifier] in the context of [emulationSpec].
+     */
+    fun screenshotTest(
+        goldenIdentifier: String,
+        mode: Mode = Mode.WrapContent,
+        viewProvider: (ComponentActivity) -> View,
+    ) {
+        val bitmap = takeScreenshot(mode, viewProvider)
         screenshotRule.assertBitmapAgainstGolden(
             bitmap,
             goldenIdentifier,

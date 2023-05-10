@@ -30,6 +30,8 @@ import com.android.internal.util.AnnotationValidations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Contains information about the request that initiated this UX flow.
@@ -50,6 +52,12 @@ public final class RequestInfo implements Parcelable {
     @NonNull public static final String TYPE_UNDEFINED = "android.credentials.ui.TYPE_UNDEFINED";
     /** Type value for a getCredential request. */
     @NonNull public static final String TYPE_GET = "android.credentials.ui.TYPE_GET";
+    /** Type value for a getCredential request that utilizes the credential registry.
+     *
+     * @hide
+     **/
+    @NonNull public static final String TYPE_GET_VIA_REGISTRY =
+            "android.credentials.ui.TYPE_GET_VIA_REGISTRY";
     /** Type value for a createCredential request. */
     @NonNull public static final String TYPE_CREATE = "android.credentials.ui.TYPE_CREATE";
 
@@ -64,6 +72,9 @@ public final class RequestInfo implements Parcelable {
     @Nullable
     private final CreateCredentialRequest mCreateCredentialRequest;
 
+    @NonNull
+    private final List<String> mDefaultProviderIds;
+
     @Nullable
     private final GetCredentialRequest mGetCredentialRequest;
 
@@ -74,13 +85,32 @@ public final class RequestInfo implements Parcelable {
     @NonNull
     private final String mAppPackageName;
 
+    private final boolean mHasPermissionToOverrideDefault;
+
     /** Creates new {@code RequestInfo} for a create-credential flow. */
     @NonNull
     public static RequestInfo newCreateRequestInfo(
             @NonNull IBinder token, @NonNull CreateCredentialRequest createCredentialRequest,
             @NonNull String appPackageName) {
         return new RequestInfo(
-                token, TYPE_CREATE, appPackageName, createCredentialRequest, null);
+                token, TYPE_CREATE, appPackageName, createCredentialRequest, null,
+                /*hasPermissionToOverrideDefault=*/ false,
+                /*defaultProviderIds=*/ new ArrayList<>());
+    }
+
+    /**
+     * Creates new {@code RequestInfo} for a create-credential flow.
+     *
+     * @hide
+     */
+    @NonNull
+    public static RequestInfo newCreateRequestInfo(
+            @NonNull IBinder token, @NonNull CreateCredentialRequest createCredentialRequest,
+            @NonNull String appPackageName, boolean hasPermissionToOverrideDefault,
+            @NonNull List<String> defaultProviderIds) {
+        return new RequestInfo(
+                token, TYPE_CREATE, appPackageName, createCredentialRequest, null,
+                hasPermissionToOverrideDefault, defaultProviderIds);
     }
 
     /** Creates new {@code RequestInfo} for a get-credential flow. */
@@ -89,7 +119,19 @@ public final class RequestInfo implements Parcelable {
             @NonNull IBinder token, @NonNull GetCredentialRequest getCredentialRequest,
             @NonNull String appPackageName) {
         return new RequestInfo(
-                token, TYPE_GET, appPackageName, null, getCredentialRequest);
+                token, TYPE_GET, appPackageName, null, getCredentialRequest,
+                /*hasPermissionToOverrideDefault=*/ false,
+                /*defaultProviderIds=*/ new ArrayList<>());
+    }
+
+
+    /**
+     * Returns whether the calling package has the permission
+     *
+     * @hide
+     */
+    public boolean hasPermissionToOverrideDefault() {
+        return mHasPermissionToOverrideDefault;
     }
 
     /** Returns the request token matching the user request. */
@@ -121,6 +163,20 @@ public final class RequestInfo implements Parcelable {
     }
 
     /**
+     * Returns default provider identifier (flattened component name) configured from the user
+     * settings.
+     *
+     * Will only be possibly non-empty for the create use case. Not meaningful for the sign-in use
+     * case.
+     *
+     * @hide
+     */
+    @NonNull
+    public List<String> getDefaultProviderIds() {
+        return mDefaultProviderIds;
+    }
+
+    /**
      * Returns the non-null GetCredentialRequest when the type of the request is {@link
      * #TYPE_GET}, or null otherwise.
      */
@@ -132,12 +188,16 @@ public final class RequestInfo implements Parcelable {
     private RequestInfo(@NonNull IBinder token, @NonNull @RequestType String type,
             @NonNull String appPackageName,
             @Nullable CreateCredentialRequest createCredentialRequest,
-            @Nullable GetCredentialRequest getCredentialRequest) {
+            @Nullable GetCredentialRequest getCredentialRequest,
+            boolean hasPermissionToOverrideDefault,
+            @NonNull List<String> defaultProviderIds) {
         mToken = token;
         mType = type;
         mAppPackageName = appPackageName;
         mCreateCredentialRequest = createCredentialRequest;
         mGetCredentialRequest = getCredentialRequest;
+        mHasPermissionToOverrideDefault = hasPermissionToOverrideDefault;
+        mDefaultProviderIds = defaultProviderIds == null ? new ArrayList<>() : defaultProviderIds;
     }
 
     private RequestInfo(@NonNull Parcel in) {
@@ -157,6 +217,8 @@ public final class RequestInfo implements Parcelable {
         AnnotationValidations.validate(NonNull.class, null, mAppPackageName);
         mCreateCredentialRequest = createCredentialRequest;
         mGetCredentialRequest = getCredentialRequest;
+        mHasPermissionToOverrideDefault = in.readBoolean();
+        mDefaultProviderIds = in.createStringArrayList();
     }
 
     @Override
@@ -166,6 +228,8 @@ public final class RequestInfo implements Parcelable {
         dest.writeString8(mAppPackageName);
         dest.writeTypedObject(mCreateCredentialRequest, flags);
         dest.writeTypedObject(mGetCredentialRequest, flags);
+        dest.writeBoolean(mHasPermissionToOverrideDefault);
+        dest.writeStringList(mDefaultProviderIds);
     }
 
     @Override

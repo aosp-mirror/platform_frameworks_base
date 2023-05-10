@@ -110,10 +110,7 @@ public final class VirtualKeyboardConfig extends VirtualInputDeviceConfig implem
 
         /**
          * Sets the preferred input language of the virtual keyboard using an IETF
-         * <a href="https://tools.ietf.org/html/bcp47">BCP-47</a>
-         * conformant tag. See {@code keyboardLocale} attribute in
-         * frameworks/base/packages/InputDevices/res/xml/keyboard_layouts.xml for a list of
-         * supported language tags.
+         * <a href="https://tools.ietf.org/html/bcp47">BCP-47</a>  conformant tag.
          *
          * The passed in {@code languageTag} will be canonized using {@link
          * ULocale} and used by the system as a hint to configure the keyboard layout.
@@ -135,7 +132,7 @@ public final class VirtualKeyboardConfig extends VirtualInputDeviceConfig implem
         public Builder setLanguageTag(@NonNull String languageTag) {
             Objects.requireNonNull(languageTag, "languageTag cannot be null");
             ULocale locale = ULocale.forLanguageTag(languageTag);
-            if (locale.getLanguage().isEmpty() || locale.getCountry().isEmpty()) {
+            if (locale.getLanguage().isEmpty()) {
                 throw new IllegalArgumentException("The language tag is not valid.");
             }
             mLanguageTag = ULocale.createCanonical(locale).toLanguageTag();
@@ -144,8 +141,8 @@ public final class VirtualKeyboardConfig extends VirtualInputDeviceConfig implem
 
         /**
          * Sets the preferred layout type of the virtual keyboard. See {@code keyboardLayoutType}
-         * attribute in frameworks/base/packages/InputDevices/res/xml/keyboard_layouts.xml for a
-         * list of supported layout types.
+         * attribute in frameworks/base/core/res/res/values/attrs.xml for a list of supported
+         * layout types.
          *
          * Note that the preferred layout is not guaranteed. If the specified layout type is
          * well-formed but not supported, the keyboard will be using English US QWERTY layout.

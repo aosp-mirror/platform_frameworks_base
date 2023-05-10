@@ -408,6 +408,17 @@ public class DozeMachineTest extends SysuiTestCase {
     }
 
     @Test
+    public void testPulsing_dozeSuspendTriggers_pulseDone_doesntCrash() {
+        mMachine.requestState(INITIALIZED);
+
+        mMachine.requestState(DOZE);
+        mMachine.requestPulse(DozeLog.PULSE_REASON_NOTIFICATION);
+        mMachine.requestState(DOZE_PULSING);
+        mMachine.requestState(DOZE_SUSPEND_TRIGGERS);
+        mMachine.requestState(DOZE_PULSE_DONE);
+    }
+
+    @Test
     public void testSuppressingPulse_doesntCrash() {
         mMachine.requestState(INITIALIZED);
 

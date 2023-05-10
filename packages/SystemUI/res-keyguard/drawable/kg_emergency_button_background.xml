@@ -19,7 +19,7 @@
     android:color="?attr/wallpaperTextColorSecondary">
     <item android:id="@android:id/background">
         <shape android:shape="rectangle">
-            <solid android:color="?androidprv:attr/colorAccentTertiary"/>
+            <solid android:color="?androidprv:attr/materialColorTertiaryFixed"/>
             <corners android:radius="24dp"/>
         </shape>
     </item>

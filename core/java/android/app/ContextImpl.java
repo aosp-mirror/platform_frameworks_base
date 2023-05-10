@@ -1299,7 +1299,7 @@ class ContextImpl extends Context {
 
     @Override
     public void sendBroadcastMultiplePermissions(Intent intent, String[] receiverPermissions,
-            String[] excludedPermissions, String[] excludedPackages) {
+            String[] excludedPermissions, String[] excludedPackages, BroadcastOptions options) {
         warnIfCallingFromSystemProcess();
         String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
         try {
@@ -1307,7 +1307,8 @@ class ContextImpl extends Context {
             ActivityManager.getService().broadcastIntentWithFeature(
                     mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
                     null, Activity.RESULT_OK, null, null, receiverPermissions, excludedPermissions,
-                    excludedPackages, AppOpsManager.OP_NONE, null, false, false, getUserId());
+                    excludedPackages, AppOpsManager.OP_NONE,
+                    options == null ? null : options.toBundle(), false, false, getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3460,7 +3461,9 @@ class ContextImpl extends Context {
             @Nullable AttributionSource nextAttributionSource,
             @Nullable Set<String> renouncedPermissions) {
         AttributionSource attributionSource = new AttributionSource(Process.myUid(),
-                mOpPackageName, attributionTag, renouncedPermissions, nextAttributionSource);
+                Process.myPid(), mOpPackageName, attributionTag,
+                (renouncedPermissions != null) ? renouncedPermissions.toArray(new String[0]) : null,
+                nextAttributionSource);
         // If we want to access protected data on behalf of another app we need to
         // tell the OS that we opt in to participate in the attribution chain.
         if (nextAttributionSource != null) {
@@ -3614,6 +3617,17 @@ class ContextImpl extends Context {
         // ActivityThread for Activity and Service. For the context, such as WindowContext,
         // without lifecycle concept, it should be called once the context is released.
         scheduleFinalCleanup(getClass().getName(), getOuterContext().getClass().getSimpleName());
+    }
+
+    @Override
+    public void closeSystemDialogs() {
+        final Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+                .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        final Bundle options = BroadcastOptions.makeBasic()
+                .setDeliveryGroupPolicy(BroadcastOptions.DELIVERY_GROUP_POLICY_MOST_RECENT)
+                .setDeferralPolicy(BroadcastOptions.DEFERRAL_POLICY_UNTIL_ACTIVE)
+                .toBundle();
+        sendBroadcast(intent, null /* receiverPermission */, options);
     }
 
     // ----------------------------------------------------------------------

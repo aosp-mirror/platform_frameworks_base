@@ -70,6 +70,15 @@
         <item name="android:fontWeight">700</item>
     </style>
 
+    <style name="Chipbar" />
+
+    <style name="Chipbar.Text" parent="@*android:style/TextAppearance.DeviceDefault.Notification.Title">
+        <!-- Text size should be kept in sync with the notification conversation header size. (The
+             conversation header doesn't have a defined style, so the size must be copied here.)
+             See notification_template_conversation_header.xml. -->
+        <item name="android:textSize">16sp</item>
+    </style>
+
     <style name="TextAppearance" />
 
     <style name="TextAppearance.QS">
@@ -374,6 +383,10 @@
     </style>
 
     <style name="Theme.SystemUI.QuickSettings.BrightnessDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.SystemUI.ContrastDialog" parent="@android:style/Theme.DeviceDefault.Dialog">
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 
@@ -695,6 +708,8 @@
 
     <style name="MediaPlayer.Recommendation.AlbumContainer.Updated">
         <item name="android:layout_width">@dimen/qs_media_rec_album_width</item>
+        <item name="android:minWidth">@dimen/qs_media_rec_album_width</item>
+        <item name="android:minHeight">@dimen/qs_media_rec_album_height_collapsed</item>
         <item name="android:background">@drawable/qs_media_light_source</item>
         <item name="android:layout_marginTop">@dimen/qs_media_info_spacing</item>
     </style>
@@ -767,10 +782,12 @@
     </style>
 
     <style name="LongScreenshotActivity" parent="@android:style/Theme.DeviceDefault.DayNight">
+        <item name="android:colorBackground">?androidprv:attr/materialColorSurfaceContainer</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:navigationBarColor">?android:attr/colorBackgroundFloating</item>
+        <item name="android:statusBarColor">?androidprv:attr/materialColorSurfaceContainer</item>
+        <item name="android:navigationBarColor">?androidprv:attr/materialColorSurfaceContainerHighest</item>
         <item name="android:windowActivityTransitions">true</item>
     </style>
 
@@ -842,12 +859,10 @@
         <item name="wallpaperTextColor">@*android:color/primary_text_material_dark</item>
     </style>
 
-    <style name="Theme.UserSwitcherActivity" parent="@android:style/Theme.DeviceDefault.NoActionBar">
+    <style name="Theme.UserSwitcherFullscreenDialog" parent="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
         <item name="android:statusBarColor">@color/user_switcher_fullscreen_bg</item>
         <item name="android:windowBackground">@color/user_switcher_fullscreen_bg</item>
         <item name="android:navigationBarColor">@color/user_switcher_fullscreen_bg</item>
-        <!-- Setting a placeholder will avoid using the SystemUI icon on the splash screen -->
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_blank</item>
     </style>
 
     <style name="Theme.CreateUser" parent="@android:style/Theme.DeviceDefault.NoActionBar">
@@ -882,7 +897,7 @@
         <item name="android:textColor">@color/control_primary_text</item>
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_vertical</item>
-        <item name="android:minHeight">@dimen/control_menu_item_min_height</item>
+        <item name="android:minHeight">@dimen/control_menu_item_height</item>
     </style>
 
     <style name="Control.Spinner">
@@ -1041,7 +1056,7 @@
 
     <style name="TextAppearance.Dialog.Title" parent="@android:style/TextAppearance.DeviceDefault.Large">
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">24sp</item>
+        <item name="android:textSize">@dimen/dialog_title_text_size</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:lineHeight">32sp</item>
         <item name="android:gravity">center</item>
@@ -1358,6 +1373,7 @@
         <item name="android:fontFamily">google-sans</item>
         <item name="android:textColor">?androidprv:attr/textColorPrimary</item>
         <item name="android:textSize">@dimen/magnification_setting_text_size</item>
+        <item name="android:singleLine">true</item>
     </style>
 
     <style name="TextAppearance.MagnificationSetting.EditButton">
@@ -1393,5 +1409,10 @@
 
     <style name="ShortcutItemBackground">
         <item name="android:background">@color/ksh_key_item_new_background</item>
+    </style>
+
+    <style name="LongPressLockScreenAnimation">
+        <item name="android:windowEnterAnimation">@anim/long_press_lock_screen_popup_enter</item>
+        <item name="android:windowExitAnimation">@anim/long_press_lock_screen_popup_exit</item>
     </style>
 </resources>

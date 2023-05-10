@@ -37,7 +37,8 @@ interface SmartspaceViewComponent {
         fun create(
             @BindsInstance parent: ViewGroup,
             @BindsInstance @Named(PLUGIN) plugin: BcSmartspaceDataPlugin,
-            @BindsInstance onAttachListener: View.OnAttachStateChangeListener
+            @BindsInstance onAttachListener: View.OnAttachStateChangeListener,
+            @BindsInstance viewWithCustomLayout: View? = null
         ): SmartspaceViewComponent
     }
 
@@ -53,10 +54,13 @@ interface SmartspaceViewComponent {
             falsingManager: FalsingManager,
             parent: ViewGroup,
             @Named(PLUGIN) plugin: BcSmartspaceDataPlugin,
+            viewWithCustomLayout: View?,
             onAttachListener: View.OnAttachStateChangeListener
         ):
                 BcSmartspaceDataPlugin.SmartspaceView {
-            val ssView = plugin.getView(parent)
+            val ssView = viewWithCustomLayout
+                    as? BcSmartspaceDataPlugin.SmartspaceView
+                    ?: plugin.getView(parent)
             // Currently, this is only used to provide SmartspaceView on Dream surface.
             ssView.setUiSurface(UI_SURFACE_DREAM)
             ssView.registerDataProvider(plugin)
@@ -71,7 +75,11 @@ interface SmartspaceViewComponent {
                     )
                 }
 
-                override fun startPendingIntent(pi: PendingIntent, showOnLockscreen: Boolean) {
+                override fun startPendingIntent(
+                        view: View,
+                        pi: PendingIntent,
+                        showOnLockscreen: Boolean
+                ) {
                     if (showOnLockscreen) {
                         pi.send()
                     } else {

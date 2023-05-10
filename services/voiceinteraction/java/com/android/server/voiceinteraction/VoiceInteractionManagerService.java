@@ -97,14 +97,13 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.LatencyTracker;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
+import com.android.server.SoundTriggerInternal;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
-import com.android.server.soundtrigger.SoundTriggerInternal;
 import com.android.server.utils.Slogf;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
@@ -126,7 +125,9 @@ public class VoiceInteractionManagerService extends SystemService {
 
     final Context mContext;
     final ContentResolver mResolver;
-    final DatabaseHelper mDbHelper;
+    // Can be overridden for testing purposes
+    private IEnrolledModelDb mDbHelper;
+    private final IEnrolledModelDb mRealDbHelper;
     final ActivityManagerInternal mAmInternal;
     final ActivityTaskManagerInternal mAtmInternal;
     final UserManagerInternal mUserManagerInternal;
@@ -144,7 +145,7 @@ public class VoiceInteractionManagerService extends SystemService {
         mResolver = context.getContentResolver();
         mUserManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(UserManagerInternal.class));
-        mDbHelper = new DatabaseHelper(context);
+        mDbHelper = mRealDbHelper = new DatabaseHelper(context);
         mServiceStub = new VoiceInteractionManagerServiceStub();
         mAmInternal = Objects.requireNonNull(
                 LocalServices.getService(ActivityManagerInternal.class));
@@ -380,51 +381,21 @@ public class VoiceInteractionManagerService extends SystemService {
                 @NonNull Identity originatorIdentity, IBinder client,
                 ModuleProperties moduleProperties) {
             Objects.requireNonNull(originatorIdentity);
-            boolean forHotwordDetectionService;
+            boolean forHotwordDetectionService = false;
             synchronized (VoiceInteractionManagerServiceStub.this) {
                 enforceIsCurrentVoiceInteractionService();
                 forHotwordDetectionService =
                         mImpl != null && mImpl.mHotwordDetectionConnection != null;
             }
-            IVoiceInteractionSoundTriggerSession session;
-            if (forHotwordDetectionService) {
-                // Use our own identity and handle the permission checks ourselves. This allows
-                // properly checking/noting against the voice interactor or hotword detection
-                // service as needed.
-                if (HotwordDetectionConnection.DEBUG) {
-                    Slog.d(TAG, "Creating a SoundTriggerSession for a HotwordDetectionService");
-                }
-                originatorIdentity.uid = Binder.getCallingUid();
-                originatorIdentity.pid = Binder.getCallingPid();
-                session = new SoundTriggerSessionPermissionsDecorator(
-                        createSoundTriggerSessionForSelfIdentity(client, moduleProperties),
-                        mContext,
-                        originatorIdentity);
-            } else {
-                if (HotwordDetectionConnection.DEBUG) {
-                    Slog.d(TAG, "Creating a SoundTriggerSession");
-                }
-                try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
-                        originatorIdentity)) {
-                    session = new SoundTriggerSession(mSoundTriggerInternal.attach(client,
-                                moduleProperties));
-                }
+            if (HotwordDetectionConnection.DEBUG) {
+                Slog.d(TAG, "Creating a SoundTriggerSession, for HDS: "
+                        + forHotwordDetectionService);
             }
-            return new SoundTriggerSessionBinderProxy(session);
-        }
-
-        private IVoiceInteractionSoundTriggerSession createSoundTriggerSessionForSelfIdentity(
-                IBinder client, ModuleProperties moduleProperties) {
-            Identity identity = new Identity();
-            identity.uid = Process.myUid();
-            identity.pid = Process.myPid();
-            identity.packageName = ActivityThread.currentOpPackageName();
-            return Binder.withCleanCallingIdentity(() -> {
-                try (SafeCloseable ignored = IdentityContext.create(identity)) {
-                    return new SoundTriggerSession(
-                            mSoundTriggerInternal.attach(client, moduleProperties));
-                }
-            });
+            try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
+                    originatorIdentity)) {
+                return new SoundTriggerSession(mSoundTriggerInternal.attach(client,
+                            moduleProperties, forHotwordDetectionService));
+            }
         }
 
         @Override
@@ -443,6 +414,10 @@ public class VoiceInteractionManagerService extends SystemService {
             final int callingUid = Binder.getCallingUid();
             final long caller = Binder.clearCallingIdentity();
             try {
+                // HotwordDetector trigger uses VoiceInteractionService#showSession
+                // We need to cancel here because UI is not being shown due to a SoundTrigger
+                // HAL event.
+                HotwordMetricsLogger.cancelHotwordTriggerToUiLatencySession(mContext);
                 mImpl.showSessionLocked(options,
                         VoiceInteractionSession.SHOW_SOURCE_ACTIVITY, attributionTag,
                         new IVoiceInteractionSessionShowCallback.Stub() {
@@ -993,6 +968,13 @@ public class VoiceInteractionManagerService extends SystemService {
                 if (mImpl == null) {
                     Slog.w(TAG, "showSessionFromSession without running voice interaction service");
                     return false;
+                }
+                // If the token is null, then the request to show the session is not coming from
+                // the active VoiceInteractionService session.
+                // We need to cancel here because UI is not being shown due to a SoundTrigger
+                // HAL event.
+                if (token == null) {
+                    HotwordMetricsLogger.cancelHotwordTriggerToUiLatencySession(mContext);
                 }
                 final long caller = Binder.clearCallingIdentity();
                 try {
@@ -1595,6 +1577,42 @@ public class VoiceInteractionManagerService extends SystemService {
             }
         }
 
+        @Override
+        @android.annotation.EnforcePermission(android.Manifest.permission.MANAGE_VOICE_KEYPHRASES)
+        public void setModelDatabaseForTestEnabled(boolean enabled, IBinder token) {
+            super.setModelDatabaseForTestEnabled_enforcePermission();
+            enforceCallerAllowedToEnrollVoiceModel();
+            synchronized (this) {
+                if (enabled) {
+                    // Replace the dbhelper with a new test db
+                    final var db = new TestModelEnrollmentDatabase();
+                    try {
+                        // Listen to our caller death, and make sure we revert to the real
+                        // db if they left the model in a test state.
+                        token.linkToDeath(() -> {
+                            synchronized (this) {
+                                if (mDbHelper == db) {
+                                    mDbHelper = mRealDbHelper;
+                                    mImpl.notifySoundModelsChangedLocked();
+                                }
+                            }
+                        }, 0);
+                    } catch (RemoteException e) {
+                        // If the caller is already dead, nothing to do.
+                        return;
+                    }
+                    mDbHelper = db;
+                    mImpl.notifySoundModelsChangedLocked();
+                } else {
+                    // Nothing to do if the db is already set to the real impl.
+                    if (mDbHelper != mRealDbHelper) {
+                        mDbHelper = mRealDbHelper;
+                        mImpl.notifySoundModelsChangedLocked();
+                    }
+                }
+            }
+        }
+
         //----------------- SoundTrigger APIs --------------------------------//
         @Override
         public boolean isEnrolledForKeyphrase(int keyphraseId, String bcp47Locale) {
@@ -1652,11 +1670,7 @@ public class VoiceInteractionManagerService extends SystemService {
             return null;
         }
 
-        /**
-         * Implementation of SoundTriggerSession. Does not implement {@link #asBinder()} as it's
-         * intended to be wrapped by an {@link IVoiceInteractionSoundTriggerSession.Stub} object.
-         */
-        private class SoundTriggerSession implements IVoiceInteractionSoundTriggerSession {
+        private class SoundTriggerSession extends IVoiceInteractionSoundTriggerSession.Stub {
             final SoundTriggerInternal.Session mSession;
             private IHotwordRecognitionStatusCallback mSessionExternalCallback;
             private IRecognitionStatusCallback mSessionInternalCallback;
@@ -1702,28 +1716,27 @@ public class VoiceInteractionManagerService extends SystemService {
                 final long caller = Binder.clearCallingIdentity();
                 try {
                     KeyphraseSoundModel soundModel =
-                            mDbHelper.getKeyphraseSoundModel(keyphraseId, callingUserId, bcp47Locale);
+                            mDbHelper.getKeyphraseSoundModel(keyphraseId,
+                                    callingUserId, bcp47Locale);
                     if (soundModel == null
                             || soundModel.getUuid() == null
                             || soundModel.getKeyphrases() == null) {
                         Slog.w(TAG, "No matching sound model found in startRecognition");
                         return SoundTriggerInternal.STATUS_ERROR;
-                    } else {
-                        // Regardless of the status of the start recognition, we need to make sure
-                        // that we unload this model if needed later.
-                        synchronized (VoiceInteractionManagerServiceStub.this) {
-                            mLoadedKeyphraseIds.put(keyphraseId, this);
-                            if (mSessionExternalCallback == null
-                                    || mSessionInternalCallback == null
-                                    || callback.asBinder() != mSessionExternalCallback.asBinder()) {
-                                mSessionInternalCallback = createSoundTriggerCallbackLocked(
-                                        callback);
-                                mSessionExternalCallback = callback;
-                            }
-                        }
-                        return mSession.startRecognition(keyphraseId, soundModel,
-                                mSessionInternalCallback, recognitionConfig, runInBatterySaverMode);
                     }
+                    // Regardless of the status of the start recognition, we need to make sure
+                    // that we unload this model if needed later.
+                    synchronized (VoiceInteractionManagerServiceStub.this) {
+                        mLoadedKeyphraseIds.put(keyphraseId, this);
+                        if (mSessionExternalCallback == null
+                                || mSessionInternalCallback == null
+                                || callback.asBinder() != mSessionExternalCallback.asBinder()) {
+                            mSessionInternalCallback = createSoundTriggerCallbackLocked(callback);
+                            mSessionExternalCallback = callback;
+                        }
+                    }
+                    return mSession.startRecognition(keyphraseId, soundModel,
+                            mSessionInternalCallback, recognitionConfig, runInBatterySaverMode);
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
@@ -1804,9 +1817,8 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             @Override
-            public IBinder asBinder() {
-                throw new UnsupportedOperationException(
-                        "This object isn't intended to be used as a Binder.");
+            public void detach() {
+                mSession.detach();
             }
 
             private int unloadKeyphraseModel(int keyphraseId) {
@@ -1862,6 +1874,11 @@ public class VoiceInteractionManagerService extends SystemService {
 
                 final long caller = Binder.clearCallingIdentity();
                 try {
+                    // HotwordDetector trigger uses VoiceInteractionService#showSession
+                    // We need to cancel here because UI is not being shown due to a SoundTrigger
+                    // HAL event.
+                    HotwordMetricsLogger.cancelHotwordTriggerToUiLatencySession(mContext);
+
                     return mImpl.showSessionLocked(args,
                             sourceFlags
                                     | VoiceInteractionSession.SHOW_WITH_ASSIST
@@ -2081,8 +2098,6 @@ public class VoiceInteractionManagerService extends SystemService {
                     mImpl.dumpLocked(fd, pw, args);
                 }
             }
-
-            mSoundTriggerInternal.dump(fd, pw, args);
         }
 
         @Override
@@ -2521,8 +2536,11 @@ public class VoiceInteractionManagerService extends SystemService {
                 public void onVoiceSessionWindowVisibilityChanged(boolean visible)
                         throws RemoteException {
                     if (visible) {
-                        LatencyTracker.getInstance(mContext)
-                                .onActionEnd(LatencyTracker.ACTION_SHOW_VOICE_INTERACTION);
+                        // The AlwaysOnHotwordDetector trigger latency is always completed here even
+                        // if the reason the window was shown was not due to a SoundTrigger HAL
+                        // event. It is expected that the latency will be canceled if shown for
+                        // other invocation reasons, and this call becomes a noop.
+                        HotwordMetricsLogger.stopHotwordTriggerToUiLatencySession(mContext);
                     }
                 }
 

@@ -34,6 +34,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.window.ConfigurationHelper.freeTextLayoutCachesIfNeeded;
 import static android.window.ConfigurationHelper.isDifferentDisplay;
 import static android.window.ConfigurationHelper.shouldUpdateResources;
+import static android.window.ConfigurationHelper.shouldUpdateWindowMetricsBounds;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
 import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_PATH_FOR_PATH_TRAVERSAL;
@@ -41,6 +42,7 @@ import static com.android.internal.os.SafeZipPathValidatorCallback.VALIDATE_ZIP_
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.RemoteServiceException.BadForegroundServiceNotificationException;
+import android.app.RemoteServiceException.BadUserInitiatedJobNotificationException;
 import android.app.RemoteServiceException.CannotPostForegroundServiceNotificationException;
 import android.app.RemoteServiceException.CrashedByAdbException;
 import android.app.RemoteServiceException.ForegroundServiceDidNotStartInTimeException;
@@ -240,6 +242,7 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -359,9 +362,8 @@ public final class ActivityThread extends ClientTransactionHandler
     /** The activities to be truly destroyed (not include relaunch). */
     final Map<IBinder, ClientTransactionItem> mActivitiesToBeDestroyed =
             Collections.synchronizedMap(new ArrayMap<IBinder, ClientTransactionItem>());
-    // List of new activities (via ActivityRecord.nextIdle) that should
-    // be reported when next we idle.
-    ActivityClientRecord mNewActivities = null;
+    // List of new activities that should be reported when next we idle.
+    final ArrayList<ActivityClientRecord> mNewActivities = new ArrayList<>();
     // Number of activities that are currently visible on-screen.
     @UnsupportedAppUsage
     int mNumVisibleActivities = 0;
@@ -562,7 +564,6 @@ public final class ActivityThread extends ClientTransactionHandler
         private Configuration tmpConfig = new Configuration();
         // Callback used for updating activity override config and camera compat control state.
         ViewRootImpl.ActivityConfigCallback activityConfigCallback;
-        ActivityClientRecord nextIdle;
 
         // Indicates whether this activity is currently the topmost resumed one in the system.
         // This holds the last reported value from server.
@@ -656,7 +657,6 @@ public final class ActivityThread extends ClientTransactionHandler
             paused = false;
             stopped = false;
             hideForNow = false;
-            nextIdle = null;
             activityConfigCallback = new ViewRootImpl.ActivityConfigCallback() {
                 @Override
                 public void onConfigurationChanged(Configuration overrideConfig,
@@ -849,8 +849,10 @@ public final class ActivityThread extends ClientTransactionHandler
         @UnsupportedAppUsage
         Intent intent;
         boolean rebind;
+        long bindSeq;
         public String toString() {
-            return "BindServiceData{token=" + token + " intent=" + intent + "}";
+            return "BindServiceData{token=" + token + " intent=" + intent
+                    + " bindSeq=" + bindSeq + "}";
         }
     }
 
@@ -1107,12 +1109,13 @@ public final class ActivityThread extends ClientTransactionHandler
         }
 
         public final void scheduleBindService(IBinder token, Intent intent,
-                boolean rebind, int processState) {
+                boolean rebind, int processState, long bindSeq) {
             updateProcessState(processState, false);
             BindServiceData s = new BindServiceData();
             s.token = token;
             s.intent = intent;
             s.rebind = rebind;
+            s.bindSeq = bindSeq;
 
             if (DEBUG_SERVICE)
                 Slog.v(TAG, "scheduleBindService token=" + token + " intent=" + intent + " uid="
@@ -1124,6 +1127,7 @@ public final class ActivityThread extends ClientTransactionHandler
             BindServiceData s = new BindServiceData();
             s.token = token;
             s.intent = intent;
+            s.bindSeq = -1;
 
             sendMessage(H.UNBIND_SERVICE, s);
         }
@@ -2076,6 +2080,9 @@ public final class ActivityThread extends ClientTransactionHandler
             case BadForegroundServiceNotificationException.TYPE_ID:
                 throw new BadForegroundServiceNotificationException(message);
 
+            case BadUserInitiatedJobNotificationException.TYPE_ID:
+                throw new BadUserInitiatedJobNotificationException(message);
+
             case MissingRequestPasswordComplexityPermissionException.TYPE_ID:
                 throw new MissingRequestPasswordComplexityPermissionException(message);
 
@@ -2478,29 +2485,22 @@ public final class ActivityThread extends ClientTransactionHandler
     private class Idler implements MessageQueue.IdleHandler {
         @Override
         public final boolean queueIdle() {
-            ActivityClientRecord a = mNewActivities;
             boolean stopProfiling = false;
             if (mBoundApplication != null && mProfiler.profileFd != null
                     && mProfiler.autoStopProfiler) {
                 stopProfiling = true;
             }
-            if (a != null) {
-                mNewActivities = null;
-                final ActivityClient ac = ActivityClient.getInstance();
-                ActivityClientRecord prev;
-                do {
-                    if (localLOGV) Slog.v(
-                        TAG, "Reporting idle of " + a +
-                        " finished=" +
-                        (a.activity != null && a.activity.mFinished));
-                    if (a.activity != null && !a.activity.mFinished) {
-                        ac.activityIdle(a.token, a.createdConfig, stopProfiling);
-                        a.createdConfig = null;
-                    }
-                    prev = a;
-                    a = a.nextIdle;
-                    prev.nextIdle = null;
-                } while (a != null);
+            final ActivityClient ac = ActivityClient.getInstance();
+            while (mNewActivities.size() > 0) {
+                final ActivityClientRecord a = mNewActivities.remove(0);
+                if (localLOGV) {
+                    Slog.v(TAG, "Reporting idle of " + a + " finished="
+                            + (a.activity != null && a.activity.mFinished));
+                }
+                if (a.activity != null && !a.activity.mFinished) {
+                    ac.activityIdle(a.token, a.createdConfig, stopProfiling);
+                    a.createdConfig = null;
+                }
             }
             if (stopProfiling) {
                 mProfiler.stopProfiling();
@@ -3557,8 +3557,13 @@ public final class ActivityThread extends ClientTransactionHandler
             if (mLastProcessState == processState) {
                 return;
             }
+            // Do not issue a transitional GC if we are transitioning between 2 cached states.
+            // Only update if the state flips between cached and uncached or vice versa
+            if (ActivityManager.isProcStateCached(mLastProcessState)
+                    != ActivityManager.isProcStateCached(processState)) {
+                updateVmProcessState(processState);
+            }
             mLastProcessState = processState;
-            updateVmProcessState(processState);
             if (localLOGV) {
                 Slog.i(TAG, "******************* PROCESS STATE CHANGED TO: " + processState
                         + (fromIpc ? " (from ipc" : ""));
@@ -3567,12 +3572,16 @@ public final class ActivityThread extends ClientTransactionHandler
     }
 
     /** Update VM state based on ActivityManager.PROCESS_STATE_* constants. */
+    // Currently ART VM only uses state updates for Transitional GC, and thus
+    // this function initiates a Transitional GC for transitions into Cached apps states.
     private void updateVmProcessState(int processState) {
-        // TODO: Tune this since things like gmail sync are important background but not jank
-        // perceptible.
-        final int state = processState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND
-                ? VM_PROCESS_STATE_JANK_PERCEPTIBLE
-                : VM_PROCESS_STATE_JANK_IMPERCEPTIBLE;
+        // Only a transition into Cached state should result in a Transitional GC request
+        // to the ART runtime. Update VM state to JANK_IMPERCEPTIBLE in that case.
+        // Note that there are 4 possible cached states currently, all of which are
+        // JANK_IMPERCEPTIBLE from GC point of view.
+        final int state = ActivityManager.isProcStateCached(processState)
+                ? VM_PROCESS_STATE_JANK_IMPERCEPTIBLE
+                : VM_PROCESS_STATE_JANK_PERCEPTIBLE;
         VMRuntime.getRuntime().updateProcessState(state);
     }
 
@@ -4339,18 +4348,20 @@ public final class ActivityThread extends ClientTransactionHandler
 
     static void handleAttachStartupAgents(String dataDir) {
         try {
-            Path code_cache = ContextImpl.getCodeCacheDirBeforeBind(new File(dataDir)).toPath();
-            if (!Files.exists(code_cache)) {
+            Path codeCache = ContextImpl.getCodeCacheDirBeforeBind(new File(dataDir)).toPath();
+            if (!Files.exists(codeCache)) {
                 return;
             }
-            Path startup_path = code_cache.resolve("startup_agents");
-            if (Files.exists(startup_path)) {
-                for (Path p : Files.newDirectoryStream(startup_path)) {
-                    handleAttachAgent(
-                            p.toAbsolutePath().toString()
-                            + "="
-                            + dataDir,
-                            null);
+            Path startupPath = codeCache.resolve("startup_agents");
+            if (Files.exists(startupPath)) {
+                try (DirectoryStream<Path> startupFiles = Files.newDirectoryStream(startupPath)) {
+                    for (Path p : startupFiles) {
+                        handleAttachAgent(
+                                p.toAbsolutePath().toString()
+                                        + "="
+                                        + dataDir,
+                                null);
+                    }
                 }
             }
         } catch (Exception e) {
@@ -5091,8 +5102,7 @@ public final class ActivityThread extends ClientTransactionHandler
             }
         }
 
-        r.nextIdle = mNewActivities;
-        mNewActivities = r;
+        mNewActivities.add(r);
         if (localLOGV) Slog.v(TAG, "Scheduling idle handler for " + r);
         Looper.myQueue().addIdleHandler(new Idler());
     }
@@ -5693,6 +5703,7 @@ public final class ActivityThread extends ClientTransactionHandler
         }
         if (finishing) {
             ActivityClient.getInstance().activityDestroyed(r.token);
+            mNewActivities.remove(r);
         }
         mSomeActivitiesChanged = true;
     }
@@ -5827,26 +5838,6 @@ public final class ActivityThread extends ClientTransactionHandler
 
         r.activity.mChangingConfigurations = true;
 
-        // If we are preserving the main window across relaunches we would also like to preserve
-        // the children. However the client side view system does not support preserving
-        // the child views so we notify the window manager to expect these windows to
-        // be replaced and defer requests to destroy or hide them. This way we can achieve
-        // visual continuity. It's important that we do this here prior to pause and destroy
-        // as that is when we may hide or remove the child views.
-        //
-        // There is another scenario, if we have decided locally to relaunch the app from a
-        // call to recreate, then none of the windows will be prepared for replacement or
-        // preserved by the server, so we want to notify it that we are preparing to replace
-        // everything
-        try {
-            if (r.mPreserveWindow) {
-                WindowManagerGlobal.getWindowSession().prepareToReplaceWindows(
-                        r.token, true /* childrenOnly */);
-            }
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
         handleRelaunchActivityInner(r, configChanges, tmp.pendingResults, tmp.pendingIntents,
                 pendingActions, tmp.startsNotResumed, tmp.overrideConfig, "handleRelaunchActivity");
     }
@@ -5933,7 +5924,6 @@ public final class ActivityThread extends ClientTransactionHandler
         r.activity = null;
         r.window = null;
         r.hideForNow = false;
-        r.nextIdle = null;
         // Merge any pending results and pending intents; don't just replace them
         if (pendingResults != null) {
             if (r.pendingResults == null) {
@@ -6127,6 +6117,11 @@ public final class ActivityThread extends ClientTransactionHandler
     public static boolean shouldReportChange(@Nullable Configuration currentConfig,
             @NonNull Configuration newConfig, @Nullable SizeConfigurationBuckets sizeBuckets,
             int handledConfigChanges, boolean alwaysReportChange) {
+        // Always report changes in window configuration bounds
+        if (shouldUpdateWindowMetricsBounds(currentConfig, newConfig)) {
+            return true;
+        }
+
         final int publicDiff = currentConfig.diffPublicOnly(newConfig);
         // Don't report the change if there's no public diff between current and new config.
         if (publicDiff == 0) {
@@ -6644,12 +6639,13 @@ public final class ActivityThread extends ClientTransactionHandler
             // Setup a location to store generated/compiled graphics code.
             final Context deviceContext = context.createDeviceProtectedStorageContext();
             final File codeCacheDir = deviceContext.getCodeCacheDir();
-            if (codeCacheDir != null) {
+            final File deviceCacheDir = deviceContext.getCacheDir();
+            if (codeCacheDir != null && deviceCacheDir != null) {
                 try {
                     int uid = Process.myUid();
                     String[] packages = getPackageManager().getPackagesForUid(uid);
                     if (packages != null) {
-                        HardwareRenderer.setupDiskCache(codeCacheDir);
+                        HardwareRenderer.setupDiskCache(deviceCacheDir);
                         RenderScriptCacheDir.setupDiskCache(codeCacheDir);
                     }
                 } catch (RemoteException e) {

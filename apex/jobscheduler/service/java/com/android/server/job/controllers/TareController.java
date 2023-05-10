@@ -30,7 +30,7 @@ import android.util.Slog;
 import android.util.SparseArrayMap;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.JobSchedulerBackgroundThread;
+import com.android.server.AppSchedulingModuleThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.tare.EconomicPolicy;
@@ -424,7 +424,7 @@ public class TareController extends StateController {
         if (mIsEnabled != mConstants.USE_TARE_POLICY) {
             mIsEnabled = mConstants.USE_TARE_POLICY;
             // Update job bookkeeping out of band.
-            JobSchedulerBackgroundThread.getHandler().post(() -> {
+            AppSchedulingModuleThread.getHandler().post(() -> {
                 synchronized (mLock) {
                     final long nowElapsed = sElapsedRealtimeClock.millis();
                     mService.getJobStore().forEachJob((jobStatus) -> {

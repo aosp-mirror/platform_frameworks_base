@@ -217,7 +217,7 @@ public class DozeSensors {
                         true /* settingDef */,
                         true /* configured */,
                         DozeLog.REASON_SENSOR_TAP,
-                        false /* reports touch coordinates */,
+                        true /* reports touch coordinates */,
                         true /* touchscreen */,
                         false /* ignoresSetting */,
                         dozeParameters.singleTapUsesProx(mDevicePosture) /* requiresProx */,

@@ -124,7 +124,7 @@ class WindowlessSplashWindowCreator extends AbsSplashWindowCreator {
         }
 
         @Override
-        public void removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
+        public boolean removeIfPossible(StartingWindowRemovalInfo info, boolean immediately) {
             if (!immediately) {
                 mSplashscreenContentDrawer.applyExitAnimation(mSplashView,
                         info.windowAnimationLeash, info.mainFrame,
@@ -132,6 +132,7 @@ class WindowlessSplashWindowCreator extends AbsSplashWindowCreator {
             } else {
                 release();
             }
+            return true;
         }
 
         void release() {

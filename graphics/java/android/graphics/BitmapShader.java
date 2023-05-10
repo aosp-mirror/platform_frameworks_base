@@ -120,6 +120,7 @@ public class BitmapShader extends Shader {
         if (bitmap == null) {
             throw new IllegalArgumentException("Bitmap must be non-null");
         }
+        bitmap.checkRecycled("Cannot create BitmapShader for recycled bitmap");
         mBitmap = bitmap;
         mTileX = tileX;
         mTileY = tileY;
@@ -188,6 +189,8 @@ public class BitmapShader extends Shader {
     /** @hide */
     @Override
     protected long createNativeInstance(long nativeMatrix, boolean filterFromPaint) {
+        mBitmap.checkRecycled("BitmapShader's bitmap has been recycled");
+
         boolean enableLinearFilter = mFilterMode == FILTER_MODE_LINEAR;
         if (mFilterMode == FILTER_MODE_DEFAULT) {
             mFilterFromPaint = filterFromPaint;

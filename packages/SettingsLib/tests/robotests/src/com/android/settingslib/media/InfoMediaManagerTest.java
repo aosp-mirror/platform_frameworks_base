@@ -25,11 +25,14 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 import static android.media.MediaRoute2ProviderService.REASON_NETWORK_ERROR;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 
+import static com.android.settingslib.media.LocalMediaManager.MediaDeviceState.STATE_SELECTED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -137,6 +140,56 @@ public class InfoMediaManagerTest {
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
         assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(infoDevice);
         assertThat(mInfoMediaManager.mMediaDevices).hasSize(routes.size());
+    }
+
+    @Test
+    public void onSessionReleased_shouldUpdateConnectedDevice() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo sessionInfo1 = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo1);
+        final RoutingSessionInfo sessionInfo2 = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo2);
+
+        final List<String> selectedRoutesSession1 = new ArrayList<>();
+        selectedRoutesSession1.add(TEST_ID_1);
+        when(sessionInfo1.getSelectedRoutes()).thenReturn(selectedRoutesSession1);
+
+        final List<String> selectedRoutesSession2 = new ArrayList<>();
+        selectedRoutesSession2.add(TEST_ID_2);
+        when(sessionInfo2.getSelectedRoutes()).thenReturn(selectedRoutesSession2);
+
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+
+        final MediaRoute2Info info1 = mock(MediaRoute2Info.class);
+        when(info1.getId()).thenReturn(TEST_ID_1);
+        when(info1.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        final MediaRoute2Info info2 = mock(MediaRoute2Info.class);
+        when(info2.getId()).thenReturn(TEST_ID_2);
+        when(info2.getClientPackageName()).thenReturn(TEST_PACKAGE_NAME);
+
+        final List<MediaRoute2Info> routes = new ArrayList<>();
+        routes.add(info1);
+        routes.add(info2);
+        mShadowRouter2Manager.setAllRoutes(routes);
+        mShadowRouter2Manager.setTransferableRoutes(routes);
+
+        final MediaDevice mediaDevice1 = mInfoMediaManager.findMediaDevice(TEST_ID_1);
+        assertThat(mediaDevice1).isNull();
+        final MediaDevice mediaDevice2 = mInfoMediaManager.findMediaDevice(TEST_ID_2);
+        assertThat(mediaDevice2).isNull();
+
+        mInfoMediaManager.mMediaRouterCallback.onRoutesUpdated();
+        final MediaDevice infoDevice1 = mInfoMediaManager.mMediaDevices.get(0);
+        assertThat(infoDevice1.getId()).isEqualTo(TEST_ID_1);
+        final MediaDevice infoDevice2 = mInfoMediaManager.mMediaDevices.get(1);
+        assertThat(infoDevice2.getId()).isEqualTo(TEST_ID_2);
+        // The active routing session is the last one in the list, which maps to infoDevice2.
+        assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(infoDevice2);
+
+        routingSessionInfos.remove(sessionInfo2);
+        mInfoMediaManager.mMediaRouterCallback.onSessionReleased(sessionInfo2);
+        assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(infoDevice1);
     }
 
     @Test
@@ -799,12 +852,12 @@ public class InfoMediaManagerTest {
     }
 
     @Test
-    public void onTransferFailed_shouldDispatchOnRequestFailed() {
+    public void onTransferFailed_notDispatchOnRequestFailed() {
         mInfoMediaManager.registerCallback(mCallback);
 
         mInfoMediaManager.mMediaRouterCallback.onTransferFailed(null, null);
 
-        verify(mCallback).onRequestFailed(REASON_UNKNOWN_ERROR);
+        verify(mCallback, never()).onRequestFailed(REASON_UNKNOWN_ERROR);
     }
 
     @Test
@@ -952,6 +1005,37 @@ public class InfoMediaManagerTest {
         mInfoMediaManager.addMediaDevice(route2Info);
 
         assertThat(mInfoMediaManager.mMediaDevices.size()).isEqualTo(0);
+    }
+
+    @Test
+    public void addMediaDevice_deviceIncludedInSelectedDevices_shouldSetAsCurrentConnected() {
+        final MediaRoute2Info route2Info = mock(MediaRoute2Info.class);
+        final CachedBluetoothDeviceManager cachedBluetoothDeviceManager =
+                mock(CachedBluetoothDeviceManager.class);
+        final CachedBluetoothDevice cachedDevice = mock(CachedBluetoothDevice.class);
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(sessionInfo);
+
+        when(mRouterManager.getRoutingSessions(TEST_PACKAGE_NAME)).thenReturn(routingSessionInfos);
+        when(sessionInfo.getSelectedRoutes()).thenReturn(ImmutableList.of(TEST_ID));
+        when(route2Info.getType()).thenReturn(TYPE_BLUETOOTH_A2DP);
+        when(route2Info.getAddress()).thenReturn("00:00:00:00:00:00");
+        when(route2Info.getId()).thenReturn(TEST_ID);
+        when(mLocalBluetoothManager.getCachedDeviceManager())
+                .thenReturn(cachedBluetoothDeviceManager);
+        when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class)))
+                .thenReturn(cachedDevice);
+        mInfoMediaManager.mRouterManager = mRouterManager;
+
+        mInfoMediaManager.mMediaDevices.clear();
+        mInfoMediaManager.addMediaDevice(route2Info);
+
+        MediaDevice device = mInfoMediaManager.mMediaDevices.get(0);
+
+        assertThat(device instanceof BluetoothMediaDevice).isTrue();
+        assertThat(device.getState()).isEqualTo(STATE_SELECTED);
+        assertThat(mInfoMediaManager.getCurrentConnectedDevice()).isEqualTo(device);
     }
 
     @Test

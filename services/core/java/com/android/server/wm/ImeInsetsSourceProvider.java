@@ -48,7 +48,7 @@ import java.io.PrintWriter;
  * Controller for IME inset source on the server. It's called provider as it provides the
  * {@link InsetsSource} to the client that uses it in {@link InsetsSourceConsumer}.
  */
-final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider {
+final class ImeInsetsSourceProvider extends InsetsSourceProvider {
 
     /** The token tracking the current IME request or {@code null} otherwise. */
     @Nullable
@@ -145,18 +145,44 @@ final class ImeInsetsSourceProvider extends WindowContainerInsetsSourceProvider 
         }
         boolean changed = super.updateClientVisibility(caller);
         if (changed && caller.isRequestedVisible(mSource.getType())) {
-            reportImeDrawnForOrganizer(caller);
+            reportImeDrawnForOrganizerIfNeeded(caller);
         }
         changed |= mDisplayContent.onImeInsetsClientVisibilityUpdate();
         return changed;
     }
 
-    private void reportImeDrawnForOrganizer(InsetsControlTarget caller) {
-        if (caller.getWindow() != null && caller.getWindow().getTask() != null) {
-            if (caller.getWindow().getTask().isOrganized()) {
-                mWindowContainer.mWmService.mAtmService.mTaskOrganizerController
-                        .reportImeDrawnOnTask(caller.getWindow().getTask());
-            }
+    private void reportImeDrawnForOrganizerIfNeeded(@NonNull InsetsControlTarget caller) {
+        final WindowState callerWindow = caller.getWindow();
+        if (callerWindow == null) {
+            return;
+        }
+        WindowToken imeToken = mWindowContainer.asWindowState() != null
+                ? mWindowContainer.asWindowState().mToken : null;
+        if (mDisplayContent.getAsyncRotationController() != null
+                && mDisplayContent.getAsyncRotationController().isTargetToken(imeToken)) {
+            // Skip reporting IME drawn state when the control target is in fixed
+            // rotation, AsyncRotationController will report after the animation finished.
+            return;
+        }
+        reportImeDrawnForOrganizer(caller);
+    }
+
+    private void reportImeDrawnForOrganizer(@NonNull InsetsControlTarget caller) {
+        final WindowState callerWindow = caller.getWindow();
+        if (callerWindow == null || callerWindow.getTask() == null) {
+            return;
+        }
+        if (callerWindow.getTask().isOrganized()) {
+            mWindowContainer.mWmService.mAtmService.mTaskOrganizerController
+                    .reportImeDrawnOnTask(caller.getWindow().getTask());
+        }
+    }
+
+    /** Report the IME has drawn on the current IME control target for its task organizer */
+    void reportImeDrawnForOrganizer() {
+        final InsetsControlTarget imeControlTarget = getControlTarget();
+        if (imeControlTarget != null) {
+            reportImeDrawnForOrganizer(imeControlTarget);
         }
     }
 

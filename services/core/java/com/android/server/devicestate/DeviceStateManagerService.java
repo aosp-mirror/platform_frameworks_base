@@ -25,6 +25,7 @@ import static android.hardware.devicestate.DeviceStateManager.MINIMUM_DEVICE_STA
 import static com.android.server.devicestate.DeviceState.FLAG_CANCEL_OVERRIDE_REQUESTS;
 import static com.android.server.devicestate.OverrideRequest.OVERRIDE_REQUEST_TYPE_BASE_STATE;
 import static com.android.server.devicestate.OverrideRequest.OVERRIDE_REQUEST_TYPE_EMULATED_STATE;
+import static com.android.server.devicestate.OverrideRequestController.FLAG_POWER_SAVE_ENABLED;
 import static com.android.server.devicestate.OverrideRequestController.FLAG_THERMAL_CRITICAL;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_ACTIVE;
 import static com.android.server.devicestate.OverrideRequestController.STATUS_CANCELED;
@@ -609,7 +610,8 @@ public final class DeviceStateManagerService extends SystemService {
 
     @GuardedBy("mLock")
     private void onOverrideRequestStatusChangedLocked(@NonNull OverrideRequest request,
-            @OverrideRequestController.RequestStatus int status, int flags) {
+            @OverrideRequestController.RequestStatus int status,
+            @OverrideRequestController.StatusChangedFlag int flags) {
         if (request.getRequestType() == OVERRIDE_REQUEST_TYPE_BASE_STATE) {
             switch (status) {
                 case STATUS_ACTIVE:
@@ -640,6 +642,10 @@ public final class DeviceStateManagerService extends SystemService {
                         if ((flags & FLAG_THERMAL_CRITICAL) == FLAG_THERMAL_CRITICAL) {
                             mDeviceStateNotificationController
                                     .showThermalCriticalNotificationIfNeeded(
+                                            request.getRequestedState());
+                        } else if ((flags & FLAG_POWER_SAVE_ENABLED) == FLAG_POWER_SAVE_ENABLED) {
+                            mDeviceStateNotificationController
+                                    .showPowerSaveNotificationIfNeeded(
                                             request.getRequestedState());
                         }
                     }

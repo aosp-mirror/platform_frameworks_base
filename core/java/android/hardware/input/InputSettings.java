@@ -25,6 +25,7 @@ import android.annotation.TestApi;
 import android.content.Context;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.sysprop.InputProperties;
 
 /**
  * InputSettings encapsulates reading and writing settings related to input
@@ -232,7 +233,7 @@ public class InputSettings {
      */
     public static boolean useTouchpadNaturalScrolling(@NonNull Context context) {
         return Settings.System.getIntForUser(context.getContentResolver(),
-                Settings.System.TOUCHPAD_NATURAL_SCROLLING, 0, UserHandle.USER_CURRENT) == 1;
+                Settings.System.TOUCHPAD_NATURAL_SCROLLING, 1, UserHandle.USER_CURRENT) == 1;
     }
 
     /**
@@ -315,5 +316,16 @@ public class InputSettings {
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether a pointer icon will be shown over the location of a
+     * stylus pointer.
+     * @hide
+     */
+    public static boolean isStylusPointerIconEnabled(@NonNull Context context) {
+        return context.getResources()
+                       .getBoolean(com.android.internal.R.bool.config_enableStylusPointerIcon)
+               || InputProperties.force_enable_stylus_pointer_icon().orElse(false);
     }
 }

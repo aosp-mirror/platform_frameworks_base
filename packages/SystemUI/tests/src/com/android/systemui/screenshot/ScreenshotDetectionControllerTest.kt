@@ -19,12 +19,14 @@ package com.android.systemui.screenshot
 import android.content.ComponentName
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS
 import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.IWindowManager
 import android.view.WindowManager
 import androidx.test.filters.SmallTest
 import com.android.systemui.util.mockito.any
+import com.android.systemui.util.mockito.argThat
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.whenever
 import junit.framework.Assert.assertEquals
@@ -32,6 +34,7 @@ import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatcher
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -158,4 +161,56 @@ class ScreenshotDetectionControllerTest {
         assertEquals(appName2, list[1])
         assertEquals(appName3, list[2])
     }
+
+    private fun includesFlagBits(@PackageManager.ComponentInfoFlagsBits mask: Int) =
+        ComponentInfoFlagMatcher(mask, mask)
+    private fun excludesFlagBits(@PackageManager.ComponentInfoFlagsBits mask: Int) =
+        ComponentInfoFlagMatcher(mask, 0)
+
+    private class ComponentInfoFlagMatcher(
+        @PackageManager.ComponentInfoFlagsBits val mask: Int, val value: Int
+    ): ArgumentMatcher<PackageManager.ComponentInfoFlags> {
+        override fun matches(flags: PackageManager.ComponentInfoFlags): Boolean {
+            return (mask.toLong() and flags.value) == value.toLong()
+        }
+
+        override fun toString(): String{
+            return "mask 0x%08x == 0x%08x".format(mask, value)
+        }
+    }
+
+    @Test
+    fun testMaybeNotifyOfScreenshot_disabledApp() {
+        val data = ScreenshotData.forTesting()
+        data.source = WindowManager.ScreenshotSource.SCREENSHOT_KEY_CHORD
+
+        val component = ComponentName("package1", "class1")
+        val appName = "app name"
+        val activityInfo = mock(ActivityInfo::class.java)
+
+        whenever(
+            packageManager.getActivityInfo(
+                eq(component),
+                argThat(includesFlagBits(MATCH_DISABLED_COMPONENTS))
+            )
+        ).thenReturn(activityInfo);
+
+        whenever(
+            packageManager.getActivityInfo(
+                eq(component),
+                argThat(excludesFlagBits(MATCH_DISABLED_COMPONENTS))
+            )
+        ).thenThrow(PackageManager.NameNotFoundException::class.java);
+
+        whenever(windowManager.notifyScreenshotListeners(eq(Display.DEFAULT_DISPLAY)))
+            .thenReturn(listOf(component))
+
+        whenever(activityInfo.loadLabel(eq(packageManager))).thenReturn(appName)
+
+        val list = controller.maybeNotifyOfScreenshot(data)
+
+        assertEquals(1, list.size)
+        assertEquals(appName, list[0])
+    }
+
 }

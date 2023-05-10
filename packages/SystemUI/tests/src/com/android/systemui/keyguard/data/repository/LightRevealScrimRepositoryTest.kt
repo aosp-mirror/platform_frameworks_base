@@ -17,7 +17,9 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.RoboPilotTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.shared.model.BiometricUnlockModel
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
@@ -31,11 +33,11 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import org.mockito.MockitoAnnotations
 
 @SmallTest
-@RunWith(JUnit4::class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4::class)
 class LightRevealScrimRepositoryTest : SysuiTestCase() {
     private lateinit var fakeKeyguardRepository: FakeKeyguardRepository
     private lateinit var underTest: LightRevealScrimRepositoryImpl
@@ -48,7 +50,7 @@ class LightRevealScrimRepositoryTest : SysuiTestCase() {
     }
 
     @Test
-    fun `nextRevealEffect - effect switches between default and biometric with no dupes`() =
+    fun nextRevealEffect_effectSwitchesBetweenDefaultAndBiometricWithNoDupes() =
         runTest {
             val values = mutableListOf<LightRevealEffect>()
             val job = launch { underTest.revealEffect.collect { values.add(it) } }

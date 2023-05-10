@@ -28,6 +28,7 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.hardware.input.InputManager;
+import android.hardware.input.InputManagerGlobal;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -1130,7 +1131,7 @@ public class Instrumentation {
         newEvent.setFlags(event.getFlags() | KeyEvent.FLAG_FROM_SYSTEM);
         setDisplayIfNeeded(newEvent);
 
-        InputManager.getInstance().injectInputEvent(newEvent,
+        InputManagerGlobal.getInstance().injectInputEvent(newEvent,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
@@ -1151,7 +1152,7 @@ public class Instrumentation {
         }
 
         UserManager userManager = mInstrContext.getSystemService(UserManager.class);
-        int userDisplayId = userManager.getDisplayIdAssignedToUser();
+        int userDisplayId = userManager.getMainDisplayIdAssignedToUser();
         if (VERBOSE) {
             Log.v(TAG, "setDisplayIfNeeded(" + event + "): eventDisplayId=" + eventDisplayId
                     + ", user=" + mInstrContext.getUser() + ", userDisplayId=" + userDisplayId);
@@ -1229,7 +1230,7 @@ public class Instrumentation {
             }
 
             // Direct the injected event into windows owned by the instrumentation target.
-            InputManager.getInstance().injectInputEvent(
+            InputManagerGlobal.getInstance().injectInputEvent(
                     event, InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH, Process.myUid());
 
             if (syncAfter) {
@@ -1259,7 +1260,7 @@ public class Instrumentation {
         if (!event.isFromSource(InputDevice.SOURCE_CLASS_TRACKBALL)) {
             event.setSource(InputDevice.SOURCE_TRACKBALL);
         }
-        InputManager.getInstance().injectInputEvent(event,
+        InputManagerGlobal.getInstance().injectInputEvent(event,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
 
@@ -2353,8 +2354,7 @@ public class Instrumentation {
                 return mUiAutomation;
             }
             if (mustCreateNewAutomation) {
-                mUiAutomation = new UiAutomation(getTargetContext().getMainLooper(),
-                        mUiAutomationConnection);
+                mUiAutomation = new UiAutomation(getTargetContext(), mUiAutomationConnection);
             } else {
                 mUiAutomation.disconnect();
             }

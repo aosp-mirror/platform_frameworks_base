@@ -981,6 +981,15 @@ public class PackageInstaller {
      *
      * The result is returned by a callback because some constraints might take a long time
      * to evaluate.
+     *
+     * @param packageNames a list of package names to check the constraints for installation
+     * @param constraints the constraints for installation.
+     * @param executor the {@link Executor} on which to invoke the callback
+     * @param callback called when the {@link InstallConstraintsResult} is ready
+     *
+     * @throws SecurityException if the given packages' installer of record doesn't match the
+     *             caller's own package name or the installerPackageName set by the caller doesn't
+     *             match the caller's own package name.
      */
     public void checkInstallConstraints(@NonNull List<String> packageNames,
             @NonNull InstallConstraints constraints,
@@ -1008,6 +1017,8 @@ public class PackageInstaller {
      * Note: the device idle constraint might take a long time to evaluate. The system will
      * ensure the constraint is evaluated completely before handling timeout.
      *
+     * @param packageNames a list of package names to check the constraints for installation
+     * @param constraints the constraints for installation.
      * @param callback Called when the constraints are satisfied or after timeout.
      *                 Intents sent to this callback contain:
      *                 {@link Intent#EXTRA_PACKAGES} for the input package names,
@@ -1017,6 +1028,9 @@ public class PackageInstaller {
      *                      satisfied. Valid range is from 0 to one week. {@code 0} means the
      *                      callback will be invoked immediately no matter constraints are
      *                      satisfied or not.
+     * @throws SecurityException if the given packages' installer of record doesn't match the
+     *             caller's own package name or the installerPackageName set by the caller doesn't
+     *             match the caller's own package name.
      */
     public void waitForInstallConstraints(@NonNull List<String> packageNames,
             @NonNull InstallConstraints constraints,
@@ -1039,6 +1053,7 @@ public class PackageInstaller {
      * may be performed on the session. In the case of timeout, you may commit the
      * session again using this method or {@link Session#commit(IntentSender)} for retries.
      *
+     * @param sessionId the session ID to commit when all constraints are satisfied.
      * @param statusReceiver Called when the state of the session changes. Intents
      *                       sent to this receiver contain {@link #EXTRA_STATUS}.
      *                       Refer to the individual status codes on how to handle them.
@@ -2072,6 +2087,25 @@ public class PackageInstaller {
         return new InstallInfo(result);
     }
 
+    /**
+     * Parse a single APK file passed as an FD to get install relevant information about
+     * the package wrapped in {@link InstallInfo}.
+     * @throws PackageParsingException if the package source file(s) provided is(are) not valid,
+     * or the parser isn't able to parse the supplied source(s).
+     * @hide
+     */
+    @NonNull
+    public InstallInfo readInstallInfo(@NonNull ParcelFileDescriptor pfd,
+            @Nullable String debugPathName, int flags) throws PackageParsingException {
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<PackageLite> result = ApkLiteParseUtils.parseMonolithicPackageLite(input,
+                pfd.getFileDescriptor(), debugPathName, flags);
+        if (result.isError()) {
+            throw new PackageParsingException(result.getErrorCode(), result.getErrorMessage());
+        }
+        return new InstallInfo(result);
+    }
+
     // (b/239722738) This class serves as a bridge between the PackageLite class, which
     // is a hidden class, and the consumers of this class. (e.g. InstallInstalling.java)
     // This is a part of an effort to remove dependency on hidden APIs and use SystemAPIs or
@@ -2124,6 +2158,21 @@ public class PackageInstaller {
          */
         public long calculateInstalledSize(@NonNull SessionParams params) throws IOException {
             return InstallLocationUtils.calculateInstalledSize(mPkg, params.abiOverride);
+        }
+
+        /**
+         * @param params {@link SessionParams} of the installation
+         * @param pfd of an APK opened for read
+         * @return Total disk space occupied by an application after installation.
+         * Includes the size of the raw APKs, possibly unpacked resources, raw dex metadata files,
+         * and all relevant native code.
+         * @throws IOException when size of native binaries cannot be calculated.
+         * @hide
+         */
+        public long calculateInstalledSize(@NonNull SessionParams params,
+                @NonNull ParcelFileDescriptor pfd) throws IOException {
+            return InstallLocationUtils.calculateInstalledSize(mPkg, params.abiOverride,
+                    pfd.getFileDescriptor());
         }
     }
 
@@ -2531,9 +2580,9 @@ public class PackageInstaller {
          * Sets the state of permissions for the package at installation.
          * <p/>
          * Granting any runtime permissions require the
-         * {@link android.Manifest.permission#INSTALL_GRANT_RUNTIME_PERMISSIONS} permission to be
-         * held by the caller. Revoking runtime permissions is not allowed, even during app update
-         * sessions.
+         * {@link android.Manifest.permission#INSTALL_GRANT_RUNTIME_PERMISSIONS
+         * INSTALL_GRANT_RUNTIME_PERMISSIONS} permission to be held by the caller. Revoking runtime
+         * permissions is not allowed, even during app update sessions.
          * <p/>
          * Holders without the permission are allowed to change the following special permissions:
          * <p/>
@@ -2990,6 +3039,10 @@ public class PackageInstaller {
          *
          * The update ownership enforcement can only be enabled on initial installation. Set
          * this to {@code true} on package update is a no-op.
+         *
+         * Apps may opt themselves out of update ownership by setting the
+         * <a href="https://developer.android.com/guide/topics/manifest/manifest-element.html#allowupdateownership">android:alllowUpdateOwnership</a>
+         * attribute in their manifest to <code>false</code>.
          *
          * Note: To enable the update ownership enforcement, the installer must have the
          * {@link android.Manifest.permission#ENFORCE_UPDATE_OWNERSHIP ENFORCE_UPDATE_OWNERSHIP}
@@ -3547,6 +3600,18 @@ public class PackageInstaller {
          */
         public @Nullable Uri getReferrerUri() {
             return referrerUri;
+        }
+
+        /**
+         * @return the path to the validated base APK for this session, which may point at an
+         * APK inside the session (when the session defines the base), or it may
+         * point at the existing base APK (when adding splits to an existing app).
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+        public @Nullable String getResolvedBaseApkPath() {
+            return resolvedBaseCodePath;
         }
 
         /**

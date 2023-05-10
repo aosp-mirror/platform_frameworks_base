@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyboard.backlight.ui.view
 
+import android.annotation.AttrRes
 import android.annotation.ColorInt
 import android.app.Dialog
 import android.content.Context
@@ -31,6 +32,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.LinearLayout.LayoutParams
 import android.widget.LinearLayout.LayoutParams.WRAP_CONTENT
+import com.android.settingslib.Utils
 import com.android.systemui.R
 import com.android.systemui.util.children
 
@@ -38,7 +40,7 @@ class KeyboardBacklightDialog(
     context: Context,
     initialCurrentLevel: Int,
     initialMaxLevel: Int,
-) : Dialog(context) {
+) : Dialog(context, R.style.Theme_SystemUI_Dialog) {
 
     private data class RootProperties(
         val cornerRadius: Float,
@@ -69,9 +71,14 @@ class KeyboardBacklightDialog(
     private lateinit var rootProperties: RootProperties
     private lateinit var iconProperties: BacklightIconProperties
     private lateinit var stepProperties: StepViewProperties
-    @ColorInt var filledRectangleColor: Int = 0
-    @ColorInt var emptyRectangleColor: Int = 0
-    @ColorInt var backgroundColor: Int = 0
+    @ColorInt
+    var filledRectangleColor = getColorFromStyle(com.android.internal.R.attr.materialColorPrimary)
+    @ColorInt
+    var emptyRectangleColor =
+        getColorFromStyle(com.android.internal.R.attr.materialColorOutlineVariant)
+    @ColorInt
+    var backgroundColor = getColorFromStyle(com.android.internal.R.attr.materialColorSurfaceBright)
+    @ColorInt var iconColor = getColorFromStyle(com.android.internal.R.attr.materialColorOnPrimary)
 
     init {
         currentLevel = initialCurrentLevel
@@ -80,7 +87,7 @@ class KeyboardBacklightDialog(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setUpWindowProperties(this)
-        setWindowTitle()
+        setWindowPosition()
         updateResources()
         rootView = buildRootView()
         setContentView(rootView)
@@ -90,9 +97,6 @@ class KeyboardBacklightDialog(
 
     private fun updateResources() {
         context.resources.apply {
-            filledRectangleColor = getColor(R.color.backlight_indicator_step_filled)
-            emptyRectangleColor = getColor(R.color.backlight_indicator_step_empty)
-            backgroundColor = getColor(R.color.backlight_indicator_background)
             rootProperties =
                 RootProperties(
                     cornerRadius =
@@ -124,6 +128,11 @@ class KeyboardBacklightDialog(
                             .toFloat(),
                 )
         }
+    }
+
+    @ColorInt
+    fun getColorFromStyle(@AttrRes colorId: Int): Int {
+        return Utils.getColorAttrDefaultColor(context, colorId)
     }
 
     fun updateState(current: Int, max: Int, forceRefresh: Boolean = false) {
@@ -159,6 +168,7 @@ class KeyboardBacklightDialog(
     private fun buildRootView(): LinearLayout {
         val linearLayout =
             LinearLayout(context).apply {
+                id = R.id.keyboard_backlight_dialog_container
                 orientation = LinearLayout.HORIZONTAL
                 layoutParams = LayoutParams(WRAP_CONTENT, WRAP_CONTENT)
                 setPadding(
@@ -214,6 +224,7 @@ class KeyboardBacklightDialog(
     private fun createBacklightIconView(): ImageView {
         return ImageView(context).apply {
             setImageResource(R.drawable.ic_keyboard_backlight)
+            setColorFilter(iconColor)
             layoutParams =
                 FrameLayout.LayoutParams(iconProperties.width, iconProperties.height).apply {
                     gravity = Gravity.CENTER
@@ -222,25 +233,29 @@ class KeyboardBacklightDialog(
         }
     }
 
-    private fun setWindowTitle() {
-        val attrs = window.attributes
-        // TODO(b/271796169): check if title needs to be a translatable resource.
-        attrs.title = "KeyboardBacklightDialog"
-        attrs?.y = dialogBottomMargin
-        window.attributes = attrs
+    private fun setWindowPosition() {
+        window?.apply {
+            setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+            this.attributes =
+                WindowManager.LayoutParams().apply {
+                    copyFrom(attributes)
+                    y = dialogBottomMargin
+                }
+        }
     }
 
     private fun setUpWindowProperties(dialog: Dialog) {
-        val window = dialog.window
-        window.requestFeature(Window.FEATURE_NO_TITLE) // otherwise fails while creating actionBar
-        window.setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
-        window.addFlags(
-            WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM or
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-        )
-        window.clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-        window.setBackgroundDrawableResource(android.R.color.transparent)
-        window.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL)
+        dialog.window?.apply {
+            requestFeature(Window.FEATURE_NO_TITLE) // otherwise fails while creating actionBar
+            setType(WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL)
+            addFlags(
+                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM or
+                    WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+            )
+            clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
+            setBackgroundDrawableResource(android.R.color.transparent)
+            attributes.title = "KeyboardBacklightDialog"
+        }
         setCanceledOnTouchOutside(true)
     }
 

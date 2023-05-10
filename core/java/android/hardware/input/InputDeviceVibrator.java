@@ -45,14 +45,14 @@ final class InputDeviceVibrator extends Vibrator {
     private final int mDeviceId;
     private final VibratorInfo mVibratorInfo;
     private final Binder mToken;
-    private final InputManager mInputManager;
+    private final InputManagerGlobal mGlobal;
 
     @GuardedBy("mDelegates")
     private final ArrayMap<OnVibratorStateChangedListener,
             OnVibratorStateChangedListenerDelegate> mDelegates = new ArrayMap<>();
 
-    InputDeviceVibrator(InputManager inputManager, int deviceId, int vibratorId) {
-        mInputManager = inputManager;
+    InputDeviceVibrator(int deviceId, int vibratorId) {
+        mGlobal = InputManagerGlobal.getInstance();
         mDeviceId = deviceId;
         mVibratorInfo = new VibratorInfo.Builder(vibratorId)
                 .setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL)
@@ -93,7 +93,7 @@ final class InputDeviceVibrator extends Vibrator {
 
     @Override
     public boolean isVibrating() {
-        return mInputManager.isVibrating(mDeviceId);
+        return mGlobal.isVibrating(mDeviceId);
     }
 
     /**
@@ -132,7 +132,7 @@ final class InputDeviceVibrator extends Vibrator {
 
             final OnVibratorStateChangedListenerDelegate delegate =
                     new OnVibratorStateChangedListenerDelegate(listener, executor);
-            if (!mInputManager.registerVibratorStateListener(mDeviceId, delegate)) {
+            if (!mGlobal.registerVibratorStateListener(mDeviceId, delegate)) {
                 Log.w(TAG, "Failed to register vibrate state listener");
                 return;
             }
@@ -156,7 +156,7 @@ final class InputDeviceVibrator extends Vibrator {
             if (mDelegates.containsKey(listener)) {
                 final OnVibratorStateChangedListenerDelegate delegate = mDelegates.get(listener);
 
-                if (!mInputManager.unregisterVibratorStateListener(mDeviceId, delegate)) {
+                if (!mGlobal.unregisterVibratorStateListener(mDeviceId, delegate)) {
                     Log.w(TAG, "Failed to unregister vibrate state listener");
                     return;
                 }
@@ -176,12 +176,12 @@ final class InputDeviceVibrator extends Vibrator {
     @Override
     public void vibrate(int uid, String opPkg, @NonNull VibrationEffect effect, String reason,
             @NonNull VibrationAttributes attributes) {
-        mInputManager.vibrate(mDeviceId, effect, mToken);
+        mGlobal.vibrate(mDeviceId, effect, mToken);
     }
 
     @Override
     public void cancel() {
-        mInputManager.cancelVibrate(mDeviceId, mToken);
+        mGlobal.cancelVibrate(mDeviceId, mToken);
     }
 
     @Override

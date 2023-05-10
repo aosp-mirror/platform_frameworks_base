@@ -37,13 +37,17 @@ class AuthResultCoordinator {
      */
     static final int AUTHENTICATOR_DEFAULT = 0;
     /**
-     * Indicated this authenticator has received a lockout.
+     * Indicated this authenticator has received a permanent lockout.
      */
-    static final int AUTHENTICATOR_LOCKED = 1 << 0;
+    static final int AUTHENTICATOR_PERMANENT_LOCKED = 1 << 0;
+    /**
+     * Indicates this authenticator has received a timed unlock.
+     */
+    static final int AUTHENTICATOR_TIMED_LOCKED = 1 << 1;
     /**
      * Indicates this authenticator has received a successful unlock.
      */
-    static final int AUTHENTICATOR_UNLOCKED = 1 << 1;
+    static final int AUTHENTICATOR_UNLOCKED = 1 << 2;
     private static final String TAG = "AuthResultCoordinator";
     private final Map<Integer, Integer> mAuthenticatorState;
 
@@ -85,7 +89,14 @@ class AuthResultCoordinator {
      * Adds a lock out of a given strength to the current operation list.
      */
     void lockedOutFor(@Authenticators.Types int strength) {
-        updateState(strength, (old) -> AUTHENTICATOR_LOCKED | old);
+        updateState(strength, (old) -> AUTHENTICATOR_PERMANENT_LOCKED | old);
+    }
+
+    /**
+     * Adds a timed lock out of a given strength to the current operation list.
+     */
+    void lockOutTimed(@Authenticators.Types int strength) {
+        updateState(strength, (old) -> AUTHENTICATOR_TIMED_LOCKED | old);
     }
 
     /**

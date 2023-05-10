@@ -89,6 +89,10 @@ jboolean AGnssRil::updateNetworkState(jboolean connected, jint type, jboolean ro
 }
 
 jboolean AGnssRil::injectNiSuplMessageData(const jbyteArray& msgData, jint length, jint slotIndex) {
+    if (mIAGnssRil->getInterfaceVersion() <= 2) {
+        ALOGE("IAGnssRil does not support injectNiSuplMessageData().");
+        return JNI_FALSE;
+    }
     JNIEnv* env = getJniEnv();
     jbyte* bytes = reinterpret_cast<jbyte*>(env->GetPrimitiveArrayCritical(msgData, 0));
     auto status = mIAGnssRil->injectNiSuplMessageData(std::vector<uint8_t>((const uint8_t*)bytes,

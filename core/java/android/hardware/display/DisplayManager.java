@@ -51,12 +51,18 @@ import android.view.Display;
 import android.view.Surface;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
+
+import libcore.util.EmptyArray;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 
 
 /**
@@ -81,9 +87,8 @@ public final class DisplayManager {
     private final DisplayManagerGlobal mGlobal;
 
     private final Object mLock = new Object();
-    private final SparseArray<Display> mDisplays = new SparseArray<Display>();
-
-    private final ArrayList<Display> mTempDisplays = new ArrayList<Display>();
+    @GuardedBy("mLock")
+    private final WeakDisplayCache mDisplayCache = new WeakDisplayCache();
 
     /**
      * Broadcast receiver that indicates when the Wifi display status changes.
@@ -623,9 +628,7 @@ public final class DisplayManager {
      * @return The display object, or null if there is no valid display with the given id.
      */
     public Display getDisplay(int displayId) {
-        synchronized (mLock) {
-            return getOrCreateDisplayLocked(displayId, false /*assumeValid*/);
-        }
+        return getOrCreateDisplay(displayId, false /*assumeValid*/);
     }
 
     /**
@@ -657,72 +660,67 @@ public final class DisplayManager {
         boolean includeDisabled = (category != null
                 && category.equals(DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED));
         final int[] displayIds = mGlobal.getDisplayIds(includeDisabled);
-        synchronized (mLock) {
-            try {
-                if (DISPLAY_CATEGORY_PRESENTATION.equals(category)) {
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_WIFI,
-                            Display.FLAG_PRESENTATION);
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_EXTERNAL,
-                            Display.FLAG_PRESENTATION);
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_OVERLAY,
-                            Display.FLAG_PRESENTATION);
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_VIRTUAL,
-                            Display.FLAG_PRESENTATION);
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL,
-                            Display.FLAG_PRESENTATION);
-                } else if (DISPLAY_CATEGORY_REAR.equals(category)) {
-                    addDisplaysLocked(mTempDisplays, displayIds, Display.TYPE_INTERNAL,
-                            Display.FLAG_REAR);
-                } else if (category == null
-                        || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
-                    addAllDisplaysLocked(mTempDisplays, displayIds);
-                }
-                return mTempDisplays.toArray(new Display[mTempDisplays.size()]);
-            } finally {
-                mTempDisplays.clear();
-            }
+        if (DISPLAY_CATEGORY_PRESENTATION.equals(category)) {
+            return getDisplays(displayIds, DisplayManager::isPresentationDisplay);
+        } else if (DISPLAY_CATEGORY_REAR.equals(category)) {
+            return getDisplays(displayIds, DisplayManager::isRearDisplay);
+        } else if (category == null || DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED.equals(category)) {
+            return getDisplays(displayIds, Objects::nonNull);
         }
+        return (Display[]) EmptyArray.OBJECT;
     }
 
-    private void addAllDisplaysLocked(ArrayList<Display> displays, int[] displayIds) {
-        for (int i = 0; i < displayIds.length; i++) {
-            Display display = getOrCreateDisplayLocked(displayIds[i], true /*assumeValid*/);
-            if (display != null) {
-                displays.add(display);
-            }
-        }
-    }
-
-    private void addDisplaysLocked(
-            ArrayList<Display> displays, int[] displayIds, int matchType, int flagMask) {
+    private Display[] getDisplays(int[] displayIds, Predicate<Display> predicate) {
+        ArrayList<Display> tmpDisplays = new ArrayList<>();
         for (int displayId : displayIds) {
-            if (displayId == DEFAULT_DISPLAY) {
-                continue;
+            Display display = getOrCreateDisplay(displayId, /*assumeValid=*/true);
+            if (predicate.test(display)) {
+                tmpDisplays.add(display);
             }
+        }
+        return tmpDisplays.toArray(new Display[tmpDisplays.size()]);
+    }
 
-            Display display = getOrCreateDisplayLocked(displayId, /* assumeValid= */ true);
-            if (display != null
-                    && (display.getFlags() & flagMask) == flagMask
-                    && display.getType() == matchType) {
-                displays.add(display);
-            }
+    private static boolean isPresentationDisplay(@Nullable Display display) {
+        if (display == null || (display.getDisplayId() == DEFAULT_DISPLAY)
+                || (display.getFlags() & Display.FLAG_PRESENTATION) == 0) {
+            return false;
+        }
+        switch (display.getType()) {
+            case Display.TYPE_INTERNAL:
+            case Display.TYPE_EXTERNAL:
+            case Display.TYPE_WIFI:
+            case Display.TYPE_OVERLAY:
+            case Display.TYPE_VIRTUAL:
+                return true;
+            default:
+                return false;
         }
     }
 
-    private Display getOrCreateDisplayLocked(int displayId, boolean assumeValid) {
-        Display display = mDisplays.get(displayId);
-        if (display == null) {
-            // TODO: We cannot currently provide any override configurations for metrics on displays
-            // other than the display the context is associated with.
-            final Resources resources = mContext.getDisplayId() == displayId
-                    ? mContext.getResources() : null;
+    private static boolean isRearDisplay(@Nullable Display display) {
+        return display != null && display.getDisplayId() != DEFAULT_DISPLAY
+                && display.getType() == Display.TYPE_INTERNAL
+                && (display.getFlags() & Display.FLAG_REAR) != 0;
+    }
 
-            display = mGlobal.getCompatibleDisplay(displayId, resources);
-            if (display != null) {
-                mDisplays.put(displayId, display);
+    private Display getOrCreateDisplay(int displayId, boolean assumeValid) {
+        Display display;
+        synchronized (mLock) {
+            display = mDisplayCache.get(displayId);
+            if (display == null) {
+                // TODO: We cannot currently provide any override configurations for metrics on
+                // displays other than the display the context is associated with.
+                final Resources resources = mContext.getDisplayId() == displayId
+                        ? mContext.getResources() : null;
+
+                display = mGlobal.getCompatibleDisplay(displayId, resources);
+                if (display != null) {
+                    mDisplayCache.put(display);
+                }
+            } else if (!assumeValid && !display.isValid()) {
+                display = null;
             }
-        } else if (!assumeValid && !display.isValid()) {
-            display = null;
         }
         return display;
     }
@@ -1096,8 +1094,7 @@ public final class DisplayManager {
             @NonNull VirtualDisplayConfig config,
             @Nullable Handler handler,
             @Nullable VirtualDisplay.Callback callback) {
-        return createVirtualDisplay(null /* projection */, config, callback, handler,
-                null /* windowContext */);
+        return createVirtualDisplay(null /* projection */, config, callback, handler);
     }
 
     // TODO : Remove this hidden API after remove all callers. (Refer to MultiDisplayService)
@@ -1122,15 +1119,13 @@ public final class DisplayManager {
         if (surface != null) {
             builder.setSurface(surface);
         }
-        return createVirtualDisplay(projection, builder.build(), callback, handler,
-                null /* windowContext */);
+        return createVirtualDisplay(projection, builder.build(), callback, handler);
     }
 
     /** @hide */
     public VirtualDisplay createVirtualDisplay(@Nullable MediaProjection projection,
             @NonNull VirtualDisplayConfig virtualDisplayConfig,
-            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler,
-            @Nullable Context windowContext) {
+            @Nullable VirtualDisplay.Callback callback, @Nullable Handler handler) {
         Executor executor = null;
         // If callback is null, the executor will not be used. Avoid creating the handler and the
         // handler executor.
@@ -1139,7 +1134,7 @@ public final class DisplayManager {
                     Handler.createAsync(handler != null ? handler.getLooper() : Looper.myLooper()));
         }
         return mGlobal.createVirtualDisplay(mContext, projection, virtualDisplayConfig, callback,
-                executor, windowContext);
+                executor);
     }
 
     /**
@@ -1610,7 +1605,7 @@ public final class DisplayManager {
             throw ex.rethrowFromSystemServer();
         }
         return DisplayManagerGlobal.getInstance().createVirtualDisplayWrapper(virtualDisplayConfig,
-                null, callbackWrapper, displayId);
+                callbackWrapper, displayId);
     }
 
     /**
@@ -1761,11 +1756,66 @@ public final class DisplayManager {
         /**
          * Key for the brightness throttling data as a String formatted:
          * <displayId>,<no of throttling levels>,[<severity as string>,<brightness cap>]
-         * Where the latter part is repeated for each throttling level, and the entirety is repeated
-         * for each display, separated by a semicolon.
+         * [,<throttlingId>]?
+         * Where [<severity as string>,<brightness cap>] is repeated for each throttling level.
+         * The entirety is repeated for each display and throttling id, separated by a semicolon.
          * For example:
          * 123,1,critical,0.8;456,2,moderate,0.9,critical,0.7
+         * 123,1,critical,0.8,default;123,1,moderate,0.6,id_2;456,2,moderate,0.9,critical,0.7
          */
         String KEY_BRIGHTNESS_THROTTLING_DATA = "brightness_throttling_data";
+    }
+
+    /**
+     * Helper class to maintain cache of weak references to Display instances.
+     *
+     * Note this class is not thread-safe, so external synchronization is needed if accessed
+     * concurrently.
+     */
+    private static final class WeakDisplayCache {
+        private final SparseArray<WeakReference<Display>> mDisplayCache = new SparseArray<>();
+
+        /**
+         * Return cached {@link Display} instance for the provided display id.
+         *
+         * @param displayId - display id of the requested {@link Display} instance.
+         * @return cached {@link Display} instance or null
+         */
+        Display get(int displayId) {
+            WeakReference<Display> wrDisplay = mDisplayCache.get(displayId);
+            if (wrDisplay == null) {
+                return null;
+            }
+            return wrDisplay.get();
+        }
+
+        /**
+         * Insert new {@link Display} instance in the cache. This replaced the previously cached
+         * {@link Display} instance, if there's already one with the same display id.
+         *
+         * @param display - Display instance to cache.
+         */
+        void put(Display display) {
+            removeStaleEntries();
+            mDisplayCache.put(display.getDisplayId(), new WeakReference<>(display));
+        }
+
+        /**
+         * Evict gc-ed entries from the cache.
+         */
+        private void removeStaleEntries() {
+            ArrayList<Integer> staleEntriesIndices = new ArrayList();
+            for (int i = 0; i < mDisplayCache.size(); i++) {
+                if (mDisplayCache.valueAt(i).get() == null) {
+                    staleEntriesIndices.add(i);
+                }
+            }
+
+            for (int i = 0; i < staleEntriesIndices.size(); i++) {
+                // removeAt call to SparseArray doesn't compact the underlying array
+                // so the indices stay valid even after removal.
+                mDisplayCache.removeAt(staleEntriesIndices.get(i));
+            }
+        }
     }
 }

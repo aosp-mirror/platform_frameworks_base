@@ -19,7 +19,7 @@ package com.android.server.wm.flicker.launch
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Postsubmit
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -109,13 +109,16 @@ class OpenAppFromLockNotificationWithLockOverlayApp(flicker: FlickerTest) :
     override fun navBarLayerIsVisibleAtStartAndEnd() = super.navBarLayerIsVisibleAtStartAndEnd()
 
     /** {@inheritDoc} */
-    @FlakyTest(bugId = 209599395)
+    @Presubmit
     @Test
     override fun navBarWindowIsAlwaysVisible() = super.navBarWindowIsAlwaysVisible()
 
-    @FlakyTest(bugId = 266730606)
+    @Presubmit @Test override fun entireScreenCovered() = super.entireScreenCovered()
+
+    @FlakyTest(bugId = 278227468)
     @Test
-    override fun entireScreenCovered() = super.entireScreenCovered()
+    override fun visibleWindowsShownMoreThanOneConsecutiveEntry() =
+        super.visibleWindowsShownMoreThanOneConsecutiveEntry()
 
     companion object {
         /**

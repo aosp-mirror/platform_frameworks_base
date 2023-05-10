@@ -180,5 +180,7 @@ class RecommendationViewHolder private constructor(itemView: View, updatedView: 
                 R.id.media_cover2_container,
                 R.id.media_cover3_container
             )
+
+        val backgroundId = R.id.sizing_view
     }
 }

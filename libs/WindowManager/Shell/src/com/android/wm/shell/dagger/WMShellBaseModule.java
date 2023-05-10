@@ -32,9 +32,6 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.RootDisplayAreaOrganizer;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.TaskViewFactory;
-import com.android.wm.shell.TaskViewFactoryController;
-import com.android.wm.shell.TaskViewTransitions;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.back.BackAnimation;
@@ -82,6 +79,7 @@ import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
+import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.startingsurface.StartingSurface;
@@ -92,6 +90,9 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellInterface;
+import com.android.wm.shell.taskview.TaskViewFactory;
+import com.android.wm.shell.taskview.TaskViewFactoryController;
+import com.android.wm.shell.taskview.TaskViewTransitions;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
 import com.android.wm.shell.unfold.ShellUnfoldProgressProvider;
@@ -185,15 +186,16 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static DragAndDropController provideDragAndDropController(Context context,
+    static Optional<DragAndDropController> provideDragAndDropController(Context context,
             ShellInit shellInit,
             ShellController shellController,
+            ShellCommandHandler shellCommandHandler,
             DisplayController displayController,
             UiEventLogger uiEventLogger,
             IconProvider iconProvider,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new DragAndDropController(context, shellInit, shellController, displayController,
-                uiEventLogger, iconProvider, mainExecutor);
+        return Optional.ofNullable(DragAndDropController.create(context, shellInit, shellController,
+                shellCommandHandler, displayController, uiEventLogger, iconProvider, mainExecutor));
     }
 
     @WMSingleton
@@ -520,6 +522,9 @@ public abstract class WMShellBaseModule {
                         desktopModeTaskRepository, mainExecutor));
     }
 
+    @BindsOptionalOf
+    abstract RecentsTransitionHandler optionalRecentsTransitionHandler();
+
     //
     // Shell transitions
     //
@@ -540,13 +545,14 @@ public abstract class WMShellBaseModule {
             DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
-            @ShellAnimationThread ShellExecutor animExecutor) {
+            @ShellAnimationThread ShellExecutor animExecutor,
+            ShellCommandHandler shellCommandHandler) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTransitionsOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
         return new Transitions(context, shellInit, shellController, organizer, pool,
-                displayController, mainExecutor, mainHandler, animExecutor);
+                displayController, mainExecutor, mainHandler, animExecutor, shellCommandHandler);
     }
 
     @WMSingleton
@@ -792,7 +798,7 @@ public abstract class WMShellBaseModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropControllerOptional,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,
@@ -803,6 +809,7 @@ public abstract class WMShellBaseModule {
             Optional<UnfoldTransitionHandler> unfoldTransitionHandler,
             Optional<FreeformComponents> freeformComponents,
             Optional<RecentTasksController> recentTasksOptional,
+            Optional<RecentsTransitionHandler> recentsTransitionHandlerOptional,
             Optional<OneHandedController> oneHandedControllerOptional,
             Optional<HideDisplayCutoutController> hideDisplayCutoutControllerOptional,
             Optional<ActivityEmbeddingController> activityEmbeddingOptional,

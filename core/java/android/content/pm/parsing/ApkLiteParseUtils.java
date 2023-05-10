@@ -109,7 +109,7 @@ public class ApkLiteParseUtils {
     }
 
     /**
-     * Parse lightweight details about a single APK files.
+     * Parse lightweight details about a single APK file.
      */
     public static ParseResult<PackageLite> parseMonolithicPackageLite(ParseInput input,
             File packageFile, int flags) {
@@ -127,7 +127,35 @@ public class ApkLiteParseUtils {
                             null /* isFeatureSplits */, null /* usesSplitNames */,
                             null /* configForSplit */, null /* splitApkPaths */,
                             null /* splitRevisionCodes */, baseApk.getTargetSdkVersion(),
-                            null /* requiredSplitTypes */, null /* splitTypes */));
+                            null /* requiredSplitTypes */, null, /* splitTypes */
+                            baseApk.isAllowUpdateOwnership()));
+        } finally {
+            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+        }
+    }
+
+    /**
+     * Parse lightweight details about a single APK file passed as an FD.
+     */
+    public static ParseResult<PackageLite> parseMonolithicPackageLite(ParseInput input,
+            FileDescriptor packageFd, String debugPathName, int flags) {
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parseApkLite");
+        try {
+            final ParseResult<ApkLite> result = parseApkLite(input, packageFd, debugPathName,
+                    flags);
+            if (result.isError()) {
+                return input.error(result);
+            }
+
+            final ApkLite baseApk = result.getResult();
+            final String packagePath = debugPathName;
+            return input.success(
+                    new PackageLite(packagePath, baseApk.getPath(), baseApk, null /* splitNames */,
+                            null /* isFeatureSplits */, null /* usesSplitNames */,
+                            null /* configForSplit */, null /* splitApkPaths */,
+                            null /* splitRevisionCodes */, baseApk.getTargetSdkVersion(),
+                            null /* requiredSplitTypes */, null, /* splitTypes */
+                            baseApk.isAllowUpdateOwnership()));
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
@@ -273,7 +301,8 @@ public class ApkLiteParseUtils {
         return input.success(
                 new PackageLite(codePath, baseCodePath, baseApk, splitNames, isFeatureSplits,
                         usesSplitNames, configForSplits, splitCodePaths, splitRevisionCodes,
-                        baseApk.getTargetSdkVersion(), requiredSplitTypes, splitTypes));
+                        baseApk.getTargetSdkVersion(), requiredSplitTypes, splitTypes,
+                        baseApk.isAllowUpdateOwnership()));
     }
 
     /**
@@ -400,6 +429,8 @@ public class ApkLiteParseUtils {
                 "isFeatureSplit", false);
         boolean isSplitRequired = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
                 "isSplitRequired", false);
+        boolean allowUpdateOwnership = parser.getAttributeBooleanValue(ANDROID_RES_NAMESPACE,
+                "allowUpdateOwnership", true);
         String configForSplit = parser.getAttributeValue(null, "configForSplit");
 
         int targetSdkVersion = DEFAULT_TARGET_SDK_VERSION;
@@ -583,7 +614,7 @@ public class ApkLiteParseUtils {
                         overlayIsStatic, overlayPriority, requiredSystemPropertyName,
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
-                        hasDeviceAdminReceiver, isSdkLibrary));
+                        hasDeviceAdminReceiver, isSdkLibrary, allowUpdateOwnership));
     }
 
     private static boolean isDeviceAdminReceiver(

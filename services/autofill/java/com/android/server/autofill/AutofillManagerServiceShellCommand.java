@@ -327,13 +327,11 @@ public final class AutofillManagerServiceShellCommand extends ShellCommand {
     private int setTemporaryDetectionService(PrintWriter pw) {
         final int userId = getNextIntArgRequired();
         final String serviceName = getNextArg();
-        final int duration = getNextIntArgRequired();
-
         if (serviceName == null) {
             mService.resetTemporaryDetectionService(userId);
             return 0;
         }
-
+        final int duration = getNextIntArgRequired();
         if (duration <= 0) {
             mService.resetTemporaryDetectionService(userId);
             return 0;

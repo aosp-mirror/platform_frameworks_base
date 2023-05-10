@@ -16,19 +16,26 @@
 
 package com.android.systemui.log.table
 
+import android.os.Trace
 import com.android.systemui.Dumpable
-import com.android.systemui.plugins.util.RingBuffer
+import com.android.systemui.common.buffer.RingBuffer
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.log.LogLevel
+import com.android.systemui.log.LogcatEchoTracker
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 
 /**
  * A logger that logs changes in table format.
  *
  * Some parts of System UI maintain a lot of pieces of state at once.
- * [com.android.systemui.plugins.log.LogBuffer] allows us to easily log change events:
+ * [com.android.systemui.log.LogBuffer] allows us to easily log change events:
  * - 10-10 10:10:10.456: state2 updated to newVal2
  * - 10-10 10:11:00.000: stateN updated to StateN(val1=true, val2=1)
  * - 10-10 10:11:02.123: stateN updated to StateN(val1=true, val2=2)
@@ -73,18 +80,53 @@ class TableLogBuffer(
     maxSize: Int,
     private val name: String,
     private val systemClock: SystemClock,
+    private val logcatEchoTracker: LogcatEchoTracker,
+    @Background private val bgDispatcher: CoroutineDispatcher,
+    private val coroutineScope: CoroutineScope,
+    private val localLogcat: LogProxy = LogProxyDefault(),
 ) : Dumpable {
     init {
         if (maxSize <= 0) {
             throw IllegalArgumentException("maxSize must be > 0")
         }
     }
+    // For local logcat, send messages across this channel so the background job can process them
+    private val logMessageChannel = Channel<TableChange>(capacity = 10)
 
     private val buffer = RingBuffer(maxSize) { TableChange() }
 
+    // Stores the most recently evicted value for each column name (indexed on column name).
+    //
+    // Why it's necessary: Because we use a RingBuffer of a fixed size, it's possible that a column
+    // that's logged infrequently will eventually get pushed out by a different column that's
+    // logged more frequently. Then, that infrequently-logged column isn't present in the RingBuffer
+    // at all and we have no logs that the column ever existed. This is a problem because the
+    // column's information is still relevant, valid, and may be critical to debugging issues.
+    //
+    // Fix: When a change is being evicted from the RingBuffer, we store it in this map (based on
+    // its [TableChange.getName()]. This ensures that we always have at least one value for every
+    // column ever logged. See b/272016422 for more details.
+    private val lastEvictedValues = mutableMapOf<String, TableChange>()
+
     // A [TableRowLogger] object, re-used each time [logDiffs] is called.
     // (Re-used to avoid object allocation.)
-    private val tempRow = TableRowLoggerImpl(0, columnPrefix = "", this)
+    private val tempRow =
+        TableRowLoggerImpl(
+            timestamp = 0,
+            columnPrefix = "",
+            isInitial = false,
+            tableLogBuffer = this,
+        )
+
+    /** Start this log buffer logging in the background */
+    internal fun init() {
+        coroutineScope.launch(bgDispatcher) {
+            while (!logMessageChannel.isClosedForReceive) {
+                val log = logMessageChannel.receive()
+                echoToDesiredEndpoints(log)
+            }
+        }
+    }
 
     /**
      * Log the differences between [prevVal] and [newVal].
@@ -102,6 +144,8 @@ class TableLogBuffer(
         val row = tempRow
         row.timestamp = systemClock.currentTimeMillis()
         row.columnPrefix = columnPrefix
+        // Because we have a prevVal and a newVal, we know that this isn't the initial log.
+        row.isInitial = false
         newVal.logDiffs(prevVal, row)
     }
 
@@ -110,55 +154,115 @@ class TableLogBuffer(
      *
      * @param rowInitializer a function that will be called immediately to store relevant data on
      *   the row.
+     * @param isInitial true if this change represents the starting value for a particular column
+     *   (as opposed to a value that was updated after receiving new information). This is used to
+     *   help us identify which values were just default starting values, and which values were
+     *   derived from updated information. Most callers should use false for this value.
      */
     @Synchronized
-    fun logChange(columnPrefix: String, rowInitializer: (TableRowLogger) -> Unit) {
+    fun logChange(
+        columnPrefix: String,
+        isInitial: Boolean = false,
+        rowInitializer: (TableRowLogger) -> Unit
+    ) {
         val row = tempRow
         row.timestamp = systemClock.currentTimeMillis()
         row.columnPrefix = columnPrefix
+        row.isInitial = isInitial
         rowInitializer(row)
     }
 
-    /** Logs a String? change. */
-    fun logChange(prefix: String, columnName: String, value: String?) {
-        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
+    /**
+     * Logs a String? change.
+     *
+     * @param isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
+     */
+    fun logChange(prefix: String, columnName: String, value: String?, isInitial: Boolean = false) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value, isInitial)
     }
 
-    /** Logs a boolean change. */
-    fun logChange(prefix: String, columnName: String, value: Boolean) {
-        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
+    /**
+     * Logs a boolean change.
+     *
+     * @param isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
+     */
+    fun logChange(prefix: String, columnName: String, value: Boolean, isInitial: Boolean = false) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value, isInitial)
     }
 
-    /** Logs a Int change. */
-    fun logChange(prefix: String, columnName: String, value: Int?) {
-        logChange(systemClock.currentTimeMillis(), prefix, columnName, value)
+    /**
+     * Logs a Int change.
+     *
+     * @param isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
+     */
+    fun logChange(prefix: String, columnName: String, value: Int?, isInitial: Boolean = false) {
+        logChange(systemClock.currentTimeMillis(), prefix, columnName, value, isInitial)
     }
 
     // Keep these individual [logChange] methods private (don't let clients give us their own
     // timestamps.)
 
-    private fun logChange(timestamp: Long, prefix: String, columnName: String, value: String?) {
-        val change = obtain(timestamp, prefix, columnName)
+    private fun logChange(
+        timestamp: Long,
+        prefix: String,
+        columnName: String,
+        value: String?,
+        isInitial: Boolean,
+    ) {
+        Trace.beginSection("TableLogBuffer#logChange(string)")
+        val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
+        tryAddMessage(change)
+        Trace.endSection()
     }
 
-    private fun logChange(timestamp: Long, prefix: String, columnName: String, value: Boolean) {
-        val change = obtain(timestamp, prefix, columnName)
+    private fun logChange(
+        timestamp: Long,
+        prefix: String,
+        columnName: String,
+        value: Boolean,
+        isInitial: Boolean,
+    ) {
+        Trace.beginSection("TableLogBuffer#logChange(boolean)")
+        val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
+        tryAddMessage(change)
+        Trace.endSection()
     }
 
-    private fun logChange(timestamp: Long, prefix: String, columnName: String, value: Int?) {
-        val change = obtain(timestamp, prefix, columnName)
+    private fun logChange(
+        timestamp: Long,
+        prefix: String,
+        columnName: String,
+        value: Int?,
+        isInitial: Boolean,
+    ) {
+        Trace.beginSection("TableLogBuffer#logChange(int)")
+        val change = obtain(timestamp, prefix, columnName, isInitial)
         change.set(value)
+        tryAddMessage(change)
+        Trace.endSection()
+    }
+
+    private fun tryAddMessage(change: TableChange) {
+        logMessageChannel.trySend(change)
     }
 
     // TODO(b/259454430): Add additional change types here.
 
     @Synchronized
-    private fun obtain(timestamp: Long, prefix: String, columnName: String): TableChange {
+    private fun obtain(
+        timestamp: Long,
+        prefix: String,
+        columnName: String,
+        isInitial: Boolean,
+    ): TableChange {
         verifyValidName(prefix, columnName)
         val tableChange = buffer.advance()
-        tableChange.reset(timestamp, prefix, columnName)
+        if (tableChange.hasData()) {
+            saveEvictedValue(tableChange)
+        }
+        tableChange.reset(timestamp, prefix, columnName, isInitial)
         return tableChange
     }
 
@@ -173,10 +277,34 @@ class TableLogBuffer(
         }
     }
 
+    private fun saveEvictedValue(change: TableChange) {
+        Trace.beginSection("TableLogBuffer#saveEvictedValue")
+        val name = change.getName()
+        val previouslyEvicted =
+            lastEvictedValues[name] ?: TableChange().also { lastEvictedValues[name] = it }
+        // For recycling purposes, update the existing object in the map with the new information
+        // instead of creating a new object.
+        previouslyEvicted.updateTo(change)
+        Trace.endSection()
+    }
+
+    private fun echoToDesiredEndpoints(change: TableChange) {
+        if (
+            logcatEchoTracker.isBufferLoggable(bufferName = name, LogLevel.DEBUG) ||
+                logcatEchoTracker.isTagLoggable(change.getColumnName(), LogLevel.DEBUG)
+        ) {
+            if (change.hasData()) {
+                localLogcat.d(name, change.logcatRepresentation())
+            }
+        }
+    }
+
     @Synchronized
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println(HEADER_PREFIX + name)
         pw.println("version $VERSION")
+
+        lastEvictedValues.values.sortedBy { it.timestamp }.forEach { it.dump(pw) }
         for (i in 0 until buffer.size) {
             buffer[i].dump(pw)
         }
@@ -197,6 +325,12 @@ class TableLogBuffer(
         pw.println()
     }
 
+    /** Transforms an individual [TableChange] into a String for logcat */
+    private fun TableChange.logcatRepresentation(): String {
+        val formattedTimestamp = TABLE_LOG_DATE_FORMAT.format(timestamp)
+        return "$formattedTimestamp$SEPARATOR${getName()}$SEPARATOR${getVal()}"
+    }
+
     /**
      * A private implementation of [TableRowLogger].
      *
@@ -205,21 +339,22 @@ class TableLogBuffer(
     private class TableRowLoggerImpl(
         var timestamp: Long,
         var columnPrefix: String,
+        var isInitial: Boolean,
         val tableLogBuffer: TableLogBuffer,
     ) : TableRowLogger {
         /** Logs a change to a string value. */
         override fun logChange(columnName: String, value: String?) {
-            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value)
+            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value, isInitial)
         }
 
         /** Logs a change to a boolean value. */
         override fun logChange(columnName: String, value: Boolean) {
-            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value)
+            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value, isInitial)
         }
 
         /** Logs a change to an int value. */
         override fun logChange(columnName: String, value: Int) {
-            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value)
+            tableLogBuffer.logChange(timestamp, columnPrefix, columnName, value, isInitial)
         }
     }
 }

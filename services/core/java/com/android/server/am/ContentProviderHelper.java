@@ -16,6 +16,8 @@
 package com.android.server.am;
 
 import static android.Manifest.permission.GET_ANY_PROVIDER_TYPE;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_GET_PROVIDER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_REMOVE_PROVIDER;
 import static android.content.ContentProvider.isAuthorityRedirectedForCloneProfile;
 import static android.os.Process.PROC_CHAR;
 import static android.os.Process.PROC_OUT_LONG;
@@ -263,7 +265,8 @@ public class ContentProviderHelper {
                             PROVIDER_ACQUISITION_EVENT_REPORTED,
                             r.uid, callingUid,
                             PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
-                            PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL);
+                            PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                            cpi.packageName, callingPackage);
                     return holder;
                 }
 
@@ -291,7 +294,7 @@ public class ContentProviderHelper {
                     checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                     final int verifiedAdj = cpr.proc.mState.getVerifiedAdj();
                     boolean success = mService.updateOomAdjLocked(cpr.proc,
-                            OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
+                            OOM_ADJ_REASON_GET_PROVIDER);
                     // XXX things have changed so updateOomAdjLocked doesn't actually tell us
                     // if the process has been successfully adjusted.  So to reduce races with
                     // it, we will check whether the process still exists.  Note that this doesn't
@@ -334,7 +337,8 @@ public class ContentProviderHelper {
                                 PROVIDER_ACQUISITION_EVENT_REPORTED,
                                 cpr.proc.uid, callingUid,
                                 PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
-                                PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL);
+                                PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                                cpi.packageName, callingPackage);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(origId);
@@ -511,7 +515,8 @@ public class ContentProviderHelper {
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM,
-                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL);
+                                    PROVIDER_ACQUISITION_EVENT_REPORTED__PACKAGE_STOPPED_STATE__PACKAGE_STATE_NORMAL,
+                                    cpi.packageName, callingPackage);
                         } else {
                             final int packageState =
                                     ((cpr.appInfo.flags & ApplicationInfo.FLAG_STOPPED) != 0)
@@ -536,7 +541,7 @@ public class ContentProviderHelper {
                                     PROVIDER_ACQUISITION_EVENT_REPORTED,
                                     proc.uid, callingUid,
                                     PROVIDER_ACQUISITION_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_COLD,
-                                    packageState);
+                                    packageState, cpi.packageName, callingPackage);
                         }
                         cpr.launchingApp = proc;
                         mLaunchingProviders.add(cpr);
@@ -754,7 +759,7 @@ public class ContentProviderHelper {
 
             // update the app's oom adj value and each provider's usage stats
             if (providersPublished) {
-                mService.updateOomAdjLocked(r, OomAdjuster.OOM_ADJ_REASON_GET_PROVIDER);
+                mService.updateOomAdjLocked(r, OOM_ADJ_REASON_GET_PROVIDER);
                 for (int i = 0, size = providers.size(); i < size; i++) {
                     ContentProviderHolder src = providers.get(i);
                     if (src == null || src.info == null || src.provider == null) {
@@ -773,7 +778,7 @@ public class ContentProviderHelper {
      * Drop a content provider from a ProcessRecord's bookkeeping
      */
     void removeContentProvider(IBinder connection, boolean stable) {
-        mService.enforceNotIsolatedOrSdkSandboxCaller("removeContentProvider");
+        mService.enforceNotIsolatedCaller("removeContentProvider");
         final long ident = Binder.clearCallingIdentity();
         try {
             ContentProviderConnection conn;
@@ -832,8 +837,7 @@ public class ContentProviderHelper {
             ContentProviderRecord localCpr = mProviderMap.getProviderByClass(comp, userId);
             if (localCpr.hasExternalProcessHandles()) {
                 if (localCpr.removeExternalProcessHandleLocked(token)) {
-                    mService.updateOomAdjLocked(localCpr.proc,
-                            OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
+                    mService.updateOomAdjLocked(localCpr.proc, OOM_ADJ_REASON_REMOVE_PROVIDER);
                 } else {
                     Slog.e(TAG, "Attempt to remove content provider " + localCpr
                             + " with no external reference for token: " + token + ".");
@@ -1503,8 +1507,7 @@ public class ContentProviderHelper {
             mService.stopAssociationLocked(conn.client.uid, conn.client.processName, cpr.uid,
                     cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
             if (updateOomAdj) {
-                mService.updateOomAdjLocked(conn.provider.proc,
-                        OomAdjuster.OOM_ADJ_REASON_REMOVE_PROVIDER);
+                mService.updateOomAdjLocked(conn.provider.proc, OOM_ADJ_REASON_REMOVE_PROVIDER);
             }
         }
     }

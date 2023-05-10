@@ -21,7 +21,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 /**
  * Controller to cache in process the state of the device provisioning.
  * <p>
- * This controller keeps track of the values of device provisioning and user setup complete
+ * This controller keeps track of the values of device provisioning, user setup complete, and
+ * whether Factory Reset Protection is active.
  */
 public interface DeviceProvisionedController extends CallbackController<DeviceProvisionedListener> {
 
@@ -49,6 +50,9 @@ public interface DeviceProvisionedController extends CallbackController<DevicePr
      */
     boolean isCurrentUserSetup();
 
+    /** Returns true when Factory Reset Protection is locking the device. */
+    boolean isFrpActive();
+
     /**
      * Interface to provide calls when the values tracked change
      */
@@ -69,5 +73,10 @@ public interface DeviceProvisionedController extends CallbackController<DevicePr
          * Call when some user changes from not provisioned to provisioned
          */
         default void onUserSetupChanged() { }
+
+        /**
+         * Called when the state of FRP changes.
+         */
+        default void onFrpActiveChanged() {}
     }
 }

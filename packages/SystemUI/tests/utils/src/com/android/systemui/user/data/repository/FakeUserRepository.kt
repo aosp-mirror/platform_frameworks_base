@@ -100,4 +100,8 @@ class FakeUserRepository : UserRepository {
     fun setGuestUserAutoCreated(value: Boolean) {
         _isGuestUserAutoCreated = value
     }
+
+    fun setUserSwitching(value: Boolean) {
+        _userSwitchingInProgress.value = value
+    }
 }

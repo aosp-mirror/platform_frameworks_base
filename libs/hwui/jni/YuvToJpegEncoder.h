@@ -2,7 +2,7 @@
 #define _ANDROID_GRAPHICS_YUV_TO_JPEG_ENCODER_H_
 
 #include <android/data_space.h>
-#include <jpegrecoverymap/jpegr.h>
+#include <ultrahdr/jpegr.h>
 
 extern "C" {
     #include "jpeglib.h"
@@ -103,7 +103,7 @@ public:
      *  @param aDataSpace data space defined in data_space.h.
      *  @return color gamut for JPEG/R.
      */
-    static android::jpegrecoverymap::jpegr_color_gamut findColorGamut(JNIEnv* env, int aDataSpace);
+    static android::ultrahdr::ultrahdr_color_gamut findColorGamut(JNIEnv* env, int aDataSpace);
 
     /** Map data space (defined in DataSpace.java and data_space.h) to the transfer function
      *  used in JPEG/R
@@ -112,7 +112,7 @@ public:
      *  @param aDataSpace data space defined in data_space.h.
      *  @return color gamut for JPEG/R.
      */
-    static android::jpegrecoverymap::jpegr_transfer_function findHdrTransferFunction(
+    static android::ultrahdr::ultrahdr_transfer_function findHdrTransferFunction(
             JNIEnv* env, int aDataSpace);
 };
 

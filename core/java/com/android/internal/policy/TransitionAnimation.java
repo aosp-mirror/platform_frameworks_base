@@ -50,6 +50,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.os.SystemProperties;
 import android.util.Slog;
+import android.view.InflateException;
 import android.view.SurfaceControl;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.TransitionOldType;
@@ -1264,7 +1265,7 @@ public class TransitionAnimation {
     public static Animation loadAnimationSafely(Context context, int resId, String tag) {
         try {
             return AnimationUtils.loadAnimation(context, resId);
-        } catch (Resources.NotFoundException e) {
+        } catch (Resources.NotFoundException | InflateException e) {
             Slog.w(tag, "Unable to load animation resource", e);
             return null;
         }
@@ -1295,6 +1296,17 @@ public class TransitionAnimation {
         }
 
         return set;
+    }
+
+    /** Sets the default attributes of the screenshot layer used for animation. */
+    public static void configureScreenshotLayer(SurfaceControl.Transaction t, SurfaceControl layer,
+            ScreenCapture.ScreenshotHardwareBuffer buffer) {
+        t.setBuffer(layer, buffer.getHardwareBuffer());
+        t.setDataSpace(layer, buffer.getColorSpace().getDataSpace());
+        // Avoid showing dimming effect for HDR content when running animation.
+        if (buffer.containsHdrLayers()) {
+            t.setDimmingEnabled(layer, false);
+        }
     }
 
     /** Returns whether the hardware buffer passed in is marked as protected. */

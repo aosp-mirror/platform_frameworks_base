@@ -243,6 +243,12 @@ public final class DevicePolicyResources {
                     PREFIX + "ACCESSIBILITY_CATEGORY_PERSONAL";
 
             /**
+             * Content description for clone profile accounts group
+             */
+            public static final String ACCESSIBILITY_CATEGORY_CLONE =
+                    PREFIX + "ACCESSIBILITY_CATEGORY_CLONE";
+
+            /**
              * Content description for work profile details page title
              */
             public static final String ACCESSIBILITY_WORK_ACCOUNT_TITLE =
@@ -1172,6 +1178,13 @@ public final class DevicePolicyResources {
                     PREFIX + "PERSONAL_CATEGORY_HEADER";
 
             /**
+             * Header for items under the clone user
+             */
+            public static final String CLONE_CATEGORY_HEADER =
+                    PREFIX + "CLONE_CATEGORY_HEADER";
+
+
+            /**
              * Text to indicate work notification content will be shown on the lockscreen.
              */
             public static final String LOCK_SCREEN_SHOW_WORK_NOTIFICATION_CONTENT =
@@ -1662,14 +1675,16 @@ public final class DevicePolicyResources {
             /**
              * Label returned from
              * {@link android.content.pm.CrossProfileApps#getProfileSwitchingLabel(UserHandle)}
-             * that calling app can show to user for the semantic of switching to work profile.
+             * that calling app can show to user for the semantic of switching to work profile, and
+             * accepts the app name as a param.
              */
             public static final String SWITCH_TO_WORK_LABEL = PREFIX + "SWITCH_TO_WORK_LABEL";
 
             /**
              * Label returned from
              * {@link android.content.pm.CrossProfileApps#getProfileSwitchingLabel(UserHandle)}
-             * that calling app can show to user for the semantic of switching to personal profile.
+             * that calling app can show to user for the semantic of switching to personal profile,
+             * and accepts the app name as a param.
              */
             public static final String SWITCH_TO_PERSONAL_LABEL =
                     PREFIX + "SWITCH_TO_PERSONAL_LABEL";
@@ -1802,14 +1817,6 @@ public final class DevicePolicyResources {
                     PREFIX + "UNLAUNCHABLE_APP_WORK_PAUSED_TITLE";
 
             /**
-             * Text for dialog shown when user tries to open a work app when the work profile is
-             * turned off, confirming that the user wants to turn on access to their
-             * work apps.
-             */
-            public static final String UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE =
-                    PREFIX + "UNLAUNCHABLE_APP_WORK_PAUSED_MESSAGE";
-
-            /**
              * Notification title shown when work profile is credential encrypted and requires
              * the user to unlock before it's usable.
              */
@@ -1857,6 +1864,24 @@ public final class DevicePolicyResources {
             public static final String WORK_PROFILE_TELEPHONY_PAUSED_TURN_ON_BUTTON =
                     PREFIX + "TURN_ON_WORK_PROFILE_BUTTON_TEXT";
 
+            public static final String MINIRESOLVER_OPEN_IN_WORK =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_WORK";
+
+            public static final String MINIRESOLVER_OPEN_IN_PERSONAL =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
+
+            /**
+             * Title for a dialog shown when the user has no apps capable of handling an intent
+             * in the personal profile, and must choose whether to open the intent in a
+             * cross-profile app in the work profile, or cancel. Accepts the app name as a param.
+             */
+            public static final String MINIRESOLVER_OPEN_WORK = PREFIX + "MINIRESOLVER_OPEN_WORK";
+
+            public static final String MINIRESOLVER_USE_WORK_BROWSER =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
+
+            public static final String MINIRESOLVER_USE_PERSONAL_BROWSER =
+                    PREFIX + "MINIRESOLVER_OPEN_IN_PERSONAL";
         }
 
         /**

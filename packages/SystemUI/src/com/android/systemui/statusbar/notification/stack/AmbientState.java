@@ -34,7 +34,6 @@ import com.android.systemui.shade.transition.LargeScreenShadeInterpolator;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.BypassController;
@@ -65,7 +64,6 @@ public class AmbientState implements Dumpable {
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private int mScrollY;
     private boolean mDimmed;
-    private ActivatableNotificationView mActivatedChild;
     private float mOverScrollTopAmount;
     private float mOverScrollBottomAmount;
     private boolean mDozing;
@@ -360,14 +358,6 @@ public class AmbientState implements Dumpable {
         mHideSensitive = hideSensitive;
     }
 
-    /**
-     * In dimmed mode, a child can be activated, which happens on the first tap of the double-tap
-     * interaction. This child is then scaled normally and its background is fully opaque.
-     */
-    public void setActivatedChild(ActivatableNotificationView activatedChild) {
-        mActivatedChild = activatedChild;
-    }
-
     public boolean isDimmed() {
         // While we are expanding from pulse, we want the notifications not to be dimmed, otherwise
         // you'd see the difference to the pulsing notification
@@ -380,10 +370,6 @@ public class AmbientState implements Dumpable {
 
     public boolean isHideSensitive() {
         return mHideSensitive;
-    }
-
-    public ActivatableNotificationView getActivatedChild() {
-        return mActivatedChild;
     }
 
     public void setOverScrollAmount(float amount, boolean onTop) {

@@ -15,11 +15,16 @@
  */
 package com.android.systemui.notetask
 
+import android.app.role.RoleManager
+import android.os.UserHandle
 import android.view.KeyEvent
 import androidx.annotation.VisibleForTesting
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.CommandQueue
 import com.android.wm.shell.bubbles.Bubbles
 import java.util.Optional
+import java.util.concurrent.Executor
 import javax.inject.Inject
 
 /** Class responsible to "glue" all note task dependencies. */
@@ -27,27 +32,38 @@ internal class NoteTaskInitializer
 @Inject
 constructor(
     private val controller: NoteTaskController,
+    private val roleManager: RoleManager,
     private val commandQueue: CommandQueue,
     private val optionalBubbles: Optional<Bubbles>,
+    @Background private val backgroundExecutor: Executor,
     @NoteTaskEnabledKey private val isEnabled: Boolean,
+    private val userTracker: UserTracker,
 ) {
 
     @VisibleForTesting
     val callbacks =
         object : CommandQueue.Callbacks {
-            override fun handleSystemKey(keyCode: Int) {
-                if (keyCode == KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL) {
+            override fun handleSystemKey(key: KeyEvent) {
+                if (key.keyCode == KeyEvent.KEYCODE_STYLUS_BUTTON_TAIL) {
                     controller.showNoteTask(NoteTaskEntryPoint.TAIL_BUTTON)
+                } else if (
+                    key.keyCode == KeyEvent.KEYCODE_N && key.isMetaPressed && key.isCtrlPressed
+                ) {
+                    controller.showNoteTask(NoteTaskEntryPoint.KEYBOARD_SHORTCUT)
                 }
             }
         }
 
     fun initialize() {
-        controller.setNoteTaskShortcutEnabled(isEnabled)
-
         // Guard against feature not being enabled or mandatory dependencies aren't available.
         if (!isEnabled || optionalBubbles.isEmpty) return
 
+        controller.setNoteTaskShortcutEnabled(true, userTracker.userHandle)
         commandQueue.addCallback(callbacks)
+        roleManager.addOnRoleHoldersChangedListenerAsUser(
+            backgroundExecutor,
+            controller::onRoleHoldersChanged,
+            UserHandle.ALL,
+        )
     }
 }

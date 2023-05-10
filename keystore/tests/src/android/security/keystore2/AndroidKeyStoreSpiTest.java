@@ -17,9 +17,14 @@
 package android.security.keystore2;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.security.KeyStore2;
@@ -36,6 +41,12 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.NoSuchElementException;
+
 public class AndroidKeyStoreSpiTest {
 
     @Mock
@@ -48,14 +59,176 @@ public class AndroidKeyStoreSpiTest {
 
     @Test
     public void testEngineAliasesReturnsEmptySetOnKeyStoreError() throws Exception {
-        when(mKeystore2.list(anyInt(), anyLong()))
+        when(mKeystore2.listBatch(anyInt(), anyLong(), isNull()))
                 .thenThrow(new KeyStoreException(6, "Some Error"));
         AndroidKeyStoreSpi spi = new AndroidKeyStoreSpi();
         spi.initForTesting(mKeystore2);
 
         assertThat("Empty collection expected", !spi.engineAliases().hasMoreElements());
 
-        verify(mKeystore2).list(anyInt(), anyLong());
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), isNull());
+    }
+
+    @Test
+    public void testEngineAliasesCorrectlyListsZeroEntriesEmptyArray() throws Exception {
+        when(mKeystore2.listBatch(anyInt(), anyLong(), anyString()))
+                .thenReturn(new KeyDescriptor[0]);
+        AndroidKeyStoreSpi spi = new AndroidKeyStoreSpi();
+        spi.initForTesting(mKeystore2);
+
+        Enumeration<String> aliases = spi.engineAliases();
+        assertThat("Should not have any elements", !aliases.hasMoreElements());
+        assertThrows("Should have no elements to return", NoSuchElementException.class,
+                () -> aliases.nextElement());
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), isNull());
+    }
+
+    @Test
+    public void testEngineAliasesCorrectlyListsZeroEntriesNullArray() throws Exception {
+        when(mKeystore2.listBatch(anyInt(), anyLong(), anyString()))
+                .thenReturn(null);
+        AndroidKeyStoreSpi spi = new AndroidKeyStoreSpi();
+        spi.initForTesting(mKeystore2);
+
+        Enumeration<String> aliases = spi.engineAliases();
+        assertThat("Should not have any elements", !aliases.hasMoreElements());
+        assertThrows("Should have no elements to return", NoSuchElementException.class,
+                () -> aliases.nextElement());
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), isNull());
+    }
+
+    private static KeyDescriptor newKeyDescriptor(String alias) {
+        KeyDescriptor result = new KeyDescriptor();
+        result.alias = alias;
+        return result;
+    }
+
+    private static KeyDescriptor[] createKeyDescriptorsArray(int numEntries) {
+        KeyDescriptor[] kds = new KeyDescriptor[numEntries];
+        for (int i = 0; i < kds.length; i++) {
+            kds[i] = newKeyDescriptor(String.format("alias-%d", i));
+        }
+
+        return kds;
+    }
+
+    private static void assertAliasListsEqual(
+            KeyDescriptor[] keyDescriptors, Enumeration<String> aliasesEnumerator) {
+        List<String> aliases = Collections.list(aliasesEnumerator);
+        Assert.assertArrayEquals(Arrays.stream(keyDescriptors).map(kd -> kd.alias).toArray(),
+                aliases.toArray());
+    }
+
+    @Test
+    public void testEngineAliasesCorrectlyListsEntriesInASingleBatch() throws Exception {
+        final String alias1 = "testAlias1";
+        final String alias2 = "testAlias2";
+        final String alias3 = "testAlias3";
+        KeyDescriptor[] kds = {newKeyDescriptor(alias1),
+                newKeyDescriptor(alias2), newKeyDescriptor(alias3)};
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq(null)))
+                .thenReturn(kds);
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq("testAlias3")))
+                .thenReturn(null);
+
+        AndroidKeyStoreSpi spi = new AndroidKeyStoreSpi();
+        spi.initForTesting(mKeystore2);
+
+        Enumeration<String> aliases = spi.engineAliases();
+        assertThat("Should have more elements before first.", aliases.hasMoreElements());
+        Assert.assertEquals(aliases.nextElement(), alias1);
+        assertThat("Should have more elements before second.", aliases.hasMoreElements());
+        Assert.assertEquals(aliases.nextElement(), alias2);
+        assertThat("Should have more elements before third.", aliases.hasMoreElements());
+        Assert.assertEquals(aliases.nextElement(), alias3);
+        assertThat("Should have no more elements after third.", !aliases.hasMoreElements());
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq(null));
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq("testAlias3"));
+        verifyNoMoreInteractions(mKeystore2);
+    }
+
+    @Test
+    public void testEngineAliasesCorrectlyListsEntriesInMultipleBatches() throws Exception {
+        final int numEntries = 2500;
+        KeyDescriptor[] kds = createKeyDescriptorsArray(numEntries);
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq(null)))
+                .thenReturn(Arrays.copyOfRange(kds, 0, 1000));
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq("alias-999")))
+                .thenReturn(Arrays.copyOfRange(kds, 1000, 2000));
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq("alias-1999")))
+                .thenReturn(Arrays.copyOfRange(kds, 2000, 2500));
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq("alias-2499")))
+                .thenReturn(null);
+
+        AndroidKeyStoreSpi spi = new AndroidKeyStoreSpi();
+        spi.initForTesting(mKeystore2);
+
+        assertAliasListsEqual(kds, spi.engineAliases());
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq(null));
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq("alias-999"));
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq("alias-1999"));
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq("alias-2499"));
+        verifyNoMoreInteractions(mKeystore2);
+    }
+
+    @Test
+    public void testEngineAliasesCorrectlyListsEntriesWhenNumEntriesIsExactlyOneBatchSize()
+            throws Exception {
+        final int numEntries = 1000;
+        KeyDescriptor[] kds = createKeyDescriptorsArray(numEntries);
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq(null)))
+                .thenReturn(kds);
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq("alias-999")))
+                .thenReturn(null);
+
+        AndroidKeyStoreSpi spi = new AndroidKeyStoreSpi();
+        spi.initForTesting(mKeystore2);
+
+        assertAliasListsEqual(kds, spi.engineAliases());
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq(null));
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq("alias-999"));
+        verifyNoMoreInteractions(mKeystore2);
+    }
+
+    @Test
+    public void testEngineAliasesCorrectlyListsEntriesWhenNumEntriesIsAMultiplyOfBatchSize()
+            throws Exception {
+        final int numEntries = 2000;
+        KeyDescriptor[] kds = createKeyDescriptorsArray(numEntries);
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq(null)))
+                .thenReturn(Arrays.copyOfRange(kds, 0, 1000));
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq("alias-999")))
+                .thenReturn(Arrays.copyOfRange(kds, 1000, 2000));
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq("alias-1999")))
+                .thenReturn(null);
+
+        AndroidKeyStoreSpi spi = new AndroidKeyStoreSpi();
+        spi.initForTesting(mKeystore2);
+
+        assertAliasListsEqual(kds, spi.engineAliases());
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq(null));
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq("alias-999"));
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq("alias-1999"));
+        verifyNoMoreInteractions(mKeystore2);
+    }
+
+    @Test
+    public void testEngineAliasesCorrectlyListsEntriesWhenReturningLessThanBatchSize()
+            throws Exception {
+        final int numEntries = 500;
+        KeyDescriptor[] kds = createKeyDescriptorsArray(numEntries);
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq(null)))
+                .thenReturn(kds);
+        when(mKeystore2.listBatch(anyInt(), anyLong(), eq("alias-499")))
+                .thenReturn(new KeyDescriptor[0]);
+
+        AndroidKeyStoreSpi spi = new AndroidKeyStoreSpi();
+        spi.initForTesting(mKeystore2);
+
+        assertAliasListsEqual(kds, spi.engineAliases());
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq(null));
+        verify(mKeystore2).listBatch(anyInt(), anyLong(), eq("alias-499"));
+        verifyNoMoreInteractions(mKeystore2);
     }
 
     @Mock

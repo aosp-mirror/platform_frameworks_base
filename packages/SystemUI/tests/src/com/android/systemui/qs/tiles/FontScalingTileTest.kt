@@ -23,7 +23,6 @@ import android.testing.TestableLooper
 import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.internal.logging.UiEventLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
 import com.android.systemui.classifier.FalsingManagerFake
@@ -31,12 +30,15 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.qs.QSTileHost
+import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QsEventLogger
 import com.android.systemui.qs.logging.QSLogger
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeSettings
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -52,15 +54,17 @@ import org.mockito.MockitoAnnotations
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class FontScalingTileTest : SysuiTestCase() {
-    @Mock private lateinit var qsHost: QSTileHost
+    @Mock private lateinit var qsHost: QSHost
     @Mock private lateinit var metricsLogger: MetricsLogger
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var qsLogger: QSLogger
     @Mock private lateinit var dialogLaunchAnimator: DialogLaunchAnimator
-    @Mock private lateinit var uiEventLogger: UiEventLogger
+    @Mock private lateinit var uiEventLogger: QsEventLogger
 
     private lateinit var testableLooper: TestableLooper
+    private lateinit var systemClock: FakeSystemClock
+    private lateinit var backgroundDelayableExecutor: FakeExecutor
     private lateinit var fontScalingTile: FontScalingTile
 
     val featureFlags = FakeFeatureFlags()
@@ -70,11 +74,13 @@ class FontScalingTileTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
         testableLooper = TestableLooper.get(this)
         `when`(qsHost.getContext()).thenReturn(mContext)
-        `when`(qsHost.uiEventLogger).thenReturn(uiEventLogger)
+        systemClock = FakeSystemClock()
+        backgroundDelayableExecutor = FakeExecutor(systemClock)
 
         fontScalingTile =
             FontScalingTile(
                 qsHost,
+                uiEventLogger,
                 testableLooper.looper,
                 Handler(testableLooper.looper),
                 FalsingManagerFake(),
@@ -84,7 +90,10 @@ class FontScalingTileTest : SysuiTestCase() {
                 qsLogger,
                 dialogLaunchAnimator,
                 FakeSettings(),
-                featureFlags
+                FakeSettings(),
+                FakeSystemClock(),
+                featureFlags,
+                backgroundDelayableExecutor,
             )
         fontScalingTile.initialize()
         testableLooper.processAllMessages()

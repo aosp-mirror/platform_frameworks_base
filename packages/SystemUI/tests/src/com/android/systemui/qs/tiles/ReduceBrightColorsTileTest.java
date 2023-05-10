@@ -39,6 +39,7 @@ import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.ReduceBrightColorsController;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -69,6 +70,8 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
     private UserTracker mUserTracker;
     @Mock
     private ReduceBrightColorsController mReduceBrightColorsController;
+    @Mock
+    private QsEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private ReduceBrightColorsTile mTile;
@@ -85,6 +88,7 @@ public class ReduceBrightColorsTileTest extends SysuiTestCase {
                 true,
                 mReduceBrightColorsController,
                 mHost,
+                mUiEventLogger,
                 mTestableLooper.getLooper(),
                 new Handler(mTestableLooper.getLooper()),
                 new FalsingManagerFake(),

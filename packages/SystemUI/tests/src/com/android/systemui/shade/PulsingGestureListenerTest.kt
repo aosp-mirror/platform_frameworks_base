@@ -17,11 +17,11 @@
 package com.android.systemui.shade
 
 import android.hardware.display.AmbientDisplayConfiguration
+import android.os.PowerManager
 import android.provider.Settings.Secure.DOZE_DOUBLE_TAP_GESTURE
 import android.provider.Settings.Secure.DOZE_TAP_SCREEN_GESTURE
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
-import android.os.PowerManager
 import android.view.MotionEvent
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -38,15 +38,14 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.Mockito.`when` as whenever
 
 @RunWith(AndroidTestingRunner::class)
 @RunWithLooper(setAsMainLooper = true)
@@ -112,7 +111,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
         // THEN wake up device if dozing
         verify(centralSurfaces).wakeUpIfDozing(
-                anyLong(), any(), anyString(), eq(PowerManager.WAKE_REASON_TAP))
+                anyLong(), anyString(), eq(PowerManager.WAKE_REASON_TAP))
     }
 
     @Test
@@ -132,7 +131,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
         // THEN wake up device if dozing
         verify(centralSurfaces).wakeUpIfDozing(
-                anyLong(), any(), anyString(), eq(PowerManager.WAKE_REASON_TAP))
+                anyLong(), anyString(), eq(PowerManager.WAKE_REASON_TAP))
     }
 
     @Test
@@ -164,7 +163,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
         // THEN the device doesn't wake up
         verify(centralSurfaces, never()).wakeUpIfDozing(
-                anyLong(), any(), anyString(), anyInt())
+                anyLong(), anyString(), anyInt())
     }
 
     @Test
@@ -212,7 +211,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
         // THEN the device doesn't wake up
         verify(centralSurfaces, never()).wakeUpIfDozing(
-                anyLong(), any(), anyString(), anyInt())
+                anyLong(), anyString(), anyInt())
     }
 
     @Test
@@ -232,7 +231,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
         // THEN the device doesn't wake up
         verify(centralSurfaces, never()).wakeUpIfDozing(
-                anyLong(), any(), anyString(), anyInt())
+                anyLong(), anyString(), anyInt())
     }
 
     @Test
@@ -252,7 +251,7 @@ class PulsingGestureListenerTest : SysuiTestCase() {
 
         // THEN the device doesn't wake up
         verify(centralSurfaces, never()).wakeUpIfDozing(
-                anyLong(), any(), anyString(), anyInt())
+                anyLong(), anyString(), anyInt())
     }
 
     fun updateSettings() {

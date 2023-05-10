@@ -3655,6 +3655,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
 
         for (String permission : pkg.getRequestedPermissions()) {
             Integer permissionState = permissionStates.get(permission);
+
             if (permissionState == null || permissionState == PERMISSION_STATE_DEFAULT) {
                 continue;
             }

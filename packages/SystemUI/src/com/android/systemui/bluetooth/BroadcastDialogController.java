@@ -16,11 +16,14 @@
 
 package com.android.systemui.bluetooth;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.view.View;
 
 import com.android.internal.logging.UiEventLogger;
+import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.animation.DialogLaunchAnimator;
+import com.android.systemui.broadcast.BroadcastSender;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.media.dialog.MediaOutputDialogFactory;
 
@@ -36,15 +39,21 @@ public class BroadcastDialogController {
     private UiEventLogger mUiEventLogger;
     private DialogLaunchAnimator mDialogLaunchAnimator;
     private MediaOutputDialogFactory mMediaOutputDialogFactory;
+    private final LocalBluetoothManager mLocalBluetoothManager;
+    private BroadcastSender mBroadcastSender;
 
     @Inject
     public BroadcastDialogController(Context context, UiEventLogger uiEventLogger,
             DialogLaunchAnimator dialogLaunchAnimator,
-            MediaOutputDialogFactory mediaOutputDialogFactory) {
+            MediaOutputDialogFactory mediaOutputDialogFactory,
+            @Nullable LocalBluetoothManager localBluetoothManager,
+            BroadcastSender broadcastSender) {
         mContext = context;
         mUiEventLogger = uiEventLogger;
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mMediaOutputDialogFactory = mediaOutputDialogFactory;
+        mLocalBluetoothManager = localBluetoothManager;
+        mBroadcastSender = broadcastSender;
     }
 
     /** Creates a [BroadcastDialog] for the user to switch broadcast or change the output device
@@ -55,7 +64,8 @@ public class BroadcastDialogController {
     public void createBroadcastDialog(String currentBroadcastAppName, String outputPkgName,
             boolean aboveStatusBar, View view) {
         BroadcastDialog broadcastDialog = new BroadcastDialog(mContext, mMediaOutputDialogFactory,
-                currentBroadcastAppName, outputPkgName, mUiEventLogger);
+                mLocalBluetoothManager, currentBroadcastAppName, outputPkgName, mUiEventLogger,
+                mBroadcastSender);
         if (view != null) {
             mDialogLaunchAnimator.showFromView(broadcastDialog, view);
         } else {

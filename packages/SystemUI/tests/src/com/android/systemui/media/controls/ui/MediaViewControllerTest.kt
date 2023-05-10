@@ -21,10 +21,11 @@ import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.media.controls.models.player.MediaViewHolder
+import com.android.systemui.media.controls.models.recommendation.RecommendationViewHolder
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.util.animation.MeasurementInput
 import com.android.systemui.util.animation.TransitionLayout
@@ -56,15 +57,12 @@ class MediaViewControllerTest : SysuiTestCase() {
     @Mock private lateinit var mockCopiedState: TransitionViewState
     @Mock private lateinit var detailWidgetState: WidgetState
     @Mock private lateinit var controlWidgetState: WidgetState
-    @Mock private lateinit var bgWidgetState: WidgetState
     @Mock private lateinit var mediaTitleWidgetState: WidgetState
     @Mock private lateinit var mediaSubTitleWidgetState: WidgetState
     @Mock private lateinit var mediaContainerWidgetState: WidgetState
     @Mock private lateinit var mediaFlags: MediaFlags
-    @Mock private lateinit var expandedLayout: ConstraintSet
-    @Mock private lateinit var collapsedLayout: ConstraintSet
 
-    val delta = 0.1F
+    private val delta = 0.1F
 
     private lateinit var mediaViewController: MediaViewController
 
@@ -82,16 +80,47 @@ class MediaViewControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testOrientationChanged_layoutsAreLoaded() {
-        mediaViewController.expandedLayout = expandedLayout
-        mediaViewController.collapsedLayout = collapsedLayout
-
+    fun testOrientationChanged_heightOfPlayerIsUpdated() {
         val newConfig = Configuration()
+
+        mediaViewController.attach(player, MediaViewController.TYPE.PLAYER)
+        // Change the height to see the effect of orientation change.
+        MediaViewHolder.backgroundIds.forEach { id ->
+            mediaViewController.expandedLayout.getConstraint(id).layout.mHeight = 10
+        }
         newConfig.orientation = ORIENTATION_LANDSCAPE
         configurationController.onConfigurationChanged(newConfig)
 
-        verify(expandedLayout).load(context, R.xml.media_session_expanded)
-        verify(collapsedLayout).load(context, R.xml.media_session_collapsed)
+        MediaViewHolder.backgroundIds.forEach { id ->
+            assertTrue(
+                mediaViewController.expandedLayout.getConstraint(id).layout.mHeight ==
+                    context.resources.getDimensionPixelSize(
+                        R.dimen.qs_media_session_height_expanded
+                    )
+            )
+        }
+    }
+
+    @Test
+    fun testOrientationChanged_heightOfRecCardIsUpdated() {
+        val newConfig = Configuration()
+
+        mediaViewController.attach(recommendation, MediaViewController.TYPE.RECOMMENDATION)
+        // Change the height to see the effect of orientation change.
+        mediaViewController.expandedLayout
+            .getConstraint(RecommendationViewHolder.backgroundId)
+            .layout
+            .mHeight = 10
+        newConfig.orientation = ORIENTATION_LANDSCAPE
+        configurationController.onConfigurationChanged(newConfig)
+
+        assertTrue(
+            mediaViewController.expandedLayout
+                .getConstraint(RecommendationViewHolder.backgroundId)
+                .layout
+                .mHeight ==
+                context.resources.getDimensionPixelSize(R.dimen.qs_media_session_height_expanded)
+        )
     }
 
     @Test

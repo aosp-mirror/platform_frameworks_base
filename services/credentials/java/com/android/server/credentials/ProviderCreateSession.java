@@ -29,6 +29,7 @@ import android.credentials.ui.CreateCredentialProviderData;
 import android.credentials.ui.Entry;
 import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.Bundle;
+import android.os.ICancellationSignal;
 import android.service.credentials.BeginCreateCredentialRequest;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.CallingAppInfo;
@@ -36,7 +37,6 @@ import android.service.credentials.CreateCredentialRequest;
 import android.service.credentials.CreateEntry;
 import android.service.credentials.CredentialProviderService;
 import android.service.credentials.RemoteEntry;
-import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 
@@ -65,7 +65,8 @@ public final class ProviderCreateSession extends ProviderSession<
     private final ProviderResponseDataHandler mProviderResponseDataHandler;
 
     /** Creates a new provider session to be used by the request session. */
-    @Nullable public static ProviderCreateSession createNewSession(
+    @Nullable
+    public static ProviderCreateSession createNewSession(
             Context context,
             @UserIdInt int userId,
             CredentialProviderInfo providerInfo,
@@ -74,7 +75,8 @@ public final class ProviderCreateSession extends ProviderSession<
         CreateCredentialRequest providerCreateRequest =
                 createProviderRequest(providerInfo.getCapabilities(),
                         createRequestSession.mClientRequest,
-                        createRequestSession.mClientAppInfo);
+                        createRequestSession.mClientAppInfo,
+                        providerInfo.isSystemProvider());
         if (providerCreateRequest != null) {
             return new ProviderCreateSession(
                     context,
@@ -91,7 +93,8 @@ public final class ProviderCreateSession extends ProviderSession<
                     createRequestSession.mHybridService
             );
         }
-        Log.i(TAG, "Unable to create provider session");
+        Slog.i(TAG, "Unable to create provider session for: "
+                + providerInfo.getComponentName());
         return null;
     }
 
@@ -112,15 +115,21 @@ public final class ProviderCreateSession extends ProviderSession<
     }
 
     @Nullable
-    private static CreateCredentialRequest createProviderRequest(List<String> providerCapabilities,
+    private static CreateCredentialRequest createProviderRequest(
+            List<String> providerCapabilities,
             android.credentials.CreateCredentialRequest clientRequest,
-            CallingAppInfo callingAppInfo) {
+            CallingAppInfo callingAppInfo,
+            boolean isSystemProvider) {
+        if (clientRequest.isSystemProviderRequired() && !isSystemProvider) {
+            // Request requires system provider but this session does not correspond to a
+            // system service
+            return null;
+        }
         String capability = clientRequest.getType();
         if (providerCapabilities.contains(capability)) {
             return new CreateCredentialRequest(callingAppInfo, capability,
                     clientRequest.getCredentialData());
         }
-        Log.i(TAG, "Unable to create provider request - capabilities do not match");
         return null;
     }
 
@@ -133,7 +142,7 @@ public final class ProviderCreateSession extends ProviderSession<
             @NonNull BeginCreateCredentialRequest beginCreateRequest,
             @NonNull CreateCredentialRequest completeCreateRequest,
             String hybridService) {
-        super(context, info, beginCreateRequest, callbacks, userId,
+        super(context, beginCreateRequest, callbacks, info.getComponentName(), userId,
                 remoteCredentialService);
         mCompleteRequest = completeCreateRequest;
         setStatus(Status.PENDING);
@@ -144,7 +153,7 @@ public final class ProviderCreateSession extends ProviderSession<
     @Override
     public void onProviderResponseSuccess(
             @Nullable BeginCreateCredentialResponse response) {
-        Log.i(TAG, "in onProviderResponseSuccess");
+        Slog.i(TAG, "Remote provider responded with a valid response: " + mComponentName);
         onSetInitialRemoteResponse(response);
     }
 
@@ -154,44 +163,56 @@ public final class ProviderCreateSession extends ProviderSession<
         if (exception instanceof CreateCredentialException) {
             // Store query phase exception for aggregation with final response
             mProviderException = (CreateCredentialException) exception;
+            // TODO(b/271135048) : Decide on exception type length
+            mProviderSessionMetric.collectCandidateFrameworkException(mProviderException.getType());
         }
-        updateStatusAndInvokeCallback(toStatus(errorCode));
+        mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
+        updateStatusAndInvokeCallback(Status.CANCELED,
+                /*source=*/ CredentialsSource.REMOTE_PROVIDER);
     }
 
     /** Called when provider service dies. */
     @Override
     public void onProviderServiceDied(RemoteCredentialService service) {
-        if (service.getComponentName().equals(mProviderInfo.getServiceInfo().getComponentName())) {
-            updateStatusAndInvokeCallback(Status.SERVICE_DEAD);
+        if (service.getComponentName().equals(mComponentName)) {
+            updateStatusAndInvokeCallback(Status.SERVICE_DEAD,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
-            Slog.i(TAG, "Component names different in onProviderServiceDied - "
+            Slog.w(TAG, "Component names different in onProviderServiceDied - "
                     + "this should not happen");
         }
     }
 
+    @Override
+    public void onProviderCancellable(ICancellationSignal cancellation) {
+        mProviderCancellationSignal = cancellation;
+    }
+
     private void onSetInitialRemoteResponse(BeginCreateCredentialResponse response) {
-        Log.i(TAG, "onSetInitialRemoteResponse with save entries");
         mProviderResponse = response;
         mProviderResponseDataHandler.addResponseContent(response.getCreateEntries(),
                 response.getRemoteCreateEntry());
         if (mProviderResponseDataHandler.isEmptyResponse(response)) {
-            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
+            updateStatusAndInvokeCallback(Status.EMPTY_RESPONSE,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
-            updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED);
+            mProviderSessionMetric.collectCandidateEntryMetrics(response, /*isAuthEntry*/false);
+            updateStatusAndInvokeCallback(Status.SAVE_ENTRIES_RECEIVED,
+                    /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         }
     }
 
     @Override
-    @Nullable protected CreateCredentialProviderData prepareUiData()
+    @Nullable
+    protected CreateCredentialProviderData prepareUiData()
             throws IllegalArgumentException {
-        Log.i(TAG, "In prepareUiData");
         if (!ProviderSession.isUiInvokingStatus(getStatus())) {
-            Log.i(TAG, "In prepareUiData not in uiInvokingStatus");
+            Slog.i(TAG, "No data for UI from: " + mComponentName.flattenToString());
             return null;
         }
 
         if (mProviderResponse != null && !mProviderResponseDataHandler.isEmptyResponse()) {
-            Log.i(TAG, "In prepareUiData save entries not null");
             return mProviderResponseDataHandler.toCreateCredentialProviderData();
         }
         return null;
@@ -203,7 +224,7 @@ public final class ProviderCreateSession extends ProviderSession<
         switch (entryType) {
             case SAVE_ENTRY_KEY:
                 if (mProviderResponseDataHandler.getCreateEntry(entryKey) == null) {
-                    Log.i(TAG, "Unexpected save entry key");
+                    Slog.i(TAG, "Unexpected save entry key");
                     invokeCallbackOnInternalInvalidState();
                     return;
                 }
@@ -211,14 +232,14 @@ public final class ProviderCreateSession extends ProviderSession<
                 break;
             case REMOTE_ENTRY_KEY:
                 if (mProviderResponseDataHandler.getRemoteEntry(entryKey) == null) {
-                    Log.i(TAG, "Unexpected remote entry key");
+                    Slog.i(TAG, "Unexpected remote entry key");
                     invokeCallbackOnInternalInvalidState();
                     return;
                 }
                 onRemoteEntrySelected(providerPendingIntentResponse);
                 break;
             default:
-                Log.i(TAG, "Unsupported entry type selected");
+                Slog.i(TAG, "Unsupported entry type selected");
                 invokeCallbackOnInternalInvalidState();
         }
     }
@@ -226,8 +247,9 @@ public final class ProviderCreateSession extends ProviderSession<
     @Override
     protected void invokeSession() {
         if (mRemoteCredentialService != null) {
-            mCandidateProviderMetric.setStartQueryTimeNanoseconds(System.nanoTime());
-            mRemoteCredentialService.onCreateCredential(mProviderRequest, this);
+            startCandidateMetrics();
+            mRemoteCredentialService.setCallback(this);
+            mRemoteCredentialService.onBeginCreateCredential(mProviderRequest);
         }
     }
 
@@ -253,7 +275,7 @@ public final class ProviderCreateSession extends ProviderSession<
         if (credentialResponse != null) {
             mCallbacks.onFinalResponseReceived(mComponentName, credentialResponse);
         } else {
-            Log.i(TAG, "onSaveEntrySelected - no response or error found in pending "
+            Slog.i(TAG, "onSaveEntrySelected - no response or error found in pending "
                     + "intent response");
             invokeCallbackOnInternalInvalidState();
         }
@@ -269,14 +291,14 @@ public final class ProviderCreateSession extends ProviderSession<
     private CreateCredentialException maybeGetPendingIntentException(
             ProviderPendingIntentResponse pendingIntentResponse) {
         if (pendingIntentResponse == null) {
-            Log.i(TAG, "pendingIntentResponse is null");
+            Slog.i(TAG, "pendingIntentResponse is null");
             return new CreateCredentialException(CreateCredentialException.TYPE_NO_CREATE_OPTIONS);
         }
         if (PendingIntentResultHandler.isValidResponse(pendingIntentResponse)) {
             CreateCredentialException exception = PendingIntentResultHandler
                     .extractCreateCredentialException(pendingIntentResponse.getResultData());
             if (exception != null) {
-                Log.i(TAG, "Pending intent contains provider exception");
+                Slog.i(TAG, "Pending intent contains provider exception");
                 return exception;
             }
         } else if (PendingIntentResultHandler.isCancelledResponse(pendingIntentResponse)) {
@@ -298,12 +320,14 @@ public final class ProviderCreateSession extends ProviderSession<
     }
 
     private class ProviderResponseDataHandler {
-        @Nullable private final ComponentName mExpectedRemoteEntryProviderService;
+        @Nullable
+        private final ComponentName mExpectedRemoteEntryProviderService;
 
         @NonNull
         private final Map<String, Pair<CreateEntry, Entry>> mUiCreateEntries = new HashMap<>();
 
-        @Nullable private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
+        @Nullable
+        private Pair<String, Pair<RemoteEntry, Entry>> mUiRemoteEntry = null;
 
         ProviderResponseDataHandler(@Nullable ComponentName expectedRemoteEntryProviderService) {
             mExpectedRemoteEntryProviderService = expectedRemoteEntryProviderService;
@@ -316,6 +340,7 @@ public final class ProviderCreateSession extends ProviderSession<
                 setRemoteEntry(remoteEntry);
             }
         }
+
         public void addCreateEntry(CreateEntry createEntry) {
             String id = generateUniqueId();
             Entry entry = new Entry(SAVE_ENTRY_KEY,
@@ -325,7 +350,7 @@ public final class ProviderCreateSession extends ProviderSession<
 
         public void setRemoteEntry(@Nullable RemoteEntry remoteEntry) {
             if (!enforceRemoteEntryRestrictions(mExpectedRemoteEntryProviderService)) {
-                Log.i(TAG, "Remote entry being dropped as it does not meet the restriction"
+                Slog.w(TAG, "Remote entry being dropped as it does not meet the restriction"
                         + "checks.");
                 return;
             }
@@ -366,6 +391,7 @@ public final class ProviderCreateSession extends ProviderSession<
         private boolean isEmptyResponse() {
             return mUiCreateEntries.isEmpty() && mUiRemoteEntry == null;
         }
+
         @Nullable
         public RemoteEntry getRemoteEntry(String entryKey) {
             return mUiRemoteEntry == null || mUiRemoteEntry

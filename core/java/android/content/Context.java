@@ -322,6 +322,7 @@ public abstract class Context {
             BIND_EXTERNAL_SERVICE_LONG,
             // Make sure no flag uses the sign bit (most significant bit) of the long integer,
             // to avoid future confusion.
+            BIND_BYPASS_USER_NETWORK_RESTRICTIONS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BindServiceFlagsLongBits {}
@@ -686,6 +687,16 @@ public abstract class Context {
      * value that is compatible to {@link BindServiceFlags}.
      */
     public static final long BIND_EXTERNAL_SERVICE_LONG = 1L << 62;
+
+    /**
+     * Flag for {@link #bindService}: allow the process hosting the target service to gain
+     * {@link ActivityManager#PROCESS_CAPABILITY_USER_RESTRICTED_NETWORK}, which allows it be able
+     * to access network regardless of any user restrictions.
+     *
+     * @hide
+     */
+    public static final long BIND_BYPASS_USER_NETWORK_RESTRICTIONS = 0x1_0000_0000L;
+
 
     /**
      * These bind flags reduce the strength of the binding such that we shouldn't
@@ -2399,7 +2410,6 @@ public abstract class Context {
         sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions, null);
     }
 
-
     /**
      * Like {@link #sendBroadcastMultiplePermissions(Intent, String[], String[])}, but also allows
      * specification of a list of excluded packages.
@@ -2409,6 +2419,19 @@ public abstract class Context {
     public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
             @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
             @Nullable String[] excludedPackages) {
+        sendBroadcastMultiplePermissions(intent, receiverPermissions, excludedPermissions,
+                excludedPackages, null);
+    }
+
+    /**
+     * Like {@link #sendBroadcastMultiplePermissions(Intent, String[], String[], String[])}, but
+     * also allows specification of options generated from {@link android.app.BroadcastOptions}.
+     *
+     * @hide
+     */
+    public void sendBroadcastMultiplePermissions(@NonNull Intent intent,
+            @NonNull String[] receiverPermissions, @Nullable String[] excludedPermissions,
+            @Nullable String[] excludedPackages, @Nullable BroadcastOptions options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 
@@ -7590,7 +7613,7 @@ public abstract class Context {
      * the device association is changed by the system.
      * <p>
      * The callback can be called when an app is moved to a different device and the {@code Context}
-     * is not explicily associated with a specific device.
+     * is not explicitly associated with a specific device.
      * </p>
      * <p> When an application receives a device id update callback, this Context is guaranteed to
      * also have an updated display ID(if any) and {@link Configuration}.
@@ -7859,6 +7882,17 @@ public abstract class Context {
      * @hide
      */
     public boolean isConfigurationContext() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
+     * Closes temporary system dialogs. Some examples of temporary system dialogs are the
+     * notification window-shade and the recent tasks dialog.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS)
+    public void closeSystemDialogs() {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
 }

@@ -64,7 +64,7 @@ class FooterActionsViewModel(
      * the UI should still participate to the layout it is included in (i.e. in the View world it
      * should be INVISIBLE, not GONE).
      */
-    private val _isVisible = MutableStateFlow(true)
+    private val _isVisible = MutableStateFlow(false)
     val isVisible: StateFlow<Boolean> = _isVisible.asStateFlow()
 
     /** The alpha the UI rendering this ViewModel should have. */
@@ -230,7 +230,7 @@ class FooterActionsViewModel(
             return
         }
 
-        footerActionsInteractor.showUserSwitcher(context, expandable)
+        footerActionsInteractor.showUserSwitcher(expandable)
     }
 
     private fun onSettingsButtonClicked(expandable: Expandable) {

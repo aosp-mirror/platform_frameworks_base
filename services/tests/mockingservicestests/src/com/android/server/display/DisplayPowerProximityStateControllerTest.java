@@ -87,12 +87,7 @@ public final class DisplayPowerProximityStateControllerTest {
                 new DisplayPowerProximityStateController.Injector() {
                     @Override
                     DisplayPowerProximityStateController.Clock createClock() {
-                        return new DisplayPowerProximityStateController.Clock() {
-                            @Override
-                            public long uptimeMillis() {
-                                return mClock.now();
-                            }
-                        };
+                        return mClock::now;
                     }
                 };
         mDisplayPowerProximityStateController = new DisplayPowerProximityStateController(

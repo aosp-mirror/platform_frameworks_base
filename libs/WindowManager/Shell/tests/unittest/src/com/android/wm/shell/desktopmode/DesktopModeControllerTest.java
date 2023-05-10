@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_BOUNDS;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -41,6 +42,7 @@ import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.RunningTaskInfo;
@@ -80,6 +82,8 @@ import java.util.Arrays;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DesktopModeControllerTest extends ShellTestCase {
+
+    private static final int SECOND_DISPLAY = 2;
 
     @Mock
     private ShellController mShellController;
@@ -247,22 +251,22 @@ public class DesktopModeControllerTest extends ShellTestCase {
     public void testShowDesktopApps_allAppsInvisible_bringsToFront() {
         // Set up two active tasks on desktop, task2 is on top of task1.
         RunningTaskInfo freeformTask1 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(freeformTask1.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, freeformTask1.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(freeformTask1.taskId);
         mDesktopModeTaskRepository.updateVisibleFreeformTasks(
-                freeformTask1.taskId, false /* visible */);
+                DEFAULT_DISPLAY, freeformTask1.taskId, false /* visible */);
         RunningTaskInfo freeformTask2 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(freeformTask2.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, freeformTask2.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(freeformTask2.taskId);
         mDesktopModeTaskRepository.updateVisibleFreeformTasks(
-                freeformTask2.taskId, false /* visible */);
+                DEFAULT_DISPLAY, freeformTask2.taskId, false /* visible */);
         when(mShellTaskOrganizer.getRunningTaskInfo(freeformTask1.taskId)).thenReturn(
                 freeformTask1);
         when(mShellTaskOrganizer.getRunningTaskInfo(freeformTask2.taskId)).thenReturn(
                 freeformTask2);
 
         // Run show desktop apps logic
-        mController.showDesktopApps();
+        mController.showDesktopApps(DEFAULT_DISPLAY);
 
         final WindowContainerTransaction wct = getBringAppsToFrontTransaction();
         // Check wct has reorder calls
@@ -282,17 +286,19 @@ public class DesktopModeControllerTest extends ShellTestCase {
     @Test
     public void testShowDesktopApps_appsAlreadyVisible_bringsToFront() {
         final RunningTaskInfo task1 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, task1.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
-        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, true /* visible */);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(DEFAULT_DISPLAY, task1.taskId,
+                true /* visible */);
         when(mShellTaskOrganizer.getRunningTaskInfo(task1.taskId)).thenReturn(task1);
         final RunningTaskInfo task2 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, task2.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
-        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, true /* visible */);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(DEFAULT_DISPLAY, task2.taskId,
+                true /* visible */);
         when(mShellTaskOrganizer.getRunningTaskInfo(task2.taskId)).thenReturn(task2);
 
-        mController.showDesktopApps();
+        mController.showDesktopApps(DEFAULT_DISPLAY);
 
         final WindowContainerTransaction wct = getBringAppsToFrontTransaction();
         // Check wct has reorder calls
@@ -311,17 +317,19 @@ public class DesktopModeControllerTest extends ShellTestCase {
     @Test
     public void testShowDesktopApps_someAppsInvisible_reordersAll() {
         final RunningTaskInfo task1 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, task1.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
-        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, false /* visible */);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(DEFAULT_DISPLAY, task1.taskId,
+                false /* visible */);
         when(mShellTaskOrganizer.getRunningTaskInfo(task1.taskId)).thenReturn(task1);
         final RunningTaskInfo task2 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, task2.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
-        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, true /* visible */);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(DEFAULT_DISPLAY, task2.taskId,
+                true /* visible */);
         when(mShellTaskOrganizer.getRunningTaskInfo(task2.taskId)).thenReturn(task2);
 
-        mController.showDesktopApps();
+        mController.showDesktopApps(DEFAULT_DISPLAY);
 
         final WindowContainerTransaction wct = getBringAppsToFrontTransaction();
         // Both tasks should be reordered to top, even if one was already visible.
@@ -335,38 +343,87 @@ public class DesktopModeControllerTest extends ShellTestCase {
     }
 
     @Test
+    public void testShowDesktopApps_twoDisplays_bringsToFrontOnlyOneDisplay() {
+        RunningTaskInfo taskDefaultDisplay = createFreeformTask(DEFAULT_DISPLAY);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, taskDefaultDisplay.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(taskDefaultDisplay.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(
+                DEFAULT_DISPLAY, taskDefaultDisplay.taskId, false /* visible */);
+        when(mShellTaskOrganizer.getRunningTaskInfo(taskDefaultDisplay.taskId)).thenReturn(
+                taskDefaultDisplay);
+
+        RunningTaskInfo taskSecondDisplay = createFreeformTask(SECOND_DISPLAY);
+        mDesktopModeTaskRepository.addActiveTask(SECOND_DISPLAY, taskSecondDisplay.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(taskSecondDisplay.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(
+                SECOND_DISPLAY, taskSecondDisplay.taskId, false /* visible */);
+        when(mShellTaskOrganizer.getRunningTaskInfo(taskSecondDisplay.taskId)).thenReturn(
+                taskSecondDisplay);
+
+        mController.showDesktopApps(DEFAULT_DISPLAY);
+
+        WindowContainerTransaction wct = getBringAppsToFrontTransaction();
+        assertThat(wct.getHierarchyOps()).hasSize(1);
+        HierarchyOp op = wct.getHierarchyOps().get(0);
+        assertThat(op.getContainer()).isEqualTo(taskDefaultDisplay.token.asBinder());
+    }
+
+    @Test
     public void testGetVisibleTaskCount_noTasks_returnsZero() {
-        assertThat(mController.getVisibleTaskCount()).isEqualTo(0);
+        assertThat(mController.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(0);
     }
 
     @Test
     public void testGetVisibleTaskCount_twoTasks_bothVisible_returnsTwo() {
         RunningTaskInfo task1 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, task1.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
-        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, true /* visible */);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(DEFAULT_DISPLAY, task1.taskId,
+                true /* visible */);
 
         RunningTaskInfo task2 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, task2.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
-        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, true /* visible */);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(DEFAULT_DISPLAY, task2.taskId,
+                true /* visible */);
 
-        assertThat(mController.getVisibleTaskCount()).isEqualTo(2);
+        assertThat(mController.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(2);
     }
 
     @Test
     public void testGetVisibleTaskCount_twoTasks_oneVisible_returnsOne() {
         RunningTaskInfo task1 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(task1.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, task1.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task1.taskId);
-        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task1.taskId, true /* visible */);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(DEFAULT_DISPLAY, task1.taskId,
+                true /* visible */);
 
         RunningTaskInfo task2 = createFreeformTask();
-        mDesktopModeTaskRepository.addActiveTask(task2.taskId);
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, task2.taskId);
         mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(task2.taskId);
-        mDesktopModeTaskRepository.updateVisibleFreeformTasks(task2.taskId, false /* visible */);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(DEFAULT_DISPLAY, task2.taskId,
+                false /* visible */);
 
-        assertThat(mController.getVisibleTaskCount()).isEqualTo(1);
+        assertThat(mController.getVisibleTaskCount(DEFAULT_DISPLAY)).isEqualTo(1);
+    }
+
+    @Test
+    public void testGetVisibleTaskCount_twoTasksVisibleOnDifferentDisplays_returnsOne() {
+        RunningTaskInfo taskDefaultDisplay = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(DEFAULT_DISPLAY, taskDefaultDisplay.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(taskDefaultDisplay.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(DEFAULT_DISPLAY,
+                taskDefaultDisplay.taskId,
+                true /* visible */);
+
+        RunningTaskInfo taskSecondDisplay = createFreeformTask();
+        mDesktopModeTaskRepository.addActiveTask(SECOND_DISPLAY, taskSecondDisplay.taskId);
+        mDesktopModeTaskRepository.addOrMoveFreeformTaskToTop(taskSecondDisplay.taskId);
+        mDesktopModeTaskRepository.updateVisibleFreeformTasks(SECOND_DISPLAY,
+                taskSecondDisplay.taskId,
+                true /* visible */);
+
+        assertThat(mController.getVisibleTaskCount(SECOND_DISPLAY)).isEqualTo(1);
     }
 
     @Test
@@ -416,6 +473,17 @@ public class DesktopModeControllerTest extends ShellTestCase {
                 mock(IBinder.class),
                 new TransitionRequestInfo(TRANSIT_TO_FRONT, trigger, null /* remote */));
         assertThat(wct).isNotNull();
+    }
+
+    @Test
+    public void testHandleTransitionRequest_taskOpen_doesNotStartAnotherTransition() {
+        RunningTaskInfo trigger = new RunningTaskInfo();
+        trigger.token = new MockToken().token();
+        trigger.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mController.handleRequest(
+                mock(IBinder.class),
+                new TransitionRequestInfo(TRANSIT_OPEN, trigger, null /* remote */));
+        verifyZeroInteractions(mTransitions);
     }
 
     private DesktopModeController createController() {

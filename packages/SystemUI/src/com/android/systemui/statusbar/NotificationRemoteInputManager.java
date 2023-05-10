@@ -54,6 +54,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.CentralSurfacesDependenciesModule;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
+import com.android.systemui.statusbar.notification.RemoteInputControllerLogger;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry.EditedSuggestionInfo;
 import com.android.systemui.statusbar.notification.collection.render.NotificationVisibilityProvider;
@@ -65,14 +66,14 @@ import com.android.systemui.statusbar.policy.RemoteInputView;
 import com.android.systemui.util.DumpUtilsKt;
 import com.android.systemui.util.ListenerSet;
 
+import dagger.Lazy;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-
-import dagger.Lazy;
 
 /**
  * Class for handling remote input state over a set of notifications. This class handles things
@@ -104,6 +105,8 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final KeyguardManager mKeyguardManager;
     private final StatusBarStateController mStatusBarStateController;
     private final RemoteInputUriController mRemoteInputUriController;
+
+    private final RemoteInputControllerLogger mRemoteInputControllerLogger;
     private final NotificationClickNotifier mClickNotifier;
 
     protected RemoteInputController mRemoteInputController;
@@ -121,7 +124,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                 View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
             mCentralSurfacesOptionalLazy.get().ifPresent(
                     centralSurfaces -> centralSurfaces.wakeUpIfDozing(
-                            SystemClock.uptimeMillis(), view, "NOTIFICATION_CLICK",
+                            SystemClock.uptimeMillis(), "NOTIFICATION_CLICK",
                             PowerManager.WAKE_REASON_GESTURE));
 
             final NotificationEntry entry = getNotificationForParent(view.getParent());
@@ -259,6 +262,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             Lazy<Optional<CentralSurfaces>> centralSurfacesOptionalLazy,
             StatusBarStateController statusBarStateController,
             RemoteInputUriController remoteInputUriController,
+            RemoteInputControllerLogger remoteInputControllerLogger,
             NotificationClickNotifier clickNotifier,
             ActionClickLogger logger,
             DumpManager dumpManager) {
@@ -275,6 +279,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mStatusBarStateController = statusBarStateController;
         mRemoteInputUriController = remoteInputUriController;
+        mRemoteInputControllerLogger = remoteInputControllerLogger;
         mClickNotifier = clickNotifier;
 
         dumpManager.registerDumpable(this);
@@ -294,7 +299,8 @@ public class NotificationRemoteInputManager implements Dumpable {
     /** Initializes this component with the provided dependencies. */
     public void setUpWithCallback(Callback callback, RemoteInputController.Delegate delegate) {
         mCallback = callback;
-        mRemoteInputController = new RemoteInputController(delegate, mRemoteInputUriController);
+        mRemoteInputController = new RemoteInputController(delegate,
+                mRemoteInputUriController, mRemoteInputControllerLogger);
         if (mRemoteInputListener != null) {
             mRemoteInputListener.setRemoteInputController(mRemoteInputController);
         }

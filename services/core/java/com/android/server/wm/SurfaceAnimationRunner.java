@@ -221,11 +221,11 @@ class SurfaceAnimationRunner {
                 if (!mAnimationStartDeferred && mPreProcessingAnimations.isEmpty()) {
                     mChoreographer.postFrameCallback(this::startAnimations);
                 }
-
-                // Some animations (e.g. move animations) require the initial transform to be
-                // applied immediately.
-                applyTransformation(runningAnim, t, 0 /* currentPlayTime */);
             }
+
+            // Some animations (e.g. move animations) require the initial transform to be
+            // applied immediately.
+            applyTransformation(runningAnim, t, 0 /* currentPlayTime */);
         }
     }
 

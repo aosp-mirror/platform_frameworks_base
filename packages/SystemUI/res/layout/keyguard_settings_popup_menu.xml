@@ -15,25 +15,24 @@
   ~
   -->
 
-<LinearLayout
+<com.android.systemui.animation.view.LaunchableLinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:minHeight="52dp"
+    android:minHeight="@dimen/keyguard_affordance_fixed_height"
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="@drawable/keyguard_settings_popup_menu_background"
-    android:paddingStart="16dp"
-    android:paddingEnd="24dp"
-    android:paddingVertical="16dp">
+    android:padding="12dp">
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:layout_marginEnd="16dp"
-        android:tint="?android:attr/textColorPrimary"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="8dp"
+        android:tint="?androidprv:attr/materialColorOnSecondaryFixed"
         android:importantForAccessibility="no"
         tools:ignore="UseAppTint" />
 
@@ -42,9 +41,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="?androidprv:attr/materialColorOnSecondaryFixed"
         android:textSize="14sp"
         android:maxLines="1"
         android:ellipsize="end" />
 
-</LinearLayout>
+</com.android.systemui.animation.view.LaunchableLinearLayout>

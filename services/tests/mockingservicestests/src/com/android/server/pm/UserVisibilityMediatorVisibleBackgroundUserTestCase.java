@@ -160,6 +160,8 @@ abstract class UserVisibilityMediatorVisibleBackgroundUserTestCase
 
         assertUserCanBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID);
 
+        listener.verify();
+
         // Assign again, without unassigning (to make sure it becomes invisible on stop)
         AsyncUserVisibilityListener listener2 = addListenerForEvents(onInvisible(USER_ID));
         assertUserCanBeAssignedExtraDisplay(USER_ID, OTHER_SECONDARY_DISPLAY_ID,

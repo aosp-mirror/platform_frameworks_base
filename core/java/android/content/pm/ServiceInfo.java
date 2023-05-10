@@ -332,7 +332,6 @@ public class ServiceInfo extends ComponentInfo
      * permissions:
      * {@link android.Manifest.permission#ACTIVITY_RECOGNITION},
      * {@link android.Manifest.permission#BODY_SENSORS},
-     * {@link android.Manifest.permission#BODY_SENSORS_WRIST_TEMPERATURE},
      * {@link android.Manifest.permission#HIGH_SAMPLING_RATE_SENSORS}.
      */
     @RequiresPermission(
@@ -342,7 +341,6 @@ public class ServiceInfo extends ComponentInfo
             anyOf = {
                 Manifest.permission.ACTIVITY_RECOGNITION,
                 Manifest.permission.BODY_SENSORS,
-                Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE,
                 Manifest.permission.HIGH_SAMPLING_RATE_SENSORS,
             }
     )

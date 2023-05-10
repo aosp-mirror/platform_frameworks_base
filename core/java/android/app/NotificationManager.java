@@ -31,7 +31,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.PermissionChecker;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
@@ -726,8 +725,9 @@ public class NotificationManager {
      * Cancels a previously posted notification.
      *
      *  <p>If the notification does not currently represent a
-     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
-     *  removed from the UI and live
+     *  {@link Service#startForeground(int, Notification) foreground service} or a
+     *  {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job},
+     *  it will be removed from the UI and live
      *  {@link android.service.notification.NotificationListenerService notification listeners}
      *  will be informed so they can remove the notification from their UIs.</p>
      */
@@ -740,8 +740,9 @@ public class NotificationManager {
      * Cancels a previously posted notification.
      *
      *  <p>If the notification does not currently represent a
-     *  {@link Service#startForeground(int, Notification) foreground service}, it will be
-     *  removed from the UI and live
+     *  {@link Service#startForeground(int, Notification) foreground service} or a
+     *  {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job},
+     *  it will be removed from the UI and live
      *  {@link android.service.notification.NotificationListenerService notification listeners}
      *  will be informed so they can remove the notification from their UIs.</p>
      */
@@ -754,8 +755,9 @@ public class NotificationManager {
      * Cancels a previously posted notification.
      *
      * <p>If the notification does not currently represent a
-     * {@link Service#startForeground(int, Notification) foreground service}, it will be
-     * removed from the UI and live
+     *  {@link Service#startForeground(int, Notification) foreground service} or a
+     *  {@link android.app.job.JobInfo.Builder#setUserInitiated(boolean) user-initiated job},
+     *  it will be removed from the UI and live
      * {@link android.service.notification.NotificationListenerService notification listeners}
      * will be informed so they can remove the notification from their UIs.</p>
      *
@@ -874,19 +876,11 @@ public class NotificationManager {
      * {@link android.provider.Settings#ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT}.
      */
     public boolean canUseFullScreenIntent() {
-        final int result = PermissionChecker.checkPermissionForPreflight(mContext,
-                android.Manifest.permission.USE_FULL_SCREEN_INTENT,
-                mContext.getAttributionSource());
-
-        switch (result) {
-            case PermissionChecker.PERMISSION_GRANTED:
-                return true;
-            case PermissionChecker.PERMISSION_SOFT_DENIED:
-            case PermissionChecker.PERMISSION_HARD_DENIED:
-                return false;
-            default:
-                if (localLOGV) Log.v(TAG, "Unknown PermissionChecker result: " + result);
-                return false;
+        INotificationManager service = getService();
+        try {
+            return service.canUseFullScreenIntent(mContext.getAttributionSource());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

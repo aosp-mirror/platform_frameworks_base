@@ -86,7 +86,7 @@ public final class TunerAdapterTest {
         doAnswer(invocation -> {
             mTunerCallback = (ITunerCallback) invocation.getArguments()[3];
             return mTunerMock;
-        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any(), anyInt());
+        }).when(mRadioServiceMock).openTuner(anyInt(), any(), anyBoolean(), any());
 
         doAnswer(invocation -> {
             ProgramSelector program = (ProgramSelector) invocation.getArguments()[0];
@@ -747,6 +747,15 @@ public final class TunerAdapterTest {
         mTunerCallback.onCurrentProgramInfoChanged(null);
 
         verify(mCallbackMock, after(CALLBACK_TIMEOUT_MS).never()).onProgramInfoChanged(any());
+    }
+
+    @Test
+    public void onTuneFailed_withCanceledResult() throws Exception {
+        mTunerCallback.onTuneFailed(RadioTuner.TUNER_RESULT_CANCELED, FM_SELECTOR);
+
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onTuneFailed(
+                RadioTuner.TUNER_RESULT_CANCELED, FM_SELECTOR);
+        verify(mCallbackMock, timeout(CALLBACK_TIMEOUT_MS)).onError(RadioTuner.ERROR_CANCELLED);
     }
 
     @Test

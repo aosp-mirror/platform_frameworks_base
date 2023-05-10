@@ -174,8 +174,19 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // allow while-in-use permissions in foreground service or not.
     // while-in-use permissions in FGS started from background might be restricted.
     boolean mAllowWhileInUsePermissionInFgs;
+    @PowerExemptionManager.ReasonCode
+    int mAllowWhileInUsePermissionInFgsReason;
+
+    // Integer version of mAllowWhileInUsePermissionInFgs that we keep track to compare
+    // the old and new logics.
+    // TODO: Remove them once we're confident in the new logic.
+    int mDebugWhileInUseReasonInStartForeground = REASON_DENIED;
+    int mDebugWhileInUseReasonInBindService = REASON_DENIED;
+
     // A copy of mAllowWhileInUsePermissionInFgs's value when the service is entering FGS state.
     boolean mAllowWhileInUsePermissionInFgsAtEntering;
+    /** Allow scheduling user-initiated jobs from the background. */
+    boolean mAllowUiJobScheduling;
 
     // the most recent package that start/bind this service.
     String mRecentCallingPackage;
@@ -212,8 +223,13 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // created. (i.e. due to "bound" or "start".) It never decreases, even when stopForeground()
     // is called.
     int mStartForegroundCount;
-    // Last time mAllowWhileInUsePermissionInFgs or mAllowStartForeground is set.
-    long mLastSetFgsRestrictionTime;
+
+    // Last time mAllowWhileInUsePermissionInFgs or mAllowStartForeground was set to "allowed"
+    // from "disallowed" when the service was _not_ already a foreground service.
+    // this means they're set in startService(). (not startForegroundService)
+    // In startForeground(), if this timestamp is too old, we can't trust these flags, so
+    // we need to reset them.
+    long mLastUntrustedSetFgsRestrictionAllowedTime;
 
     // This is a service record of a FGS delegate (not a service record of a real service)
     boolean mIsFgsDelegate;
@@ -249,6 +265,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         final String mCallingProcessName;
         final Intent intent;
         final NeededUriGrants neededGrants;
+        final @Nullable String mCallingPackageName;
         long deliveredTime;
         int deliveryCount;
         int doneExecutingCount;
@@ -258,7 +275,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         StartItem(ServiceRecord _sr, boolean _taskRemoved, int _id,
                 Intent _intent, NeededUriGrants _neededGrants, int _callingId,
-                String callingProcessName) {
+                String callingProcessName, @Nullable String callingPackageName) {
             sr = _sr;
             taskRemoved = _taskRemoved;
             id = _id;
@@ -266,6 +283,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             neededGrants = _neededGrants;
             callingId = _callingId;
             mCallingProcessName = callingProcessName;
+            mCallingPackageName = callingPackageName;
         }
 
         UriPermissionOwner getUriPermissionsLocked() {
@@ -391,6 +409,15 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         long getAnrTime() {
             return mStartTime + ams.mConstants.mShortFgsTimeoutDuration
                     + ams.mConstants.mShortFgsAnrExtraWaitDuration;
+        }
+
+        String getDescription() {
+            return "sfc=" + this.mStartForegroundCount
+                    + " sid=" + this.mStartId
+                    + " stime=" + this.mStartTime
+                    + " tt=" + this.getTimeoutTime()
+                    + " dt=" + this.getProcStateDemoteTime()
+                    + " at=" + this.getAnrTime();
         }
     }
 
@@ -594,8 +621,15 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             pw.print(prefix); pw.print("mIsAllowedBgActivityStartsByStart=");
             pw.println(mBackgroundStartPrivilegesByStartMerged);
         }
-        pw.print(prefix); pw.print("allowWhileInUsePermissionInFgs=");
-                pw.println(mAllowWhileInUsePermissionInFgs);
+        pw.print(prefix); pw.print("mAllowWhileInUsePermissionInFgsReason=");
+        pw.println(mAllowWhileInUsePermissionInFgsReason);
+
+        pw.print(prefix); pw.print("debugWhileInUseReasonInStartForeground=");
+        pw.println(mDebugWhileInUseReasonInStartForeground);
+        pw.print(prefix); pw.print("debugWhileInUseReasonInBindService=");
+        pw.println(mDebugWhileInUseReasonInBindService);
+
+        pw.print(prefix); pw.print("allowUiJobScheduling="); pw.println(mAllowUiJobScheduling);
         pw.print(prefix); pw.print("recentCallingPackage=");
                 pw.println(mRecentCallingPackage);
         pw.print(prefix); pw.print("recentCallingUid=");
@@ -606,6 +640,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         pw.println(mStartForegroundCount);
         pw.print(prefix); pw.print("infoAllowStartForeground=");
         pw.println(mInfoAllowStartForeground);
+
+        pw.print(prefix); pw.print("lastUntrustedSetFgsRestrictionAllowedTime=");
+        TimeUtils.formatDuration(mLastUntrustedSetFgsRestrictionAllowedTime, now, pw);
+        pw.println();
+
         if (delayed) {
             pw.print(prefix); pw.print("delayed="); pw.println(delayed);
         }
@@ -836,10 +875,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             mAppForAllowingBgActivityStartsByStart =
                     mBackgroundStartPrivilegesByStartMerged.allowsAny()
                     ? proc : null;
-            if (mBackgroundStartPrivilegesByStartMerged.allowsAny()
-                    || mIsAllowedBgActivityStartsByBinding) {
+            BackgroundStartPrivileges backgroundStartPrivileges =
+                    getBackgroundStartPrivilegesWithExclusiveToken();
+            if (backgroundStartPrivileges.allowsAny()) {
                 proc.addOrUpdateBackgroundStartPrivileges(this,
-                        getBackgroundStartPrivilegesWithExclusiveToken());
+                        backgroundStartPrivileges);
             } else {
                 proc.removeBackgroundStartPrivileges(this);
             }
@@ -1013,7 +1053,17 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 ams.mConstants.SERVICE_BG_ACTIVITY_START_TIMEOUT);
     }
 
+    void updateAllowUiJobScheduling(boolean allowUiJobScheduling) {
+        if (mAllowUiJobScheduling == allowUiJobScheduling) {
+            return;
+        }
+        mAllowUiJobScheduling = allowUiJobScheduling;
+    }
+
     private void setAllowedBgActivityStartsByStart(BackgroundStartPrivileges newValue) {
+        if (mBackgroundStartPrivilegesByStartMerged == newValue) {
+            return;
+        }
         mBackgroundStartPrivilegesByStartMerged = newValue;
         updateParentProcessBgActivityStartsToken();
     }
@@ -1413,10 +1463,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         this.mShortFgsInfo = null;
     }
 
-    /**
-     * @return true if it's a short FGS that's still up and running, and should be timed out.
-     */
-    public boolean shouldTriggerShortFgsTimeout() {
+    private boolean shouldTriggerShortFgsTimedEvent(long targetTime, long nowUptime) {
         if (!isAppAlive()) {
             return false;
         }
@@ -1424,36 +1471,48 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 || !mShortFgsInfo.isCurrent()) {
             return false;
         }
-        return mShortFgsInfo.getTimeoutTime() <= SystemClock.uptimeMillis();
+        return targetTime <= nowUptime;
+    }
+
+    /**
+     * @return true if it's a short FGS that's still up and running, and should be timed out.
+     */
+    public boolean shouldTriggerShortFgsTimeout(long nowUptime) {
+        return shouldTriggerShortFgsTimedEvent(
+                (mShortFgsInfo == null ? 0 : mShortFgsInfo.getTimeoutTime()),
+                nowUptime);
     }
 
     /**
      * @return true if it's a short FGS's procstate should be demoted.
      */
-    public boolean shouldDemoteShortFgsProcState() {
-        if (!isAppAlive()) {
-            return false;
-        }
-        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
-                || !mShortFgsInfo.isCurrent()) {
-            return false;
-        }
-        return mShortFgsInfo.getProcStateDemoteTime() <= SystemClock.uptimeMillis();
+    public boolean shouldDemoteShortFgsProcState(long nowUptime) {
+        return shouldTriggerShortFgsTimedEvent(
+                (mShortFgsInfo == null ? 0 : mShortFgsInfo.getProcStateDemoteTime()),
+                nowUptime);
     }
 
     /**
      * @return true if it's a short FGS that's still up and running, and should be declared
      * an ANR.
      */
-    public boolean shouldTriggerShortFgsAnr() {
-        if (!isAppAlive()) {
-            return false;
-        }
-        if (!this.startRequested || !isShortFgs() || mShortFgsInfo == null
-                || !mShortFgsInfo.isCurrent()) {
-            return false;
-        }
-        return mShortFgsInfo.getAnrTime() <= SystemClock.uptimeMillis();
+    public boolean shouldTriggerShortFgsAnr(long nowUptime) {
+        return shouldTriggerShortFgsTimedEvent(
+                (mShortFgsInfo == null ? 0 : mShortFgsInfo.getAnrTime()),
+                nowUptime);
+    }
+
+    /**
+     * Human readable description about short-FGS internal states.
+     */
+    public String getShortFgsTimedEventDescription(long nowUptime) {
+        return "aa=" + isAppAlive()
+                + " sreq=" + this.startRequested
+                + " isfg=" + this.isForeground
+                + " type=" + Integer.toHexString(this.foregroundServiceType)
+                + " sfc=" + this.mStartForegroundCount
+                + " now=" + nowUptime
+                + " " + (mShortFgsInfo == null ? "" : mShortFgsInfo.getDescription());
     }
 
     private boolean isAppAlive() {

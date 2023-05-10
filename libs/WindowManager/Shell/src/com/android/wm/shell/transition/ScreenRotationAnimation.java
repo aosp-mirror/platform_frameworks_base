@@ -31,7 +31,6 @@ import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.ColorSpace;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -145,6 +144,7 @@ class ScreenRotationAnimation {
                                 .setCaptureSecureLayers(true)
                                 .setAllowProtected(true)
                                 .setSourceCrop(new Rect(0, 0, mStartWidth, mStartHeight))
+                                .setHintForSeamlessTransition(true)
                                 .build();
                 ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
                         ScreenCapture.captureLayers(args);
@@ -162,13 +162,12 @@ class ScreenRotationAnimation {
                         .setName("RotationLayer")
                         .build();
 
-                final ColorSpace colorSpace = screenshotBuffer.getColorSpace();
+                TransitionAnimation.configureScreenshotLayer(t, mScreenshotLayer, screenshotBuffer);
                 final HardwareBuffer hardwareBuffer = screenshotBuffer.getHardwareBuffer();
-                t.setDataSpace(mScreenshotLayer, colorSpace.getDataSpace());
-                t.setBuffer(mScreenshotLayer, hardwareBuffer);
                 t.show(mScreenshotLayer);
                 if (!isCustomRotate()) {
-                    mStartLuma = TransitionAnimation.getBorderLuma(hardwareBuffer, colorSpace);
+                    mStartLuma = TransitionAnimation.getBorderLuma(hardwareBuffer,
+                            screenshotBuffer.getColorSpace());
                 }
                 hardwareBuffer.close();
             }
@@ -230,7 +229,7 @@ class ScreenRotationAnimation {
         } else if ((mEndWidth > mStartWidth) == (mEndHeight > mStartHeight)
                 && (mEndWidth != mStartWidth || mEndHeight != mStartHeight)) {
             // Display resizes without rotation change.
-            final float scale = Math.max((float) mEndWidth / mStartHeight,
+            final float scale = Math.max((float) mEndWidth / mStartWidth,
                     (float) mEndHeight / mStartHeight);
             matrix.setScale(scale, scale);
         }

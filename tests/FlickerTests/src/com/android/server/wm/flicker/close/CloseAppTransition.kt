@@ -17,7 +17,7 @@
 package com.android.server.wm.flicker.close
 
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.LAUNCHER
+import android.tools.common.traces.component.ComponentNameMatcher.Companion.LAUNCHER
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest

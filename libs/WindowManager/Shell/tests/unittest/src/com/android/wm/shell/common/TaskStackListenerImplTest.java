@@ -112,9 +112,9 @@ public class TaskStackListenerImplTest extends ShellTestCase {
     @Test
     public void testOnTaskProfileLocked() {
         ActivityManager.RunningTaskInfo info = mock(ActivityManager.RunningTaskInfo.class);
-        mImpl.onTaskProfileLocked(info);
-        verify(mCallback).onTaskProfileLocked(eq(info));
-        verify(mOtherCallback).onTaskProfileLocked(eq(info));
+        mImpl.onTaskProfileLocked(info, 0);
+        verify(mCallback).onTaskProfileLocked(eq(info), eq(0));
+        verify(mOtherCallback).onTaskProfileLocked(eq(info), eq(0));
     }
 
     @Test

@@ -18,6 +18,7 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.AccountTypePolicyKey;
 import android.app.admin.BooleanPolicyValue;
 import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
@@ -226,8 +227,7 @@ final class PolicyDefinition<V> {
      * Passing in {@code null} for {@code packageName} will return
      * {@link #GENERIC_APPLICATION_RESTRICTIONS}.
      */
-    static PolicyDefinition<Bundle> APPLICATION_RESTRICTIONS(
-            String packageName) {
+    static PolicyDefinition<Bundle> APPLICATION_RESTRICTIONS(String packageName) {
         if (packageName == null) {
             return GENERIC_APPLICATION_RESTRICTIONS;
         }
@@ -246,9 +246,95 @@ final class PolicyDefinition<V> {
             (Long value, Context context, Integer userId, PolicyKey policyKey) -> true,
             new LongPolicySerializer());
 
+    static PolicyDefinition<Integer> KEYGUARD_DISABLED_FEATURES = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.KEYGUARD_DISABLED_FEATURES_POLICY),
+            new FlagUnion(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY,
+            // Nothing is enforced for keyguard features, we just need to store it
+            (Integer value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            new IntegerPolicySerializer());
+
+    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
+    static PolicyDefinition<Boolean> GENERIC_APPLICATION_HIDDEN =
+            new PolicyDefinition<>(
+                    new PackagePolicyKey(
+                            DevicePolicyIdentifiers.APPLICATION_HIDDEN_POLICY),
+                    // TODO(b/276713779): Don't need to take in a resolution mechanism since its
+                    //  never used, but might need some refactoring to not always assume a non-null
+                    //  mechanism.
+                    TRUE_MORE_RESTRICTIVE,
+                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
+                    PolicyEnforcerCallbacks::setApplicationHidden,
+                    new BooleanPolicySerializer());
+
+    /**
+     * Passing in {@code null} for {@code packageName} will return
+     * {@link #GENERIC_APPLICATION_HIDDEN}.
+     */
+    static PolicyDefinition<Boolean> APPLICATION_HIDDEN(String packageName) {
+        if (packageName == null) {
+            return GENERIC_APPLICATION_HIDDEN;
+        }
+        return GENERIC_APPLICATION_HIDDEN.createPolicyDefinition(
+                new PackagePolicyKey(
+                        DevicePolicyIdentifiers.APPLICATION_HIDDEN_POLICY, packageName));
+    }
+
+    // This is saved in the static map sPolicyDefinitions so that we're able to reconstruct the
+    // actual policy with the correct arguments (i.e. packageName) when reading the policies from
+    // xml.
+    static PolicyDefinition<Boolean> GENERIC_ACCOUNT_MANAGEMENT_DISABLED =
+            new PolicyDefinition<>(
+                    new AccountTypePolicyKey(
+                            DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY),
+                    TRUE_MORE_RESTRICTIVE,
+                    POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
+                    // Nothing is enforced, we just need to store it
+                    (Boolean value, Context context, Integer userId, PolicyKey policyKey) -> true,
+                    new BooleanPolicySerializer());
+
+    /**
+     * Passing in {@code null} for {@code accountType} will return
+     * {@link #GENERIC_ACCOUNT_MANAGEMENT_DISABLED}.
+     */
+    static PolicyDefinition<Boolean> ACCOUNT_MANAGEMENT_DISABLED(String accountType) {
+        if (accountType == null) {
+            return GENERIC_ACCOUNT_MANAGEMENT_DISABLED;
+        }
+        return GENERIC_ACCOUNT_MANAGEMENT_DISABLED.createPolicyDefinition(
+                new AccountTypePolicyKey(
+                        DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY, accountType));
+    }
+
+    static PolicyDefinition<Set<String>> PERMITTED_INPUT_METHODS = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY),
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
+            (Set<String> value, Context context, Integer userId, PolicyKey policyKey) -> true,
+            new StringSetPolicySerializer());
+
+
+    static PolicyDefinition<Boolean> SCREEN_CAPTURE_DISABLED = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY),
+            TRUE_MORE_RESTRICTIVE,
+            POLICY_FLAG_INHERITABLE,
+            PolicyEnforcerCallbacks::setScreenCaptureDisabled,
+            new BooleanPolicySerializer());
+
+    static PolicyDefinition<Boolean> PERSONAL_APPS_SUSPENDED = new PolicyDefinition<>(
+            new NoArgsPolicyKey(DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY),
+            new MostRecent<>(),
+            POLICY_FLAG_LOCAL_ONLY_POLICY | POLICY_FLAG_INHERITABLE,
+            PolicyEnforcerCallbacks::setPersonalAppsSuspended,
+            new BooleanPolicySerializer());
+
+
     private static final Map<String, PolicyDefinition<?>> POLICY_DEFINITIONS = new HashMap<>();
     private static Map<String, Integer> USER_RESTRICTION_FLAGS = new HashMap<>();
 
+    // TODO(b/277218360): Revisit policies that should be marked as global-only.
     static {
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.AUTO_TIMEZONE_POLICY, AUTO_TIMEZONE);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMISSION_GRANT_POLICY,
@@ -264,6 +350,18 @@ final class PolicyDefinition<V> {
                 GENERIC_APPLICATION_RESTRICTIONS);
         POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.RESET_PASSWORD_TOKEN_POLICY,
                 RESET_PASSWORD_TOKEN);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.KEYGUARD_DISABLED_FEATURES_POLICY,
+                KEYGUARD_DISABLED_FEATURES);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.APPLICATION_HIDDEN_POLICY,
+                GENERIC_APPLICATION_HIDDEN);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.ACCOUNT_MANAGEMENT_DISABLED_POLICY,
+                GENERIC_ACCOUNT_MANAGEMENT_DISABLED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERMITTED_INPUT_METHODS_POLICY,
+                PERMITTED_INPUT_METHODS);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.SCREEN_CAPTURE_DISABLED_POLICY,
+                SCREEN_CAPTURE_DISABLED);
+        POLICY_DEFINITIONS.put(DevicePolicyIdentifiers.PERSONAL_APPS_SUSPENDED_POLICY,
+                PERSONAL_APPS_SUSPENDED);
 
         // User Restriction Policies
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MODIFY_ACCOUNTS, /* flags= */ 0);
@@ -273,8 +371,9 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_WIFI_TETHERING, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_GRANT_ADMIN, /* flags= */ 0);
+        // TODO: set as global only once we get rid of the mapping
         USER_RESTRICTION_FLAGS.put(
-                UserManager.DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+                UserManager.DISALLOW_SHARING_ADMIN_CONFIGURED_WIFI, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_WIFI_DIRECT, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(
@@ -294,8 +393,10 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_BLUETOOTH, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_BLUETOOTH, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_BLUETOOTH_SHARING, /* flags= */ 0);
+        // This effectively always applies globally, but it can be set on the profile
+        // parent, check the javadocs on the restriction for more info.
         USER_RESTRICTION_FLAGS.put(
-                UserManager.DISALLOW_USB_FILE_TRANSFER, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+                UserManager.DISALLOW_USB_FILE_TRANSFER, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_CREDENTIALS, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_REMOVE_USER, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE, /* flags= */ 0);
@@ -305,8 +406,10 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CONFIG_DATE_TIME, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_CONFIG_TETHERING, /* flags= */ 0);
+        // This effectively always applies globally, but it can be set on the profile
+        // parent, check the javadocs on the restriction for more info.
         USER_RESTRICTION_FLAGS.put(
-                UserManager.DISALLOW_NETWORK_RESET, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+                UserManager.DISALLOW_NETWORK_RESET, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_FACTORY_RESET, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_USER, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_ADD_MANAGED_PROFILE, /* flags= */ 0);
@@ -337,8 +440,7 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_UNMUTE_DEVICE, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_DATA_ROAMING, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_SET_USER_ICON, /* flags= */ 0);
-            // TODO: double check flags
-        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_OEM_UNLOCK, POLICY_FLAG_GLOBAL_ONLY_POLICY);
+        USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_OEM_UNLOCK, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_UNIFIED_PASSWORD, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.ALLOW_PARENT_PROFILE_APP_LINKING, /* flags= */ 0);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_AUTOFILL, /* flags= */ 0);
@@ -351,6 +453,7 @@ final class PolicyDefinition<V> {
         USER_RESTRICTION_FLAGS.put(
                 UserManager.DISALLOW_CONFIG_PRIVATE_DNS, POLICY_FLAG_GLOBAL_ONLY_POLICY);
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_MICROPHONE_TOGGLE, /* flags= */ 0);
+        // TODO: According the UserRestrictionsUtils, this is global only, need to confirm.
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_CAMERA_TOGGLE, /* flags= */ 0);
         // TODO: check if its global only
         USER_RESTRICTION_FLAGS.put(UserManager.DISALLOW_BIOMETRIC, /* flags= */ 0);
@@ -444,7 +547,7 @@ final class PolicyDefinition<V> {
             String restriction, int flags) {
         String identifier = DevicePolicyIdentifiers.getIdentifierForUserRestriction(restriction);
         UserRestrictionPolicyKey key = new UserRestrictionPolicyKey(identifier, restriction);
-        flags |= POLICY_FLAG_USER_RESTRICTION_POLICY;
+        flags |= (POLICY_FLAG_USER_RESTRICTION_POLICY | POLICY_FLAG_INHERITABLE);
         PolicyDefinition<Boolean> definition = new PolicyDefinition<>(
                 key,
                 TRUE_MORE_RESTRICTIVE,
@@ -492,7 +595,6 @@ final class PolicyDefinition<V> {
     }
 
     void saveToXml(TypedXmlSerializer serializer) throws IOException {
-        // TODO: here and elsewhere, add tags to ensure attributes aren't overridden by duplication.
         mPolicyKey.saveToXml(serializer);
     }
 
@@ -515,14 +617,14 @@ final class PolicyDefinition<V> {
         return genericPolicyDefinition.mPolicyKey.readFromXml(parser);
     }
 
-    void savePolicyValueToXml(TypedXmlSerializer serializer, String attributeName, V value)
+    void savePolicyValueToXml(TypedXmlSerializer serializer, V value)
             throws IOException {
-        mPolicySerializer.saveToXml(mPolicyKey, serializer, attributeName, value);
+        mPolicySerializer.saveToXml(mPolicyKey, serializer, value);
     }
 
     @Nullable
-    PolicyValue<V> readPolicyValueFromXml(TypedXmlPullParser parser, String attributeName) {
-        return mPolicySerializer.readFromXml(parser, attributeName);
+    PolicyValue<V> readPolicyValueFromXml(TypedXmlPullParser parser) {
+        return mPolicySerializer.readFromXml(parser);
     }
 
     @Override

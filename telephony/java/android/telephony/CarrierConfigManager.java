@@ -1628,6 +1628,7 @@ public class CarrierConfigManager {
      * <li>  9: WiFi Calling</li>
      * <li> 10: VoWifi</li>
      * <li> 11: %s WiFi Calling</li>
+     * <li> 12: WiFi Call</li>
      * @hide
      */
     public static final String KEY_WFC_SPN_FORMAT_IDX_INT = "wfc_spn_format_idx_int";
@@ -1974,8 +1975,13 @@ public class CarrierConfigManager {
     /**
      * Boolean indicating if LTE+ icon should be shown if available.
      */
-    public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL =
-            "hide_lte_plus_data_icon_bool";
+    public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL = "hide_lte_plus_data_icon_bool";
+
+    /**
+     * Boolean indicting if the 5G slice icon should be shown if available.
+     * @hide
+     */
+    public static final String KEY_SHOW_5G_SLICE_ICON_BOOL = "show_5g_slice_icon_bool";
 
     /**
      * The combined channel bandwidth threshold (non-inclusive) in KHz required to display the
@@ -4438,6 +4444,22 @@ public class CarrierConfigManager {
             "min_udp_port_4500_nat_timeout_sec_int";
 
     /**
+     * The preferred IKE protocol for ESP packets.
+     *
+     * This will be used by Android platform VPNs to select preferred encapsulation type and IP
+     * protocol type. The possible customization values are:
+     *
+     * AUTO IP VERSION and ENCAPSULATION TYPE SELECTION : "0"
+     * IPv4 UDP                                         : "40"
+     * IPv6 ESP                                         : "61"
+     *
+     * See the {@code PREFERRED_IKE_PROTOCOL_} constants in
+     * {@link com.android.server.connectivity.Vpn}.
+     * @hide
+     */
+    public static final String KEY_PREFERRED_IKE_PROTOCOL_INT = "preferred_ike_protocol_int";
+
+    /**
      * Specifies whether the system should prefix the EAP method to the anonymous identity.
      * The following prefix will be added if this key is set to TRUE:
      *   EAP-AKA: "0"
@@ -4562,6 +4584,57 @@ public class CarrierConfigManager {
      */
     public static final String KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY =
             "data_stall_recovery_should_skip_bool_array";
+
+    /**
+     * String array containing the list of names for service numbers provided by carriers. This key
+     * should be used with {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY}. The names provided in
+     * this array will be mapped 1:1 with the numbers provided in the {@link
+     * #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} array.
+     *
+     * <p>The data would be considered valid if and only if:
+     *
+     * <ul>
+     *   <li>The number of items in both the arrays are equal
+     *   <li>The data added to the {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} array is valid.
+     *       See {@link #KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY} for more information.
+     * </ul>
+     *
+     * <p>Example:
+     *
+     * <pre><code>
+     * <string-array name="carrier_service_name_array" num="2">
+     *   <item value="Police"/>
+     *   <item value="Ambulance"/>
+     * </string-array>
+     * </code></pre>
+     */
+    public static final String KEY_CARRIER_SERVICE_NAME_STRING_ARRAY = "carrier_service_name_array";
+
+    /**
+     * String array containing the list of service numbers provided by carriers. This key should be
+     * used with {@link #KEY_CARRIER_SERVICE_NAME_STRING_ARRAY}. The numbers provided in this array
+     * will be mapped 1:1 with the names provided in the {@link
+     * #KEY_CARRIER_SERVICE_NAME_STRING_ARRAY} array.
+     *
+     * <p>The data would be considered valid if and only if:
+     *
+     * <ul>
+     *   <li>The number of items in both the arrays are equal
+     *   <li>The item added in this key follows a specific format. Either it should be all numbers,
+     *       or "+" followed by all numbers.
+     * </ul>
+     *
+     * <p>Example:
+     *
+     * <pre><code>
+     * <string-array name="carrier_service_number_array" num="2">
+     *   <item value="123"/>
+     *   <item value="+343"/>
+     * </string-array>
+     * </code></pre>
+     */
+    public static final String KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY =
+        "carrier_service_number_array";
 
     /**
      * Configs used by ImsServiceEntitlement.
@@ -5688,6 +5761,58 @@ public class CarrierConfigManager {
         public static final String KEY_CAPABILITY_TYPE_PRESENCE_UCE_INT_ARRAY =
                 KEY_PREFIX + "capability_type_presence_uce_int_array";
 
+        /**
+         * Specifies the policy for disabling NR SA mode. Default value is
+         *{@link #SA_DISABLE_POLICY_NONE}.
+         * The value set as below:
+         * <ul>
+         * <li>0: {@link #SA_DISABLE_POLICY_NONE }</li>
+         * <li>1: {@link #SA_DISABLE_POLICY_WFC_ESTABLISHED }</li>
+         * <li>2: {@link #SA_DISABLE_POLICY_WFC_ESTABLISHED_WHEN_VONR_DISABLED  }</li>
+         * <li>3: {@link #SA_DISABLE_POLICY_VOWIFI_REGISTERED  }</li>
+         * </ul>
+         * @hide
+         */
+        public static final String KEY_NR_SA_DISABLE_POLICY_INT =
+                KEY_PREFIX + "sa_disable_policy_int";
+
+        /** @hide */
+        @IntDef({
+                NR_SA_DISABLE_POLICY_NONE,
+                NR_SA_DISABLE_POLICY_WFC_ESTABLISHED,
+                NR_SA_DISABLE_POLICY_WFC_ESTABLISHED_WHEN_VONR_DISABLED,
+                NR_SA_DISABLE_POLICY_VOWIFI_REGISTERED
+        })
+        public @interface NrSaDisablePolicy {}
+
+        /**
+         * Do not disables NR SA mode.
+         * @hide
+         */
+        public static final int NR_SA_DISABLE_POLICY_NONE = 0;
+
+        /**
+         * Disables NR SA mode when VoWiFi call is established in order to improve the delay or
+         * voice mute when the handover from ePDG to NR is not supported in UE or network.
+         * @hide
+         */
+        public static final int NR_SA_DISABLE_POLICY_WFC_ESTABLISHED = 1;
+
+        /**
+         * Disables NR SA mode when VoWiFi call is established when VoNR is disabled in order to
+         * improve the delay or voice mute when the handover from ePDG to NR is not supported
+         * in UE or network.
+         * @hide
+         */
+        public static final int NR_SA_DISABLE_POLICY_WFC_ESTABLISHED_WHEN_VONR_DISABLED = 2;
+
+        /**
+         * Disables NR SA mode when IMS is registered over WiFi in order to improve the delay or
+         * voice mute when the handover from ePDG to NR is not supported in UE or network.
+         * @hide
+         */
+        public static final int NR_SA_DISABLE_POLICY_VOWIFI_REGISTERED = 3;
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -5759,6 +5884,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_REGISTRATION_RETRY_BASE_TIMER_MILLIS_INT, 30000);
             defaults.putInt(KEY_REGISTRATION_RETRY_MAX_TIMER_MILLIS_INT, 1800000);
             defaults.putInt(KEY_REGISTRATION_SUBSCRIBE_EXPIRY_TIMER_SEC_INT, 600000);
+            defaults.putInt(KEY_NR_SA_DISABLE_POLICY_INT, NR_SA_DISABLE_POLICY_NONE);
 
             defaults.putIntArray(
                     KEY_IPSEC_AUTHENTICATION_ALGORITHMS_INT_ARRAY,
@@ -7515,6 +7641,25 @@ public class CarrierConfigManager {
         public static final String KEY_EMERGENCY_SCAN_TIMER_SEC_INT =
                 KEY_PREFIX + "emergency_scan_timer_sec_int";
 
+        /**
+         * The timer to wait for the call completion on the cellular network before attempting the
+         * call over Wi-Fi. On timer expiry, if emergency call on Wi-Fi is allowed and possible,
+         * telephony shall cancel the scan on the cellular network and place the call on Wi-Fi.
+         * If dialing over cellular network is ongoing when timer expires, dialing over Wi-Fi
+         * will be requested only when the ongoing dialing fails. If emergency call on Wi-Fi is not
+         * possible, then domain selection continues to try dialing from the radio and the timer
+         * remains expired. Later when calling over Wi-Fi is possible and dialing over cellular
+         * networks fails, calling over Wi-Fi will be requested. The timer shall be restarted from
+         * initial state if calling over Wi-Fi fails.
+         * If this value is set to {@link #REDIAL_TIMER_DISABLED}, then the timer will never be
+         * started.
+         *
+         * The default value for the timer is {@link #REDIAL_TIMER_DISABLED}.
+         * @hide
+         */
+        public static final String KEY_MAXIMUM_CELLULAR_SEARCH_TIMER_SEC_INT =
+                KEY_PREFIX + "maximum_cellular_search_timer_sec_int";
+
         /** @hide */
         @IntDef(prefix = "SCAN_TYPE_",
             value = {
@@ -7609,10 +7754,12 @@ public class CarrierConfigManager {
                 KEY_PREFIX + "emergency_requires_volte_enabled_bool";
 
         /**
-         * This values indicates that the cross SIM redialing timer shall be disabled.
+         * This values indicates that the cross SIM redialing timer and maximum celluar search
+         * timer shall be disabled.
          *
          * @see #KEY_CROSS_STACK_REDIAL_TIMER_SEC_INT
          * @see #KEY_QUICK_CROSS_STACK_REDIAL_TIMER_SEC_INT
+         * @see #KEY_MAXIMUM_CELLULAR_SEARCH_TIMER_SEC_INT
          * @hide
          */
         public static final int REDIAL_TIMER_DISABLED = 0;
@@ -7716,6 +7863,7 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_EMERGENCY_VOWIFI_REQUIRES_CONDITION_INT, VOWIFI_REQUIRES_NONE);
             defaults.putInt(KEY_MAXIMUM_NUMBER_OF_EMERGENCY_TRIES_OVER_VOWIFI_INT, 1);
             defaults.putInt(KEY_EMERGENCY_SCAN_TIMER_SEC_INT, 10);
+            defaults.putInt(KEY_MAXIMUM_CELLULAR_SEARCH_TIMER_SEC_INT, REDIAL_TIMER_DISABLED);
             defaults.putInt(KEY_EMERGENCY_NETWORK_SCAN_TYPE_INT, SCAN_TYPE_NO_PREFERENCE);
             defaults.putInt(KEY_EMERGENCY_CALL_SETUP_TIMER_ON_CURRENT_NETWORK_SEC_INT, 0);
             defaults.putBoolean(KEY_EMERGENCY_REQUIRES_IMS_REGISTRATION_BOOL, false);
@@ -8648,6 +8796,16 @@ public class CarrierConfigManager {
         public static final String KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY =
                 KEY_PREFIX + "epdg_address_priority_int_array";
 
+        /**
+         * A priority list of PLMN to be used in EPDG_ADDRESS_PLMN. Possible values are {@link
+         * #EPDG_PLMN_RPLMN}, {@link #EPDG_PLMN_HPLMN}, {@link #EPDG_PLMN_EHPLMN_ALL}, {@link
+         * #EPDG_PLMN_EHPLMN_FIRST}
+         *
+         * @hide
+         */
+        public static final String KEY_EPDG_PLMN_PRIORITY_INT_ARRAY =
+                KEY_PREFIX + "epdg_plmn_priority_int_array";
+
         /** Epdg static IP address or FQDN */
         public static final String KEY_EPDG_STATIC_ADDRESS_STRING =
                 KEY_PREFIX + "epdg_static_address_string";
@@ -8848,6 +9006,36 @@ public class CarrierConfigManager {
         public static final int EPDG_ADDRESS_VISITED_COUNTRY = 4;
 
         /** @hide */
+        @IntDef({
+                EPDG_PLMN_RPLMN,
+                EPDG_PLMN_HPLMN,
+                EPDG_PLMN_EHPLMN_ALL,
+                EPDG_PLMN_EHPLMN_FIRST
+        })
+        public @interface EpdgAddressPlmnType {}
+
+        /**
+         * Use the Registered PLMN
+         * @hide
+         */
+        public static final int EPDG_PLMN_RPLMN = 0;
+        /**
+         * Use the PLMN derived from IMSI
+         * @hide
+         */
+        public static final int EPDG_PLMN_HPLMN = 1;
+        /**
+         * Use all EHPLMN from SIM EF files
+         * @hide
+         */
+        public static final int EPDG_PLMN_EHPLMN_ALL = 2;
+        /**
+         * Use the first EHPLMN from SIM EF files
+         * @hide
+         */
+        public static final int EPDG_PLMN_EHPLMN_FIRST = 3;
+
+        /** @hide */
         @IntDef({ID_TYPE_FQDN, ID_TYPE_RFC822_ADDR, ID_TYPE_KEY_ID})
         public @interface IkeIdType {}
 
@@ -8982,6 +9170,12 @@ public class CarrierConfigManager {
             defaults.putIntArray(
                     KEY_EPDG_ADDRESS_PRIORITY_INT_ARRAY,
                     new int[] {EPDG_ADDRESS_PLMN, EPDG_ADDRESS_STATIC});
+            defaults.putIntArray(
+                    KEY_EPDG_PLMN_PRIORITY_INT_ARRAY,
+                    new int[]{
+                            EPDG_PLMN_RPLMN,
+                            EPDG_PLMN_HPLMN,
+                            EPDG_PLMN_EHPLMN_ALL});
             defaults.putStringArray(KEY_MCC_MNCS_STRING_ARRAY, new String[0]);
             defaults.putInt(KEY_IKE_LOCAL_ID_TYPE_INT, ID_TYPE_RFC822_ADDR);
             defaults.putInt(KEY_IKE_REMOTE_ID_TYPE_INT, ID_TYPE_FQDN);
@@ -9913,6 +10107,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_OPERATOR_NAME_FILTER_PATTERN_STRING, "");
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
+        sDefaults.putBoolean(KEY_SHOW_5G_SLICE_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
         sDefaults.putInt(KEY_NR_ADVANCED_THRESHOLD_BANDWIDTH_KHZ_INT, 0);
         sDefaults.putBoolean(KEY_INCLUDE_LTE_FOR_NR_ADVANCED_THRESHOLD_BANDWIDTH_BOOL, false);
@@ -10123,6 +10318,7 @@ public class CarrierConfigManager {
         sDefaults.putInt(KEY_PARAMETERS_USED_FOR_LTE_SIGNAL_BAR_INT,
                 CellSignalStrengthLte.USE_RSRP);
         sDefaults.putInt(KEY_MIN_UDP_PORT_4500_NAT_TIMEOUT_SEC_INT, 300);
+        sDefaults.putInt(KEY_PREFERRED_IKE_PROTOCOL_INT, 0);
         // Default wifi configurations.
         sDefaults.putAll(Wifi.getDefaults());
         sDefaults.putBoolean(ENABLE_EAP_METHOD_PREFIX_BOOL, false);
@@ -10215,6 +10411,8 @@ public class CarrierConfigManager {
                 new long[] {180000, 180000, 180000, 180000});
         sDefaults.putBooleanArray(KEY_DATA_STALL_RECOVERY_SHOULD_SKIP_BOOL_ARRAY,
                 new boolean[] {false, false, true, false, false});
+        sDefaults.putStringArray(KEY_CARRIER_SERVICE_NAME_STRING_ARRAY, new String[0]);
+        sDefaults.putStringArray(KEY_CARRIER_SERVICE_NUMBER_STRING_ARRAY, new String[0]);
     }
 
     /**

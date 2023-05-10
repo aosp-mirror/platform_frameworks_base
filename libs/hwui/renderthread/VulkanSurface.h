@@ -47,6 +47,7 @@ public:
     const SkMatrix& getCurrentPreTransform() { return mWindowInfo.preTransform; }
 
     void setColorSpace(sk_sp<SkColorSpace> colorSpace);
+    const SkM44& getPixelSnapMatrix() const { return mWindowInfo.pixelSnapMatrix; }
 
 private:
     /*
@@ -105,6 +106,7 @@ private:
         SkISize actualSize;
         // transform to be applied to the SkSurface to map the coordinates to the provided transform
         SkMatrix preTransform;
+        SkM44 pixelSnapMatrix;
     };
 
     VulkanSurface(ANativeWindow* window, const WindowInfo& windowInfo, GrDirectContext* grContext);
@@ -114,6 +116,7 @@ private:
                                            WindowInfo* outWindowInfo);
     static bool UpdateWindow(ANativeWindow* window, const WindowInfo& windowInfo);
     void releaseBuffers();
+    void invalidateBuffers();
 
     // TODO: This number comes from ui/BufferQueueDefs. We're not pulling the
     // header in so that we don't need to depend on libui, but we should share

@@ -2232,6 +2232,11 @@ public class Resources {
         return mResourcesImpl.getSizeConfigurations();
     }
 
+    /** @hide */
+    public Configuration[] getSizeAndUiModeConfigurations() {
+        return mResourcesImpl.getSizeAndUiModeConfigurations();
+    }
+
     /**
      * Return the compatibility mode information for the application.
      * The returned object should be treated as read-only.

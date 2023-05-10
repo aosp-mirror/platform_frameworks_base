@@ -44,6 +44,8 @@ constructor(
     private val quickAffordanceInteractor: KeyguardQuickAffordanceInteractor,
     private val bottomAreaInteractor: KeyguardBottomAreaInteractor,
     private val burnInHelperWrapper: BurnInHelperWrapper,
+    private val longPressViewModel: KeyguardLongPressViewModel,
+    val settingsMenuViewModel: KeyguardSettingsMenuViewModel,
 ) {
     data class PreviewMode(
         val isInPreviewMode: Boolean = false,
@@ -161,6 +163,14 @@ constructor(
         selectedPreviewSlotId.value = slotId
     }
 
+    /**
+     * Notifies that some input gesture has started somewhere in the bottom area that's outside of
+     * the lock screen settings menu item pop-up.
+     */
+    fun onTouchedOutsideLockScreenSettingsMenu() {
+        longPressViewModel.onTouchedOutside()
+    }
+
     private fun button(
         position: KeyguardQuickAffordancePosition
     ): Flow<KeyguardQuickAffordanceViewModel> {
@@ -174,7 +184,8 @@ constructor(
                     bottomAreaInteractor.animateDozingTransitions.distinctUntilChanged(),
                     areQuickAffordancesFullyOpaque,
                     selectedPreviewSlotId,
-                ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId ->
+                    quickAffordanceInteractor.useLongPress(),
+                ) { model, animateReveal, isFullyOpaque, selectedPreviewSlotId, useLongPress ->
                     val slotId = position.toSlotId()
                     val isSelected = selectedPreviewSlotId == slotId
                     model.toViewModel(
@@ -190,6 +201,7 @@ constructor(
                                 !isSelected,
                         forceInactive = previewMode.isInPreviewMode,
                         slotId = slotId,
+                        useLongPress = useLongPress,
                     )
                 }
                 .distinctUntilChanged()
@@ -203,6 +215,7 @@ constructor(
         isDimmed: Boolean,
         forceInactive: Boolean,
         slotId: String,
+        useLongPress: Boolean,
     ): KeyguardQuickAffordanceViewModel {
         return when (this) {
             is KeyguardQuickAffordanceModel.Visible ->
@@ -221,13 +234,14 @@ constructor(
                     isClickable = isClickable,
                     isActivated = !forceInactive && activationState is ActivationState.Active,
                     isSelected = isSelected,
-                    useLongPress = quickAffordanceInteractor.useLongPress,
+                    useLongPress = useLongPress,
                     isDimmed = isDimmed,
                     slotId = slotId,
                 )
-            is KeyguardQuickAffordanceModel.Hidden -> KeyguardQuickAffordanceViewModel(
-                slotId = slotId,
-            )
+            is KeyguardQuickAffordanceModel.Hidden ->
+                KeyguardQuickAffordanceViewModel(
+                    slotId = slotId,
+                )
         }
     }
 

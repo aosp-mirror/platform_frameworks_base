@@ -403,7 +403,7 @@ public class CachedBluetoothDeviceManagerTest {
      */
     @Test
     public void updateHearingAidDevices_directToHearingAidDeviceManager() {
-        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mLocalBluetoothManager,
+        mHearingAidDeviceManager = spy(new HearingAidDeviceManager(mContext, mLocalBluetoothManager,
                 mCachedDeviceManager.mCachedDevices));
         mCachedDeviceManager.mHearingAidDeviceManager = mHearingAidDeviceManager;
         mCachedDeviceManager.updateHearingAidsDevices();

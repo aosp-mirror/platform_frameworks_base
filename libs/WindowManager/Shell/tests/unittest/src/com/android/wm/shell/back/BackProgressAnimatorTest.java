@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.back;
 
-import static android.window.BackEvent.EDGE_LEFT;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -48,12 +46,21 @@ public class BackProgressAnimatorTest {
     private CountDownLatch mTargetProgressCalled = new CountDownLatch(1);
     private Handler mMainThreadHandler;
 
+    private BackMotionEvent backMotionEventFrom(float touchX, float progress) {
+        return new BackMotionEvent(
+                /* touchX = */ touchX,
+                /* touchY = */ 0,
+                /* progress = */ progress,
+                /* velocityX = */ 0,
+                /* velocityY = */ 0,
+                /* swipeEdge = */ BackEvent.EDGE_LEFT,
+                /* departingAnimationTarget = */ null);
+    }
+
     @Before
     public void setUp() throws Exception {
         mMainThreadHandler = new Handler(Looper.getMainLooper());
-        final BackMotionEvent backEvent = new BackMotionEvent(
-                0, 0,
-                0, EDGE_LEFT, null);
+        final BackMotionEvent backEvent = backMotionEventFrom(0, 0);
         mMainThreadHandler.post(
                 () -> {
                     mProgressAnimator = new BackProgressAnimator();
@@ -63,9 +70,7 @@ public class BackProgressAnimatorTest {
 
     @Test
     public void testBackProgressed() throws InterruptedException {
-        final BackMotionEvent backEvent = new BackMotionEvent(
-                100, 0,
-                mTargetProgress, EDGE_LEFT, null);
+        final BackMotionEvent backEvent = backMotionEventFrom(100, mTargetProgress);
         mMainThreadHandler.post(
                 () -> mProgressAnimator.onBackProgressed(backEvent));
 
@@ -78,9 +83,7 @@ public class BackProgressAnimatorTest {
     @Test
     public void testBackCancelled() throws InterruptedException {
         // Give the animator some progress.
-        final BackMotionEvent backEvent = new BackMotionEvent(
-                100, 0,
-                mTargetProgress, EDGE_LEFT, null);
+        final BackMotionEvent backEvent = backMotionEventFrom(100, mTargetProgress);
         mMainThreadHandler.post(
                 () -> mProgressAnimator.onBackProgressed(backEvent));
         mTargetProgressCalled.await(1, TimeUnit.SECONDS);

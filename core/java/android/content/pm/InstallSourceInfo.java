@@ -95,8 +95,8 @@ public final class InstallSourceInfo implements Parcelable {
      * remains unchanged. It continues to identify the actual package that performed the install
      * or update.
      * <p>
-     * Null may be returned if the app was not installed by a package (e.g. a system app or an app
-     * installed via adb) or if the initiating package has itself been uninstalled.
+     * Null may be returned if the app was not installed by a package (e.g. a system app) or if the
+     * initiating package has itself been uninstalled.
      */
     @Nullable
     public String getInitiatingPackageName() {

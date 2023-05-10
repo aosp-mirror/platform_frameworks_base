@@ -73,11 +73,13 @@
                     android:textAlignment="center"/>
 
                 <LinearLayout
+                    android:id="@+id/letterbox_restart_dialog_checkbox_container"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:paddingVertical="14dp"
                     android:orientation="horizontal"
                     android:layout_gravity="center_vertical"
-                    android:layout_marginVertical="32dp">
+                    android:layout_marginVertical="18dp">
 
                     <CheckBox
                         android:id="@+id/letterbox_restart_dialog_checkbox"

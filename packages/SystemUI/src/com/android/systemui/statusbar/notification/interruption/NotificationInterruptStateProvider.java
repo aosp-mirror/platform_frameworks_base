@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.interruption;
 
+import androidx.annotation.NonNull;
+
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 /**
@@ -59,6 +61,12 @@ public interface NotificationInterruptStateProvider {
          */
         NO_FSI_SUPPRESSIVE_GROUP_ALERT_BEHAVIOR(false),
         /**
+         * Notification should not FSI due to having suppressive BubbleMetadata. This blocks a
+         * potentially malicious use of flags that previously allowed apps to escalate a HUN to an
+         * FSI even while the device was unlocked.
+         */
+        NO_FSI_SUPPRESSIVE_BUBBLE_METADATA(false),
+        /**
          * Device screen is off, so the FSI should launch.
          */
         FSI_DEVICE_NOT_INTERACTIVE(true),
@@ -90,9 +98,9 @@ public interface NotificationInterruptStateProvider {
          */
         NO_FSI_NO_HUN_OR_KEYGUARD(false),
         /**
-         * No conditions blocking FSI launch.
+         * The notification is coming from a suspended packages, so FSI is suppressed.
          */
-        FSI_EXPECTED_NOT_TO_HUN(true);
+        NO_FSI_SUSPENDED(false);
 
         public final boolean shouldLaunch;
 
@@ -153,7 +161,8 @@ public interface NotificationInterruptStateProvider {
      * @param entry the entry to evaluate
      * @return FullScreenIntentDecision representing the decision for whether to show the intent
      */
-    FullScreenIntentDecision getFullScreenIntentDecision(NotificationEntry entry);
+    @NonNull
+    FullScreenIntentDecision getFullScreenIntentDecision(@NonNull NotificationEntry entry);
 
     /**
      * Write the full screen launch decision for the given entry to logs.

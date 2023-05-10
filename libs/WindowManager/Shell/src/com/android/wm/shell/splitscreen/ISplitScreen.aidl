@@ -129,9 +129,10 @@ interface ISplitScreen {
     /**
      * Start a pair of intents in one transition.
      */
-    oneway void startIntents(in PendingIntent pendingIntent1, in Bundle options1,
-            in PendingIntent pendingIntent2, in Bundle options2, int splitPosition,
-            float splitRatio, in RemoteTransition remoteTransition, in InstanceId instanceId) = 19;
+    oneway void startIntents(in PendingIntent pendingIntent1, in ShortcutInfo shortcutInfo1,
+            in Bundle options1, in PendingIntent pendingIntent2, in ShortcutInfo shortcutInfo2,
+            in Bundle options2, int splitPosition, float splitRatio,
+            in RemoteTransition remoteTransition, in InstanceId instanceId) = 19;
 
     /**
      * Blocking call that notifies and gets additional split-screen targets when entering

@@ -561,6 +561,14 @@ static jstring com_android_server_am_CachedAppOptimizer_getFreezerCheckPath(JNIE
     return env->NewStringUTF(path.c_str());
 }
 
+static jboolean com_android_server_am_CachedAppOptimizer_isFreezerProfileValid(JNIEnv* env) {
+    int uid = getuid();
+    int pid = getpid();
+
+    return isProfileValidForProcess("Frozen", uid, pid) &&
+            isProfileValidForProcess("Unfrozen", uid, pid);
+}
+
 static const JNINativeMethod sMethods[] = {
         /* name, signature, funcPtr */
         {"cancelCompaction", "()V",
@@ -578,7 +586,9 @@ static const JNINativeMethod sMethods[] = {
         {"getBinderFreezeInfo", "(I)I",
          (void*)com_android_server_am_CachedAppOptimizer_getBinderFreezeInfo},
         {"getFreezerCheckPath", "()Ljava/lang/String;",
-         (void*)com_android_server_am_CachedAppOptimizer_getFreezerCheckPath}};
+         (void*)com_android_server_am_CachedAppOptimizer_getFreezerCheckPath},
+        {"isFreezerProfileValid", "()Z",
+         (void*)com_android_server_am_CachedAppOptimizer_isFreezerProfileValid}};
 
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env)
 {

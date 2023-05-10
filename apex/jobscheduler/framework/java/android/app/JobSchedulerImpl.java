@@ -65,8 +65,12 @@ public class JobSchedulerImpl extends JobScheduler {
     @NonNull
     @Override
     public JobScheduler forNamespace(@NonNull String namespace) {
+        namespace = sanitizeNamespace(namespace);
         if (namespace == null) {
-            throw new IllegalArgumentException("namespace cannot be null");
+            throw new NullPointerException("namespace cannot be null");
+        }
+        if (namespace.isEmpty()) {
+            throw new IllegalArgumentException("namespace cannot be empty");
         }
         return new JobSchedulerImpl(this, namespace);
     }

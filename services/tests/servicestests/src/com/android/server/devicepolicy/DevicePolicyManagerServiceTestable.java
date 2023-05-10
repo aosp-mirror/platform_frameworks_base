@@ -56,6 +56,7 @@ import com.android.server.AlarmManagerInternal;
 import com.android.server.LocalServices;
 import com.android.server.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -147,6 +148,11 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         @Override
         PackageManagerInternal getPackageManagerInternal() {
             return services.packageManagerInternal;
+        }
+
+        @Override
+        PackageManagerLocal getPackageManagerLocal() {
+            return services.packageManagerLocal;
         }
 
         @Override
