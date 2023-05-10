@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"ਕ੍ਰੀਡੈਂਸ਼ੀਅਲ ਪ੍ਰਬੰਧਕ"</string>
     <string name="string_cancel" msgid="6369133483981306063">"ਰੱਦ ਕਰੋ"</string>
     <string name="string_continue" msgid="1346732695941131882">"ਜਾਰੀ ਰੱਖੋ"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"ਹੋਰ ਵਿਕਲਪ"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"ਹੋਰ ਤਰੀਕੇ ਰੱਖਿਅਤ ਕਰੋ"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"ਹੋਰ ਜਾਣੋ"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"ਪਾਸਵਰਡ ਦਿਖਾਓ"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"ਪਾਸਵਰਡ ਲੁਕਾਓ"</string>
@@ -49,12 +49,9 @@
     <string name="sign_ins" msgid="4710739369149469208">"ਸਾਈਨ-ਇਨਾਂ ਦੀ ਜਾਣਕਾਰੀ"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"ਸਾਈਨ-ਇਨ ਜਾਣਕਾਰੀ"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> ਨੂੰ ਇੱਥੇ ਰੱਖਿਅਤ ਕਰੋ"</string>
-    <!-- no translation found for create_passkey_in_other_device_title (2360053098931886245) -->
-    <skip />
-    <!-- no translation found for save_password_on_other_device_title (5829084591948321207) -->
-    <skip />
-    <!-- no translation found for save_sign_in_on_other_device_title (2827990118560134692) -->
-    <skip />
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"ਕੀ ਕਿਸੇ ਹੋਰ ਡੀਵਾਈਸ \'ਤੇ ਪਾਸਕੀ ਬਣਾਉਣੀ ਹੈ?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"ਕੀ ਕਿਸੇ ਹੋਰ ਡੀਵਾਈਸ \'ਤੇ ਪਾਸਵਰਡ ਰੱਖਿਅਤ ਕਰਨਾ ਹੈ?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"ਕੀ ਕਿਸੇ ਹੋਰ ਡੀਵਾਈਸ \'ਤੇ ਸਾਈਨ-ਇਨ ਕ੍ਰੀਡੈਂਸ਼ੀਅਲ ਰੱਖਿਅਤ ਕਰਨੇ ਹਨ?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"ਕੀ ਆਪਣੇ ਸਾਰੇ ਸਾਈਨ-ਇਨਾਂ ਲਈ<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"<xliff:g id="USERNAME">%1$s</xliff:g> ਦਾ ਇਹ Password Manager ਆਸਾਨੀ ਨਾਲ ਸਾਈਨ-ਇਨ ਕਰਨ ਵਿੱਚ ਤੁਹਾਡੀ ਮਦਦ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਪਾਸਵਰਡਾਂ ਅਤੇ ਪਾਸਕੀਆਂ ਨੂੰ ਸਟੋਰ ਕਰੇਗਾ"</string>
     <string name="set_as_default" msgid="4415328591568654603">"ਪੂਰਵ-ਨਿਰਧਾਰਿਤ ਵਜੋਂ ਸੈੱਟ ਕਰੋ"</string>
@@ -72,7 +69,12 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"ਬੰਦ ਕਰੋ"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"ਖਾਰਜ ਕਰੋ"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਆਪਣੀ ਰੱਖਿਅਤ ਕੀਤੀ ਪਾਸਕੀ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
+    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਤੁਹਾਡਾ ਰੱਖਿਅਤ ਕੀਤਾ ਪਾਸਵਰਡ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਆਪਣਾ ਸਾਈਨ-ਇਨ ਕਰਨ ਦਾ ਵਿਕਲਪ ਵਰਤਣਾ ਹੈ?"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਸਾਈਨ-ਇਨ ਵਿਕਲਪਾਂ ਨੂੰ ਅਣਲਾਕ ਕਰਨਾ ਹੈ?"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਕੋਈ ਰੱਖਿਅਤ ਕੀਤੀ ਪਾਸਕੀ ਚੁਣੋ"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਕੋਈ ਰੱਖਿਅਤ ਕੀਤਾ ਪਾਸਵਰਡ ਚੁਣੋ"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਕੋਈ ਰੱਖਿਅਤ ਕੀਤੀ ਸਾਈਨ-ਇਨ ਜਾਣਕਾਰੀ ਚੁਣੋ"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਸਾਈਨ-ਇਨ ਕਰਨ ਦਾ ਵਿਕਲਪ ਚੁਣੋ"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> ਲਈ ਕਿਸੇ ਵਿਕਲਪ ਦੀ ਚੋਣ ਕਰਨੀ ਹੈ?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"ਕੀ <xliff:g id="APP_NAME">%1$s</xliff:g> \'ਤੇ ਇਸ ਜਾਣਕਾਰੀ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
