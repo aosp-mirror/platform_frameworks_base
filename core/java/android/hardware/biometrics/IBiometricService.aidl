@@ -66,8 +66,7 @@ interface IBiometricService {
 
     // Register callback for when keyguard biometric eligibility changes.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback,
-            int callingUserId);
+    void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
 
     // Notify BiometricService when <Biometric>Service is ready to start the prepared client.
     // Client lifecycle is still managed in <Biometric>Service.
