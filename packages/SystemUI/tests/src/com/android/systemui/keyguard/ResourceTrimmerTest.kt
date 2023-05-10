@@ -7,11 +7,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.data.repository.FakeCommandQueue
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardTransitionRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -60,13 +58,12 @@ class ResourceTrimmerTest : SysuiTestCase() {
         keyguardRepository.setDozeAmount(0f)
         keyguardRepository.setKeyguardGoingAway(false)
 
-        val keyguardInteractor =
-            KeyguardInteractor(
-                keyguardRepository,
-                FakeCommandQueue(),
-                featureFlags,
-                FakeKeyguardBouncerRepository()
+        val withDeps =
+            KeyguardInteractorFactory.create(
+                repository = keyguardRepository,
+                featureFlags = featureFlags,
             )
+        val keyguardInteractor = withDeps.keyguardInteractor
         resourceTrimmer =
             ResourceTrimmer(
                 keyguardInteractor,

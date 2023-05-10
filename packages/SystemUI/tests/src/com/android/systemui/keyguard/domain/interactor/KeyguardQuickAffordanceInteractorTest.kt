@@ -40,7 +40,6 @@ import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanc
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLegacySettingSyncer
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceLocalUserSelectionManager
 import com.android.systemui.keyguard.data.quickaffordance.KeyguardQuickAffordanceRemoteUserSelectionManager
-import com.android.systemui.keyguard.data.repository.FakeKeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.KeyguardQuickAffordanceRepository
 import com.android.systemui.keyguard.domain.model.KeyguardQuickAffordanceModel
@@ -53,7 +52,6 @@ import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserFileManager
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.keyguard.shared.model.KeyguardQuickAffordanceSlots
-import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.FakeSharedPreferences
 import com.android.systemui.util.mockito.mock
@@ -84,7 +82,6 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var launchAnimator: DialogLaunchAnimator
-    @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var logger: KeyguardQuickAffordancesMetricsLogger
 
@@ -166,15 +163,14 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 set(Flags.FACE_AUTH_REFACTOR, true)
             }
 
+        val withDeps =
+            KeyguardInteractorFactory.create(
+                featureFlags = featureFlags,
+                repository = repository,
+            )
         underTest =
             KeyguardQuickAffordanceInteractor(
-                keyguardInteractor =
-                    KeyguardInteractor(
-                        repository = repository,
-                        commandQueue = commandQueue,
-                        featureFlags = featureFlags,
-                        bouncerRepository = FakeKeyguardBouncerRepository(),
-                    ),
+                keyguardInteractor = withDeps.keyguardInteractor,
                 registry =
                     FakeKeyguardQuickAffordanceRegistry(
                         mapOf(

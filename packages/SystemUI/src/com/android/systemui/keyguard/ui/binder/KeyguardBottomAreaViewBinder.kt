@@ -21,12 +21,10 @@ import android.content.Intent
 import android.graphics.Rect
 import android.graphics.drawable.Animatable2
 import android.util.Size
-import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -108,14 +106,10 @@ object KeyguardBottomAreaViewBinder {
         activityStarter: ActivityStarter?,
         messageDisplayer: (Int) -> Unit,
     ): Binding {
-        val indicationArea: View = view.requireViewById(R.id.keyguard_indication_area)
         val ambientIndicationArea: View? = view.findViewById(R.id.ambient_indication_container)
         val startButton: ImageView = view.requireViewById(R.id.start_button)
         val endButton: ImageView = view.requireViewById(R.id.end_button)
         val overlayContainer: View = view.requireViewById(R.id.overlay_container)
-        val indicationText: TextView = view.requireViewById(R.id.keyguard_indication_text)
-        val indicationTextBottom: TextView =
-            view.requireViewById(R.id.keyguard_indication_text_bottom)
         val settingsMenu: LaunchableLinearLayout =
             view.requireViewById(R.id.keyguard_settings_button)
 
@@ -183,7 +177,6 @@ object KeyguardBottomAreaViewBinder {
                                 }
 
                             ambientIndicationArea?.alpha = alpha
-                            indicationArea.alpha = alpha
                         }
                     }
 
@@ -205,25 +198,8 @@ object KeyguardBottomAreaViewBinder {
 
                     launch {
                         viewModel.indicationAreaTranslationX.collect { translationX ->
-                            indicationArea.translationX = translationX
                             ambientIndicationArea?.translationX = translationX
                         }
-                    }
-
-                    launch {
-                        combine(
-                                viewModel.isIndicationAreaPadded,
-                                configurationBasedDimensions.map { it.indicationAreaPaddingPx },
-                            ) { isPadded, paddingIfPaddedPx ->
-                                if (isPadded) {
-                                    paddingIfPaddedPx
-                                } else {
-                                    0
-                                }
-                            }
-                            .collect { paddingPx ->
-                                indicationArea.setPadding(paddingPx, 0, paddingPx, 0)
-                            }
                     }
 
                     launch {
@@ -233,22 +209,12 @@ object KeyguardBottomAreaViewBinder {
                                 viewModel.indicationAreaTranslationY(defaultBurnInOffsetY)
                             }
                             .collect { translationY ->
-                                indicationArea.translationY = translationY
                                 ambientIndicationArea?.translationY = translationY
                             }
                     }
 
                     launch {
                         configurationBasedDimensions.collect { dimensions ->
-                            indicationText.setTextSize(
-                                TypedValue.COMPLEX_UNIT_PX,
-                                dimensions.indicationTextSizePx.toFloat(),
-                            )
-                            indicationTextBottom.setTextSize(
-                                TypedValue.COMPLEX_UNIT_PX,
-                                dimensions.indicationTextSizePx.toFloat(),
-                            )
-
                             startButton.updateLayoutParams<ViewGroup.LayoutParams> {
                                 width = dimensions.buttonSizePx.width
                                 height = dimensions.buttonSizePx.height
@@ -305,7 +271,7 @@ object KeyguardBottomAreaViewBinder {
 
         return object : Binding {
             override fun getIndicationAreaAnimators(): List<ViewPropertyAnimator> {
-                return listOf(indicationArea, ambientIndicationArea).mapNotNull { it?.animate() }
+                return listOf(ambientIndicationArea).mapNotNull { it?.animate() }
             }
 
             override fun onConfigurationChanged() {
@@ -479,12 +445,6 @@ object KeyguardBottomAreaViewBinder {
         return ConfigurationBasedDimensions(
             defaultBurnInPreventionYOffsetPx =
                 view.resources.getDimensionPixelOffset(R.dimen.default_burn_in_prevention_offset),
-            indicationAreaPaddingPx =
-                view.resources.getDimensionPixelOffset(R.dimen.keyguard_indication_area_padding),
-            indicationTextSizePx =
-                view.resources.getDimensionPixelSize(
-                    com.android.internal.R.dimen.text_size_small_material,
-                ),
             buttonSizePx =
                 Size(
                     view.resources.getDimensionPixelSize(R.dimen.keyguard_affordance_fixed_width),
@@ -514,8 +474,6 @@ object KeyguardBottomAreaViewBinder {
 
     private data class ConfigurationBasedDimensions(
         val defaultBurnInPreventionYOffsetPx: Int,
-        val indicationAreaPaddingPx: Int,
-        val indicationTextSizePx: Int,
         val buttonSizePx: Size,
     )
 }

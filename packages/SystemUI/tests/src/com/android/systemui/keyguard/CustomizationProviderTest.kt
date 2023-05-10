@@ -34,6 +34,7 @@ import com.android.systemui.R
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
+import com.android.systemui.common.ui.data.repository.FakeConfigurationRepository
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -185,6 +186,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                         commandQueue = commandQueue,
                         featureFlags = featureFlags,
                         bouncerRepository = FakeKeyguardBouncerRepository(),
+                        configurationRepository = FakeConfigurationRepository(),
                     ),
                 registry = mock(),
                 lockPatternUtils = lockPatternUtils,

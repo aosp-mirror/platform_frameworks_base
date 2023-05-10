@@ -275,6 +275,9 @@
     <!-- The padding at start and end of indication text shown on AOD -->
     <dimen name="keyguard_indication_text_padding">16dp</dimen>
 
+    <!-- The min height on the indication text shown on AOD -->
+    <dimen name="keyguard_indication_text_min_height">48dp</dimen>
+
     <!-- Shadows under the clock, date and other keyguard text fields -->
     <dimen name="keyguard_shadow_radius">5</dimen>
 

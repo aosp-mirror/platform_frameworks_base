@@ -21,6 +21,7 @@ import android.app.StatusBarManager
 import android.graphics.Point
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
+import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -59,6 +60,7 @@ constructor(
     private val commandQueue: CommandQueue,
     featureFlags: FeatureFlags,
     bouncerRepository: KeyguardBouncerRepository,
+    configurationRepository: ConfigurationRepository,
 ) {
     /**
      * The amount of doze the system is in, where `1.0` is fully dozing and `0.0` is not dozing at
@@ -171,6 +173,9 @@ constructor(
 
     /** The approximate location on the screen of the face unlock sensor, if one is available. */
     val faceSensorLocation: Flow<Point?> = repository.faceSensorLocation
+
+    /** Notifies when a new configuration is set */
+    val configurationChange: Flow<Unit> = configurationRepository.onAnyConfigurationChange
 
     fun dozeTransitionTo(vararg states: DozeStateModel): Flow<DozeTransitionModel> {
         return dozeTransitionModel.filter { states.contains(it.to) }

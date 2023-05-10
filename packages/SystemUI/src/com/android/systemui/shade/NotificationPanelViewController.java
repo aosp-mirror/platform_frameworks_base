@@ -125,6 +125,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController;
+import com.android.systemui.keyguard.KeyguardViewConfigurator;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
@@ -598,6 +599,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private final KeyguardTransitionInteractor mKeyguardTransitionInteractor;
     private final KeyguardInteractor mKeyguardInteractor;
+    private final KeyguardViewConfigurator mKeyguardViewConfigurator;
     private final @Nullable MultiShadeInteractor mMultiShadeInteractor;
     private final CoroutineDispatcher mMainDispatcher;
     private boolean mIsAnyMultiShadeExpanded;
@@ -740,6 +742,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             KeyguardLongPressViewModel keyguardLongPressViewModel,
             KeyguardInteractor keyguardInteractor,
             ActivityStarter activityStarter,
+            KeyguardViewConfigurator keyguardViewConfigurator,
             KeyguardFaceAuthInteractor keyguardFaceAuthInteractor) {
         mInteractionJankMonitor = interactionJankMonitor;
         keyguardStateController.addCallback(new KeyguardStateController.Callback() {
@@ -762,6 +765,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mLockscreenToOccludedTransitionViewModel = lockscreenToOccludedTransitionViewModel;
         mKeyguardTransitionInteractor = keyguardTransitionInteractor;
         mKeyguardInteractor = keyguardInteractor;
+        mKeyguardViewConfigurator = keyguardViewConfigurator;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
             public void onViewAttachedToWindow(View v) {
@@ -1319,7 +1323,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mKeyguardBottomArea.initFrom(oldBottomArea);
         mView.addView(mKeyguardBottomArea, index);
         initBottomArea();
-        mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
         mStatusBarStateListener.onDozeAmountChanged(mStatusBarStateController.getDozeAmount(),
                 mStatusBarStateController.getInterpolatedDozeAmount());
 
@@ -1361,6 +1364,9 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
                         mKeyguardIndicationController.showTransientIndication(stringResourceId),
                 mVibratorHelper,
                 mActivityStarter);
+
+        // Rebind (for now), as a new bottom area and indication area may have been created
+        mKeyguardViewConfigurator.bindIndicationArea(mKeyguardBottomArea);
     }
 
     @VisibleForTesting
@@ -1398,7 +1404,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     private void setKeyguardBottomArea(KeyguardBottomAreaView keyguardBottomArea) {
         mKeyguardBottomArea = keyguardBottomArea;
-        mKeyguardIndicationController.setIndicationArea(mKeyguardBottomArea);
     }
 
     void setOpenCloseListener(OpenCloseListener openCloseListener) {
@@ -3020,12 +3025,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
 
     void setStatusAccessibilityImportance(int mode) {
         mKeyguardStatusViewController.setStatusAccessibilityImportance(mode);
-    }
-
-    //TODO(b/254875405): this should be removed.
-    @Override
-    public KeyguardBottomAreaView getKeyguardBottomAreaView() {
-        return mKeyguardBottomArea;
     }
 
     @Override
