@@ -56,7 +56,6 @@ public final class Backup {
     }
 
     public void run(String[] args) {
-        Log.d(TAG, "Called run() with args: " + String.join(" ", args));
         if (mBackupManager == null) {
             Log.e(TAG, "Can't obtain Backup Manager binder");
             return;
@@ -70,8 +69,6 @@ public final class Backup {
             Log.e(TAG, "BackupManager is not available for user " + userId);
             return;
         }
-
-        Log.d(TAG, "UserId : " + userId);
 
         String arg = nextArg();
         if (arg.equals("backup")) {
