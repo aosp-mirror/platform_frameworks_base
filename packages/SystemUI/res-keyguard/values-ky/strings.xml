@@ -84,7 +84,7 @@
     <string name="kg_prompt_reason_device_admin" msgid="6961159596224055685">"Түзмөктү администратор кулпулап койгон"</string>
     <string name="kg_prompt_reason_user_request" msgid="6015774877733717904">"Түзмөк кол менен кулпуланды"</string>
     <string name="kg_face_not_recognized" msgid="7903950626744419160">"Таанылган жок"</string>
-    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Жөндөөлөрдөн камерага уруксат беришиңиз керек"</string>
+    <string name="kg_face_sensor_privacy_enabled" msgid="939511161763558512">"Параметрлерден камерага уруксат беришиңиз керек"</string>
     <string name="kg_password_default_pin_message" msgid="1434544655827987873">"{count,plural, =1{SIM-картанын PIN кодун киргизиңиз. Сизде # аракет калды, андан кийин түзмөктү бөгөттөн чыгаруу үчүн байланыш операторуна кайрылышыңыз керек болот.}other{SIM-картанын PIN кодун киргизиңиз. # аракет калды.}}"</string>
     <string name="kg_password_default_puk_message" msgid="1025139786449741950">"{count,plural, =1{SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK кодду киргизиңиз. SIM-картанын биротоло жарактан чыгаарына # аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.}other{SIM-карта азыр жарактан чыкты. Улантуу үчүн PUK кодду киргизиңиз. SIM-картанын биротоло жарактан чыгарына # аракет калды. Чоо-жайын билүү үчүн байланыш операторуна кайрылыңыз.}}"</string>
     <string name="clock_title_default" msgid="6342735240617459864">"Демейки"</string>
