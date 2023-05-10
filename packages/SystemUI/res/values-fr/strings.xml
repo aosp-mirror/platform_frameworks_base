@@ -96,25 +96,19 @@
     <string name="screenshot_detected_template" msgid="7940376642921719915">"<xliff:g id="APPNAME">%1$s</xliff:g> a détecté cette capture d\'écran."</string>
     <string name="screenshot_detected_multiple_template" msgid="7644827792093819241">"<xliff:g id="APPNAME">%1$s</xliff:g> et d\'autres applis ouvertes ont détecté cette capture d\'écran."</string>
     <string name="app_clips_save_add_to_note" msgid="3460200751278069445">"Ajouter à la note"</string>
-    <!-- no translation found for screenrecord_title (4257171601439507792) -->
-    <skip />
+    <string name="screenrecord_title" msgid="4257171601439507792">"Enregistreur d\'écran"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Enregistrement de l\'écran…"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notification en cours pour une session d\'enregistrement de l\'écran"</string>
-    <!-- no translation found for screenrecord_permission_dialog_title (303380743267672953) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_entire_screen (4152602778470789965) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_warning_single_app (6818309727772146138) -->
-    <skip />
-    <!-- no translation found for screenrecord_permission_dialog_continue (5811122652514424967) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_title" msgid="303380743267672953">"Lancer l\'enregistrement ?"</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="4152602778470789965">"Lorsque vous enregistrez, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="6818309727772146138">"Lorsque vous enregistrez une appli, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
+    <string name="screenrecord_permission_dialog_continue" msgid="5811122652514424967">"Lancer l\'enregistrement"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Enregistrer l\'audio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio de l\'appareil"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Son provenant de l\'appareil (musique, appels et sonneries, etc.)"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micro"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio de l\'appareil et micro"</string>
-    <!-- no translation found for screenrecord_continue (4055347133700593164) -->
-    <skip />
+    <string name="screenrecord_continue" msgid="4055347133700593164">"Commencer"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Enregistrement de l\'écran…"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Enregistrement de l\'écran et de l\'audio…"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Afficher les points touchés sur l\'écran"</string>
@@ -400,42 +394,24 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"Toutes les applications et les données de cet utilisateur seront supprimées."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Supprimer"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Démarrer l\'enregistrement ou la diffusion avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ?"</string>
-    <!-- no translation found for media_projection_dialog_warning (1303664408388363598) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_title (3751133258891897878) -->
-    <skip />
-    <!-- no translation found for media_projection_sys_service_dialog_warning (2443872865267330320) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_entire_screen (3131200488455089620) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_dialog_option_single_app (4350961814397220929) -->
-    <skip />
-    <!-- no translation found for screen_share_permission_app_selector_title (1404878013670347899) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_title (9155535851866407199) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_entire_screen (8736391633234144237) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_warning_single_app (5211695779082563959) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_app_permission_dialog_continue (295463518195075840) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_title (8860150223172993547) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_entire_screen (1986212276016817231) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_warning_single_app (9900961380294292) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_cast_permission_dialog_continue (7209890669948870042) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_title (4519802931547483628) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_entire_screen (5407906851409410209) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_warning_single_app (3454859977888159495) -->
-    <skip />
-    <!-- no translation found for media_projection_entry_generic_permission_dialog_continue (8640381403048097116) -->
-    <skip />
+    <string name="media_projection_dialog_warning" msgid="1303664408388363598">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> aura accès à toutes les informations visibles sur votre écran ou lues depuis votre appareil pendant un enregistrement ou une diffusion de contenu. Il peut s\'agir de mots de passe, détails de mode de paiement, photos, messages ou encore contenus audio lus."</string>
+    <string name="media_projection_sys_service_dialog_title" msgid="3751133258891897878">"Commencer à enregistrer ou à caster ?"</string>
+    <string name="media_projection_sys_service_dialog_warning" msgid="2443872865267330320">"Le service qui fournit cette fonction aura accès à toutes les infos visibles sur votre écran ou lues depuis votre appareil pendant un enregistrement ou une diffusion de contenu. Il peut s\'agir de mots de passe, détails de mode de paiement, photos, messages ou encore contenus audio lus."</string>
+    <string name="screen_share_permission_dialog_option_entire_screen" msgid="3131200488455089620">"Tout l\'écran"</string>
+    <string name="screen_share_permission_dialog_option_single_app" msgid="4350961814397220929">"Une seule appli"</string>
+    <string name="screen_share_permission_app_selector_title" msgid="1404878013670347899">"Partager ou enregistrer une appli"</string>
+    <string name="media_projection_entry_app_permission_dialog_title" msgid="9155535851866407199">"Commencer à enregistrer ou à caster avec <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ?"</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_entire_screen" msgid="8736391633234144237">"Lorsque vous partagez, enregistrez ou castez, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
+    <string name="media_projection_entry_app_permission_dialog_warning_single_app" msgid="5211695779082563959">"Lorsque vous partagez, enregistrez ou castez une appli, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
+    <string name="media_projection_entry_app_permission_dialog_continue" msgid="295463518195075840">"Commencer"</string>
+    <string name="media_projection_entry_cast_permission_dialog_title" msgid="8860150223172993547">"Commencer à caster ?"</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_entire_screen" msgid="1986212276016817231">"Lorsque vous castez, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
+    <string name="media_projection_entry_cast_permission_dialog_warning_single_app" msgid="9900961380294292">"Lorsque vous castez une appli, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
+    <string name="media_projection_entry_cast_permission_dialog_continue" msgid="7209890669948870042">"Commencer à caster"</string>
+    <string name="media_projection_entry_generic_permission_dialog_title" msgid="4519802931547483628">"Commencer à partager ?"</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_entire_screen" msgid="5407906851409410209">"Lorsque vous partagez, enregistrez ou castez, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages, photos et contenus audio et vidéo."</string>
+    <string name="media_projection_entry_generic_permission_dialog_warning_single_app" msgid="3454859977888159495">"Lorsque vous partagez, enregistrez ou castez une appli, Android a accès à tout ce qui est visible sur votre écran ou lu sur votre appareil. Faites donc attention aux éléments tels que les mots de passe, détails de mode de paiement, messages et contenus audio et vidéo."</string>
+    <string name="media_projection_entry_generic_permission_dialog_continue" msgid="8640381403048097116">"Commencer"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_title" msgid="2113331792064527203">"Bloquée par votre administrateur informatique"</string>
     <string name="screen_capturing_disabled_by_policy_dialog_description" msgid="6015975736747696431">"La capture d\'écran est désactivée conformément aux règles relatives à l\'appareil"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tout effacer"</string>
@@ -484,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Une autorité de certification est installée sur cet appareil. Votre trafic sur le réseau sécurisé peut être contrôlé ou modifié."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Votre administrateur a activé la journalisation du réseau, pour contrôler le trafic sur votre appareil."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Votre administrateur a activé la journalisation réseau, qui surveille le trafic de votre profil professionnel, mais pas celui de votre profil personnel."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Cet appareil est connecté à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Le fournisseur de VPN a accès à votre activité réseau (e-mails, données de navigation, etc.)."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Cet appareil est connecté à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Votre administrateur informatique a accès à votre activité réseau (e-mails, données de navigation, etc.)."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Cet appareil est connecté à Internet via <xliff:g id="VPN_APP_0">%1$s</xliff:g> et <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Votre administrateur informatique a accès à votre activité réseau (e-mails, données de navigation, etc.)."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vos applis professionnelles sont connectées à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Votre administrateur informatique et votre fournisseur de VPN ont accès à votre activité réseau dans les applis professionnelles (e-mails, données de navigation, etc.)."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vos applis personnelles sont connectées à Internet via <xliff:g id="VPN_APP">%1$s</xliff:g>. Votre fournisseur de VPN a accès à votre activité réseau (e-mails, données de navigation, etc.)."</string>
@@ -1011,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Enceintes et écrans"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Appareils suggérés"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Fonctionnement des annonces"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Annonce"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Les personnes à proximité équipées d\'appareils Bluetooth compatibles peuvent écouter le contenu multimédia que vous diffusez"</string>
@@ -1148,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Installer une appli d\'appareil photo"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• L\'appli est configurée"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Au moins un appareil est disponible"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Sélectionnez une appli de notes par défaut pour utiliser le raccourci de prise de notes"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Sélectionner une appli"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Appuyez de manière prolongée sur raccourci"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Annuler"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Changer d\'écran maintenant"</string>
@@ -1164,7 +1140,7 @@
     <string name="stylus_battery_low_percentage" msgid="1620068112350141558">"<xliff:g id="PERCENTAGE">%s</xliff:g> de batterie restante"</string>
     <string name="stylus_battery_low_subtitle" msgid="3583843128908823273">"Connectez votre stylet à un chargeur"</string>
     <string name="stylus_battery_low" msgid="7134370101603167096">"La batterie du stylet est faible"</string>
-    <string name="video_camera" msgid="7654002575156149298">"Caméra vidéo"</string>
+    <string name="video_camera" msgid="7654002575156149298">"Caméra"</string>
     <string name="call_from_work_profile_title" msgid="6991157106804289643">"Impossible d\'appeler depuis ce profil"</string>
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Votre règle professionnelle ne vous permet de passer des appels que depuis le profil professionnel"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Passer au profil professionnel"</string>
