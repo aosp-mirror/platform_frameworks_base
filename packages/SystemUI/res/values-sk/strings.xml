@@ -356,7 +356,7 @@
       <item quantity="other">Môžete pridať maximálne <xliff:g id="COUNT">%d</xliff:g> používateľov.</item>
       <item quantity="one">Môžete vytvoriť iba jedného používateľa.</item>
     </plurals>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"Odstrániť používateľa?"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"Odobrať používateľa?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Všetky aplikácie a údaje tohto používateľa budú odstránené."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Odstrániť"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"Povolenie <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bude mať prístup k všetkým informáciám zobrazovaným na obrazovke alebo prehrávaným v zariadení počas nahrávania či prenosu. Patria medzi ne informácie, akými sú napríklad heslá, platobné podrobnosti, fotky, správy a prehrávaný zvuk."</string>
