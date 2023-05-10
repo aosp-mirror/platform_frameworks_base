@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.res.Resources;
 import android.testing.AndroidTestingRunner;
 import android.view.View;
 
@@ -71,6 +72,9 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
 
     @Mock
     private Context mContext;
+
+    @Mock
+    private Resources mResources;
 
     @Mock
     private ControlsComponent mControlsComponent;
@@ -118,7 +122,7 @@ public class DreamHomeControlsComplicationTest extends SysuiTestCase {
     @Test
     public void complicationType() {
         final DreamHomeControlsComplication complication =
-                new DreamHomeControlsComplication(mComponentFactory);
+                new DreamHomeControlsComplication(mResources, mComponentFactory);
         assertThat(complication.getRequiredTypeAvailability()).isEqualTo(
                 COMPLICATION_TYPE_HOME_CONTROLS);
     }

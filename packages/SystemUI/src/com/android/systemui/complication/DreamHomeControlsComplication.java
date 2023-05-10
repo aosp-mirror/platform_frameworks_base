@@ -24,6 +24,7 @@ import static com.android.systemui.controls.dagger.ControlsComponent.Visibility.
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -39,6 +40,7 @@ import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsActivity;
 import com.android.systemui.controls.ui.ControlsUiController;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.SystemUser;
 import com.android.systemui.dreams.DreamOverlayStateController;
 import com.android.systemui.plugins.ActivityStarter;
@@ -56,17 +58,20 @@ import javax.inject.Named;
  * devices at home like lights and thermostats).
  */
 public class DreamHomeControlsComplication implements Complication {
+    private final Resources mResources;
     private final DreamHomeControlsComplicationComponent.Factory mComponentFactory;
 
     @Inject
     public DreamHomeControlsComplication(
+            @Main Resources resources,
             DreamHomeControlsComplicationComponent.Factory componentFactory) {
+        mResources = resources;
         mComponentFactory = componentFactory;
     }
 
     @Override
     public ViewHolder createView(ComplicationViewModel model) {
-        return mComponentFactory.create().getViewHolder();
+        return mComponentFactory.create(mResources).getViewHolder();
     }
 
     @Override
