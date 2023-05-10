@@ -431,6 +431,19 @@ class TransitionController {
         return inCollectingTransition(wc) || inPlayingTransition(wc);
     }
 
+    /** Returns {@code true} if the id matches a collecting or playing transition. */
+    boolean inTransition(int syncId) {
+        if (mCollectingTransition != null && mCollectingTransition.getSyncId() == syncId) {
+            return true;
+        }
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            if (mPlayingTransitions.get(i).getSyncId() == syncId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** @return {@code true} if wc is in a participant subtree */
     boolean isTransitionOnDisplay(@NonNull DisplayContent dc) {
         if (mCollectingTransition != null && mCollectingTransition.isOnDisplay(dc)) {
