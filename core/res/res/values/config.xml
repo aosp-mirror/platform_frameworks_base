@@ -794,10 +794,10 @@
 
     <!--  Control whether to launch Car dock home app when user presses home button or when
           car dock intent is fired.
-          In mobile device, usually separate home app is expected in car mode, and this should be
-          enabled. But in environments like real car, default home app may be enough, and in that
-          case, this can be disabled (set to false). -->
-    <bool name="config_enableCarDockHomeLaunch">true</bool>
+          For devices where a separate home app is expected in car mode this should be enabled.
+          But in environments like real car, default home app may be enough, and in that case
+          this can be disabled (set to false). Defaults to false on mobile devices. -->
+    <bool name="config_enableCarDockHomeLaunch">false</bool>
 
     <!-- Control whether to force apps to give up control over the display of system bars at all
          times regardless of System Ui Flags.
@@ -2957,8 +2957,13 @@
     <!-- Whether safe headphone volume is enabled or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
 
-    <!-- Whether safe headphone sound dosage warning is enabled or not (country specific). -->
-    <bool name="config_safe_sound_dosage_enabled">true</bool>
+    <!-- Whether safe headphone sound dosage warning is enabled or not
+         (country specific). This value should only be overlaid to true
+         when a vendor supports offload and has the HAL sound dose
+         interfaces implemented. Otherwise, this can lead to a compliance
+         issue with the safe hearing standards EN50332-3 and IEC62368-1.
+    -->
+    <bool name="config_safe_sound_dosage_enabled">false</bool>
 
     <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
     <bool name="config_safe_media_disable_on_volume_up">true</bool>

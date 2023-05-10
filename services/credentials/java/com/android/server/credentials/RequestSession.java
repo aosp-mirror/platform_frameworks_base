@@ -210,7 +210,6 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         if (propagateCancellation) {
             mProviders.values().forEach(ProviderSession::cancelProviderRemoteSession);
         }
-        cancelExistingPendingIntent();
         mRequestSessionStatus = RequestSessionStatus.COMPLETE;
         mProviders.clear();
         clearRequestSessionLocked();

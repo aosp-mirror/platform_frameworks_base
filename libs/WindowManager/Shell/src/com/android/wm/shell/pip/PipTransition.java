@@ -888,9 +888,6 @@ public class PipTransition extends PipTransitionController {
         // setting bounds.
         animator.setPipTransactionHandler(mTransactionConsumer).applySurfaceControlTransaction(
                 leash, finishTransaction, PipAnimationController.FRACTION_END);
-        // Remove the workaround after fixing ClosePipBySwipingDownTest that detects the shadow
-        // as unexpected visible.
-        finishTransaction.setShadowRadius(leash, 0);
         // Start to animate enter PiP.
         animator.setPipTransactionHandler(mPipOrganizer.getPipTransactionHandler()).start();
     }
