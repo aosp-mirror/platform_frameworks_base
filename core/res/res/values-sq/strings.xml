@@ -664,7 +664,7 @@
     <skip />
     <string name="face_acquired_recalibrate_alt" msgid="5702674220280332115">"Modeli i fytyrës nuk krijohet. Provo sërish."</string>
     <string name="face_acquired_dark_glasses_detected_alt" msgid="4052123776406041972">"U zbuluan syze të errëta. Fytyra jote duhet të jetë plotësisht e dukshme."</string>
-    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Fytyra është e mbuluar. Fytyra duhet të jetë plotësisht e dukshme."</string>
+    <string name="face_acquired_mouth_covering_detected_alt" msgid="1122294982850589766">"Fytyra është e mbuluar. Duhet të jetë plotësisht e dukshme."</string>
   <string-array name="face_acquired_vendor">
   </string-array>
     <string name="face_error_hw_not_available" msgid="5085202213036026288">"Fytyra s\'mund të verifikohet. Hardueri nuk ofrohet."</string>
@@ -1253,7 +1253,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Aplikacionet e fillimit."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Po përfundon nisjen."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Shtype butonin e energjisë — zakonisht, kjo e fik ekranin.\n\nProvo të trokasësh lehtë ndërkohë që konfiguron gjurmën e gishtit."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Përfundo konfigurimin; fik ekranin"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Përfundo konfigurimin duke fikur ekranin"</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Çaktivizo"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Të vazhdohet verifikimi i gjurmës?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Shtype butonin e energjisë — zakonisht, kjo e fik ekranin.\n\nProvo të trokasësh lehtë për të verifikuar gjurmën e gishtit."</string>

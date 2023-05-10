@@ -1254,7 +1254,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Concluindo a inicialização."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela durante a configuração da impressão digital."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Desligue a tela para encerrar a configuração"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Desligue a tela para encerrar a configuração."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Desativar"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuar a verificação da digital?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela para verificar sua impressão digital."</string>

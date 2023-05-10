@@ -1363,7 +1363,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Bol zapnutý tethering cez USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Bol zapnutý režim MIDI cez USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Bolo pripojené príslušenstvo USB"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte ďalšie možnosti."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte ďalšie možnosti"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Pripojené zariadenie sa nabíja. Ďalšie možností získate klepnutím."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bolo zistené analógové zvukové príslušenstvo"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Pripojené zariadenie nie je kompatibilné s týmto telefónom. Ďalšie informácie zobrazíte klepnutím."</string>
@@ -1573,7 +1573,7 @@
     <string name="storage_internal" msgid="8490227947584914460">"Interné zdieľané úložisko"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"SD karta"</string>
     <string name="storage_sd_card_label" msgid="7526153141147470509">"SD karta <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
-    <string name="storage_usb_drive" msgid="448030813201444573">"Disk USB"</string>
+    <string name="storage_usb_drive" msgid="448030813201444573">"Kľúč USB"</string>
     <string name="storage_usb_drive_label" msgid="6631740655876540521">"Disk USB <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb" msgid="2391213347883616886">"Ukladací priestor USB"</string>
     <string name="extract_edit_menu_button" msgid="63954536535863040">"Upraviť"</string>

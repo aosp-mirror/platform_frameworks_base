@@ -1362,11 +1362,11 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Uključeno je modemsko povezivanje putem USB-a"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Uključen je MIDI putem USB-a"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Priključen je USB dodatak"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Dodirnite za više opcija."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Dodirnite za više opcija"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Povezani se uređaj puni. Dodirnite za više opcija."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Otkriven je analogni audiododatak"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Priključeni uređaj nije kompatibilan s ovim telefonom. Dodirnite da biste saznali više."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"Priključen je alat za otklanjanje pogrešaka putem USB-a"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"Uključeno je otklanjanje pogrešaka USB-om"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Dodirnite da isključite otkl. pogrešaka putem USB-a"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Odaberite da biste onemogućili rješavanje programske pogreške na USB-u."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Bežično otklanjanje pogrešaka povezano"</string>
@@ -1615,7 +1615,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tabletno računalo"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televizor"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Zvučnici postolja"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Zvučnici priključne stanice"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Slušalice"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>

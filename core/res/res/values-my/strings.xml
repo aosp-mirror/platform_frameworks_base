@@ -83,7 +83,7 @@
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ဖုန်းဝန်ဆောင်မှု မရှိပါ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"ဖုန်းခေါ်ဆိုခြင်း ဝန်ဆောင်မှု သို့မဟုတ် အရေးပေါ်ခေါ်ဆိုခြင်း မရနိုင်ပါ"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားသည်"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> အတွက် သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားပါသည်"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> အတွက် သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားပါသည်"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"မိုဘိုင်းကွန်ရက် လိုင်းမရပါ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ဦးစားပေးကွန်ရက်သို့ ပြောင်းကြည့်ပါ။ ပြောင်းရန် တို့ပါ။"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"အရေးပေါ်ခေါ်ဆိုမှု မရနိုင်ပါ"</string>
@@ -706,8 +706,8 @@
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ရေးခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်နှင့် လက်ခံနိုင်ရန် အက်ပ်ကို ခွင့်ပြုပါ။"</string>
-    <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"တယ်လီကွမ် ဆင်းမ် ချိတ်ဆက်မှုများကို မှတ်ပုံတင်ပါ"</string>
-    <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"အက်ပ်အား တယ်လီကွမ် ဆင်းမ် ချိတ်ဆက်မှုကို မှတ်ပုံတင်ခွင့် ပြုသည်။"</string>
+    <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"တယ်လီကွမ် ဆင်းမ်ကတ် ချိတ်ဆက်မှုများကို မှတ်ပုံတင်ပါ"</string>
+    <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"အက်ပ်အား တယ်လီကွမ် ဆင်းမ်ကတ် ချိတ်ဆက်မှုကို မှတ်ပုံတင်ခွင့် ပြုသည်။"</string>
     <string name="permlab_register_call_provider" msgid="6135073566140050702">"တယ်လီကွမ် တယ်လီကွမ် ချိတ်ဆက်မှု အသစ်များကို မှတ်ပုံတင်ပါ"</string>
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"အက်ပ်အား တယ်လီကွမ် ချိတ်ဆက်မှု အသစ်များကို မှတ်ပုံတင်ခွင့် ပြုသည်။"</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"တယ်လီကွမ် ဆက်သွယ်မှုများကို စီမံရန်"</string>
@@ -2033,14 +2033,14 @@
     <string name="etws_primary_default_message_test" msgid="4583367373909549421">"အရေးပေါ် မက်ဆေ့ဂျ် စမ်းသပ်မှု"</string>
     <string name="notification_reply_button_accessibility" msgid="5235776156579456126">"စာပြန်ရန်"</string>
     <string name="etws_primary_default_message_others" msgid="7958161706019130739"></string>
-    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"စကားသံအတွက် ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"စကားသံအတွက် ဆင်းမ်ကို ထောက်ပံ့မထားပါ"</string>
-    <string name="mmcc_illegal_ms" msgid="7509650265233909445">"စကားသံအတွက် ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"စကားသံအတွက် ဆင်းမ်ကတ်ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"စကားသံအတွက် ဆင်းမ်ကတ်ကို ထောက်ပံ့မထားပါ"</string>
+    <string name="mmcc_illegal_ms" msgid="7509650265233909445">"စကားသံအတွက် ဆင်းမ်ကတ်ကို ခွင့်မပြုပါ"</string>
     <string name="mmcc_illegal_me" msgid="6505557881889904915">"စကားသံအတွက် ဖုန်းကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ပေးမထားပါ"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ပေးမထားပါ"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
     <string name="popup_window_default_title" msgid="6907717596694826919">"ပေါ့ပ်အပ် ဝင်းဒိုး"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"အက်ပ်ဗားရှင်းကို အဆင့်နှိမ့်ထားသည် သို့မဟုတ် ဤဖြတ်လမ်းလင့်ခ်နှင့် သဟဇာတမဖြစ်ပါ"</string>

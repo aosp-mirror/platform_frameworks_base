@@ -1845,8 +1845,8 @@
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ruota per migliorare l\'anteprima"</string>
     <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Esci dallo schermo diviso per migliorare l\'anteprima"</string>
     <string name="done_label" msgid="7283767013231718521">"Fine"</string>
-    <string name="hour_picker_description" msgid="5153757582093524635">"Dispositivo di scorrimento circolare per le ore"</string>
-    <string name="minute_picker_description" msgid="9029797023621927294">"Dispositivo di scorrimento circolare per i minuti"</string>
+    <string name="hour_picker_description" msgid="5153757582093524635">"Cursore circolare per le ore"</string>
+    <string name="minute_picker_description" msgid="9029797023621927294">"Cursore circolare per i minuti"</string>
     <string name="select_hours" msgid="5982889657313147347">"Seleziona le ore"</string>
     <string name="select_minutes" msgid="9157401137441014032">"Seleziona i minuti"</string>
     <string name="select_day" msgid="2060371240117403147">"Seleziona mese e giorno"</string>
