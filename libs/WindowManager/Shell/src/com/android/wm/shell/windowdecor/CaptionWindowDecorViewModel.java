@@ -268,7 +268,10 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                     return false;
                 }
                 case MotionEvent.ACTION_MOVE: {
-                    int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    if (e.findPointerIndex(mDragPointerId) == -1) {
+                        mDragPointerId = e.getPointerId(0);
+                    }
+                    final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragPositioningCallback.onDragPositioningMove(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mIsDragging = true;
@@ -276,7 +279,10 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel {
                 }
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL: {
-                    int dragPointerIdx = e.findPointerIndex(mDragPointerId);
+                    if (e.findPointerIndex(mDragPointerId) == -1) {
+                        mDragPointerId = e.getPointerId(0);
+                    }
+                    final int dragPointerIdx = e.findPointerIndex(mDragPointerId);
                     mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     final boolean wasDragging = mIsDragging;
