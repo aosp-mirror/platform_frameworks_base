@@ -1177,6 +1177,10 @@ public final class JobStatus {
         mInternalFlags |= flags;
     }
 
+    public void removeInternalFlags(int flags) {
+        mInternalFlags = mInternalFlags & ~flags;
+    }
+
     int getPreferredConstraintFlags() {
         return mPreferredConstraints;
     }

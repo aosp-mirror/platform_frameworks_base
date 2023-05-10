@@ -582,6 +582,49 @@ public class JobStatusTest {
     }
 
     @Test
+    public void testModifyingInternalFlags() {
+        final JobInfo jobInfo =
+                new JobInfo.Builder(101, new ComponentName("foo", "bar"))
+                        .setExpedited(true)
+                        .build();
+        JobStatus job = createJobStatus(jobInfo);
+
+        assertEquals(0, job.getInternalFlags());
+
+        // Add single flag
+        job.addInternalFlags(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION);
+        assertEquals(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION, job.getInternalFlags());
+
+        // Add multiple flags
+        job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER
+                | JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ);
+        assertEquals(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION
+                        | JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER
+                        | JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ,
+                job.getInternalFlags());
+
+        // Add flag that's already set
+        job.addInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ);
+        assertEquals(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION
+                        | JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER
+                        | JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ,
+                job.getInternalFlags());
+
+        // Remove multiple
+        job.removeInternalFlags(JobStatus.INTERNAL_FLAG_HAS_FOREGROUND_EXEMPTION
+                | JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        assertEquals(JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ, job.getInternalFlags());
+
+        // Remove one that isn't set
+        job.removeInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        assertEquals(JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ, job.getInternalFlags());
+
+        // Remove final flag.
+        job.removeInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ);
+        assertEquals(0, job.getInternalFlags());
+    }
+
+    @Test
     public void testShouldTreatAsUserInitiated() {
         JobInfo jobInfo = new JobInfo.Builder(101, new ComponentName("foo", "bar"))
                 .setUserInitiated(false)
@@ -619,6 +662,9 @@ public class JobStatusTest {
         rescheduledJob = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME,
                 0, 0, 0, 0, 0);
         assertFalse(rescheduledJob.shouldTreatAsUserInitiatedJob());
+
+        rescheduledJob.removeInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER);
+        assertTrue(rescheduledJob.shouldTreatAsUserInitiatedJob());
     }
 
     @Test
@@ -641,6 +687,9 @@ public class JobStatusTest {
         rescheduledJob = new JobStatus(job, NO_EARLIEST_RUNTIME, NO_LATEST_RUNTIME,
                 0, 0, 0, 0, 0);
         assertFalse(rescheduledJob.shouldTreatAsUserInitiatedJob());
+
+        rescheduledJob.removeInternalFlags(JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ);
+        assertTrue(rescheduledJob.shouldTreatAsUserInitiatedJob());
     }
 
     /**

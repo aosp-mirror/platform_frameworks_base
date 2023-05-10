@@ -1500,6 +1500,16 @@ public class JobSchedulerService extends com.android.server.SystemService
                     }
 
                     toCancel.enqueueWorkLocked(work);
+                    if (toCancel.getJob().isUserInitiated()) {
+                        // The app is in a state to successfully schedule a UI job. Presumably, the
+                        // user has asked for this additional bit of work, so remove any demotion
+                        // flags. Only do this for UI jobs since they have strict scheduling
+                        // requirements; it's harder to assume other jobs were scheduled due to
+                        // user interaction/request.
+                        toCancel.removeInternalFlags(
+                                JobStatus.INTERNAL_FLAG_DEMOTED_BY_USER
+                                        | JobStatus.INTERNAL_FLAG_DEMOTED_BY_SYSTEM_UIJ);
+                    }
                     mJobs.touchJob(toCancel);
                     sEnqueuedJwiHighWaterMarkLogger.logSampleWithUid(uId, toCancel.getWorkCount());
 
