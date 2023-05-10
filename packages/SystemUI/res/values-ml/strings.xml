@@ -657,7 +657,7 @@
     <string name="group_system_hide_reshow_taskbar" msgid="3809304065624351131">"ടാസ്‌ക്ബാർ മറയ്ക്കുക, (വീണ്ടും) കാണിക്കുക"</string>
     <string name="group_system_access_system_settings" msgid="7961639365383008053">"സിസ്റ്റം ക്രമീകരണം ആക്സസ് ചെയ്യുക"</string>
     <string name="group_system_access_google_assistant" msgid="1186152943161483864">"Google Assistant ആക്സസ് ചെയ്യുക"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"സ്‌ക്രീൻ ലോക്ക് ചെയ്യുക"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"ലോക്ക് സ്‌ക്രീൻ"</string>
     <string name="group_system_quick_memo" msgid="2914234890158583919">"അതിവേഗ മെമോ തയ്യാറാക്കുന്നതിന് നോട്ട്‌സ് ആപ്പ് തുറക്കുക"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="1065232949510862593">"സിസ്റ്റം മൾട്ടിടാസ്‌കിംഗ്"</string>
     <string name="system_multitasking_rhs" msgid="6593269428880305699">"നിലവിലെ ആപ്പ് വലതുവശത്ത് വരുന്ന രീതിയിൽ സ്ക്രീൻ വിഭജന മോഡിൽ കടക്കുക"</string>
@@ -985,6 +985,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"സ്‌പീക്കറുകളും ഡിസ്പ്ലേകളും"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"നിർദ്ദേശിച്ച ഉപകരണങ്ങൾ"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"മീഡിയയെ മറ്റൊരു ഉപകരണത്തിലേക്ക് നീക്കുന്നതിന് നിങ്ങളുടെ പങ്കിട്ട സെഷൻ നിർത്തുക"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"നിർത്തുക"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ബ്രോഡ്‌കാസ്‌റ്റ് എങ്ങനെയാണ് പ്രവർത്തിക്കുന്നത്"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ബ്രോഡ്‌കാസ്റ്റ്"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"അനുയോജ്യമായ Bluetooth ഉപകരണങ്ങളോടെ സമീപമുള്ള ആളുകൾക്ക് നിങ്ങൾ ബ്രോഡ്‌കാസ്‌റ്റ് ചെയ്യുന്ന മീഡിയ കേൾക്കാനാകും"</string>
