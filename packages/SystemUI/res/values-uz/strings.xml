@@ -833,7 +833,7 @@
     <string name="controls_error_generic" msgid="352500456918362905">"Holat axboroti yuklanmadi"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Xato, qayta urining"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Element kiritish"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Elementlarni tahrirlash"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Boshqaruvni tahrirlash"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Chiquvchi qurilmani kiritish"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Guruh"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 ta qurilma tanlandi"</string>
