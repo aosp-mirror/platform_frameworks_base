@@ -2349,7 +2349,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         super.removeImmediately();
 
         if (isImeOverlayLayeringTarget()) {
-            mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(),
+            mWmService.dispatchImeTargetOverlayVisibilityChanged(mClient.asBinder(), mAttrs.type,
                     false /* visible */, true /* removed */);
         }
         final DisplayContent dc = getDisplayContent();
