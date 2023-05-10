@@ -121,7 +121,6 @@ import com.android.internal.logging.nano.MetricsProto;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
-import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
@@ -460,13 +459,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) {
-            return;
-        }
-
-        mContext.getSystemService(PermissionControllerManager.class).dump(fd, args);
-    }
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {}
 
     /**
      * This method should typically only be used when granting or revoking

@@ -48,6 +48,7 @@ import android.provider.Settings
 import android.util.ArrayMap
 import android.util.ArraySet
 import android.util.DebugUtils
+import android.util.IndentingPrintWriter
 import android.util.IntArray as GrowingIntArray
 import android.util.Log
 import android.util.SparseBooleanArray
@@ -63,6 +64,7 @@ import com.android.server.PermissionThread
 import com.android.server.ServiceThread
 import com.android.server.SystemConfig
 import com.android.server.permission.access.AccessCheckingService
+import com.android.server.permission.access.AccessState
 import com.android.server.permission.access.AppOpUri
 import com.android.server.permission.access.GetStateScope
 import com.android.server.permission.access.MutateStateScope
@@ -1743,7 +1745,143 @@ class PermissionService(
         if (!DumpUtils.checkDumpPermission(context, LOG_TAG, pw)) {
             return
         }
-        context.getSystemService(PermissionControllerManager::class.java)!!.dump(fd, args)
+
+        val writer = IndentingPrintWriter(pw, "  ")
+
+        if (args.isNullOrEmpty()) {
+            service.getState {
+                writer.dumpSystemState(state)
+                getAllAppIdPackageNames(state).forEachIndexed { _, appId, packageNames ->
+                    if (appId != Process.INVALID_UID) {
+                        writer.dumpAppIdState(appId, state, packageNames)
+                    }
+                }
+            }
+        } else if (args[0] == "--app-id" && args.size == 2) {
+            val appId = args[1].toInt()
+            service.getState {
+                val appIdPackageNames = getAllAppIdPackageNames(state)
+                if (appId in appIdPackageNames) {
+                    writer.dumpAppIdState(appId, state, appIdPackageNames[appId])
+                } else {
+                    writer.println("Unknown app ID $appId.")
+                }
+            }
+        } else {
+            writer.println("Usage: dumpsys permission [--app-id APP_ID]")
+        }
+    }
+
+    private fun getAllAppIdPackageNames(
+        state: AccessState
+    ): IndexedMap<Int, MutableIndexedSet<String>> {
+        val appIds = MutableIndexedSet<Int>()
+
+        val packageStates = packageManagerLocal.withUnfilteredSnapshot().use {
+            it.packageStates
+        }
+        state.userStates.forEachIndexed { _, _, userState ->
+            userState.appIdPermissionFlags.forEachIndexed { _, appId, _ ->
+                appIds.add(appId)
+            }
+            userState.appIdAppOpModes.forEachIndexed { _, appId, _ ->
+                appIds.add(appId)
+            }
+            userState.packageVersions.forEachIndexed packageVersions@ { _, packageName, _ ->
+                val appId = packageStates[packageName]?.appId ?: return@packageVersions
+                appIds.add(appId)
+            }
+            userState.packageAppOpModes.forEachIndexed packageAppOpModes@ { _, packageName, _ ->
+                val appId = packageStates[packageName]?.appId ?: return@packageAppOpModes
+                appIds.add(appId)
+            }
+        }
+
+        val appIdPackageNames = MutableIndexedMap<Int, MutableIndexedSet<String>>()
+        packageStates.forEach { (_, packageState) ->
+            appIdPackageNames.getOrPut(packageState.appId) { MutableIndexedSet() }
+                .add(packageState.packageName)
+        }
+        // add non-package app IDs which might not be reported by package manager.
+        appIds.forEachIndexed { _, appId ->
+            appIdPackageNames.getOrPut(appId) { MutableIndexedSet() }
+        }
+
+        return appIdPackageNames
+    }
+
+    private fun IndentingPrintWriter.dumpSystemState(state: AccessState) {
+        println("Permissions:")
+        withIndent {
+            state.systemState.permissions.forEachIndexed { _, _, permission ->
+                val protectionLevel = PermissionInfo.protectionToString(permission.protectionLevel)
+                println("${permission.name}: appId=${permission.appId}, " +
+                    "type=${Permission.typeToString(permission.type)}, " +
+                    "gids=${permission.gids.contentToString()}, " +
+                    "protection=[$protectionLevel], " +
+                    "flags=${PermissionInfo.flagsToString(permission.permissionInfo.flags)}"
+                )
+            }
+        }
+        println("Permission trees:")
+        withIndent {
+            state.systemState.permissionTrees.forEachIndexed { _, _, permissionTree ->
+                println("${permissionTree.name}: appId=${permissionTree.appId}")
+            }
+        }
+    }
+
+    private fun IndentingPrintWriter.dumpAppIdState(
+        appId: Int,
+        state: AccessState,
+        packageNames: IndexedSet<String>?
+    ) {
+        println("App ID: $appId")
+        withIndent {
+            state.userStates.forEachIndexed { _, userId, userState ->
+                println("User: $userId")
+                withIndent {
+                    println("Permissions:")
+                    withIndent {
+                        userState.appIdPermissionFlags[appId]?.forEachIndexed {
+                                _, permissionName, flags ->
+                            val isGranted = PermissionFlags.isPermissionGranted(flags)
+                            println(
+                                "$permissionName: granted=$isGranted, flags=" +
+                                    PermissionFlags.toString(flags)
+                            )
+                        }
+                    }
+
+                    println("App ops:")
+                    withIndent {
+                        userState.appIdAppOpModes[appId]?.forEachIndexed {_, appOpName, appOpMode ->
+                            println("$appOpName: mode=${AppOpsManager.modeToName(appOpMode)}")
+                        }
+                    }
+                    packageNames?.forEachIndexed { _, packageName ->
+                        println("Package: $packageName")
+                        withIndent {
+                            println("version=${userState.packageVersions[packageName]}")
+                            println("App ops:")
+                            withIndent {
+                                userState.packageAppOpModes[packageName]?.forEachIndexed {
+                                        _, appOpName, appOpMode ->
+                                    val modeName = AppOpsManager.modeToName(appOpMode)
+                                    println("$appOpName: mode=$modeName")
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private inline fun IndentingPrintWriter.withIndent(block: IndentingPrintWriter.() -> Unit) {
+        increaseIndent()
+        block()
+        decreaseIndent()
     }
 
     override fun getPermissionTEMP(permissionName: String): LegacyPermission2? {
