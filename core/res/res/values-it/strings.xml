@@ -1835,8 +1835,8 @@
     <string name="immersive_cling_description" msgid="7092737175345204832">"Per uscire, scorri dall\'alto verso il basso."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="done_label" msgid="7283767013231718521">"Fine"</string>
-    <string name="hour_picker_description" msgid="5153757582093524635">"Dispositivo di scorrimento circolare per le ore"</string>
-    <string name="minute_picker_description" msgid="9029797023621927294">"Dispositivo di scorrimento circolare per i minuti"</string>
+    <string name="hour_picker_description" msgid="5153757582093524635">"Cursore circolare per le ore"</string>
+    <string name="minute_picker_description" msgid="9029797023621927294">"Cursore circolare per i minuti"</string>
     <string name="select_hours" msgid="5982889657313147347">"Seleziona le ore"</string>
     <string name="select_minutes" msgid="9157401137441014032">"Seleziona i minuti"</string>
     <string name="select_day" msgid="2060371240117403147">"Seleziona mese e giorno"</string>
