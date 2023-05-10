@@ -18,7 +18,9 @@ package com.android.keyguard;
 
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 
 import androidx.annotation.VisibleForTesting;
@@ -45,6 +47,31 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
     private final AnnounceRunnable mAnnounceRunnable;
+    private final TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void afterTextChanged(Editable editable) {
+            CharSequence msg = editable;
+            if (!TextUtils.isEmpty(msg)) {
+                mView.removeCallbacks(mAnnounceRunnable);
+                mAnnounceRunnable.setTextToAnnounce(msg);
+                mView.postDelayed(() -> {
+                    if (msg == mView.getText()) {
+                        mAnnounceRunnable.run();
+                    }
+                }, ANNOUNCEMENT_DELAY);
+            }
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            /* no-op */
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            /* no-op */
+        }
+    };
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
         public void onFinishedGoingToSleep(int why) {
@@ -89,12 +116,14 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
         mKeyguardUpdateMonitor.registerCallback(mInfoCallback);
         mView.setSelected(mKeyguardUpdateMonitor.isDeviceInteractive());
         mView.onThemeChanged();
+        mView.addTextChangedListener(mTextWatcher);
     }
 
     @Override
     protected void onViewDetached() {
         mConfigurationController.removeCallback(mConfigurationListener);
         mKeyguardUpdateMonitor.removeCallback(mInfoCallback);
+        mView.removeTextChangedListener(mTextWatcher);
     }
 
     /**
@@ -113,12 +142,6 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
      */
     public void setMessage(CharSequence s, boolean animate) {
         mView.setMessage(s, animate);
-        CharSequence msg = mView.getText();
-        if (!TextUtils.isEmpty(msg)) {
-            mView.removeCallbacks(mAnnounceRunnable);
-            mAnnounceRunnable.setTextToAnnounce(msg);
-            mView.postDelayed(mAnnounceRunnable, ANNOUNCEMENT_DELAY);
-        }
     }
 
     public void setMessage(int resId) {
