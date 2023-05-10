@@ -1825,6 +1825,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             pw.decreaseIndent();
         }
         mSilentUpdatePolicy.dump(pw);
+        mGentleUpdateHelper.dump(pw);
     }
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
