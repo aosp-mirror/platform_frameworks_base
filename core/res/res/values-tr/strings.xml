@@ -1370,7 +1370,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analog ses aksesuarı algılandı"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Takılan cihaz bu telefonla uyumlu değil. Daha fazla bilgi edinmek için dokunun."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB hata ayıklaması bağlandı"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB hata ayıklama işlevini kapatmak için dokunun"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB hata ayıklamayı kapatmak için dokunun"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB hata ayıklamasını devre dışı bırakmak için seçin."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Kablosuz hata ayıklama bağlı"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Kablosuz hata ayıklamayı kapatmak için dokunun"</string>
@@ -2164,8 +2164,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Devam ettir"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"İş uygulaması yok"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Kişisel uygulama yok"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Kişisel uygulamayı (<xliff:g id="APP">%s</xliff:g>) aç"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"İş uygulamasını (<xliff:g id="APP">%s</xliff:g>) aç"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Kişisel tarayıcıyı kullan"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"İş tarayıcısını kullan"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ağ kilidi açma PIN kodu"</string>
