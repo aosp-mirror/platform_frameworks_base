@@ -22,7 +22,6 @@ import static android.media.AudioManager.CSD_WARNING_DOSE_REPEATED_5X;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.app.Notification;
@@ -75,17 +74,14 @@ public class CsdWarningDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void create5XCsdDiSalogAndWait_willNotSendNotification() {
+    public void create5XCsdDiSalogAndWait_willSendNotification() {
         FakeExecutor executor =  new FakeExecutor(new FakeSystemClock());
         CsdWarningDialog dialog = new CsdWarningDialog(CSD_WARNING_DOSE_REPEATED_5X, mContext,
                 mAudioManager, mNotificationManager, executor, null);
 
         dialog.show();
-        executor.advanceClockToLast();
-        executor.runAllReady();
-        dialog.dismiss();
 
-        verify(mNotificationManager, never()).notify(
+        verify(mNotificationManager).notify(
                 eq(SystemMessageProto.SystemMessage.NOTE_CSD_LOWER_AUDIO), any(Notification.class));
     }
 }

@@ -1312,9 +1312,17 @@
     <string name="volume_panel_dialog_settings_button">Settings</string>
 
     <!-- Title for notification after audio lowers -->
-    <string name="csd_lowered_title" product="default">Lowered to safer volume</string>
+    <string name="csd_lowered_title" product="default">Volume lowered to safer level</string>
     <!-- Message shown in notification after system lowers audio -->
-    <string name="csd_system_lowered_text" product="default">The volume has been high for longer than recommended</string>
+    <string name="csd_system_lowered_text" product="default">Headphone volume has been high for longer than recommended</string>
+    <!-- Message shown in notification after system lowers audio after 500% of
+         sound dosage is reached.
+    -->
+    <string name="csd_500_system_lowered_text" product="default">Headphone volume has exceeded the safe limit for this week</string>
+    <!-- Message for sound dose warning dialog button to keep listening -->
+    <string name="csd_button_keep_listening" product="default">Keep listening</string>
+    <!-- Message for sound dose warning dialog button to lower volume -->
+    <string name="csd_button_lower_volume" product="default">Lower volume</string>
 
     <!-- content description for audio output chooser [CHAR LIMIT=NONE]-->
 
