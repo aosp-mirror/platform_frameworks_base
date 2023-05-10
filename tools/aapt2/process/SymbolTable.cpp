@@ -260,10 +260,11 @@ bool AssetManagerSymbolSource::IsPackageDynamic(uint32_t packageId,
 static std::unique_ptr<SymbolTable::Symbol> LookupAttributeInTable(
     android::AssetManager2& am, ResourceId id) {
   using namespace android;
-  if (am.GetApkAssets().empty()) {
+  if (am.GetApkAssetsCount() == 0) {
     return {};
   }
 
+  auto op = am.StartOperation();
   auto bag_result = am.GetBag(id.id);
   if (!bag_result.has_value()) {
     return nullptr;
