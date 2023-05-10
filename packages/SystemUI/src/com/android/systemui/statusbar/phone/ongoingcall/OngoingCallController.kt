@@ -136,6 +136,9 @@ class OngoingCallController @Inject constructor(
     fun setChipView(chipView: View) {
         tearDownChipView()
         this.chipView = chipView
+        val backgroundView: OngoingCallBackgroundContainer? =
+            chipView.findViewById(R.id.ongoing_call_chip_background)
+        backgroundView?.maxHeightFetcher = { statusBarWindowController.get().statusBarHeight }
         if (hasOngoingCall()) {
             updateChip()
         }
