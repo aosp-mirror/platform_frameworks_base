@@ -20,6 +20,7 @@ import android.os.Handler
 import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
+import android.view.Display
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
@@ -29,6 +30,7 @@ import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.settings.GlobalSettings
 import junit.framework.Assert.assertFalse
 import org.junit.After
@@ -141,7 +143,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Test
     fun testAodUiNotShownIfInteractive() {
         `when`(dozeParameters.canControlUnlockedScreenOff()).thenReturn(true)
-        `when`(powerManager.isInteractive).thenReturn(true)
+        `when`(powerManager.isInteractive(eq(Display.DEFAULT_DISPLAY))).thenReturn(true)
 
         val callbackCaptor = ArgumentCaptor.forClass(Runnable::class.java)
         controller.startAnimation()
@@ -150,6 +152,21 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         callbackCaptor.value.run()
 
         verify(shadeViewController, never()).showAodUi()
+    }
+
+    @Test
+    fun testAodUiShownIfGloballyInteractiveButDefaultDisplayNotInteractive() {
+        `when`(dozeParameters.canControlUnlockedScreenOff()).thenReturn(true)
+        `when`(powerManager.isInteractive()).thenReturn(false)
+        `when`(powerManager.isInteractive(eq(Display.DEFAULT_DISPLAY))).thenReturn(false)
+
+        val callbackCaptor = ArgumentCaptor.forClass(Runnable::class.java)
+        controller.startAnimation()
+
+        verify(handler).postDelayed(callbackCaptor.capture(), anyLong())
+        callbackCaptor.value.run()
+
+        verify(shadeViewController).showAodUi()
     }
 
     @Test
