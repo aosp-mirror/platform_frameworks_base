@@ -3730,12 +3730,7 @@ public class AudioManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(Manifest.permission.BLUETOOTH_STACK)
     public void setA2dpSuspended(boolean enable) {
-        final IAudioService service = getService();
-        try {
-            service.setA2dpSuspended(enable);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        AudioSystem.setParameters("A2dpSuspended=" + enable);
     }
 
     /**
@@ -3748,12 +3743,7 @@ public class AudioManager {
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(Manifest.permission.BLUETOOTH_STACK)
     public void setLeAudioSuspended(boolean enable) {
-        final IAudioService service = getService();
-        try {
-            service.setLeAudioSuspended(enable);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        AudioSystem.setParameters("LeAudioSuspended=" + enable);
     }
 
     /**
