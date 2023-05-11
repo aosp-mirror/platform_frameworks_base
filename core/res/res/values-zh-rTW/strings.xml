@@ -1952,7 +1952,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"目前無法使用「<xliff:g id="APP_NAME_0">%1$s</xliff:g>」。這項設定是由「<xliff:g id="APP_NAME_1">%2$s</xliff:g>」管理。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"瞭解詳情"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"取消暫停應用程式"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"要取消暫停工作應用程式嗎？"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"要解除工作應用程式的暫停狀態嗎？"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"取消暫停"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"撥打緊急電話"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"應用程式無法使用"</string>
@@ -2161,11 +2161,15 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"無法透過個人應用程式分享這項內容"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"無法使用個人應用程式開啟這項內容"</string>
     <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"工作應用程式目前為暫停狀態"</string>
-    <string name="resolver_switch_on_work" msgid="4527096360772311894">"取消暫停"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"解除暫停"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"沒有適用的工作應用程式"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"沒有適用的個人應用程式"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"開啟個人用「<xliff:g id="APP">%s</xliff:g>」"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"開啟工作用「<xliff:g id="APP">%s</xliff:g>」"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"使用個人瀏覽器"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"使用工作瀏覽器"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 卡網路解鎖 PIN 碼"</string>

@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"En sertifiseringsinstans er installert på denne enheten. Den sikre nettverkstrafikken din kan overvåkes eller endres."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administratoren din har slått på loggføring av nettverk, som overvåker trafikken på enheten din."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administratoren din har slått på loggføring av nettverk, som overvåker trafikken i jobbprofilen din, men ikke i den personlige profilen din."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Denne enheten er koblet til internett via <xliff:g id="VPN_APP">%1$s</xliff:g>. Nettverksaktiviteten din, inkludert e-poster og nettlesingsdata, er synlig for VPN-leverandøren."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Denne enheten er koblet til internett via <xliff:g id="VPN_APP">%1$s</xliff:g>. Nettverksaktiviteten din, inkludert e-poster og nettlesingsdata, er synlig for IT-administratoren din."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Denne enheten er koblet til internett via <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Nettverksaktiviteten din, inkludert e-poster og nettlesingsdata, er synlig for IT-administratoren din."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Jobbappene dine er koblet til internett via <xliff:g id="VPN_APP">%1$s</xliff:g>. Nettverksaktiviteten din i jobbapper, inkludert e-poster og nettlesingsdata, er synlige for IT-administratoren og VPN-leverandøren din."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"De personlige appene dine er koblet til internett via <xliff:g id="VPN_APP">%1$s</xliff:g>. Nettverksaktiviteten din, inkludert e-poster og nettlesingsdata, er synlig for VPN-leverandøren din."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Høyttalere og skjermer"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Foreslåtte enheter"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Slik fungerer kringkasting"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Kringkasting"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Folk i nærheten med kompatible Bluetooth-enheter kan lytte til mediene du kringkaster"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• en kameraapp er installert"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• appen er konfigurert"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• minst én enhet er tilgjengelig"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Velg en standard notatapp du vil bruke med notatsnarveien"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Velg app"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Trykk på og hold inne snarveien"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Avbryt"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Bytt skjerm nå"</string>

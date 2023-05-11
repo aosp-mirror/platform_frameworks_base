@@ -271,6 +271,55 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         })
     }
 
+    @Test
+    fun testDragResize_resize_resizingTaskReorderedToTopWhenNotFocused() {
+        mockDesktopWindowDecoration.mTaskInfo.isFocused = false
+        taskPositioner.onDragPositioningStart(
+                CTRL_TYPE_RIGHT, // Resize right
+                STARTING_BOUNDS.left.toFloat(),
+                STARTING_BOUNDS.top.toFloat()
+        )
+
+        // Verify task is reordered to top
+        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+            return@argThat wct.hierarchyOps.any { hierarchyOps ->
+                hierarchyOps.container == taskBinder && hierarchyOps.toTop }
+        })
+    }
+
+    @Test
+    fun testDragResize_resize_resizingTaskNotReorderedToTopWhenFocused() {
+        mockDesktopWindowDecoration.mTaskInfo.isFocused = true
+        taskPositioner.onDragPositioningStart(
+                CTRL_TYPE_RIGHT, // Resize right
+                STARTING_BOUNDS.left.toFloat(),
+                STARTING_BOUNDS.top.toFloat()
+        )
+
+        // Verify task is not reordered to top
+        verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
+            return@argThat wct.hierarchyOps.any { hierarchyOps ->
+                hierarchyOps.container == taskBinder && hierarchyOps.toTop }
+        })
+    }
+
+    @Test
+    fun testDragResize_drag_draggedTaskNotReorderedToTop() {
+        mockDesktopWindowDecoration.mTaskInfo.isFocused = false
+        taskPositioner.onDragPositioningStart(
+                CTRL_TYPE_UNDEFINED, // drag
+                STARTING_BOUNDS.left.toFloat(),
+                STARTING_BOUNDS.top.toFloat()
+        )
+
+        // Verify task is not reordered to top since task is already brought to top before dragging
+        // begins
+        verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
+            return@argThat wct.hierarchyOps.any { hierarchyOps ->
+                hierarchyOps.container == taskBinder && hierarchyOps.toTop }
+        })
+    }
+
     companion object {
         private const val TASK_ID = 5
         private const val MIN_WIDTH = 10

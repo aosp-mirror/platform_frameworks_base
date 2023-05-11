@@ -211,7 +211,7 @@
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activer"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"Les appels et messages sont désactivés"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"Vous avez mis en pause les applications professionnelles. Vous ne recevrez aucun appel téléphonique ni message texte."</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Réact. applis prof."</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"Réact. applis pros"</string>
     <string name="me" msgid="6207584824693813140">"Moi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Options de la tablette"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Options d\'Android TV"</string>
@@ -670,7 +670,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Problème avec la fonctionnalité de déverrouillage par reconnaissance faciale"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Touchez pour supprimer votre modèle facial, puis ajoutez votre visage de nouveau"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le déverrouillage par reconnaissance faciale"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"Configurer le Déverrouillage par reconnaissance faciale"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Déverrouillez votre téléphone en le regardant"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"Pour utiliser le déverrouillage par reconnaissance faciale, activez l\'"<b>"accès à l\'appareil photo"</b>" dans Paramètres &gt; Confidentialité"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Configurer d\'autres méthodes de déverrouillage"</string>
@@ -1954,7 +1954,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"L\'application <xliff:g id="APP_NAME_0">%1$s</xliff:g> n\'est pas accessible pour le moment. Ceci est géré par <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"En savoir plus"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Réactiver l\'application"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Réactiver les applis prof.?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Réactiver les applis pros?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Réactiver"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Urgence"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'application n\'est pas accessible"</string>
@@ -2168,8 +2168,12 @@
     <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Aucune application professionnelle"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Aucune application personnelle"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans le profil personnel"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Ouvrir <xliff:g id="APP">%s</xliff:g> dans le profil professionnel"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utiliser le navigateur du profil personnel"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utiliser le navigateur du profil professionnel"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"NIP de déverrouillage du réseau associé au module SIM"</string>

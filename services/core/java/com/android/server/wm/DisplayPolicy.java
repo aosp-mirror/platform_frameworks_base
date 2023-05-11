@@ -1530,6 +1530,11 @@ public class DisplayPolicy {
             if (isOverlappingWithNavBar(win) && mNavBarColorWindowCandidate == null) {
                 mNavBarColorWindowCandidate = win;
             }
+        } else if (appWindow && attached == null && mNavBarColorWindowCandidate == null
+                && win.getFrame().contains(
+                        getBarContentFrameForWindow(win, Type.navigationBars()))) {
+            mNavBarColorWindowCandidate = win;
+            addSystemBarColorApp(win);
         }
     }
 

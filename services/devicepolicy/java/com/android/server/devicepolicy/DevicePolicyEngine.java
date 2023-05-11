@@ -56,6 +56,7 @@ import android.util.Xml;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.utils.Slogf;
 
 import libcore.io.IoUtils;
 
@@ -80,6 +81,10 @@ import java.util.Set;
  */
 final class DevicePolicyEngine {
     static final String TAG = "DevicePolicyEngine";
+
+    // TODO(b/281701062): reference role name from role manager once its exposed.
+    static final String DEVICE_LOCK_CONTROLLER_ROLE =
+            "android.app.role.SYSTEM_FINANCED_DEVICE_CONTROLLER";
 
     private static final String CELLULAR_2G_USER_RESTRICTION_ID =
             DevicePolicyIdentifiers.getIdentifierForUserRestriction(
@@ -1010,11 +1015,21 @@ final class DevicePolicyEngine {
     /**
      * Handles internal state related to packages getting updated.
      */
-    void handlePackageChanged(@Nullable String updatedPackage, int userId) {
+    void handlePackageChanged(@Nullable String updatedPackage, int userId, boolean packageRemoved) {
         if (updatedPackage == null) {
             return;
         }
-        updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+        if (packageRemoved) {
+            Set<EnforcingAdmin> admins = getEnforcingAdminsOnUser(userId);
+            for (EnforcingAdmin admin : admins) {
+                if (admin.getPackageName().equals(updatedPackage)) {
+                    // remove policies for the uninstalled package
+                    removePoliciesForAdmin(admin);
+                }
+            }
+        } else {
+            updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+        }
     }
 
     /**
@@ -1030,6 +1045,28 @@ final class DevicePolicyEngine {
      */
     void handleUserCreated(UserInfo user) {
         enforcePoliciesOnInheritableProfilesIfApplicable(user);
+    }
+
+    /**
+     * Handles internal state related to roles getting updated.
+     */
+    void handleRoleChanged(@NonNull String roleName, int userId) {
+        // TODO(b/256852787): handle all roles changing.
+        if (!DEVICE_LOCK_CONTROLLER_ROLE.equals(roleName)) {
+            // We only support device lock controller role for now.
+            return;
+        }
+        String roleAuthority = EnforcingAdmin.getRoleAuthorityOf(roleName);
+        Set<EnforcingAdmin> admins = getEnforcingAdminsOnUser(userId);
+        for (EnforcingAdmin admin : admins) {
+            if (admin.hasAuthority(roleAuthority)) {
+                admin.reloadRoleAuthorities();
+                // remove admin policies if role was lost
+                if (!admin.hasAuthority(roleAuthority)) {
+                    removePoliciesForAdmin(admin);
+                }
+            }
+        }
     }
 
     private void enforcePoliciesOnInheritableProfilesIfApplicable(UserInfo user) {
@@ -1475,7 +1512,7 @@ final class DevicePolicyEngine {
                 readInner(parser);
 
             } catch (XmlPullParserException | IOException | ClassNotFoundException e) {
-                Log.e(TAG, "Error parsing resources file", e);
+                Slogf.wtf(TAG, "Error parsing resources file", e);
             } finally {
                 IoUtils.closeQuietly(input);
             }
@@ -1497,7 +1534,7 @@ final class DevicePolicyEngine {
                         readEnforcingAdminsInner(parser);
                         break;
                     default:
-                        Log.e(TAG, "Unknown tag " + tag);
+                        Slogf.wtf(TAG, "Unknown tag " + tag);
                 }
             }
         }
@@ -1518,7 +1555,7 @@ final class DevicePolicyEngine {
                         policyState = PolicyState.readFromXml(parser);
                         break;
                     default:
-                        Log.e(TAG, "Unknown tag for local policy entry" + tag);
+                        Slogf.wtf(TAG, "Unknown tag for local policy entry" + tag);
                 }
             }
 
@@ -1528,7 +1565,9 @@ final class DevicePolicyEngine {
                 }
                 mLocalPolicies.get(userId).put(policyKey, policyState);
             } else {
-                Log.e(TAG, "Error parsing local policy");
+                Slogf.wtf(TAG, "Error parsing local policy, policyKey is "
+                        + (policyKey == null ? "null" : policyKey) + ", and policyState is "
+                        + (policyState == null ? "null" : policyState) + ".");
             }
         }
 
@@ -1547,20 +1586,26 @@ final class DevicePolicyEngine {
                         policyState = PolicyState.readFromXml(parser);
                         break;
                     default:
-                        Log.e(TAG, "Unknown tag for local policy entry" + tag);
+                        Slogf.wtf(TAG, "Unknown tag for local policy entry" + tag);
                 }
             }
 
             if (policyKey != null && policyState != null) {
                 mGlobalPolicies.put(policyKey, policyState);
             } else {
-                Log.e(TAG, "Error parsing global policy");
+                Slogf.wtf(TAG, "Error parsing global policy, policyKey is "
+                        + (policyKey == null ? "null" : policyKey) + ", and policyState is "
+                        + (policyState == null ? "null" : policyState) + ".");
             }
         }
 
         private void readEnforcingAdminsInner(TypedXmlPullParser parser)
                 throws XmlPullParserException {
             EnforcingAdmin admin = EnforcingAdmin.readFromXml(parser);
+            if (admin == null) {
+                Slogf.wtf(TAG, "Error parsing enforcingAdmins, EnforcingAdmin is null.");
+                return;
+            }
             if (!mEnforcingAdmins.contains(admin.getUserId())) {
                 mEnforcingAdmins.put(admin.getUserId(), new HashSet<>());
             }

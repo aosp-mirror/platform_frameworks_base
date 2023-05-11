@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Na ovom uređaju je instaliran autoritet za izdavanje sertifikata. Bezbedni mrežni saobraćaj može da se prati ili menja."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator je uključio evidentiranje mreže, koje prati saobraćaj na uređaju."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator je uključio evidentiranje mreže, koje prati saobraćaj na poslovnom profilu, ali ne i na ličnom profilu."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Ovaj uređaj je povezan na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša aktivnost na mreži, uključujući imejlove i podatke pregledanja, vidljiva je dobavljaču VPN-a."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Ovaj uređaj je povezan na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša aktivnost na mreži, uključujući imejlove i podatke pregledanja, vidljiva je IT administratoru."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Ovaj uređaj je povezan na internet preko: <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaša aktivnost na mreži, uključujući imejlove i podatke pregledanja, vidljiva je IT administratoru."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše poslovne aplikacije su povezane na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša aktivnost na mreži u poslovnim aplikacijama, uključujući imejlove i podatke pregledanja, vidljiva je IT administratoru i dobavljaču VPN-a."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vaše lične aplikacije su povezane na internet preko: <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaša aktivnost na mreži, uključujući imejlove i podatke pregledanja, vidljiva je dobavljaču VPN-a."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Zvučnici i ekrani"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Predloženi uređaji"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Kako funkcioniše emitovanje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Emitovanje"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ljudi u blizini sa kompatibilnim Bluetooth uređajima mogu da slušaju medijski sadržaj koji emitujete"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• da ste instalirali aplikaciju za kameru"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• da je aplikacija podešena"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• da je dostupan barem jedan uređaj"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Izaberite podrazumevanu aplikaciju za beleške da biste koristili prečicu za pravljenje beleški"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Izaberi aplikaciju"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Dodirnite i zadržite prečicu"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Otkaži"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Zameni ekrane"</string>

@@ -171,7 +171,7 @@
     <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Поставете „Отклучување со отпечаток“ повторно"</string>
     <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Отклучување со отпечаток"</string>
     <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Поставување „Отклучување со отпечаток“"</string>
-    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"За да поставите „Отклучување со отпечаток“ повторно, вашите сегашните слики и модели на отпечаток ќе се избришат.\n\nОткако ќе се избришат, ќе треба повторно да поставите „Отклучување со отпечаток“ за да го користите отпечатокот за да го отклучите телефонот или да потврдите дека сте вие."</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"За да поставите „Отклучување со отпечаток“ повторно, вашите сегашни слики и модели на отпечаток ќе се избришат.\n\nОткако ќе се избришат, ќе треба повторно да поставите „Отклучување со отпечаток“ за да го користите отпечатокот за отклучување на телефонот или потврда дека сте вие."</string>
     <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"За да поставите „Отклучување со отпечаток“ повторно, вашите сегашните слики и модели на отпечаток ќе бидат избришат.\n\nОткако ќе се избришат, ќе треба повторно да поставите „Отклучување со отпечаток“ за да го користите отпечатокот за да го отклучите телефонот или да потврдите дека сте вие."</string>
     <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Не можеше да се постави „Отклучување со отпечаток“. Одете во „Поставки“ за да се обидете повторно."</string>
     <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Поставете „Отклучување со лик“ повторно"</string>
@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На уредов е инсталиран авторитет за сертификат. Вашиот безбеден мрежен сообраќај можно е да се следи или изменува."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Вашиот администратор вклучил евиденција на мрежата, што подразбира следење на сообраќајот на вашиот уред."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Вашиот администратор вклучил мрежна евиденција, што подразбира следење на сообраќајот во работниот, но не и во личниот профил."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Уредов е поврзан на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, заедно со е-пораките и податоците од прелистување, е видлива за VPN-операторот."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Уредов е поврзан на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, заедно со е-пораките и податоците од прелистување, е видлива за вашиот IT-администратор."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Уредот е поврзан на интернет преку <xliff:g id="VPN_APP_0">%1$s</xliff:g> и <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Вашата мрежна активност, вклучително е-пораките и податоците од прелистување, е видлива за IT-администраторот."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Вашите работни апликации се поврзани на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, вклучително е-пораките и податоците од прелистување, е видлива за вашиот IT-администратор и давател на услуги за VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Вашите лични апликации се поврзани на интернет преку <xliff:g id="VPN_APP">%1$s</xliff:g>. Вашата мрежна активност во работните апликации, вклучително е-пораките и податоците од прелистување, е видлива за вашиот давател на услуги за VPN."</string>
@@ -880,7 +878,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Допрете за функциите за пристапност. Приспособете или заменете го копчево во „Поставки“.\n\n"<annotation id="link">"Прикажи поставки"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Преместете го копчето до работ за да го сокриете привремено"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Врати"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Отстранета е кратенката за <xliff:g id="FEATURE_NAME">%s</xliff:g>"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Кратенката за „<xliff:g id="FEATURE_NAME">%s</xliff:g>“ е отстранета"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{Отстранета е # кратенка}one{Отстранети се # кратенка}other{Отстранети се # кратенки}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Премести горе лево"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Премести горе десно"</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Звучници и екрани"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Предложени уреди"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Како функционира емитувањето"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Емитување"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Луѓето во ваша близина со компатибилни уреди со Bluetooth може да ги слушаат аудиозаписите што ги емитувате"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• инсталирана е апликација за камера"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• апликацијата е поставена"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• достапен е најмалку еден уред"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Изберете стандардна апликација за белешки за да ја користите кратенката за фаќање белешки"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Изберете апликација"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Допрете и задржете ја кратенката"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Откажи"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Променете го екранот сега"</string>

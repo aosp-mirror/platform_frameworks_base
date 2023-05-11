@@ -78,6 +78,16 @@
                 <action android:name="android.service.trust.TrustAgentService" />
             </intent-filter>
         </service>
+        <service
+            android:name=".IsActiveUnlockRunningTrustAgent"
+            android:exported="true"
+            android:label="Test Agent"
+            android:permission="android.permission.BIND_TRUST_AGENT">
+            <intent-filter>
+                <action android:name="android.service.trust.TrustAgentService" />
+            </intent-filter>
+        </service>
+
     </application>
 
     <!--  self-instrumenting test package. -->

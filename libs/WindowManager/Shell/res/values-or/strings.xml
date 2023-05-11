@@ -26,7 +26,7 @@
     <string name="pip_notification_title" msgid="1347104727641353453">"<xliff:g id="NAME">%s</xliff:g> \"ଛବି-ଭିତରେ-ଛବି\"ରେ ଅଛି"</string>
     <string name="pip_notification_message" msgid="8854051911700302620">"ଏହି ବୈଶିଷ୍ଟ୍ୟ <xliff:g id="NAME">%s</xliff:g> ବ୍ୟବହାର ନକରିବାକୁ ଯଦି ଆପଣ ଚାହାଁନ୍ତି, ସେଟିଙ୍ଗ ଖୋଲିବାକୁ ଟାପ୍‍ କରନ୍ତୁ ଏବଂ ଏହା ଅଫ୍‍ କରିଦିଅନ୍ତୁ।"</string>
     <string name="pip_play" msgid="3496151081459417097">"ପ୍ଲେ କରନ୍ତୁ"</string>
-    <string name="pip_pause" msgid="690688849510295232">"ପଜ୍‍ କରନ୍ତୁ"</string>
+    <string name="pip_pause" msgid="690688849510295232">"ବିରତ କରନ୍ତୁ"</string>
     <string name="pip_skip_to_next" msgid="8403429188794867653">"ପରବର୍ତ୍ତୀକୁ ଯାଆନ୍ତୁ"</string>
     <string name="pip_skip_to_prev" msgid="7172158111196394092">"ପୂର୍ବବର୍ତ୍ତୀକୁ ଛାଡ଼ନ୍ତୁ"</string>
     <string name="accessibility_action_pip_resize" msgid="4623966104749543182">"ରିସାଇଜ୍ କରନ୍ତୁ"</string>

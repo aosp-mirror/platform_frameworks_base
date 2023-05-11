@@ -1619,7 +1619,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Таблет"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевизор"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Телефон"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Докинг станц.: Високогов."</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Високоговорители докинг станция"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Външно устройство"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Слушалки"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -2164,8 +2164,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Отмяна на паузата"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Няма подходящи служебни приложения"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Няма подходящи лични приложения"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Към личния потребителски профил в(ъв) <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Към служебния потребителски профил в(ъв) <xliff:g id="APP">%s</xliff:g>"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Използване на личния браузър"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Използване на служебния браузър"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ПИН за отключване на мрежата за SIM"</string>

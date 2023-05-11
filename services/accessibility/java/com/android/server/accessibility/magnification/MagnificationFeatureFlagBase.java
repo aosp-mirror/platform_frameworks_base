@@ -80,6 +80,9 @@ abstract class MagnificationFeatureFlagBase {
      *
      * <p>{@see DeviceConfig#addOnPropertiesChangedListener(
      * String, Executor, DeviceConfig.OnPropertiesChangedListener)}
+     *
+     * <p>Note: be weary of using a DIRECT_EXECUTOR here. You may run into deadlocks! (see
+     * b/281132229)
      */
     @NonNull
     public DeviceConfig.OnPropertiesChangedListener addOnChangedListener(

@@ -18,12 +18,17 @@
 package com.android.packageinstaller;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.View;
@@ -32,6 +37,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import java.io.Closeable;
 import java.io.File;
@@ -205,6 +211,38 @@ public class PackageUtil {
             } catch (IOException ioe) {
                 // Catch and discard the error
             }
+        }
+    }
+
+    /**
+     * A simple error dialog showing a message
+     */
+    public static class SimpleErrorDialog extends DialogFragment {
+        private static final String MESSAGE_KEY =
+                SimpleErrorDialog.class.getName() + "MESSAGE_KEY";
+
+        static SimpleErrorDialog newInstance(@StringRes int message) {
+            SimpleErrorDialog dialog = new SimpleErrorDialog();
+
+            Bundle args = new Bundle();
+            args.putInt(MESSAGE_KEY, message);
+            dialog.setArguments(args);
+
+            return dialog;
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            return new AlertDialog.Builder(getActivity())
+                    .setMessage(getArguments().getInt(MESSAGE_KEY))
+                    .setPositiveButton(R.string.ok, (dialog, which) -> getActivity().finish())
+                    .create();
+        }
+
+        @Override
+        public void onCancel(DialogInterface dialog) {
+            getActivity().setResult(Activity.RESULT_CANCELED);
+            getActivity().finish();
         }
     }
 }
