@@ -271,11 +271,13 @@ constructor(
     }
 
     private fun echoToSystrace(message: LogMessage, strMessage: String) {
-        Trace.instantForTrack(
-            Trace.TRACE_TAG_APP,
-            "UI Events",
-            "$name - ${message.level.shortString} ${message.tag}: $strMessage"
-        )
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_APP)) {
+            Trace.instantForTrack(
+                Trace.TRACE_TAG_APP,
+                "UI Events",
+                "$name - ${message.level.shortString} ${message.tag}: $strMessage"
+            )
+        }
     }
 
     private fun echoToLogcat(message: LogMessage, strMessage: String) {
