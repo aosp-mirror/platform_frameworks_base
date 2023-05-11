@@ -27,7 +27,6 @@ import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -39,7 +38,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -61,8 +59,6 @@ public class ArcTerminationActionFromAvrTest {
 
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
-    @Mock
-    private AudioManager mAudioManager;
 
     @Before
     public void setUp() throws Exception {
@@ -70,14 +66,12 @@ public class ArcTerminationActionFromAvrTest {
 
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         HdmiControlService hdmiControlService =
                 new HdmiControlService(mContextSpy, Collections.emptyList(),
-                        new FakeAudioDeviceVolumeManagerWrapper()) {
-                    @Override
-                    AudioManager getAudioManager() {
-                        return mAudioManager;
-                    }
-
+                        audioFramework.getAudioManager(),
+                        audioFramework.getAudioDeviceVolumeManager()) {
                     @Override
                     boolean isPowerStandby() {
                         return false;
