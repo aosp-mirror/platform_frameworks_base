@@ -67,8 +67,11 @@ public class HdmiCecNetworkTest {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getTargetContext();
+
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlService = new HdmiControlService(mContext, Collections.emptyList(),
-                new FakeAudioDeviceVolumeManagerWrapper()) {
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()) {
             @Override
             void invokeDeviceEventListeners(HdmiDeviceInfo device, int status) {
                 mDeviceEventListenerStatuses.add(status);

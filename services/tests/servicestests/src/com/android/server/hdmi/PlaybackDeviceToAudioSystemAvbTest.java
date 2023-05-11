@@ -16,10 +16,12 @@
 
 package com.android.server.hdmi;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.hardware.hdmi.DeviceFeatures;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
-import android.media.AudioDeviceAttributes;
+import android.media.AudioManager;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -33,33 +35,13 @@ import org.junit.runners.JUnit4;
 import java.util.Arrays;
 
 /**
- * Tests for Absolute Volume Control where the local device is a Playback device and the
+ * Tests for absolute volume behavior where the local device is a Playback device and the
  * System Audio device is an Audio System.
  */
 @SmallTest
 @Presubmit
 @RunWith(JUnit4.class)
-public class PlaybackDeviceToAudioSystemAvcTest extends BaseAbsoluteVolumeControlTest {
-
-    @Override
-    protected HdmiCecLocalDevice createLocalDevice(HdmiControlService hdmiControlService) {
-        return new HdmiCecLocalDevicePlayback(hdmiControlService);
-    }
-
-    @Override
-    protected int getPhysicalAddress() {
-        return 0x1100;
-    }
-
-    @Override
-    protected int getDeviceType() {
-        return HdmiDeviceInfo.DEVICE_PLAYBACK;
-    }
-
-    @Override
-    protected AudioDeviceAttributes getAudioOutputDevice() {
-        return HdmiControlService.AUDIO_OUTPUT_DEVICE_HDMI;
-    }
+public class PlaybackDeviceToAudioSystemAvbTest extends BasePlaybackDeviceAvbTest {
 
     @Override
     protected int getSystemAudioDeviceLogicalAddress() {
@@ -72,17 +54,18 @@ public class PlaybackDeviceToAudioSystemAvcTest extends BaseAbsoluteVolumeContro
     }
 
     /**
-     * AVC is disabled if the Audio System disables System Audio mode, and the TV has unknown
+     * AVB is disabled if the Audio System disables System Audio mode, and the TV has unknown
      * support for <Set Audio Volume Level>. It is enabled once the TV confirms support for
      * <Set Audio Volume Level> and sends <Report Audio Status>.
      */
     @Test
     public void switchToTv_absoluteVolumeControlDisabledUntilAllConditionsMet() {
-        enableAbsoluteVolumeControl();
+        enableAbsoluteVolumeBehavior();
 
-        // Audio System disables System Audio Mode. AVC should be disabled.
+        // Audio System disables System Audio Mode. AVB should be disabled.
         receiveSetSystemAudioMode(false);
-        verifyAbsoluteVolumeDisabled();
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
 
         // TV reports support for <Set Audio Volume Level>
         mNativeWrapper.onCecMessage(ReportFeaturesMessage.build(
@@ -102,6 +85,7 @@ public class PlaybackDeviceToAudioSystemAvcTest extends BaseAbsoluteVolumeContro
                 false));
         mTestLooper.dispatchAll();
 
-        verifyAbsoluteVolumeEnabled();
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
     }
 }
