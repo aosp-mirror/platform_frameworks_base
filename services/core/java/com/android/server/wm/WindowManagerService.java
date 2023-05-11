@@ -8990,7 +8990,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
         final SurfaceControl mirror = SurfaceControl.mirrorSurface(displaySc);
         outSurfaceControl.copyFrom(mirror, "WMS.mirrorDisplay");
-
+        mirror.release();
         return true;
     }
 
