@@ -257,14 +257,14 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
          * Authentication has happened and it's time to dismiss keyguard. This function
          * should clean up and inform KeyguardViewMediator.
          *
-         * @param strongAuth whether the user has authenticated with strong authentication like
+         * @param fromPrimaryAuth whether the user has authenticated with primary auth like
          *                   pattern, password or PIN but not by trust agents or fingerprint
          * @param targetUserId a user that needs to be the foreground user at the dismissal
          *                    completion.
          */
         @Override
-        public void finish(boolean strongAuth, int targetUserId) {
-            if (!mKeyguardStateController.canDismissLockScreen() && !strongAuth) {
+        public void finish(boolean fromPrimaryAuth, int targetUserId) {
+            if (!mKeyguardStateController.canDismissLockScreen() && !fromPrimaryAuth) {
                 Log.e(TAG,
                         "Tried to dismiss keyguard when lockscreen is not dismissible and user "
                                 + "was not authenticated with a primary security method "
@@ -283,9 +283,9 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             }
             if (mViewMediatorCallback != null) {
                 if (deferKeyguardDone) {
-                    mViewMediatorCallback.keyguardDonePending(strongAuth, targetUserId);
+                    mViewMediatorCallback.keyguardDonePending(fromPrimaryAuth, targetUserId);
                 } else {
-                    mViewMediatorCallback.keyguardDone(strongAuth, targetUserId);
+                    mViewMediatorCallback.keyguardDone(fromPrimaryAuth, targetUserId);
                 }
             }
         }
@@ -603,8 +603,8 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
     /**
      * Dismiss keyguard due to a user unlock event.
      */
-    public void finish(boolean strongAuth, int currentUser) {
-        mKeyguardSecurityCallback.finish(strongAuth, currentUser);
+    public void finish(boolean primaryAuth, int currentUser) {
+        mKeyguardSecurityCallback.finish(primaryAuth, currentUser);
     }
 
     /**
@@ -736,7 +736,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         }
 
         boolean finish = false;
-        boolean strongAuth = false;
+        boolean primaryAuth = false;
         int eventSubtype = -1;
         BouncerUiEvent uiEvent = BouncerUiEvent.UNKNOWN;
         if (mUpdateMonitor.getUserHasTrust(targetUserId)) {
@@ -761,7 +761,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                 case Pattern:
                 case Password:
                 case PIN:
-                    strongAuth = true;
+                    primaryAuth = true;
                     finish = true;
                     eventSubtype = BOUNCER_DISMISS_PASSWORD;
                     uiEvent = BouncerUiEvent.BOUNCER_DISMISS_PASSWORD;
@@ -805,7 +805,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
             mUiEventLogger.log(uiEvent, getSessionId());
         }
         if (finish) {
-            mKeyguardSecurityCallback.finish(strongAuth, targetUserId);
+            mKeyguardSecurityCallback.finish(primaryAuth, targetUserId);
         }
         return finish;
     }
