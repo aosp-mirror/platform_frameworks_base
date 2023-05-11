@@ -20,7 +20,7 @@
     <string name="app_name" msgid="4539824758261855508">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‎‎‎‎‏‎‏‏‎‎‏‎‏‎‎‏‎‎‎‎‏‎‎‎‏‎‏‎‏‎‏‏‏‎‎‎‏‎‏‏‎‏‎‏‎‎‎‏‎‏‎‎‎Credential Manager‎‏‎‎‏‎"</string>
     <string name="string_cancel" msgid="6369133483981306063">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‎‎‎‏‏‏‎‏‏‎‏‎‏‎‎‏‎‏‎‎‎‏‎‎‏‎‏‏‏‏‏‎‎‎‎‎‎‎‏‏‏‏‎‎‎‏‏‎‎‏‏‏‏‎Cancel‎‏‎‎‏‎"</string>
     <string name="string_continue" msgid="1346732695941131882">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‏‎‏‏‎‎‎‎‏‎‎‎‏‏‏‎‎‏‎‎‎‎‎‎‎‏‏‎‏‏‎‎‏‏‏‏‏‎‎‏‏‎‏‎‏‏‏‎‎‏‏‎‏‎‏‎‎Continue‎‏‎‎‏‎"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‎‏‏‏‎‎‏‎‎‏‎‎‎‎‏‎‏‏‏‎‎‎‎‏‏‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‏‏‏‏‎‎‎‏‏‏‎‏‎‎‎More options‎‏‎‎‏‎"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‎‏‏‎‏‏‎‎‏‎‏‏‎‎‏‏‏‏‏‎‏‎‎‏‏‎‎‏‎‏‎‎‎‎‎‎‎‏‎‎‎‎‏‏‏‎‏‎‎‎‎‎‎‎‎Save another way‎‏‎‎‏‎"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‎‎‏‏‏‎‎‎‎‎‎‎‏‏‎‎‎‏‏‎‎‎‏‏‎‎‎‏‎‏‎‏‎‎‎‏‏‏‏‏‎‎‏‏‎‏‏‏‏‏‏‏‏‎Learn more‎‏‎‎‏‎"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‏‏‎‎‏‎‎‎‏‎‏‎‏‎‏‏‏‏‎‏‎‏‏‏‎‏‎‎‎‎‏‎‎‎‏‏‏‏‏‎‏‎‎‏‎‎‎‏‎‏‎‎‎‎‏‏‏‎Show password‎‏‎‎‏‎"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‏‏‏‎‎‎‏‎‏‏‏‎‎‏‏‎‎‏‏‎‎‏‎‏‏‏‏‎‏‎‎‎‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‎‏‏‏‏‎‎‎Hide password‎‏‎‎‏‎"</string>
@@ -49,12 +49,9 @@
     <string name="sign_ins" msgid="4710739369149469208">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‎‏‎‏‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‏‏‏‏‎‏‏‎‎‏‏‏‏‎‎‏‏‎‏‎‎‎‎‏‎‎‏‎‎‎‎‏‏‎‎‎‎sign-ins‎‏‎‎‏‎"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‎‏‏‏‎‏‏‏‏‎‏‏‏‎‎‎‎‎‏‏‎‎‎‏‏‏‏‎‎‏‎‏‏‎‏‏‏‎‏‏‎‏‎‎‎‎‎‎‏‎‎‎‎sign-in info‎‏‎‎‏‎"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‎‎‎‎‎‎‏‎‎‎‎‎‎‏‎‏‏‏‎‏‏‎‏‏‎‎‏‎‎‎‎‎‎‏‎‏‎‎‏‎‏‏‏‎‎‏‎‎‎‎‎‏‏‏‏‏‎‏‎Save ‎‏‎‎‏‏‎<xliff:g id="CREDENTIALTYPES">%1$s</xliff:g>‎‏‎‎‏‏‏‎ to‎‏‎‎‏‎"</string>
-    <!-- no translation found for create_passkey_in_other_device_title (2360053098931886245) -->
-    <skip />
-    <!-- no translation found for save_password_on_other_device_title (5829084591948321207) -->
-    <skip />
-    <!-- no translation found for save_sign_in_on_other_device_title (2827990118560134692) -->
-    <skip />
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‏‏‎‎‎‎‎‎‏‎‎‏‎‏‏‏‏‏‎‎‏‎‏‎‎‎‎‏‎‏‎‎‏‏‏‎‎‏‎‏‎‎‎‏‏‎‎‎‏‎‏‎‎‏‎‏‎Create passkey on another device?‎‏‎‎‏‎"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‏‏‎‎‏‎‏‎‎‎‏‎‎‎‏‏‎‎‎‏‏‎‏‎‏‏‏‎‏‎‎‏‏‎‎‏‎‎‎‎‏‎‏‎‎‎‏‏‎‏‏‎‏‏‏‎Save password on another device?‎‏‎‎‏‎"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‏‏‏‏‏‏‎‎‎‎‏‎‏‎‎‎‎‎‎‏‏‏‏‎‎‎‏‏‎‏‎‎‎‏‎‏‏‏‎‏‏‏‎‏‏‎‎‎‏‎‎‏‎‎‎Save sign-in on another device?‎‏‎‎‏‎"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‎‏‎‎‏‎‎‏‏‎‏‎‎‎‎‎‏‎‏‏‎‎‏‏‏‎‎‎‎‎‎‎‏‎‎‏‎‏‏‏‎‏‏‏‎‎‏‎‏‏‏‏‎‎‏‎‏‎‏‎Use ‎‏‎‎‏‏‎<xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ for all your sign-ins?‎‏‎‎‏‎"</string>
     <string name="use_provider_for_all_description" msgid="1998772715863958997">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‏‏‎‏‏‏‏‎‏‎‎‎‏‎‎‎‏‎‎‏‏‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‏‎‎‎‎‎‏‏‎‎‏‎‏‏‏‎‏‎‏‎‏‎This password manager for ‎‏‎‎‏‏‎<xliff:g id="USERNAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎ will store your passwords and passkeys to help you easily sign in‎‏‎‎‏‎"</string>
     <string name="set_as_default" msgid="4415328591568654603">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎‎‏‏‎‎‏‏‎‎‏‎‏‏‏‏‏‎‏‎‏‏‏‏‎‏‎‏‏‎‎‎‏‎‎‏‏‎‏‎‏‎‎‎‏‎‎‎‎‏‎‏‏‎Set as default‎‏‎‎‏‎"</string>
@@ -72,7 +69,12 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‎‏‎‎‏‎‏‎‏‎‏‏‎‏‎‏‎‎‎‎‎‎‎‏‎‏‏‎‎‏‎‏‎‏‏‎‎‎‎‏‎‏‎‏‎‏‏‏‎‎‏‎‏‏‏‎Close‎‏‎‎‏‎"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‏‏‏‏‏‏‎‎‎‎‏‎‎‏‏‎‏‏‏‏‎‏‎‎‎‎‏‏‏‎‏‎‏‎‏‎‎‎‎‎‏‏‎‎‎‏‎‎‎‎‏‎‏‏‎‎‎‎Dismiss‎‏‎‎‏‎"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‎‏‎‎‎‏‏‎‎‏‏‏‎‎‎‏‎‏‎‏‏‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎‎‎‎‎‏‏‏‎Use your saved passkey for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
+    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‎‎‏‎‏‎‏‏‏‏‎‏‏‎‎‎‏‏‎‏‎‎‎‏‎‏‎‏‏‏‎‏‏‏‎‏‎‏‏‏‎‏‏‏‎‏‎‎‎‎‏‎‎‏‎‏‎‎‎Use your saved password for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‎‏‏‏‏‎‏‏‎‏‏‎‏‎‎‏‎‎‎‏‎‏‎‎‏‎‎‎‎‎‏‎‏‎‏‎‏‎‏‏‎‎‏‎‎‎‎‎‏‏‎‎‎‏‎‎‏‎Use your sign-in for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‎‎‎‏‏‎‎‎‏‏‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‏‎‏‏‏‎‎‏‎‏‎‏‎‎‎‏‎‎‎‏‏‎‏‏‎‎‎‏‎Unlock sign-in options for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‏‏‏‎‏‏‎‎‎‏‎‏‎‎‎‏‏‏‏‏‏‎‎‎‎‏‏‎‏‏‏‎‏‎‎‎‎‏‎‏‏‎‏‏‏‏‏‎‏‎‎Choose a saved passkey for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‎‏‏‏‎‎‏‏‎‏‏‎‏‎‎‏‏‏‏‏‎‏‏‎‎‏‏‎‎‏‏‎‎‏‏‎‎‎‏‎‎‏‎‏‏‎‎‎‏‎‏‎‏‎Choose a saved password for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‏‏‎‎‏‎‏‏‎‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‏‎‏‎‏‎‎‎‏‏‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‏‏‏‏‏‎‎‎‎Choose a saved sign-in for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‎‎‏‏‏‏‏‏‎‎‎‎‏‏‏‏‎‎‏‏‎‎‏‎‎‏‎‎‎‎‎‏‏‏‏‎‏‏‏‎‎‎‏‏‏‏‎‎‏‎‎‎‏‎‎Choose a sign-in for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‎‎‎‎‏‏‏‏‏‎‏‎‎‏‏‏‎‏‎‎‏‎‎‎‏‏‏‎‎‎‏‎‎‏‎‏‏‏‏‎‏‎‏‏‎‏‎‏‏‏‏‏‎‎‏‏‎Choose an option for ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‎‎‎‎‎‏‎‎‎‏‏‎‏‏‏‏‎‎‎‏‏‎‏‏‏‏‏‏‎‎‏‏‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‎‎‎‏‎‏‎‎Use this info on ‎‏‎‎‏‏‎<xliff:g id="APP_NAME">%1$s</xliff:g>‎‏‎‎‏‏‏‎?‎‏‎‎‏‎"</string>
