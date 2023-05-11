@@ -31,7 +31,6 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
-import android.media.AudioManager;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
@@ -46,7 +45,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -88,8 +86,6 @@ public class HdmiCecLocalDevicePlaybackTest {
     private boolean mActiveMediaSessionsPaused;
     private FakePowerManagerInternalWrapper mPowerManagerInternal =
             new FakePowerManagerInternalWrapper();
-    @Mock
-    protected AudioManager mAudioManager;
 
     @Before
     public void setUp() {
@@ -98,20 +94,17 @@ public class HdmiCecLocalDevicePlaybackTest {
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
                         Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
-                        new FakeAudioDeviceVolumeManagerWrapper()) {
+                        audioFramework.getAudioManager(),
+                        audioFramework.getAudioDeviceVolumeManager()) {
 
                     @Override
                     void wakeUp() {
                         mWokenUp = true;
                         super.wakeUp();
-                    }
-
-                    @Override
-                    AudioManager getAudioManager() {
-                        return mAudioManager;
                     }
 
                     @Override
