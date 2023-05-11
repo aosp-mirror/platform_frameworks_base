@@ -28,6 +28,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -35,7 +36,6 @@ import android.content.Context;
 import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.AudioDescriptor;
 import android.media.AudioDeviceAttributes;
-import android.media.AudioManager;
 import android.os.Looper;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
@@ -49,7 +49,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
@@ -78,8 +77,7 @@ public class HdmiEarcLocalDeviceTxTest {
     private Looper mMyLooper;
     private TestLooper mTestLooper = new TestLooper();
 
-    @Mock
-    private AudioManager mAudioManager;
+    private AudioManagerWrapper mAudioManager;
 
     @Captor
     ArgumentCaptor<AudioDeviceAttributes> mAudioAttributesCaptor;
@@ -91,10 +89,13 @@ public class HdmiEarcLocalDeviceTxTest {
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+        mAudioManager = spy(audioFramework.getAudioManager());
+
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
                         Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
-                        new FakeAudioDeviceVolumeManagerWrapper()) {
+                        mAudioManager, audioFramework.getAudioDeviceVolumeManager()) {
                     @Override
                     boolean isCecControlEnabled() {
                         return true;
@@ -113,11 +114,6 @@ public class HdmiEarcLocalDeviceTxTest {
                     @Override
                     boolean isPowerStandby() {
                         return false;
-                    }
-
-                    @Override
-                    AudioManager getAudioManager() {
-                        return mAudioManager;
                     }
                 };
 
