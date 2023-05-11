@@ -146,6 +146,31 @@ public class CrossDeviceSyncController {
         mPhoneAccountManager = new PhoneAccountManager(mContext);
     }
 
+    /** Invoke set-up tasks that happen when boot is completed. */
+    public void onBootCompleted() {
+        if (!CompanionDeviceConfig.isEnabled(CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
+            return;
+        }
+
+        mPhoneAccountManager.onBootCompleted();
+
+        final TelecomManager telecomManager = mContext.getSystemService(TelecomManager.class);
+        if (telecomManager.getCallCapablePhoneAccounts().size() != 0) {
+            final PhoneAccountHandle defaultOutgoingTelAccountHandle =
+                    telecomManager.getDefaultOutgoingPhoneAccount(PhoneAccount.SCHEME_TEL);
+            if (defaultOutgoingTelAccountHandle != null) {
+                final PhoneAccount defaultOutgoingTelAccount = telecomManager.getPhoneAccount(
+                        defaultOutgoingTelAccountHandle);
+                if (defaultOutgoingTelAccount != null) {
+                    mCallFacilitators.add(
+                            new CallMetadataSyncData.CallFacilitator(
+                                    defaultOutgoingTelAccount.getLabel().toString(),
+                                    FACILITATOR_ID_SYSTEM));
+                }
+            }
+        }
+    }
+
     private void processCallCreateRequests(int associationId,
             CallMetadataSyncData callMetadataSyncData) {
         final Iterator<CallMetadataSyncData.CallCreateRequest> iterator =
@@ -544,6 +569,10 @@ public class CrossDeviceSyncController {
             mTelecomManager = context.getSystemService(TelecomManager.class);
             mConnectionServiceComponentName = new ComponentName(context,
                     CallMetadataSyncConnectionService.class);
+        }
+
+        void onBootCompleted() {
+            mTelecomManager.clearPhoneAccounts();
         }
 
         PhoneAccountHandle getPhoneAccountHandle(int associationId, String appIdentifier) {
