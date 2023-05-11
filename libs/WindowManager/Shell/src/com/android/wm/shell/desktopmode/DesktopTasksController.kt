@@ -524,14 +524,16 @@ class DesktopTasksController(
      * Perform checks required on drag end. Move to fullscreen if drag ends in status bar area.
      *
      * @param taskInfo the task being dragged.
-     * @param position position of surface when drag ends
+     * @param position position of surface when drag ends.
+     * @param y the Y position of the motion event.
      */
     fun onDragPositioningEnd(
             taskInfo: RunningTaskInfo,
-            position: Point
+            position: Point,
+            y: Float
     ) {
         val statusBarHeight = getStatusBarHeight(taskInfo)
-        if (position.y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
+        if (y <= statusBarHeight && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM) {
             moveToFullscreenWithAnimation(taskInfo, position)
         }
     }

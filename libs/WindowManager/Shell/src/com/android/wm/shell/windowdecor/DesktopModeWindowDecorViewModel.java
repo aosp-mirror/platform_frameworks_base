@@ -405,7 +405,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel {
                     mDragPositioningCallback.onDragPositioningEnd(
                             e.getRawX(dragPointerIdx), e.getRawY(dragPointerIdx));
                     mDesktopTasksController.ifPresent(c -> c.onDragPositioningEnd(taskInfo,
-                            position));
+                            position, e.getRawY()));
                     final boolean wasDragging = mIsDragging;
                     mIsDragging = false;
                     return wasDragging;
