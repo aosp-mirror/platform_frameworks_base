@@ -314,6 +314,7 @@ public class WallpaperManager {
     private final boolean mWcgEnabled;
     private final ColorManagementProxy mCmProxy;
     private static Boolean sIsLockscreenLiveWallpaperEnabled = null;
+    private static Boolean sIsMultiCropEnabled = null;
 
     /**
      * Special drawable that draws a wallpaper as fast as possible.  Assumes
@@ -863,6 +864,26 @@ public class WallpaperManager {
             }
         }
         return sIsLockscreenLiveWallpaperEnabled;
+    }
+
+    /**
+     * Temporary method for project b/270726737
+     * @return true if the wallpaper supports different crops for different display dimensions
+     * @hide
+     */
+    public static boolean isMultiCropEnabled() {
+        if (sGlobals == null) {
+            sIsMultiCropEnabled = SystemProperties.getBoolean(
+                    "persist.wm.debug.wallpaper_multi_crop", false);
+        }
+        if (sIsMultiCropEnabled == null) {
+            try {
+                sIsMultiCropEnabled = sGlobals.mService.isMultiCropEnabled();
+            } catch (RemoteException e) {
+                e.rethrowFromSystemServer();
+            }
+        }
+        return sIsMultiCropEnabled;
     }
 
     /**
