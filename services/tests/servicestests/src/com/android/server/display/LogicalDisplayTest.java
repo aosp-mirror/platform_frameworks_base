@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
@@ -191,6 +192,19 @@ public class LogicalDisplayTest {
     }
 
     @Test
+    public void testUpdateLayoutLimitedRefreshRate_setsDirtyFlag() {
+        SurfaceControl.RefreshRateRange layoutLimitedRefreshRate =
+                new SurfaceControl.RefreshRateRange(0, 120);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLayoutLimitedRefreshRateLocked(layoutLimitedRefreshRate);
+        assertTrue(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+    }
+
+    @Test
     public void testUpdateRefreshRateThermalThrottling() {
         SparseArray<SurfaceControl.RefreshRateRange> refreshRanges = new SparseArray<>();
         refreshRanges.put(0, new SurfaceControl.RefreshRateRange(0, 120));
@@ -207,6 +221,45 @@ public class LogicalDisplayTest {
     }
 
     @Test
+    public void testUpdateRefreshRateThermalThrottling_setsDirtyFlag() {
+        SparseArray<SurfaceControl.RefreshRateRange> refreshRanges = new SparseArray<>();
+        refreshRanges.put(0, new SurfaceControl.RefreshRateRange(0, 120));
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateThermalRefreshRateThrottling(refreshRanges);
+        assertTrue(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+    }
+
+    @Test
+    public void testUpdateDisplayGroupIdLocked() {
+        int newId = 999;
+        DisplayInfo info1 = mLogicalDisplay.getDisplayInfoLocked();
+        mLogicalDisplay.updateDisplayGroupIdLocked(newId);
+        DisplayInfo info2 = mLogicalDisplay.getDisplayInfoLocked();
+        // Display info should only be updated when updateLocked is called
+        assertEquals(info2, info1);
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        DisplayInfo info3 = mLogicalDisplay.getDisplayInfoLocked();
+        assertNotEquals(info3, info2);
+        assertEquals(newId, info3.displayGroupId);
+    }
+
+    @Test
+    public void testUpdateDisplayGroupIdLocked_setsDirtyFlag() {
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateDisplayGroupIdLocked(99);
+        assertTrue(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+    }
+
+    @Test
     public void testSetThermalBrightnessThrottlingDataId() {
         String brightnessThrottlingDataId = "throttling_data_id";
         DisplayInfo info1 = mLogicalDisplay.getDisplayInfoLocked();
@@ -219,5 +272,16 @@ public class LogicalDisplayTest {
         DisplayInfo info3 = mLogicalDisplay.getDisplayInfoLocked();
         assertNotEquals(info3, info2);
         assertEquals(brightnessThrottlingDataId, info3.thermalBrightnessThrottlingDataId);
+    }
+
+    @Test
+    public void testSetThermalBrightnessThrottlingDataId_setsDirtyFlag() {
+        assertFalse(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.setThermalBrightnessThrottlingDataIdLocked("99");
+        assertTrue(mLogicalDisplay.isDirtyLocked());
+
+        mLogicalDisplay.updateLocked(mDeviceRepo);
+        assertFalse(mLogicalDisplay.isDirtyLocked());
     }
 }
