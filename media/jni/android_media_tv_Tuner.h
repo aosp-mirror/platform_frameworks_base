@@ -163,17 +163,19 @@ private:
     jmethodID mRestartEventInitID;
     jfieldID mMediaEventFieldContextID;
     bool mSharedFilter;
-    void getSectionEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getMediaEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getPesEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getTsRecordEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getMmtpRecordEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getDownloadEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getIpPayloadEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getTemiEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getScramblingStatusEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getIpCidChangeEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
-    void getRestartEvent(jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getSectionEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getMediaEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getPesEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getTsRecordEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getMmtpRecordEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getDownloadEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getIpPayloadEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getTemiEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
+    void getScramblingStatusEvent(const jobjectArray& arr, const int size,
+                                  const DemuxFilterEvent& event);
+    void getIpCidChangeEvent(const jobjectArray& arr, const int size,
+                             const DemuxFilterEvent& event);
+    void getRestartEvent(const jobjectArray& arr, const int size, const DemuxFilterEvent& event);
 };
 
 struct JTuner;
