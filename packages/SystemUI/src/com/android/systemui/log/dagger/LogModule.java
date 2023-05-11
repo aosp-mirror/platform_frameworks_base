@@ -60,7 +60,7 @@ public class LogModule {
         if (Compile.IS_DEBUG && notifPipelineFlags.isDevLoggingEnabled()) {
             maxSize *= 10;
         }
-        return factory.create("NotifLog", maxSize, false /* systrace */);
+        return factory.create("NotifLog", maxSize, Compile.IS_DEBUG /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to notifications on the lockscreen. */
