@@ -74,14 +74,22 @@ public final class SoundTriggerFailure implements Parcelable {
     public @interface SoundTriggerErrorCode {}
 
     private final int mErrorCode;
+    private final int mSuggestedAction;
     private final String mErrorMessage;
 
     /**
      * @hide
      */
     @TestApi
-    public SoundTriggerFailure(@SoundTriggerErrorCode int errorCode,
-            @NonNull String errorMessage) {
+    public SoundTriggerFailure(@SoundTriggerErrorCode int errorCode, @NonNull String errorMessage) {
+        this(errorCode, errorMessage, getSuggestedActionBasedOnErrorCode(errorCode));
+    }
+
+    /**
+     * @hide
+     */
+    public SoundTriggerFailure(@SoundTriggerErrorCode int errorCode, @NonNull String errorMessage,
+            @FailureSuggestedAction.FailureSuggestedActionDef int suggestedAction) {
         if (TextUtils.isEmpty(errorMessage)) {
             throw new IllegalArgumentException("errorMessage is empty or null.");
         }
@@ -95,7 +103,13 @@ public final class SoundTriggerFailure implements Parcelable {
             default:
                 throw new IllegalArgumentException("Invalid ErrorCode: " + errorCode);
         }
+        if (suggestedAction != getSuggestedActionBasedOnErrorCode(errorCode)
+                && errorCode != ERROR_CODE_UNKNOWN) {
+            throw new IllegalArgumentException("Invalid suggested next action: "
+                    + "errorCode=" + errorCode + ", suggestedAction=" + suggestedAction);
+        }
         mErrorMessage = errorMessage;
+        mSuggestedAction = suggestedAction;
     }
 
     /**
@@ -119,7 +133,11 @@ public final class SoundTriggerFailure implements Parcelable {
      */
     @FailureSuggestedAction.FailureSuggestedActionDef
     public int getSuggestedAction() {
-        switch (mErrorCode) {
+        return mSuggestedAction;
+    }
+
+    private static int getSuggestedActionBasedOnErrorCode(@SoundTriggerErrorCode int errorCode) {
+        switch (errorCode) {
             case ERROR_CODE_UNKNOWN:
             case ERROR_CODE_MODULE_DIED:
             case ERROR_CODE_UNEXPECTED_PREEMPTION:
@@ -144,8 +162,11 @@ public final class SoundTriggerFailure implements Parcelable {
 
     @Override
     public String toString() {
-        return "SoundTriggerFailure { errorCode = " + mErrorCode + ", errorMessage = "
-                + mErrorMessage + " }";
+        return "SoundTriggerFailure {"
+                + " errorCode = " + mErrorCode
+                + ", errorMessage = " + mErrorMessage
+                + ", suggestedNextAction = " + mSuggestedAction
+                + " }";
     }
 
     public static final @NonNull Parcelable.Creator<SoundTriggerFailure> CREATOR =
