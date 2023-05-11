@@ -203,7 +203,7 @@ public final class DeviceStateManagerService extends SystemService {
 
     @VisibleForTesting
     DeviceStateManagerService(@NonNull Context context, @NonNull DeviceStatePolicy policy,
-                @NonNull SystemPropertySetter systemPropertySetter) {
+            @NonNull SystemPropertySetter systemPropertySetter) {
         super(context);
         mSystemPropertySetter = systemPropertySetter;
         // We use the DisplayThread because this service indirectly drives
@@ -389,12 +389,7 @@ public final class DeviceStateManagerService extends SystemService {
 
             setRearDisplayStateLocked();
 
-            if (!mPendingState.isPresent()) {
-                // If the change in the supported states didn't result in a change of the pending
-                // state commitPendingState() will never be called and the callbacks will never be
-                // notified of the change.
-                notifyDeviceStateInfoChangedAsync();
-            }
+            notifyDeviceStateInfoChangedAsync();
 
             mHandler.post(this::notifyPolicyIfNeeded);
         }
@@ -458,12 +453,7 @@ public final class DeviceStateManagerService extends SystemService {
             mOverrideRequestController.handleBaseStateChanged(identifier);
             updatePendingStateLocked();
 
-            if (!mPendingState.isPresent()) {
-                // If the change in base state didn't result in a change of the pending state
-                // commitPendingState() will never be called and the callbacks will never be
-                // notified of the change.
-                notifyDeviceStateInfoChangedAsync();
-            }
+            notifyDeviceStateInfoChangedAsync();
 
             mHandler.post(this::notifyPolicyIfNeeded);
         }
@@ -591,6 +581,18 @@ public final class DeviceStateManagerService extends SystemService {
 
     private void notifyDeviceStateInfoChangedAsync() {
         synchronized (mLock) {
+            if (mPendingState.isPresent()) {
+                Slog.i(TAG,
+                        "Cannot notify device state info change when pending state is present.");
+                return;
+            }
+
+            if (!mBaseState.isPresent() || !mCommittedState.isPresent()) {
+                Slog.e(TAG, "Cannot notify device state info change before the initial state has"
+                        + " been committed.");
+                return;
+            }
+
             if (mProcessRecords.size() == 0) {
                 return;
             }
@@ -656,7 +658,7 @@ public final class DeviceStateManagerService extends SystemService {
             }
         } else {
             throw new IllegalArgumentException(
-                        "Unknown OverrideRest type: " + request.getRequestType());
+                    "Unknown OverrideRest type: " + request.getRequestType());
         }
 
         boolean updatedPendingState = updatePendingStateLocked();
