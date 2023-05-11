@@ -21,7 +21,11 @@ import android.graphics.Rect
 class FakeOverlapDetector : OverlapDetector {
     var shouldReturn: Map<Int, Boolean> = mapOf()
 
-    override fun isGoodOverlap(touchData: NormalizedTouchData, nativeSensorBounds: Rect): Boolean {
+    override fun isGoodOverlap(
+        touchData: NormalizedTouchData,
+        nativeSensorBounds: Rect,
+        nativeOverlayBounds: Rect
+    ): Boolean {
         return shouldReturn[touchData.pointerId]
             ?: error("Unexpected PointerId not declared in TestCase currentPointers")
     }

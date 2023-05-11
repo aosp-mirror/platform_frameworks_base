@@ -46,7 +46,13 @@ class SinglePointerTouchProcessor @Inject constructor(val overlapDetector: Overl
             val touchData = List(event.pointerCount) { event.normalize(it, overlayParams) }
             val pointersOnSensor =
                 touchData
-                    .filter { overlapDetector.isGoodOverlap(it, overlayParams.nativeSensorBounds) }
+                    .filter {
+                        overlapDetector.isGoodOverlap(
+                            it,
+                            overlayParams.nativeSensorBounds,
+                            overlayParams.nativeOverlayBounds
+                        )
+                    }
                     .map { it.pointerId }
             return PreprocessedTouch(touchData, previousPointerOnSensorId, pointersOnSensor)
         }
