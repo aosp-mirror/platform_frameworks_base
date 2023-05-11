@@ -16,6 +16,7 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:layout_width="@dimen/letterbox_education_dialog_action_width"
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
@@ -36,7 +37,7 @@
         android:layout_height="wrap_content"
         android:lineSpacingExtra="4sp"
         android:textAlignment="center"
-        android:textColor="@color/compat_controls_text"
+        android:textColor="?android:attr/textColorSecondary"
         android:textSize="14sp"/>
 
 </LinearLayout>
