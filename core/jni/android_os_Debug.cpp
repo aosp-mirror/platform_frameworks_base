@@ -1014,6 +1014,10 @@ static jboolean android_os_Debug_isVmapStack(JNIEnv *env, jobject clazz)
     return cfg_state == CONFIG_SET;
 }
 
+static jboolean android_os_Debug_logAllocatorStats(JNIEnv*, jobject) {
+    return mallopt(M_LOG_STATS, 0) == 1 ? JNI_TRUE : JNI_FALSE;
+}
+
 /*
  * JNI registration.
  */
@@ -1056,6 +1060,7 @@ static const JNINativeMethod gMethods[] = {
         {"getDmabufHeapPoolsSizeKb", "()J", (void*)android_os_Debug_getDmabufHeapPoolsSizeKb},
         {"getGpuTotalUsageKb", "()J", (void*)android_os_Debug_getGpuTotalUsageKb},
         {"isVmapStack", "()Z", (void*)android_os_Debug_isVmapStack},
+        {"logAllocatorStats", "()Z", (void*)android_os_Debug_logAllocatorStats},
 };
 
 int register_android_os_Debug(JNIEnv *env)
