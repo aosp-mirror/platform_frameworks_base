@@ -16,6 +16,8 @@
 
 package com.android.server.devicepolicy;
 
+import static com.android.server.devicepolicy.DevicePolicyManagerService.DEFAULT_KEEP_PROFILES_RUNNING_FLAG;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -70,6 +72,7 @@ class DevicePolicyData {
     private static final String TAG_PASSWORD_TOKEN_HANDLE = "password-token";
     private static final String TAG_PROTECTED_PACKAGES = "protected-packages";
     private static final String TAG_BYPASS_ROLE_QUALIFICATIONS = "bypass-role-qualifications";
+    private static final String TAG_KEEP_PROFILES_RUNNING = "keep-profiles-running";
     private static final String ATTR_VALUE = "value";
     private static final String ATTR_ALIAS = "alias";
     private static final String ATTR_ID = "id";
@@ -192,6 +195,12 @@ class DevicePolicyData {
     // Whether it's necessary to show a disclaimer (that the device is managed) after the user
     // starts.
     String mNewUserDisclaimer = NEW_USER_DISCLAIMER_NOT_NEEDED;
+
+    /**
+     * Effective state of the feature flag. It is updated to the current configuration value
+     * during boot and doesn't change value after than unless overridden by test code.
+     */
+    boolean mEffectiveKeepProfilesRunning = DEFAULT_KEEP_PROFILES_RUNNING_FLAG;
 
     DevicePolicyData(@UserIdInt int userId) {
         mUserId = userId;
@@ -392,6 +401,12 @@ class DevicePolicyData {
                 out.endTag(null, TAG_BYPASS_ROLE_QUALIFICATIONS);
             }
 
+            if (policyData.mEffectiveKeepProfilesRunning != DEFAULT_KEEP_PROFILES_RUNNING_FLAG) {
+                out.startTag(null, TAG_KEEP_PROFILES_RUNNING);
+                out.attributeBoolean(null, ATTR_VALUE, policyData.mEffectiveKeepProfilesRunning);
+                out.endTag(null, TAG_KEEP_PROFILES_RUNNING);
+            }
+
             out.endTag(null, "policies");
 
             out.endDocument();
@@ -574,7 +589,10 @@ class DevicePolicyData {
                             parser.getAttributeBoolean(null, ATTR_VALUE, false);
                 } else if (TAG_BYPASS_ROLE_QUALIFICATIONS.equals(tag)) {
                     policy.mBypassDevicePolicyManagementRoleQualifications = true;
-                    policy.mCurrentRoleHolder =  parser.getAttributeValue(null, ATTR_VALUE);
+                    policy.mCurrentRoleHolder = parser.getAttributeValue(null, ATTR_VALUE);
+                } else if (TAG_KEEP_PROFILES_RUNNING.equals(tag)) {
+                    policy.mEffectiveKeepProfilesRunning = parser.getAttributeBoolean(
+                            null, ATTR_VALUE, DEFAULT_KEEP_PROFILES_RUNNING_FLAG);
                 // Deprecated tags below
                 } else if (TAG_PROTECTED_PACKAGES.equals(tag)) {
                     if (policy.mUserControlDisabledPackages == null) {
