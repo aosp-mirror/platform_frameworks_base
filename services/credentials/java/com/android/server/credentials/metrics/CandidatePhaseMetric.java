@@ -59,6 +59,8 @@ public class CandidatePhaseMetric {
     // Stores the response credential information, as well as the response entry information which
     // by default, contains empty info
     private ResponseCollective mResponseCollective = new ResponseCollective(Map.of(), Map.of());
+    // Indicates if this candidate is a primary provider, false by default
+    private boolean mIsPrimary = false;
 
     public CandidatePhaseMetric(int sessionIdTrackTwo) {
         mSessionIdProvider = sessionIdTrackTwo;
@@ -184,5 +186,13 @@ public class CandidatePhaseMetric {
 
     public String getFrameworkException() {
         return mFrameworkException;
+    }
+
+    public void setPrimary(boolean primary) {
+        mIsPrimary = primary;
+    }
+
+    public boolean isPrimary() {
+        return mIsPrimary;
     }
 }

@@ -179,6 +179,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -494,8 +495,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mA11yWindowManager = new AccessibilityWindowManager(mLock, mMainHandler,
                 mWindowManagerService, this, mSecurityPolicy, this, mTraceManager);
         mA11yDisplayListener = new AccessibilityDisplayListener(mContext, mMainHandler);
-        mMagnificationController = new MagnificationController(this, mLock, mContext,
-                new MagnificationScaleProvider(mContext));
+        mMagnificationController = new MagnificationController(
+                this,
+                mLock,
+                mContext,
+                new MagnificationScaleProvider(mContext),
+                Executors.newSingleThreadExecutor()
+        );
         mMagnificationProcessor = new MagnificationProcessor(mMagnificationController);
         mCaptioningManagerImpl = new CaptioningManagerImpl(mContext);
         mProxyManager = new ProxyManager(mLock, mA11yWindowManager, mContext, mMainHandler,

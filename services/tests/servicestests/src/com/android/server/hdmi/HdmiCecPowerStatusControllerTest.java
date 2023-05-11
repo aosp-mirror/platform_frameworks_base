@@ -64,9 +64,11 @@ public class HdmiCecPowerStatusControllerTest {
         Context contextSpy = spy(new ContextWrapper(InstrumentationRegistry.getTargetContext()));
         Looper myLooper = mTestLooper.getLooper();
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+
         mHdmiControlService = new HdmiControlService(contextSpy,
                 Collections.singletonList(HdmiDeviceInfo.DEVICE_PLAYBACK),
-                new FakeAudioDeviceVolumeManagerWrapper()) {
+                audioFramework.getAudioManager(), audioFramework.getAudioDeviceVolumeManager()) {
             @Override
             boolean isCecControlEnabled() {
                 return true;

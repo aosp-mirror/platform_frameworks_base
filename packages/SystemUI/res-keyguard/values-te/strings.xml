@@ -22,7 +22,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"మీ పిన్‌ని నమోదు చేయండి"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"PINను ఎంటర్ చేయండి"</string>
-    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"మీ నమూనాను నమోదు చేయండి"</string>
+    <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"మీ ఆకృతిని ఎంటర్ చేయండి"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ఆకృతిని గీయండి"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"మీ పాస్‌వర్డ్‌ను ఎంటర్ చేయండి"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"పాస్‌వర్డ్‌ను ఎంటర్ చేయండి"</string>

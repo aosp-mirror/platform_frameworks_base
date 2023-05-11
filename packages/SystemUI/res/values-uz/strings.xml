@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Qurilmada CA sertifikati o‘rnatilgan. U himoyalangan tarmoq trafigini nazorat qilishi va o‘zgartirishi mumkin."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator qurilmangizdagi trafikni nazorat qiluvchi tarmoq jurnalini yuritishni faollashtirgan."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator ish profilingizdagi trafikni nazorat qiluvchi tarmoq jurnalini yuritishni faollashtirgan (shaxsiy profildan maʼlumotlar olinmaydi)."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Bu qurilma internetga <xliff:g id="VPN_APP">%1$s</xliff:g> orqali ulangan. Emaillar va brauzer tarixi kabi tarmoq harakatlaringiz VPN provayderiga koʻrinadi."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Bu qurilma Internetga <xliff:g id="VPN_APP">%1$s</xliff:g> orqali ulangan. Emaillar va brauzer tarixi kabi tarmoqdagi xatti-harakatlaringiz AT administratoriga koʻrinadi."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Bu qurilma internet <xliff:g id="VPN_APP_0">%1$s</xliff:g> va <xliff:g id="VPN_APP_1">%2$s</xliff:g> orqali ulangan. Emaillar va brauzer tarixi kabi tarmoq harakatlaringiz AT administratoriga koʻrinadi."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Ishga oid ilovalar internetga <xliff:g id="VPN_APP">%1$s</xliff:g> orqali ulangan. Ishga oid ilovalarda emaillar va brauzer tarixi kabi tarmoq harakatlaringiz AT administratori va VPN provayderiga koʻrinadi."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Shaxsiy ilovalaringiz Internetga <xliff:g id="VPN_APP">%1$s</xliff:g> orqali ulangan. Emaillar va brauzer tarixi kabi tarmoqdagi xatti-harakatlaringiz VPN provayderiga koʻrinadi."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Karnaylar va displeylar"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Taklif qilingan qurilmalar"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Translatsiya qanday ishlaydi"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Translatsiya"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Atrofingizdagi mos Bluetooth qurilmasiga ega foydalanuvchilar siz translatsiya qilayotgan mediani tinglay olishadi"</string>

@@ -30,8 +30,8 @@ private enum class SensorPixelPosition {
     TARGET // Pixel within sensor center target
 }
 
-private val isDebug = true
-private val TAG = "EllipseOverlapDetector"
+private const val isDebug = false
+private const val TAG = "EllipseOverlapDetector"
 
 /**
  * Approximates the touch as an ellipse and determines whether the ellipse has a sufficient overlap
@@ -39,10 +39,19 @@ private val TAG = "EllipseOverlapDetector"
  */
 @SysUISingleton
 class EllipseOverlapDetector(private val params: EllipseOverlapDetectorParams) : OverlapDetector {
-    override fun isGoodOverlap(touchData: NormalizedTouchData, nativeSensorBounds: Rect): Boolean {
-        // First, check if touch is within bounding box,
-        if (nativeSensorBounds.contains(touchData.x.toInt(), touchData.y.toInt())) {
+    override fun isGoodOverlap(
+        touchData: NormalizedTouchData,
+        nativeSensorBounds: Rect,
+        nativeOverlayBounds: Rect,
+    ): Boolean {
+        // First, check if touch is within bounding box to exit early
+        if (touchData.isWithinBounds(nativeSensorBounds)) {
             return true
+        }
+
+        // Check touch is within overlay bounds, not worth checking if outside
+        if (!touchData.isWithinBounds(nativeOverlayBounds)) {
+            return false
         }
 
         var isTargetTouched = false
@@ -77,7 +86,7 @@ class EllipseOverlapDetector(private val params: EllipseOverlapDetectorParams) :
 
         val percentage: Float = coveredPixels.toFloat() / sensorPixels
         if (isDebug) {
-            Log.v(
+            Log.d(
                 TAG,
                 "covered: $coveredPixels, sensor: $sensorPixels, " +
                     "percentage: $percentage, isCenterTouched: $isTargetTouched"

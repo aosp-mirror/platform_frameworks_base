@@ -76,7 +76,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class PolicyVersionUpgraderTest extends DpmTestBase {
     // NOTE: Only change this value if the corresponding CL also adds a test to test the upgrade
     // to the new version.
-    private static final int LATEST_TESTED_VERSION = 4;
+    private static final int LATEST_TESTED_VERSION = 5;
     public static final String PERMISSIONS_TAG = "admin-can-grant-sensors-permissions";
     public static final String DEVICE_OWNER_XML = "device_owner_2.xml";
     private ComponentName mFakeAdmin;
@@ -310,6 +310,24 @@ public class PolicyVersionUpgraderTest extends DpmTestBase {
             storedSuspendedPkgs.add(item.getAttribute("value"));
         }
         assertThat(storedSuspendedPkgs).isEqualTo(suspendedPkgs);
+    }
+
+    @Test
+    public void testEffectiveKeepProfilesRunningSet() throws Exception {
+        writeVersionToXml(4);
+
+        final int userId = UserHandle.USER_SYSTEM;
+        mProvider.mUsers = new int[]{userId};
+        preparePoliciesFile(userId, "device_policies.xml");
+
+        mUpgrader.upgradePolicy(5);
+
+        assertThat(readVersionFromXml()).isAtLeast(5);
+
+        Document policies = readPolicies(userId);
+        Element keepProfilesRunning = (Element) policies.getDocumentElement()
+                .getElementsByTagName("keep-profiles-running").item(0);
+        assertThat(keepProfilesRunning.getAttribute("value")).isEqualTo("false");
     }
 
     @Test

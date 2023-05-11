@@ -17,24 +17,52 @@
 package com.android.server.credentials.metrics;
 
 import com.android.server.credentials.ProviderSession;
+import com.android.server.credentials.metrics.shared.ResponseCollective;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * This will generate most of its data via using the information of {@link CandidatePhaseMetric}
- * across all the providers. This belongs to the metric flow where the calling app is known.
+ * across all the providers. This belongs to the metric flow where the calling app is known. It
+ * also contains {@link BrowsedAuthenticationMetric} data aggregated within.
  */
 public class CandidateAggregateMetric {
 
     private static final String TAG = "CandidateProviderMetric";
     // The session id of this provider metric
     private final int mSessionIdProvider;
-    // Indicates if this provider returned from the query phase, default false
+    // Indicates if this provider returned from the candidate query phase,
+    // true if at least one provider returns validly, even if empty, default false
     private boolean mQueryReturned = false;
+    // For reference, the initial log timestamp when the service started running the API call,
+    // defaults to -1
+    private long mServiceBeganTimeNanoseconds = -1;
     // Indicates the total number of providers this aggregate captures information for, default 0
     private int mNumProviders = 0;
+    // Indicates if the authentication entry returned, true if at least one entry returns validly,
+    // even if empty, default false
+    private boolean mAuthReturned = false;
     // Indicates the total number of authentication entries that were tapped in aggregate, default 0
     private int mNumAuthEntriesTapped = 0;
+    // The combined aggregate collective across the candidate get/create
+    private ResponseCollective mAggregateCollectiveQuery =
+            new ResponseCollective(Map.of(), Map.of());
+    // The combined aggregate collective across the auth entry info
+    private ResponseCollective mAggregateCollectiveAuth =
+            new ResponseCollective(Map.of(), Map.of());
+    // The minimum of all the providers query start time, defaults to -1
+    private long mMinProviderTimestampNanoseconds = -1;
+    // The maximum of all the providers query finish time, defaults to -1
+    private long mMaxProviderTimestampNanoseconds = -1;
+    // The total number of failures across all the providers, defaults to 0
+    private int mTotalQueryFailures = 0;
+    // The map of all seen framework exceptions and their counts across all providers, default empty
+    private Map<String, Integer> mExceptionCountQuery = new LinkedHashMap<>();
+    // The total number of failures across all auth entries, defaults to 0
+    private int mTotalAuthFailures = 0;
+    // The map of all seen framework exceptions and their counts across auth entries, default empty
+    private Map<String, Integer> mExceptionCountAuth = new LinkedHashMap<>();
 
     public CandidateAggregateMetric(int sessionIdTrackOne) {
         mSessionIdProvider = sessionIdTrackOne;
@@ -51,14 +79,70 @@ public class CandidateAggregateMetric {
      * @param providers the providers associated with the candidate flow
      */
     public void collectAverages(Map<String, ProviderSession> providers) {
-        // TODO(b/271135048) : Complete this method
+        collectQueryAggregates(providers);
+        collectAuthAggregates(providers);
+    }
+
+    private void collectQueryAggregates(Map<String, ProviderSession> providers) {
         mNumProviders = providers.size();
+        Map<String, Integer> responseCountQuery = new LinkedHashMap<>();
+        Map<EntryEnum, Integer> entryCountQuery = new LinkedHashMap<>();
+        var providerSessions = providers.values();
+        long min_query_start = Integer.MAX_VALUE;
+        long max_query_end = Integer.MIN_VALUE;
+        for (var session : providerSessions) {
+            var sessionMetric = session.getProviderSessionMetric();
+            var candidateMetric = sessionMetric.getCandidatePhasePerProviderMetric();
+            if (mServiceBeganTimeNanoseconds == -1) {
+                mServiceBeganTimeNanoseconds = candidateMetric.getServiceBeganTimeNanoseconds();
+            }
+            mQueryReturned = mQueryReturned || candidateMetric.isQueryReturned();
+            ResponseCollective candidateCollective = candidateMetric.getResponseCollective();
+            ResponseCollective.combineTypeCountMaps(responseCountQuery,
+                    candidateCollective.getResponseCountsMap());
+            ResponseCollective.combineTypeCountMaps(entryCountQuery,
+                    candidateCollective.getEntryCountsMap());
+            min_query_start = Math.min(min_query_start,
+                    candidateMetric.getStartQueryTimeNanoseconds());
+            max_query_end = Math.max(max_query_end, candidateMetric
+                    .getQueryFinishTimeNanoseconds());
+            mTotalQueryFailures += (candidateMetric.isHasException() ? 1 : 0);
+            if (!candidateMetric.getFrameworkException().isEmpty()) {
+                mExceptionCountQuery.put(candidateMetric.getFrameworkException(),
+                        mExceptionCountQuery.getOrDefault(
+                                candidateMetric.getFrameworkException(), 0) + 1);
+            }
+        }
+        mMinProviderTimestampNanoseconds = min_query_start;
+        mMaxProviderTimestampNanoseconds = max_query_end;
+        mAggregateCollectiveQuery = new ResponseCollective(responseCountQuery, entryCountQuery);
+    }
+
+    private void collectAuthAggregates(Map<String, ProviderSession> providers) {
+        mNumProviders = providers.size();
+        Map<String, Integer> responseCountAuth = new LinkedHashMap<>();
+        Map<EntryEnum, Integer> entryCountAuth = new LinkedHashMap<>();
         var providerSessions = providers.values();
         for (var session : providerSessions) {
-            var metric = session.getProviderSessionMetric();
-            mQueryReturned = mQueryReturned || metric
-                    .mCandidatePhasePerProviderMetric.isQueryReturned();
+            var sessionMetric = session.getProviderSessionMetric();
+            var authMetrics = sessionMetric.getBrowsedAuthenticationMetric();
+            mNumAuthEntriesTapped += authMetrics.size();
+            for (var authMetric : authMetrics) {
+                mAuthReturned = mAuthReturned || authMetric.isAuthReturned();
+                ResponseCollective authCollective = authMetric.getAuthEntryCollective();
+                ResponseCollective.combineTypeCountMaps(responseCountAuth,
+                        authCollective.getResponseCountsMap());
+                ResponseCollective.combineTypeCountMaps(entryCountAuth,
+                        authCollective.getEntryCountsMap());
+                mTotalQueryFailures += (authMetric.isHasException() ? 1 : 0);
+                if (!authMetric.getFrameworkException().isEmpty()) {
+                    mExceptionCountQuery.put(authMetric.getFrameworkException(),
+                            mExceptionCountQuery.getOrDefault(
+                                    authMetric.getFrameworkException(), 0) + 1);
+                }
+            }
         }
+        mAggregateCollectiveAuth = new ResponseCollective(responseCountAuth, entryCountAuth);
     }
 
     public int getNumProviders() {
@@ -69,7 +153,83 @@ public class CandidateAggregateMetric {
         return mQueryReturned;
     }
 
+
     public int getNumAuthEntriesTapped() {
         return mNumAuthEntriesTapped;
+    }
+
+    public ResponseCollective getAggregateCollectiveQuery() {
+        return mAggregateCollectiveQuery;
+    }
+
+    public ResponseCollective getAggregateCollectiveAuth() {
+        return mAggregateCollectiveAuth;
+    }
+
+    public boolean isAuthReturned() {
+        return mAuthReturned;
+    }
+
+    public long getMaxProviderTimestampNanoseconds() {
+        return mMaxProviderTimestampNanoseconds;
+    }
+
+    public long getMinProviderTimestampNanoseconds() {
+        return mMinProviderTimestampNanoseconds;
+    }
+
+    public int getTotalQueryFailures() {
+        return mTotalQueryFailures;
+    }
+
+    /**
+     * Returns the unique, deduped, exception classtypes for logging associated with this provider.
+     *
+     * @return a string array for deduped exception classtypes
+     */
+    public String[] getUniqueExceptionStringsQuery() {
+        String[] result = new String[mExceptionCountQuery.keySet().size()];
+        mExceptionCountQuery.keySet().toArray(result);
+        return result;
+    }
+
+    /**
+     * Returns the unique, deduped, exception classtype counts for logging associated with this
+     * provider.
+     *
+     * @return a string array for deduped classtype exception counts
+     */
+    public int[] getUniqueExceptionCountsQuery() {
+        return mExceptionCountQuery.values().stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    /**
+     * Returns the unique, deduped, exception classtypes for logging associated with this provider
+     * for auth entries.
+     *
+     * @return a string array for deduped exception classtypes for auth entries
+     */
+    public String[] getUniqueExceptionStringsAuth() {
+        String[] result = new String[mExceptionCountAuth.keySet().size()];
+        mExceptionCountAuth.keySet().toArray(result);
+        return result;
+    }
+
+    /**
+     * Returns the unique, deduped, exception classtype counts for logging associated with this
+     * provider for auth entries.
+     *
+     * @return a string array for deduped classtype exception counts for auth entries
+     */
+    public int[] getUniqueExceptionCountsAuth() {
+        return mExceptionCountAuth.values().stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    public long getServiceBeganTimeNanoseconds() {
+        return mServiceBeganTimeNanoseconds;
+    }
+
+    public int getTotalAuthFailures() {
+        return mTotalAuthFailures;
     }
 }

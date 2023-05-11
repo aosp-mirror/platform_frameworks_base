@@ -56,6 +56,7 @@ import android.util.Xml;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.server.utils.Slogf;
 
 import libcore.io.IoUtils;
 
@@ -1511,7 +1512,7 @@ final class DevicePolicyEngine {
                 readInner(parser);
 
             } catch (XmlPullParserException | IOException | ClassNotFoundException e) {
-                Log.e(TAG, "Error parsing resources file", e);
+                Slogf.wtf(TAG, "Error parsing resources file", e);
             } finally {
                 IoUtils.closeQuietly(input);
             }
@@ -1533,7 +1534,7 @@ final class DevicePolicyEngine {
                         readEnforcingAdminsInner(parser);
                         break;
                     default:
-                        Log.e(TAG, "Unknown tag " + tag);
+                        Slogf.wtf(TAG, "Unknown tag " + tag);
                 }
             }
         }
@@ -1554,7 +1555,7 @@ final class DevicePolicyEngine {
                         policyState = PolicyState.readFromXml(parser);
                         break;
                     default:
-                        Log.e(TAG, "Unknown tag for local policy entry" + tag);
+                        Slogf.wtf(TAG, "Unknown tag for local policy entry" + tag);
                 }
             }
 
@@ -1564,7 +1565,9 @@ final class DevicePolicyEngine {
                 }
                 mLocalPolicies.get(userId).put(policyKey, policyState);
             } else {
-                Log.e(TAG, "Error parsing local policy");
+                Slogf.wtf(TAG, "Error parsing local policy, policyKey is "
+                        + (policyKey == null ? "null" : policyKey) + ", and policyState is "
+                        + (policyState == null ? "null" : policyState) + ".");
             }
         }
 
@@ -1583,20 +1586,26 @@ final class DevicePolicyEngine {
                         policyState = PolicyState.readFromXml(parser);
                         break;
                     default:
-                        Log.e(TAG, "Unknown tag for local policy entry" + tag);
+                        Slogf.wtf(TAG, "Unknown tag for local policy entry" + tag);
                 }
             }
 
             if (policyKey != null && policyState != null) {
                 mGlobalPolicies.put(policyKey, policyState);
             } else {
-                Log.e(TAG, "Error parsing global policy");
+                Slogf.wtf(TAG, "Error parsing global policy, policyKey is "
+                        + (policyKey == null ? "null" : policyKey) + ", and policyState is "
+                        + (policyState == null ? "null" : policyState) + ".");
             }
         }
 
         private void readEnforcingAdminsInner(TypedXmlPullParser parser)
                 throws XmlPullParserException {
             EnforcingAdmin admin = EnforcingAdmin.readFromXml(parser);
+            if (admin == null) {
+                Slogf.wtf(TAG, "Error parsing enforcingAdmins, EnforcingAdmin is null.");
+                return;
+            }
             if (!mEnforcingAdmins.contains(admin.getUserId())) {
                 mEnforcingAdmins.put(admin.getUserId(), new HashSet<>());
             }

@@ -1621,7 +1621,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablični računalnik"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televizor"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Zvočniki stojala"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Zvočniki nosilca"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Zunanja naprava"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Slušalke"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -2166,8 +2166,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Znova aktiviraj"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nobena delovna aplikacija ni na voljo"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nobena osebna aplikacija"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Odpri aplikacijo <xliff:g id="APP">%s</xliff:g> v osebnem profilu"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Odpri aplikacijo <xliff:g id="APP">%s</xliff:g> v delovnem profilu"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Uporabi osebni brskalnik"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Uporabi delovni brskalnik"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Koda PIN za odklepanje omrežja kartice SIM"</string>

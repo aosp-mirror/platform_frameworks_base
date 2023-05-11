@@ -24,16 +24,11 @@ import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_BOOT_UP;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.TruthJUnit.assume;
 
-import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -59,8 +54,6 @@ import com.android.server.SystemService;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InOrder;
-import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -68,20 +61,20 @@ import java.util.Arrays;
 import java.util.Collections;
 
 /**
- * Tests that Absolute Volume Control (AVC) is enabled and disabled correctly, and that
+ * Tests that absolute volume behavior (AVB) is enabled and disabled correctly, and that
  * the device responds correctly to incoming <Report Audio Status> messages and API calls
- * from AudioService when AVC is active.
+ * from AudioService when AVB is active.
  *
  * This is an abstract base class. Concrete subclasses specify the type of the local device, and the
  * type of the System Audio device. This allows each test to be run for multiple setups.
  *
  * We test the following pairs of (local device, System Audio device):
- * (Playback, TV): {@link PlaybackDeviceToTvAvcTest}
- * (Playback, Audio System): {@link PlaybackDeviceToAudioSystemAvcTest}
- * (TV, Audio System): {@link TvToAudioSystemAvcTest}
+ * (Playback, TV): {@link PlaybackDeviceToTvAvbTest}
+ * (Playback, Audio System): {@link PlaybackDeviceToAudioSystemAvbTest}
+ * (TV, Audio System): {@link TvToAudioSystemAvbTest}
  */
-public abstract class BaseAbsoluteVolumeControlTest {
-    private HdmiControlService mHdmiControlService;
+public abstract class BaseAbsoluteVolumeBehaviorTest {
+    protected HdmiControlService mHdmiControlService;
     private HdmiCecController mHdmiCecController;
     private HdmiCecLocalDevice mHdmiCecLocalDevice;
     private FakeHdmiCecConfig mHdmiCecConfig;
@@ -90,25 +83,28 @@ public abstract class BaseAbsoluteVolumeControlTest {
     private Context mContextSpy;
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
 
-    @Mock protected AudioManager mAudioManager;
-    protected FakeAudioDeviceVolumeManagerWrapper mAudioDeviceVolumeManager;
+    protected FakeAudioFramework mAudioFramework;
+    protected AudioManagerWrapper mAudioManager;
+    protected AudioDeviceVolumeManagerWrapper mAudioDeviceVolumeManager;
 
     protected TestLooper mTestLooper = new TestLooper();
     protected FakeNativeWrapper mNativeWrapper;
 
-    // Audio Status given by the System Audio device in its initial <Report Audio Status> that
-    // triggers AVC being enabled
+    // Default Audio Status given by the System Audio device in its initial <Report Audio Status>
+    // that triggers AVB being enabled
     private static final AudioStatus INITIAL_SYSTEM_AUDIO_DEVICE_STATUS =
             new AudioStatus(50, false);
 
-    // VolumeInfo passed to AudioDeviceVolumeManager#setDeviceAbsoluteVolumeBehavior to enable AVC
-    private static final VolumeInfo ENABLE_AVC_VOLUME_INFO =
+    // VolumeInfo passed to AudioDeviceVolumeManager#setDeviceAbsoluteVolumeBehavior to enable AVB
+    private static final VolumeInfo ENABLE_AVB_VOLUME_INFO =
             new VolumeInfo.Builder(AudioManager.STREAM_MUSIC)
                     .setMuted(INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getMute())
                     .setVolumeIndex(INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume())
                     .setMaxVolumeIndex(AudioStatus.MAX_VOLUME)
                     .setMinVolumeIndex(AudioStatus.MIN_VOLUME)
                     .build();
+
+    private static final int EMPTY_FLAGS = 0;
 
     protected abstract HdmiCecLocalDevice createLocalDevice(HdmiControlService hdmiControlService);
 
@@ -126,17 +122,17 @@ public abstract class BaseAbsoluteVolumeControlTest {
         mContextSpy = spy(new ContextWrapper(
                 InstrumentationRegistry.getInstrumentation().getTargetContext()));
 
-        mAudioDeviceVolumeManager = spy(new FakeAudioDeviceVolumeManagerWrapper());
+        mAudioFramework = new FakeAudioFramework();
+        mAudioManager = spy(mAudioFramework.getAudioManager());
+        mAudioDeviceVolumeManager = spy(mAudioFramework.getAudioDeviceVolumeManager());
+
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 1, EMPTY_FLAGS);
+        mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
                         Collections.singletonList(getDeviceType()),
-                        mAudioDeviceVolumeManager) {
-                    @Override
-                    AudioManager getAudioManager() {
-                        return mAudioManager;
-                    }
-
+                        mAudioManager, mAudioDeviceVolumeManager) {
                     @Override
                     protected void writeStringSystemProperty(String key, String value) {
                         // do nothing
@@ -186,22 +182,12 @@ public abstract class BaseAbsoluteVolumeControlTest {
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_BOOT_UP);
         mTestLooper.dispatchAll();
 
-        // Simulate AudioManager's behavior and response when setDeviceVolumeBehavior is called
-        doAnswer(invocation -> {
-            setDeviceVolumeBehavior(invocation.getArgument(0), invocation.getArgument(1));
-            return null;
-        }).when(mAudioManager).setDeviceVolumeBehavior(any(), anyInt());
-
-        // Set starting volume behavior
-        doReturn(AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE)
-                .when(mAudioManager).getDeviceVolumeBehavior(eq(getAudioOutputDevice()));
-
         // Audio service always plays STREAM_MUSIC on the device we need
-        doReturn(Collections.singletonList(getAudioOutputDevice())).when(mAudioManager)
-                .getDevicesForAttributes(HdmiControlService.STREAM_MUSIC_ATTRIBUTES);
+        mAudioFramework.setDevicesForAttributes(HdmiControlService.STREAM_MUSIC_ATTRIBUTES,
+                Collections.singletonList(getAudioOutputDevice()));
 
         // Max volume of STREAM_MUSIC
-        doReturn(25).when(mAudioManager).getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        mAudioFramework.setStreamMaxVolume(AudioManager.STREAM_MUSIC, 25);
 
         // Receive messages from devices to make sure they're registered in HdmiCecNetwork
         mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildGiveDevicePowerStatus(
@@ -218,16 +204,6 @@ public abstract class BaseAbsoluteVolumeControlTest {
 
     protected int getLogicalAddress() {
         return mHdmiCecLocalDevice.getDeviceInfo().getLogicalAddress();
-    }
-
-    /**
-     * Simulates the volume behavior of {@code device} being set to {@code behavior}.
-     */
-    protected void setDeviceVolumeBehavior(AudioDeviceAttributes device,
-            @AudioManager.DeviceVolumeBehavior int behavior) {
-        doReturn(behavior).when(mAudioManager).getDeviceVolumeBehavior(eq(device));
-        mHdmiControlService.onDeviceVolumeBehaviorChanged(device, behavior);
-        mTestLooper.dispatchAll();
     }
 
     /**
@@ -278,16 +254,6 @@ public abstract class BaseAbsoluteVolumeControlTest {
     }
 
     /**
-     * Has the device receive a <Report Audio Status> reporting the status in
-     * {@link #INITIAL_SYSTEM_AUDIO_DEVICE_STATUS}
-     */
-    protected void receiveInitialReportAudioStatus() {
-        receiveReportAudioStatus(
-                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume(),
-                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getMute());
-    }
-
-    /**
      * Has the device receive a <Report Audio Status> message from the System Audio Device.
      */
     protected void receiveReportAudioStatus(int volume, boolean mute) {
@@ -300,40 +266,34 @@ public abstract class BaseAbsoluteVolumeControlTest {
     }
 
     /**
-     * Triggers all the conditions required to enable Absolute Volume Control.
+     * Triggers all the conditions required to enable absolute volume behavior.
      */
-    protected void enableAbsoluteVolumeControl() {
-        setDeviceVolumeBehavior(getAudioOutputDevice(), AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+    protected void enableAbsoluteVolumeBehavior() {
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
         setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
         receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_SUPPORTED);
         enableSystemAudioModeIfNeeded();
-        receiveInitialReportAudioStatus();
+        receiveReportAudioStatus(
+                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume(),
+                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getMute());
 
-        verifyAbsoluteVolumeEnabled();
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
     }
 
-    /**
-     * Verifies that AVC was enabled - that is the audio output device's volume behavior was last
-     * set to absolute volume behavior.
-     */
-    protected void verifyAbsoluteVolumeEnabled() {
-        InOrder inOrder = inOrder(mAudioManager, mAudioDeviceVolumeManager);
-        inOrder.verify(mAudioDeviceVolumeManager, atLeastOnce()).setDeviceAbsoluteVolumeBehavior(
-                eq(getAudioOutputDevice()), any(), any(), any(), anyBoolean());
-        inOrder.verify(mAudioManager, never()).setDeviceVolumeBehavior(
-                eq(getAudioOutputDevice()), not(eq(AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE)));
-    }
+    protected void enableAdjustOnlyAbsoluteVolumeBehavior() {
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
+        enableSystemAudioModeIfNeeded();
+        receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_NOT_SUPPORTED);
+        receiveReportAudioStatus(
+                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getVolume(),
+                INITIAL_SYSTEM_AUDIO_DEVICE_STATUS.getMute());
 
-    /**
-     * Verifies that AVC was disabled - that is, the audio output device's volume behavior was
-     * last set to something other than absolute volume behavior.
-     */
-    protected void verifyAbsoluteVolumeDisabled() {
-        InOrder inOrder = inOrder(mAudioManager, mAudioDeviceVolumeManager);
-        inOrder.verify(mAudioManager, atLeastOnce()).setDeviceVolumeBehavior(
-                eq(getAudioOutputDevice()), not(eq(AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE)));
-        inOrder.verify(mAudioDeviceVolumeManager, never()).setDeviceAbsoluteVolumeBehavior(
-                eq(getAudioOutputDevice()), any(), any(), any(), anyBoolean());
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY);
     }
 
     protected void verifyGiveAudioStatusNeverSent() {
@@ -350,7 +310,8 @@ public abstract class BaseAbsoluteVolumeControlTest {
 
     @Test
     public void allConditionsExceptSavlSupportMet_sendsSetAudioVolumeLevelAndGiveFeatures() {
-        setDeviceVolumeBehavior(getAudioOutputDevice(), AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
         setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
         enableSystemAudioModeIfNeeded();
 
@@ -365,7 +326,8 @@ public abstract class BaseAbsoluteVolumeControlTest {
 
     @Test
     public void allConditionsMet_savlSupportLast_reportFeatures_giveAudioStatusSent() {
-        setDeviceVolumeBehavior(getAudioOutputDevice(), AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
         setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
         enableSystemAudioModeIfNeeded();
         verifyGiveAudioStatusNeverSent();
@@ -376,7 +338,8 @@ public abstract class BaseAbsoluteVolumeControlTest {
 
     @Test
     public void allConditionsMet_savlSupportLast_noFeatureAbort_giveAudioStatusSent() {
-        setDeviceVolumeBehavior(getAudioOutputDevice(), AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
         setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
         enableSystemAudioModeIfNeeded();
         verifyGiveAudioStatusNeverSent();
@@ -388,7 +351,8 @@ public abstract class BaseAbsoluteVolumeControlTest {
 
     @Test
     public void allConditionsMet_cecVolumeEnabledLast_giveAudioStatusSent() {
-        setDeviceVolumeBehavior(getAudioOutputDevice(), AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
         enableSystemAudioModeIfNeeded();
         receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_SUPPORTED);
         verifyGiveAudioStatusNeverSent();
@@ -404,7 +368,9 @@ public abstract class BaseAbsoluteVolumeControlTest {
         receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_SUPPORTED);
         verifyGiveAudioStatusNeverSent();
 
-        setDeviceVolumeBehavior(getAudioOutputDevice(), AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        mTestLooper.dispatchAll();
         verifyGiveAudioStatusSent();
     }
 
@@ -413,7 +379,8 @@ public abstract class BaseAbsoluteVolumeControlTest {
         // Only run when the System Audio device is an Audio System.
         assume().that(getSystemAudioDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
 
-        setDeviceVolumeBehavior(getAudioOutputDevice(), AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
         setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
         receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_SUPPORTED);
         verifyGiveAudioStatusNeverSent();
@@ -423,62 +390,97 @@ public abstract class BaseAbsoluteVolumeControlTest {
     }
 
     @Test
-    public void giveAudioStatusSent_systemAudioDeviceSendsReportAudioStatus_avcEnabled() {
+    public void giveAudioStatusSent_systemAudioDeviceSendsReportAudioStatus_avbEnabled() {
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
         setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
         enableSystemAudioModeIfNeeded();
         receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_SUPPORTED);
-        setDeviceVolumeBehavior(getAudioOutputDevice(), AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
 
-        // Verify that AVC was never enabled
-        verify(mAudioDeviceVolumeManager, never()).setDeviceAbsoluteVolumeBehavior(
-                eq(getAudioOutputDevice()), any(), any(), any(), anyBoolean());
-        receiveInitialReportAudioStatus();
+        // AVB should not be enabled before receiving <Report Audio Status>
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
 
-        verifyAbsoluteVolumeEnabled();
+        receiveReportAudioStatus(60, false);
+
+        // Check that absolute volume behavior was the last one adopted
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE);
+
+        // Check that the volume and mute status received were included when setting AVB
+        verify(mAudioDeviceVolumeManager).setDeviceAbsoluteVolumeBehavior(
+                eq(getAudioOutputDevice()),
+                eq(new VolumeInfo.Builder(AudioManager.STREAM_MUSIC)
+                        .setVolumeIndex(60)
+                        .setMuted(false)
+                        .setMaxVolumeIndex(AudioStatus.MAX_VOLUME)
+                        .setMinVolumeIndex(AudioStatus.MIN_VOLUME)
+                        .build()),
+                any(), any(), anyBoolean());
     }
 
     @Test
-    public void avcEnabled_cecVolumeDisabled_absoluteVolumeDisabled() {
-        enableAbsoluteVolumeControl();
+    public void giveAudioStatusSent_reportAudioStatusVolumeOutOfBounds_avbNotEnabled() {
+        mAudioManager.setDeviceVolumeBehavior(getAudioOutputDevice(),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_ENABLED);
+        enableSystemAudioModeIfNeeded();
+        receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_SUPPORTED);
+
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+        receiveReportAudioStatus(127, false);
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
+    }
+
+    @Test
+    public void avbEnabled_cecVolumeDisabled_avbDisabled() {
+        enableAbsoluteVolumeBehavior();
 
         setCecVolumeControlSetting(HdmiControlManager.VOLUME_CONTROL_DISABLED);
-        verifyAbsoluteVolumeDisabled();
+
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
     }
 
     @Test
-    public void avcEnabled_setAudioVolumeLevelNotSupported_absoluteVolumeDisabled() {
-        enableAbsoluteVolumeControl();
+    public void avbEnabled_setAudioVolumeLevelNotSupported_avbDisabled() {
+        enableAbsoluteVolumeBehavior();
 
         receiveSetAudioVolumeLevelSupport(DeviceFeatures.FEATURE_NOT_SUPPORTED);
-        verifyAbsoluteVolumeDisabled();
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
     }
 
     @Test
-    public void avcEnabled_setAudioVolumeLevelFeatureAborted_absoluteVolumeDisabled() {
-        enableAbsoluteVolumeControl();
+    public void avbEnabled_setAudioVolumeLevelFeatureAborted_avbDisabled() {
+        enableAbsoluteVolumeBehavior();
 
         mNativeWrapper.onCecMessage(HdmiCecMessageBuilder.buildFeatureAbortCommand(
                 getSystemAudioDeviceLogicalAddress(), getLogicalAddress(),
                 Constants.MESSAGE_SET_AUDIO_VOLUME_LEVEL, Constants.ABORT_UNRECOGNIZED_OPCODE));
         mTestLooper.dispatchAll();
-        verifyAbsoluteVolumeDisabled();
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
     }
 
     @Test
-    public void avcEnabled_systemAudioModeDisabled_absoluteVolumeDisabled() {
+    public void avbEnabled_systemAudioModeDisabled_avbDisabled() {
         // Only run when the System Audio device is an Audio System.
         assume().that(getSystemAudioDeviceType()).isEqualTo(HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
 
-        enableAbsoluteVolumeControl();
+        enableAbsoluteVolumeBehavior();
 
         receiveSetSystemAudioMode(false);
-        verifyAbsoluteVolumeDisabled();
+        assertThat(mAudioManager.getDeviceVolumeBehavior(getAudioOutputDevice())).isEqualTo(
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
     }
 
     @Test
-    public void avcEnabled_receiveReportAudioStatus_notifiesVolumeOrMuteChanges() {
+    public void avbEnabled_receiveReportAudioStatus_notifiesVolumeOrMuteChanges() {
         // Initial <Report Audio Status> has volume=50 and mute=false
-        enableAbsoluteVolumeControl();
+        enableAbsoluteVolumeBehavior();
 
         // New volume and mute status: sets both
         receiveReportAudioStatus(20, true);
@@ -512,12 +514,20 @@ public abstract class BaseAbsoluteVolumeControlTest {
                 eq(AudioManager.ADJUST_UNMUTE), anyInt());
         clearInvocations(mAudioManager);
 
+        // Volume not within range [0, 100]: sets neither volume nor mute
+        receiveReportAudioStatus(127, true);
+        verify(mAudioManager, never()).setStreamVolume(eq(AudioManager.STREAM_MUSIC), anyInt(),
+                anyInt());
+        verify(mAudioManager, never()).adjustStreamVolume(eq(AudioManager.STREAM_MUSIC), anyInt(),
+                anyInt());
+        clearInvocations(mAudioManager);
+
         // If AudioService causes us to send <Set Audio Volume Level>, the System Audio device's
         // volume changes. Afterward, a duplicate of an earlier <Report Audio Status> should
         // still cause us to call setStreamVolume()
         mHdmiControlService.getAbsoluteVolumeChangedListener().onAudioDeviceVolumeChanged(
                 getAudioOutputDevice(),
-                new VolumeInfo.Builder(ENABLE_AVC_VOLUME_INFO)
+                new VolumeInfo.Builder(ENABLE_AVB_VOLUME_INFO)
                         .setVolumeIndex(20)
                         .build()
         );
@@ -530,13 +540,13 @@ public abstract class BaseAbsoluteVolumeControlTest {
     }
 
     @Test
-    public void avcEnabled_audioDeviceVolumeAdjusted_sendsUserControlPressedAndGiveAudioStatus() {
-        enableAbsoluteVolumeControl();
+    public void avbEnabled_audioDeviceVolumeAdjusted_sendsUserControlPressedAndGiveAudioStatus() {
+        enableAbsoluteVolumeBehavior();
         mNativeWrapper.clearResultMessages();
 
         mHdmiControlService.getAbsoluteVolumeChangedListener().onAudioDeviceVolumeAdjusted(
                 getAudioOutputDevice(),
-                ENABLE_AVC_VOLUME_INFO,
+                ENABLE_AVB_VOLUME_INFO,
                 AudioManager.ADJUST_RAISE,
                 AudioDeviceVolumeManager.ADJUST_MODE_NORMAL
         );
@@ -554,14 +564,16 @@ public abstract class BaseAbsoluteVolumeControlTest {
     }
 
     @Test
-    public void avcEnabled_audioDeviceVolumeChanged_sendsSetAudioVolumeLevel() {
-        enableAbsoluteVolumeControl();
+    public void avbEnabled_audioDeviceVolumeChanged_sendsSetAudioVolumeLevel() {
+        enableAbsoluteVolumeBehavior();
         mNativeWrapper.clearResultMessages();
 
         mHdmiControlService.getAbsoluteVolumeChangedListener().onAudioDeviceVolumeChanged(
                 getAudioOutputDevice(),
-                new VolumeInfo.Builder(ENABLE_AVC_VOLUME_INFO)
+                new VolumeInfo.Builder(AudioManager.STREAM_MUSIC)
                         .setVolumeIndex(20)
+                        .setMaxVolumeIndex(AudioStatus.MAX_VOLUME)
+                        .setMinVolumeIndex(AudioStatus.MIN_VOLUME)
                         .build()
         );
         mTestLooper.dispatchAll();

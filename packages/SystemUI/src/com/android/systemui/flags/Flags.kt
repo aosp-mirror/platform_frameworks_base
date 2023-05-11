@@ -206,7 +206,7 @@ object Flags {
     // TODO(b/267722622): Tracking Bug
     @JvmField
     val WALLPAPER_PICKER_UI_FOR_AIWP =
-            unreleasedFlag(
+            releasedFlag(
                     229,
                     "wallpaper_picker_ui_for_aiwp"
             )
@@ -523,6 +523,13 @@ object Flags {
     @Keep
     @JvmField val LOCKSCREEN_LIVE_WALLPAPER =
         sysPropBooleanFlag(1117, "persist.wm.debug.lockscreen_live_wallpaper", default = false)
+
+    // TODO(b/281648899): Tracking bug
+    @Keep
+    @JvmField
+    val WALLPAPER_MULTI_CROP =
+        sysPropBooleanFlag(1118, "persist.wm.debug.wallpaper_multi_crop", default = false)
+
 
     // 1200 - predictive back
     @Keep

@@ -22,6 +22,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.log.TableLogBufferBase;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -41,6 +42,7 @@ public class Monitor {
     private final String mTag = getClass().getSimpleName();
     private final Executor mExecutor;
     private final Set<Condition> mPreconditions;
+    private final TableLogBufferBase mLogBuffer;
 
     private final HashMap<Condition, ArraySet<Subscription.Token>> mConditions = new HashMap<>();
     private final HashMap<Subscription.Token, SubscriptionState> mSubscriptions = new HashMap<>();
@@ -160,11 +162,23 @@ public class Monitor {
      * Main constructor, allowing specifying preconditions.
      */
     public Monitor(Executor executor, Set<Condition> preconditions) {
+        this(executor, preconditions, null);
+    }
+
+    /**
+     * Main constructor, allowing specifying preconditions and a log buffer for logging.
+     */
+    public Monitor(Executor executor, Set<Condition> preconditions, TableLogBufferBase logBuffer) {
         mExecutor = executor;
         mPreconditions = preconditions;
+        mLogBuffer = logBuffer;
     }
 
     private void updateConditionMetState(Condition condition) {
+        if (mLogBuffer != null) {
+            mLogBuffer.logChange(/* prefix= */ "", condition.getTag(), condition.getState());
+        }
+
         final ArraySet<Subscription.Token> subscriptions = mConditions.get(condition);
 
         // It's possible the condition was removed between the time the callback occurred and

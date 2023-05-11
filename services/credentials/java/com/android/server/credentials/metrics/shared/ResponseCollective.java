@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 
 import com.android.server.credentials.metrics.EntryEnum;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -70,6 +71,24 @@ public class ResponseCollective {
     }
 
     /**
+     * Returns an unmodifiable map of the entry counts, safe under the immutability of the
+     * class the original map is held within.
+     * @return an unmodifiable map of the entry : counts
+     */
+    public Map<EntryEnum, Integer> getEntryCountsMap() {
+        return Collections.unmodifiableMap(mEntryCounts);
+    }
+
+    /**
+     * Returns an unmodifiable map of the response counts, safe under the immutability of the
+     * class the original map is held within.
+     * @return an unmodifiable map of the response : counts
+     */
+    public Map<String, Integer> getResponseCountsMap() {
+        return Collections.unmodifiableMap(mResponseCounts);
+    }
+
+    /**
      * Returns the unique, deduped, response classtype counts for logging associated with this
      * provider.
      * @return a string array for deduped classtype counts
@@ -111,5 +130,45 @@ public class ResponseCollective {
      */
     public int getNumEntriesTotal() {
         return mEntryCounts.values().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    /**
+     * This combines the current collective with another collective, only if that other
+     * collective is indeed a differing one in memory.
+     * @param other the other response collective to combine with
+     * @return a combined {@link ResponseCollective} object
+     */
+    public ResponseCollective combineCollectives(ResponseCollective other) {
+        if (this == other) {
+            return this;
+        }
+
+        Map<String, Integer> responseCounts = new LinkedHashMap<>(other.mResponseCounts);
+        for (String response : mResponseCounts.keySet()) {
+            responseCounts.merge(response, mResponseCounts.get(response), Integer::sum);
+        }
+
+        Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>(other.mEntryCounts);
+        for (EntryEnum entry : mEntryCounts.keySet()) {
+            entryCounts.merge(entry, mEntryCounts.get(entry), Integer::sum);
+        }
+
+        return new ResponseCollective(responseCounts, entryCounts);
+    }
+
+    /**
+     * Given two maps of type : counts, this combines the second into the first, to get an aggregate
+     * deduped type:count output.
+     * @param first the first map of some type to counts used as the base
+     * @param second the second map of some type to counts that mixies with the first
+     * @param <T> The type of the object we are mix-deduping - i.e. responses or entries.
+     * @return the first map updated with the second map's information for type:counts
+     */
+    public static <T> Map<T, Integer> combineTypeCountMaps(Map<T, Integer> first,
+            Map<T, Integer> second) {
+        for (T response : second.keySet()) {
+            first.merge(response, first.getOrDefault(response, 0), Integer::sum);
+        }
+        return first;
     }
 }

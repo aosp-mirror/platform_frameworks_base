@@ -457,6 +457,7 @@ class OwnersData {
                 case TAG_POLICY_ENGINE_MIGRATION:
                     mMigratedToPolicyEngine = parser.getAttributeBoolean(
                             null, ATTR_MIGRATED_TO_POLICY_ENGINE, false);
+                    break;
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);
                     return false;

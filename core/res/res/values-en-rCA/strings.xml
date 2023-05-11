@@ -2164,8 +2164,9 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Unpause"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"No work apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"No personal apps"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Open personal <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Open work <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Open work <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Open in personal <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Open in work <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Use personal browser"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Use work browser"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM network unlock PIN"</string>

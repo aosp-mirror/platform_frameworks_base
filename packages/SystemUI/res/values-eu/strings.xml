@@ -902,7 +902,7 @@
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"Erabilerraztasun-eginbideak irekitzeko, sakatu hau. Ezarpenetan pertsonalizatu edo ordez dezakezu botoia.\n\n"<annotation id="link">"Ikusi ezarpenak"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"Eraman botoia ertzera aldi baterako ezkutatzeko"</string>
     <string name="accessibility_floating_button_undo" msgid="511112888715708241">"Desegin"</string>
-    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"<xliff:g id="FEATURE_NAME">%s</xliff:g> eginbidearen lasterbidea kendu da"</string>
+    <string name="accessibility_floating_button_undo_message_label_text" msgid="9017658016426242640">"Kendu da lasterbidea (<xliff:g id="FEATURE_NAME">%s</xliff:g>)"</string>
     <string name="accessibility_floating_button_undo_message_number_text" msgid="4909270290725226075">"{count,plural, =1{# lasterbide kendu da}other{# lasterbide kendu dira}}"</string>
     <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"Eraman goialdera, ezkerretara"</string>
     <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"Eraman goialdera, eskuinetara"</string>
@@ -1009,6 +1009,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"%% <xliff:g id="PERCENTAGE">%1$d</xliff:g>"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Bozgorailuak eta pantailak"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Iradokitako gailuak"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Gelditu partekatutako saioa multimedia-edukia beste gailu batera eramateko"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Gelditu"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Nola funtzionatzen dute iragarpenek?"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Iragarri"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Bluetooth bidezko gailu bateragarriak dituzten inguruko pertsonek iragartzen ari zaren multimedia-edukia entzun dezakete"</string>
@@ -1146,10 +1148,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Kamera-aplikazio bat instalatu da."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikazioa konfiguratuta dago."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Gutxienez gailu bat erabilgarri dago."</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Oharrak idazteko lasterbidea erabiltzeko, hautatu oharretarako aplikazio lehenetsia."</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Hautatu aplikazioa"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Eduki sakatuta lasterbidea"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Utzi"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Aldatu pantaila batetik bestera"</string>

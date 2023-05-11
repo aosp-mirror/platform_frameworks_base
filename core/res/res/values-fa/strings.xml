@@ -210,7 +210,7 @@
     <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"روشن کردن"</string>
     <string name="work_profile_telephony_paused_title" msgid="7690804479291839519">"تماس‌ها و پیام‌ها خاموش هستند"</string>
     <string name="work_profile_telephony_paused_text" msgid="8065762301100978221">"برنامه‌های کاری را موقتاً متوقف کرده‌اید. تماس یا پیامکی دریافت نخواهید کرد."</string>
-    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"ازسرگیری برنامه‌های کاری"</string>
+    <string name="work_profile_telephony_paused_turn_on_button" msgid="7542632318337068821">"لغو مکث برنامه‌های کاری"</string>
     <string name="me" msgid="6207584824693813140">"من"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"گزینه‌های رایانهٔ لوحی"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏گزینه‌های Android TV"</string>
@@ -1951,9 +1951,9 @@
     <string name="app_suspended_title" msgid="888873445010322650">"برنامه در دسترس نیست"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> درحال‌حاضر در دسترس نیست. <xliff:g id="APP_NAME_1">%2$s</xliff:g> آن را مدیریت می‌کند."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"بیشتر بدانید"</string>
-    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو توقف موقت برنامه"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"برنامه‌های کاری ازسر گرفته شود؟"</string>
-    <string name="work_mode_turn_on" msgid="5316648862401307800">"ازسرگیری"</string>
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو مکث برنامه"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"مکث برنامه‌های کاری لغو شود؟"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"لغو مکث"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"اضطراری"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"برنامه در دسترس نیست"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> درحال‌حاضر در دسترس نیست."</string>
@@ -2161,11 +2161,15 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"نمی‌توان این محتوا را با برنامه‌های شخصی هم‌رسانی کرد"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"نمی‌توان این محتوا را با برنامه‌های شخصی باز کرد"</string>
     <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"برنامه‌های کاری موقتاً متوقف شده است"</string>
-    <string name="resolver_switch_on_work" msgid="4527096360772311894">"ازسرگیری"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"لغو مکث"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"برنامه کاری‌ای وجود ندارد"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"برنامه شخصی‌ای وجود ندارد"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"باز کردن <xliff:g id="APP">%s</xliff:g> شخصی"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"باز کردن <xliff:g id="APP">%s</xliff:g> کاری"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"استفاده از مرورگر شخصی"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"استفاده از مرورگر کاری"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"پین باز کردن قفل شبکه سیم‌کارت"</string>

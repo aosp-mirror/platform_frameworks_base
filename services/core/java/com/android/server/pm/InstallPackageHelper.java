@@ -280,7 +280,7 @@ final class InstallPackageHelper {
             SharedUserSetting requestSharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(
                     request.getScanRequestPackageSetting());
             SharedUserSetting resultSharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(
-                    request.getScanRequestPackageSetting());
+                    request.getScannedPackageSetting());
             if (requestSharedUserSetting != null
                     && requestSharedUserSetting != resultSharedUserSetting) {
                 // shared user changed, remove from old shared user
@@ -497,13 +497,6 @@ final class InstallPackageHelper {
         if (mPm.mCustomResolverComponentName != null
                 && mPm.mCustomResolverComponentName.getPackageName().equals(pkg.getPackageName())) {
             mPm.setUpCustomResolverActivity(pkg, pkgSetting);
-        }
-
-        File appMetadataFile = new File(pkgSetting.getPath(), APP_METADATA_FILE_NAME);
-        if (appMetadataFile.exists()) {
-            pkgSetting.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
-        } else {
-            pkgSetting.setAppMetadataFilePath(null);
         }
 
         if (pkg.getPackageName().equals("android")) {
@@ -2124,6 +2117,13 @@ final class InstallPackageHelper {
                 installRequest.setNewUsers(
                         ps.queryInstalledUsers(mPm.mUserManager.getUserIds(), true));
                 ps.setUpdateAvailable(false /*updateAvailable*/);
+
+                File appMetadataFile = new File(ps.getPath(), APP_METADATA_FILE_NAME);
+                if (appMetadataFile.exists()) {
+                    ps.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+                } else {
+                    ps.setAppMetadataFilePath(null);
+                }
             }
             if (installRequest.getReturnCode() == PackageManager.INSTALL_SUCCEEDED) {
                 mPm.updateSequenceNumberLP(ps, installRequest.getNewUsers());

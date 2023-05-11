@@ -18,6 +18,7 @@
 #define ANDROID_HWUI_DRAW_GL_INFO_H
 
 #include <SkColorSpace.h>
+#include <SkColorType.h>
 
 namespace android {
 namespace uirenderer {
@@ -91,6 +92,12 @@ struct DrawGlInfo {
     // be baked into the color_space_ptr, so this is just to indicate the amount of extended
     // range is available if desired
     float currentHdrSdrRatio;
+
+    // Whether or not dithering is globally enabled
+    bool shouldDither;
+
+    // The color type of the destination framebuffer
+    SkColorType fboColorType;
 };  // struct DrawGlInfo
 
 }  // namespace uirenderer

@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
@@ -150,7 +151,12 @@ public class HeavyWeightSwitcherActivity extends Activity {
                             Intent.FLAG_ACTIVITY_FORWARD_RESULT,
                             Intent.FLAG_ACTIVITY_FORWARD_RESULT, 0);
                 } else {
-                    startIntentSenderForResult(mStartIntent, -1, null, 0, 0, 0);
+                    ActivityOptions activityOptions =
+                            ActivityOptions.makeBasic()
+                                .setPendingIntentBackgroundActivityStartMode(
+                                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED);
+                    startIntentSenderForResult(mStartIntent, -1, null, 0, 0, 0,
+                            activityOptions.toBundle());
                 }
             } catch (IntentSender.SendIntentException ex) {
                 Log.w("HeavyWeightSwitcherActivity", "Failure starting", ex);
