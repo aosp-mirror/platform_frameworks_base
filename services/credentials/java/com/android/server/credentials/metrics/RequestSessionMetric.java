@@ -20,6 +20,7 @@ import static com.android.server.credentials.MetricUtilities.DEFAULT_INT_32;
 import static com.android.server.credentials.MetricUtilities.DELTA_EXCEPTION_CUT;
 import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
+import static com.android.server.credentials.MetricUtilities.logApiCalledAggregateCandidate;
 import static com.android.server.credentials.MetricUtilities.logApiCalledAuthenticationMetric;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidateGetMetric;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
@@ -27,6 +28,7 @@ import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPh
 import static com.android.server.credentials.MetricUtilities.logApiCalledNoUidFinal;
 
 import android.annotation.NonNull;
+import android.content.ComponentName;
 import android.credentials.GetCredentialRequest;
 import android.credentials.ui.UserSelectionDialogResult;
 import android.util.Slog;
@@ -280,6 +282,26 @@ public class RequestSessionMetric {
     }
 
     /**
+     * Used to update metrics when a response is received in a RequestSession.
+     *
+     * @param componentName the component name associated with the provider the response is for
+     */
+    public void updateMetricsOnResponseReceived(Map<String, ProviderSession> providers,
+            ComponentName componentName, boolean isPrimary) {
+        try {
+            var chosenProviderSession = providers.get(componentName.flattenToString());
+            if (chosenProviderSession != null) {
+                ProviderSessionMetric providerSessionMetric =
+                        chosenProviderSession.getProviderSessionMetric();
+                collectChosenMetricViaCandidateTransfer(providerSessionMetric
+                        .getCandidatePhasePerProviderMetric(), isPrimary);
+            }
+        } catch (Exception e) {
+            Slog.i(TAG, "Exception upon candidate to chosen metric transfer: " + e);
+        }
+    }
+
+    /**
      * Called by RequestSessions upon chosen metric determination. It's expected that most bits
      * are transferred here. However, certain new information, such as the selected provider's final
      * exception bit, the framework to ui and back latency, or the ui response bit are set at other
@@ -288,10 +310,13 @@ public class RequestSessionMetric {
      * {@link com.android.internal.util.FrameworkStatsLog} metric generation.
      *
      * @param candidatePhaseMetric the componentName to associate with a provider
+     * @param isPrimary indicates that this chosen provider is the primary provider (or not)
      */
-    public void collectChosenMetricViaCandidateTransfer(CandidatePhaseMetric candidatePhaseMetric) {
+    public void collectChosenMetricViaCandidateTransfer(CandidatePhaseMetric candidatePhaseMetric,
+            boolean isPrimary) {
         try {
             mChosenProviderFinalPhaseMetric.setChosenUid(candidatePhaseMetric.getCandidateUid());
+            mChosenProviderFinalPhaseMetric.setPrimary(isPrimary);
 
             mChosenProviderFinalPhaseMetric.setQueryPhaseLatencyMicroseconds(
                     candidatePhaseMetric.getQueryLatencyMicroseconds());
@@ -357,6 +382,7 @@ public class RequestSessionMetric {
     public void logCandidateAggregateMetrics(Map<String, ProviderSession> providers) {
         try {
             mCandidateAggregateMetric.collectAverages(providers);
+            logApiCalledAggregateCandidate(mCandidateAggregateMetric, ++mSequenceCounter);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during aggregate candidate logging " + e);
         }

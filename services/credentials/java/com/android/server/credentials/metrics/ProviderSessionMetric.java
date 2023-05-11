@@ -100,8 +100,8 @@ public class ProviderSessionMetric {
      */
     public void collectAuthenticationExceptionStatus(boolean hasException) {
         try {
-            var mostRecentAuthenticationMetric = mBrowsedAuthenticationMetric
-                    .get(mBrowsedAuthenticationMetric.size() - 1);
+            BrowsedAuthenticationMetric mostRecentAuthenticationMetric =
+                    getUsedAuthenticationMetric();
             mostRecentAuthenticationMetric.setHasException(hasException);
         } catch (Exception e) {
             Slog.i(TAG, "Error while setting authentication metric exception " + e);
@@ -122,24 +122,25 @@ public class ProviderSessionMetric {
 
     private void collectAuthEntryUpdate(boolean isFailureStatus,
             boolean isCompletionStatus, int providerSessionUid) {
-        // TODO(b/271135048) - Mimic typical candidate update, but with authentication metric
-        // Collect the final timestamps (and start timestamp), status, exceptions and the provider
-        // uid. This occurs typically *after* the collection is complete.
-        var mostRecentAuthenticationMetric = mBrowsedAuthenticationMetric
-                .get(mBrowsedAuthenticationMetric.size() - 1);
+        BrowsedAuthenticationMetric mostRecentAuthenticationMetric =
+                getUsedAuthenticationMetric();
         mostRecentAuthenticationMetric.setProviderUid(providerSessionUid);
-        // TODO(immediately) - add timestamps (no longer needed!!) but also update below values!
         if (isFailureStatus) {
-            mostRecentAuthenticationMetric.setQueryReturned(false);
+            mostRecentAuthenticationMetric.setAuthReturned(false);
             mostRecentAuthenticationMetric.setProviderStatus(
                     ProviderStatusForMetrics.QUERY_FAILURE
                             .getMetricCode());
         } else if (isCompletionStatus) {
-            mostRecentAuthenticationMetric.setQueryReturned(true);
+            mostRecentAuthenticationMetric.setAuthReturned(true);
             mostRecentAuthenticationMetric.setProviderStatus(
                     ProviderStatusForMetrics.QUERY_SUCCESS
                             .getMetricCode());
         }
+    }
+
+    private BrowsedAuthenticationMetric getUsedAuthenticationMetric() {
+        return mBrowsedAuthenticationMetric
+                .get(mBrowsedAuthenticationMetric.size() - 1);
     }
 
     /**
@@ -148,14 +149,17 @@ public class ProviderSessionMetric {
      * @param isFailureStatus indicates the candidate provider sent back a terminated response
      * @param isCompletionStatus indicates the candidate provider sent back a completion response
      * @param providerSessionUid the uid of the provider
+     * @param isPrimary indicates if this candidate provider was the primary provider
      */
     public void collectCandidateMetricUpdate(boolean isFailureStatus,
-            boolean isCompletionStatus, int providerSessionUid, boolean isAuthEntry) {
+            boolean isCompletionStatus, int providerSessionUid, boolean isAuthEntry,
+            boolean isPrimary) {
         try {
             if (isAuthEntry) {
                 collectAuthEntryUpdate(isFailureStatus, isCompletionStatus, providerSessionUid);
                 return;
             }
+            mCandidatePhasePerProviderMetric.setPrimary(isPrimary);
             mCandidatePhasePerProviderMetric.setCandidateUid(providerSessionUid);
             mCandidatePhasePerProviderMetric
                     .setQueryFinishTimeNanoseconds(System.nanoTime());
