@@ -110,6 +110,12 @@ public class PolicyVersionUpgrader {
             currentVersion = 4;
         }
 
+        if (currentVersion == 4) {
+            Slog.i(LOG_TAG, String.format("Upgrading from version %d", currentVersion));
+            initializeEffectiveKeepProfilesRunning(allUsersData);
+            currentVersion = 5;
+        }
+
         writePoliciesAndVersion(allUsers, allUsersData, ownersData, currentVersion);
     }
 
@@ -212,6 +218,16 @@ public class PolicyVersionUpgrader {
         ownerAdmin.suspendedPackages = mProvider.getPlatformSuspendedPackages(ownerUserId);
         Slog.i(LOG_TAG, String.format("Saved %d packages suspended by %s in user %d",
                 ownerAdmin.suspendedPackages.size(), ownerPackage, ownerUserId));
+    }
+
+    private void initializeEffectiveKeepProfilesRunning(
+            SparseArray<DevicePolicyData> allUsersData) {
+        DevicePolicyData systemUserData = allUsersData.get(UserHandle.USER_SYSTEM);
+        if (systemUserData == null) {
+            return;
+        }
+        systemUserData.mEffectiveKeepProfilesRunning = false;
+        Slog.i(LOG_TAG, "Keep profile running effective state set to false");
     }
 
     private OwnersData loadOwners(int[] allUsers) {
