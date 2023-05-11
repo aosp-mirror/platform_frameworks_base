@@ -74,6 +74,7 @@ import android.os.IBinder;
 import android.os.IWakeLockCallback;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
@@ -117,6 +118,7 @@ import org.mockito.stubbing.Answer;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -150,6 +152,7 @@ public class PowerManagerServiceTest {
     @Mock private SystemPropertiesWrapper mSystemPropertiesMock;
     @Mock private AppOpsManager mAppOpsManagerMock;
     @Mock private LowPowerStandbyController mLowPowerStandbyControllerMock;
+    @Mock private Callable<Void> mInvalidateInteractiveCachesMock;
 
     @Mock
     private InattentiveSleepWarningController mInattentiveSleepWarningControllerMock;
@@ -310,7 +313,11 @@ public class PowerManagerServiceTest {
 
             @Override
             void invalidateIsInteractiveCaches() {
-                // Avoids an SELinux failure.
+                try {
+                    mInvalidateInteractiveCachesMock.call();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
             }
 
             @Override
@@ -2315,6 +2322,140 @@ public class PowerManagerServiceTest {
         verify(mNotifierMock, atMost(1)).onGroupWakefulnessChangeStarted(
                 eq(nonDefaultDisplayGroupId), eq(WAKEFULNESS_ASLEEP),
                 eq(PowerManager.GO_TO_SLEEP_REASON_APPLICATION), eq(eventTime));
+    }
+
+    @Test
+    public void testMultiDisplay_isInteractive_nonExistentGroup() {
+        createService();
+        startSystem();
+
+        int nonExistentDisplayGroup = 999;
+        BinderService binderService = mService.getBinderServiceInstance();
+        assertThat(binderService.isDisplayInteractive(nonExistentDisplayGroup)).isFalse();
+    }
+
+    private void testMultiDisplay_isInteractive_returnsCorrectValue(
+            boolean defaultDisplayAwake, boolean secondGroupDisplayAwake) {
+        final int nonDefaultDisplayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
+        // We use a display id that does not match the group id, to make sure we aren't accidentally
+        // confusing display id's and display group id's in the implementation.
+        final int nonDefaultDisplay = Display.DEFAULT_DISPLAY + 17;
+        final AtomicReference<DisplayManagerInternal.DisplayGroupListener> listener =
+                new AtomicReference<>();
+        doAnswer((Answer<Void>) invocation -> {
+            listener.set(invocation.getArgument(0));
+            return null;
+        }).when(mDisplayManagerInternalMock).registerDisplayGroupListener(any());
+
+        final DisplayInfo defaultDisplayInfo = new DisplayInfo();
+        defaultDisplayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY)).thenReturn(
+                defaultDisplayInfo);
+
+        final DisplayInfo secondDisplayInfo = new DisplayInfo();
+        secondDisplayInfo.displayGroupId = nonDefaultDisplayGroupId;
+        when(mDisplayManagerInternalMock.getDisplayInfo(nonDefaultDisplay)).thenReturn(
+                secondDisplayInfo);
+
+        createService();
+        startSystem();
+        listener.get().onDisplayGroupAdded(nonDefaultDisplayGroupId);
+
+        if (!defaultDisplayAwake) {
+            mService.setWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP, WAKEFULNESS_ASLEEP,
+                    mClock.now(), 0, PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0, null, null);
+        }
+        if (!secondGroupDisplayAwake) {
+            mService.setWakefulnessLocked(nonDefaultDisplayGroupId, WAKEFULNESS_ASLEEP,
+                    mClock.now(), 0,
+                    PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0, null, null);
+        }
+        assertThat(PowerManagerInternal.isInteractive(
+                mService.getWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP))).isEqualTo(
+                defaultDisplayAwake);
+        assertThat(PowerManagerInternal.isInteractive(
+                mService.getWakefulnessLocked(nonDefaultDisplayGroupId))).isEqualTo(
+                secondGroupDisplayAwake);
+
+        BinderService binderService = mService.getBinderServiceInstance();
+        assertThat(binderService.isInteractive()).isEqualTo(
+                defaultDisplayAwake || secondGroupDisplayAwake);
+        assertThat(binderService.isDisplayInteractive(Display.DEFAULT_DISPLAY)).isEqualTo(
+                defaultDisplayAwake);
+        assertThat(binderService.isDisplayInteractive(nonDefaultDisplay)).isEqualTo(
+                secondGroupDisplayAwake);
+    }
+
+    @Test
+    public void testMultiDisplay_isInteractive_defaultGroupIsAwakeSecondGroupIsAwake() {
+        testMultiDisplay_isInteractive_returnsCorrectValue(true, true);
+    }
+
+    @Test
+    public void testMultiDisplay_isInteractive_defaultGroupIsAwakeSecondGroupIsAsleep() {
+        testMultiDisplay_isInteractive_returnsCorrectValue(true, false);
+    }
+
+    @Test
+    public void testMultiDisplay_isInteractive_defaultGroupIsAsleepSecondGroupIsAwake() {
+        testMultiDisplay_isInteractive_returnsCorrectValue(false, true);
+    }
+
+    @Test
+    public void testMultiDisplay_isInteractive_bothGroupsAreAsleep() {
+        testMultiDisplay_isInteractive_returnsCorrectValue(false, false);
+    }
+
+    @Test
+    public void testMultiDisplay_defaultGroupWakefulnessChange_causesIsInteractiveInvalidate()
+            throws Exception {
+        final int nonDefaultDisplayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
+        final int nonDefaultDisplay = Display.DEFAULT_DISPLAY + 1;
+        final AtomicReference<DisplayManagerInternal.DisplayGroupListener> listener =
+                new AtomicReference<>();
+        doAnswer((Answer<Void>) invocation -> {
+            listener.set(invocation.getArgument(0));
+            return null;
+        }).when(mDisplayManagerInternalMock).registerDisplayGroupListener(any());
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = nonDefaultDisplayGroupId;
+        when(mDisplayManagerInternalMock.getDisplayInfo(nonDefaultDisplay)).thenReturn(info);
+        createService();
+        startSystem();
+        listener.get().onDisplayGroupAdded(nonDefaultDisplayGroupId);
+
+        verify(mInvalidateInteractiveCachesMock).call();
+
+        mService.setWakefulnessLocked(Display.DEFAULT_DISPLAY_GROUP, WAKEFULNESS_ASLEEP,
+                mClock.now(), 0, PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0, null, null);
+
+        verify(mInvalidateInteractiveCachesMock, times(2)).call();
+    }
+
+    @Test
+    public void testMultiDisplay_secondGroupWakefulness_causesIsInteractiveInvalidate()
+            throws Exception {
+        final int nonDefaultDisplayGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
+        final int nonDefaultDisplay = Display.DEFAULT_DISPLAY + 1;
+        final AtomicReference<DisplayManagerInternal.DisplayGroupListener> listener =
+                new AtomicReference<>();
+        doAnswer((Answer<Void>) invocation -> {
+            listener.set(invocation.getArgument(0));
+            return null;
+        }).when(mDisplayManagerInternalMock).registerDisplayGroupListener(any());
+        final DisplayInfo info = new DisplayInfo();
+        info.displayGroupId = nonDefaultDisplayGroupId;
+        when(mDisplayManagerInternalMock.getDisplayInfo(nonDefaultDisplay)).thenReturn(info);
+        createService();
+        startSystem();
+        listener.get().onDisplayGroupAdded(nonDefaultDisplayGroupId);
+
+        verify(mInvalidateInteractiveCachesMock).call();
+
+        mService.setWakefulnessLocked(nonDefaultDisplayGroupId, WAKEFULNESS_ASLEEP, mClock.now(),
+                0, PowerManager.GO_TO_SLEEP_REASON_APPLICATION, 0, null, null);
+
+        verify(mInvalidateInteractiveCachesMock, times(2)).call();
     }
 
     @Test
