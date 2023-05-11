@@ -231,8 +231,8 @@ public class HdmiControlService extends SystemService {
             new AudioDeviceAttributes(AudioDeviceAttributes.ROLE_OUTPUT,
                     AudioDeviceInfo.TYPE_HDMI_EARC, "");
 
-    // Audio output devices used for Absolute Volume Control
-    private static final List<AudioDeviceAttributes> AVC_AUDIO_OUTPUT_DEVICES =
+    // Audio output devices used for absolute volume behavior
+    private static final List<AudioDeviceAttributes> AVB_AUDIO_OUTPUT_DEVICES =
             Collections.unmodifiableList(Arrays.asList(AUDIO_OUTPUT_DEVICE_HDMI,
                     AUDIO_OUTPUT_DEVICE_HDMI_ARC, AUDIO_OUTPUT_DEVICE_HDMI_EARC));
 
@@ -265,7 +265,7 @@ public class HdmiControlService extends SystemService {
     @HdmiControlManager.VolumeControl
     private int mHdmiCecVolumeControl;
 
-    // Caches the volume behaviors of all audio output devices in AVC_AUDIO_OUTPUT_DEVICES.
+    // Caches the volume behaviors of all audio output devices in AVB_AUDIO_OUTPUT_DEVICES.
     @GuardedBy("mLock")
     private Map<AudioDeviceAttributes, Integer> mAudioDeviceVolumeBehaviors = new HashMap<>();
 
@@ -458,6 +458,9 @@ public class HdmiControlService extends SystemService {
     private boolean mEarcTxFeatureFlagEnabled = false;
 
     @ServiceThreadOnly
+    private boolean mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled = false;
+
+    @ServiceThreadOnly
     private boolean mTransitionFromArcToEarcTxEnabled = false;
 
     @ServiceThreadOnly
@@ -491,10 +494,10 @@ public class HdmiControlService extends SystemService {
     private PowerManagerInternalWrapper mPowerManagerInternal;
 
     @Nullable
-    private AudioManager mAudioManager;
+    private AudioManagerWrapper mAudioManager;
 
     @Nullable
-    private AudioDeviceVolumeManagerWrapperInterface mAudioDeviceVolumeManager;
+    private AudioDeviceVolumeManagerWrapper mAudioDeviceVolumeManager;
 
     @Nullable
     private Looper mIoLooper;
@@ -528,18 +531,20 @@ public class HdmiControlService extends SystemService {
     /**
      * Constructor for testing.
      *
-     * It's critical to use a fake AudioDeviceVolumeManager because a normally instantiated
-     * AudioDeviceVolumeManager can access the "real" AudioService on the DUT.
+     * Takes fakes for AudioManager and AudioDeviceVolumeManager.
      *
-     * @see FakeAudioDeviceVolumeManagerWrapper
+     * This is especially important for AudioDeviceVolumeManager because a normally instantiated
+     * AudioDeviceVolumeManager can access the "real" AudioService on the DUT.
      */
     @VisibleForTesting HdmiControlService(Context context, List<Integer> deviceTypes,
-            AudioDeviceVolumeManagerWrapperInterface audioDeviceVolumeManager) {
+            AudioManagerWrapper audioManager,
+            AudioDeviceVolumeManagerWrapper audioDeviceVolumeManager) {
         super(context);
         mCecLocalDevices = deviceTypes;
         mSettingsObserver = new SettingsObserver(mHandler);
         mHdmiCecConfig = new HdmiCecConfig(context);
         mDeviceConfig = new DeviceConfigWrapper();
+        mAudioManager = audioManager;
         mAudioDeviceVolumeManager = audioDeviceVolumeManager;
     }
 
@@ -680,6 +685,8 @@ public class HdmiControlService extends SystemService {
                 Constants.DEVICE_CONFIG_FEATURE_FLAG_ENABLE_EARC_TX, false);
         mTransitionFromArcToEarcTxEnabled = mDeviceConfig.getBoolean(
                 Constants.DEVICE_CONFIG_FEATURE_FLAG_TRANSITION_ARC_TO_EARC_TX, false);
+        mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled = mDeviceConfig.getBoolean(
+                Constants.DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI, false);
 
         synchronized (mLock) {
             mEarcEnabled = (mHdmiCecConfig.getIntValue(
@@ -899,6 +906,17 @@ public class HdmiControlService extends SystemService {
                                 false);
                     }
                 });
+
+        mDeviceConfig.addOnPropertiesChangedListener(getContext().getMainExecutor(),
+                new DeviceConfig.OnPropertiesChangedListener() {
+                    @Override
+                    public void onPropertiesChanged(DeviceConfig.Properties properties) {
+                        mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled = properties.getBoolean(
+                                Constants.DEVICE_CONFIG_FEATURE_FLAG_TV_NUMERIC_SOUNDBAR_VOLUME_UI,
+                                false);
+                        checkAndUpdateAbsoluteVolumeBehavior();
+                    }
+                });
     }
     /** Returns true if the device screen is off */
     boolean isScreenOff() {
@@ -931,11 +949,6 @@ public class HdmiControlService extends SystemService {
         // We don't transition to POWER_STATUS_ON initially, as we might be booting in quiescent
         // mode, during which we don't want to appear powered on to avoid being made active source.
         return HdmiControlManager.POWER_STATUS_TRANSIENT_TO_STANDBY;
-    }
-
-    @VisibleForTesting
-    void setAudioManager(AudioManager audioManager) {
-        mAudioManager = audioManager;
     }
 
     @VisibleForTesting
@@ -975,11 +988,13 @@ public class HdmiControlService extends SystemService {
                     Context.TV_INPUT_SERVICE);
             mPowerManager = new PowerManagerWrapper(getContext());
             mPowerManagerInternal = new PowerManagerInternalWrapper();
-            mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+            if (mAudioManager == null) {
+                mAudioManager = new DefaultAudioManagerWrapper(getContext());
+            }
             mStreamMusicMaxVolume = getAudioManager().getStreamMaxVolume(AudioManager.STREAM_MUSIC);
             if (mAudioDeviceVolumeManager == null) {
                 mAudioDeviceVolumeManager =
-                        new AudioDeviceVolumeManagerWrapper(getContext());
+                        new DefaultAudioDeviceVolumeManagerWrapper(getContext());
             }
             getAudioDeviceVolumeManager().addOnDeviceVolumeBehaviorChangedListener(
                     mServiceThreadExecutor, this::onDeviceVolumeBehaviorChanged);
@@ -1773,7 +1788,7 @@ public class HdmiControlService extends SystemService {
                 == HdmiControlManager.VOLUME_CONTROL_DISABLED) {
             return;
         }
-        AudioManager audioManager = getAudioManager();
+        AudioManagerWrapper audioManager = getAudioManager();
         boolean muted = audioManager.isStreamMute(AudioManager.STREAM_MUSIC);
         if (mute) {
             if (!muted) {
@@ -2751,7 +2766,7 @@ public class HdmiControlService extends SystemService {
             pw.println("mPowerStatus: " + mPowerStatusController.getPowerStatus());
             pw.println("mIsCecAvailable: " + mIsCecAvailable);
             pw.println("mCecVersion: " + mCecVersion);
-            pw.println("mIsAbsoluteVolumeControlEnabled: " + isAbsoluteVolumeControlEnabled());
+            pw.println("mIsAbsoluteVolumeBehaviorEnabled: " + isAbsoluteVolumeBehaviorEnabled());
 
             // System settings
             pw.println("System_settings:");
@@ -2919,7 +2934,7 @@ public class HdmiControlService extends SystemService {
             @HdmiControlManager.VolumeControl int hdmiCecVolumeControl) {
         mHdmiCecVolumeControl = hdmiCecVolumeControl;
         announceHdmiCecVolumeControlFeatureChange(hdmiCecVolumeControl);
-        runOnServiceThread(this::checkAndUpdateAbsoluteVolumeControlState);
+        runOnServiceThread(this::checkAndUpdateAbsoluteVolumeBehavior);
     }
 
     // Get the source address to send out commands to devices connected to the current device
@@ -3485,7 +3500,7 @@ public class HdmiControlService extends SystemService {
      * Returns null before the boot phase {@link SystemService#PHASE_SYSTEM_SERVICES_READY}.
      */
     @Nullable
-    AudioManager getAudioManager() {
+    AudioManagerWrapper getAudioManager() {
         return mAudioManager;
     }
 
@@ -3493,7 +3508,7 @@ public class HdmiControlService extends SystemService {
      * Returns null before the boot phase {@link SystemService#PHASE_SYSTEM_SERVICES_READY}.
      */
     @Nullable
-    private AudioDeviceVolumeManagerWrapperInterface getAudioDeviceVolumeManager() {
+    private AudioDeviceVolumeManagerWrapper getAudioDeviceVolumeManager() {
         return mAudioDeviceVolumeManager;
     }
 
@@ -3882,7 +3897,7 @@ public class HdmiControlService extends SystemService {
         synchronized (mLock) {
             mSystemAudioActivated = on;
         }
-        runOnServiceThread(this::checkAndUpdateAbsoluteVolumeControlState);
+        runOnServiceThread(this::checkAndUpdateAbsoluteVolumeBehavior);
     }
 
     @ServiceThreadOnly
@@ -3993,7 +4008,7 @@ public class HdmiControlService extends SystemService {
                     deviceIsActiveSource, caller);
         }
 
-        runOnServiceThread(this::checkAndUpdateAbsoluteVolumeControlState);
+        runOnServiceThread(this::checkAndUpdateAbsoluteVolumeBehavior);
     }
 
     // This method should only be called when the device can be the active source
@@ -4189,17 +4204,17 @@ public class HdmiControlService extends SystemService {
 
     /**
      * Listener for changes to the volume behavior of an audio output device. Caches the
-     * volume behavior of devices used for Absolute Volume Control.
+     * volume behavior of devices used for absolute volume behavior.
      */
     @VisibleForTesting
     @ServiceThreadOnly
     void onDeviceVolumeBehaviorChanged(AudioDeviceAttributes device, int volumeBehavior) {
         assertRunOnServiceThread();
-        if (AVC_AUDIO_OUTPUT_DEVICES.contains(device)) {
+        if (AVB_AUDIO_OUTPUT_DEVICES.contains(device)) {
             synchronized (mLock) {
                 mAudioDeviceVolumeBehaviors.put(device, volumeBehavior);
             }
-            checkAndUpdateAbsoluteVolumeControlState();
+            checkAndUpdateAbsoluteVolumeBehavior();
         }
     }
 
@@ -4209,7 +4224,7 @@ public class HdmiControlService extends SystemService {
      */
     @AudioManager.DeviceVolumeBehavior
     private int getDeviceVolumeBehavior(AudioDeviceAttributes device) {
-        if (AVC_AUDIO_OUTPUT_DEVICES.contains(device)) {
+        if (AVB_AUDIO_OUTPUT_DEVICES.contains(device)) {
             synchronized (mLock) {
                 if (mAudioDeviceVolumeBehaviors.containsKey(device)) {
                     return mAudioDeviceVolumeBehaviors.get(device);
@@ -4220,25 +4235,29 @@ public class HdmiControlService extends SystemService {
     }
 
     /**
-     * Returns whether Absolute Volume Control is enabled or not. This is determined by the
+     * Returns whether absolute volume behavior is enabled or not. This is determined by the
      * volume behavior of the relevant HDMI audio output device(s) for this device's type.
      */
-    public boolean isAbsoluteVolumeControlEnabled() {
+    public boolean isAbsoluteVolumeBehaviorEnabled() {
         if (!isTvDevice() && !isPlaybackDevice()) {
             return false;
         }
-        AudioDeviceAttributes avcAudioOutputDevice = getAvcAudioOutputDevice();
-        if (avcAudioOutputDevice == null) {
+        AudioDeviceAttributes avbAudioOutputDevice = getAvbAudioOutputDevice();
+        if (avbAudioOutputDevice == null) {
             return false;
         }
-        return getDeviceVolumeBehavior(avcAudioOutputDevice)
-                    == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE;
+
+        @AudioManager.DeviceVolumeBehavior int deviceVolumeBehavior =
+                getDeviceVolumeBehavior(avbAudioOutputDevice);
+
+        return deviceVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE
+                || deviceVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY;
     }
 
-    private AudioDeviceAttributes getAvcAudioOutputDevice() {
-        if (isTvDevice()) {
+    private AudioDeviceAttributes getAvbAudioOutputDevice() {
+        if (tv() != null) {
             return tv().getSystemAudioOutputDevice();
-        } else if (isPlaybackDevice()) {
+        } else if (playback() != null) {
             return AUDIO_OUTPUT_DEVICE_HDMI;
         } else {
             return null;
@@ -4246,30 +4265,30 @@ public class HdmiControlService extends SystemService {
     }
 
     /**
-     * Checks the conditions for Absolute Volume Control (AVC), and enables or disables the feature
-     * if necessary. AVC is enabled precisely when a specific audio output device
-     * (HDMI for playback devices, and HDMI_ARC or HDMI_EARC for TVs) is using absolute volume
-     * behavior.
+     * This method is responsible for adopting or disabling absolute volume behavior and
+     * adjust-only absolute volume behavior in AudioService. These volume behaviors are adopted on
+     * specific audio output devices: HDMI for playback devices, and HDMI_ARC or HDMI_EARC for TVs.
      *
-     * AVC must be enabled on a Playback device or TV precisely when it is playing
-     * audio on an external device (the System Audio device) that supports the feature.
-     * This reduces to these conditions:
+     * This method enables absolute volume behavior on a Playback device or TV panel when it is
+     * playing audio on an external device (the System Audio device) that supports the feature.
+     * This allows the volume level of the System Audio device to be tracked and set by Android.
      *
+     * Absolute volume behavior requires the following conditions:
      * 1. If the System Audio Device is an Audio System: System Audio Mode is active
      * 2. Our HDMI audio output device is using full volume behavior
      * 3. CEC volume is enabled
-     * 4. The System Audio device supports AVC (i.e. it supports <Set Audio Volume Level>)
+     * 4. The System Audio device supports the <Set Audio Volume Level> message
      *
-     * If not all of these conditions are met, this method disables AVC if necessary.
-     *
-     * If all of these conditions are met, this method starts an action to query the System Audio
-     * device's audio status, which enables AVC upon obtaining the audio status.
+     * This method enables adjust-only absolute volume behavior on TV panels when conditions
+     * 1, 2, and 3 are met, but condition 4 is not. This allows TVs to track the volume level of
+     * the System Audio device and display numeric volume UI for it, even if the System Audio device
+     * does not support <Set Audio Volume Level>.
      */
     @ServiceThreadOnly
-    void checkAndUpdateAbsoluteVolumeControlState() {
+    void checkAndUpdateAbsoluteVolumeBehavior() {
         assertRunOnServiceThread();
 
-        // Can't enable or disable AVC before we have access to system services
+        // Can't set volume behavior before we have access to system services
         if (getAudioManager() == null) {
             return;
         }
@@ -4281,84 +4300,110 @@ public class HdmiControlService extends SystemService {
             // (Doesn't apply to Playback Devices, where if SAM isn't active, we assume the
             // TV is the System Audio Device instead.)
             if (!isSystemAudioActivated()) {
-                disableAbsoluteVolumeControl();
+                switchToFullVolumeBehavior();
                 return;
             }
         } else if (isPlaybackDevice() && playback() != null) {
             localCecDevice = playback();
         } else {
-            // Either this device type doesn't support AVC, or it hasn't fully initialized yet
+            // Either this device type doesn't support AVB, or it hasn't fully initialized yet
             return;
         }
 
-        HdmiDeviceInfo systemAudioDeviceInfo = getHdmiCecNetwork().getSafeCecDeviceInfo(
+        HdmiDeviceInfo systemAudioDeviceInfo = getDeviceInfo(
                 localCecDevice.findAudioReceiverAddress());
         @AudioManager.DeviceVolumeBehavior int currentVolumeBehavior =
-                        getDeviceVolumeBehavior(getAvcAudioOutputDevice());
+                        getDeviceVolumeBehavior(getAvbAudioOutputDevice());
 
         // Condition 2: Already using full or absolute volume behavior
         boolean alreadyUsingFullOrAbsoluteVolume =
-                currentVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL
-                        || currentVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE;
+                (currentVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL)
+                        || (currentVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE)
+                        || (currentVolumeBehavior
+                        == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY);
         // Condition 3: CEC volume is enabled
         boolean cecVolumeEnabled =
                 getHdmiCecVolumeControl() == HdmiControlManager.VOLUME_CONTROL_ENABLED;
 
         if (!cecVolumeEnabled || !alreadyUsingFullOrAbsoluteVolume) {
-            disableAbsoluteVolumeControl();
+            switchToFullVolumeBehavior();
             return;
         }
 
-        // Check for safety: if the System Audio device is a candidate for AVC, we should already
+        // Check for safety: if the System Audio device is a candidate for AVB, we should already
         // have received messages from it to trigger the other conditions.
         if (systemAudioDeviceInfo == null) {
-            disableAbsoluteVolumeControl();
+            switchToFullVolumeBehavior();
             return;
         }
-        // Condition 4: The System Audio device supports AVC (i.e. <Set Audio Volume Level>).
+
+        // Condition 4: The System Audio device supports <Set Audio Volume Level>
         switch (systemAudioDeviceInfo.getDeviceFeatures().getSetAudioVolumeLevelSupport()) {
             case DeviceFeatures.FEATURE_SUPPORTED:
-                if (!isAbsoluteVolumeControlEnabled()) {
-                    // Start an action that will call {@link #enableAbsoluteVolumeControl}
+                if (currentVolumeBehavior != AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE) {
+                    // If we're currently using adjust-only absolute volume behavior, switch to
+                    // full volume behavior until we successfully adopt absolute volume behavior
+                    switchToFullVolumeBehavior();
+                    // Start an action that will call enableAbsoluteVolumeBehavior
                     // once the System Audio device sends <Report Audio Status>
-                    localCecDevice.addAvcAudioStatusAction(
+                    localCecDevice.addAvbAudioStatusAction(
                             systemAudioDeviceInfo.getLogicalAddress());
                 }
                 return;
             case DeviceFeatures.FEATURE_NOT_SUPPORTED:
-                disableAbsoluteVolumeControl();
+                // TVs may adopt adjust-only absolute volume behavior if condition 4 isn't met.
+                // This allows the device to display numeric volume UI for the System Audio device.
+                if (tv() != null && mNumericSoundbarVolumeUiOnTvFeatureFlagEnabled) {
+                    if (currentVolumeBehavior
+                            != AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY) {
+                        // If we're currently using absolute volume behavior, switch to full volume
+                        // behavior until we successfully adopt adjust-only absolute volume behavior
+                        switchToFullVolumeBehavior();
+                        // Start an action that will call enableAbsoluteVolumeBehavior
+                        // once the System Audio device sends <Report Audio Status>
+                        localCecDevice.addAvbAudioStatusAction(
+                                systemAudioDeviceInfo.getLogicalAddress());
+                    }
+                } else {
+                    switchToFullVolumeBehavior();
+                }
                 return;
             case DeviceFeatures.FEATURE_SUPPORT_UNKNOWN:
-                disableAbsoluteVolumeControl();
-                localCecDevice.queryAvcSupport(systemAudioDeviceInfo.getLogicalAddress());
-                return;
-            default:
-                return;
+                switchToFullVolumeBehavior();
+                localCecDevice.querySetAudioVolumeLevelSupport(
+                        systemAudioDeviceInfo.getLogicalAddress());
         }
     }
 
-    private void disableAbsoluteVolumeControl() {
-        if (isPlaybackDevice()) {
-            playback().removeAvcAudioStatusAction();
-        } else if (isTvDevice()) {
-            tv().removeAvcAudioStatusAction();
+    /**
+     * Switches to full volume behavior, if either absolute or adjust-only absolute volume behavior
+     * are currently used. Removes the action for handling volume updates for these behaviors.
+     */
+    private void switchToFullVolumeBehavior() {
+        if (playback() != null) {
+            playback().removeAvbAudioStatusAction();
+        } else if (tv() != null) {
+            tv().removeAvbAudioStatusAction();
         }
-        AudioDeviceAttributes device = getAvcAudioOutputDevice();
-        if (getDeviceVolumeBehavior(device) == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE) {
+        AudioDeviceAttributes device = getAvbAudioOutputDevice();
+        int volumeBehavior = getDeviceVolumeBehavior(device);
+        if (volumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE
+                || volumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_ADJUST_ONLY) {
             getAudioManager().setDeviceVolumeBehavior(device,
                     AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL);
         }
     }
 
     /**
-     * Enables Absolute Volume Control. Should only be called when all the conditions for
-     * AVC are met (see {@link #checkAndUpdateAbsoluteVolumeControlState}).
+     * Enables absolute volume behavior or adjust-only absolute volume behavior. Should only be
+     * called when the conditions for one of these behaviors is met -
+     * see {@link #checkAndUpdateAbsoluteVolumeBehavior}.
+     *
      * @param audioStatus The initial audio status to set the audio output device to
      */
-    void enableAbsoluteVolumeControl(AudioStatus audioStatus) {
+    void enableAbsoluteVolumeBehavior(AudioStatus audioStatus) {
         HdmiCecLocalDevice localDevice = isPlaybackDevice() ? playback() : tv();
-        HdmiDeviceInfo systemAudioDevice = getHdmiCecNetwork().getDeviceInfo(
-                localDevice.findAudioReceiverAddress());
+        HdmiDeviceInfo systemAudioDevice = getDeviceInfo(localDevice.findAudioReceiverAddress());
         VolumeInfo volumeInfo = new VolumeInfo.Builder(AudioManager.STREAM_MUSIC)
                 .setMuted(audioStatus.getMute())
                 .setVolumeIndex(audioStatus.getVolume())
@@ -4370,10 +4415,21 @@ public class HdmiControlService extends SystemService {
 
         // AudioService sets the volume of the stream and device based on the input VolumeInfo
         // when enabling absolute volume behavior, but not the mute state
-        notifyAvcMuteChange(audioStatus.getMute());
-        getAudioDeviceVolumeManager().setDeviceAbsoluteVolumeBehavior(
-                getAvcAudioOutputDevice(), volumeInfo, mServiceThreadExecutor,
-                mAbsoluteVolumeChangedListener, true);
+        notifyAvbMuteChange(audioStatus.getMute());
+
+        // If <Set Audio Volume Level> is supported, enable absolute volume behavior.
+        // Otherwise, enable adjust-only AVB on TVs only.
+        if (systemAudioDevice.getDeviceFeatures().getSetAudioVolumeLevelSupport()
+                == DeviceFeatures.FEATURE_SUPPORTED) {
+            getAudioDeviceVolumeManager().setDeviceAbsoluteVolumeBehavior(
+                    getAvbAudioOutputDevice(), volumeInfo, mServiceThreadExecutor,
+                    mAbsoluteVolumeChangedListener, true);
+        } else if (tv() != null) {
+            getAudioDeviceVolumeManager().setDeviceAbsoluteVolumeAdjustOnlyBehavior(
+                    getAvbAudioOutputDevice(), volumeInfo, mServiceThreadExecutor,
+                    mAbsoluteVolumeChangedListener, true);
+        }
+
     }
 
     private AbsoluteVolumeChangedListener mAbsoluteVolumeChangedListener;
@@ -4407,6 +4463,14 @@ public class HdmiControlService extends SystemService {
         public void onAudioDeviceVolumeChanged(
                 @NonNull AudioDeviceAttributes audioDevice,
                 @NonNull VolumeInfo volumeInfo) {
+
+            // Do nothing if the System Audio device does not support <Set Audio Volume Level>
+            if (mSystemAudioDevice.getDeviceFeatures().getSetAudioVolumeLevelSupport()
+                    != DeviceFeatures.FEATURE_SUPPORTED) {
+                return;
+            }
+
+            // Send <Set Audio Volume Level> to notify the System Audio device of the volume change
             int localDeviceAddress = mLocalDevice.getDeviceInfo().getLogicalAddress();
             sendCecCommand(SetAudioVolumeLevelMessage.build(
                             localDeviceAddress,
@@ -4418,8 +4482,8 @@ public class HdmiControlService extends SystemService {
                         if (errorCode == SendMessageResult.SUCCESS) {
                             // Update the volume tracked in our AbsoluteVolumeAudioStatusAction
                             // so it correctly processes incoming <Report Audio Status> messages
-                            HdmiCecLocalDevice avcDevice = isTvDevice() ? tv() : playback();
-                            avcDevice.updateAvcVolume(volumeInfo.getVolumeIndex());
+                            HdmiCecLocalDevice avbDevice = isTvDevice() ? tv() : playback();
+                            avbDevice.updateAvbVolume(volumeInfo.getVolumeIndex());
                         } else {
                             sendCecCommand(HdmiCecMessageBuilder.buildGiveAudioStatus(
                                     localDeviceAddress,
@@ -4477,13 +4541,13 @@ public class HdmiControlService extends SystemService {
 
     /**
      * Notifies AudioService of a change in the volume of the System Audio device. Has no effect if
-     * AVC is disabled, or the audio output device for AVC is not playing for STREAM_MUSIC
+     * AVB is disabled, or the audio output device for AVB is not playing for STREAM_MUSIC
      */
-    void notifyAvcVolumeChange(int volume) {
-        if (!isAbsoluteVolumeControlEnabled()) return;
+    void notifyAvbVolumeChange(int volume) {
+        if (!isAbsoluteVolumeBehaviorEnabled()) return;
         List<AudioDeviceAttributes> streamMusicDevices =
                 getAudioManager().getDevicesForAttributes(STREAM_MUSIC_ATTRIBUTES);
-        if (streamMusicDevices.contains(getAvcAudioOutputDevice())) {
+        if (streamMusicDevices.contains(getAvbAudioOutputDevice())) {
             int flags = AudioManager.FLAG_ABSOLUTE_VOLUME;
             if (isTvDevice()) {
                 flags |= AudioManager.FLAG_SHOW_UI;
@@ -4494,13 +4558,13 @@ public class HdmiControlService extends SystemService {
 
     /**
      * Notifies AudioService of a change in the mute status of the System Audio device. Has no
-     * effect if AVC is disabled, or the audio output device for AVC is not playing for STREAM_MUSIC
+     * effect if AVB is disabled, or the audio output device for AVB is not playing for STREAM_MUSIC
      */
-    void notifyAvcMuteChange(boolean mute) {
-        if (!isAbsoluteVolumeControlEnabled()) return;
+    void notifyAvbMuteChange(boolean mute) {
+        if (!isAbsoluteVolumeBehaviorEnabled()) return;
         List<AudioDeviceAttributes> streamMusicDevices =
                 getAudioManager().getDevicesForAttributes(STREAM_MUSIC_ATTRIBUTES);
-        if (streamMusicDevices.contains(getAvcAudioOutputDevice())) {
+        if (streamMusicDevices.contains(getAvbAudioOutputDevice())) {
             int direction = mute ? AudioManager.ADJUST_MUTE : AudioManager.ADJUST_UNMUTE;
             int flags = AudioManager.FLAG_ABSOLUTE_VOLUME;
             if (isTvDevice()) {
