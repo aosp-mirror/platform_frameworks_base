@@ -5398,11 +5398,11 @@
     <string name="app_streaming_blocked_message" product="tablet">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your tablet instead.</string>
     <!-- Message shown when an app is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message" product="default">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g> at this time. Try on your phone instead.</string>
-    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tv">This app is requesting additional security. Try on your Android TV device instead.</string>
-    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet">This app is requesting additional security. Try on your tablet instead.</string>
-    <!-- Message shown when the fingerprint permission is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
+    <!-- Message shown when an app being streamed to another device requests authentication such as via the biometrics API, and the user needs to complete the on their device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default">This app is requesting additional security. Try on your phone instead.</string>
     <!-- Message shown when the settings is blocked from being streamed to a remote device. [CHAR LIMIT=NONE] -->
     <string name="app_streaming_blocked_message_for_settings_dialog" product="tv">This can’t be accessed on your <xliff:g id="device" example="Chromebook">%1$s</xliff:g>. Try on your Android TV device instead.</string>
