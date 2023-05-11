@@ -163,6 +163,6 @@ public class PermissionEnforcer {
      * @hide
      */
     public static PermissionEnforcer fromContext(@NonNull Context context) {
-        return context.getSystemService(PermissionEnforcer.class);
+        return (PermissionEnforcer) context.getSystemService(Context.PERMISSION_ENFORCER_SERVICE);
     }
 }
