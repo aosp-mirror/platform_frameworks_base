@@ -30,6 +30,7 @@ import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.role.RoleManagerLocal;
 import com.android.server.LocalManagerRegistry;
+import com.android.server.utils.Slogf;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -51,6 +52,9 @@ import java.util.Set;
  *
  */
 final class EnforcingAdmin {
+
+    static final String TAG = "EnforcingAdmin";
+
     static final String ROLE_AUTHORITY_PREFIX = "role:";
     static final String DPC_AUTHORITY = "enterprise";
     static final String DEVICE_ADMIN_AUTHORITY = "device_admin";
@@ -286,6 +290,7 @@ final class EnforcingAdmin {
         }
     }
 
+    @Nullable
     static EnforcingAdmin readFromXml(TypedXmlPullParser parser)
             throws XmlPullParserException {
         String packageName = parser.getAttributeValue(/* namespace= */ null, ATTR_PACKAGE_NAME);
@@ -294,13 +299,25 @@ final class EnforcingAdmin {
         int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
 
         if (isRoleAuthority) {
+            if (packageName == null) {
+                Slogf.wtf(TAG, "Error parsing EnforcingAdmin with RoleAuthority, packageName is "
+                        + "null.");
+                return null;
+            }
             // TODO(b/281697976): load active admin
             return new EnforcingAdmin(packageName, userId, null);
         } else {
+            if (packageName == null || authoritiesStr == null) {
+                Slogf.wtf(TAG, "Error parsing EnforcingAdmin, packageName is "
+                        + (packageName == null ? "null" : packageName) + ", and authorities is "
+                        + (authoritiesStr == null ? "null" : authoritiesStr) + ".");
+                return null;
+            }
             String className = parser.getAttributeValue(/* namespace= */ null, ATTR_CLASS_NAME);
             ComponentName componentName = className == null
                     ? null :  new ComponentName(packageName, className);
             Set<String> authorities = Set.of(authoritiesStr.split(ATTR_AUTHORITIES_SEPARATOR));
+            // TODO(b/281697976): load active admin
             return new EnforcingAdmin(packageName, componentName, authorities, userId, null);
         }
     }
