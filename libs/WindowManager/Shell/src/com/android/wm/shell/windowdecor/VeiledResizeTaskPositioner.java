@@ -77,7 +77,7 @@ public class VeiledResizeTaskPositioner implements DragPositioningCallback {
                 mDesktopWindowDecoration.mTaskInfo.configuration.windowConfiguration.getBounds());
         mRepositionStartPoint.set(x, y);
         if (isResizing()) {
-            mDesktopWindowDecoration.showResizeVeil();
+            mDesktopWindowDecoration.showResizeVeil(mTaskBoundsAtDragStart);
             if (!mDesktopWindowDecoration.mTaskInfo.isFocused) {
                 WindowContainerTransaction wct = new WindowContainerTransaction();
                 wct.reorder(mDesktopWindowDecoration.mTaskInfo.token, true);

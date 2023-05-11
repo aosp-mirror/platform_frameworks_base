@@ -104,7 +104,7 @@ public class ResizeVeil {
     /**
      * Animate veil's alpha to 1, fading it in.
      */
-    public void showVeil(SurfaceControl parentSurface) {
+    public void showVeil(SurfaceControl parentSurface, Rect taskBounds) {
         // Parent surface can change, ensure it is up to date.
         SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
         if (!parentSurface.equals(mParentSurface)) {
@@ -115,8 +115,6 @@ public class ResizeVeil {
         int backgroundColorId = getBackgroundColorId();
         mViewHost.getView().setBackgroundColor(mContext.getColor(backgroundColorId));
 
-        t.show(mVeilSurface)
-                .apply();
         final ValueAnimator animator = new ValueAnimator();
         animator.setFloatValues(0f, 1f);
         animator.setDuration(RESIZE_ALPHA_DURATION);
@@ -124,19 +122,32 @@ public class ResizeVeil {
             t.setAlpha(mVeilSurface, animator.getAnimatedFraction());
             t.apply();
         });
-        animator.start();
+
+        relayout(taskBounds, t);
+        t.show(mVeilSurface)
+                .addTransactionCommittedListener(mContext.getMainExecutor(), () -> animator.start())
+                .setAlpha(mVeilSurface, 0);
+        mViewHost.getView().getViewRootImpl().applyTransactionOnDraw(t);
     }
 
     /**
      * Update veil bounds to match bounds changes.
      * @param newBounds bounds to update veil to.
      */
-    public void relayout(Rect newBounds) {
-        SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+    private void relayout(Rect newBounds, SurfaceControl.Transaction t) {
         mViewHost.relayout(newBounds.width(), newBounds.height());
         t.setWindowCrop(mVeilSurface, newBounds.width(), newBounds.height());
         t.setPosition(mParentSurface, newBounds.left, newBounds.top);
         t.setWindowCrop(mParentSurface, newBounds.width(), newBounds.height());
+    }
+
+    /**
+     * Calls relayout to update task and veil bounds.
+     * @param newBounds bounds to update veil to.
+     */
+    public void updateResizeVeil(Rect newBounds) {
+        SurfaceControl.Transaction t = mSurfaceControlTransactionSupplier.get();
+        relayout(newBounds, t);
         mViewHost.getView().getViewRootImpl().applyTransactionOnDraw(t);
     }
 
