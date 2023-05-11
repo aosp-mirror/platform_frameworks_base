@@ -3349,6 +3349,7 @@
   <java-symbol type="string" name="app_streaming_blocked_title_for_playstore_dialog" />
   <java-symbol type="string" name="app_streaming_blocked_title_for_settings_dialog" />
   <java-symbol type="string" name="app_streaming_blocked_message" />
+  <java-symbol type="string" name="app_streaming_blocked_message_for_permission_request" />
   <java-symbol type="string" name="app_streaming_blocked_message_for_fingerprint_dialog" />
   <java-symbol type="string" name="app_streaming_blocked_message_for_settings_dialog" />
 
