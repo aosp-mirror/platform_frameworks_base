@@ -479,11 +479,26 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_displayRotationNotChanging_noRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        doReturn(false).when(mActivity.mLetterboxUiController)
+                .isCameraCompatSplitScreenAspectRatioAllowed();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
         callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ false);
 
         assertActivityRefreshRequested(/* refreshRequested */ false);
+    }
+
+    @Test
+    public void testOnActivityConfigurationChanging_splitScreenAspectRatioAllowed_refresh()
+            throws Exception {
+        configureActivity(SCREEN_ORIENTATION_PORTRAIT);
+        doReturn(true).when(mActivity.mLetterboxUiController)
+                .isCameraCompatSplitScreenAspectRatioAllowed();
+
+        mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
+        callOnActivityConfigurationChanging(mActivity, /* isDisplayRotationChanging */ false);
+
+        assertActivityRefreshRequested(/* refreshRequested */ true);
     }
 
     @Test
