@@ -123,7 +123,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             STARTING_BOUNDS.left.toFloat(),
             STARTING_BOUNDS.top.toFloat()
         )
-        verify(mockDesktopWindowDecoration).showResizeVeil()
+        verify(mockDesktopWindowDecoration).showResizeVeil(STARTING_BOUNDS)
 
         taskPositioner.onDragPositioningEnd(
             STARTING_BOUNDS.left.toFloat(),
@@ -180,7 +180,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             STARTING_BOUNDS.right.toFloat(),
             STARTING_BOUNDS.top.toFloat()
         )
-        verify(mockDesktopWindowDecoration).showResizeVeil()
+        verify(mockDesktopWindowDecoration).showResizeVeil(STARTING_BOUNDS)
 
         taskPositioner.onDragPositioningMove(
             STARTING_BOUNDS.right.toFloat() + 10,
@@ -224,7 +224,7 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             STARTING_BOUNDS.left.toFloat(),
             STARTING_BOUNDS.top.toFloat()
         )
-        verify(mockDesktopWindowDecoration).showResizeVeil()
+        verify(mockDesktopWindowDecoration).showResizeVeil(STARTING_BOUNDS)
 
         taskPositioner.onDragPositioningMove(
             STARTING_BOUNDS.left.toFloat(),
