@@ -43,21 +43,40 @@ import com.android.server.permission.access.util.tagName
 
 class AppIdPermissionPersistence {
     fun BinaryXmlPullParser.parseSystemState(state: MutableAccessState) {
-        val systemState = state.mutateSystemState(WriteMode.NONE)
         when (tagName) {
-            TAG_PERMISSION_TREES -> parsePermissions(systemState.mutatePermissionTrees())
-            TAG_PERMISSIONS -> parsePermissions(systemState.mutatePermissions())
+            TAG_PERMISSION_TREES -> parsePermissions(state, true)
+            TAG_PERMISSIONS -> parsePermissions(state, false)
             else -> {}
         }
     }
 
     private fun BinaryXmlPullParser.parsePermissions(
-        permissions: MutableIndexedMap<String, Permission>
+        state: MutableAccessState,
+        isPermissionTree: Boolean
     ) {
+        val systemState = state.mutateSystemState(WriteMode.NONE)
+        val permissions = if (isPermissionTree) {
+            systemState.mutatePermissionTrees()
+        } else {
+            systemState.mutatePermissions()
+        }
         forEachTag {
             when (val tagName = tagName) {
                 TAG_PERMISSION -> parsePermission(permissions)
                 else -> Log.w(LOG_TAG, "Ignoring unknown tag $tagName when parsing permissions")
+            }
+        }
+        permissions.forEachReversedIndexed { permissionIndex, _, permission ->
+            val packageName = permission.packageName
+            val externalState = state.externalState
+            if (packageName !in externalState.packageStates &&
+                packageName !in externalState.disabledSystemPackageStates) {
+                Log.w(
+                    LOG_TAG,
+                    "Dropping permission with unknown package $packageName when parsing permissions"
+                )
+                permissions.removeAt(permissionIndex)
+                systemState.requestWriteMode(WriteMode.ASYNCHRONOUS)
             }
         }
     }
