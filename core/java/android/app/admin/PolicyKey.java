@@ -25,6 +25,7 @@ import android.os.Parcelable;
 
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -41,6 +42,9 @@ import java.util.Objects;
 @SuppressLint({"ParcelNotFinal", "ParcelCreator"})
 @SystemApi
 public abstract class PolicyKey implements Parcelable {
+
+    static final String TAG = "PolicyKey";
+
     /**
      * @hide
      */
@@ -76,9 +80,14 @@ public abstract class PolicyKey implements Parcelable {
     /**
      * @hide
      */
+    @Nullable
     public static PolicyKey readGenericPolicyKeyFromXml(TypedXmlPullParser parser) {
         String identifier = parser.getAttributeValue(
                 /* namespace= */ null, ATTR_POLICY_IDENTIFIER);
+        if (identifier == null) {
+            Log.wtf(TAG, "Error parsing generic policy key, identifier is null.");
+            return null;
+        }
         return new NoArgsPolicyKey(identifier);
     }
 
