@@ -229,20 +229,36 @@ public class InsetsSourceTest {
 
     @Test
     public void testGetIndex() {
-        for (int index = 0; index < 2048; index++) {
-            for (int type = FIRST; type <= LAST; type = type << 1) {
-                final int id = InsetsSource.createId(null, index, type);
-                assertEquals(index, InsetsSource.getIndex(id));
+        // Here doesn't iterate all the owners, or the test cannot be done before timeout.
+        for (int owner = 0; owner < 100; owner++) {
+            for (int index = 0; index < 2048; index++) {
+                for (int type = FIRST; type <= LAST; type = type << 1) {
+                    final int id = InsetsSource.createId(owner, index, type);
+                    final int indexFromId = InsetsSource.getIndex(id);
+                    assertEquals("index and indexFromId must be the same. id=" + id
+                            + ", owner=" + owner
+                            + ", index=" + index
+                            + ", type=" + type
+                            + ", indexFromId=" + indexFromId + ".", index, indexFromId);
+                }
             }
         }
     }
 
     @Test
     public void testGetType() {
-        for (int index = 0; index < 2048; index++) {
-            for (int type = FIRST; type <= LAST; type = type << 1) {
-                final int id = InsetsSource.createId(null, index, type);
-                assertEquals(type, InsetsSource.getType(id));
+        // Here doesn't iterate all the owners, or the test cannot be done before timeout.
+        for (int owner = 0; owner < 100; owner++) {
+            for (int index = 0; index < 2048; index++) {
+                for (int type = FIRST; type <= LAST; type = type << 1) {
+                    final int id = InsetsSource.createId(owner, index, type);
+                    final int typeFromId = InsetsSource.getType(id);
+                    assertEquals("type and typeFromId must be the same. id=" + id
+                            + ", owner=" + owner
+                            + ", index=" + index
+                            + ", type=" + type
+                            + ", typeFromId=" + typeFromId + ".", type, typeFromId);
+                }
             }
         }
     }
