@@ -223,7 +223,7 @@ final class DisplayRotationCompatPolicy {
         try {
             activity.mLetterboxUiController.setIsRefreshAfterRotationRequested(true);
             ProtoLog.v(WM_DEBUG_STATES,
-                    "Refershing activity for camera compatibility treatment, "
+                    "Refreshing activity for camera compatibility treatment, "
                             + "activityRecord=%s", activity);
             final ClientTransaction transaction = ClientTransaction.obtain(
                     activity.app.getThread(), activity.token);
@@ -311,11 +311,14 @@ final class DisplayRotationCompatPolicy {
         }
     }
 
-    // Refreshing only when configuration changes after rotation.
+    // Refreshing only when configuration changes after rotation or camera split screen aspect ratio
+    // treatment is enabled
     private boolean shouldRefreshActivity(ActivityRecord activity, Configuration newConfig,
             Configuration lastReportedConfig) {
-        return newConfig.windowConfiguration.getDisplayRotation()
-                        != lastReportedConfig.windowConfiguration.getDisplayRotation()
+        final boolean displayRotationChanged = (newConfig.windowConfiguration.getDisplayRotation()
+                != lastReportedConfig.windowConfiguration.getDisplayRotation());
+        return (displayRotationChanged
+                || activity.mLetterboxUiController.isCameraCompatSplitScreenAspectRatioAllowed())
                 && isTreatmentEnabledForActivity(activity)
                 && activity.mLetterboxUiController.shouldRefreshActivityForCameraCompat();
     }
