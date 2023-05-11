@@ -3677,8 +3677,11 @@ public class Vpn {
                     encapType = IkeSessionParams.ESP_ENCAP_TYPE_NONE;
                     break;
                 default:
-                    ipVersion = IkeSessionParams.ESP_IP_VERSION_AUTO;
-                    encapType = IkeSessionParams.ESP_ENCAP_TYPE_AUTO;
+                    // By default, PREFERRED_IKE_PROTOCOL_IPV4_UDP is used for safety. This is
+                    // because some carriers' networks do not support IPv6 very well, and using
+                    // IPv4 can help to prevent problems.
+                    ipVersion = IkeSessionParams.ESP_IP_VERSION_IPV4;
+                    encapType = IkeSessionParams.ESP_ENCAP_TYPE_UDP;
                     break;
             }
             return new CarrierConfigInfo(mccMnc, natKeepalive, encapType, ipVersion);
