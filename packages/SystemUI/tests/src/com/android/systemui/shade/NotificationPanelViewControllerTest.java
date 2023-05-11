@@ -1099,7 +1099,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
-    public void shadeExpanded_inShadeState() {
+    public void shadeFullyExpanded_inShadeState() {
         mStatusBarStateController.setState(SHADE);
 
         mNotificationPanelViewController.setExpandedHeight(0);
@@ -1111,7 +1111,7 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
-    public void shadeExpanded_onKeyguard() {
+    public void shadeFullyExpanded_onKeyguard() {
         mStatusBarStateController.setState(KEYGUARD);
 
         int transitionDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
@@ -1120,8 +1120,39 @@ public class NotificationPanelViewControllerTest extends NotificationPanelViewCo
     }
 
     @Test
-    public void shadeExpanded_onShadeLocked() {
+    public void shadeFullyExpanded_onShadeLocked() {
         mStatusBarStateController.setState(SHADE_LOCKED);
         assertThat(mNotificationPanelViewController.isShadeFullyExpanded()).isTrue();
+    }
+
+    @Test
+    public void shadeExpanded_whenHasHeight() {
+        int transitionDistance = mNotificationPanelViewController.getMaxPanelTransitionDistance();
+        mNotificationPanelViewController.setExpandedHeight(transitionDistance);
+        assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void shadeExpanded_whenInstantExpanding() {
+        mNotificationPanelViewController.expand(true);
+        assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void shadeExpanded_whenHunIsPresent() {
+        when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
+        assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void shadeExpanded_whenWaitingForExpandGesture() {
+        mNotificationPanelViewController.startWaitingForExpandGesture();
+        assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
+    }
+
+    @Test
+    public void shadeExpanded_whenUnlockedOffscreenAnimationRunning() {
+        when(mUnlockedScreenOffAnimationController.isAnimationPlaying()).thenReturn(true);
+        assertThat(mNotificationPanelViewController.isExpanded()).isTrue();
     }
 }
