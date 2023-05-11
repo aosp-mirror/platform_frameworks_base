@@ -34,6 +34,7 @@ import android.util.SparseArray;
 import android.view.InputApplicationHandle;
 
 import com.android.internal.os.TimeoutRecord;
+import com.android.server.FgThread;
 import com.android.server.am.StackTracesDumpHelper;
 import com.android.server.criticalevents.CriticalEventLog;
 
@@ -68,7 +69,9 @@ class AnrController {
             TimeoutRecord timeoutRecord) {
         try {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "notifyAppUnresponsive()");
+            timeoutRecord.mLatencyTracker.preDumpIfLockTooSlowStarted();
             preDumpIfLockTooSlow();
+            timeoutRecord.mLatencyTracker.preDumpIfLockTooSlowEnded();
             final ActivityRecord activity;
             timeoutRecord.mLatencyTracker.waitingOnGlobalLockStarted();
             boolean blamePendingFocusRequest = false;
@@ -108,7 +111,7 @@ class AnrController {
                 if (!blamePendingFocusRequest) {
                     Slog.i(TAG_WM, "ANR in " + activity.getName() + ".  Reason: "
                             + timeoutRecord.mReason);
-                    dumpAnrStateLocked(activity, null /* windowState */, timeoutRecord.mReason);
+                    dumpAnrStateAsync(activity, null /* windowState */, timeoutRecord.mReason);
                     mUnresponsiveAppByDisplay.put(activity.getDisplayId(), activity);
                 }
             }
@@ -159,7 +162,9 @@ class AnrController {
      */
     private boolean notifyWindowUnresponsive(@NonNull IBinder inputToken,
             TimeoutRecord timeoutRecord) {
+        timeoutRecord.mLatencyTracker.preDumpIfLockTooSlowStarted();
         preDumpIfLockTooSlow();
+        timeoutRecord.mLatencyTracker.preDumpIfLockTooSlowEnded();
         final int pid;
         final boolean aboveSystem;
         final ActivityRecord activity;
@@ -178,7 +183,7 @@ class AnrController {
                     ? windowState.mActivityRecord : null;
             Slog.i(TAG_WM, "ANR in " + target + ". Reason:" + timeoutRecord.mReason);
             aboveSystem = isWindowAboveSystem(windowState);
-            dumpAnrStateLocked(activity, windowState, timeoutRecord.mReason);
+            dumpAnrStateAsync(activity, windowState, timeoutRecord.mReason);
         }
         if (activity != null) {
             activity.inputDispatchingTimedOut(timeoutRecord, pid);
@@ -197,7 +202,7 @@ class AnrController {
         timeoutRecord.mLatencyTracker.waitingOnGlobalLockStarted();
         synchronized (mService.mGlobalLock) {
             timeoutRecord.mLatencyTracker.waitingOnGlobalLockEnded();
-            dumpAnrStateLocked(null /* activity */, null /* windowState */, timeoutRecord.mReason);
+            dumpAnrStateAsync(null /* activity */, null /* windowState */, timeoutRecord.mReason);
         }
 
         // We cannot determine the z-order of the window, so place the anr dialog as high
@@ -351,15 +356,23 @@ class AnrController {
 
     }
 
-    private void dumpAnrStateLocked(ActivityRecord activity, WindowState windowState,
-                                    String reason) {
-        try {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "dumpAnrStateLocked()");
-            mService.saveANRStateLocked(activity, windowState, reason);
-            mService.mAtmService.saveANRState(reason);
-        } finally {
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
-        }
+    /**
+     * Executes asynchronously on the fg thread not to block the stack dump for
+     * the ANRing processes.
+     */
+    private void dumpAnrStateAsync(ActivityRecord activity, WindowState windowState,
+            String reason) {
+        FgThread.getExecutor().execute(() -> {
+            try {
+                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "dumpAnrStateLocked()");
+                synchronized (mService.mGlobalLock) {
+                    mService.saveANRStateLocked(activity, windowState, reason);
+                    mService.mAtmService.saveANRState(reason);
+                }
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+            }
+        });
     }
 
     private boolean isWindowAboveSystem(@NonNull WindowState windowState) {
