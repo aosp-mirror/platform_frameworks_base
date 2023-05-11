@@ -362,10 +362,8 @@ public class BootReceiver extends BroadcastReceiver {
                             PosixFilePermissions.fromString("rw-rw----"));
 
                     // Write the new proto container proto with headers.
-                    ParcelFileDescriptor pfd;
-                    try {
-                        pfd = ParcelFileDescriptor.open(tombstoneProtoWithHeaders, MODE_READ_WRITE);
-
+                    try (ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                            tombstoneProtoWithHeaders, MODE_READ_WRITE)) {
                         ProtoOutputStream protoStream = new ProtoOutputStream(
                                 pfd.getFileDescriptor());
                         protoStream.write(TombstoneWithHeadersProto.TOMBSTONE, tombstoneBytes);
@@ -379,6 +377,8 @@ public class BootReceiver extends BroadcastReceiver {
                     } catch (FileNotFoundException ex) {
                         Slog.e(TAG, "failed to open for write: " + tombstoneProtoWithHeaders, ex);
                         throw ex;
+                    } catch (IOException ex) {
+                        Slog.e(TAG, "IO exception during write: " + tombstoneProtoWithHeaders, ex);
                     } finally {
                         // Remove the temporary file.
                         if (tombstoneProtoWithHeaders != null) {
