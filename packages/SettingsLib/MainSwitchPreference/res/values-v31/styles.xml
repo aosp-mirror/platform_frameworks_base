@@ -20,5 +20,6 @@
     <style name="MainSwitchText.Settingslib" parent="@android:style/TextAppearance.DeviceDefault.Widget.ActionBar.Title.Inverse">
         <item name="android:textSize">20sp</item>
         <item name="android:fontFamily">@string/settingslib_config_headlineFontFamily</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 </resources>
