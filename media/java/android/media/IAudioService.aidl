@@ -232,12 +232,6 @@ interface IAudioService {
 
     void setBluetoothScoOn(boolean on);
 
-    @EnforcePermission("BLUETOOTH_STACK")
-    void setA2dpSuspended(boolean on);
-
-    @EnforcePermission("BLUETOOTH_STACK")
-    void setLeAudioSuspended(boolean enable);
-
     boolean isBluetoothScoOn();
 
     void setBluetoothA2dpOn(boolean on);
