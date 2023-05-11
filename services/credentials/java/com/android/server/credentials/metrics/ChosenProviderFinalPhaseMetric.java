@@ -76,6 +76,8 @@ public class ChosenProviderFinalPhaseMetric {
     // Stores the response credential information, as well as the response entry information which
     // by default, contains empty info
     private ResponseCollective mResponseCollective = new ResponseCollective(Map.of(), Map.of());
+    // Indicates if this chosen provider was the primary provider, false by default
+    private boolean mIsPrimary = false;
 
 
     public ChosenProviderFinalPhaseMetric(int sessionIdCaller, int sessionIdProvider) {
@@ -291,5 +293,13 @@ public class ChosenProviderFinalPhaseMetric {
 
     public int getSessionIdCaller() {
         return mSessionIdCaller;
+    }
+
+    public void setPrimary(boolean primary) {
+        mIsPrimary = primary;
+    }
+
+    public boolean isPrimary() {
+        return mIsPrimary;
     }
 }
