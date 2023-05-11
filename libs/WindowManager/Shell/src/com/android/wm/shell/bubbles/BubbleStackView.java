@@ -1791,6 +1791,7 @@ public class BubbleStackView extends FrameLayout
                 bubble.cleanupViews(); // cleans up the icon view
                 updateExpandedView(); // resets state for no expanded bubble
             });
+            logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
             return;
         }
         // Remove it from the views
@@ -1816,6 +1817,7 @@ public class BubbleStackView extends FrameLayout
         // If a bubble is suppressed, it is not attached to the container. Clean it up.
         if (bubble.isSuppressed()) {
             bubble.cleanupViews();
+            logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
         } else {
             Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
         }
