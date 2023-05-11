@@ -15,6 +15,7 @@
   ~ limitations under the License.
   -->
 <inset xmlns:android="http://schemas.android.com/apk/res/android"
+       xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
        android:insetTop="@dimen/letterbox_education_dialog_vertical_inset"
        android:insetBottom="@dimen/letterbox_education_dialog_vertical_inset">
     <ripple android:color="@color/letterbox_education_dismiss_button_background_ripple">
@@ -31,7 +32,7 @@
         </item>
         <item>
             <shape android:shape="rectangle">
-                <solid android:color="@color/letterbox_education_accent_primary"/>
+                <solid android:color="?androidprv:attr/colorAccentPrimaryVariant"/>
                 <corners android:radius="@dimen/letterbox_education_dialog_button_radius"/>
                 <padding android:left="@dimen/letterbox_education_dialog_horizontal_padding"
                          android:top="@dimen/letterbox_education_dialog_vertical_padding"
