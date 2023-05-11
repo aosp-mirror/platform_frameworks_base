@@ -81,13 +81,9 @@ class DismissSplitScreenByDivider(override val flicker: FlickerTest) :
     @Presubmit
     @Test
     fun secondaryAppBoundsIsFullscreenAtEnd() {
-        flicker.assertLayers {
-            this.isVisible(secondaryApp).then().isInvisible(secondaryApp).then().invoke(
-                "secondaryAppBoundsIsFullscreenAtEnd"
-            ) {
-                val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)
-                it.visibleRegion(secondaryApp).coversExactly(displayBounds)
-            }
+        flicker.assertLayersEnd {
+            val displayBounds = WindowUtils.getDisplayBounds(flicker.scenario.endRotation)
+            visibleRegion(secondaryApp).coversExactly(displayBounds)
         }
     }
 
