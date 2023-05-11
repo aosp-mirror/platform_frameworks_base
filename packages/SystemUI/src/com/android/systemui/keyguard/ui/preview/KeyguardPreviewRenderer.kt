@@ -122,7 +122,9 @@ constructor(
 
             setUpUdfps(rootView)
 
-            setUpClock(rootView)
+            if (!shouldHideClock) {
+                setUpClock(rootView)
+            }
 
             rootView.measure(
                 View.MeasureSpec.makeMeasureSpec(
@@ -352,28 +354,23 @@ constructor(
         clockController.clock = clock
 
         colorOverride?.let { clock.events.onSeedColorChanged(it) }
-        if (!shouldHideClock) {
-            clock.largeClock.events.onTargetRegionChanged(
-                KeyguardClockSwitch.getLargeClockRegion(parentView)
-            )
 
-            clockView?.let { parentView.removeView(it) }
-            clockView =
-                clock.largeClock.view.apply {
-                    if (shouldHighlightSelectedAffordance) {
-                        alpha = DIM_ALPHA
-                    }
-                    parentView.addView(this)
-                    visibility = View.VISIBLE
+        clock.largeClock.events.onTargetRegionChanged(
+            KeyguardClockSwitch.getLargeClockRegion(parentView)
+        )
+
+        clockView?.let { parentView.removeView(it) }
+        clockView =
+            clock.largeClock.view.apply {
+                if (shouldHighlightSelectedAffordance) {
+                    alpha = DIM_ALPHA
                 }
-        } else {
-            clockView?.visibility = View.GONE
-        }
+                parentView.addView(this)
+                visibility = View.VISIBLE
+            }
 
         // Hide smart space if the clock has weather display; otherwise show it
-        val hasCustomWeatherDataDisplay =
-            clock.largeClock.config.hasCustomWeatherDataDisplay == true
-        hideSmartspace(hasCustomWeatherDataDisplay)
+        hideSmartspace(clock.largeClock.config.hasCustomWeatherDataDisplay)
     }
 
     companion object {
