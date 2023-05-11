@@ -1815,18 +1815,36 @@ class PermissionService(
         withIndent {
             state.systemState.permissions.forEachIndexed { _, _, permission ->
                 val protectionLevel = PermissionInfo.protectionToString(permission.protectionLevel)
-                println("${permission.name}: appId=${permission.appId}, " +
-                    "type=${Permission.typeToString(permission.type)}, " +
-                    "gids=${permission.gids.contentToString()}, " +
-                    "protection=[$protectionLevel], " +
-                    "flags=${PermissionInfo.flagsToString(permission.permissionInfo.flags)}"
+                println(
+                    "${permission.name}: " +
+                        "type=${Permission.typeToString(permission.type)}, " +
+                        "packageName=${permission.packageName}, " +
+                        "appId=${permission.appId}, " +
+                        "gids=${permission.gids.contentToString()}, " +
+                        "protectionLevel=[$protectionLevel], " +
+                        "flags=${PermissionInfo.flagsToString(permission.permissionInfo.flags)}"
                 )
             }
         }
+
+        println("Permission groups:")
+        withIndent {
+            state.systemState.permissionGroups.forEachIndexed { _, _, permissionGroup ->
+                println(
+                    "${permissionGroup.name}: " +
+                        "packageName=${permissionGroup.packageName}"
+                )
+            }
+        }
+
         println("Permission trees:")
         withIndent {
             state.systemState.permissionTrees.forEachIndexed { _, _, permissionTree ->
-                println("${permissionTree.name}: appId=${permissionTree.appId}")
+                println(
+                    "${permissionTree.name}: " +
+                        "packageName=${permissionTree.packageName}, " +
+                        "appId=${permissionTree.appId}"
+                )
             }
         }
     }
@@ -1859,6 +1877,7 @@ class PermissionService(
                             println("$appOpName: mode=${AppOpsManager.modeToName(appOpMode)}")
                         }
                     }
+
                     packageNames?.forEachIndexed { _, packageName ->
                         println("Package: $packageName")
                         withIndent {

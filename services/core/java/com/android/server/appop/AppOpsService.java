@@ -932,53 +932,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                 new AppOpsCheckingServiceInterface.AppOpsModeChangedListener() {
                     @Override
                     public void onUidModeChanged(int uid, int code, int mode) {
-                        notifyOpChangedForAllPkgsInUid(code, uid, false);
+                        mHandler.sendMessage(PooledLambda.obtainMessage(
+                                AppOpsService::notifyOpChangedForAllPkgsInUid, AppOpsService.this,
+                                code, uid, false));
                     }
 
                     @Override
                     public void onPackageModeChanged(String packageName, int userId, int code,
                             int mode) {
-                        ArraySet<OnOpModeChangedListener> repCbs = null;
-                        int uid = -1;
-                        synchronized (AppOpsService.this) {
-                            ArraySet<OnOpModeChangedListener> cbs =
-                                    mOpModeWatchers.get(code);
-                            if (cbs != null) {
-                                if (repCbs == null) {
-                                    repCbs = new ArraySet<>();
-                                }
-                                repCbs.addAll(cbs);
-                            }
-                            cbs = mPackageModeWatchers.get(packageName);
-                            if (cbs != null) {
-                                if (repCbs == null) {
-                                    repCbs = new ArraySet<>();
-                                }
-                                repCbs.addAll(cbs);
-                            }
-                            if (repCbs != null && mIgnoredCallback != null) {
-                                repCbs.remove(mModeWatchers.get(mIgnoredCallback.asBinder()));
-                            }
-                            uid = getPackageManagerInternal().getPackageUid(packageName,
-                                    PackageManager.MATCH_KNOWN_PACKAGES, userId);
-                            Op op = getOpLocked(code, uid, packageName, null, false, null,
-                                    /* edit */ false);
-                            if (op != null && mode == AppOpsManager.opToDefaultMode(op.op)) {
-                                // If going into the default mode, prune this op
-                                // if there is nothing else interesting in it.
-                                pruneOpLocked(op, uid, packageName);
-                            }
-                            scheduleFastWriteLocked();
-                            if (mode != MODE_ERRORED) {
-                                updateStartedOpModeForUidLocked(code, mode == MODE_IGNORED, uid);
-                            }
-                        }
-
-                        if (repCbs != null && uid != -1) {
-                            mHandler.sendMessage(PooledLambda.obtainMessage(
-                                    AppOpsService::notifyOpChanged,
-                                    AppOpsService.this, repCbs, code, uid, packageName));
-                        }
+                        mHandler.sendMessage(PooledLambda.obtainMessage(
+                                AppOpsService::notifyOpChangedForPkg, AppOpsService.this,
+                                packageName, code, mode, userId));
                     }
                 });
         //mAppOpsCheckingService = new AppOpsCheckingServiceLoggingDecorator(
@@ -1991,6 +1955,48 @@ public class AppOpsService extends IAppOpsService.Stub {
                             this, callback, code, uid, reportedPackageName));
                 }
             }
+        }
+    }
+
+    private void notifyOpChangedForPkg(@NonNull String packageName, int code, int mode,
+            @UserIdInt int userId) {
+        ArraySet<OnOpModeChangedListener> repCbs = null;
+        int uid = -1;
+        synchronized (AppOpsService.this) {
+            ArraySet<OnOpModeChangedListener> cbs = mOpModeWatchers.get(code);
+            if (cbs != null) {
+                if (repCbs == null) {
+                    repCbs = new ArraySet<>();
+                }
+                repCbs.addAll(cbs);
+            }
+            cbs = mPackageModeWatchers.get(packageName);
+            if (cbs != null) {
+                if (repCbs == null) {
+                    repCbs = new ArraySet<>();
+                }
+                repCbs.addAll(cbs);
+            }
+            if (repCbs != null && mIgnoredCallback != null) {
+                repCbs.remove(mModeWatchers.get(mIgnoredCallback.asBinder()));
+            }
+            uid = getPackageManagerInternal().getPackageUid(packageName,
+                    PackageManager.MATCH_KNOWN_PACKAGES, userId);
+            Op op = getOpLocked(code, uid, packageName, null, false, null, /* edit */ false);
+            if (op != null && mode == AppOpsManager.opToDefaultMode(op.op)) {
+                // If going into the default mode, prune this op
+                // if there is nothing else interesting in it.
+                pruneOpLocked(op, uid, packageName);
+            }
+            scheduleFastWriteLocked();
+            if (mode != MODE_ERRORED) {
+                updateStartedOpModeForUidLocked(code, mode == MODE_IGNORED, uid);
+            }
+        }
+
+        if (repCbs != null && uid != -1) {
+            mHandler.sendMessage(PooledLambda.obtainMessage(AppOpsService::notifyOpChanged, this,
+                    repCbs, code, uid, packageName));
         }
     }
 
