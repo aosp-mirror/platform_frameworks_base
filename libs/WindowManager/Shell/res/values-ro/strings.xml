@@ -79,7 +79,7 @@
     <string name="notification_bubble_title" msgid="6082910224488253378">"Balon"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"Gestionează"</string>
     <string name="accessibility_bubble_dismissed" msgid="8367471990421247357">"Balonul a fost respins."</string>
-    <string name="restart_button_description" msgid="6712141648865547958">"Atinge ca să repornești aplicația pentru o vizualizare mai bună."</string>
+    <string name="restart_button_description" msgid="6712141648865547958">"Atinge ca să repornești aplicația pentru o afișare mai bună."</string>
     <string name="camera_compat_treatment_suggested_button_description" msgid="8103916969024076767">"Ai probleme cu camera foto?\nAtinge pentru a reîncadra"</string>
     <string name="camera_compat_treatment_applied_button_description" msgid="2944157113330703897">"Nu ai remediat problema?\nAtinge pentru a reveni"</string>
     <string name="camera_compat_dismiss_button_description" msgid="2795364433503817511">"Nu ai probleme cu camera foto? Atinge pentru a închide."</string>
