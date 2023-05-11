@@ -17,7 +17,6 @@
 package com.android.systemui.dagger
 
 import com.android.keyguard.KeyguardBiometricLockoutLogger
-import com.android.systemui.ChooserSelector
 import com.android.systemui.CoreStartable
 import com.android.systemui.LatencyTester
 import com.android.systemui.ScreenDecorations
@@ -83,12 +82,6 @@ abstract class SystemUICoreStartableModule {
     abstract fun bindBiometricNotificationService(
         service: BiometricNotificationService
     ): CoreStartable
-
-    /** Inject into ChooserCoreStartable. */
-    @Binds
-    @IntoMap
-    @ClassKey(ChooserSelector::class)
-    abstract fun bindChooserSelector(sysui: ChooserSelector): CoreStartable
 
     /** Inject into ClipboardListener.  */
     @Binds
