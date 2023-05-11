@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.text.LineBreakConfig;
 import android.os.Build;
 import android.text.method.OffsetMapping;
 import android.text.style.ReplacementSpan;
@@ -88,6 +89,7 @@ public class DynamicLayout extends Layout {
             b.mBreakStrategy = Layout.BREAK_STRATEGY_SIMPLE;
             b.mHyphenationFrequency = Layout.HYPHENATION_FREQUENCY_NONE;
             b.mJustificationMode = Layout.JUSTIFICATION_MODE_NONE;
+            b.mLineBreakConfig = LineBreakConfig.NONE;
             return b;
         }
 
@@ -268,6 +270,22 @@ public class DynamicLayout extends Layout {
         }
 
         /**
+         * Set the line break configuration. The line break will be passed to native used for
+         * calculating the text wrapping. The default value of the line break style is
+         * {@link LineBreakConfig#LINE_BREAK_STYLE_NONE}
+         *
+         * @param lineBreakConfig the line break configuration for text wrapping.
+         * @return this builder, useful for chaining.
+         * @see android.widget.TextView#setLineBreakStyle
+         * @see android.widget.TextView#setLineBreakWordStyle
+         */
+        @NonNull
+        public Builder setLineBreakConfig(@NonNull LineBreakConfig lineBreakConfig) {
+            mLineBreakConfig = lineBreakConfig;
+            return this;
+        }
+
+        /**
          * Build the {@link DynamicLayout} after options have been set.
          *
          * <p>Note: the builder object must not be reused in any way after calling this method.
@@ -298,6 +316,7 @@ public class DynamicLayout extends Layout {
         private int mJustificationMode;
         private TextUtils.TruncateAt mEllipsize;
         private int mEllipsizedWidth;
+        private LineBreakConfig mLineBreakConfig = LineBreakConfig.NONE;
 
         private final Paint.FontMetricsInt mFontMetricsInt = new Paint.FontMetricsInt();
 
@@ -344,7 +363,7 @@ public class DynamicLayout extends Layout {
         this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
                 spacingmult, spacingadd, includepad,
                 Layout.BREAK_STRATEGY_SIMPLE, Layout.HYPHENATION_FREQUENCY_NONE,
-                Layout.JUSTIFICATION_MODE_NONE, ellipsize, ellipsizedWidth);
+                Layout.JUSTIFICATION_MODE_NONE, LineBreakConfig.NONE, ellipsize, ellipsizedWidth);
     }
 
     /**
@@ -365,6 +384,7 @@ public class DynamicLayout extends Layout {
                          boolean includepad, @BreakStrategy int breakStrategy,
                          @HyphenationFrequency int hyphenationFrequency,
                          @JustificationMode int justificationMode,
+                         @NonNull LineBreakConfig lineBreakConfig,
                          @Nullable TextUtils.TruncateAt ellipsize,
                          @IntRange(from = 0) int ellipsizedWidth) {
         super(createEllipsizer(ellipsize, display),
@@ -381,6 +401,7 @@ public class DynamicLayout extends Layout {
         mBreakStrategy = breakStrategy;
         mJustificationMode = justificationMode;
         mHyphenationFrequency = hyphenationFrequency;
+        mLineBreakConfig = lineBreakConfig;
 
         generate(b);
 
@@ -396,6 +417,7 @@ public class DynamicLayout extends Layout {
         mBreakStrategy = b.mBreakStrategy;
         mJustificationMode = b.mJustificationMode;
         mHyphenationFrequency = b.mHyphenationFrequency;
+        mLineBreakConfig = b.mLineBreakConfig;
 
         generate(b);
     }
@@ -608,6 +630,7 @@ public class DynamicLayout extends Layout {
                 .setBreakStrategy(mBreakStrategy)
                 .setHyphenationFrequency(mHyphenationFrequency)
                 .setJustificationMode(mJustificationMode)
+                .setLineBreakConfig(mLineBreakConfig)
                 .setAddLastLineLineSpacing(!islast);
 
         reflowed.generate(b, false /*includepad*/, true /*trackpad*/);
@@ -1209,6 +1232,18 @@ public class DynamicLayout extends Layout {
         return mInts.getValue(line, ELLIPSIS_COUNT);
     }
 
+    /**
+     * Gets the {@link LineBreakconfig} used in this DynamicLayout.
+     * Use this only to consult the LineBreakConfig's properties and not
+     * to change them.
+     *
+     * @return The line break config in this DynamicLayout.
+     */
+    @NonNull
+    public LineBreakConfig getLineBreakConfig() {
+        return mLineBreakConfig;
+    }
+
     private CharSequence mBase;
     private CharSequence mDisplay;
     private ChangeWatcher mWatcher;
@@ -1220,6 +1255,7 @@ public class DynamicLayout extends Layout {
     private int mBreakStrategy;
     private int mHyphenationFrequency;
     private int mJustificationMode;
+    private LineBreakConfig mLineBreakConfig;
 
     private PackedIntVector mInts;
     private PackedObjectVector<Directions> mObjects;
