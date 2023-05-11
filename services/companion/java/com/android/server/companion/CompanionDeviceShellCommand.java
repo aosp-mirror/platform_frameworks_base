@@ -26,6 +26,7 @@ import android.os.ShellCommand;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.server.companion.datatransfer.SystemDataTransferRequestStore;
+import com.android.server.companion.datatransfer.contextsync.BitmapUtils;
 import com.android.server.companion.datatransfer.contextsync.CrossDeviceSyncController;
 import com.android.server.companion.presence.CompanionDevicePresenceMonitor;
 import com.android.server.companion.transport.CompanionTransportManager;
@@ -168,13 +169,17 @@ class CompanionDeviceShellCommand extends ShellCommand {
                 case "send-context-sync-call-facilitators-message": {
                     associationId = getNextIntArgRequired();
                     int numberOfFacilitators = getNextIntArgRequired();
+                    String facilitatorName = getNextArgRequired();
+                    String facilitatorId = getNextArgRequired();
                     final ProtoOutputStream pos = new ProtoOutputStream();
                     pos.write(ContextSyncMessage.VERSION, 1);
                     final long telecomToken = pos.start(ContextSyncMessage.TELECOM);
                     for (int i = 0; i < numberOfFacilitators; i++) {
                         final long facilitatorsToken = pos.start(Telecom.FACILITATORS);
-                        pos.write(Telecom.CallFacilitator.NAME, "Call Facilitator App #" + i);
-                        pos.write(Telecom.CallFacilitator.IDENTIFIER, "com.android.test" + i);
+                        pos.write(Telecom.CallFacilitator.NAME,
+                                numberOfFacilitators == 1 ? facilitatorName : facilitatorName + i);
+                        pos.write(Telecom.CallFacilitator.IDENTIFIER,
+                                numberOfFacilitators == 1 ? facilitatorId : facilitatorId + i);
                         pos.end(facilitatorsToken);
                     }
                     pos.end(telecomToken);
@@ -188,6 +193,15 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     associationId = getNextIntArgRequired();
                     String callId = getNextArgRequired();
                     String facilitatorId = getNextArgRequired();
+                    int status = getNextIntArgRequired();
+                    boolean acceptControl = getNextBooleanArgRequired();
+                    boolean rejectControl = getNextBooleanArgRequired();
+                    boolean silenceControl = getNextBooleanArgRequired();
+                    boolean muteControl = getNextBooleanArgRequired();
+                    boolean unmuteControl = getNextBooleanArgRequired();
+                    boolean endControl = getNextBooleanArgRequired();
+                    boolean holdControl = getNextBooleanArgRequired();
+                    boolean unholdControl = getNextBooleanArgRequired();
                     final ProtoOutputStream pos = new ProtoOutputStream();
                     pos.write(ContextSyncMessage.VERSION, 1);
                     final long telecomToken = pos.start(ContextSyncMessage.TELECOM);
@@ -195,15 +209,40 @@ class CompanionDeviceShellCommand extends ShellCommand {
                     pos.write(Telecom.Call.ID, callId);
                     final long originToken = pos.start(Telecom.Call.ORIGIN);
                     pos.write(Telecom.Call.Origin.CALLER_ID, "Caller Name");
+                    pos.write(Telecom.Call.Origin.APP_ICON, BitmapUtils.renderDrawableToByteArray(
+                            mService.getContext().getPackageManager().getApplicationIcon(
+                                    facilitatorId)));
                     final long facilitatorToken = pos.start(
                             Telecom.Request.CreateAction.FACILITATOR);
                     pos.write(Telecom.CallFacilitator.NAME, "Test App Name");
                     pos.write(Telecom.CallFacilitator.IDENTIFIER, facilitatorId);
                     pos.end(facilitatorToken);
                     pos.end(originToken);
-                    pos.write(Telecom.Call.STATUS, Telecom.Call.RINGING);
-                    pos.write(Telecom.Call.CONTROLS, Telecom.ACCEPT);
-                    pos.write(Telecom.Call.CONTROLS, Telecom.REJECT);
+                    pos.write(Telecom.Call.STATUS, status);
+                    if (acceptControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.ACCEPT);
+                    }
+                    if (rejectControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.REJECT);
+                    }
+                    if (silenceControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.SILENCE);
+                    }
+                    if (muteControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.MUTE);
+                    }
+                    if (unmuteControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.UNMUTE);
+                    }
+                    if (endControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.END);
+                    }
+                    if (holdControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.PUT_ON_HOLD);
+                    }
+                    if (unholdControl) {
+                        pos.write(Telecom.Call.CONTROLS, Telecom.TAKE_OFF_HOLD);
+                    }
                     pos.end(callsToken);
                     pos.end(telecomToken);
                     mTransportManager.createEmulatedTransport(associationId)
