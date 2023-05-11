@@ -45,9 +45,7 @@ import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.CrossFadeHelper;
 import com.android.systemui.statusbar.NotificationGroupingUtil;
-import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FeedbackIcon;
-import com.android.systemui.statusbar.notification.LegacySourceType;
 import com.android.systemui.statusbar.notification.NotificationFadeAware;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.Roundable;
@@ -133,7 +131,6 @@ public class NotificationChildrenContainer extends ViewGroup
     private int mUntruncatedChildCount;
     private boolean mContainingNotificationIsFaded = false;
     private RoundableState mRoundableState;
-    private boolean mUseRoundnessSourceTypes;
 
     public NotificationChildrenContainer(Context context) {
         this(context, null);
@@ -328,13 +325,6 @@ public class NotificationChildrenContainer extends ViewGroup
         row.setContentTransformationAmount(0, false /* isLastChild */);
         row.setNotificationFaded(mContainingNotificationIsFaded);
 
-        if (!mUseRoundnessSourceTypes) {
-            // This is a workaround, the NotificationShelf should be the owner of `OnScroll`
-            // roundness.
-            // Here we should reset the `OnScroll` roundness only on top-level rows.
-            NotificationShelf.resetLegacyOnScrollRoundness(row);
-        }
-
         // It doesn't make sense to keep old animations around, lets cancel them!
         ExpandableViewState viewState = row.getViewState();
         if (viewState != null) {
@@ -342,9 +332,7 @@ public class NotificationChildrenContainer extends ViewGroup
             row.cancelAppearDrawing();
         }
 
-        if (mUseRoundnessSourceTypes) {
-            applyRoundnessAndInvalidate();
-        }
+        applyRoundnessAndInvalidate();
     }
 
     private void ensureRemovedFromTransientContainer(View v) {
@@ -379,10 +367,8 @@ public class NotificationChildrenContainer extends ViewGroup
             mGroupingUtil.restoreChildNotification(row);
         }
 
-        if (mUseRoundnessSourceTypes) {
-            row.requestRoundnessReset(FROM_PARENT, /* animate = */ false);
-            applyRoundnessAndInvalidate();
-        }
+        row.requestRoundnessReset(FROM_PARENT, /* animate = */ false);
+        applyRoundnessAndInvalidate();
     }
 
     /**
@@ -409,10 +395,7 @@ public class NotificationChildrenContainer extends ViewGroup
                             getContext(),
                             mNotificationHeader,
                             mContainingNotification);
-            mNotificationHeaderWrapper.useRoundnessSourceTypes(mUseRoundnessSourceTypes);
-            if (mUseRoundnessSourceTypes) {
-                mNotificationHeaderWrapper.setOnRoundnessChangedListener(this::invalidate);
-            }
+            mNotificationHeaderWrapper.setOnRoundnessChangedListener(this::invalidate);
             addView(mNotificationHeader, 0);
             invalidate();
         } else {
@@ -450,12 +433,7 @@ public class NotificationChildrenContainer extends ViewGroup
                                 getContext(),
                                 mNotificationHeaderLowPriority,
                                 mContainingNotification);
-                mNotificationHeaderWrapperLowPriority.useRoundnessSourceTypes(
-                        mUseRoundnessSourceTypes
-                );
-                if (mUseRoundnessSourceTypes) {
-                    mNotificationHeaderWrapper.setOnRoundnessChangedListener(this::invalidate);
-                }
+                mNotificationHeaderWrapper.setOnRoundnessChangedListener(this::invalidate);
                 addView(mNotificationHeaderLowPriority, 0);
                 invalidate();
             } else {
@@ -891,7 +869,7 @@ public class NotificationChildrenContainer extends ViewGroup
 
             isCanvasChanged = true;
             canvas.save();
-            if (mUseRoundnessSourceTypes && translation != 0f) {
+            if (translation != 0f) {
                 clipPath.offset(translation, 0f);
                 canvas.clipPath(clipPath);
                 clipPath.offset(-translation, 0f);
@@ -1444,40 +1422,30 @@ public class NotificationChildrenContainer extends ViewGroup
     @Override
     public void applyRoundnessAndInvalidate() {
         boolean last = true;
-        if (mUseRoundnessSourceTypes) {
-            if (mNotificationHeaderWrapper != null) {
-                mNotificationHeaderWrapper.requestTopRoundness(
-                        /* value = */ getTopRoundness(),
-                        /* sourceType = */ FROM_PARENT,
-                        /* animate = */ false
-                );
-            }
-            if (mNotificationHeaderWrapperLowPriority != null) {
-                mNotificationHeaderWrapperLowPriority.requestTopRoundness(
-                        /* value = */ getTopRoundness(),
-                        /* sourceType = */ FROM_PARENT,
-                        /* animate = */ false
-                );
-            }
+        if (mNotificationHeaderWrapper != null) {
+            mNotificationHeaderWrapper.requestTopRoundness(
+                    /* value = */ getTopRoundness(),
+                    /* sourceType = */ FROM_PARENT,
+                    /* animate = */ false
+            );
+        }
+        if (mNotificationHeaderWrapperLowPriority != null) {
+            mNotificationHeaderWrapperLowPriority.requestTopRoundness(
+                    /* value = */ getTopRoundness(),
+                    /* sourceType = */ FROM_PARENT,
+                    /* animate = */ false
+            );
         }
         for (int i = mAttachedChildren.size() - 1; i >= 0; i--) {
             ExpandableNotificationRow child = mAttachedChildren.get(i);
             if (child.getVisibility() == View.GONE) {
                 continue;
             }
-            if (mUseRoundnessSourceTypes) {
-                child.requestRoundness(
-                        /* top = */ 0f,
-                        /* bottom = */ last ? getBottomRoundness() : 0f,
-                        /* sourceType = */ FROM_PARENT,
-                        /* animate = */ false);
-            } else {
-                child.requestRoundness(
-                        /* top = */ 0f,
-                        /* bottom = */ last ? getBottomRoundness() : 0f,
-                        LegacySourceType.DefaultValue,
-                        /* animate = */ isShown());
-            }
+            child.requestRoundness(
+                    /* top = */ 0f,
+                    /* bottom = */ last ? getBottomRoundness() : 0f,
+                    /* sourceType = */ FROM_PARENT,
+                    /* animate = */ false);
             last = false;
         }
         Roundable.super.applyRoundnessAndInvalidate();
@@ -1537,18 +1505,11 @@ public class NotificationChildrenContainer extends ViewGroup
         return mNotificationHeaderWrapper;
     }
 
-    /**
-     * Enable the support for rounded corner based on the SourceType
-     *
-     * @param enabled true if is supported
-     */
-    public void useRoundnessSourceTypes(boolean enabled) {
-        mUseRoundnessSourceTypes = enabled;
-    }
-
-    @Override
-    public String toString() {
-        String roundableStateDebug = "RoundableState = " + getRoundableState().debugString();
-        return "NotificationChildrenContainer:" + hashCode() + " { " + roundableStateDebug + " }";
+    public String debugString() {
+        return TAG + " { "
+                + "visibility: " + getVisibility()
+                + ", alpha: " + getAlpha()
+                + ", translationY: " + getTranslationY()
+                + ", roundableState: " + getRoundableState().debugString() + "}";
     }
 }

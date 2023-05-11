@@ -51,32 +51,37 @@ class AuthDialogPanelInteractionDetectorTest : SysuiTestCase() {
     @Test
     fun testEnableDetector_expandWithTrack_shouldPostRunnable() {
         detector.enable(action)
-        // simulate notification expand
-        shadeExpansionStateManager.onPanelExpansionChanged(5566f, true, true, 5566f)
+        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, true, 0f)
         verify(action).run()
     }
 
     @Test
     fun testEnableDetector_trackOnly_shouldPostRunnable() {
         detector.enable(action)
-        // simulate notification expand
-        shadeExpansionStateManager.onPanelExpansionChanged(5566f, false, true, 5566f)
+        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, false, true, 0f)
         verify(action).run()
     }
 
     @Test
     fun testEnableDetector_expandOnly_shouldPostRunnable() {
         detector.enable(action)
-        // simulate notification expand
-        shadeExpansionStateManager.onPanelExpansionChanged(5566f, true, false, 5566f)
+        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, false, 0f)
         verify(action).run()
+    }
+
+    @Test
+    fun testEnableDetector_expandWithoutFraction_shouldPostRunnable() {
+        detector.enable(action)
+        // simulate headsup notification
+        shadeExpansionStateManager.onPanelExpansionChanged(0.0f, true, false, 0f)
+        verifyZeroInteractions(action)
     }
 
     @Test
     fun testEnableDetector_shouldNotPostRunnable() {
         detector.enable(action)
         detector.disable()
-        shadeExpansionStateManager.onPanelExpansionChanged(5566f, true, true, 5566f)
+        shadeExpansionStateManager.onPanelExpansionChanged(1.0f, true, true, 0f)
         verifyZeroInteractions(action)
     }
 }

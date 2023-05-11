@@ -126,6 +126,12 @@ public final class StageTaskListenerTests extends ShellTestCase {
         verify(mCallbacks).onStatusChanged(eq(mRootTask.isVisible), eq(true));
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testUnknownTaskVanished() {
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder().build();
+        mStageTaskListener.onTaskVanished(task);
+    }
+
     @Test
     public void testTaskVanished() {
         // With shell transitions, the transition manages status changes, so skip this test.

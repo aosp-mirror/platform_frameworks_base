@@ -62,12 +62,14 @@ import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.fragments.FragmentHostManager;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.media.controls.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.shade.data.repository.ShadeRepository;
 import com.android.systemui.shade.transition.ShadeTransitionController;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
@@ -81,11 +83,15 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.KeyguardBottomAreaView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
+import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import dagger.Lazy;
 
 import org.junit.After;
 import org.junit.Before;
@@ -96,8 +102,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.List;
-
-import dagger.Lazy;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
@@ -130,6 +134,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private PulseExpansionHandler mPulseExpansionHandler;
     @Mock private NotificationRemoteInputManager mNotificationRemoteInputManager;
     @Mock private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
+    @Mock private LightBarController mLightBarController;
     @Mock private NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
     @Mock private LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
@@ -153,6 +158,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
     @Mock private ShadeLogger mShadeLogger;
     @Mock private DumpManager mDumpManager;
     @Mock private UiEventLogger mUiEventLogger;
+    @Mock private CastController mCastController;
 
     private SysuiStatusBarStateController mStatusBarStateController;
 
@@ -219,6 +225,7 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mNotificationRemoteInputManager,
                 mShadeExpansionStateManager,
                 mStatusBarKeyguardViewManager,
+                mLightBarController,
                 mNotificationStackScrollLayoutController,
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
@@ -239,7 +246,10 @@ public class QuickSettingsControllerTest extends SysuiTestCase {
                 mMetricsLogger,
                 mFeatureFlags,
                 mInteractionJankMonitor,
-                mShadeLogger
+                mShadeLogger,
+                mock(KeyguardFaceAuthInteractor.class),
+                mock(ShadeRepository.class),
+                mCastController
         );
 
         mFragmentListener = mQsController.getQsFragmentListener();

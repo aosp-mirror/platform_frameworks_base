@@ -73,7 +73,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         /** Pip was entered while handling an intent with its own remoteTransition. */
         static final int TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE = 3;
 
-        /** Recents transition while split-screen active. */
+        /** Recents transition while split-screen foreground. */
         static final int TYPE_RECENTS_DURING_SPLIT = 4;
 
         /** The default animation for this mixed transition. */
@@ -152,7 +152,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             @NonNull TransitionRequestInfo request) {
         if (mPipHandler.requestHasPipEnter(request) && mSplitHandler.isSplitScreenVisible()) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a PiP-enter request while "
-                    + "Split-Screen is active, so treat it as Mixed.");
+                    + "Split-Screen is foreground, so treat it as Mixed.");
             if (request.getRemoteTransition() != null) {
                 throw new IllegalStateException("Unexpected remote transition in"
                         + "pip-enter-from-split request");
@@ -183,13 +183,13 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             mixed.mLeftoversHandler = handler.first;
             mActiveTransitions.add(mixed);
             return handler.second;
-        } else if (mSplitHandler.isSplitActive()
+        } else if (mSplitHandler.isSplitScreenVisible()
                 && isOpeningType(request.getType())
                 && request.getTriggerTask() != null
                 && request.getTriggerTask().getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 && request.getTriggerTask().getActivityType() == ACTIVITY_TYPE_HOME) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a going-home request while "
-                    + "Split-Screen is active, so treat it as Mixed.");
+                    + "Split-Screen is foreground, so treat it as Mixed.");
             Pair<Transitions.TransitionHandler, WindowContainerTransaction> handler =
                     mPlayer.dispatchRequest(transition, request, this);
             if (handler == null) {
@@ -211,7 +211,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
     @Override
     public Transitions.TransitionHandler handleRecentsRequest(WindowContainerTransaction outWCT) {
-        if (mRecentsHandler != null && mSplitHandler.isSplitActive()) {
+        if (mRecentsHandler != null && mSplitHandler.isSplitScreenVisible()) {
             return this;
         }
         return null;
@@ -219,9 +219,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
     @Override
     public void setRecentsTransition(IBinder transition) {
-        if (mSplitHandler.isSplitActive()) {
+        if (mSplitHandler.isSplitScreenVisible()) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Got a recents request while "
-                    + "Split-Screen is active, so treat it as Mixed.");
+                    + "Split-Screen is foreground, so treat it as Mixed.");
             final MixedTransition mixed = new MixedTransition(
                     MixedTransition.TYPE_RECENTS_DURING_SPLIT, transition);
             mixed.mLeftoversHandler = mRecentsHandler;
@@ -235,6 +235,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     private TransitionInfo subCopy(@NonNull TransitionInfo info,
             @WindowManager.TransitionType int newType, boolean withChanges) {
         final TransitionInfo out = new TransitionInfo(newType, withChanges ? info.getFlags() : 0);
+        out.setTrack(info.getTrack());
         out.setDebugId(info.getDebugId());
         if (withChanges) {
             for (int i = 0; i < info.getChanges().size(); ++i) {
@@ -350,7 +351,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Animating a mixed transition for "
-                + "entering PIP while Split-Screen is active.");
+                + "entering PIP while Split-Screen is foreground.");
         TransitionInfo.Change pipChange = null;
         TransitionInfo.Change wallpaper = null;
         final TransitionInfo everythingElse = subCopy(info, TRANSIT_TO_BACK, true /* changes */);

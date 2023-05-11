@@ -96,7 +96,7 @@ public class UidObserverController {
     }
 
     int enqueueUidChange(@Nullable ChangeRecord currentRecord, int uid, int change, int procState,
-            long procStateSeq, int capability, boolean ephemeral) {
+            int procAdj, long procStateSeq, int capability, boolean ephemeral) {
         synchronized (mLock) {
             if (mPendingUidChanges.size() == 0) {
                 if (DEBUG_UID_OBSERVERS) {
@@ -117,6 +117,7 @@ public class UidObserverController {
             changeRecord.uid = uid;
             changeRecord.change = change;
             changeRecord.procState = procState;
+            changeRecord.procAdj = procAdj;
             changeRecord.procStateSeq = procStateSeq;
             changeRecord.capability = capability;
             changeRecord.ephemeral = ephemeral;
@@ -344,7 +345,7 @@ public class UidObserverController {
                     }
                     if ((reg.mWhich & ActivityManager.UID_OBSERVER_PROC_OOM_ADJ) != 0
                             && (change & UidRecord.CHANGE_PROCADJ) != 0) {
-                        observer.onUidProcAdjChanged(item.uid);
+                        observer.onUidProcAdjChanged(item.uid, item.procAdj);
                     }
                 }
                 final int duration = (int) (SystemClock.uptimeMillis() - start);
@@ -426,6 +427,7 @@ public class UidObserverController {
         public int uid;
         public int change;
         public int procState;
+        public int procAdj;
         public int capability;
         public boolean ephemeral;
         public long procStateSeq;
@@ -435,6 +437,7 @@ public class UidObserverController {
             changeRecord.uid = uid;
             changeRecord.change = change;
             changeRecord.procState = procState;
+            changeRecord.procAdj = procAdj;
             changeRecord.capability = capability;
             changeRecord.ephemeral = ephemeral;
             changeRecord.procStateSeq = procStateSeq;

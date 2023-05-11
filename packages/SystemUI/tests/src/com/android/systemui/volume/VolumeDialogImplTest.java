@@ -58,6 +58,7 @@ import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -102,6 +103,15 @@ public class VolumeDialogImplTest extends SysuiTestCase {
     InteractionJankMonitor mInteractionJankMonitor;
     @Mock
     private DumpManager mDumpManager;
+    @Mock CsdWarningDialog mCsdWarningDialog;
+
+    private final CsdWarningDialog.Factory mCsdWarningDialogFactory =
+            new CsdWarningDialog.Factory() {
+        @Override
+        public CsdWarningDialog create(int warningType, Runnable onCleanup) {
+            return mCsdWarningDialog;
+        }
+    };
 
     @Before
     public void setup() throws Exception {
@@ -124,6 +134,7 @@ public class VolumeDialogImplTest extends SysuiTestCase {
                 mInteractionJankMonitor,
                 mDeviceConfigProxy,
                 mExecutor,
+                mCsdWarningDialogFactory,
                 mDumpManager
             );
         mDialog.init(0, null);
@@ -350,6 +361,21 @@ public class VolumeDialogImplTest extends SysuiTestCase {
         // animation has ended.
         verify(mVolumeDialogController, times(0)).notifyVisible(false);
         mDialog.getDialogView().animate().cancel();
+    }
+
+    @Test
+    public void showCsdWarning_dialogShown() {
+        mDialog.showCsdWarningH(AudioManager.CSD_WARNING_DOSE_REACHED_1X,
+                CsdWarningDialog.NO_ACTION_TIMEOUT_MS);
+
+        verify(mCsdWarningDialog).show();
+    }
+
+    @After
+    public void teardown() {
+        if (mDialog != null) {
+            mDialog.clearInternalHandlerAfterTest();
+        }
     }
 
 /*

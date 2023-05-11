@@ -534,8 +534,10 @@
     <!-- If this is true, long press on power button will be available from the non-interactive state -->
     <bool name="config_supportLongPressPowerWhenNonInteractive">false</bool>
 
-    <!-- If this is true, then keep dreaming when undocking. -->
-    <bool name="config_keepDreamingWhenUndocking">false</bool>
+    <!-- If this is true, then keep dreaming when unplugging.
+         This config was formerly known as config_keepDreamingWhenUndocking.
+         It has been updated to affect other plug types. -->
+    <bool name="config_keepDreamingWhenUnplugging">false</bool>
 
     <!-- The timeout (in ms) to wait before attempting to reconnect to the dream overlay service if
          it becomes disconnected -->
@@ -555,6 +557,9 @@
          still use the accelerometer to determine the orientation, such as when
          docked if the dock is configured to enable the accelerometer. -->
     <bool name="config_supportAutoRotation">true</bool>
+
+    <!-- If true, allows rotation resolver service to help resolve screen rotation. -->
+    <bool name="config_allowRotationResolver">true</bool>
 
     <!-- If true, the screen can be rotated via the accelerometer in all 4
          rotations as the default behavior. -->
@@ -986,6 +991,25 @@
         <!-- Nominal White Z --> <item>1.089058</item>
     </string-array>
 
+    <!-- The CCT closest to the white coordinates (primary) above and in SurfaceControl. -->
+    <integer name="config_displayWhiteBalanceDisplayNominalWhiteCct">6500</integer>
+
+    <!-- Range minimums corresponding to config_displayWhiteBalanceDisplaySteps. For example, if the
+         range minimums are [0, 3000] and the steps are [10, 20] then between 0 and 3000, exclusive,
+         the step between them will be 10 (i.e. 0, 10, 20, etc.) and the step between 3000 and the
+         maximum value is 20 (i.e. 3000, 3020, 3040, etc.). -->
+    <integer-array name="config_displayWhiteBalanceDisplayRangeMinimums">
+        <item>0</item>
+    </integer-array>
+
+    <!-- Steps corresponding to config_displayWhiteBalanceDisplayRangeMinimums. For example, if the
+         range minimums are [0, 3000] and the steps are [10, 20] then between 0 and 3000, exclusive,
+         the step between them will be 10 (i.e. 0, 10, 20, etc.) and the step between 3000 and the
+         maximum value is 20 (i.e. 3000, 3020, 3040, etc.). -->
+    <integer-array name="config_displayWhiteBalanceDisplaySteps">
+        <item>1</item>
+    </integer-array>
+
     <!-- Boolean indicating whether light mode is allowed when DWB is turned on. -->
     <bool name="config_displayWhiteBalanceLightModeAllowed">true</bool>
 
@@ -1372,6 +1396,9 @@
 
     <!-- Number of notifications to keep in the notification service historical archive -->
     <integer name="config_notificationServiceArchiveSize">100</integer>
+
+    <!-- List of packages that will be able to use full screen intent in notifications by default -->
+    <string-array name="config_useFullScreenIntentPackages" translatable="false" />
 
     <!-- Allow the menu hard key to be disabled in LockScreen on some devices -->
     <bool name="config_disableMenuKeyInLockScreen">false</bool>
@@ -1912,7 +1939,8 @@
     <string name="config_defaultNetworkRecommendationProviderPackage" translatable="false"></string>
 
     <!-- The package name of the default search selector app. Must be granted the POST_NOTIFICATIONS
-         permission.
+         permission, and notifications from this app must be given the notification flag
+         FLAG_NO_DISMISS if the notification requests FLAG_ONGOING_EVENT.
     -->
     <string name="config_defaultSearchSelectorPackageName" translatable="false"></string>
 
@@ -2095,9 +2123,6 @@
 
     <!-- The default volume for the ring stream -->
     <integer name="config_audio_ring_vol_default">5</integer>
-
-    <!-- Enable sound dose computation and warnings -->
-    <bool name="config_audio_csd_enabled_default">true</bool>
 
     <!-- The default value for whether head tracking for
          spatial audio is enabled for a newly connected audio device -->
@@ -2929,6 +2954,9 @@
 
     <!-- Whether safe headphone volume is enabled or not (country specific). -->
     <bool name="config_safe_media_volume_enabled">true</bool>
+
+    <!-- Whether safe headphone sound dosage warning is enabled or not (country specific). -->
+    <bool name="config_safe_sound_dosage_enabled">true</bool>
 
     <!-- Whether safe headphone volume warning dialog is disabled on Vol+ (operator specific). -->
     <bool name="config_safe_media_disable_on_volume_up">true</bool>
@@ -4301,8 +4329,12 @@
          This package must be trusted, as it has the permissions to control other applications
          on the device.
          Example: "com.android.wellbeing"
+
+         Note: This config is deprecated, please use config_systemWellbeing instead.
      -->
-    <string name="config_defaultWellbeingPackage" translatable="false"></string>
+    <string name="config_defaultWellbeingPackage" translatable="false">
+        @string/config_systemWellbeing
+    </string>
 
     <!-- The component name for the default system attention service.
          This service must be trusted, as it can be activated without explicit consent of the user.
@@ -6383,7 +6415,7 @@
         Packages can be added by OEMs in an allowlist, to prevent them from being scanned as
         "stopped" during initial boot of a device, or after an OTA update. Stopped state of
         an app is not changed during subsequent reboots.  -->
-    <bool name="config_stopSystemPackagesByDefault">false</bool>
+    <bool name="config_stopSystemPackagesByDefault">true</bool>
 
     <!-- Whether to show weather on the lock screen by default. -->
     <bool name="config_lockscreenWeatherEnabledByDefault">false</bool>

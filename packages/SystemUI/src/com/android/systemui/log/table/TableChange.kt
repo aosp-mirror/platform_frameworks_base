@@ -27,19 +27,27 @@ import androidx.annotation.VisibleForTesting
  */
 data class TableChange(
     var timestamp: Long = 0,
-    var columnPrefix: String = "",
-    var columnName: String = "",
-    var isInitial: Boolean = false,
-    var type: DataType = DataType.EMPTY,
-    var bool: Boolean = false,
-    var int: Int? = null,
-    var str: String? = null,
+    private var columnPrefix: String = "",
+    private var columnName: String = "",
+    private var isInitial: Boolean = false,
+    private var type: DataType = DataType.EMPTY,
+    private var bool: Boolean = false,
+    private var int: Int? = null,
+    private var str: String? = null,
 ) {
+    init {
+        // Truncate any strings that were passed into the constructor. [reset] and [set] will take
+        // care of the rest of the truncation.
+        this.columnPrefix = columnPrefix.take(MAX_STRING_LENGTH)
+        this.columnName = columnName.take(MAX_STRING_LENGTH)
+        this.str = str?.take(MAX_STRING_LENGTH)
+    }
+
     /** Resets to default values so that the object can be recycled. */
     fun reset(timestamp: Long, columnPrefix: String, columnName: String, isInitial: Boolean) {
         this.timestamp = timestamp
-        this.columnPrefix = columnPrefix
-        this.columnName = columnName
+        this.columnPrefix = columnPrefix.take(MAX_STRING_LENGTH)
+        this.columnName = columnName.take(MAX_STRING_LENGTH)
         this.isInitial = isInitial
         this.type = DataType.EMPTY
         this.bool = false
@@ -50,7 +58,7 @@ data class TableChange(
     /** Sets this to store a string change. */
     fun set(value: String?) {
         type = DataType.STRING
-        str = value
+        str = value?.take(MAX_STRING_LENGTH)
     }
 
     /** Sets this to store a boolean change. */
@@ -89,6 +97,8 @@ data class TableChange(
         }
     }
 
+    fun getColumnName() = columnName
+
     fun getVal(): String {
         val value =
             when (type) {
@@ -109,5 +119,8 @@ data class TableChange(
 
     companion object {
         @VisibleForTesting const val IS_INITIAL_PREFIX = "**"
+        // Don't allow any strings larger than this length so that we have a hard upper limit on the
+        // size of the data stored by the buffer.
+        @VisibleForTesting const val MAX_STRING_LENGTH = 500
     }
 }

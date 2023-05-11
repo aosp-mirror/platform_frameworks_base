@@ -80,7 +80,7 @@ final class ContentRecordingController {
         }
         // Invalid scenario: ignore identical incoming session.
         if (ContentRecordingSession.isProjectionOnSameDisplay(mSession, incomingSession)) {
-            // TODO(242833866) if incoming session is no longer waiting to record, allow
+            // TODO(242833866): if incoming session is no longer waiting to record, allow
             //  the update through.
 
             ProtoLog.v(WM_DEBUG_CONTENT_RECORDING,
@@ -99,7 +99,7 @@ final class ContentRecordingController {
             incomingDisplayContent = wmService.mRoot.getDisplayContentOrCreate(
                     incomingSession.getVirtualDisplayId());
             incomingDisplayContent.setContentRecordingSession(incomingSession);
-            // TODO(b/270118861) When user grants consent to re-use, explicitly ask ContentRecorder
+            // TODO(b/270118861): When user grants consent to re-use, explicitly ask ContentRecorder
             //  to update, since no config/display change arrives. Mark recording as black.
         }
         // Takeover and stopping scenario: stop recording on the pre-existing session.

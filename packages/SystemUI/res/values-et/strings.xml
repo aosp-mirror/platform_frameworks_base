@@ -168,6 +168,34 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Kui sisestate järgmisel katsel vale mustri, kustutatakse teie tööprofiil ja selle andmed."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Kui sisestate järgmisel katsel vale PIN-koodi, kustutatakse teie tööprofiil ja selle andmed."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Kui sisestate järgmisel katsel vale parooli, kustutatakse teie tööprofiil ja selle andmed."</string>
+    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
+    <skip />
+    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
+    <skip />
+    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Puudutage sõrmejäljeandurit"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Nägu ei õnnestu tuvastada. Kasutage sõrmejälge."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -299,6 +327,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Alustage"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Peatage"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Ühekäerežiim"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Kontrastsus"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Tavaline"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Keskmine"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Kõrge"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Kas tühistada seadme mikrofoni blokeerimine?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Kas tühistada seadme kaamera blokeerimine?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Kas tühistada seadme kaamera ja mikrofoni blokeerimine?"</string>
@@ -458,10 +490,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"keela"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Heli ja vibreerimine"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Seaded"</string>
-    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
-    <skip />
-    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
-    <skip />
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Ohutuma helitugevuse huvides vähendatud"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Heli on olnud vali soovitatavast ajast kauem"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Rakendus on kinnitatud"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppe Tagasi ja Ülevaade."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"See hoitakse kuval, kuni selle vabastate. Vabastamiseks puudutage pikalt nuppe Tagasi ja Avakuva."</string>
@@ -869,7 +899,7 @@
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"Teisalda servast eemale ja kuva"</string>
     <string name="accessibility_floating_button_action_remove_menu" msgid="6730432848162552135">"Eemalda"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"lülita"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Seadmete juhikud"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Seadmete juhtimisvidinad"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Valige juhtelementide lisamiseks rakendus"</string>
     <string name="controls_number_of_favorites" msgid="4481806788981836355">"{count,plural, =1{Lisati # juhtnupp.}other{Lisati # juhtnuppu.}}"</string>
     <string name="controls_removed" msgid="3731789252222856959">"Eemaldatud"</string>
@@ -883,17 +913,15 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"eemalda lemmikute hulgast"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Teisalda asendisse <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Juhtnupud"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Valige juhtelemendid, millele kiirseadete kaudu juurde pääseda"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Juhtelementide ümberpaigutamiseks hoidke neid all ja lohistage"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Kõik juhtelemendid eemaldati"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Muudatusi ei salvestatud"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Kuva muud rakendused"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Korralda ümber"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Lisa juhtelemente"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Tagasi muutmise juurde"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Juhtelemente ei õnnestunud laadida. Kontrollige rakendust <xliff:g id="APP">%s</xliff:g> ja veenduge, et rakenduse seaded poleks muutunud."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Ühilduvaid juhtelemente pole saadaval"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Muu"</string>
@@ -917,7 +945,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pühkige sõrmega, et näha rohkem"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Soovituste laadimine"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Meedia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Kas peita rakenduses <xliff:g id="APP_NAME">%1$s</xliff:g> see meediajuhik?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Kas peita see rakenduse <xliff:g id="APP_NAME">%1$s</xliff:g> meediajuhik?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Praegust meediaseanssi ei saa peita."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Peida"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Jätka"</string>
@@ -1123,11 +1151,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Teie töökoha eeskirjad lubavad teil helistada ainult tööprofiililt"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Lülitu tööprofiilile"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Sule"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Lukustuskuva seaded"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Kohanda lukustuskuva"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Lukustuskuva kohandamiseks avage"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"WiFi pole saadaval"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kaamera on blokeeritud"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kaamera ja mikrofon on blokeeritud"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon on blokeeritud"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Prioriteetne režiim on sisse lülitatud"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistent on aktiveeritud"</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Määrake seadetes märkmete vaikerakendus."</string>
 </resources>

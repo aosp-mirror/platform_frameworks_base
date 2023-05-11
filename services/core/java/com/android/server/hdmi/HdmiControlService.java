@@ -1267,6 +1267,7 @@ public class HdmiControlService extends SystemService {
         // It's now safe to flush existing local devices from mCecController since they were
         // already moved to 'localDevices'.
         clearCecLocalDevices();
+        mHdmiCecNetwork.clearDeviceList();
         allocateLogicalAddress(localDevices, initiatedBy);
     }
 
@@ -1303,6 +1304,7 @@ public class HdmiControlService extends SystemService {
                                         HdmiControlManager.POWER_STATUS_ON, getCecVersion());
                                 localDevice.setDeviceInfo(deviceInfo);
                                 mHdmiCecNetwork.addLocalDevice(deviceType, localDevice);
+                                mHdmiCecNetwork.addCecDevice(localDevice.getDeviceInfo());
                                 mCecController.addLogicalAddress(logicalAddress);
                                 allocatedDevices.add(localDevice);
                             }
@@ -1609,6 +1611,7 @@ public class HdmiControlService extends SystemService {
         @HdmiCecMessageValidator.ValidationResult
         int validationResult = message.getValidationResult();
         if (validationResult == HdmiCecMessageValidator.ERROR_PARAMETER
+                || validationResult == HdmiCecMessageValidator.ERROR_PARAMETER_LONG
                 || !verifyPhysicalAddresses(message)) {
             return Constants.ABORT_INVALID_OPERAND;
         } else if (validationResult != HdmiCecMessageValidator.OK

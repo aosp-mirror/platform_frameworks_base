@@ -34,6 +34,7 @@ import android.service.controls.Control
 import android.service.controls.ControlsProviderService
 import android.util.Log
 import android.view.ContextThemeWrapper
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -72,7 +73,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -540,12 +540,12 @@ class ControlsUiControllerImpl @Inject constructor (
         val anchor = parent.requireViewById<ImageView>(R.id.controls_more)
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
-                popup = GlobalActionsPopupMenu(
-                        popupThemedContext,
-                        false /* isDropDownMode */
-                ).apply {
-                    setAnchorView(anchor)
+                popup = ControlsPopupMenu(popupThemedContext).apply {
+                    width = ViewGroup.LayoutParams.WRAP_CONTENT
+                    anchorView = anchor
+                    setDropDownGravity(Gravity.END)
                     setAdapter(adapter)
+
                     setOnItemClickListener(object : AdapterView.OnItemClickListener {
                         override fun onItemClick(
                             parent: AdapterView<*>,
@@ -618,7 +618,8 @@ class ControlsUiControllerImpl @Inject constructor (
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
                 popup = ControlsPopupMenu(popupThemedContext).apply {
-                    setAnchorView(anchor)
+                    anchorView = anchor
+                    width = ViewGroup.LayoutParams.MATCH_PARENT
                     setAdapter(adapter)
 
                     setOnItemClickListener(object : AdapterView.OnItemClickListener {

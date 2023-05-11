@@ -18,7 +18,6 @@ package com.android.systemui.dreams.conditions;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
@@ -26,13 +25,12 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.DreamManager;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.keyguard.KeyguardUpdateMonitor;
+import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.shared.condition.Condition;
 
@@ -43,17 +41,22 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import kotlinx.coroutines.CoroutineScope;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class DreamConditionTest extends SysuiTestCase {
-    @Mock
-    Context mContext;
-
     @Mock
     Condition.Callback mCallback;
 
     @Mock
     DreamManager mDreamManager;
+
+    @Mock
+    KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+
+    @Mock
+    CoroutineScope mScope;
 
     @Before
     public void setup() {
@@ -66,7 +69,8 @@ public class DreamConditionTest extends SysuiTestCase {
     @Test
     public void testInitialDreamingState() {
         when(mDreamManager.isDreaming()).thenReturn(true);
-        final DreamCondition condition = new DreamCondition(mContext, mDreamManager);
+        final DreamCondition condition = new DreamCondition(mScope, mDreamManager,
+                mKeyguardUpdateMonitor);
         condition.addCallback(mCallback);
 
         verify(mCallback).onConditionChanged(eq(condition));
@@ -79,7 +83,8 @@ public class DreamConditionTest extends SysuiTestCase {
     @Test
     public void testInitialNonDreamingState() {
         when(mDreamManager.isDreaming()).thenReturn(false);
-        final DreamCondition condition = new DreamCondition(mContext, mDreamManager);
+        final DreamCondition condition = new DreamCondition(mScope, mDreamManager,
+                mKeyguardUpdateMonitor);
         condition.addCallback(mCallback);
 
         verify(mCallback, never()).onConditionChanged(eq(condition));
@@ -91,15 +96,22 @@ public class DreamConditionTest extends SysuiTestCase {
      */
     @Test
     public void testChange() {
-        final ArgumentCaptor<BroadcastReceiver> receiverCaptor =
-                ArgumentCaptor.forClass(BroadcastReceiver.class);
+        final ArgumentCaptor<KeyguardUpdateMonitorCallback> callbackCaptor =
+                ArgumentCaptor.forClass(KeyguardUpdateMonitorCallback.class);
         when(mDreamManager.isDreaming()).thenReturn(true);
-        final DreamCondition condition = new DreamCondition(mContext, mDreamManager);
+        final DreamCondition condition = new DreamCondition(mScope, mDreamManager,
+                mKeyguardUpdateMonitor);
         condition.addCallback(mCallback);
-        verify(mContext).registerReceiver(receiverCaptor.capture(), any());
+        verify(mKeyguardUpdateMonitor).registerCallback(callbackCaptor.capture());
+
         clearInvocations(mCallback);
-        receiverCaptor.getValue().onReceive(mContext, new Intent(Intent.ACTION_DREAMING_STOPPED));
+        callbackCaptor.getValue().onDreamingStateChanged(false);
         verify(mCallback).onConditionChanged(eq(condition));
         assertThat(condition.isConditionMet()).isFalse();
+
+        clearInvocations(mCallback);
+        callbackCaptor.getValue().onDreamingStateChanged(true);
+        verify(mCallback).onConditionChanged(eq(condition));
+        assertThat(condition.isConditionMet()).isTrue();
     }
 }

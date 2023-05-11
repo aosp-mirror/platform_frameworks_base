@@ -39,6 +39,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.inputmethod.InputMethodInfo;
 
@@ -88,6 +89,12 @@ public class AccessibilitySecurityPolicy {
          */
         int getCurrentUserIdLocked();
         // TODO: Should include resolveProfileParentLocked, but that was already in SecurityPolicy
+
+        // TODO(b/255426725): temporary hack; see comment on A11YMS.mVisibleBgUserIds
+        /**
+         * Returns the {@link android.os.UserManager#getVisibleUsers() visible users}.
+         */
+        @Nullable SparseBooleanArray getVisibleUserIdsLocked();
     }
 
     private final Context mContext;

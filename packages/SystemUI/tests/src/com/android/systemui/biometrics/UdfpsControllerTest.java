@@ -58,7 +58,6 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.VibrationAttributes;
-import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -68,6 +67,7 @@ import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceIdSequence;
@@ -76,6 +76,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.udfps.UdfpsOverlayParams;
 import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.R;
+import com.android.systemui.RoboPilotTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.biometrics.udfps.InteractionEvent;
@@ -87,6 +88,7 @@ import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.domain.interactor.AlternateBouncerInteractor;
+import com.android.systemui.keyguard.domain.interactor.KeyguardFaceAuthInteractor;
 import com.android.systemui.keyguard.domain.interactor.PrimaryBouncerInteractor;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.plugins.FalsingManager;
@@ -124,7 +126,8 @@ import java.util.Optional;
 import javax.inject.Provider;
 
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RoboPilotTest
+@RunWith(AndroidJUnit4.class)
 @RunWithLooper(setAsMainLooper = true)
 public class UdfpsControllerTest extends SysuiTestCase {
 
@@ -311,7 +314,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mUnlockedScreenOffAnimationController, mSystemUIDialogManager, mLatencyTracker,
                 mActivityLaunchAnimator, alternateTouchProvider, mBiometricExecutor,
                 mPrimaryBouncerInteractor, mSinglePointerTouchProcessor, mSessionTracker,
-                mAlternateBouncerInteractor, mSecureSettings, mInputManager, mUdfpsUtils);
+                mAlternateBouncerInteractor, mSecureSettings, mInputManager, mUdfpsUtils,
+                mock(KeyguardFaceAuthInteractor.class));
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
         verify(mScreenLifecycle).addObserver(mScreenObserverCaptor.capture());
@@ -1017,7 +1021,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
             // THEN the display should be unconfigured once. If the timeout action is not
             // cancelled, the display would be unconfigured twice which would cause two
             // FP attempts.
-            verify(mUdfpsView, times(1)).unconfigureDisplay();
+            verify(mUdfpsView).unconfigureDisplay();
         } else {
             verify(mUdfpsView, never()).unconfigureDisplay();
         }
@@ -1301,8 +1305,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mBiometricExecutor.runAllReady();
         downEvent.recycle();
 
-        // THEN the touch is pilfered, expected twice (valid overlap and touch on sensor)
-        verify(mInputManager, times(2)).pilferPointers(any());
+        // THEN the touch is pilfered
+        verify(mInputManager).pilferPointers(any());
     }
 
     @Test
@@ -1340,7 +1344,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
         downEvent.recycle();
 
         // THEN the touch is NOT pilfered
-        verify(mInputManager, times(0)).pilferPointers(any());
+        verify(mInputManager, never()).pilferPointers(any());
     }
 
     @Test
@@ -1380,7 +1384,53 @@ public class UdfpsControllerTest extends SysuiTestCase {
         downEvent.recycle();
 
         // THEN the touch is pilfered
-        verify(mInputManager, times(1)).pilferPointers(any());
+        verify(mInputManager).pilferPointers(any());
+    }
+
+    @Test
+    public void onTouch_withNewTouchDetection_doNotProcessTouchWhenPullingUpBouncer()
+            throws RemoteException {
+        final NormalizedTouchData touchData = new NormalizedTouchData(0, 0f, 0f, 0f, 0f, 0f, 0L,
+                0L);
+        final TouchProcessorResult processorResultMove =
+                new TouchProcessorResult.ProcessedTouch(InteractionEvent.DOWN,
+                        1 /* pointerId */, touchData);
+
+        // Enable new touch detection.
+        when(mFeatureFlags.isEnabled(Flags.UDFPS_NEW_TOUCH_DETECTION)).thenReturn(true);
+
+        // Configure UdfpsController to use FingerprintManager as opposed to AlternateTouchProvider.
+        initUdfpsController(mOpticalProps, false /* hasAlternateTouchProvider */);
+
+        // Configure UdfpsView to accept the ACTION_MOVE event
+        when(mUdfpsView.isDisplayConfigured()).thenReturn(false);
+        when(mUdfpsView.isWithinSensorArea(anyFloat(), anyFloat())).thenReturn(true);
+
+        // GIVEN that the alternate bouncer is not showing and a11y touch exploration NOT enabled
+        when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
+        when(mAlternateBouncerInteractor.isVisibleState()).thenReturn(false);
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricOverlayConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mUdfpsView).setOnTouchListener(mTouchListenerCaptor.capture());
+
+        // GIVEN a swipe up to bring up primary bouncer is in progress or swipe down for QS
+        when(mPrimaryBouncerInteractor.isInTransit()).thenReturn(true);
+        when(mLockscreenShadeTransitionController.getFractionToShade()).thenReturn(1f);
+
+        // WHEN ACTION_MOVE is received and touch is within sensor
+        when(mSinglePointerTouchProcessor.processTouch(any(), anyInt(), any())).thenReturn(
+                processorResultMove);
+        MotionEvent moveEvent = MotionEvent.obtain(0, 0, ACTION_MOVE, 0, 0, 0);
+        mTouchListenerCaptor.getValue().onTouch(mUdfpsView, moveEvent);
+        mBiometricExecutor.runAllReady();
+        moveEvent.recycle();
+
+        // THEN the touch is NOT processed
+        verify(mFingerprintManager, never()).onPointerDown(anyLong(), anyInt(), anyInt(),
+                anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyFloat(), anyLong(), anyLong(),
+                anyBoolean());
     }
 
     @Test

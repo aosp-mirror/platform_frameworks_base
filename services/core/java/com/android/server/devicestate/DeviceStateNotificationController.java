@@ -37,7 +37,10 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.R;
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.util.Locale;
 
 /**
  * Manages the user-visible device state notifications.
@@ -56,15 +59,14 @@ class DeviceStateNotificationController extends BroadcastReceiver {
     private final NotificationManager mNotificationManager;
     private final PackageManager mPackageManager;
 
-    // Stores the notification title and content indexed with the device state identifier.
-    private final SparseArray<NotificationInfo> mNotificationInfos;
-
     // The callback when a device state is requested to be canceled.
     private final Runnable mCancelStateRunnable;
 
+    private final NotificationInfoProvider mNotificationInfoProvider;
+
     DeviceStateNotificationController(@NonNull Context context, @NonNull Handler handler,
             @NonNull Runnable cancelStateRunnable) {
-        this(context, handler, cancelStateRunnable, getNotificationInfos(context),
+        this(context, handler, cancelStateRunnable, new NotificationInfoProvider(context),
                 context.getPackageManager(), context.getSystemService(NotificationManager.class));
     }
 
@@ -72,13 +74,13 @@ class DeviceStateNotificationController extends BroadcastReceiver {
     DeviceStateNotificationController(
             @NonNull Context context, @NonNull Handler handler,
             @NonNull Runnable cancelStateRunnable,
-            @NonNull SparseArray<NotificationInfo> notificationInfos,
+            @NonNull NotificationInfoProvider notificationInfoProvider,
             @NonNull PackageManager packageManager,
             @NonNull NotificationManager notificationManager) {
         mContext = context;
         mHandler = handler;
         mCancelStateRunnable = cancelStateRunnable;
-        mNotificationInfos = notificationInfos;
+        mNotificationInfoProvider = notificationInfoProvider;
         mPackageManager = packageManager;
         mNotificationManager = notificationManager;
         mContext.registerReceiver(
@@ -97,7 +99,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      * @param requestingAppUid the uid of the requesting app used to retrieve the app name.
      */
     void showStateActiveNotificationIfNeeded(int state, int requestingAppUid) {
-        NotificationInfo info = mNotificationInfos.get(state);
+        NotificationInfo info = getNotificationInfos().get(state);
         if (info == null || !info.hasActiveNotification()) {
             return;
         }
@@ -127,7 +129,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      * @param state the identifier of the device state being canceled.
      */
     void showThermalCriticalNotificationIfNeeded(int state) {
-        NotificationInfo info = mNotificationInfos.get(state);
+        NotificationInfo info = getNotificationInfos().get(state);
         if (info == null || !info.hasThermalCriticalNotification()) {
             return;
         }
@@ -148,7 +150,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      * @param state the identifier of the device state being canceled.
      */
     void showPowerSaveNotificationIfNeeded(int state) {
-        NotificationInfo info = mNotificationInfos.get(state);
+        NotificationInfo info = getNotificationInfos().get(state);
         if (info == null || !info.hasPowerSaveModeNotification()) {
             return;
         }
@@ -170,7 +172,7 @@ class DeviceStateNotificationController extends BroadcastReceiver {
      * @param state the device state identifier.
      */
     void cancelNotification(int state) {
-        if (!mNotificationInfos.contains(state)) {
+        if (getNotificationInfos().get(state) == null) {
             return;
         }
         mNotificationManager.cancel(NOTIFICATION_TAG, NOTIFICATION_ID);
@@ -221,69 +223,121 @@ class DeviceStateNotificationController extends BroadcastReceiver {
         mNotificationManager.notify(NOTIFICATION_TAG, NOTIFICATION_ID, builder.build());
     }
 
-    /**
-     * Loads the resources for the notifications. The device state identifiers and strings are
-     * stored in arrays. All the string arrays must have the same length and same order as the
-     * identifier array.
-     */
-    private static SparseArray<NotificationInfo> getNotificationInfos(Context context) {
-        final SparseArray<NotificationInfo> notificationInfos = new SparseArray<>();
+    private SparseArray<NotificationInfo> getNotificationInfos() {
+        Locale locale = mContext.getResources().getConfiguration().getLocales().get(0);
+        return mNotificationInfoProvider.getNotificationInfos(locale);
+    }
 
-        final int[] stateIdentifiers =
-                context.getResources().getIntArray(
-                        R.array.device_state_notification_state_identifiers);
-        final String[] names =
-                context.getResources().getStringArray(R.array.device_state_notification_names);
-        final String[] activeNotificationTitles =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_active_titles);
-        final String[] activeNotificationContents =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_active_contents);
-        final String[] thermalCriticalNotificationTitles =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_thermal_titles);
-        final String[] thermalCriticalNotificationContents =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_thermal_contents);
-        final String[] powerSaveModeNotificationTitles =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_power_save_titles);
-        final String[] powerSaveModeNotificationContents =
-                context.getResources().getStringArray(
-                        R.array.device_state_notification_power_save_contents);
+    @VisibleForTesting
+    public static class NotificationInfoProvider {
+        @NonNull
+        private final Context mContext;
+        private final Object mLock = new Object();
 
+        @GuardedBy("mLock")
+        @Nullable
+        private SparseArray<NotificationInfo> mCachedNotificationInfos;
 
-        if (stateIdentifiers.length != names.length
-                || stateIdentifiers.length != activeNotificationTitles.length
-                || stateIdentifiers.length != activeNotificationContents.length
-                || stateIdentifiers.length != thermalCriticalNotificationTitles.length
-                || stateIdentifiers.length != thermalCriticalNotificationContents.length
-                || stateIdentifiers.length != powerSaveModeNotificationTitles.length
-                || stateIdentifiers.length != powerSaveModeNotificationContents.length
-        ) {
-            throw new IllegalStateException(
-                    "The length of state identifiers and notification texts must match!");
+        @GuardedBy("mLock")
+        @Nullable
+        @VisibleForTesting
+        Locale mCachedLocale;
+
+        NotificationInfoProvider(@NonNull Context context) {
+            mContext = context;
         }
 
-        for (int i = 0; i < stateIdentifiers.length; i++) {
-            int identifier = stateIdentifiers[i];
-            if (identifier == DeviceStateManager.INVALID_DEVICE_STATE) {
-                continue;
+        /**
+         * Loads the resources for the notifications. The device state identifiers and strings are
+         * stored in arrays. All the string arrays must have the same length and same order as the
+         * identifier array.
+         */
+        @NonNull
+        public SparseArray<NotificationInfo> getNotificationInfos(@NonNull Locale locale) {
+            synchronized (mLock) {
+                if (!locale.equals(mCachedLocale)) {
+                    refreshNotificationInfos(locale);
+                }
+                return mCachedNotificationInfos;
+            }
+        }
+
+
+        @VisibleForTesting
+        Locale getCachedLocale() {
+            synchronized (mLock) {
+                return mCachedLocale;
+            }
+        }
+
+        @VisibleForTesting
+        public void refreshNotificationInfos(Locale locale) {
+            synchronized (mLock) {
+                mCachedLocale = locale;
+                mCachedNotificationInfos = loadNotificationInfos();
+            }
+        }
+
+        @VisibleForTesting
+        public SparseArray<NotificationInfo> loadNotificationInfos() {
+            final SparseArray<NotificationInfo> notificationInfos = new SparseArray<>();
+
+            final int[] stateIdentifiers =
+                    mContext.getResources().getIntArray(
+                            R.array.device_state_notification_state_identifiers);
+            final String[] names =
+                    mContext.getResources().getStringArray(R.array.device_state_notification_names);
+            final String[] activeNotificationTitles =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_active_titles);
+            final String[] activeNotificationContents =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_active_contents);
+            final String[] thermalCriticalNotificationTitles =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_thermal_titles);
+            final String[] thermalCriticalNotificationContents =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_thermal_contents);
+            final String[] powerSaveModeNotificationTitles =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_power_save_titles);
+            final String[] powerSaveModeNotificationContents =
+                    mContext.getResources().getStringArray(
+                            R.array.device_state_notification_power_save_contents);
+
+            if (stateIdentifiers.length != names.length
+                    || stateIdentifiers.length != activeNotificationTitles.length
+                    || stateIdentifiers.length != activeNotificationContents.length
+                    || stateIdentifiers.length != thermalCriticalNotificationTitles.length
+                    || stateIdentifiers.length != thermalCriticalNotificationContents.length
+                    || stateIdentifiers.length != powerSaveModeNotificationTitles.length
+                    || stateIdentifiers.length != powerSaveModeNotificationContents.length
+            ) {
+                throw new IllegalStateException(
+                        "The length of state identifiers and notification texts must match!");
             }
 
-            notificationInfos.put(
-                    identifier,
-                    new NotificationInfo(
-                            names[i], activeNotificationTitles[i], activeNotificationContents[i],
-                            thermalCriticalNotificationTitles[i],
-                            thermalCriticalNotificationContents[i],
-                            powerSaveModeNotificationTitles[i],
-                            powerSaveModeNotificationContents[i])
-            );
-        }
+            for (int i = 0; i < stateIdentifiers.length; i++) {
+                int identifier = stateIdentifiers[i];
+                if (identifier == DeviceStateManager.INVALID_DEVICE_STATE) {
+                    continue;
+                }
 
-        return notificationInfos;
+                notificationInfos.put(
+                        identifier,
+                        new NotificationInfo(
+                                names[i],
+                                activeNotificationTitles[i],
+                                activeNotificationContents[i],
+                                thermalCriticalNotificationTitles[i],
+                                thermalCriticalNotificationContents[i],
+                                powerSaveModeNotificationTitles[i],
+                                powerSaveModeNotificationContents[i])
+                );
+            }
+            return notificationInfos;
+        }
     }
 
     /**

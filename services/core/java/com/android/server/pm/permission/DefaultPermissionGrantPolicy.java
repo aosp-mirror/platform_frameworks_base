@@ -206,8 +206,6 @@ final class DefaultPermissionGrantPolicy {
     static {
         SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS);
         SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS_BACKGROUND);
-        SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE);
-        SENSORS_PERMISSIONS.add(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND);
     }
 
     private static final Set<String> STORAGE_PERMISSIONS = new ArraySet<>();

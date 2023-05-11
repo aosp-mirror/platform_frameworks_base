@@ -1560,7 +1560,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     jobStatus.getJob().getMinLatencyMillis(),
                     jobStatus.getEstimatedNetworkDownloadBytes(),
                     jobStatus.getEstimatedNetworkUploadBytes(),
-                    jobStatus.getWorkCount());
+                    jobStatus.getWorkCount(),
+                    ActivityManager.processStateAmToProto(mUidProcStates.get(jobStatus.getUid())));
 
             // If the job is immediately ready to run, then we can just immediately
             // put it in the pending list and try to schedule it.  This is especially
@@ -1577,8 +1578,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 mJobPackageTracker.notePending(jobStatus);
                 mPendingJobQueue.add(jobStatus);
                 maybeRunPendingJobsLocked();
-            } else {
-                evaluateControllerStatesLocked(jobStatus);
             }
         }
         return JobScheduler.RESULT_SUCCESS;
@@ -1588,12 +1587,12 @@ public class JobSchedulerService extends com.android.server.SystemService
         final ArrayMap<String, List<JobInfo>> outMap = new ArrayMap<>();
         synchronized (mLock) {
             ArraySet<JobStatus> jobs = mJobs.getJobsByUid(uid);
-            // Write out for loop to avoid addAll() creating an Iterator.
+            // Write out for loop to avoid creating an Iterator.
             for (int i = jobs.size() - 1; i >= 0; i--) {
                 final JobStatus job = jobs.valueAt(i);
                 List<JobInfo> outList = outMap.get(job.getNamespace());
                 if (outList == null) {
-                    outList = new ArrayList<JobInfo>(jobs.size());
+                    outList = new ArrayList<>();
                     outMap.put(job.getNamespace(), outList);
                 }
 
@@ -1606,7 +1605,7 @@ public class JobSchedulerService extends com.android.server.SystemService
     private List<JobInfo> getPendingJobsInNamespace(int uid, @Nullable String namespace) {
         synchronized (mLock) {
             ArraySet<JobStatus> jobs = mJobs.getJobsByUid(uid);
-            ArrayList<JobInfo> outList = new ArrayList<JobInfo>(jobs.size());
+            ArrayList<JobInfo> outList = new ArrayList<>();
             // Write out for loop to avoid addAll() creating an Iterator.
             for (int i = jobs.size() - 1; i >= 0; i--) {
                 final JobStatus job = jobs.valueAt(i);
@@ -1937,6 +1936,7 @@ public class JobSchedulerService extends com.android.server.SystemService
      * {@code incomingJob} is non-null, it replaces {@code cancelled} in the store of
      * currently scheduled jobs.
      */
+    @GuardedBy("mLock")
     private void cancelJobImplLocked(JobStatus cancelled, JobStatus incomingJob,
             @JobParameters.StopReason int reason, int internalReasonCode, String debugReason) {
         if (DEBUG) Slog.d(TAG, "CANCEL: " + cancelled.toShortString());
@@ -1988,7 +1988,8 @@ public class JobSchedulerService extends com.android.server.SystemService
                     cancelled.getJob().getMinLatencyMillis(),
                     cancelled.getEstimatedNetworkDownloadBytes(),
                     cancelled.getEstimatedNetworkUploadBytes(),
-                    cancelled.getWorkCount());
+                    cancelled.getWorkCount(),
+                    ActivityManager.processStateAmToProto(mUidProcStates.get(cancelled.getUid())));
         }
         // If this is a replacement, bring in the new version of the job
         if (incomingJob != null) {
@@ -3050,8 +3051,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     Slog.d(TAG, "    queued " + job.toShortString());
                 }
                 newReadyJobs.add(job);
-            } else {
-                evaluateControllerStatesLocked(job);
             }
         }
 
@@ -3171,7 +3170,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                 } else if (mPendingJobQueue.remove(job)) {
                     noteJobNonPending(job);
                 }
-                evaluateControllerStatesLocked(job);
             }
         }
 
@@ -3297,7 +3295,7 @@ public class JobSchedulerService extends com.android.server.SystemService
 
     @GuardedBy("mLock")
     boolean isReadyToBeExecutedLocked(JobStatus job, boolean rejectActive) {
-        final boolean jobReady = job.isReady();
+        final boolean jobReady = job.isReady() || evaluateControllerStatesLocked(job);
 
         if (DEBUG) {
             Slog.v(TAG, "isReadyToBeExecutedLocked: " + job.toShortString()
@@ -3372,12 +3370,17 @@ public class JobSchedulerService extends com.android.server.SystemService
         return !appIsBad;
     }
 
+    /**
+     * Gets each controller to evaluate the job's state
+     * and then returns the value of {@link JobStatus#isReady()}.
+     */
     @VisibleForTesting
-    void evaluateControllerStatesLocked(final JobStatus job) {
+    boolean evaluateControllerStatesLocked(final JobStatus job) {
         for (int c = mControllers.size() - 1; c >= 0; --c) {
             final StateController sc = mControllers.get(c);
             sc.evaluateStateLocked(job);
         }
+        return job.isReady();
     }
 
     /**
@@ -3713,26 +3716,22 @@ public class JobSchedulerService extends com.android.server.SystemService
 
         @Override
         public boolean isNotificationAssociatedWithAnyUserInitiatedJobs(int notificationId,
-                int userId, String packageName) {
+                int userId, @NonNull String packageName) {
             if (packageName == null) {
                 return false;
             }
-            synchronized (mLock) {
-                return mConcurrencyManager.isNotificationAssociatedWithAnyUserInitiatedJobs(
-                        notificationId, userId, packageName);
-            }
+            return mConcurrencyManager.isNotificationAssociatedWithAnyUserInitiatedJobs(
+                    notificationId, userId, packageName);
         }
 
         @Override
         public boolean isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
-                String notificationChannel, int userId, String packageName) {
+                @NonNull String notificationChannel, int userId, @NonNull String packageName) {
             if (packageName == null || notificationChannel == null) {
                 return false;
             }
-            synchronized (mLock) {
-                return mConcurrencyManager.isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
-                        notificationChannel, userId, packageName);
-            }
+            return mConcurrencyManager.isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
+                    notificationChannel, userId, packageName);
         }
 
         @Override

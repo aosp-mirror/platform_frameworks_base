@@ -1854,6 +1854,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             applyTransactionOnVriDraw(transaction);
         }
         mSurfacePackage = p;
+
+        if (isFocused()) {
+            requestEmbeddedFocus(true);
+        }
         invalidate();
     }
 
@@ -1947,8 +1951,12 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     @Override
     protected void onFocusChanged(boolean gainFocus, @FocusDirection int direction,
-                                  @Nullable Rect previouslyFocusedRect) {
+            @Nullable Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
+        requestEmbeddedFocus(gainFocus);
+    }
+
+    private void requestEmbeddedFocus(boolean gainFocus) {
         final ViewRootImpl viewRoot = getViewRootImpl();
         if (mSurfacePackage == null || viewRoot == null) {
             return;

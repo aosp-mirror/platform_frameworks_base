@@ -61,7 +61,6 @@ import java.util.function.Consumer;
  * proxy connection will belong to a separate user state.
  *
  * TODO(241117292): Remove or cut down during simultaneous user refactoring.
- * TODO(262244375): Add unit tests.
  */
 public class ProxyManager {
     private static final boolean DEBUG = false;
@@ -128,7 +127,7 @@ public class ProxyManager {
         RemoteCallbackList<IAccessibilityManagerClient> getCurrentUserClientsLocked();
     }
 
-    ProxyManager(Object lock, AccessibilityWindowManager awm,
+    public ProxyManager(Object lock, AccessibilityWindowManager awm,
             Context context, Handler mainHandler, UiAutomationManager uiAutomationManager,
             SystemSupport systemSupport) {
         mLock = lock;
@@ -144,9 +143,7 @@ public class ProxyManager {
      * Creates the service connection.
      */
     public void registerProxy(IAccessibilityServiceClient client, int displayId,
-            Context context,
-            int id, Handler mainHandler,
-            AccessibilitySecurityPolicy securityPolicy,
+            int id, AccessibilitySecurityPolicy securityPolicy,
             AbstractAccessibilityServiceConnection.SystemSupport systemSupport,
             AccessibilityTrace trace,
             WindowManagerInternal windowManagerInternal) throws RemoteException {
@@ -169,8 +166,8 @@ public class ProxyManager {
         info.setComponentName(new ComponentName(PROXY_COMPONENT_PACKAGE_NAME,
                 componentClassDisplayName));
         ProxyAccessibilityServiceConnection connection =
-                new ProxyAccessibilityServiceConnection(context, info.getComponentName(), info,
-                        id, mainHandler, mLock, securityPolicy, systemSupport, trace,
+                new ProxyAccessibilityServiceConnection(mContext, info.getComponentName(), info,
+                        id, mMainHandler, mLock, securityPolicy, systemSupport, trace,
                         windowManagerInternal,
                         mA11yWindowManager, displayId, deviceId);
 
@@ -263,7 +260,7 @@ public class ProxyManager {
      * When the connection is removed from tracking in ProxyManager, propagate changes to other a11y
      * system components like the input filter and IAccessibilityManagerClients.
      */
-    public void updateStateForRemovedDisplay(int displayId, int deviceId) {
+    private void updateStateForRemovedDisplay(int displayId, int deviceId) {
         mA11yWindowManager.stopTrackingDisplayProxy(displayId);
         // A11yInputFilter isn't thread-safe, so post on the system thread.
         mMainHandler.post(
@@ -360,8 +357,9 @@ public class ProxyManager {
     /**
      * If there is at least one proxy, accessibility is enabled.
      */
-    public int getStateLocked(int deviceId, boolean automationRunning) {
+    public int getStateLocked(int deviceId) {
         int clientState = 0;
+        final boolean automationRunning = mUiAutomationManager.isUiAutomationRunningLocked();
         if (automationRunning) {
             clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
         }
@@ -387,7 +385,7 @@ public class ProxyManager {
     /**
      * If there is at least one proxy, accessibility is enabled.
      */
-    public int getStateForDisplayIdLocked(ProxyAccessibilityServiceConnection proxy) {
+    private int getStateForDisplayIdLocked(ProxyAccessibilityServiceConnection proxy) {
         int clientState = 0;
         if (proxy != null) {
             clientState |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
@@ -409,14 +407,14 @@ public class ProxyManager {
     /**
      * Gets the last state for a device.
      */
-    public int getLastSentStateLocked(int deviceId) {
+    private int getLastSentStateLocked(int deviceId) {
         return mLastStates.get(deviceId, 0);
     }
 
     /**
      * Sets the last state for a device.
      */
-    public void setLastStateLocked(int deviceId, int proxyState) {
+    private void setLastStateLocked(int deviceId, int proxyState) {
         mLastStates.put(deviceId, proxyState);
     }
 
@@ -429,7 +427,7 @@ public class ProxyManager {
      * Virtual Device, the app clients will get the aggregated event types for all proxy-ed displays
      * belonging to a VirtualDevice.
      */
-    public void updateRelevantEventTypesLocked(int deviceId) {
+    private void updateRelevantEventTypesLocked(int deviceId) {
         if (!isProxyedDeviceId(deviceId)) {
             return;
         }
@@ -452,7 +450,7 @@ public class ProxyManager {
     /**
      * Returns the relevant event types for a Client.
      */
-    int computeRelevantEventTypesLocked(AccessibilityManagerService.Client client) {
+    public int computeRelevantEventTypesLocked(AccessibilityManagerService.Client client) {
         int relevantEventTypes = 0;
         for (int i = 0; i < mProxyA11yServiceConnections.size(); i++) {
             final ProxyAccessibilityServiceConnection proxy =
@@ -578,9 +576,8 @@ public class ProxyManager {
     /**
      * Updates the states of the app AccessibilityManagers.
      */
-    public void scheduleUpdateProxyClientsIfNeededLocked(int deviceId) {
-        final int proxyState = getStateLocked(deviceId,
-                mUiAutomationManager.isUiAutomationRunningLocked());
+    private void scheduleUpdateProxyClientsIfNeededLocked(int deviceId) {
+        final int proxyState = getStateLocked(deviceId);
         if (DEBUG) {
             Slog.v(LOG_TAG, "State for device id " + deviceId + " is " + proxyState);
             Slog.v(LOG_TAG, "Last state for device id " + deviceId + " is "
@@ -606,7 +603,7 @@ public class ProxyManager {
      *
      * @see AccessibilityManager.AccessibilityServicesStateChangeListener
      */
-    public void scheduleNotifyProxyClientsOfServicesStateChangeLocked(int deviceId) {
+    private void scheduleNotifyProxyClientsOfServicesStateChangeLocked(int deviceId) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "Notify services state change at device id " + deviceId);
         }
@@ -625,7 +622,7 @@ public class ProxyManager {
     /**
      * Updates the focus appearance of AccessibilityManagerClients.
      */
-    public void updateFocusAppearanceLocked(int deviceId) {
+    private void updateFocusAppearanceLocked(int deviceId) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "Update proxy focus appearance at device id " + deviceId);
         }
@@ -764,7 +761,7 @@ public class ProxyManager {
     /**
      * Sets a Client device id if the app uid belongs to the virtual device.
      */
-    public void updateDeviceIdsIfNeededLocked(int deviceId) {
+    private void updateDeviceIdsIfNeededLocked(int deviceId) {
         final RemoteCallbackList<IAccessibilityManagerClient> userClients =
                 mSystemSupport.getCurrentUserClientsLocked();
         final RemoteCallbackList<IAccessibilityManagerClient> globalClients =
@@ -777,7 +774,7 @@ public class ProxyManager {
     /**
      * Updates the device ids of IAccessibilityManagerClients if needed.
      */
-    public void updateDeviceIdsIfNeededLocked(int deviceId,
+    private void updateDeviceIdsIfNeededLocked(int deviceId,
             @NonNull RemoteCallbackList<IAccessibilityManagerClient> clients) {
         final VirtualDeviceManagerInternal localVdm = getLocalVdm();
         if (localVdm == null) {
@@ -809,14 +806,17 @@ public class ProxyManager {
         }
     }
 
-    void setAccessibilityInputFilter(AccessibilityInputFilter filter) {
+    /**
+     * Sets the input filter for enabling and disabling features for proxy displays.
+     */
+    public void setAccessibilityInputFilter(AccessibilityInputFilter filter) {
         if (DEBUG) {
             Slog.v(LOG_TAG, "Set proxy input filter to " + filter);
         }
         mA11yInputFilter = filter;
     }
 
-    VirtualDeviceManagerInternal getLocalVdm() {
+    private VirtualDeviceManagerInternal getLocalVdm() {
         if (mLocalVdm == null) {
             mLocalVdm =  LocalServices.getService(VirtualDeviceManagerInternal.class);
         }

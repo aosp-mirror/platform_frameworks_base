@@ -268,7 +268,7 @@ public class PipControllerTest extends ShellTestCase {
     }
 
     @Test
-    public void saveReentryState_userHasResized_savesSize() {
+    public void saveReentryState_nonEmptyUserResizeBounds_savesSize() {
         final Rect bounds = new Rect(0, 0, 10, 10);
         final Rect resizedBounds = new Rect(0, 0, 30, 30);
         when(mMockPipBoundsAlgorithm.getSnapFraction(bounds)).thenReturn(1.0f);
@@ -278,6 +278,19 @@ public class PipControllerTest extends ShellTestCase {
         mPipController.saveReentryState(bounds);
 
         verify(mMockPipBoundsState).saveReentryState(new Size(30, 30), 1.0f);
+    }
+
+    @Test
+    public void saveReentryState_emptyUserResizeBounds_savesSize() {
+        final Rect bounds = new Rect(0, 0, 10, 10);
+        final Rect resizedBounds = new Rect(0, 0, 0, 0);
+        when(mMockPipBoundsAlgorithm.getSnapFraction(bounds)).thenReturn(1.0f);
+        when(mMockPipTouchHandler.getUserResizeBounds()).thenReturn(resizedBounds);
+        when(mMockPipBoundsState.hasUserResizedPip()).thenReturn(true);
+
+        mPipController.saveReentryState(bounds);
+
+        verify(mMockPipBoundsState).saveReentryState(new Size(10, 10), 1.0f);
     }
 
     @Test

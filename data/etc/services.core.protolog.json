@@ -175,12 +175,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-1941440781": {
-      "message": "Creating Pending Move-to-back: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/Task.java"
-    },
     "-1939861963": {
       "message": "Create root task displayId=%d winMode=%d",
       "level": "VERBOSE",
@@ -312,6 +306,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
+    },
+    "-1828118576": {
+      "message": "SyncGroup %d: Started %sfor listener: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "-1824578273": {
       "message": "Reporting new frame to %s: %s",
@@ -475,6 +475,18 @@
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RecentTasks.java"
     },
+    "-1643780158": {
+      "message": "Saving original orientation before camera compat, last orientation is %d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
+    },
+    "-1639406696": {
+      "message": "NOSENSOR override detected",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationReversionController.java"
+    },
     "-1638958146": {
       "message": "Removing activity %s from task=%s adding to task=%s Callers=%s",
       "level": "INFO",
@@ -619,12 +631,6 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityStarter.java"
     },
-    "-1484988952": {
-      "message": "Creating Pending Multiwindow Fullscreen Request: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/ActivityClientController.java"
-    },
     "-1483435730": {
       "message": "InsetsSource setWin %s for type %s",
       "level": "DEBUG",
@@ -750,6 +756,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_IME",
       "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
+    "-1397175017": {
+      "message": "Other orientation overrides are in place: not reverting",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationReversionController.java"
     },
     "-1394745488": {
       "message": "ControlAdapter onAnimationCancelled mSource: %s mControlTarget: %s",
@@ -1171,6 +1183,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "-1005167552": {
+      "message": "Playing #%d in parallel on track #%d",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "-1003678883": {
       "message": "Cleaning splash screen token=%s",
       "level": "VERBOSE",
@@ -1303,6 +1321,12 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-874087484": {
+      "message": "SyncGroup %d: Set ready %b",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
     "-869242375": {
       "message": "Content Recording: Unable to start recording due to invalid region for display %d",
       "level": "VERBOSE",
@@ -1428,6 +1452,12 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_TASKS",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
+    },
+    "-774908272": {
+      "message": "Marking #%d animation as SYNC.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
     },
     "-771177730": {
       "message": "Removing focused app token:%s displayId=%d",
@@ -1704,6 +1734,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
+    },
+    "-529187878": {
+      "message": "Reverting orientation after camera compat force rotation",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
     "-521613870": {
       "message": "App died during pause, not stopping: %s",
@@ -1987,6 +2023,12 @@
       "group": "WM_DEBUG_WALLPAPER",
       "at": "com\/android\/server\/wm\/WallpaperController.java"
     },
+    "-266707683": {
+      "message": "Moving #%d from collecting to waiting.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "-262984451": {
       "message": "Relaunch failed %s",
       "level": "INFO",
@@ -2058,6 +2100,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_MOVEMENT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-186693085": {
+      "message": "Starting a Recents transition which can be parallel.",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
+      "at": "com\/android\/server\/wm\/Transition.java"
     },
     "-182877285": {
       "message": "Wallpaper layer changed: assigning layers + relayout",
@@ -2377,6 +2425,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "138097009": {
+      "message": "NOSENSOR override is absent: reverting",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_ORIENTATION",
+      "at": "com\/android\/server\/wm\/DisplayRotationReversionController.java"
+    },
     "140319294": {
       "message": "IME target changed within ActivityRecord",
       "level": "DEBUG",
@@ -2568,12 +2622,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowState.java"
-    },
-    "286170861": {
-      "message": "Creating Pending Transition for TaskFragment: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
     },
     "288485303": {
       "message": "Attempted to set remove mode to a display that does not exist: %d",
@@ -2875,12 +2923,6 @@
       "group": "WM_DEBUG_BOOT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "550717438": {
-      "message": "SyncGroup %d: Started for listener: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
-    },
     "556758086": {
       "message": "Applying new update lock state '%s' for %s",
       "level": "DEBUG",
@@ -3157,12 +3199,6 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
-    "800698875": {
-      "message": "SyncGroup %d: Started when there is other active SyncGroup",
-      "level": "WARN",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
-    },
     "801521566": {
       "message": "Content Recording: Attempting to mirror %d from %d but no DisplayContent associated. Changing to mirror default display.",
       "level": "WARN",
@@ -3222,12 +3258,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
-    "898260097": {
-      "message": "Creating Pending Pip-Enter: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "898863925": {
       "message": "Attempted to add QS dialog window with unknown token %s.  Aborting.",
@@ -3799,6 +3829,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransitionController.java"
     },
+    "1463355909": {
+      "message": "Queueing legacy sync-set: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
+    },
     "1469310004": {
       "message": "          SKIP: common mode mismatch. was %s",
       "level": "VERBOSE",
@@ -3973,12 +4009,6 @@
       "group": "WM_DEBUG_CONTENT_RECORDING",
       "at": "com\/android\/server\/wm\/ContentRecorder.java"
     },
-    "1667162379": {
-      "message": "Creating Pending Transition: %s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_WINDOW_TRANSITIONS",
-      "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
-    },
     "1670933628": {
       "message": " Setting allReady override",
       "level": "VERBOSE",
@@ -4009,12 +4039,6 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "1689989893": {
-      "message": "SyncGroup %d: Set ready",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_SYNC_ENGINE",
-      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
-    },
     "1699269281": {
       "message": "Don't organize or trigger events for untrusted displayId=%d",
       "level": "WARN",
@@ -4044,6 +4068,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_SYNC_ENGINE",
       "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
+    },
+    "1735199721": {
+      "message": "Queueing transition: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_WINDOW_TRANSITIONS_MIN",
+      "at": "com\/android\/server\/wm\/TransitionController.java"
     },
     "1739298851": {
       "message": "removeWindowToken: Attempted to remove token: %s for non-exiting displayId=%d",
@@ -4122,6 +4152,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ANIM",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
+    },
+    "1820873642": {
+      "message": "SyncGroup %d:  Unfinished dependencies: %s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_SYNC_ENGINE",
+      "at": "com\/android\/server\/wm\/BLASTSyncEngine.java"
     },
     "1822314934": {
       "message": "Expected target rootTask=%s to restored behind rootTask=%s but it is behind rootTask=%s",

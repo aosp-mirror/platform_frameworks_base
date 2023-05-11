@@ -48,7 +48,7 @@
     <string name="always_use_device" msgid="210535878779644679">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="8274884945238642726">"Omogućiti otklanjanje grešaka putem USB-a?"</string>
-    <string name="usb_debugging_message" msgid="5794616114463921773">"RSA otisak prsta za otključavanje računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="5794616114463921773">"Digitalni otisak RSA ključa računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Uvijek dozvoli sa ovog računara"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dozvoli"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka putem USB-a nije dozvoljeno"</string>
@@ -168,6 +168,20 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Ako u sljedećem pokušaju unesete neispravan uzorak, vaš radni profil i njegovi podaci će se izbrisati."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Ako u sljedećem pokušaju unesete neispravan PIN, vaš radni profil i njegovi podaci će se izbrisati."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Ako u sljedećem pokušaju unesete neispravnu lozinku, vaš radni profil i njegovi podaci će se izbrisati."</string>
+    <string name="biometric_re_enroll_dialog_confirm" msgid="3049858021857801836">"Postavi"</string>
+    <string name="biometric_re_enroll_dialog_cancel" msgid="93760939407091417">"Ne sada"</string>
+    <string name="biometric_re_enroll_notification_content" msgid="8685925877186288180">"Ovo je potrebno radi poboljšanja sigurnosti i performansi"</string>
+    <string name="fingerprint_re_enroll_notification_title" msgid="4539432429683916604">"Ponovo postavite otključavanje otiskom prsta"</string>
+    <string name="fingerprint_re_enroll_notification_name" msgid="630798657797645704">"Otključavanje otiskom prsta"</string>
+    <string name="fingerprint_re_enroll_dialog_title" msgid="3526033128113925780">"Postavite otključavanje otiskom prsta"</string>
+    <string name="fingerprint_re_enroll_dialog_content" msgid="4866561176695984879">"Da ponovo postavite otključavanje otiskom prsta, trenutne slike i modeli otiska prsta će se izbrisati.\n\nNakon što se izbrišu, morat ćete ponovo postaviti otključavanje otiskom prsta da koristite otisak prsta za otključavanje telefona ili potvrdu identiteta."</string>
+    <string name="fingerprint_re_enroll_dialog_content_singular" msgid="3083663339787381218">"Da ponovo postavite otključavanje otiskom prsta, trenutne slike i model otiska prsta će se izbrisati.\n\nNakon što se izbrišu, morat ćete ponovo postaviti otključavanje otiskom prsta da koristite otisak prsta za otključavanje telefona ili potvrdu identiteta."</string>
+    <string name="fingerprint_reenroll_failure_dialog_content" msgid="4733768492747300666">"Postavljanje otključavanja otiskom prsta nije uspjelo. Idite u Postavke da pokušate ponovo."</string>
+    <string name="face_re_enroll_notification_title" msgid="1850838867718410520">"Ponovo postavite otključavanje licem"</string>
+    <string name="face_re_enroll_notification_name" msgid="7384545252206120659">"Otključavanje licem"</string>
+    <string name="face_re_enroll_dialog_title" msgid="6392173708176069994">"Postavite otključavanje licem"</string>
+    <string name="face_re_enroll_dialog_content" msgid="7353502359464038511">"Da ponovo postavite otključavanje licem, trenutni model lica će se izbrisati.\n\nMorat ćete ponovo postaviti ovu funkciju da koristite lice za otključavanje telefona."</string>
+    <string name="face_reenroll_failure_dialog_content" msgid="7073947334397236935">"Postavljanje otključavanja licem nije uspjelo. Idite u Postavke da pokušate ponovo."</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Dodirnite senzor za otisak prsta"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Nije moguće prepoznati lice. Koristite otisak prsta."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -299,6 +313,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Započnite"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavite"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Način rada jednom rukom"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Kontrast"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standardno"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Srednje"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Visoko"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Deblokirati mikrofon uređaja?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Deblokirati kameru uređaja?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Deblokirati kameru i mikrofon uređaja?"</string>
@@ -458,10 +476,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"onemogući"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Zvuk i vibracija"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Postavke"</string>
-    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
-    <skip />
-    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
-    <skip />
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Stišano je na sigurniju jačinu zvuka"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Jačina zvuka je bila glasna duže nego što se preporučuje"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikacija je zakačena"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ekran ostaje prikazan ovako dok ga ne otkačite. Da ga otkačite, dodirnite i držite dugme Nazad."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Na ovaj način ekran ostaje prikazan dok ga ne otkačite. Da otkačite ekran, dodirnite i držite dugme Nazad i Početna."</string>
@@ -517,13 +533,13 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Postavke zaključavanja ekrana"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"Skener QR koda"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Ažuriranje"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Profil za posao"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Radni profil"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Način rada u avionu"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Nećete čuti sljedeći alarm u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template" msgid="2234991538018805736">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"u <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Pristupna tačka"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Profil za posao"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Radni profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Zabava za neke, ali ne za sve"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Podešavač za korisnički interfejs sistema vam omogućava dodatne načine da podesite i prilagodite Androidov interfejs. Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Ove eksperimentalne funkcije se u budućim verzijama mogu mijenjati, kvariti ili nestati. Budite oprezni."</string>
@@ -883,23 +899,20 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"uklonite iz omiljenog"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Premjesti na poziciju <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Odaberite kontrole kojim želite pristupati iz Brzih postavki"</string>
+    <string name="controls_favorite_subtitle" msgid="5818709315630850796">"Odaberite kontrole uređaja da pristupite brzo"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite i prevucite da preuredite kontrole"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve kontrole su uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu sačuvane"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Prikaži druge aplikacije"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Preuređivanje"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Dodaj kontrole"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Nazad na uređivanje"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Učitavanje kontrola nije uspjelo. Provjerite aplikaciju <xliff:g id="APP">%s</xliff:g> da se uvjerite da postavke aplikacije nisu izmijenjene."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatibilne kontrole nisu dostupne"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajte u kontrole uređaja"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
-    <string name="controls_dialog_remove" msgid="3775288002711561936">"Uklanjanje"</string>
+    <string name="controls_dialog_remove" msgid="3775288002711561936">"Ukloni"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Predlaže <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Uređaj je zaključan"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Prikazati uređaje i kontrolirati njima sa zaključanog ekrana?"</string>
@@ -1046,7 +1059,7 @@
     <string name="wifi_wont_autoconnect_for_now" msgid="5782282612749867762">"WiFi se trenutno ne može automatski povezati"</string>
     <string name="see_all_networks" msgid="3773666844913168122">"Prikaži sve"</string>
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"Da promijenite mrežu, isključite ethernet"</string>
-    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu bilo kada skenirati WiFi mreže, čak i kada je WiFi isključen. Ovo možete promijeniti u Postavkama skeniranja WiFi mreže. "<annotation id="link">"Promijeni"</annotation></string>
+    <string name="wifi_scan_notify_message" msgid="3753839537448621794">"Radi poboljšanja iskustva s uređajem aplikacije i usluge i dalje mogu tražiti WiFi mreže bilo kada, čak i kada je WiFi isključen. Ovo možete promijeniti u Postavkama traženja WiFi mreže. "<annotation id="link">"Promijeni"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"Isključi način rada u avionu"</string>
     <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"<xliff:g id="APPNAME">%1$s</xliff:g> želi dodati sljedeću karticu u Brze postavke"</string>
     <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"Dodaj karticu"</string>
@@ -1123,11 +1136,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Radna pravila vam dozvoljavaju upućivanje telefonskih poziva samo s radnog profila"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Pređite na radni profil"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Zatvori"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Postavke zaključavanja ekrana"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Prilagodi zaključavanje ekrana"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Otključajte da prilagodite zaključavanje ekrana"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"WiFi mreža nije dostupna"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera je blokirana"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera i mikrofon su blokirani"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofon je blokiran"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Način rada Prioriteti je uključen"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Pažnja Asistenta je uključena"</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Postavite zadanu aplikaciju za bilješke u Postavkama"</string>
 </resources>

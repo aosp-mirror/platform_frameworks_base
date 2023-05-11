@@ -21,11 +21,11 @@ import android.app.WallpaperManager
 import android.content.res.Resources
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.SPLASH_SCREEN
-import android.tools.common.datatypes.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
-import android.tools.common.datatypes.component.ComponentSplashScreenMatcher
-import android.tools.common.datatypes.component.IComponentMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher.Companion.SPLASH_SCREEN
+import android.tools.common.traces.component.ComponentNameMatcher.Companion.WALLPAPER_BBQ_WRAPPER
+import android.tools.common.traces.component.ComponentSplashScreenMatcher
+import android.tools.common.traces.component.IComponentMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
@@ -118,7 +118,7 @@ class TaskTransitionTest(flicker: FlickerTest) : BaseTest(flicker) {
     }
 
     /** Checks that a color background is visible while the task transition is occurring. */
-    @Presubmit
+    @FlakyTest(bugId = 265007895)
     @Test
     fun transitionHasColorBackground() {
         val backgroundColorLayer = ComponentNameMatcher("", "Animation Background")

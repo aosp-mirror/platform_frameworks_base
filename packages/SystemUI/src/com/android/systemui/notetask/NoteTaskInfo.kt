@@ -15,10 +15,13 @@
  */
 package com.android.systemui.notetask
 
+import android.os.UserHandle
+
 /** Contextual information required to launch a Note Task by [NoteTaskController]. */
 data class NoteTaskInfo(
     val packageName: String,
     val uid: Int,
+    val user: UserHandle,
     val entryPoint: NoteTaskEntryPoint? = null,
     val isKeyguardLocked: Boolean = false,
 ) {

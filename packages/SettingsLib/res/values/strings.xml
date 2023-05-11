@@ -1262,6 +1262,12 @@
 
     <!-- Button label for generic cancel action [CHAR LIMIT=20] -->
     <string name="cancel">Cancel</string>
+    <!-- Button label for generic next action [CHAR LIMIT=20] -->
+    <string name="next">Next</string>
+    <!-- Button label for generic back action [CHAR LIMIT=20] -->
+    <string name="back">Back</string>
+    <!-- Button label for generic save action [CHAR LIMIT=20] -->
+    <string name="save">Save</string>
     <!-- Button label for generic OK action [CHAR LIMIT=20] -->
     <string name="okay">OK</string>
     <!-- Button label for generic Done action, to be pressed when an action has been completed [CHAR LIMIT=20] -->
@@ -1388,9 +1394,11 @@
     <!-- Message for add user confirmation dialog - short version. [CHAR LIMIT=none] -->
     <string name="user_add_user_message_short">When you add a new user, that person needs to set up their space.\n\nAny user can update apps for all other users. </string>
     <!-- Title for grant user admin privileges dialog [CHAR LIMIT=65] -->
-    <string name="user_grant_admin_title">Give this user admin privileges?</string>
+    <string name="user_grant_admin_title">Make this user an admin?</string>
     <!-- Message for grant admin privileges dialog. [CHAR LIMIT=none] -->
-    <string name="user_grant_admin_message">As an admin, they will be able to manage other users, modify device settings and factory reset the device.</string>
+    <string name="user_grant_admin_message">Admins have special privileges that other users don\’t. An admin can manage all users, update or reset this device, modify settings, see all installed apps, and grant or revoke admin privileges for others.</string>
+    <!-- Confirmation button for grant user admin privileges dialog [CHAR LIMIT=65] -->
+    <string name="user_grant_admin_button">Make admin</string>
     <!-- Title of dialog to setup a new user [CHAR LIMIT=30] -->
     <string name="user_setup_dialog_title">Set up user now?</string>
     <!-- Message in dialog to setup a new user after creation [CHAR LIMIT=none] -->
@@ -1458,9 +1466,9 @@
     <string name="guest_exit_dialog_message">This will delete
         apps and data from the current guest session</string>
     <!-- Dialog message on action grant admin privileges [CHAR LIMIT=60] -->
-    <string name="grant_admin">Give this user admin privileges</string>
+    <string name="grant_admin">Yes, make them an admin</string>
     <!-- Dialog message on action not grant admin privileges [CHAR LIMIT=60] -->
-    <string name="not_grant_admin">Do not give user admin privileges</string>
+    <string name="not_grant_admin">No, don\’t make them an admin</string>
     <!-- Dialog button on action exit guest (ephemeral guest) [CHAR LIMIT=80] -->
     <string name="guest_exit_dialog_button">Exit</string>
     <!-- Dialog title on action exit guest (non-ephemeral guest) [CHAR LIMIT=32] -->

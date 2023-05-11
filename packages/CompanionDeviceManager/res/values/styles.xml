@@ -36,7 +36,7 @@
     </style>
 
     <style name="DescriptionTitle"
-           parent="@android:style/TextAppearance.DeviceDefault.Medium">
+           parent="@android:style/TextAppearance.DeviceDefault">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>

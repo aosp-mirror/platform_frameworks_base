@@ -10,8 +10,8 @@
     <string name="power_utterance" msgid="7444296686402104807">"Optionen für Ein-/Aus-Taste"</string>
     <string name="recent_apps_label" msgid="6583276995616385847">"Kürzlich geöffnete Apps"</string>
     <string name="lockscreen_label" msgid="648347953557887087">"Sperrbildschirm"</string>
-    <string name="quick_settings_label" msgid="2999117381487601865">"Schnell­einstellungen"</string>
-    <string name="notifications_label" msgid="6829741046963013567">"Benach­richtigungen"</string>
+    <string name="quick_settings_label" msgid="2999117381487601865">"Schnell­­­ein­­stel­lungen"</string>
+    <string name="notifications_label" msgid="6829741046963013567">"Benach­­rich­ti­gungen"</string>
     <string name="screenshot_label" msgid="863978141223970162">"Screenshot"</string>
     <string name="screenshot_utterance" msgid="1430760563401895074">"Screenshot erstellen"</string>
     <string name="volume_up_label" msgid="8592766918780362870">"Lautstärke erhöhen"</string>

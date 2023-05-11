@@ -1450,9 +1450,8 @@ public class AppOpsManager {
     public static final int OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD =
             AppProtoEnums.APP_OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD;
 
-    /** @hide Access to wrist temperature sensors. */
-    public static final int OP_BODY_SENSORS_WRIST_TEMPERATURE =
-            AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
+    // App op deprecated/removed.
+    private static final int OP_DEPRECATED_2 = AppProtoEnums.APP_OP_BODY_SENSORS_WRIST_TEMPERATURE;
 
     /**
      * Send an intent to launch instead of posting the notification to the status bar.
@@ -1461,9 +1460,25 @@ public class AppOpsManager {
      */
     public static final int OP_USE_FULL_SCREEN_INTENT = AppProtoEnums.APP_OP_USE_FULL_SCREEN_INTENT;
 
+    /**
+     * Hides camera indicator for sandboxed detection apps that directly access the service.
+     *
+     * @hide
+     */
+    public static final int OP_CAMERA_SANDBOXED =
+            AppProtoEnums.APP_OP_CAMERA_SANDBOXED;
+
+    /**
+     * Hides microphone indicator for sandboxed detection apps that directly access the service.
+     *
+     * @hide
+     */
+    public static final int OP_RECORD_AUDIO_SANDBOXED =
+            AppProtoEnums.APP_OP_RECORD_AUDIO_SANDBOXED;
+
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int _NUM_OP = 134;
+    public static final int _NUM_OP = 136;
 
     /**
      * All app ops represented as strings.
@@ -1603,8 +1618,9 @@ public class AppOpsManager {
             OPSTR_SYSTEM_EXEMPT_FROM_HIBERNATION,
             OPSTR_SYSTEM_EXEMPT_FROM_ACTIVITY_BG_START_RESTRICTION,
             OPSTR_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
-            OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
             OPSTR_USE_FULL_SCREEN_INTENT,
+            OPSTR_CAMERA_SANDBOXED,
+            OPSTR_RECORD_AUDIO_SANDBOXED
     })
     public @interface AppOpString {}
 
@@ -2013,6 +2029,20 @@ public class AppOpsManager {
     public static final String OPSTR_COARSE_LOCATION_SOURCE = "android:coarse_location_source";
 
     /**
+     * Camera is being recorded in sandboxed detection process.
+     *
+     * @hide
+     */
+    public static final String OPSTR_CAMERA_SANDBOXED = "android:camera_sandboxed";
+
+    /**
+     * Audio is being recorded in sandboxed detection process.
+     *
+     * @hide
+     */
+    public static final String OPSTR_RECORD_AUDIO_SANDBOXED = "android:record_audio_sandboxed";
+
+    /**
      * Allow apps to create the requests to manage the media files without user confirmation.
      *
      * @see android.Manifest.permission#MANAGE_MEDIA
@@ -2189,11 +2219,10 @@ public class AppOpsManager {
             "android:capture_consentless_bugreport_on_userdebug_build";
 
     /**
-     * Access to wrist temperature body sensors.
+     * App op deprecated/removed.
      * @hide
      */
-    public static final String OPSTR_BODY_SENSORS_WRIST_TEMPERATURE =
-            "android:body_sensors_wrist_temperature";
+    public static final String OPSTR_DEPRECATED_2 = "android:deprecated_2";
 
     /**
      * Send an intent to launch instead of posting the notification to the status bar.
@@ -2311,7 +2340,6 @@ public class AppOpsManager {
             OP_READ_MEDIA_VISUAL_USER_SELECTED,
             OP_FOREGROUND_SERVICE_SPECIAL_USE,
             OP_CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD,
-            OP_BODY_SENSORS_WRIST_TEMPERATURE,
             OP_USE_FULL_SCREEN_INTENT
     };
 
@@ -2519,7 +2547,7 @@ public class AppOpsManager {
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
         new AppOpInfo.Builder(OP_TURN_SCREEN_ON, OPSTR_TURN_SCREEN_ON, "TURN_SCREEN_ON")
             .setPermission(Manifest.permission.TURN_SCREEN_ON)
-            .setDefaultMode(AppOpsManager.MODE_ERRORED).build(),
+            .setDefaultMode(AppOpsManager.MODE_DEFAULT).build(),
         new AppOpInfo.Builder(OP_GET_ACCOUNTS, OPSTR_GET_ACCOUNTS, "GET_ACCOUNTS")
             .setPermission(Manifest.permission.GET_ACCOUNTS)
             .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
@@ -2731,14 +2759,15 @@ public class AppOpsManager {
                 "CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD")
                 .setPermission(Manifest.permission.CAPTURE_CONSENTLESS_BUGREPORT_ON_USERDEBUG_BUILD)
                 .build(),
-        new AppOpInfo.Builder(OP_BODY_SENSORS_WRIST_TEMPERATURE,
-                OPSTR_BODY_SENSORS_WRIST_TEMPERATURE,
-                "BODY_SENSORS_WRIST_TEMPERATURE")
-                .setPermission(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE)
-                .setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_DEPRECATED_2, OPSTR_DEPRECATED_2, "DEPRECATED_2")
+                .setDefaultMode(AppOpsManager.MODE_IGNORED).build(),
         new AppOpInfo.Builder(OP_USE_FULL_SCREEN_INTENT, OPSTR_USE_FULL_SCREEN_INTENT,
                 "USE_FULL_SCREEN_INTENT").setPermission(Manifest.permission.USE_FULL_SCREEN_INTENT)
-                .build()
+                .build(),
+        new AppOpInfo.Builder(OP_CAMERA_SANDBOXED, OPSTR_CAMERA_SANDBOXED,
+            "CAMERA_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build(),
+        new AppOpInfo.Builder(OP_RECORD_AUDIO_SANDBOXED, OPSTR_RECORD_AUDIO_SANDBOXED,
+                "RECORD_AUDIO_SANDBOXED").setDefaultMode(AppOpsManager.MODE_ALLOWED).build()
     };
 
     // The number of longs needed to form a full bitmask of app ops

@@ -107,6 +107,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
+    private static final int MAX_RAPID_ACTIVITY_LAUNCH_COUNT = 500;
+    private static final long RAPID_ACTIVITY_LAUNCH_MS = 300;
+    private static final long RESET_RAPID_ACTIVITY_LAUNCH_MS = 5 * RAPID_ACTIVITY_LAUNCH_MS;
+
+    private int mRapidActivityLaunchCount;
+
     // all about the first app in the process
     final ApplicationInfo mInfo;
     final String mName;
@@ -538,7 +544,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mLastActivityLaunchTime > 0;
     }
 
-    void setLastActivityLaunchTime(long launchTime) {
+    void setLastActivityLaunchTime(ActivityRecord r) {
+        long launchTime = r.lastLaunchTime;
         if (launchTime <= mLastActivityLaunchTime) {
             if (launchTime < mLastActivityLaunchTime) {
                 Slog.w(TAG,
@@ -547,7 +554,27 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
             return;
         }
+        updateRapidActivityLaunch(r, launchTime, mLastActivityLaunchTime);
         mLastActivityLaunchTime = launchTime;
+    }
+
+    void updateRapidActivityLaunch(ActivityRecord r, long launchTime, long lastLaunchTime) {
+        if (mInstrumenting || mDebugging || lastLaunchTime <= 0) {
+            return;
+        }
+
+        final long diff = lastLaunchTime - launchTime;
+        if (diff < RAPID_ACTIVITY_LAUNCH_MS) {
+            mRapidActivityLaunchCount++;
+        } else if (diff >= RESET_RAPID_ACTIVITY_LAUNCH_MS) {
+            mRapidActivityLaunchCount = 0;
+        }
+
+        if (mRapidActivityLaunchCount > MAX_RAPID_ACTIVITY_LAUNCH_COUNT) {
+            Slog.w(TAG, "Killing " + mPid + " because of rapid activity launch");
+            r.getRootTask().moveTaskToBack(r.getTask());
+            mAtm.mH.post(() -> mAtm.mAmInternal.killProcess(mName, mUid, "rapidActivityLaunch"));
+        }
     }
 
     void setLastActivityFinishTimeIfNeeded(long finishTime) {
@@ -696,7 +723,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     void addActivityIfNeeded(ActivityRecord r) {
         // even if we already track this activity, note down that it has been launched
-        setLastActivityLaunchTime(r.lastLaunchTime);
+        setLastActivityLaunchTime(r);
         if (mActivities.contains(r)) {
             return;
         }

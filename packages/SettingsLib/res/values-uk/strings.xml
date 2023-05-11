@@ -519,6 +519,9 @@
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"Більше часу."</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"Менше часу."</string>
     <string name="cancel" msgid="5665114069455378395">"Скасувати"</string>
+    <string name="next" msgid="2699398661093607009">"Далі"</string>
+    <string name="back" msgid="5554327870352703710">"Назад"</string>
+    <string name="save" msgid="3745809743277153149">"Зберегти"</string>
     <string name="okay" msgid="949938843324579502">"ОК"</string>
     <string name="done" msgid="381184316122520313">"Готово"</string>
     <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Будильники й нагадування"</string>
@@ -573,8 +576,9 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Додати нового користувача?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Цим пристроєм можуть користуватися кілька людей. Для цього потрібно створити додаткові профілі. Власник профілю може налаштувати його на свій смак: вибрати фоновий малюнок, установити потрібні додатки тощо. Користувачі також можуть налаштовувати певні параметри пристрою (як-от Wi-Fi), які застосовуватимуться до решти профілів.\n\nПісля створення новий профіль потрібно налаштувати.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів. Налаштування спеціальних можливостей і сервісів можуть не передаватися новому користувачеві."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Користувач має налаштувати свій профіль після створення.\n\nБудь-який користувач пристрою може оновлювати додатки для решти користувачів."</string>
-    <string name="user_grant_admin_title" msgid="5565796912475193314">"Надати права адміністратора?"</string>
-    <string name="user_grant_admin_message" msgid="7925257971286380976">"Права адміністратора дадуть змогу керувати іншими користувачами, змінювати та скидати налаштування пристрою."</string>
+    <string name="user_grant_admin_title" msgid="5157031020083343984">"Надати цьому користувачу права адміністратора?"</string>
+    <string name="user_grant_admin_message" msgid="1673791931033486709">"Адміністратори, на відміну від звичайних користувачів, мають спеціальні права. Вони можуть керувати всіма користувачами, оновлювати, скидати чи змінювати налаштування цього пристрою, переглядати всі встановлені додатки, а також надавати іншим користувачам права адміністратора або відкликати їх."</string>
+    <string name="user_grant_admin_button" msgid="5441486731331725756">"Надати права адміністратора"</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"Створити користувача зараз?"</string>
     <string name="user_setup_dialog_message" msgid="269931619868102841">"Переконайтеся, що користувач може взяти пристрій і налаштувати профіль"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Налаштувати профіль зараз?"</string>
@@ -606,8 +610,8 @@
     <string name="guest_reset_and_restart_dialog_message" msgid="2764425635305200790">"Почнеться новий сеанс у режимі гостя, а всі додатки й дані з поточного сеансу буде видалено"</string>
     <string name="guest_exit_dialog_title" msgid="1846494656849381804">"Вийти з режиму гостя?"</string>
     <string name="guest_exit_dialog_message" msgid="1743218864242719783">"Усі додатки й дані з поточного сеансу в режимі гостя буде видалено."</string>
-    <string name="grant_admin" msgid="4273077214151417783">"Надати цьому користувачу права адміністратора"</string>
-    <string name="not_grant_admin" msgid="6985027675930546850">"Не надавати користувачу права адміністратора"</string>
+    <string name="grant_admin" msgid="4323199171790522574">"Так, надати права адміністратора"</string>
+    <string name="not_grant_admin" msgid="3557849576157702485">"Ні, не надавати прав адміністратора"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Вийти"</string>
     <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Зберегти дії в режимі гостя?"</string>
     <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Ви можете зберегти дії з поточного сеансу або видалити всі додатки й дані"</string>

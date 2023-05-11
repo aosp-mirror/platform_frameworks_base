@@ -57,7 +57,8 @@ import java.util.List;
  * A View that represents Pip Menu on TV. It's responsible for displaying the Pip menu actions from
  * the TvPipActionsProvider as well as the buttons for manually moving the PiP.
  */
-public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.Listener {
+public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.Listener,
+        TvPipMenuEduTextDrawer.Listener {
     private static final String TAG = "TvPipMenuView";
 
     private final TvPipMenuView.Listener mListener;
@@ -76,6 +77,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     private final View mDimLayer;
 
     private final TvPipMenuEduTextDrawer mEduTextDrawer;
+    private final ViewGroup mEduTextContainer;
 
     private final int mPipMenuOuterSpace;
     private final int mPipMenuBorderWidth;
@@ -139,9 +141,9 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         mPipMenuBorderWidth = context.getResources()
                 .getDimensionPixelSize(R.dimen.pip_menu_border_width);
 
-        mEduTextDrawer = new TvPipMenuEduTextDrawer(mContext, mainHandler, mListener);
-        ((FrameLayout) findViewById(R.id.tv_pip_menu_edu_text_drawer_placeholder))
-                .addView(mEduTextDrawer);
+        mEduTextDrawer = new TvPipMenuEduTextDrawer(mContext, mainHandler, this);
+        mEduTextContainer = (ViewGroup) findViewById(R.id.tv_pip_menu_edu_text_container);
+        mEduTextContainer.addView(mEduTextDrawer);
     }
 
     void onPipTransitionToTargetBoundsStarted(Rect targetBounds) {
@@ -235,11 +237,13 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
      * pip menu when it gains focus.
      */
     private void updatePipFrameBounds() {
-        final ViewGroup.LayoutParams pipFrameParams = mPipFrameView.getLayoutParams();
-        if (pipFrameParams != null) {
-            pipFrameParams.width = mCurrentPipBounds.width() + 2 * mPipMenuBorderWidth;
-            pipFrameParams.height = mCurrentPipBounds.height() + 2 * mPipMenuBorderWidth;
-            mPipFrameView.setLayoutParams(pipFrameParams);
+        if (mPipFrameView.getVisibility() == VISIBLE) {
+            final ViewGroup.LayoutParams pipFrameParams = mPipFrameView.getLayoutParams();
+            if (pipFrameParams != null) {
+                pipFrameParams.width = mCurrentPipBounds.width() + 2 * mPipMenuBorderWidth;
+                pipFrameParams.height = mCurrentPipBounds.height() + 2 * mPipMenuBorderWidth;
+                mPipFrameView.setLayoutParams(pipFrameParams);
+            }
         }
 
         final ViewGroup.LayoutParams pipViewParams = mPipView.getLayoutParams();
@@ -262,7 +266,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
     Rect getPipMenuContainerBounds(Rect pipBounds) {
         final Rect menuUiBounds = new Rect(pipBounds);
         menuUiBounds.inset(-mPipMenuOuterSpace, -mPipMenuOuterSpace);
-        menuUiBounds.bottom += mEduTextDrawer.getHeight();
+        menuUiBounds.bottom += mEduTextDrawer.getEduTextDrawerHeight();
         return menuUiBounds;
     }
 
@@ -403,6 +407,17 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         } else if (added < 0) {
             mRecyclerViewAdapter.notifyItemRangeRemoved(startIndex + updated, -added);
         }
+    }
+
+    @Override
+    public void onCloseEduTextAnimationStart() {
+        mListener.onCloseEduText();
+    }
+
+    @Override
+    public void onCloseEduTextAnimationEnd() {
+        mPipFrameView.setVisibility(GONE);
+        mEduTextContainer.setVisibility(GONE);
     }
 
     @Override
@@ -551,7 +566,7 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
         }
     }
 
-    interface Listener extends TvPipMenuEduTextDrawer.Listener {
+    interface Listener {
 
         void onBackPress();
 
@@ -573,5 +588,11 @@ public class TvPipMenuView extends FrameLayout implements TvPipActionsProvider.L
          * has lost focus.
          */
         void onPipWindowFocusChanged(boolean focused);
+
+        /**
+         *  The edu text closing impacts the size of the Picture-in-Picture window and influences
+         *  how it is positioned on the screen.
+         */
+        void onCloseEduText();
     }
 }

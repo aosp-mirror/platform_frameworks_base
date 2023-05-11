@@ -100,7 +100,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Экран жазғыш бейнесін өңдеу"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Экранды бейнеге жазудың ағымдағы хабарландыруы"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Жазу басталсын ба?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Android жүйесі экранда көрсетілетін немесе құрылғыда ойнатылатын құпия ақпаратты жазып алуы мүмкін. Ондай ақпаратқа құпия сөздер, төлем ақпараты, фотосуреттер, хабарлар және аудио жатады."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Android жүйесі экранда көрсетілетін немесе құрылғыда ойнатылатын құпия ақпаратты жазып алуы мүмкін. Ондай ақпаратқа құпия сөздер, төлем ақпараты, фотосуреттер, хабарлар және дыбыстар жатады."</string>
     <string name="screenrecord_option_entire_screen" msgid="1732437834603426934">"Бүкіл экранды жазу"</string>
     <string name="screenrecord_option_single_app" msgid="5954863081500035825">"Жалғыз қолданбаны жазу"</string>
     <string name="screenrecord_warning_entire_screen" msgid="8141407178104195610">"Жазу кезінде Android жүйесі экраныңызда көрінетін не құрылғыңызда ойнатылатын барлық нәрсені пайдалана алады. Сондықтан құпия сөздерді, төлем туралы мәліметті, хабарларды немесе басқа құпия ақпаратты енгізу кезінде сақ болыңыз."</string>
@@ -168,6 +168,34 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Келесі әрекет кезінде қате өрнек енгізсеңіз, жұмыс профиліңіз бен оның деректері жойылады."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Келесі әрекет кезінде қате PIN кодын енгізсеңіз, жұмыс профиліңіз бен оның деректері жойылады."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Келесі әрекет кезінде қате құпия сөз енгізсеңіз, жұмыс профиліңіз бен оның деректері жойылады."</string>
+    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
+    <skip />
+    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
+    <skip />
+    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Саусақ ізін оқу сканерін түртіңіз"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Бет танылмады. Орнына саусақ ізін пайдаланыңыз."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -269,7 +297,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Қосылуда…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Трафикті үнемдеу режимі қосулы"</string>
     <string name="quick_settings_hotspot_secondary_label_num_devices" msgid="7536823087501239457">"{count,plural, =1{# құрылғы}other{# құрылғы}}"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Қалта шам"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Қолшам"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Камера қолданылып жатыр"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Мобильдік интернет"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Дерек шығыны"</string>
@@ -299,6 +327,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Бастау"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Тоқтату"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Бір қолмен басқару режимі"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Контраст"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Стандартты режим"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Орташа"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Жоғары"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Құрылғы микрофонының бөгеуі алынсын ба?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Құрылғы камерасының бөгеуі алынсын ба?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Құрылғы камерасы мен микрофонының бөгеуі алынсын ба?"</string>
@@ -360,12 +392,12 @@
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Тек\nдабылдар"</string>
     <string name="keyguard_indication_charging_time_wireless" msgid="577856646141738675">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Сымсыз зарядталуда • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарядталуда • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
-    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Жылдам зарядталуда • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
+    <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Жылдам зарядтау • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Баяу зарядталуда • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
     <string name="keyguard_indication_charging_time_dock" msgid="3149328898931741271">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • Зарядталып жатыр. • Толуына <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g> қалды."</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Пайдаланушыны ауыстыру"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ашылмалы мәзір"</string>
-    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Осы сеанстағы барлық қолданбалар мен деректер жойылады."</string>
+    <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Осы сеанстағы барлық қолданба мен дерек жойылады."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Қош келдіңіз, қонақ!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Сеансты жалғастыру керек пе?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Қайта бастау"</string>
@@ -458,10 +490,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"өшіру"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Дыбыс және діріл"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Параметрлер"</string>
-    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
-    <skip />
-    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
-    <skip />
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Қауіпсіз дыбыс деңгейіне төмендетілді"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Дыбыстың жоғары деңгейі ұсынылғаннан уақыттан ұзағырақ болды."</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Қолданба бекітілді"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Өзіңіз босатқаша ашық тұрады. Босату үшін \"Артқа\" және \"Шолу\" түймелерін басып тұрыңыз."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Өзіңіз босатқаша ашық тұрады. Босату үшін \"Артқа\" және \"Негізгі бет\" түймелерін басып тұрыңыз"</string>
@@ -852,8 +882,7 @@
     <string name="accessibility_magnification_medium" msgid="6994632616884562625">"Орташа"</string>
     <string name="accessibility_magnification_small" msgid="8144502090651099970">"Кішi"</string>
     <string name="accessibility_magnification_large" msgid="6602944330021308774">"Үлкен"</string>
-    <!-- no translation found for accessibility_magnification_fullscreen (5043514702759201964) -->
-    <skip />
+    <string name="accessibility_magnification_fullscreen" msgid="5043514702759201964">"Толық экран"</string>
     <string name="accessibility_magnification_done" msgid="263349129937348512">"Дайын"</string>
     <string name="accessibility_magnifier_edit" msgid="1522877239671820636">"Өзгерту"</string>
     <string name="accessibility_magnification_magnifier_window_settings" msgid="2834685072221468434">"Ұлғайтқыш терезесінің параметрлері"</string>
@@ -884,23 +913,21 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"таңдаулылардан алып тастау"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> позициясына жылжыту"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Басқару элементтері"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"\"Жылдам параметрлер\" мәзірінен пайдалануға болатын басқару элементтерін таңдаңыз."</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Басқару элементтерінің ретін өзгерту үшін оларды басып тұрып сүйреңіз."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементтері жойылды."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгерістер сақталмады."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Басқа қолданбаларды көру"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Қайта реттеу"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Басқару элементтерін қосу"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Өзгерту бетіне оралу"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Басқару элементтері жүктелмеді. Қолданба параметрлерінің өзгермегенін тексеру үшін <xliff:g id="APP">%s</xliff:g> қолданбасын қараңыз."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Үйлесімді басқару элементтері қолжетімді емес."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару элементтеріне қосу"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Енгізу"</string>
-    <string name="controls_dialog_remove" msgid="3775288002711561936">"Өшіру"</string>
+    <string name="controls_dialog_remove" msgid="3775288002711561936">"Жою"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> ұсынған"</string>
     <string name="controls_tile_locked" msgid="731547768182831938">"Құрылғы құлыпталды."</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"Құрылғыларды құлып экранынан көрсетуге және басқаруға рұқсат берілсін бе?"</string>
@@ -954,7 +981,7 @@
     <string name="controls_menu_add" msgid="4447246119229920050">"Басқару элементтерін қосу"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Басқару элементтерін өзгерту"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Қолданба қосу"</string>
-    <string name="controls_menu_remove" msgid="3006525275966023468">"Қолданбаны өшіру"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"Қолданбаны жою"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Шығыс сигналдарды қосу"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Топ"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 құрылғы таңдалды."</string>
@@ -1124,11 +1151,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Жұмыс саясатыңызға сәйкес тек жұмыс профилінен қоңырау шалуға болады."</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Жұмыс профиліне ауысу"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Жабу"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Экран құлпының параметрлері"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Құлып экранын бейімдеу"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Құлып экранын бейімдеу үшін құлыпты ашыңыз"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi қолжетімсіз."</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Камера бөгелген."</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Камера мен микрофон бөгелген."</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Микрофон бөгелген."</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"\"Маңызды\" режимі қосулы."</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant қосулы."</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Параметрлерден әдепкі жазба қолданбасын орнатыңыз."</string>
 </resources>

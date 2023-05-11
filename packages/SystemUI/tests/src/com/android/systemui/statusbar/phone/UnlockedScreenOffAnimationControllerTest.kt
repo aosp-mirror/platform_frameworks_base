@@ -16,18 +16,16 @@
 
 package com.android.systemui.statusbar.phone
 
-import android.animation.Animator
 import android.os.Handler
 import android.os.PowerManager
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
-import android.view.View
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.WakefulnessLifecycle
-import com.android.systemui.shade.NotificationPanelViewController
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.LightRevealScrim
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.policy.KeyguardStateController
@@ -39,10 +37,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.Mockito.anyLong
 import org.mockito.Mockito.never
-import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -63,9 +59,9 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
     @Mock
     private lateinit var globalSettings: GlobalSettings
     @Mock
-    private lateinit var mCentralSurfaces: CentralSurfaces
+    private lateinit var centralSurfaces: CentralSurfaces
     @Mock
-    private lateinit var notificationPanelViewController: NotificationPanelViewController
+    private lateinit var shadeViewController: ShadeViewController
     @Mock
     private lateinit var lightRevealScrim: LightRevealScrim
     @Mock
@@ -95,13 +91,13 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
                 powerManager,
                 handler = handler
         )
-        controller.initialize(mCentralSurfaces, lightRevealScrim)
-        `when`(mCentralSurfaces.notificationPanelViewController).thenReturn(
-            notificationPanelViewController)
+        controller.initialize(centralSurfaces, lightRevealScrim)
+        `when`(centralSurfaces.shadeViewController).thenReturn(
+            shadeViewController)
 
         // Screen off does not run if the panel is expanded, so we should say it's collapsed to test
         // screen off.
-        `when`(notificationPanelViewController.isFullyCollapsed).thenReturn(true)
+        `when`(shadeViewController.isFullyCollapsed).thenReturn(true)
     }
 
     @After
@@ -109,27 +105,6 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         // Tell the screen off controller to cancel the animations and clean up its state, or
         // subsequent tests will act unpredictably as the animator continues running.
         controller.onStartedWakingUp()
-    }
-
-    @Test
-    fun testAnimClearsEndListener() {
-        val keyguardView = View(context)
-        val animator = spy(keyguardView.animate())
-        val keyguardSpy = spy(keyguardView)
-        Mockito.`when`(keyguardSpy.animate()).thenReturn(animator)
-        val listener = ArgumentCaptor.forClass(Animator.AnimatorListener::class.java)
-        val endAction = ArgumentCaptor.forClass(Runnable::class.java)
-        controller.animateInKeyguard(keyguardSpy, Runnable {})
-        Mockito.verify(animator).setListener(listener.capture())
-        Mockito.verify(animator).withEndAction(endAction.capture())
-
-        // Verify that the listener is cleared if we cancel it.
-        listener.value.onAnimationCancel(null)
-        Mockito.verify(animator).setListener(null)
-
-        // Verify that the listener is also cleared if the end action is triggered.
-        endAction.value.run()
-        verify(animator, times(2)).setListener(null)
     }
 
     /**
@@ -152,7 +127,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
 
         callbackCaptor.value.run()
 
-        verify(notificationPanelViewController, times(1)).showAodUi()
+        verify(shadeViewController, times(1)).showAodUi()
     }
 
     /**
@@ -174,7 +149,7 @@ class UnlockedScreenOffAnimationControllerTest : SysuiTestCase() {
         verify(handler).postDelayed(callbackCaptor.capture(), anyLong())
         callbackCaptor.value.run()
 
-        verify(notificationPanelViewController, never()).showAodUi()
+        verify(shadeViewController, never()).showAodUi()
     }
 
     @Test

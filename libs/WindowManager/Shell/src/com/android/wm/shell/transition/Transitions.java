@@ -74,10 +74,12 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
+import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.util.TransitionUtil;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -90,16 +92,24 @@ import java.util.Arrays;
  * Basically: --start--> PENDING --onTransitionReady--> READY --play--> ACTIVE --finish--> |
  *                                                            --merge--> MERGED --^
  *
- * At the moment, only one transition can be animating at a time. While a transition is animating,
- * transitions will be queued in the "ready" state for their turn. At the same time, whenever a
- * transition makes it to the head of the "ready" queue, it will attempt to merge to with the
- * "active" transition. If the merge succeeds, it will be moved to the "active" transition's
- * "merged" and then the next "ready" transition can attempt to merge.
+ * The READY and beyond lifecycle is managed per "track". Within a track, all the animations are
+ * serialized as described; however, multiple tracks can play simultaneously. This implies that,
+ * within a track, only one transition can be animating ("active") at a time.
  *
- * Once the "active" transition animation is finished, it will be removed from the "active" list
- * and then the next "ready" transition can play.
+ * While a transition is animating in a track, transitions dispatched to the track will be queued
+ * in the "ready" state for their turn. At the same time, whenever a transition makes it to the
+ * head of the "ready" queue, it will attempt to merge to with the "active" transition. If the
+ * merge succeeds, it will be moved to the "active" transition's "merged" list and then the next
+ * "ready" transition can attempt to merge. Once the "active" transition animation is finished,
+ * the next "ready" transition can play.
+ *
+ * Track assignments are expected to be provided by WMCore and this generally tries to maintain
+ * the same assignments. If, however, WMCore decides that a transition conflicts with >1 active
+ * track, it will be marked as SYNC. This means that all currently active tracks must be flushed
+ * before the SYNC transition can play.
  */
-public class Transitions implements RemoteCallable<Transitions> {
+public class Transitions implements RemoteCallable<Transitions>,
+        ShellCommandHandler.ShellCommandActionHandler {
     static final String TAG = "ShellTransitions";
 
     /** Set to {@code true} to enable shell transitions. */
@@ -143,6 +153,10 @@ public class Transitions implements RemoteCallable<Transitions> {
     /** Transition type to fullscreen from desktop mode. */
     public static final int TRANSIT_EXIT_DESKTOP_MODE = WindowManager.TRANSIT_FIRST_CUSTOM + 12;
 
+    /** Transition type to animate back to fullscreen when drag to freeform is cancelled. */
+    public static final int TRANSIT_CANCEL_ENTERING_DESKTOP_MODE =
+            WindowManager.TRANSIT_FIRST_CUSTOM + 13;
+
     private final WindowOrganizer mOrganizer;
     private final Context mContext;
     private final ShellExecutor mMainExecutor;
@@ -154,11 +168,14 @@ public class Transitions implements RemoteCallable<Transitions> {
     private final ShellController mShellController;
     private final ShellTransitionImpl mImpl = new ShellTransitionImpl();
     private final SleepHandler mSleepHandler = new SleepHandler();
-
+    private final Tracer mTracer = new Tracer();
     private boolean mIsRegistered = false;
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
     private final ArrayList<TransitionHandler> mHandlers = new ArrayList<>();
+
+    @Nullable
+    private final ShellCommandHandler mShellCommandHandler;
 
     private final ArrayList<TransitionObserver> mObservers = new ArrayList<>();
 
@@ -168,12 +185,15 @@ public class Transitions implements RemoteCallable<Transitions> {
     private float mTransitionAnimationScaleSetting = 1.0f;
 
     /**
-     * How much time we allow for an animation to finish itself on sleep. If it takes longer, we
+     * How much time we allow for an animation to finish itself on sync. If it takes longer, we
      * will force-finish it (on this end) which may leave it in a bad state but won't hang the
      * device. This needs to be pretty small because it is an allowance for each queued animation,
      * however it can't be too small since there is some potential IPC involved.
      */
-    private static final int SLEEP_ALLOWANCE_MS = 120;
+    private static final int SYNC_ALLOWANCE_MS = 120;
+
+    /** For testing only. Disables the force-finish timeout on sync. */
+    private boolean mDisableForceSync = false;
 
     private static final class ActiveTransition {
         IBinder mToken;
@@ -186,23 +206,45 @@ public class Transitions implements RemoteCallable<Transitions> {
         /** Ordered list of transitions which have been merged into this one. */
         private ArrayList<ActiveTransition> mMerged;
 
+        boolean isSync() {
+            return (mInfo.getFlags() & TransitionInfo.FLAG_SYNC) != 0;
+        }
+
+        int getTrack() {
+            return mInfo != null ? mInfo.getTrack() : -1;
+        }
+
         @Override
         public String toString() {
             if (mInfo != null && mInfo.getDebugId() >= 0) {
-                return "(#" + mInfo.getDebugId() + ")" + mToken;
+                return "(#" + mInfo.getDebugId() + ")" + mToken + "@" + getTrack();
             }
-            return mToken.toString();
+            return mToken.toString() + "@" + getTrack();
+        }
+    }
+
+    private static class Track {
+        /** Keeps track of transitions which are ready to play but still waiting for their turn. */
+        final ArrayList<ActiveTransition> mReadyTransitions = new ArrayList<>();
+
+        /** The currently playing transition in this track. */
+        ActiveTransition mActiveTransition = null;
+
+        boolean isIdle() {
+            return mActiveTransition == null && mReadyTransitions.isEmpty();
         }
     }
 
     /** Keeps track of transitions which have been started, but aren't ready yet. */
     private final ArrayList<ActiveTransition> mPendingTransitions = new ArrayList<>();
 
-    /** Keeps track of transitions which are ready to play but still waiting for their turn. */
-    private final ArrayList<ActiveTransition> mReadyTransitions = new ArrayList<>();
+    /**
+     * Transitions which are ready to play, but haven't been sent to a track yet because a sync
+     * is ongoing.
+     */
+    private final ArrayList<ActiveTransition> mReadyDuringSync = new ArrayList<>();
 
-    /** Keeps track of currently playing transitions. For now, there can only be 1 max. */
-    private final ArrayList<ActiveTransition> mActiveTransitions = new ArrayList<>();
+    private final ArrayList<Track> mTracks = new ArrayList<>();
 
     public Transitions(@NonNull Context context,
             @NonNull ShellInit shellInit,
@@ -210,8 +252,23 @@ public class Transitions implements RemoteCallable<Transitions> {
             @NonNull WindowOrganizer organizer,
             @NonNull TransactionPool pool,
             @NonNull DisplayController displayController,
-            @NonNull ShellExecutor mainExecutor, @NonNull Handler mainHandler,
+            @NonNull ShellExecutor mainExecutor,
+            @NonNull Handler mainHandler,
             @NonNull ShellExecutor animExecutor) {
+        this(context, shellInit, shellController, organizer, pool, displayController, mainExecutor,
+                mainHandler, animExecutor, null);
+    }
+
+    public Transitions(@NonNull Context context,
+            @NonNull ShellInit shellInit,
+            @NonNull ShellController shellController,
+            @NonNull WindowOrganizer organizer,
+            @NonNull TransactionPool pool,
+            @NonNull DisplayController displayController,
+            @NonNull ShellExecutor mainExecutor,
+            @NonNull Handler mainHandler,
+            @NonNull ShellExecutor animExecutor,
+            @Nullable ShellCommandHandler shellCommandHandler) {
         mOrganizer = organizer;
         mContext = context;
         mMainExecutor = mainExecutor;
@@ -227,6 +284,7 @@ public class Transitions implements RemoteCallable<Transitions> {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Default");
         // Next lowest priority is remote transitions.
         mHandlers.add(mRemoteTransitionHandler);
+        mShellCommandHandler = shellCommandHandler;
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "addHandler: Remote");
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -257,6 +315,10 @@ public class Transitions implements RemoteCallable<Transitions> {
             }
             // Pre-load the instance.
             TransitionMetrics.getInstance();
+        }
+
+        if (mShellCommandHandler != null) {
+            mShellCommandHandler.addCommandCallback("transitions", this, this);
         }
     }
 
@@ -370,12 +432,15 @@ public class Transitions implements RemoteCallable<Transitions> {
      * will be executed when the last active transition is finished.
      */
     public void runOnIdle(Runnable runnable) {
-        if (mActiveTransitions.isEmpty() && mPendingTransitions.isEmpty()
-                && mReadyTransitions.isEmpty()) {
+        if (isIdle()) {
             runnable.run();
         } else {
             mRunWhenIdleQueue.add(runnable);
         }
+    }
+
+    void setDisableForceSyncForTest(boolean disable) {
+        mDisableForceSync = disable;
     }
 
     /**
@@ -425,6 +490,7 @@ public class Transitions implements RemoteCallable<Transitions> {
                         && (change.getFlags() & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) == 0) {
                     t.setAlpha(leash, 0.f);
                 }
+                finishT.show(leash);
             } else if (mode == TRANSIT_CLOSE || mode == TRANSIT_TO_BACK) {
                 finishT.hide(leash);
             }
@@ -467,8 +533,12 @@ public class Transitions implements RemoteCallable<Transitions> {
             final int layer;
             // Put all the OPEN/SHOW on top
             if ((change.getFlags() & FLAG_IS_WALLPAPER) != 0) {
-                // Wallpaper is always at the bottom.
-                layer = -zSplitLine;
+                // Wallpaper is always at the bottom, opening wallpaper on top of closing one.
+                if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
+                    layer = -zSplitLine + numChanges - i;
+                } else {
+                    layer = -zSplitLine - i;
+                }
             } else if (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT) {
                 if (isOpening) {
                     // put on top
@@ -537,6 +607,13 @@ public class Transitions implements RemoteCallable<Transitions> {
         return true;
     }
 
+    private Track getOrCreateTrack(int trackId) {
+        while (trackId >= mTracks.size()) {
+            mTracks.add(new Track());
+        }
+        return mTracks.get(trackId);
+    }
+
     @VisibleForTesting
     void onTransitionReady(@NonNull IBinder transitionToken, @NonNull TransitionInfo info,
             @NonNull SurfaceControl.Transaction t, @NonNull SurfaceControl.Transaction finishT) {
@@ -549,38 +626,67 @@ public class Transitions implements RemoteCallable<Transitions> {
                     + Arrays.toString(mPendingTransitions.stream().map(
                             activeTransition -> activeTransition.mToken).toArray()));
         }
-        if (activeIdx > 0) {
-            Log.e(TAG, "Transition became ready out-of-order " + mPendingTransitions.get(activeIdx)
-                    + ". Expected order: " + Arrays.toString(mPendingTransitions.stream().map(
-                            activeTransition -> activeTransition.mToken).toArray()));
-        }
         // Move from pending to ready
         final ActiveTransition active = mPendingTransitions.remove(activeIdx);
-        mReadyTransitions.add(active);
         active.mInfo = info;
         active.mStartT = t;
         active.mFinishT = finishT;
+        if (activeIdx > 0) {
+            Log.i(TAG, "Transition might be ready out-of-order " + activeIdx + " for " + active
+                    + ". This is ok if it's on a different track.");
+        }
+        if (!mReadyDuringSync.isEmpty()) {
+            mReadyDuringSync.add(active);
+        } else {
+            dispatchReady(active);
+        }
+    }
+
+    /**
+     * Returns true if dispatching succeeded, otherwise false. Dispatching can fail if it is
+     * blocked by a sync or sleep.
+     */
+    boolean dispatchReady(ActiveTransition active) {
+        final TransitionInfo info = active.mInfo;
+
+        if (info.getType() == TRANSIT_SLEEP || active.isSync()) {
+            // Adding to *front*! If we are here, it means that it was pulled off the front
+            // so we are just putting it back; or, it is the first one so it doesn't matter.
+            mReadyDuringSync.add(0, active);
+            boolean hadPreceding = false;
+            // Now flush all the tracks.
+            for (int i = 0; i < mTracks.size(); ++i) {
+                final Track tr = mTracks.get(i);
+                if (tr.isIdle()) continue;
+                hadPreceding = true;
+                // Sleep starts a process of forcing all prior transitions to finish immediately
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                        "Start finish-for-sync track %d", i);
+                finishForSync(i, null /* forceFinish */);
+            }
+            if (hadPreceding) {
+                return false;
+            }
+            // Actually able to process the sleep now, so re-remove it from the queue and continue
+            // the normal flow.
+            mReadyDuringSync.remove(active);
+        }
+
+        final Track track = getOrCreateTrack(info.getTrack());
+        track.mReadyTransitions.add(active);
 
         for (int i = 0; i < mObservers.size(); ++i) {
-            mObservers.get(i).onTransitionReady(transitionToken, info, t, finishT);
+            mObservers.get(i).onTransitionReady(
+                    active.mToken, info, active.mStartT, active.mFinishT);
         }
 
-        if (info.getType() == TRANSIT_SLEEP) {
-            if (activeIdx > 0 || !mActiveTransitions.isEmpty() || mReadyTransitions.size() > 1) {
-                // Sleep starts a process of forcing all prior transitions to finish immediately
-                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Start finish-for-sleep");
-                finishForSleep(null /* forceFinish */);
-                return;
-            }
-        }
-
-        if (info.getRootCount() == 0 && !alwaysReportToKeyguard(info)) {
+        if (info.getRootCount() == 0 && !TransitionUtil.alwaysReportToKeyguard(info)) {
             // No root-leashes implies that the transition is empty/no-op, so just do
             // housekeeping and return.
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "No transition roots in %s so"
                     + " abort", active);
             onAbort(active);
-            return;
+            return true;
         }
 
         final int changeSize = info.getChanges().size();
@@ -610,54 +716,66 @@ public class Transitions implements RemoteCallable<Transitions> {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
                     "Non-visible anim so abort: %s", active);
             onAbort(active);
-            return;
+            return true;
         }
 
         setupStartState(active.mInfo, active.mStartT, active.mFinishT);
 
-        if (mReadyTransitions.size() > 1) {
+        if (track.mReadyTransitions.size() > 1) {
             // There are already transitions waiting in the queue, so just return.
-            return;
+            return true;
         }
-        processReadyQueue();
+        processReadyQueue(track);
+        return true;
     }
 
-    /**
-     * Some transitions we always need to report to keyguard even if they are empty.
-     * TODO (b/274954192): Remove this once keyguard dispatching moves to Shell.
-     */
-    private static boolean alwaysReportToKeyguard(TransitionInfo info) {
-        // occlusion status of activities can change while screen is off so there will be no
-        // visibility change but we still need keyguardservice to be notified.
-        if (info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE) return true;
-
-        // It's possible for some activities to stop with bad timing (esp. since we can't yet
-        // queue activity transitions initiated by apps) that results in an empty transition for
-        // keyguard going-away. In general, we should should always report Keyguard-going-away.
-        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) return true;
-
-        return false;
+    private boolean areTracksIdle() {
+        for (int i = 0; i < mTracks.size(); ++i) {
+            if (!mTracks.get(i).isIdle()) return false;
+        }
+        return true;
     }
 
-    void processReadyQueue() {
-        if (mReadyTransitions.isEmpty()) {
-            // Check if idle.
-            if (mActiveTransitions.isEmpty() && mPendingTransitions.isEmpty()) {
-                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "All active transition "
-                        + "animations finished");
-                // Run all runnables from the run-when-idle queue.
-                for (int i = 0; i < mRunWhenIdleQueue.size(); i++) {
-                    mRunWhenIdleQueue.get(i).run();
+    private boolean isAnimating() {
+        return !mReadyDuringSync.isEmpty() || !areTracksIdle();
+    }
+
+    private boolean isIdle() {
+        return mPendingTransitions.isEmpty() && !isAnimating();
+    }
+
+    void processReadyQueue(Track track) {
+        if (track.mReadyTransitions.isEmpty()) {
+            if (track.mActiveTransition == null) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Track %d became idle",
+                        mTracks.indexOf(track));
+                if (areTracksIdle()) {
+                    if (!mReadyDuringSync.isEmpty()) {
+                        // Dispatch everything unless we hit another sync
+                        while (!mReadyDuringSync.isEmpty()) {
+                            ActiveTransition next = mReadyDuringSync.remove(0);
+                            boolean success = dispatchReady(next);
+                            // Hit a sync or sleep, so stop dispatching.
+                            if (!success) break;
+                        }
+                    } else if (mPendingTransitions.isEmpty()) {
+                        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "All active transition "
+                                + "animations finished");
+                        // Run all runnables from the run-when-idle queue.
+                        for (int i = 0; i < mRunWhenIdleQueue.size(); i++) {
+                            mRunWhenIdleQueue.get(i).run();
+                        }
+                        mRunWhenIdleQueue.clear();
+                    }
                 }
-                mRunWhenIdleQueue.clear();
             }
             return;
         }
-        final ActiveTransition ready = mReadyTransitions.get(0);
-        if (mActiveTransitions.isEmpty()) {
-            // The normal case, just play it (currently we only support 1 active transition).
-            mReadyTransitions.remove(0);
-            mActiveTransitions.add(ready);
+        final ActiveTransition ready = track.mReadyTransitions.get(0);
+        if (track.mActiveTransition == null) {
+            // The normal case, just play it.
+            track.mReadyTransitions.remove(0);
+            track.mActiveTransition = ready;
             if (ready.mAborted) {
                 // finish now since there's nothing to animate. Calls back into processReadyQueue
                 onFinish(ready, null, null);
@@ -665,11 +783,11 @@ public class Transitions implements RemoteCallable<Transitions> {
             }
             playTransition(ready);
             // Attempt to merge any more queued-up transitions.
-            processReadyQueue();
+            processReadyQueue(track);
             return;
         }
         // An existing animation is playing, so see if we can merge.
-        final ActiveTransition playing = mActiveTransitions.get(0);
+        final ActiveTransition playing = track.mActiveTransition;
         if (ready.mAborted) {
             // record as merged since it is no-op. Calls back into processReadyQueue
             onMerged(playing, ready);
@@ -678,23 +796,29 @@ public class Transitions implements RemoteCallable<Transitions> {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition %s ready while"
                 + " %s is still animating. Notify the animating transition"
                 + " in case they can be merged", ready, playing);
+        mTracer.logMergeRequested(ready.mInfo.getDebugId(), playing.mInfo.getDebugId());
         playing.mHandler.mergeAnimation(ready.mToken, ready.mInfo, ready.mStartT,
                 playing.mToken, (wct, cb) -> onMerged(playing, ready));
     }
 
     private void onMerged(@NonNull ActiveTransition playing, @NonNull ActiveTransition merged) {
+        if (playing.getTrack() != merged.getTrack()) {
+            throw new IllegalStateException("Can't merge across tracks: " + merged + " into "
+                    + playing);
+        }
+        final Track track = mTracks.get(playing.getTrack());
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Transition was merged: %s into %s",
                 merged, playing);
         int readyIdx = 0;
-        if (mReadyTransitions.isEmpty() || mReadyTransitions.get(0) != merged) {
+        if (track.mReadyTransitions.isEmpty() || track.mReadyTransitions.get(0) != merged) {
             Log.e(TAG, "Merged transition out-of-order? " + merged);
-            readyIdx = mReadyTransitions.indexOf(merged);
+            readyIdx = track.mReadyTransitions.indexOf(merged);
             if (readyIdx < 0) {
                 Log.e(TAG, "Merged a transition that is no-longer queued? " + merged);
                 return;
             }
         }
-        mReadyTransitions.remove(readyIdx);
+        track.mReadyTransitions.remove(readyIdx);
         if (playing.mMerged == null) {
             playing.mMerged = new ArrayList<>();
         }
@@ -706,8 +830,9 @@ public class Transitions implements RemoteCallable<Transitions> {
         for (int i = 0; i < mObservers.size(); ++i) {
             mObservers.get(i).onTransitionMerged(merged.mToken, playing.mToken);
         }
+        mTracer.logMerged(merged.mInfo.getDebugId(), playing.mInfo.getDebugId());
         // See if we should merge another transition.
-        processReadyQueue();
+        processReadyQueue(track);
     }
 
     private void playTransition(@NonNull ActiveTransition active) {
@@ -732,6 +857,8 @@ public class Transitions implements RemoteCallable<Transitions> {
         // Otherwise give every other handler a chance
         active.mHandler = dispatchTransition(active.mToken, active.mInfo, active.mStartT,
                 active.mFinishT, (wct, cb) -> onFinish(active, wct, cb), active.mHandler);
+
+        mTracer.logDispatched(active.mInfo.getDebugId(), active.mHandler);
     }
 
     /**
@@ -776,11 +903,14 @@ public class Transitions implements RemoteCallable<Transitions> {
 
     /** Aborts a transition. This will still queue it up to maintain order. */
     private void onAbort(ActiveTransition transition) {
+        final Track track = mTracks.get(transition.getTrack());
         // apply immediately since they may be "parallel" operations: We currently we use abort for
         // thing which are independent to other transitions (like starting-window transfer).
         transition.mStartT.apply();
         transition.mFinishT.apply();
         transition.mAborted = true;
+
+        mTracer.logAborted(transition.mInfo.getDebugId());
 
         if (transition.mHandler != null) {
             // Notifies to clean-up the aborted transition.
@@ -791,11 +921,11 @@ public class Transitions implements RemoteCallable<Transitions> {
         releaseSurfaces(transition.mInfo);
 
         // This still went into the queue (to maintain the correct finish ordering).
-        if (mReadyTransitions.size() > 1) {
+        if (track.mReadyTransitions.size() > 1) {
             // There are already transitions waiting in the queue, so just return.
             return;
         }
-        processReadyQueue();
+        processReadyQueue(track);
     }
 
     /**
@@ -810,17 +940,14 @@ public class Transitions implements RemoteCallable<Transitions> {
     private void onFinish(ActiveTransition active,
             @Nullable WindowContainerTransaction wct,
             @Nullable WindowContainerTransactionCallback wctCB) {
-        int activeIdx = mActiveTransitions.indexOf(active);
-        if (activeIdx < 0) {
+        final Track track = mTracks.get(active.getTrack());
+        if (track.mActiveTransition != active) {
             Log.e(TAG, "Trying to finish a non-running transition. Either remote crashed or "
                     + " a handler didn't properly deal with a merge. " + active,
                     new RuntimeException());
             return;
-        } else if (activeIdx != 0) {
-            // Relevant right now since we only allow 1 active transition at a time.
-            Log.e(TAG, "Finishing a transition out of order. " + active);
         }
-        mActiveTransitions.remove(activeIdx);
+        track.mActiveTransition = null;
 
         for (int i = 0; i < mObservers.size(); ++i) {
             mObservers.get(i).onTransitionFinished(active.mToken, active.mAborted);
@@ -872,18 +999,20 @@ public class Transitions implements RemoteCallable<Transitions> {
         }
 
         // Now that this is done, check the ready queue for more work.
-        processReadyQueue();
+        processReadyQueue(track);
     }
 
     private boolean isTransitionKnown(IBinder token) {
         for (int i = 0; i < mPendingTransitions.size(); ++i) {
             if (mPendingTransitions.get(i).mToken == token) return true;
         }
-        for (int i = 0; i < mReadyTransitions.size(); ++i) {
-            if (mReadyTransitions.get(i).mToken == token) return true;
-        }
-        for (int i = 0; i < mActiveTransitions.size(); ++i) {
-            final ActiveTransition active = mActiveTransitions.get(i);
+        for (int t = 0; t < mTracks.size(); ++t) {
+            final Track tr = mTracks.get(t);
+            for (int i = 0; i < tr.mReadyTransitions.size(); ++i) {
+                if (tr.mReadyTransitions.get(i).mToken == token) return true;
+            }
+            final ActiveTransition active = tr.mActiveTransition;
+            if (active == null) continue;
             if (active.mToken == token) return true;
             if (active.mMerged == null) continue;
             for (int m = 0; m < active.mMerged.size(); ++m) {
@@ -958,7 +1087,7 @@ public class Transitions implements RemoteCallable<Transitions> {
      *
      * This works by "merging" the sleep transition into the currently-playing transition (even if
      * its out-of-order) -- turning SLEEP into a signal. If the playing transition doesn't finish
-     * within `SLEEP_ALLOWANCE_MS` from this merge attempt, this will then finish it directly (and
+     * within `SYNC_ALLOWANCE_MS` from this merge attempt, this will then finish it directly (and
      * send an abort/consumed message).
      *
      * This is then repeated until there are no more pending sleep transitions.
@@ -966,48 +1095,53 @@ public class Transitions implements RemoteCallable<Transitions> {
      * @param forceFinish When non-null, this is the transition that we last sent the SLEEP merge
      *                    signal to -- so it will be force-finished if it's still running.
      */
-    private void finishForSleep(@Nullable ActiveTransition forceFinish) {
-        if ((mActiveTransitions.isEmpty() && mReadyTransitions.isEmpty())
-                || mSleepHandler.mSleepTransitions.isEmpty()) {
-            // Done finishing things.
-            // Prevent any weird leaks... shouldn't happen though.
-            mSleepHandler.mSleepTransitions.clear();
-            return;
-        }
-        if (forceFinish != null && mActiveTransitions.contains(forceFinish)) {
-            Log.e(TAG, "Forcing transition to finish due to sleep timeout: " + forceFinish);
-            forceFinish.mAborted = true;
-            // Last notify of it being consumed. Note: mHandler should never be null,
-            // but check just to be safe.
-            if (forceFinish.mHandler != null) {
-                forceFinish.mHandler.onTransitionConsumed(
-                        forceFinish.mToken, true /* aborted */, null /* finishTransaction */);
+    private void finishForSync(int trackIdx, @Nullable ActiveTransition forceFinish) {
+        final Track track = mTracks.get(trackIdx);
+        if (forceFinish != null) {
+            final Track trk = mTracks.get(forceFinish.getTrack());
+            if (trk != track) {
+                Log.e(TAG, "finishForSleep: mismatched Tracks between forceFinish and logic "
+                        + forceFinish.getTrack() + " vs " + trackIdx);
             }
-            onFinish(forceFinish, null, null);
+            if (trk.mActiveTransition == forceFinish) {
+                Log.e(TAG, "Forcing transition to finish due to sync timeout: " + forceFinish);
+                forceFinish.mAborted = true;
+                // Last notify of it being consumed. Note: mHandler should never be null,
+                // but check just to be safe.
+                if (forceFinish.mHandler != null) {
+                    forceFinish.mHandler.onTransitionConsumed(
+                            forceFinish.mToken, true /* aborted */, null /* finishTransaction */);
+                }
+                onFinish(forceFinish, null, null);
+            }
+        }
+        if (track.isIdle() || mReadyDuringSync.isEmpty()) {
+            // Done finishing things.
+            return;
         }
         final SurfaceControl.Transaction dummyT = new SurfaceControl.Transaction();
         final TransitionInfo dummyInfo = new TransitionInfo(TRANSIT_SLEEP, 0 /* flags */);
-        while (!mActiveTransitions.isEmpty() && !mSleepHandler.mSleepTransitions.isEmpty()) {
-            final ActiveTransition playing = mActiveTransitions.get(0);
-            int sleepIdx = findByToken(mReadyTransitions, mSleepHandler.mSleepTransitions.get(0));
-            if (sleepIdx >= 0) {
-                // Try to signal that we are sleeping by attempting to merge the sleep transition
-                // into the playing one.
-                final ActiveTransition nextSleep = mReadyTransitions.get(sleepIdx);
-                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt to merge SLEEP %s"
-                        + " into %s", nextSleep, playing);
-                playing.mHandler.mergeAnimation(nextSleep.mToken, dummyInfo, dummyT,
-                        playing.mToken, (wct, cb) -> {});
-            } else {
-                Log.e(TAG, "Couldn't find sleep transition in ready list: "
-                        + mSleepHandler.mSleepTransitions.get(0));
+        while (track.mActiveTransition != null && !mReadyDuringSync.isEmpty()) {
+            final ActiveTransition playing = track.mActiveTransition;
+            final ActiveTransition nextSync = mReadyDuringSync.get(0);
+            if (!nextSync.isSync()) {
+                Log.e(TAG, "Somehow blocked on a non-sync transition? " + nextSync);
             }
+            // Attempt to merge a SLEEP info to signal that the playing transition needs to
+            // fast-forward.
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " Attempt to merge sync %s"
+                    + " into %s via a SLEEP proxy", nextSync, playing);
+            playing.mHandler.mergeAnimation(nextSync.mToken, dummyInfo, dummyT,
+                    playing.mToken, (wct, cb) -> {});
             // it's possible to complete immediately. If that happens, just repeat the signal
             // loop until we either finish everything or start playing an animation that isn't
             // finishing immediately.
-            if (!mActiveTransitions.isEmpty() && mActiveTransitions.get(0) == playing) {
-                // Give it a (very) short amount of time to process it before forcing.
-                mMainExecutor.executeDelayed(() -> finishForSleep(playing), SLEEP_ALLOWANCE_MS);
+            if (track.mActiveTransition == playing) {
+                if (!mDisableForceSync) {
+                    // Give it a short amount of time to process it before forcing.
+                    mMainExecutor.executeDelayed(() -> finishForSync(trackIdx, playing),
+                            SYNC_ALLOWANCE_MS);
+                }
                 break;
             }
         }
@@ -1251,5 +1385,27 @@ public class Transitions implements RemoteCallable<Transitions> {
 
             mMainExecutor.execute(() -> dispatchAnimScaleSetting(mTransitionAnimationScaleSetting));
         }
+    }
+
+
+    @Override
+    public boolean onShellCommand(String[] args, PrintWriter pw) {
+        switch (args[0]) {
+            case "tracing": {
+                mTracer.onShellCommand(Arrays.copyOfRange(args, 1, args.length), pw);
+                return true;
+            }
+            default: {
+                pw.println("Invalid command: " + args[0]);
+                printShellCommandHelp(pw, "");
+                return false;
+            }
+        }
+    }
+
+    @Override
+    public void printShellCommandHelp(PrintWriter pw, String prefix) {
+        pw.println(prefix + "tracing");
+        mTracer.printShellCommandHelp(pw, prefix + "  ");
     }
 }

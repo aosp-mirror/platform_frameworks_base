@@ -17,6 +17,7 @@
 package com.android.wm.shell.transition;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
@@ -30,10 +31,12 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FIRST_CUSTOM;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_SLEEP;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.window.TransitionInfo.FLAG_DISPLAY_HAS_ALERT_WINDOWS;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
+import static android.window.TransitionInfo.FLAG_SYNC;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -48,6 +51,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.after;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
@@ -56,13 +60,19 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.app.IApplicationThread;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.util.ArraySet;
+import android.util.Pair;
+import android.view.IRecentsAnimationRunner;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
@@ -83,6 +93,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.server.testutils.StubTransaction;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.TransitionInfoBuilder;
@@ -90,6 +101,7 @@ import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.recents.RecentsTransitionHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.sysui.ShellSharedConstants;
@@ -97,6 +109,7 @@ import com.android.wm.shell.sysui.ShellSharedConstants;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InOrder;
 
 import java.util.ArrayList;
@@ -159,8 +172,8 @@ public class ShellTransitionTests extends ShellTestCase {
         verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
         assertEquals(1, mDefaultHandler.activeCount());
         mDefaultHandler.finishAll();
         mMainExecutor.flushAll();
@@ -209,8 +222,8 @@ public class ShellTransitionTests extends ShellTestCase {
         transitions.requestStartTransition(transitToken,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         verify(mOrganizer, times(1)).startTransition(eq(transitToken), isNull());
-        transitions.onTransitionReady(transitToken, open, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken, open, new StubTransaction(),
+                new StubTransaction());
         assertEquals(1, mDefaultHandler.activeCount());
         assertEquals(0, testHandler.activeCount());
         mDefaultHandler.finishAll();
@@ -225,8 +238,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_OPEN, mwTaskInfo, null /* remote */));
         verify(mOrganizer, times(1)).startTransition(
                 eq(transitToken), eq(handlerWCT));
-        transitions.onTransitionReady(transitToken, open, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken, open, new StubTransaction(),
+                new StubTransaction());
         assertEquals(1, mDefaultHandler.activeCount());
         assertEquals(0, testHandler.activeCount());
         mDefaultHandler.finishAll();
@@ -243,8 +256,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 eq(transitToken), eq(handlerWCT));
         TransitionInfo change = new TransitionInfoBuilder(TRANSIT_CHANGE)
                 .addChange(TRANSIT_CHANGE).build();
-        transitions.onTransitionReady(transitToken, change, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken, change, new StubTransaction(),
+                new StubTransaction());
         assertEquals(0, mDefaultHandler.activeCount());
         assertEquals(1, testHandler.activeCount());
         assertEquals(0, topHandler.activeCount());
@@ -281,8 +294,8 @@ public class ShellTransitionTests extends ShellTestCase {
         verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
         assertEquals(0, mDefaultHandler.activeCount());
         assertTrue(remoteCalled[0]);
         mDefaultHandler.finishAll();
@@ -431,8 +444,8 @@ public class ShellTransitionTests extends ShellTestCase {
         verify(mOrganizer, times(1)).startTransition(eq(transitToken), any());
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
         assertEquals(0, mDefaultHandler.activeCount());
         assertTrue(remoteCalled[0]);
         mDefaultHandler.finishAll();
@@ -481,10 +494,10 @@ public class ShellTransitionTests extends ShellTestCase {
         oneShot.setTransition(transitToken);
         IBinder anotherToken = new Binder();
         assertFalse(oneShot.startAnimation(anotherToken, new TransitionInfo(transitType, 0),
-                mock(SurfaceControl.Transaction.class), mock(SurfaceControl.Transaction.class),
+                new StubTransaction(), new StubTransaction(),
                 testFinish));
         assertTrue(oneShot.startAnimation(transitToken, new TransitionInfo(transitType, 0),
-                mock(SurfaceControl.Transaction.class), mock(SurfaceControl.Transaction.class),
+                new StubTransaction(), new StubTransaction(),
                 testFinish));
     }
 
@@ -498,8 +511,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken1, info1, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken1, info1, new StubTransaction(),
+                new StubTransaction());
         assertEquals(1, mDefaultHandler.activeCount());
 
         IBinder transitToken2 = new Binder();
@@ -507,8 +520,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
         TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken2, info2, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken2, info2, new StubTransaction(),
+                new StubTransaction());
         // default handler doesn't merge by default, so it shouldn't increment active count.
         assertEquals(1, mDefaultHandler.activeCount());
         assertEquals(0, mDefaultHandler.mergeCount());
@@ -539,8 +552,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken1, info1, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken1, info1, new StubTransaction(),
+                new StubTransaction());
         assertEquals(1, mDefaultHandler.activeCount());
 
         IBinder transitToken2 = new Binder();
@@ -548,8 +561,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
         TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken2, info2, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken2, info2, new StubTransaction(),
+                new StubTransaction());
         // it should still only have 1 active, but then show 1 merged
         assertEquals(1, mDefaultHandler.activeCount());
         assertEquals(1, mDefaultHandler.mergeCount());
@@ -587,7 +600,8 @@ public class ShellTransitionTests extends ShellTestCase {
         requestStartTransition(transitions, transitTokenNotReady);
 
         mDefaultHandler.setSimulateMerge(true);
-        mDefaultHandler.mFinishes.get(0).onTransitionFinished(null /* wct */, null /* wctCB */);
+        mDefaultHandler.mFinishes.get(0).second.onTransitionFinished(
+                null /* wct */, null /* wctCB */);
 
         // Make sure that the non-ready transition is not merged.
         assertEquals(0, mDefaultHandler.mergeCount());
@@ -607,8 +621,8 @@ public class ShellTransitionTests extends ShellTestCase {
                     new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
             TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                     .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-            transitions.onTransitionReady(token, info, mock(SurfaceControl.Transaction.class),
-                    mock(SurfaceControl.Transaction.class));
+            transitions.onTransitionReady(token, info, new StubTransaction(),
+                    new StubTransaction());
             return token;
         };
 
@@ -674,8 +688,8 @@ public class ShellTransitionTests extends ShellTestCase {
         // queued), so continue the transition lifecycle for that.
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
         // At this point, if things are not working, we'd get an NPE due to attempting to merge
         // into the shellInit transition which hasn't started yet.
         assertEquals(1, mDefaultHandler.activeCount());
@@ -787,8 +801,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken1, info1, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken1, info1, new StubTransaction(),
+                new StubTransaction());
         assertEquals(1, mDefaultHandler.activeCount());
 
         transitions.runOnIdle(runnable2);
@@ -802,8 +816,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
         TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        transitions.onTransitionReady(transitToken2, info2, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken2, info2, new StubTransaction(),
+                new StubTransaction());
         assertEquals(1, mDefaultHandler.activeCount());
 
         mDefaultHandler.finishAll();
@@ -854,8 +868,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         TransitionInfo info = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
-        SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction startT = new StubTransaction();
+        SurfaceControl.Transaction finishT = new StubTransaction();
         transitions.onTransitionReady(transitToken, info, startT, finishT);
 
         InOrder observerOrder = inOrder(observer);
@@ -879,8 +893,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        SurfaceControl.Transaction startT1 = mock(SurfaceControl.Transaction.class);
-        SurfaceControl.Transaction finishT1 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction startT1 = new StubTransaction();
+        SurfaceControl.Transaction finishT1 = new StubTransaction();
         transitions.onTransitionReady(transitToken1, info1, startT1, finishT1);
         verify(observer).onTransitionReady(transitToken1, info1, startT1, finishT1);
 
@@ -889,8 +903,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
         TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        SurfaceControl.Transaction startT2 = mock(SurfaceControl.Transaction.class);
-        SurfaceControl.Transaction finishT2 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction startT2 = new StubTransaction();
+        SurfaceControl.Transaction finishT2 = new StubTransaction();
         transitions.onTransitionReady(transitToken2, info2, startT2, finishT2);
         verify(observer, times(1)).onTransitionReady(transitToken2, info2, startT2, finishT2);
         verify(observer, times(0)).onTransitionStarting(transitToken2);
@@ -923,8 +937,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
         TransitionInfo info1 = new TransitionInfoBuilder(TRANSIT_OPEN)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        SurfaceControl.Transaction startT1 = mock(SurfaceControl.Transaction.class);
-        SurfaceControl.Transaction finishT1 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction startT1 = new StubTransaction();
+        SurfaceControl.Transaction finishT1 = new StubTransaction();
         transitions.onTransitionReady(transitToken1, info1, startT1, finishT1);
 
         IBinder transitToken2 = new Binder();
@@ -932,8 +946,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_CLOSE, null /* trigger */, null /* remote */));
         TransitionInfo info2 = new TransitionInfoBuilder(TRANSIT_CLOSE)
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
-        SurfaceControl.Transaction startT2 = mock(SurfaceControl.Transaction.class);
-        SurfaceControl.Transaction finishT2 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction startT2 = new StubTransaction();
+        SurfaceControl.Transaction finishT2 = new StubTransaction();
         transitions.onTransitionReady(transitToken2, info2, startT2, finishT2);
 
         InOrder observerOrder = inOrder(observer);
@@ -995,8 +1009,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 new TransitionRequestInfo(TRANSIT_CHANGE, mwTaskInfo, null /* remote */));
         TransitionInfo change = new TransitionInfoBuilder(TRANSIT_CHANGE)
                 .addChange(TRANSIT_CHANGE).build();
-        SurfaceControl.Transaction startT1 = mock(SurfaceControl.Transaction.class);
-        SurfaceControl.Transaction finishT1 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction startT1 = new StubTransaction();
+        SurfaceControl.Transaction finishT1 = new StubTransaction();
         transitions.onTransitionReady(transitToken1, change, startT1, finishT1);
 
         // Request the second transition that should be handled by the default handler
@@ -1005,8 +1019,8 @@ public class ShellTransitionTests extends ShellTestCase {
                 .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
         transitions.requestStartTransition(transitToken2,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
-        SurfaceControl.Transaction startT2 = mock(SurfaceControl.Transaction.class);
-        SurfaceControl.Transaction finishT2 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction startT2 = new StubTransaction();
+        SurfaceControl.Transaction finishT2 = new StubTransaction();
         transitions.onTransitionReady(transitToken2, open, startT2, finishT2);
         verify(observer).onTransitionReady(transitToken2, open, startT2, finishT2);
         verify(observer, times(0)).onTransitionStarting(transitToken2);
@@ -1015,8 +1029,8 @@ public class ShellTransitionTests extends ShellTestCase {
         IBinder transitToken3 = new Binder();
         transitions.requestStartTransition(transitToken3,
                 new TransitionRequestInfo(TRANSIT_OPEN, null /* trigger */, null /* remote */));
-        SurfaceControl.Transaction startT3 = mock(SurfaceControl.Transaction.class);
-        SurfaceControl.Transaction finishT3 = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction startT3 = new StubTransaction();
+        SurfaceControl.Transaction finishT3 = new StubTransaction();
         transitions.onTransitionReady(transitToken3, open, startT3, finishT3);
         verify(observer, times(0)).onTransitionStarting(transitToken2);
         verify(observer).onTransitionReady(transitToken3, open, startT3, finishT3);
@@ -1041,6 +1055,104 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     @Test
+    public void testTransitSleep_squashesRecents() {
+        ShellInit shellInit = new ShellInit(mMainExecutor);
+        final Transitions transitions =
+                new Transitions(mContext, shellInit, mock(ShellController.class), mOrganizer,
+                        mTransactionPool, createTestDisplayController(), mMainExecutor,
+                        mMainHandler, mAnimExecutor);
+        final RecentsTransitionHandler recentsHandler =
+                new RecentsTransitionHandler(shellInit, transitions, null);
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+        shellInit.init();
+
+        Transitions.TransitionObserver observer = mock(Transitions.TransitionObserver.class);
+        transitions.registerObserver(observer);
+
+        RunningTaskInfo task1 = createTaskInfo(1, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS);
+        RunningTaskInfo task2 = createTaskInfo(2);
+
+        // Start an open transition for the purpose of occupying the ready queue
+        final IBinder transitOpen1 = new Binder("transitOpen1");
+        final TransitionInfo infoOpen1 =
+                new TransitionInfoBuilder(TRANSIT_OPEN)
+                        .addChange(TRANSIT_OPEN, task1)
+                        .build();
+        mMainExecutor.execute(() -> {
+            transitions.requestStartTransition(transitOpen1, new TransitionRequestInfo(
+                        TRANSIT_OPEN, task1 /* trigger */, null /* remote */));
+            onTransitionReady(transitions, transitOpen1, infoOpen1);
+        });
+
+        // First transition on the queue should start immediately.
+        mMainExecutor.flushAll();
+        verify(observer).onTransitionReady(eq(transitOpen1), any(), any(), any());
+        verify(observer).onTransitionStarting(eq(transitOpen1));
+
+        // Start recents
+        final IRecentsAnimationRunner recentsListener =
+                mock(IRecentsAnimationRunner.class, Answers.RETURNS_DEEP_STUBS);
+        final IBinder transitRecents = recentsHandler.startRecentsTransition(
+                mock(PendingIntent.class) /* intent */,
+                mock(Intent.class) /* fillIn */,
+                new Bundle() /* options */,
+                mock(IApplicationThread.class) /* appThread */,
+                recentsListener);
+        final TransitionInfo infoRecents =
+                new TransitionInfoBuilder(TRANSIT_TO_FRONT)
+                        .addChange(TRANSIT_TO_FRONT, task1)
+                        .addChange(TRANSIT_CLOSE, task2)
+                        .build();
+        onTransitionReady(transitions, transitRecents, infoRecents);
+
+        // Start another open transition during recents
+        final IBinder transitOpen2 = new Binder("transitOpen2");
+        final TransitionInfo infoOpen2 =
+                new TransitionInfoBuilder(TRANSIT_OPEN)
+                        .addChange(TRANSIT_OPEN, task2)
+                        .addChange(TRANSIT_TO_BACK, task1)
+                        .build();
+        mMainExecutor.execute(() -> {
+            transitions.requestStartTransition(transitOpen2,  new TransitionRequestInfo(
+                        TRANSIT_OPEN, task2 /* trigger */, null /* remote */));
+            onTransitionReady(transitions, transitOpen2, infoOpen2);
+        });
+
+        // Finish testOpen1 to start processing the other transitions
+        mMainExecutor.execute(() -> {
+            mDefaultHandler.finishOne();
+        });
+        mMainExecutor.flushAll();
+
+        // Recents transition SHOULD start, and merge the open transition, which should NOT start.
+        verify(observer).onTransitionFinished(eq(transitOpen1), eq(false) /* aborted */);
+        verify(observer).onTransitionReady(eq(transitRecents), any(), any(), any());
+        verify(observer).onTransitionStarting(eq(transitRecents));
+        verify(observer).onTransitionReady(eq(transitOpen2), any(), any(), any());
+        verify(observer).onTransitionMerged(eq(transitOpen2), eq(transitRecents));
+        // verify(observer).onTransitionFinished(eq(transitOpen2), eq(true) /* aborted */);
+
+        // Go to sleep
+        final IBinder transitSleep = new Binder("transitSleep");
+        final TransitionInfo infoSleep = new TransitionInfoBuilder(TRANSIT_SLEEP).build();
+        mMainExecutor.execute(() -> {
+            transitions.requestStartTransition(transitSleep, new TransitionRequestInfo(
+                        TRANSIT_SLEEP, null /* trigger */, null /* remote */));
+            onTransitionReady(transitions, transitSleep, infoSleep);
+        });
+        mMainExecutor.flushAll();
+
+        // Recents transition should finish itself when it sees the sleep transition coming.
+        verify(observer).onTransitionFinished(eq(transitRecents), eq(false));
+        verify(observer).onTransitionFinished(eq(transitSleep), eq(false));
+    }
+
+    private void onTransitionReady(Transitions transitions, IBinder token, TransitionInfo info) {
+        transitions.onTransitionReady(token, info, new StubTransaction(),
+                new StubTransaction());
+    }
+
+    @Test
     public void testEmptyTransitionStillReportsKeyguardGoingAway() {
         Transitions transitions = createTestTransitions();
         transitions.replaceDefaultHandlerForTest(mDefaultHandler);
@@ -1052,11 +1164,228 @@ public class ShellTransitionTests extends ShellTestCase {
         // Make a no-op transition
         TransitionInfo info = new TransitionInfoBuilder(
                 TRANSIT_OPEN, TRANSIT_FLAG_KEYGUARD_GOING_AWAY, true /* noOp */).build();
-        transitions.onTransitionReady(transitToken, info, mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
+        transitions.onTransitionReady(transitToken, info, new StubTransaction(),
+                new StubTransaction());
 
         // If keyguard-going-away flag set, then it shouldn't be aborted.
         assertEquals(1, mDefaultHandler.activeCount());
+    }
+
+    @Test
+    public void testMultipleTracks() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+        TestTransitionHandler alwaysMergeHandler = new TestTransitionHandler();
+        alwaysMergeHandler.setSimulateMerge(true);
+
+        final boolean[] becameIdle = new boolean[]{false};
+
+        final WindowContainerTransaction emptyWCT = new WindowContainerTransaction();
+        final SurfaceControl.Transaction mockSCT = mock(SurfaceControl.Transaction.class);
+
+        // Make this always merge so we can ensure that it does NOT get a merge-attempt for a
+        // different track.
+        IBinder transitA = transitions.startTransition(TRANSIT_OPEN, emptyWCT, alwaysMergeHandler);
+        // start tracking idle
+        transitions.runOnIdle(() -> becameIdle[0] = true);
+
+        IBinder transitB = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+        IBinder transitC = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, mDefaultHandler);
+
+        TransitionInfo infoA = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoA.setTrack(0);
+        TransitionInfo infoB = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoB.setTrack(1);
+        TransitionInfo infoC = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoC.setTrack(1);
+
+        transitions.onTransitionReady(transitA, infoA, mockSCT, mockSCT);
+        assertEquals(1, alwaysMergeHandler.activeCount());
+        transitions.onTransitionReady(transitB, infoB, mockSCT, mockSCT);
+        // should now be running in parallel
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, alwaysMergeHandler.activeCount());
+        // make sure we didn't try to merge into a different track.
+        assertEquals(0, alwaysMergeHandler.mergeCount());
+
+        // This should be queued-up since it is on track 1 (same as B)
+        transitions.onTransitionReady(transitC, infoC, mockSCT, mockSCT);
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, alwaysMergeHandler.activeCount());
+
+        // Now finish B and make sure C starts
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        // Now C and A running in parallel
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, alwaysMergeHandler.activeCount());
+        assertEquals(0, alwaysMergeHandler.mergeCount());
+
+        // Finish A
+        alwaysMergeHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        // C still running
+        assertEquals(0, alwaysMergeHandler.activeCount());
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertFalse(becameIdle[0]);
+
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertTrue(becameIdle[0]);
+    }
+
+    @Test
+    public void testSyncMultipleTracks() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+        TestTransitionHandler secondHandler = new TestTransitionHandler();
+
+        // Disable the forced early-sync-finish so that we can test the ordering mechanics.
+        transitions.setDisableForceSyncForTest(true);
+        mDefaultHandler.mFinishOnSync = false;
+        secondHandler.mFinishOnSync = false;
+
+        final WindowContainerTransaction emptyWCT = new WindowContainerTransaction();
+        final SurfaceControl.Transaction mockSCT = mock(SurfaceControl.Transaction.class);
+
+        // Make this always merge so we can ensure that it does NOT get a merge-attempt for a
+        // different track.
+        IBinder transitA = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+        IBinder transitB = transitions.startTransition(TRANSIT_OPEN, emptyWCT, secondHandler);
+        IBinder transitC = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, secondHandler);
+        IBinder transitSync = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, mDefaultHandler);
+        IBinder transitD = transitions.startTransition(TRANSIT_OPEN, emptyWCT, secondHandler);
+        IBinder transitE = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+
+        TransitionInfo infoA = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoA.setTrack(0);
+        TransitionInfo infoB = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoB.setTrack(1);
+        TransitionInfo infoC = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoC.setTrack(1);
+        TransitionInfo infoSync = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoSync.setTrack(0);
+        infoSync.setFlags(FLAG_SYNC);
+        TransitionInfo infoD = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoD.setTrack(1);
+        TransitionInfo infoE = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoE.setTrack(0);
+
+        // Start A B and C where A is track 0, B and C are track 1 (C should be queued)
+        transitions.onTransitionReady(transitA, infoA, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitB, infoB, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitC, infoC, mockSCT, mockSCT);
+        // should now be running in parallel (with one queued)
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // Make the sync ready and the following (D, E) ready.
+        transitions.onTransitionReady(transitSync, infoSync, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitD, infoD, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitE, infoE, mockSCT, mockSCT);
+
+        // nothing should have happened yet since the sync is queued and blocking everything.
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // Finish A (which is track 0 like the sync).
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        // Even though the sync is on track 0 and track 0 became idle, it should NOT be started yet
+        // because it must wait for everything. Additionally, D/E shouldn't start yet either.
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // Now finish B and C -- this should then allow the sync to start and D to run (in parallel)
+        secondHandler.finishOne();
+        secondHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        // Now the sync and D (on track 1) should be running
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // finish the sync. track 0 still has E
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+        assertEquals(1, mDefaultHandler.activeCount());
+
+        mDefaultHandler.finishOne();
+        secondHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        assertEquals(0, mDefaultHandler.activeCount());
+        assertEquals(0, secondHandler.activeCount());
+    }
+
+    @Test
+    public void testForceSyncTracks() {
+        Transitions transitions = createTestTransitions();
+        transitions.replaceDefaultHandlerForTest(mDefaultHandler);
+        TestTransitionHandler secondHandler = new TestTransitionHandler();
+
+        final WindowContainerTransaction emptyWCT = new WindowContainerTransaction();
+        final SurfaceControl.Transaction mockSCT = mock(SurfaceControl.Transaction.class);
+
+        // Make this always merge so we can ensure that it does NOT get a merge-attempt for a
+        // different track.
+        IBinder transitA = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+        IBinder transitB = transitions.startTransition(TRANSIT_OPEN, emptyWCT, mDefaultHandler);
+        IBinder transitC = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, secondHandler);
+        IBinder transitD = transitions.startTransition(TRANSIT_OPEN, emptyWCT, secondHandler);
+        IBinder transitSync = transitions.startTransition(TRANSIT_CLOSE, emptyWCT, mDefaultHandler);
+
+        TransitionInfo infoA = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoA.setTrack(0);
+        TransitionInfo infoB = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoB.setTrack(0);
+        TransitionInfo infoC = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoC.setTrack(1);
+        TransitionInfo infoD = new TransitionInfoBuilder(TRANSIT_OPEN)
+                .addChange(TRANSIT_OPEN).build();
+        infoD.setTrack(1);
+        TransitionInfo infoSync = new TransitionInfoBuilder(TRANSIT_CLOSE)
+                .addChange(TRANSIT_OPEN).addChange(TRANSIT_CLOSE).build();
+        infoSync.setTrack(0);
+        infoSync.setFlags(FLAG_SYNC);
+
+        transitions.onTransitionReady(transitA, infoA, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitB, infoB, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitC, infoC, mockSCT, mockSCT);
+        transitions.onTransitionReady(transitD, infoD, mockSCT, mockSCT);
+        // should now be running in parallel (with one queued in each)
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(1, secondHandler.activeCount());
+
+        // Make the sync ready.
+        transitions.onTransitionReady(transitSync, infoSync, mockSCT, mockSCT);
+        mMainExecutor.flushAll();
+
+        // Everything should be forced-finish now except the sync
+        assertEquals(1, mDefaultHandler.activeCount());
+        assertEquals(0, secondHandler.activeCount());
+
+        mDefaultHandler.finishOne();
+        mMainExecutor.flushAll();
+
+        assertEquals(0, mDefaultHandler.activeCount());
     }
 
     class ChangeBuilder {
@@ -1097,9 +1426,11 @@ public class ShellTransitionTests extends ShellTestCase {
     }
 
     class TestTransitionHandler implements Transitions.TransitionHandler {
-        ArrayList<Transitions.TransitionFinishCallback> mFinishes = new ArrayList<>();
+        ArrayList<Pair<IBinder, Transitions.TransitionFinishCallback>> mFinishes =
+                new ArrayList<>();
         final ArrayList<IBinder> mMerged = new ArrayList<>();
         boolean mSimulateMerge = false;
+        boolean mFinishOnSync = true;
         final ArraySet<IBinder> mShouldMerge = new ArraySet<>();
 
         @Override
@@ -1107,7 +1438,7 @@ public class ShellTransitionTests extends ShellTestCase {
                 @NonNull SurfaceControl.Transaction startTransaction,
                 @NonNull SurfaceControl.Transaction finishTransaction,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
-            mFinishes.add(finishCallback);
+            mFinishes.add(new Pair<>(transition, finishCallback));
             return true;
         }
 
@@ -1115,6 +1446,13 @@ public class ShellTransitionTests extends ShellTestCase {
         public void mergeAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
                 @NonNull SurfaceControl.Transaction t, @NonNull IBinder mergeTarget,
                 @NonNull Transitions.TransitionFinishCallback finishCallback) {
+            if (mFinishOnSync && info.getType() == TRANSIT_SLEEP) {
+                for (int i = 0; i < mFinishes.size(); ++i) {
+                    if (mFinishes.get(i).first != mergeTarget) continue;
+                    mFinishes.remove(i).second.onTransitionFinished(null, null);
+                    return;
+                }
+            }
             if (!(mSimulateMerge || mShouldMerge.contains(transition))) return;
             mMerged.add(transition);
             finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
@@ -1136,18 +1474,19 @@ public class ShellTransitionTests extends ShellTestCase {
         }
 
         void finishAll() {
-            final ArrayList<Transitions.TransitionFinishCallback> finishes = mFinishes;
+            final ArrayList<Pair<IBinder, Transitions.TransitionFinishCallback>> finishes =
+                    mFinishes;
             mFinishes = new ArrayList<>();
             for (int i = finishes.size() - 1; i >= 0; --i) {
-                finishes.get(i).onTransitionFinished(null /* wct */, null /* wctCB */);
+                finishes.get(i).second.onTransitionFinished(null /* wct */, null /* wctCB */);
             }
             mShouldMerge.clear();
         }
 
         void finishOne() {
-            Transitions.TransitionFinishCallback fin = mFinishes.remove(0);
+            Pair<IBinder, Transitions.TransitionFinishCallback> fin = mFinishes.remove(0);
             mMerged.clear();
-            fin.onTransitionFinished(null /* wct */, null /* wctCB */);
+            fin.second.onTransitionFinished(null /* wct */, null /* wctCB */);
         }
 
         int activeCount() {
@@ -1166,7 +1505,7 @@ public class ShellTransitionTests extends ShellTestCase {
 
     private static void onTransitionReady(Transitions transitions, IBinder token) {
         transitions.onTransitionReady(token, createTransitionInfo(),
-                mock(SurfaceControl.Transaction.class), mock(SurfaceControl.Transaction.class));
+                new StubTransaction(), new StubTransaction());
     }
 
     private static TransitionInfo createTransitionInfo() {
@@ -1183,15 +1522,15 @@ public class ShellTransitionTests extends ShellTestCase {
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode, int activityType) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
+        taskInfo.topActivityType = activityType;
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         taskInfo.configuration.windowConfiguration.setActivityType(activityType);
+        taskInfo.token = mock(WindowContainerToken.class);
         return taskInfo;
     }
 
     private static RunningTaskInfo createTaskInfo(int taskId) {
-        RunningTaskInfo taskInfo = new RunningTaskInfo();
-        taskInfo.taskId = taskId;
-        return taskInfo;
+        return createTaskInfo(taskId, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
     }
 
     private DisplayController createTestDisplayController() {

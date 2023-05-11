@@ -2085,7 +2085,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param uri The URI whose file is to be opened.
      * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
-     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
+     *             or "rwt". Please note the exact implementation of these may differ for each
+     *             Provider implementation - for example, "w" may or may not truncate.
      *
      * @return Returns a new ParcelFileDescriptor which you can use to access
      * the file.
@@ -2147,7 +2148,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param uri The URI whose file is to be opened.
      * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
-     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
+     *             or "rwt". Please note the exact implementation of these may differ for each
+     *             Provider implementation - for example, "w" may or may not truncate.
      * @param signal A signal to cancel the operation in progress, or
      *            {@code null} if none. For example, if you are downloading a
      *            file from the network to service a "rw" mode request, you
@@ -2208,7 +2210,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param uri The URI whose file is to be opened.
      * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
-     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
+     *             or "rwt". Please note the exact implementation of these may differ for each
+     *             Provider implementation - for example, "w" may or may not truncate.
      *
      * @return Returns a new AssetFileDescriptor which you can use to access
      * the file.
@@ -2262,7 +2265,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param uri The URI whose file is to be opened.
      * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
-     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
+     *             or "rwt". Please note the exact implementation of these may differ for each
+     *             Provider implementation - for example, "w" may or may not truncate.
      * @param signal A signal to cancel the operation in progress, or
      *            {@code null} if none. For example, if you are downloading a
      *            file from the network to service a "rw" mode request, you
@@ -2294,7 +2298,8 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      *
      * @param uri The URI to be opened.
      * @param mode The string representation of the file mode. Can be "r", "w", "wt", "wa", "rw"
-     *             or "rwt". See{@link ParcelFileDescriptor#parseMode} for more details.
+     *             or "rwt". Please note the exact implementation of these may differ for each
+     *             Provider implementation - for example, "w" may or may not truncate.
      *
      * @return Returns a new ParcelFileDescriptor that can be used by the
      * client to access the file.

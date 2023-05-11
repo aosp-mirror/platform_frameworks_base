@@ -62,7 +62,7 @@ interface IAccessibilityManager {
             in IAccessibilityInteractionConnection connection);
 
     void registerUiTestAutomationService(IBinder owner, IAccessibilityServiceClient client,
-        in AccessibilityServiceInfo info, int flags);
+        in AccessibilityServiceInfo info, int userId, int flags);
 
     void unregisterUiTestAutomationService(IAccessibilityServiceClient client);
 

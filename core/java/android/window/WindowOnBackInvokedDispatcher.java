@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemProperties;
@@ -193,7 +195,10 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                                 ? ((ImeOnBackInvokedDispatcher.ImeOnBackInvokedCallback)
                                         callback).getIOnBackInvokedCallback()
                                 : new OnBackInvokedCallbackWrapper(callback);
-                callbackInfo = new OnBackInvokedCallbackInfo(iCallback, priority);
+                callbackInfo = new OnBackInvokedCallbackInfo(
+                        iCallback,
+                        priority,
+                        callback instanceof OnBackAnimationCallback);
             }
             mWindowSession.setOnBackInvokedCallbackInfo(mWindow, callbackInfo);
         } catch (RemoteException e) {
@@ -418,36 +423,45 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
                 return false;
             }
 
-            boolean requestsPredictiveBack;
+            boolean requestsPredictiveBack = false;
 
             // Check if the context is from an activity.
             while ((context instanceof ContextWrapper) && !(context instanceof Activity)) {
                 context = ((ContextWrapper) context).getBaseContext();
             }
 
+            boolean shouldCheckActivity = false;
+
             if (context instanceof Activity) {
                 final Activity activity = (Activity) context;
 
-                if (activity.getActivityInfo().hasOnBackInvokedCallbackEnabled()) {
-                    requestsPredictiveBack =
-                            activity.getActivityInfo().isOnBackInvokedCallbackEnabled();
-                } else {
-                    requestsPredictiveBack =
-                            context.getApplicationInfo().isOnBackInvokedCallbackEnabled();
-                }
+                final ActivityInfo activityInfo = activity.getActivityInfo();
+                if (activityInfo != null) {
+                    if (activityInfo.hasOnBackInvokedCallbackEnabled()) {
+                        shouldCheckActivity = true;
+                        requestsPredictiveBack = activityInfo.isOnBackInvokedCallbackEnabled();
 
-                if (DEBUG) {
-                    Log.d(TAG, TextUtils.formatSimple("Activity: %s isPredictiveBackEnabled=%s",
-                            activity.getComponentName(),
-                            requestsPredictiveBack));
+                        if (DEBUG) {
+                            Log.d(TAG, TextUtils.formatSimple(
+                                    "Activity: %s isPredictiveBackEnabled=%s",
+                                    activity.getComponentName(),
+                                    requestsPredictiveBack));
+                        }
+                    }
+                } else {
+                    Log.w(TAG, "The ActivityInfo is null, so we cannot verify if this Activity"
+                            + " has the 'android:enableOnBackInvokedCallback' attribute."
+                            + " The application attribute will be used as a fallback.");
                 }
-            } else {
-                requestsPredictiveBack =
-                        context.getApplicationInfo().isOnBackInvokedCallbackEnabled();
+            }
+
+            if (!shouldCheckActivity) {
+                final ApplicationInfo applicationInfo = context.getApplicationInfo();
+                requestsPredictiveBack = applicationInfo.isOnBackInvokedCallbackEnabled();
 
                 if (DEBUG) {
                     Log.d(TAG, TextUtils.formatSimple("App: %s requestsPredictiveBack=%s",
-                            context.getApplicationInfo().packageName,
+                            applicationInfo.packageName,
                             requestsPredictiveBack));
                 }
             }

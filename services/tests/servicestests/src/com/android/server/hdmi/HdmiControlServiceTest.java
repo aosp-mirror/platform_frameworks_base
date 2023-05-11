@@ -761,6 +761,13 @@ public class HdmiControlServiceTest {
 
         assertThat(mHdmiControlServiceSpy.handleCecCommand(message))
                 .isEqualTo(Constants.ABORT_INVALID_OPERAND);
+
+        // Validating ERROR_PARAMETER_LONG will generate ABORT_INVALID_OPERAND.
+        // Taken from HdmiCecMessageValidatorTest#isValid_systemAudioModeStatus
+        HdmiCecMessage systemAudioModeStatus = HdmiUtils.buildMessage("40:7E:01:1F:28");
+
+        assertThat(mHdmiControlServiceSpy.handleCecCommand(systemAudioModeStatus))
+                .isEqualTo(Constants.ABORT_INVALID_OPERAND);
     }
 
     @Test

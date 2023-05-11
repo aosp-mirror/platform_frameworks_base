@@ -19,6 +19,8 @@ package com.android.server.biometrics;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR;
+import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ACQUIRED_VENDOR_BASE;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_DEFAULT;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_MULTI_SENSOR_FINGERPRINT_AND_FACE;
 
@@ -519,6 +521,9 @@ public final class AuthSession implements IBinder.DeathRecipient {
 
         try {
             mStatusBarService.onBiometricHelp(sensorIdToModality(sensorId), message);
+            final int aAcquiredInfo = acquiredInfo == FINGERPRINT_ACQUIRED_VENDOR
+                    ? (vendorCode + FINGERPRINT_ACQUIRED_VENDOR_BASE) : acquiredInfo;
+            mClientReceiver.onAcquired(aAcquiredInfo, message);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
@@ -699,7 +704,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
             }
 
             BiometricFrameworkStatsLogger.getInstance().authenticate(
-                    mBiometricContext.updateContext(new OperationContextExt(), isCrypto()),
+                    mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
+                            isCrypto()),
                     statsModality(),
                     BiometricsProtoEnums.ACTION_UNKNOWN,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
@@ -729,7 +735,8 @@ public final class AuthSession implements IBinder.DeathRecipient {
             }
             // Auth canceled
             BiometricFrameworkStatsLogger.getInstance().error(
-                    mBiometricContext.updateContext(new OperationContextExt(), isCrypto()),
+                    mBiometricContext.updateContext(new OperationContextExt(true /* isBP */),
+                            isCrypto()),
                     statsModality(),
                     BiometricsProtoEnums.ACTION_AUTHENTICATE,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,

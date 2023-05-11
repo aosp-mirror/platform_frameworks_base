@@ -50,6 +50,7 @@ import android.provider.Settings;
 import android.util.ArraySet;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
@@ -100,7 +101,7 @@ public class VoiceInteractionService extends Service {
     public static final String SERVICE_META_DATA = "android.voice_interaction";
 
     /**
-     * For apps targeting Build.VERSION_CODES.TRAMISU and above, implementors of this
+     * For apps targeting Build.VERSION_CODES.UPSIDE_DOWN_CAKE and above, implementors of this
      * service can create multiple AlwaysOnHotwordDetector instances in parallel. They will
      * also e ale to create a single SoftwareHotwordDetector in parallel with any other
      * active AlwaysOnHotwordDetector instances.
@@ -127,7 +128,7 @@ public class VoiceInteractionService extends Service {
      * @hide
      */
     @ChangeId
-    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT)
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long MULTIPLE_ACTIVE_HOTWORD_DETECTORS = 193232191L;
 
     IVoiceInteractionService mInterface = new IVoiceInteractionService.Stub() {
@@ -200,6 +201,9 @@ public class VoiceInteractionService extends Service {
 
     private final Set<HotwordDetector> mActiveDetectors = new ArraySet<>();
 
+    // True if any of the createAOHD methods should use the test ST module.
+    @GuardedBy("mLock")
+    private boolean mTestModuleForAlwaysOnHotwordDetectorEnabled = false;
 
     private void onDetectorRemoteException(@NonNull IBinder token, int detectorType) {
         Log.d(TAG, "onDetectorRemoteException for " + HotwordDetector.detectorTypeToString(
@@ -512,14 +516,14 @@ public class VoiceInteractionService extends Service {
         Objects.requireNonNull(callback);
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
                 /* supportHotwordDetectionService= */ false, /* options= */ null,
-                /* sharedMemory= */ null, /* moduleProperties */ null, executor, callback);
+                /* sharedMemory= */ null, /* moduleProperties= */ null, executor, callback);
     }
 
     /**
      * Same as {@link createAlwaysOnHotwordDetector(String, Locale, Executor,
      * AlwaysOnHotwordDetector.Callback)}, but allow explicit selection of the underlying ST
      * module to attach to.
-     * Use {@link listModuleProperties} to get available modules to attach to.
+     * Use {@link #listModuleProperties()} to get available modules to attach to.
      * @hide
      */
     @TestApi
@@ -645,14 +649,14 @@ public class VoiceInteractionService extends Service {
         Objects.requireNonNull(callback);
         return createAlwaysOnHotwordDetectorInternal(keyphrase, locale,
                 /* supportHotwordDetectionService= */ true, options, sharedMemory,
-                /* moduleProperties */ null, executor, callback);
+                /* moduleProperties= */ null, executor, callback);
     }
 
     /**
      * Same as {@link createAlwaysOnHotwordDetector(String, Locale,
      * PersistableBundle, SharedMemory, Executor, AlwaysOnHotwordDetector.Callback)},
      * but allow explicit selection of the underlying ST module to attach to.
-     * Use {@link listModuleProperties} to get available modules to attach to.
+     * Use {@link #listModuleProperties()} to get available modules to attach to.
      * @hide
      */
     @TestApi
@@ -717,6 +721,10 @@ public class VoiceInteractionService extends Service {
 
             try {
                 dspDetector.registerOnDestroyListener(this::onHotwordDetectorDestroyed);
+                // Check if we are currently overridden, and should use the test module.
+                if (mTestModuleForAlwaysOnHotwordDetectorEnabled) {
+                    moduleProperties = getTestModuleProperties();
+                }
                 // If moduleProperties is null, the default STModule is used.
                 dspDetector.initialize(options, sharedMemory, moduleProperties);
             } catch (Exception e) {
@@ -905,8 +913,6 @@ public class VoiceInteractionService extends Service {
      * sandboxed process.
      * @param callback The callback to notify of detection events.
      * @return An instanece of {@link VisualQueryDetector}.
-     * @throws UnsupportedOperationException if only single detector is supported. Multiple detector
-     * is only available for apps targeting {@link Build.VERSION_CODES#TIRAMISU} and above.
      * @throws IllegalStateException when there is an existing {@link VisualQueryDetector}, or when
      * there is a non-trusted hotword detector running.
      *
@@ -927,21 +933,16 @@ public class VoiceInteractionService extends Service {
             throw new IllegalStateException("Not available until onReady() is called");
         }
         synchronized (mLock) {
-            if (!CompatChanges.isChangeEnabled(MULTIPLE_ACTIVE_HOTWORD_DETECTORS)) {
-                throw new UnsupportedOperationException("VisualQueryDetector is only available if "
-                        + "multiple detectors are allowed");
-            } else {
-                if (mActiveVisualQueryDetector != null) {
+            if (mActiveVisualQueryDetector != null) {
+                throw new IllegalStateException(
+                            "There is already an active VisualQueryDetector. "
+                                    + "It must be destroyed to create a new one.");
+            }
+            for (HotwordDetector detector : mActiveDetectors) {
+                if (!detector.isUsingSandboxedDetectionService()) {
                     throw new IllegalStateException(
-                                "There is already an active VisualQueryDetector. "
-                                        + "It must be destroyed to create a new one.");
-                }
-                for (HotwordDetector detector : mActiveDetectors) {
-                    if (!detector.isUsingSandboxedDetectionService()) {
-                        throw new IllegalStateException(
-                                "It disallows to create trusted and non-trusted detectors "
-                                        + "at the same time.");
-                    }
+                            "It disallows to create trusted and non-trusted detectors "
+                                    + "at the same time.");
                 }
             }
 
@@ -990,6 +991,44 @@ public class VoiceInteractionService extends Service {
         return mKeyphraseEnrollmentInfo;
     }
 
+
+    /**
+     * Configure {@link createAlwaysOnHotwordDetector(String, Locale,
+     * SoundTrigger.ModuleProperties, Executor, AlwaysOnHotwordDetector.Callback)}
+     * and similar overloads to utilize the test SoundTrigger module instead of the
+     * actual DSP module.
+     * @param isEnabled - {@code true} if subsequently created {@link AlwaysOnHotwordDetector}
+     * objects should attach to a test module. {@code false} if subsequently created
+     * {@link AlwaysOnHotwordDetector} should attach to the actual DSP module.
+     * @hide
+     */
+    @TestApi
+    public final void setTestModuleForAlwaysOnHotwordDetectorEnabled(boolean isEnabled) {
+        synchronized (mLock) {
+            mTestModuleForAlwaysOnHotwordDetectorEnabled = isEnabled;
+        }
+    }
+
+    /**
+     * Get the {@link SoundTrigger.ModuleProperties} representing the fake
+     * STHAL to attach to via {@link createAlwaysOnHotwordDetector(String, Locale,
+     * SoundTrigger.ModuleProperties, Executor, AlwaysOnHotwordDetector.Callback)} and
+     * similar overloads for test purposes.
+     * @return ModuleProperties to use for test purposes.
+     */
+    private final @NonNull SoundTrigger.ModuleProperties getTestModuleProperties() {
+        var moduleProps = listModuleProperties()
+                .stream()
+                .filter((SoundTrigger.ModuleProperties prop)
+                        -> prop.getSupportedModelArch().equals(SoundTrigger.FAKE_HAL_ARCH))
+                .findFirst()
+                .orElse(null);
+        if (moduleProps == null) {
+            throw new IllegalStateException("Fake ST HAL should always be available");
+        }
+        return moduleProps;
+    }
+
     /**
      * Checks if a given keyphrase and locale are supported to create an
      * {@link AlwaysOnHotwordDetector}.
@@ -1024,21 +1063,6 @@ public class VoiceInteractionService extends Service {
                 mActiveVisualQueryDetector = null;
             }
             mActiveDetectors.remove(detector);
-            shutdownHotwordDetectionServiceIfRequiredLocked();
-        }
-    }
-
-    private void shutdownHotwordDetectionServiceIfRequiredLocked() {
-        for (HotwordDetector detector : mActiveDetectors) {
-            if (detector.isUsingSandboxedDetectionService()) {
-                return;
-            }
-        }
-
-        try {
-            mSystemService.shutdownHotwordDetectionService();
-        } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
         }
     }
 

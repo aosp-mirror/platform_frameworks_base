@@ -18,6 +18,9 @@ package com.android.settingslib.widget;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -86,5 +89,53 @@ public class FooterPreferenceTest {
         mFooterPreference.setIconVisibility(View.GONE);
 
         assertThat(mFooterPreference.mIconVisibility).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void onBindViewHolder_whenTitleIsNull_shouldNotRaiseNpe() {
+        PreferenceViewHolder viewHolder = spy(PreferenceViewHolder.createInstanceForTests(
+                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null)));
+        when(viewHolder.findViewById(R.id.title)).thenReturn(null);
+
+        Throwable actualThrowable = null;
+        try {
+            mFooterPreference.onBindViewHolder(viewHolder);
+        } catch (Throwable throwable) {
+            actualThrowable = throwable;
+        }
+
+        assertThat(actualThrowable).isNull();
+    }
+
+    @Test
+    public void onBindViewHolder_whenLearnMoreIsNull_shouldNotRaiseNpe() {
+        PreferenceViewHolder viewHolder = spy(PreferenceViewHolder.createInstanceForTests(
+                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null)));
+        when(viewHolder.findViewById(R.id.settingslib_learn_more)).thenReturn(null);
+
+        Throwable actualThrowable = null;
+        try {
+            mFooterPreference.onBindViewHolder(viewHolder);
+        } catch (Throwable throwable) {
+            actualThrowable = throwable;
+        }
+
+        assertThat(actualThrowable).isNull();
+    }
+
+    @Test
+    public void onBindViewHolder_whenIconFrameIsNull_shouldNotRaiseNpe() {
+        PreferenceViewHolder viewHolder = spy(PreferenceViewHolder.createInstanceForTests(
+                LayoutInflater.from(mContext).inflate(R.layout.preference_footer, null)));
+        when(viewHolder.findViewById(R.id.icon_frame)).thenReturn(null);
+
+        Throwable actualThrowable = null;
+        try {
+            mFooterPreference.onBindViewHolder(viewHolder);
+        } catch (Throwable throwable) {
+            actualThrowable = throwable;
+        }
+
+        assertThat(actualThrowable).isNull();
     }
 }

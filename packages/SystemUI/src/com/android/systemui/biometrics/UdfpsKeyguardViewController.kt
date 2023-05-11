@@ -23,11 +23,11 @@ import android.view.MotionEvent
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.animation.Interpolators
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.R
 import com.android.systemui.animation.ActivityLaunchAnimator
-import com.android.systemui.animation.Interpolators
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -257,7 +257,7 @@ constructor(
     }
 
     @VisibleForTesting
-    internal suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
+    suspend fun listenForBouncerExpansion(scope: CoroutineScope): Job {
         return scope.launch {
             primaryBouncerInteractor.bouncerExpansion.collect { bouncerExpansion: Float ->
                 inputBouncerExpansion = bouncerExpansion
@@ -268,7 +268,7 @@ constructor(
     }
 
     @VisibleForTesting
-    internal suspend fun listenForAlternateBouncerVisibility(scope: CoroutineScope): Job {
+    suspend fun listenForAlternateBouncerVisibility(scope: CoroutineScope): Job {
         return scope.launch {
             alternateBouncerInteractor.isVisible.collect { isVisible: Boolean ->
                 showUdfpsBouncer(isVisible)
@@ -464,7 +464,12 @@ constructor(
             // Fade out the icon if we are animating an activity launch over the lockscreen and the
             // activity didn't request the UDFPS.
             if (isLaunchingActivity && !udfpsRequested) {
-                alpha = (alpha * (1.0f - activityLaunchProgress)).toInt()
+                val udfpsActivityLaunchAlphaMultiplier =
+                    1f -
+                        (activityLaunchProgress *
+                                (ActivityLaunchAnimator.TIMINGS.totalDuration / 83))
+                            .coerceIn(0f, 1f)
+                alpha = (alpha * udfpsActivityLaunchAlphaMultiplier).toInt()
             }
 
             // Fade out alpha when a dialog is shown

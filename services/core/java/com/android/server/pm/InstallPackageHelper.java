@@ -49,6 +49,7 @@ import static com.android.server.pm.DexOptHelper.useArtService;
 import static com.android.server.pm.InstructionSets.getAppDexInstructionSets;
 import static com.android.server.pm.InstructionSets.getDexCodeInstructionSet;
 import static com.android.server.pm.InstructionSets.getPreferredInstructionSet;
+import static com.android.server.pm.PackageManagerService.APP_METADATA_FILE_NAME;
 import static com.android.server.pm.PackageManagerService.DEBUG_BACKUP;
 import static com.android.server.pm.PackageManagerService.DEBUG_COMPRESSION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
@@ -117,6 +118,7 @@ import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.content.pm.ResolveInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.content.pm.SigningDetails;
@@ -495,6 +497,13 @@ final class InstallPackageHelper {
         if (mPm.mCustomResolverComponentName != null
                 && mPm.mCustomResolverComponentName.getPackageName().equals(pkg.getPackageName())) {
             mPm.setUpCustomResolverActivity(pkg, pkgSetting);
+        }
+
+        File appMetadataFile = new File(pkgSetting.getPath(), APP_METADATA_FILE_NAME);
+        if (appMetadataFile.exists()) {
+            pkgSetting.setAppMetadataFilePath(appMetadataFile.getAbsolutePath());
+        } else {
+            pkgSetting.setAppMetadataFilePath(null);
         }
 
         if (pkg.getPackageName().equals("android")) {
@@ -2265,10 +2274,26 @@ final class InstallPackageHelper {
                     // The caller explicitly specified INSTALL_ALL_USERS flag.
                     // Thus, updating the settings to install the app for all users.
                     for (int currentUserId : allUsers) {
-                        ps.setInstalled(true, currentUserId);
-                        if (!installRequest.isApplicationEnabledSettingPersistent()) {
-                            ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
-                                    installerPackageName);
+                        // If the app is already installed for the currentUser,
+                        // keep it as installed as we might be updating the app at this place.
+                        // If not currently installed, check if the currentUser is restricted by
+                        // DISALLOW_INSTALL_APPS or DISALLOW_DEBUGGING_FEATURES device policy.
+                        // Install / update the app if the user isn't restricted. Skip otherwise.
+                        final boolean installedForCurrentUser = ArrayUtils.contains(
+                                installedForUsers, currentUserId);
+                        final boolean restrictedByPolicy =
+                                mPm.isUserRestricted(currentUserId,
+                                        UserManager.DISALLOW_INSTALL_APPS)
+                                || mPm.isUserRestricted(currentUserId,
+                                        UserManager.DISALLOW_DEBUGGING_FEATURES);
+                        if (installedForCurrentUser || !restrictedByPolicy) {
+                            ps.setInstalled(true, currentUserId);
+                            if (!installRequest.isApplicationEnabledSettingPersistent()) {
+                                ps.setEnabled(COMPONENT_ENABLED_STATE_DEFAULT, currentUserId,
+                                        installerPackageName);
+                            }
+                        } else {
+                            ps.setInstalled(false, currentUserId);
                         }
                     }
                 }
@@ -2930,7 +2955,7 @@ final class InstallPackageHelper {
                 }
                 // Send to PermissionController for all update users, even if it may not be running
                 // for some users
-                if (BroadcastHelper.isPrivacySafetyLabelChangeNotificationsEnabled()) {
+                if (BroadcastHelper.isPrivacySafetyLabelChangeNotificationsEnabled(mContext)) {
                     mPm.sendPackageBroadcast(Intent.ACTION_PACKAGE_ADDED, packageName,
                             extras, 0 /*flags*/,
                             mPm.mRequiredPermissionControllerPackage, null /*finishedReceiver*/,
@@ -3588,6 +3613,11 @@ final class InstallPackageHelper {
                 // remove the package from the system and re-scan it without any
                 // special privileges
                 mRemovePackageHelper.removePackage(pkg, true);
+                PackageSetting ps = mPm.mSettings.getPackageLPr(packageName);
+                if (ps != null) {
+                    ps.getPkgState().setUpdatedSystemApp(false);
+                }
+
                 try {
                     final File codePath = new File(pkg.getPath());
                     synchronized (mPm.mInstallLock) {
@@ -3946,6 +3976,24 @@ final class InstallPackageHelper {
                 mPm.mSettings.disableSystemPackageLPw(parsedPackage.getPackageName(), true);
             }
         }
+
+        // If this is a system app we hadn't seen before, and this is a first boot or OTA,
+        // we need to unstop it if it doesn't have a launcher entry.
+        if (mPm.mShouldStopSystemPackagesByDefault && scanResult.mRequest.mPkgSetting == null
+                && ((scanFlags & SCAN_FIRST_BOOT_OR_UPGRADE) != 0)
+                && ((scanFlags & SCAN_AS_SYSTEM) != 0)) {
+            final Intent launcherIntent = new Intent(Intent.ACTION_MAIN);
+            launcherIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+            launcherIntent.setPackage(parsedPackage.getPackageName());
+            final List<ResolveInfo> launcherActivities =
+                    mPm.snapshotComputer().queryIntentActivitiesInternal(launcherIntent, null,
+                            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE, 0);
+            if (launcherActivities.isEmpty()) {
+                scanResult.mPkgSetting.setStopped(false, 0);
+            }
+        }
+
         if (mIncrementalManager != null && isIncrementalPath(parsedPackage.getPath())) {
             if (scanResult.mPkgSetting != null && scanResult.mPkgSetting.isLoading()) {
                 // Continue monitoring loading progress of active incremental packages
@@ -4312,12 +4360,22 @@ final class InstallPackageHelper {
 
         // A new application appeared on /system, and we are seeing it for the first time.
         // Its also not updated as we don't have a copy of it on /data. So, scan it in a
-        // STOPPED state. Ignore if it's an APEX package since stopped state does not affect them.
+        // STOPPED state.
+        // We'll skip this step under the following conditions:
+        //   - It's "android"
+        //   - It's an APEX or overlay package since stopped state does not affect them.
+        //   - It is enumerated with a <initial-package-state> tag having the stopped attribute
+        //     set to false
         final boolean isApexPkg = (scanFlags & SCAN_AS_APEX) != 0;
-        if (mPm.mShouldStopSystemPackagesByDefault && scanSystemPartition
-                && !pkgAlreadyExists && !isApexPkg) {
+        if (mPm.mShouldStopSystemPackagesByDefault
+                && scanSystemPartition
+                && !pkgAlreadyExists
+                && !isApexPkg
+                && !parsedPackage.isOverlayIsStatic()
+        ) {
             String packageName = parsedPackage.getPackageName();
-            if (!mPm.mInitialNonStoppedSystemPackages.contains(packageName)) {
+            if (!mPm.mInitialNonStoppedSystemPackages.contains(packageName)
+                    && !"android".contentEquals(packageName)) {
                 scanFlags |= SCAN_AS_STOPPED_SYSTEM_APP;
             }
         }

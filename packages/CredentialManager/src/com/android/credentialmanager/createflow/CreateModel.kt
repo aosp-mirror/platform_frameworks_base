@@ -29,12 +29,9 @@ data class CreateCredentialUiState(
   val currentScreenState: CreateScreenState,
   val requestDisplayInfo: RequestDisplayInfo,
   val sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-  // Should not change with the real time update of default provider, only determine whether
-  // we're showing provider selection page at the beginning
-  val hasDefaultProvider: Boolean,
   val activeEntry: ActiveEntry? = null,
   val remoteEntry: RemoteInfo? = null,
-  val isFromProviderSelection: Boolean? = null,
+  val foundCandidateFromUserDefaultProvider: Boolean,
 )
 
 internal fun hasContentToDisplay(state: CreateCredentialUiState): Boolean {
@@ -50,11 +47,12 @@ open class ProviderInfo(
 )
 
 class EnabledProviderInfo(
-  icon: Drawable,
-  id: String,
-  displayName: String,
-  var createOptions: List<CreateOptionInfo>,
-  var remoteEntry: RemoteInfo?,
+    icon: Drawable,
+    id: String,
+    displayName: String,
+    // Sorted by last used time
+    var sortedCreateOptions: List<CreateOptionInfo>,
+    var remoteEntry: RemoteInfo?,
 ) : ProviderInfo(icon, id, displayName)
 
 class DisabledProviderInfo(
@@ -107,6 +105,8 @@ data class RequestDisplayInfo(
   val appName: String,
   val typeIcon: Drawable,
   val preferImmediatelyAvailableCredentials: Boolean,
+  val appPreferredDefaultProviderId: String?,
+  val userSetDefaultProviderIds: Set<String>,
 )
 
 /**
@@ -122,9 +122,8 @@ data class ActiveEntry (
 enum class CreateScreenState {
   PASSKEY_INTRO,
   MORE_ABOUT_PASSKEYS_INTRO,
-  PROVIDER_SELECTION,
   CREATION_OPTION_SELECTION,
   MORE_OPTIONS_SELECTION,
-  MORE_OPTIONS_ROW_INTRO,
+  DEFAULT_PROVIDER_CONFIRMATION,
   EXTERNAL_ONLY_SELECTION,
 }

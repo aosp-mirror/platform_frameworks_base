@@ -31,7 +31,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.PermissionChecker;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Icon;
@@ -877,19 +876,11 @@ public class NotificationManager {
      * {@link android.provider.Settings#ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT}.
      */
     public boolean canUseFullScreenIntent() {
-        final int result = PermissionChecker.checkPermissionForPreflight(mContext,
-                android.Manifest.permission.USE_FULL_SCREEN_INTENT,
-                mContext.getAttributionSource());
-
-        switch (result) {
-            case PermissionChecker.PERMISSION_GRANTED:
-                return true;
-            case PermissionChecker.PERMISSION_SOFT_DENIED:
-            case PermissionChecker.PERMISSION_HARD_DENIED:
-                return false;
-            default:
-                if (localLOGV) Log.v(TAG, "Unknown PermissionChecker result: " + result);
-                return false;
+        INotificationManager service = getService();
+        try {
+            return service.canUseFullScreenIntent(mContext.getAttributionSource());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 

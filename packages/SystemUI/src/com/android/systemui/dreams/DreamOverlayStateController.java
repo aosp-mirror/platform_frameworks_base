@@ -24,9 +24,9 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.complication.Complication;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.dreams.complication.Complication;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
 import com.android.systemui.statusbar.policy.CallbackController;
@@ -184,6 +184,10 @@ public class DreamOverlayStateController implements
      * Returns collection of present {@link Complication}.
      */
     public Collection<Complication> getComplications(boolean filterByAvailability) {
+        if (isLowLightActive()) {
+            // Don't show complications on low light.
+            return Collections.emptyList();
+        }
         return Collections.unmodifiableCollection(filterByAvailability
                 ? mComplications
                 .stream()
@@ -195,7 +199,8 @@ public class DreamOverlayStateController implements
                     if (mShouldShowComplications) {
                         return (requiredTypes & getAvailableComplicationTypes()) == requiredTypes;
                     }
-                    return (requiredTypes & mSupportedTypes) == requiredTypes;
+                    final int typesToAlwaysShow = mSupportedTypes & getAvailableComplicationTypes();
+                    return (requiredTypes & typesToAlwaysShow) == requiredTypes;
                 })
                 .collect(Collectors.toCollection(HashSet::new))
                 : mComplications);

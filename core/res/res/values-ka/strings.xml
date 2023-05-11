@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"საშუალებას აძლევს აპს, მისი გამოყენებისას, წვდომა ჰქონდეს სხეულის სენსორების მონაცემებზე, როგორიცაა გულისცემა, ტემპერატურა და სისხლში ჟანგბადის პროცენტული შემცველობა."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"აპის ფონურ რეჟიმში მუშაობისას, სხეულის სენსორების მონაცემებზე წვდომა, როგორიცაა გულისცემა"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"საშუალებას აძლევს აპს, ფონურ რეჟიმში მუშაობისას, წვდომა ჰქონდეს სხეულის სენსორების მონაცემებზე, როგორიცაა გულისცემა, ტემპერატურა და სისხლში ჟანგბადის პროცენტული შემცველობა."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"სხეულის სენსორის მაჯის ტემპერატურის მონაცემებზე წვდომა აპის მუშაობისას."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"საშუალებას აძლევს აპს, მუშაობისას წვდომა ჰქონდეს სხეულის სენსორის მაჯის ტემპერატურის მონაცემებზე."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"სხეულის სენსორის მაჯის ტემპერატურის მონაცემებზე წვდომა აპის ფონურ რეჟმში მუშაობისას."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"საშუალებას აძლევს აპს, ფონურ რეჟიმში მუშაობისას წვდომა ჰქონდეს სხეულის სენსორის მაჯის ტე,პერატურის მონაცემებზე."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"კალენდრის მოვლენებისა და დეტალების წაკითხვა"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"ამ აპს შეუძლია თქვენს ტაბლეტში შენახული კალენდრის ყველა მოვლენის წაკითხვა და თქვენი კალენდრის მონაცემების გაზიარება ან შენახვა."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"ამ აპს შეუძლია თქვენს Android TV მოწყობილობაზე შენახული კალენდრის ყველა მოვლენის წაკითხვა და თქვენი კალენდრის მონაცემების გაზიარება ან შენახვა."</string>
@@ -507,7 +503,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"აპს შეეძლება, მართოს ვიბრირება."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"ნებას რთავს აპს, ჰქონდეს წვდომა ვიბრაციის მდგომარეობაზე."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"პირდაპირი დარეკვა ტელეფონის ნომრებზე"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"აპს შეეძლება დარეკოს ტელეფონის ნომრებზე თქვენი ჩარევის გარეშე. ამან შესაძლოა გამოიწვიოს თქვენს სატელეფონი ქვითარზე მოულოდნელი ხარჯებისა და ზარების გაჩენა. გაითვალისწინეთ, რომ აპს გადაუდებელი დახმარების ნომრებზე დარეკვა არ შეუძლია. მავნე აპებს შეეძლება თქვენი დადასტურების გარეშე ზარების განხორციელება და შესაბამისი საფასურის გადახდაც მოგიწევთ."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"საშუალებას აძლევს აპს, დარეკოს ტელეფონის ნომრებზე თქვენი ჩარევის გარეშე. ამან შეიძლება გამოიწვიოს მოულოდნელი ზარები ან თანხის ჩამოჭრა. გაითვალისწინეთ, რომ ეს საშუალებას არ აძლევს აპს, დარეკოს საგანგებო ვითარებაში საკონტაქტო პირის ნომრებზე. მავნე აპების გამოყენებით, შესაძლოა, თანხის გადახდა მოგიწიოთ თქვენი ნებართვის გარეშე განხორციელებული ზარების გამო, ან იმ ოპერატორების კოდების აკრეფის გამო, რომლებიც ავტომატურად გადაამისამართებს შემომავალ ზარებს სხვა ნომერზე."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS ზარების სერვისზე წვდომა"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"აპს შეეძლება, გამოიყენოს IMS სერვისი ზარების თქვენი ჩარევის გარეშე განსახორციელებლად."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"ტელეფონის სტატუსისა და იდენტობის წაკითხვა"</string>
@@ -713,7 +709,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"სახის ამოცნობა გაუქმდა."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"სახით განბლოკვა გაუქმდა მომხმარებლის მიერ"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"დაფიქსირდა ბევრი მცდელობა. ცადეთ მოგვიანებით."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"მეტისმეტად ბევრი მცდელობა იყო. სახით განბლოკვა გათიშულია."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"მეტისმეტად ბევრი მცდელობა იყო. სახით განბლოკვა მიუწვდომელია."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"მეტისმეტად ბევრი მცდელობა იყო. შეიყვანეთ ეკრანის დაბლოკვის პარამეტრები."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"სახის დადასტურება ვერ ხერხდება. ცადეთ ხელახლა."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"თქვენ არ დაგიყენებიათ სახით განბლოკვა."</string>
@@ -800,10 +796,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"მფლობელს საშუალებას აძლევს, დაიწყოს აპის ფუნქციების ინფორმაციის ნახვა."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"სენსორის მონაცემებზე წვდომა სემპლინგის მაღალი სიხშირით"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"საშუალებას აძლევს აპს, მიიღოს სენსორის მონაცემების ნიმუშები 200 ჰც-ზე მეტი სიხშირით"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"აპის განახლება მომხმარებლის ქმედების გარეშე"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"საშუალებას აძლევს მომხმარებელს, დამოუკიდებლად განაახლოს მანამდე დაინსტალირებული აპი"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"პაროლის წესების დაყენება"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"აკონტროლეთ ეკრანის ბლოკირების პაროლებისა და PIN-ების სიმბოლოების სიგრძე."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"ეკრანის განბლოკვის მცდელობების მონიტორინგი"</string>
@@ -991,7 +985,7 @@
     <string name="lockscreen_transport_stop_description" msgid="1449552232598355348">"შეწყვეტა"</string>
     <string name="lockscreen_transport_rew_description" msgid="7680106856221622779">"უკან გადახვევა"</string>
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"წინ გადახვევა"</string>
-    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი დახმარების ზარები"</string>
+    <string name="emergency_calls_only" msgid="3057351206678279851">"მხოლოდ გადაუდებელი ზარები"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ქსელი ჩაკეტილია"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"SIM დაბლოკილია PUK-ით."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"იხილეთ მომხმარებლის სახელმძღვანელო ან დაუკავშირდით კლიენტების მომსახურებას."</string>
@@ -1956,11 +1950,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ამჟამად მიუწვდომელია. ის იმართება <xliff:g id="APP_NAME_1">%2$s</xliff:g>-ის მიერ."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"შეიტყვეთ მეტი"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"აპის დაპაუზების გაუქმება"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"გსურთ სამსახურის აპების ჩართვა?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"თქვენი სამსახურის აპებსა და შეტყობინებებზე წვდომის მოპოვება"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"ჩართვა"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"გაუქმდეს სამსახურის აპების დაპაუზება?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"პაუზის გაუქმება"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"საგანგებო სიტუაცია"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"მოიპოვეთ წვდომა თქვენი სამსახურის აპებსა და ზარებზე"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"აპი მიუწვდომელია"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> ამჟამად მიუწვდომელია."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> მიუწვდომელია"</string>
@@ -2166,12 +2158,12 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"ამ კონტენტის სამსახურის აპებით გახსნა შეუძლებელია"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"ამ კონტენტის პირადი აპებისთვის გაზიარება შეუძლებელია"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"ამ კონტენტის პირადი აპებით გახსნა შეუძლებელია"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"სამსახურის პროფილი დაპაუზებულია"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"შეეხეთ ჩასართავად"</string>
+    <string name="resolver_turn_on_work_apps" msgid="1535946298236678122">"სამსახურის აპები დაპაუზებულია"</string>
+    <string name="resolver_switch_on_work" msgid="4527096360772311894">"პაუზის გაუქმება"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"სამსახურის აპები არ არის"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"პირადი აპები არ არის"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"გსურთ <xliff:g id="APP">%s</xliff:g>-ის გახსნა თქვენს პირად პროფილში?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"გსურთ <xliff:g id="APP">%s</xliff:g>-ის გახსნა თქვენს სამსახურის პროფილში?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"გახსენით პერსონალური <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"გახსენით სამუშაო <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"პირადი ბრაუზერის გამოყენება"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"სამსახურის ბრაუზერის გამოყენება"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM ქსელის განბლოკვის PIN-კოდი"</string>

@@ -27,7 +27,7 @@ import android.credentials.ui.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -67,7 +67,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
                 .createNewSession(mContext, mUserId, providerInfo,
                         this, remoteCredentialService);
         if (providerClearSession != null) {
-            Log.i(TAG, "In startProviderSession - provider session created and being added");
+            Slog.i(TAG, "Provider session created "
+                    + "and being added for: " + providerInfo.getComponentName());
             mProviders.put(providerClearSession.getComponentName().flattenToString(),
                     providerClearSession);
         }
@@ -77,12 +78,12 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     @Override // from provider session
     public void onProviderStatusChanged(ProviderSession.Status status,
             ComponentName componentName, ProviderSession.CredentialsSource source) {
-        Log.i(TAG, "in onStatusChanged with status: " + status);
+        Slog.i(TAG, "Provider changed with status: " + status + ", and source: " + source);
         if (ProviderSession.isTerminatingStatus(status)) {
-            Log.i(TAG, "in onStatusChanged terminating status");
+            Slog.i(TAG, "Provider terminating status");
             onProviderTerminated(componentName);
         } else if (ProviderSession.isCompletionStatus(status)) {
-            Log.i(TAG, "in onStatusChanged isCompletionStatus status");
+            Slog.i(TAG, "Provider has completion status");
             onProviderResponseComplete(componentName);
         }
     }

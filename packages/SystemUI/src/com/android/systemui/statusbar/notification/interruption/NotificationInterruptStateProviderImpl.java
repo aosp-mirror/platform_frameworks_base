@@ -321,30 +321,22 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                     suppressedByDND);
         }
 
-        // Check whether FSI requires the keyguard to be showing.
-        if (mFlags.fullScreenIntentRequiresKeyguard()) {
-
-            // If notification won't HUN and keyguard is showing, launch the FSI.
-            if (mKeyguardStateController.isShowing()) {
-                if (mKeyguardStateController.isOccluded()) {
-                    return getDecisionGivenSuppression(
-                            FullScreenIntentDecision.FSI_KEYGUARD_OCCLUDED,
-                            suppressedByDND);
-                } else {
-                    // Likely LOCKED_SHADE, but launch FSI anyway
-                    return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_LOCKED_SHADE,
-                            suppressedByDND);
-                }
+        // If notification won't HUN and keyguard is showing, launch the FSI.
+        if (mKeyguardStateController.isShowing()) {
+            if (mKeyguardStateController.isOccluded()) {
+                return getDecisionGivenSuppression(
+                        FullScreenIntentDecision.FSI_KEYGUARD_OCCLUDED,
+                        suppressedByDND);
+            } else {
+                // Likely LOCKED_SHADE, but launch FSI anyway
+                return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_LOCKED_SHADE,
+                        suppressedByDND);
             }
-
-            // Detect the case determined by b/231322873 to launch FSI while device is in use,
-            // as blocked by the correct implementation, and report the event.
-            return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_NO_HUN_OR_KEYGUARD,
-                    suppressedByDND);
         }
 
-        // If the notification won't HUN for some other reason (DND/snooze/etc), launch FSI.
-        return getDecisionGivenSuppression(FullScreenIntentDecision.FSI_EXPECTED_NOT_TO_HUN,
+        // Detect the case determined by b/231322873 to launch FSI while device is in use,
+        // as blocked by the correct implementation, and report the event.
+        return getDecisionGivenSuppression(FullScreenIntentDecision.NO_FSI_NO_HUN_OR_KEYGUARD,
                 suppressedByDND);
     }
 
@@ -409,14 +401,11 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
 
         final boolean isSnoozedPackage = isSnoozedPackage(sbn);
-        final boolean fsiRequiresKeyguard = mFlags.fullScreenIntentRequiresKeyguard();
         final boolean hasFsi = sbn.getNotification().fullScreenIntent != null;
 
         // Assume any notification with an FSI is time-sensitive (like an alarm or incoming call)
         // and ignore whether HUNs have been snoozed for the package.
-        final boolean shouldBypassSnooze = fsiRequiresKeyguard && hasFsi;
-
-        if (isSnoozedPackage && !shouldBypassSnooze) {
+        if (isSnoozedPackage && !hasFsi) {
             if (log) mLogger.logNoHeadsUpPackageSnoozed(entry);
             return false;
         }

@@ -234,14 +234,6 @@ class SoftwareHotwordDetector extends AbstractDetector {
         }
 
         @Override
-        public void onError(int status) throws RemoteException {
-            if (DEBUG) {
-                Slog.i(TAG, "Ignored #onError (" + status + ") event");
-            }
-            // TODO: Check if we still need to implement this method with DetectorFailure mechanism.
-        }
-
-        @Override
         public void onHotwordDetectionServiceFailure(
                 HotwordDetectionServiceFailure hotwordDetectionServiceFailure)
                 throws RemoteException {
@@ -262,6 +254,13 @@ class SoftwareHotwordDetector extends AbstractDetector {
             // It should never be called here.
             Slog.w(TAG, "onVisualQueryDetectionServiceFailure: "
                     + visualQueryDetectionServiceFailure);
+        }
+
+        @Override
+        public void onSoundTriggerFailure(SoundTriggerFailure onSoundTriggerFailure)
+                throws RemoteException {
+            // It should never be called here.
+            Slog.wtf(TAG, "Unexpected STFailure in software detector: " + onSoundTriggerFailure);
         }
 
         @Override

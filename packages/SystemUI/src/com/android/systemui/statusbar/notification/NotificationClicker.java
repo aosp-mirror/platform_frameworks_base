@@ -71,7 +71,7 @@ public final class NotificationClicker implements View.OnClickListener {
         }
 
         mCentralSurfacesOptional.ifPresent(centralSurfaces -> centralSurfaces.wakeUpIfDozing(
-                SystemClock.uptimeMillis(), v, "NOTIFICATION_CLICK",
+                SystemClock.uptimeMillis(), "NOTIFICATION_CLICK",
                 PowerManager.WAKE_REASON_GESTURE));
 
         final ExpandableNotificationRow row = (ExpandableNotificationRow) v;

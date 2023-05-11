@@ -58,6 +58,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
+import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
@@ -418,6 +419,7 @@ public class GarbageMonitor implements Dumpable {
         @Inject
         public MemoryTile(
                 QSHost host,
+                QsEventLogger uiEventLogger,
                 @Background Looper backgroundLooper,
                 @Main Handler mainHandler,
                 FalsingManager falsingManager,
@@ -428,7 +430,7 @@ public class GarbageMonitor implements Dumpable {
                 GarbageMonitor monitor,
                 PanelInteractor panelInteractor
         ) {
-            super(host, backgroundLooper, mainHandler, falsingManager, metricsLogger,
+            super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                     statusBarStateController, activityStarter, qsLogger);
             gm = monitor;
             mPanelInteractor = panelInteractor;

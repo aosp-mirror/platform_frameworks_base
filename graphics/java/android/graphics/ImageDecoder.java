@@ -40,9 +40,9 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.NinePatchDrawable;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
+import android.media.MediaFormat;
 import android.net.Uri;
 import android.os.Build;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -915,8 +915,6 @@ public final class ImageDecoder implements AutoCloseable {
             case "image/jpeg":
             case "image/webp":
             case "image/gif":
-            case "image/heif":
-            case "image/heic":
             case "image/bmp":
             case "image/x-ico":
             case "image/vnd.wap.wbmp":
@@ -931,6 +929,9 @@ public final class ImageDecoder implements AutoCloseable {
             case "image/x-pentax-pef":
             case "image/x-samsung-srw":
                 return true;
+            case "image/heif":
+            case "image/heic":
+                return isHevcDecoderSupported();
             case "image/avif":
                 return isP010SupportedForAV1();
             default:
@@ -2068,51 +2069,90 @@ public final class ImageDecoder implements AutoCloseable {
         return decodeBitmapImpl(src, null);
     }
 
+    private static boolean sIsHevcDecoderSupported = false;
+    private static boolean sIsHevcDecoderSupportedInitialized = false;
+    private static final Object sIsHevcDecoderSupportedLock = new Object();
+
+    /*
+     * Check if HEVC decoder is supported by the device.
+     */
+    @SuppressWarnings("AndroidFrameworkCompatChange")
+    private static boolean isHevcDecoderSupported() {
+        synchronized (sIsHevcDecoderSupportedLock) {
+            if (sIsHevcDecoderSupportedInitialized) {
+                return sIsHevcDecoderSupported;
+            }
+            MediaFormat format = new MediaFormat();
+            format.setString(MediaFormat.KEY_MIME, MediaFormat.MIMETYPE_VIDEO_HEVC);
+            MediaCodecList mcl = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+            sIsHevcDecoderSupported = mcl.findDecoderForFormat(format) != null;
+            sIsHevcDecoderSupportedInitialized = true;
+            return sIsHevcDecoderSupported;
+        }
+    }
+
     private static boolean sIsP010SupportedForAV1 = false;
-    private static boolean sIsP010SupportedForAV1Initialized = false;
-    private static final Object sIsP010SupportedForAV1Lock = new Object();
+    private static boolean sIsP010SupportedForHEVC = false;
+    private static boolean sIsP010SupportedFlagsInitialized = false;
+    private static final Object sIsP010SupportedLock = new Object();
 
     /**
      * Checks if the device supports decoding 10-bit AV1.
      */
     @SuppressWarnings("AndroidFrameworkCompatChange")  // This is not an app-visible API.
     private static boolean isP010SupportedForAV1() {
-        synchronized (sIsP010SupportedForAV1Lock) {
-            if (sIsP010SupportedForAV1Initialized) {
+        synchronized (sIsP010SupportedLock) {
+            if (sIsP010SupportedFlagsInitialized) {
                 return sIsP010SupportedForAV1;
             }
-
-            sIsP010SupportedForAV1Initialized = true;
-
-            if (hasHardwareDecoder("video/av01")) {
-                sIsP010SupportedForAV1 = true;
-                return true;
-            }
-
-            sIsP010SupportedForAV1 = Build.VERSION.DEVICE_INITIAL_SDK_INT
-                    >= Build.VERSION_CODES.S;
+            checkP010SupportforAV1HEVC();
             return sIsP010SupportedForAV1;
         }
     }
 
     /**
-     * Checks if the device has hardware decoder for the target mime type.
+     * Checks if the device supports decoding 10-bit HEVC.
+     * This method is called by JNI.
      */
-    private static boolean hasHardwareDecoder(String mime) {
-        final MediaCodecList sMCL = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
-        for (MediaCodecInfo info : sMCL.getCodecInfos()) {
-            if (info.isEncoder() == false && info.isHardwareAccelerated()) {
-                try {
-                     if (info.getCapabilitiesForType(mime) != null) {
-                         return true;
-                     }
-                } catch (IllegalArgumentException e) {
-                     // mime is not supported
-                     return false;
+    @SuppressWarnings("unused")
+    private static boolean isP010SupportedForHEVC() {
+        synchronized (sIsP010SupportedLock) {
+            if (sIsP010SupportedFlagsInitialized) {
+                return sIsP010SupportedForHEVC;
+            }
+            checkP010SupportforAV1HEVC();
+            return sIsP010SupportedForHEVC;
+        }
+    }
+
+    /**
+     * Checks if the device supports decoding 10-bit for the given mime type.
+     */
+    private static void checkP010SupportforAV1HEVC() {
+        MediaCodecList codecList = new MediaCodecList(MediaCodecList.REGULAR_CODECS);
+        for (MediaCodecInfo mediaCodecInfo : codecList.getCodecInfos()) {
+            if (mediaCodecInfo.isEncoder()) {
+                continue;
+            }
+            for (String mediaType : mediaCodecInfo.getSupportedTypes()) {
+                if (mediaType.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AV1)
+                        || mediaType.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_HEVC)) {
+                    MediaCodecInfo.CodecCapabilities codecCapabilities =
+                        mediaCodecInfo.getCapabilitiesForType(mediaType);
+                    for (int i = 0; i < codecCapabilities.colorFormats.length; ++i) {
+                        if (codecCapabilities.colorFormats[i]
+                            == MediaCodecInfo.CodecCapabilities.COLOR_FormatYUVP010) {
+                            if (mediaType.equalsIgnoreCase(MediaFormat.MIMETYPE_VIDEO_AV1)) {
+                                sIsP010SupportedForAV1 = true;
+                            } else {
+                                sIsP010SupportedForHEVC = true;
+                            }
+                        }
+                    }
                 }
             }
         }
-        return false;
+        sIsP010SupportedFlagsInitialized = true;
     }
 
     /**

@@ -38,6 +38,7 @@ import android.view.SurfaceView;
 import android.view.WindowManagerGlobal;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,7 +64,12 @@ public final class SurfaceSyncGroup {
     private static final int MAX_COUNT = 100;
 
     private static final AtomicInteger sCounter = new AtomicInteger(0);
-    private static final int TRANSACTION_READY_TIMEOUT = 1000 * Build.HW_TIMEOUT_MULTIPLIER;
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public static final int TRANSACTION_READY_TIMEOUT = 1000 * Build.HW_TIMEOUT_MULTIPLIER;
 
     private static Supplier<Transaction> sTransactionFactory = Transaction::new;
 
@@ -120,7 +126,16 @@ public final class SurfaceSyncGroup {
     private static HandlerThread sHandlerThread;
     private Handler mHandler;
 
+    @GuardedBy("mLock")
     private boolean mTimeoutAdded;
+
+    /**
+     * Disable the timeout for this SSG so it will never be set until there's an explicit call to
+     * add a timeout.
+     */
+    @GuardedBy("mLock")
+    private boolean mTimeoutDisabled;
+
 
     private static boolean isLocalBinder(IBinder binder) {
         return !(binder instanceof BinderProxy);
@@ -222,6 +237,10 @@ public final class SurfaceSyncGroup {
      */
     public void addSyncCompleteCallback(Executor executor, Runnable runnable) {
         synchronized (mLock) {
+            if (mFinished) {
+                executor.execute(runnable);
+                return;
+            }
             mSyncCompleteCallbacks.add(new Pair<>(executor, runnable));
         }
     }
@@ -234,6 +253,9 @@ public final class SurfaceSyncGroup {
      * SurfaceSyncGroup have completed their sync.
      */
     public void markSyncReady() {
+        if (DEBUG) {
+            Log.d(TAG, "markSyncReady " + mName);
+        }
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
             Trace.traceBegin(Trace.TRACE_TAG_VIEW, "markSyncReady " + mName);
         }
@@ -456,7 +478,15 @@ public final class SurfaceSyncGroup {
      */
     public void addTransaction(@NonNull Transaction transaction) {
         synchronized (mLock) {
-            mTransaction.merge(transaction);
+            // If the caller tries to add a transaction to a completed SSG, just apply the
+            // transaction immediately since there's nothing to wait on.
+            if (mFinished) {
+                Log.w(TAG, "Adding transaction to a completed SurfaceSyncGroup(" + mName + "). "
+                        + " Applying immediately");
+                transaction.apply();
+            } else {
+                mTransaction.merge(transaction);
+            }
         }
     }
 
@@ -509,7 +539,7 @@ public final class SurfaceSyncGroup {
 
     private boolean addLocalSync(ISurfaceSyncGroup childSyncToken, boolean parentSyncGroupMerge) {
         if (DEBUG) {
-            Log.d(TAG, "Adding local sync " + mName);
+            Log.d(TAG, "Adding local sync to " + mName);
         }
 
         SurfaceSyncGroup childSurfaceSyncGroup = getSurfaceSyncGroup(childSyncToken);
@@ -540,7 +570,7 @@ public final class SurfaceSyncGroup {
     private void setTransactionCallbackFromParent(ISurfaceSyncGroup parentSyncGroup,
             ITransactionReadyCallback transactionReadyCallback) {
         if (DEBUG) {
-            Log.d(TAG, "setTransactionCallbackFromParent " + mName);
+            Log.d(TAG, "setTransactionCallbackFromParent for child " + mName);
         }
 
         if (Trace.isTagEnabled(Trace.TRACE_TAG_VIEW)) {
@@ -677,7 +707,7 @@ public final class SurfaceSyncGroup {
      */
     public ITransactionReadyCallback createTransactionReadyCallback(boolean parentSyncGroupMerge) {
         if (DEBUG) {
-            Log.d(TAG, "createTransactionReadyCallback " + mName);
+            Log.d(TAG, "createTransactionReadyCallback as part of " + mName);
         }
         ITransactionReadyCallback transactionReadyCallback =
                 new ITransactionReadyCallback.Stub() {
@@ -756,6 +786,21 @@ public final class SurfaceSyncGroup {
         }
     }
 
+    /**
+     * @hide
+     */
+    public void toggleTimeout(boolean enable) {
+        synchronized (mLock) {
+            mTimeoutDisabled = !enable;
+            if (mTimeoutAdded && !enable) {
+                mHandler.removeCallbacksAndMessages(this);
+                mTimeoutAdded = false;
+            } else if (!mTimeoutAdded && enable) {
+                addTimeout();
+            }
+        }
+    }
+
     private void addTimeout() {
         synchronized (sHandlerThreadLock) {
             if (sHandlerThread == null) {
@@ -765,7 +810,7 @@ public final class SurfaceSyncGroup {
         }
 
         synchronized (mLock) {
-            if (mTimeoutAdded) {
+            if (mTimeoutAdded || mTimeoutDisabled) {
                 // We only need one timeout for the entire SurfaceSyncGroup since we just want to
                 // ensure it doesn't stay stuck forever.
                 return;
@@ -780,7 +825,7 @@ public final class SurfaceSyncGroup {
 
         Runnable runnable = () -> {
             Log.e(TAG, "Failed to receive transaction ready in " + TRANSACTION_READY_TIMEOUT
-                    + "ms. Marking SurfaceSyncGroup as ready " + mName);
+                    + "ms. Marking SurfaceSyncGroup(" + mName + ") as ready");
             // Clear out any pending syncs in case the other syncs can't complete or timeout due to
             // a crash.
             synchronized (mLock) {

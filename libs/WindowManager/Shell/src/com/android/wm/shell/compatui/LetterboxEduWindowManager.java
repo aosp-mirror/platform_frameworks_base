@@ -17,6 +17,7 @@
 package com.android.wm.shell.compatui;
 
 import static android.provider.Settings.Secure.LAUNCHER_TASKBAR_EDUCATION_SHOWING;
+import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -45,12 +46,6 @@ import java.util.function.Consumer;
  * Window manager for the Letterbox Education.
  */
 class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
-
-    /**
-     * The Letterbox Education should be the topmost child of the Task in case there can be more
-     * than one child.
-     */
-    public static final int Z_ORDER = Integer.MAX_VALUE;
 
     private final DialogAnimationController<LetterboxEduDialogLayout> mAnimationController;
 
@@ -118,7 +113,7 @@ class LetterboxEduWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected int getZOrder() {
-        return Z_ORDER;
+        return TASK_CHILD_LAYER_COMPAT_UI + 2;
     }
 
     @Override

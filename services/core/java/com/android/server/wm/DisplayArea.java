@@ -779,8 +779,9 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
 
         @Override
         void prepareSurfaces() {
-            final Rect dimBounds = mDimmer.resetDimStates();
+            mDimmer.resetDimStates();
             super.prepareSurfaces();
+            final Rect dimBounds = mDimmer.getDimBounds();
             if (dimBounds != null) {
                 // Bounds need to be relative, as the dim layer is a child.
                 getBounds(dimBounds);

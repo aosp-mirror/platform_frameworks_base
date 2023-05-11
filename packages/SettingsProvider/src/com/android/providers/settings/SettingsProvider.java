@@ -3748,7 +3748,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 218;
+            private static final int SETTINGS_VERSION = 219;
 
             private final int mUserId;
 
@@ -5837,6 +5837,15 @@ public class SettingsProvider extends ContentProvider {
                             mediaSessionsPackage);
 
                     currentVersion = 218;
+                }
+
+                if (currentVersion == 218) {
+                    // Version 219: Removed
+                    // TODO(b/211737588): Back up the Smooth Display setting
+                    // Future upgrades to the `peak_refresh_rate` and `min_refresh_rate` settings
+                    // should account for the database in a non-upgraded and upgraded (change id:
+                    // Ib2cb2dd100f06f5452083b7606109a486e795a0e) state.
+                    currentVersion = 219;
                 }
 
                 // vXXX: Add new settings above this point.

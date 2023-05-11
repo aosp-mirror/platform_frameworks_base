@@ -3018,7 +3018,7 @@ public class AccountManagerService
         final long identityToken = clearCallingIdentity();
         try {
             // Distill the caller's package signatures into a single digest.
-            final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg);
+            final byte[] callerPkgSigDigest = calculatePackageSignatureDigest(callerPkg, userId);
 
             // if the caller has permission, do the peek. otherwise go the more expensive
             // route of starting a Session
@@ -3182,12 +3182,12 @@ public class AccountManagerService
                 .write();
     }
 
-    private byte[] calculatePackageSignatureDigest(String callerPkg) {
+    private byte[] calculatePackageSignatureDigest(String callerPkg, int userId) {
         MessageDigest digester;
         try {
             digester = MessageDigest.getInstance("SHA-256");
-            PackageInfo pkgInfo = mPackageManager.getPackageInfo(
-                    callerPkg, PackageManager.GET_SIGNATURES);
+            PackageInfo pkgInfo = mPackageManager.getPackageInfoAsUser(
+                    callerPkg, PackageManager.GET_SIGNATURES, userId);
             for (Signature sig : pkgInfo.signatures) {
                 digester.update(sig.toByteArray());
             }
@@ -5912,22 +5912,24 @@ public class AccountManagerService
     }
 
     private boolean canUserModifyAccountsForType(int userId, String accountType, int callingUid) {
-        // the managing app can always modify accounts
-        if (isProfileOwner(callingUid)) {
-            return true;
-        }
-        DevicePolicyManager dpm = (DevicePolicyManager) mContext
-                .getSystemService(Context.DEVICE_POLICY_SERVICE);
-        String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
-        if (typesArray == null) {
-            return true;
-        }
-        for (String forbiddenType : typesArray) {
-            if (forbiddenType.equals(accountType)) {
-                return false;
+        return Binder.withCleanCallingIdentity(() -> {
+            // the managing app can always modify accounts
+            if (isProfileOwner(callingUid)) {
+                return true;
             }
-        }
-        return true;
+            DevicePolicyManager dpm = (DevicePolicyManager) mContext
+                    .getSystemService(Context.DEVICE_POLICY_SERVICE);
+            String[] typesArray = dpm.getAccountTypesWithManagementDisabledAsUser(userId);
+            if (typesArray == null) {
+                return true;
+            }
+            for (String forbiddenType : typesArray) {
+                if (forbiddenType.equals(accountType)) {
+                    return false;
+                }
+            }
+            return true;
+        });
     }
 
     private boolean isProfileOwner(int uid) {

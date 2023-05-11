@@ -22,7 +22,7 @@ import android.util.ArrayMap;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.expresslog.Counter;
+import com.android.modules.expresslog.Counter;
 
 /** Rate limiter for adding errors into dropbox. */
 public class DropboxRateLimiter {

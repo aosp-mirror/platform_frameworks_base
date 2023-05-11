@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.InsetsSource.Flags;
 import android.view.WindowInsets.Type.InsetsType;
 
 import java.util.Arrays;
@@ -61,9 +62,7 @@ public class InsetsFrameProvider implements Parcelable {
      */
     public static final int SOURCE_ARBITRARY_RECTANGLE = 3;
 
-    private final IBinder mOwner;
-    private final int mIndex;
-    private final @InsetsType int mType;
+    private final int mId;
 
     /**
      * The selection of the starting rectangle to be converted into source frame.
@@ -84,6 +83,13 @@ public class InsetsFrameProvider implements Parcelable {
      * source frame with height of 50, i.e., (0, 150) - (100, 200).
      */
     private Insets mInsetsSize = null;
+
+    /**
+     * Various behavioral options/flags. Default is none.
+     *
+     * @see Flags
+     */
+    private @Flags int mFlags;
 
     /**
      * If null, the size set in insetsSize will be applied to all window types. If it contains
@@ -114,30 +120,30 @@ public class InsetsFrameProvider implements Parcelable {
      * @param type the {@link InsetsType}.
      * @see InsetsSource#createId(Object, int, int)
      */
-    public InsetsFrameProvider(IBinder owner, @IntRange(from = 0, to = 2047) int index,
+    public InsetsFrameProvider(Object owner, @IntRange(from = 0, to = 2047) int index,
             @InsetsType int type) {
-        if (index < 0 || index >= 2048) {
-            throw new IllegalArgumentException();
-        }
-
-        // This throws IllegalArgumentException if the type is not valid.
-        WindowInsets.Type.indexOf(type);
-
-        mOwner = owner;
-        mIndex = index;
-        mType = type;
+        mId = InsetsSource.createId(owner, index, type);
     }
 
-    public IBinder getOwner() {
-        return mOwner;
+    /**
+     * Returns an unique integer which identifies the insets source.
+     */
+    public int getId() {
+        return mId;
     }
 
+    /**
+     * Returns the index specified in {@link #InsetsFrameProvider(IBinder, int, int)}.
+     */
     public int getIndex() {
-        return mIndex;
+        return InsetsSource.getIndex(mId);
     }
 
+    /**
+     * Returns the {@link InsetsType} specified in {@link #InsetsFrameProvider(IBinder, int, int)}.
+     */
     public int getType() {
-        return mType;
+        return InsetsSource.getType(mId);
     }
 
     public InsetsFrameProvider setSource(int source) {
@@ -147,6 +153,15 @@ public class InsetsFrameProvider implements Parcelable {
 
     public int getSource() {
         return mSource;
+    }
+
+    public InsetsFrameProvider setFlags(@Flags int flags, @Flags int mask) {
+        mFlags = (mFlags & ~mask) | (flags & mask);
+        return this;
+    }
+
+    public @Flags int getFlags() {
+        return mFlags;
     }
 
     public InsetsFrameProvider setInsetsSize(Insets insetsSize) {
@@ -194,10 +209,11 @@ public class InsetsFrameProvider implements Parcelable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("InsetsFrameProvider: {");
-        sb.append("owner=").append(mOwner);
-        sb.append(", index=").append(mIndex);
-        sb.append(", type=").append(WindowInsets.Type.toString(mType));
+        sb.append("id=#").append(Integer.toHexString(mId));
+        sb.append(", index=").append(getIndex());
+        sb.append(", type=").append(WindowInsets.Type.toString(getType()));
         sb.append(", source=").append(sourceToString(mSource));
+        sb.append(", flags=[").append(InsetsSource.flagsToString(mFlags)).append("]");
         if (mInsetsSize != null) {
             sb.append(", insetsSize=").append(mInsetsSize);
         }
@@ -226,10 +242,9 @@ public class InsetsFrameProvider implements Parcelable {
     }
 
     public InsetsFrameProvider(Parcel in) {
-        mOwner = in.readStrongBinder();
-        mIndex = in.readInt();
-        mType = in.readInt();
+        mId = in.readInt();
         mSource = in.readInt();
+        mFlags = in.readInt();
         mInsetsSize = in.readTypedObject(Insets.CREATOR);
         mInsetsSizeOverrides = in.createTypedArray(InsetsSizeOverride.CREATOR);
         mArbitraryRectangle = in.readTypedObject(Rect.CREATOR);
@@ -237,17 +252,16 @@ public class InsetsFrameProvider implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeStrongBinder(mOwner);
-        out.writeInt(mIndex);
-        out.writeInt(mType);
+        out.writeInt(mId);
         out.writeInt(mSource);
+        out.writeInt(mFlags);
         out.writeTypedObject(mInsetsSize, flags);
         out.writeTypedArray(mInsetsSizeOverrides, flags);
         out.writeTypedObject(mArbitraryRectangle, flags);
     }
 
     public boolean idEquals(InsetsFrameProvider o) {
-        return Objects.equals(mOwner, o.mOwner) && mIndex == o.mIndex && mType == o.mType;
+        return mId == o.mId;
     }
 
     @Override
@@ -259,8 +273,7 @@ public class InsetsFrameProvider implements Parcelable {
             return false;
         }
         final InsetsFrameProvider other = (InsetsFrameProvider) o;
-        return Objects.equals(mOwner, other.mOwner) && mIndex == other.mIndex
-                && mType == other.mType && mSource == other.mSource
+        return mId == other.mId && mSource == other.mSource && mFlags == other.mFlags
                 && Objects.equals(mInsetsSize, other.mInsetsSize)
                 && Arrays.equals(mInsetsSizeOverrides, other.mInsetsSizeOverrides)
                 && Objects.equals(mArbitraryRectangle, other.mArbitraryRectangle);
@@ -268,7 +281,7 @@ public class InsetsFrameProvider implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mOwner, mIndex, mType, mSource, mInsetsSize,
+        return Objects.hash(mId, mSource, mFlags, mInsetsSize,
                 Arrays.hashCode(mInsetsSizeOverrides), mArbitraryRectangle);
     }
 
@@ -299,7 +312,7 @@ public class InsetsFrameProvider implements Parcelable {
 
         protected InsetsSizeOverride(Parcel in) {
             mWindowType = in.readInt();
-            mInsetsSize = in.readParcelable(null, Insets.class);
+            mInsetsSize = in.readTypedObject(Insets.CREATOR);
         }
 
         public InsetsSizeOverride(int windowType, Insets insetsSize) {
@@ -334,7 +347,7 @@ public class InsetsFrameProvider implements Parcelable {
         @Override
         public void writeToParcel(Parcel out, int flags) {
             out.writeInt(mWindowType);
-            out.writeParcelable(mInsetsSize, flags);
+            out.writeTypedObject(mInsetsSize, flags);
         }
 
         @Override

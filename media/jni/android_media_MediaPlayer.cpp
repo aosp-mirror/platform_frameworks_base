@@ -385,6 +385,10 @@ android_media_MediaPlayer_prepare(JNIEnv *env, jobject thiz, jobject piidParcel)
 
     process_media_player_call( env, thiz, mp->prepare(), "java/io/IOException", "Prepare failed." );
 
+    if (env->ExceptionCheck()) {
+        return UNKNOWN_ERROR;
+    }
+
     // update the piid
     Parcel *request = parcelForJavaObject(env, piidParcel);
     auto reply = std::make_unique<Parcel>();
@@ -406,6 +410,10 @@ android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz, jobject piidPa
     mp->setVideoSurfaceTexture(st);
 
     process_media_player_call( env, thiz, mp->prepareAsync(), "java/io/IOException", "Prepare Async failed." );
+
+    if (env->ExceptionCheck()) {
+        return UNKNOWN_ERROR;
+    }
 
     // update the piid
     Parcel *request = parcelForJavaObject(env, piidParcel);

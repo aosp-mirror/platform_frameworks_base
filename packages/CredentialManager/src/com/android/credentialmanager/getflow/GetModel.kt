@@ -41,10 +41,6 @@ internal fun hasContentToDisplay(state: GetCredentialUiState): Boolean {
             !state.requestDisplayInfo.preferImmediatelyAvailableCredentials)
 }
 
-internal fun isFallbackScreen(state: GetCredentialUiState): Boolean {
-    return state.requestDisplayInfo.preferIdentityDocUi
-}
-
 internal fun findAutoSelectEntry(providerDisplayInfo: ProviderDisplayInfo): CredentialEntryInfo? {
     if (providerDisplayInfo.authenticationEntryList.isNotEmpty()) {
         return null
@@ -173,6 +169,13 @@ data class RequestDisplayInfo(
     val appName: String,
     val preferImmediatelyAvailableCredentials: Boolean,
     val preferIdentityDocUi: Boolean,
+    // A top level branding icon + display name preferred by the app.
+    val preferTopBrandingContent: TopBrandingContent?,
+)
+
+data class TopBrandingContent(
+    val icon: Drawable,
+    val displayName: String,
 )
 
 /**

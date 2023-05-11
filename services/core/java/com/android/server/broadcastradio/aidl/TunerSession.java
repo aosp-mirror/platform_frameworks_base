@@ -46,6 +46,7 @@ final class TunerSession extends ITuner.Stub {
 
     private final RadioLogger mLogger;
     private final RadioModule mModule;
+    final int mUserId;
     final android.hardware.radio.ITunerCallback mCallback;
     private final int mUid;
     private final IBroadcastRadio mService;
@@ -65,6 +66,7 @@ final class TunerSession extends ITuner.Stub {
             android.hardware.radio.ITunerCallback callback) {
         mModule = Objects.requireNonNull(radioModule, "radioModule cannot be null");
         mService = Objects.requireNonNull(service, "service cannot be null");
+        mUserId = Binder.getCallingUserHandle().getIdentifier();
         mCallback = Objects.requireNonNull(callback, "callback cannot be null");
         mUid = Binder.getCallingUid();
         mLogger = new RadioLogger(TAG, TUNER_EVENT_LOGGER_QUEUE_SIZE);

@@ -1051,6 +1051,29 @@ public class SoundTrigger {
             return "ModelParamRange [start=" + mStart + ", end=" + mEnd + "]";
         }
     }
+    /**
+     * SoundTrigger model parameter types.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "MODEL_PARAM" }, value = {
+            MODEL_PARAM_INVALID,
+            MODEL_PARAM_THRESHOLD_FACTOR
+    })
+    public @interface ModelParamTypes {}
+
+    /**
+     * See {@link ModelParams.INVALID}
+     * @hide
+     */
+    @TestApi
+    public static final int MODEL_PARAM_INVALID = ModelParams.INVALID;
+    /**
+     * See {@link ModelParams.THRESHOLD_FACTOR}
+     * @hide
+     */
+    @TestApi
+    public static final int MODEL_PARAM_THRESHOLD_FACTOR = ModelParams.THRESHOLD_FACTOR;
 
     /**
      * Modes for key phrase recognition
@@ -1450,7 +1473,8 @@ public class SoundTrigger {
      *
      *  @hide
      */
-    public static class RecognitionConfig implements Parcelable {
+    @TestApi
+    public static final class RecognitionConfig implements Parcelable {
         /** True if the DSP should capture the trigger sound and make it available for further
          * capture. */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
@@ -1464,6 +1488,7 @@ public class SoundTrigger {
          * options for each keyphrase. */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         @NonNull
+        @SuppressLint("ArrayReturn")
         public final KeyphraseRecognitionExtra keyphrases[];
         /** Opaque data for use by system applications who know about voice engine internals,
          * typically during enrollment. */
@@ -1479,8 +1504,8 @@ public class SoundTrigger {
         public final int audioCapabilities;
 
         public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
-                @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data,
-                int audioCapabilities) {
+                @SuppressLint("ArrayReturn") @Nullable KeyphraseRecognitionExtra[] keyphrases,
+                @Nullable byte[] data, int audioCapabilities) {
             this.captureRequested = captureRequested;
             this.allowMultipleTriggers = allowMultipleTriggers;
             this.keyphrases = keyphrases != null ? keyphrases : new KeyphraseRecognitionExtra[0];
@@ -1490,7 +1515,8 @@ public class SoundTrigger {
 
         @UnsupportedAppUsage
         public RecognitionConfig(boolean captureRequested, boolean allowMultipleTriggers,
-                @Nullable KeyphraseRecognitionExtra[] keyphrases, @Nullable byte[] data) {
+                @SuppressLint("ArrayReturn") @Nullable KeyphraseRecognitionExtra[] keyphrases,
+                @Nullable byte[] data) {
             this(captureRequested, allowMultipleTriggers, keyphrases, data, 0);
         }
 
@@ -1517,7 +1543,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@NonNull Parcel dest, int flags) {
             dest.writeByte((byte) (captureRequested ? 1 : 0));
             dest.writeByte((byte) (allowMultipleTriggers ? 1 : 0));
             dest.writeTypedArray(keyphrases, flags);

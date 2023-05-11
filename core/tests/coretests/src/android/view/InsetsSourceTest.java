@@ -227,5 +227,25 @@ public class InsetsSourceTest {
         assertEquals(numTotalSources, sources.size());
     }
 
+    @Test
+    public void testGetIndex() {
+        for (int index = 0; index < 2048; index++) {
+            for (int type = FIRST; type <= LAST; type = type << 1) {
+                final int id = InsetsSource.createId(null, index, type);
+                assertEquals(index, InsetsSource.getIndex(id));
+            }
+        }
+    }
+
+    @Test
+    public void testGetType() {
+        for (int index = 0; index < 2048; index++) {
+            for (int type = FIRST; type <= LAST; type = type << 1) {
+                final int id = InsetsSource.createId(null, index, type);
+                assertEquals(type, InsetsSource.getType(id));
+            }
+        }
+    }
+
     // Parcel and equals already tested via InsetsStateTest
 }

@@ -69,8 +69,8 @@ public interface JobSchedulerInternal {
      * @return {@code true} if the given notification channel is associated with any user-initiated
      * jobs.
      */
-    boolean isNotificationChannelAssociatedWithAnyUserInitiatedJobs(String notificationChannel,
-            int userId, String packageName);
+    boolean isNotificationChannelAssociatedWithAnyUserInitiatedJobs(
+            @NonNull String notificationChannel, int userId, @NonNull String packageName);
 
     /**
      * Report a snapshot of sync-related jobs back to the sync manager

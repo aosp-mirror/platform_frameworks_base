@@ -803,6 +803,20 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     protected WallpaperData mLastLockWallpaper;
     private IWallpaperManagerCallback mKeyguardListener;
     private boolean mWaitingForUnlock;
+
+    /**
+     * Flag set to true after reboot if the home wallpaper is waiting for the device to be unlocked.
+     * This happens for wallpapers that are not direct-boot aware; they can only be rendered after
+     * the user unlocks the device for the first time after a reboot. In the meantime, the default
+     * wallpaper is shown instead.
+     */
+    private boolean mHomeWallpaperWaitingForUnlock;
+
+    /**
+     * Flag set to true after reboot if the lock wallpaper is waiting for the device to be unlocked.
+     */
+    private boolean mLockWallpaperWaitingForUnlock;
+
     private boolean mShuttingDown;
 
     /**
@@ -1229,10 +1243,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     return;
                 }
 
+                // Live wallpapers always are system wallpapers unless lock screen live wp is
+                // enabled.
+                which = mIsLockscreenLiveWallpaperEnabled ? mWallpaper.mWhich : FLAG_SYSTEM;
                 mWallpaper.primaryColors = primaryColors;
 
-                // Live wallpapers always are system wallpapers.
-                which = FLAG_SYSTEM;
                 // It's also the lock screen wallpaper when we don't have a bitmap in there.
                 if (displayId == DEFAULT_DISPLAY) {
                     final WallpaperData lockedWallpaper = mLockWallpaperMap.get(mWallpaper.userId);
@@ -1338,9 +1353,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
         void complete() {
             // Only changes from home+lock to just home or lock need attention
-            // If setting the wallpaper fails, this callback will be called
-            // when the wallpaper is detached, in which case wallpapers may have
-            // already changed. Make sure we're not overwriting a more recent wallpaper.
             if (mNewWallpaper.mSystemWasBoth) {
                 if (DEBUG) {
                     Slog.v(TAG, "Handling change from system+lock wallpaper");
@@ -1363,7 +1375,8 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                     mOriginalSystem.wallpaperComponent;
                             lockWp.connection = mOriginalSystem.connection;
                             lockWp.connection.mWallpaper = lockWp;
-                            updateEngineFlags(mOriginalSystem, FLAG_LOCK);
+                            mOriginalSystem.mWhich = FLAG_LOCK;
+                            updateEngineFlags(mOriginalSystem);
                             notifyWallpaperColorsChanged(lockWp, FLAG_LOCK);
                         } else {
                             // Failed rename, use current system wp for both
@@ -1372,7 +1385,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             }
                             WallpaperData currentSystem = mWallpaperMap.get(mNewWallpaper.userId);
                             currentSystem.mWhich = FLAG_SYSTEM | FLAG_LOCK;
-                            updateEngineFlags(currentSystem, FLAG_SYSTEM | FLAG_LOCK);
+                            updateEngineFlags(currentSystem);
                             mLockWallpaperMap.remove(mNewWallpaper.userId);
                         }
                     } else {
@@ -1381,7 +1394,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                             Slog.v(TAG, "live system+lock to system success");
                         }
                         mOriginalSystem.mWhich = FLAG_LOCK;
-                        updateEngineFlags(mOriginalSystem, FLAG_LOCK);
+                        updateEngineFlags(mOriginalSystem);
                         mLockWallpaperMap.put(mNewWallpaper.userId, mOriginalSystem);
                         mLastLockWallpaper = mOriginalSystem;
                         notifyWallpaperColorsChanged(mOriginalSystem, FLAG_LOCK);
@@ -1394,7 +1407,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     WallpaperData currentSystem = mWallpaperMap.get(mNewWallpaper.userId);
                     if (currentSystem.wallpaperId == mOriginalSystem.wallpaperId) {
                         currentSystem.mWhich = FLAG_SYSTEM;
-                        updateEngineFlags(currentSystem, FLAG_SYSTEM);
+                        updateEngineFlags(currentSystem);
                     }
                 }
             }
@@ -1406,24 +1419,6 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 Slog.v(TAG, "new lastWp: " + mLastWallpaper);
                 Slog.v(TAG, "new lastLockWp: " + mLastLockWallpaper);
             }
-        }
-
-        private void updateEngineFlags(WallpaperData wallpaper, @SetWallpaperFlags int which) {
-            if (wallpaper.connection == null) {
-                return;
-            }
-            wallpaper.connection.forEachDisplayConnector(
-                    connector -> {
-                        try {
-                            if (connector.mEngine != null) {
-                                connector.mEngine.setWallpaperFlags(which);
-                                mWindowManagerInternal.setWallpaperShowWhenLocked(
-                                        connector.mToken, (which & FLAG_LOCK) != 0);
-                            }
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Failed to update wallpaper engine flags", e);
-                        }
-                    });
         }
     }
 
@@ -1613,6 +1608,15 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         public void onDisplayReady(int displayId) {
             onDisplayReadyInternal(displayId);
         }
+
+        @Override
+        public void onScreenTurnedOn(int displayId) {
+            notifyScreenTurnedOn(displayId);
+        }
+        @Override
+        public void onScreenTurningOn(int displayId) {
+            notifyScreenTurningOn(displayId);
+        }
     }
 
     void initialize() {
@@ -1780,7 +1784,23 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     public void onUnlockUser(final int userId) {
         synchronized (mLock) {
             if (mCurrentUserId == userId) {
-                if (mWaitingForUnlock) {
+                if (mIsLockscreenLiveWallpaperEnabled) {
+                    if (mHomeWallpaperWaitingForUnlock) {
+                        final WallpaperData systemWallpaper =
+                                getWallpaperSafeLocked(userId, FLAG_SYSTEM);
+                        switchWallpaper(systemWallpaper, null);
+                        // TODO(b/278261563): call notifyCallbacksLocked inside switchWallpaper
+                        notifyCallbacksLocked(systemWallpaper);
+                    }
+                    if (mLockWallpaperWaitingForUnlock) {
+                        final WallpaperData lockWallpaper =
+                                getWallpaperSafeLocked(userId, FLAG_LOCK);
+                        switchWallpaper(lockWallpaper, null);
+                        notifyCallbacksLocked(lockWallpaper);
+                    }
+                }
+
+                if (mWaitingForUnlock && !mIsLockscreenLiveWallpaperEnabled) {
                     // the desired wallpaper is not direct-boot aware, load it now
                     final WallpaperData systemWallpaper =
                             getWallpaperSafeLocked(userId, FLAG_SYSTEM);
@@ -1835,12 +1855,22 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
                 mCurrentUserId = userId;
                 systemWallpaper = getWallpaperSafeLocked(userId, FLAG_SYSTEM);
-                final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);
-                lockWallpaper = tmpLockWallpaper == null ? systemWallpaper : tmpLockWallpaper;
+
+                if (mIsLockscreenLiveWallpaperEnabled) {
+                    lockWallpaper = systemWallpaper.mWhich == (FLAG_LOCK | FLAG_SYSTEM)
+                            ? systemWallpaper : getWallpaperSafeLocked(userId, FLAG_LOCK);
+                } else {
+                    final WallpaperData tmpLockWallpaper = mLockWallpaperMap.get(userId);
+                    lockWallpaper = tmpLockWallpaper == null ? systemWallpaper : tmpLockWallpaper;
+                }
+
                 // Not started watching yet, in case wallpaper data was loaded for other reasons.
                 if (systemWallpaper.wallpaperObserver == null) {
                     systemWallpaper.wallpaperObserver = new WallpaperObserver(systemWallpaper);
                     systemWallpaper.wallpaperObserver.startWatching();
+                }
+                if (mIsLockscreenLiveWallpaperEnabled && lockWallpaper != systemWallpaper)  {
+                    switchWallpaper(lockWallpaper, null);
                 }
                 switchWallpaper(systemWallpaper, reply);
             }
@@ -1860,6 +1890,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     void switchWallpaper(WallpaperData wallpaper, IRemoteCallback reply) {
         synchronized (mLock) {
             mWaitingForUnlock = false;
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                if ((wallpaper.mWhich & FLAG_SYSTEM) != 0) mHomeWallpaperWaitingForUnlock = false;
+                if ((wallpaper.mWhich & FLAG_LOCK) != 0) mLockWallpaperWaitingForUnlock = false;
+            }
+
             final ComponentName cname = wallpaper.wallpaperComponent != null ?
                     wallpaper.wallpaperComponent : wallpaper.nextWallpaperComponent;
             if (!bindWallpaperComponentLocked(cname, true, false, wallpaper, reply)) {
@@ -1870,6 +1905,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     si = mIPackageManager.getServiceInfo(cname,
                             PackageManager.MATCH_DIRECT_BOOT_UNAWARE, wallpaper.userId);
                 } catch (RemoteException ignored) {
+                }
+
+                if (mIsLockscreenLiveWallpaperEnabled) {
+                    onSwitchWallpaperFailLocked(wallpaper, reply, si);
+                    return;
                 }
 
                 if (si == null) {
@@ -1887,6 +1927,43 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                 }
             }
         }
+    }
+
+    /**
+     * Fallback method if a wallpaper fails to load on boot or after a user switch.
+     * Only called if mIsLockscreenLiveWallpaperEnabled is true.
+     */
+    private void onSwitchWallpaperFailLocked(
+            WallpaperData wallpaper, IRemoteCallback reply, ServiceInfo serviceInfo) {
+
+        if (serviceInfo == null) {
+            Slog.w(TAG, "Failure starting previous wallpaper; clearing");
+
+            if (wallpaper.mWhich == (FLAG_LOCK | FLAG_SYSTEM)) {
+                clearWallpaperLocked(false, FLAG_SYSTEM, wallpaper.userId, null);
+                clearWallpaperLocked(false, FLAG_LOCK, wallpaper.userId, reply);
+            } else {
+                clearWallpaperLocked(false, wallpaper.mWhich, wallpaper.userId, reply);
+            }
+            return;
+        }
+        Slog.w(TAG, "Wallpaper isn't direct boot aware; using fallback until unlocked");
+        // We might end up persisting the current wallpaper data
+        // while locked, so pretend like the component was actually
+        // bound into place
+        wallpaper.wallpaperComponent = wallpaper.nextWallpaperComponent;
+        final WallpaperData fallback = new WallpaperData(wallpaper.userId, wallpaper.mWhich);
+
+        // files from the previous static wallpaper may still be stored in memory.
+        // delete them in order to show the default wallpaper.
+        if (wallpaper.wallpaperFile.exists()) {
+            wallpaper.wallpaperFile.delete();
+            wallpaper.cropFile.delete();
+        }
+
+        bindWallpaperComponentLocked(mImageWallpaper, true, false, fallback, reply);
+        if ((wallpaper.mWhich & FLAG_SYSTEM) != 0) mHomeWallpaperWaitingForUnlock = true;
+        if ((wallpaper.mWhich & FLAG_LOCK) != 0) mLockWallpaperWaitingForUnlock = true;
     }
 
     @Override
@@ -2368,12 +2445,36 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
 
     /**
      * TODO(multi-display) Extends this method with specific display.
-     * Propagate ambient state to wallpaper engine.
+     * Propagate ambient state to wallpaper engine(s).
      *
      * @param inAmbientMode {@code true} when in ambient mode, {@code false} otherwise.
      * @param animationDuration Duration of the animation, or 0 when immediate.
      */
     public void setInAmbientMode(boolean inAmbientMode, long animationDuration) {
+        if (mIsLockscreenLiveWallpaperEnabled) {
+            List<IWallpaperEngine> engines = new ArrayList<>();
+            synchronized (mLock) {
+                mInAmbientMode = inAmbientMode;
+                for (WallpaperData data : getActiveWallpapers()) {
+                    if (data.connection.mInfo == null
+                            || data.connection.mInfo.supportsAmbientMode()) {
+                        // TODO(multi-display) Extends this method with specific display.
+                        IWallpaperEngine engine = data.connection
+                                .getDisplayConnectorOrCreate(DEFAULT_DISPLAY).mEngine;
+                        if (engine != null) engines.add(engine);
+                    }
+                }
+            }
+            for (IWallpaperEngine engine : engines) {
+                try {
+                    engine.setInAmbientMode(inAmbientMode, animationDuration);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Failed to set ambient mode", e);
+                }
+            }
+            return;
+        }
+
         final IWallpaperEngine engine;
         synchronized (mLock) {
             mInAmbientMode = inAmbientMode;
@@ -2398,10 +2499,25 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
-     * Propagate a wake event to the wallpaper engine.
+     * Propagate a wake event to the wallpaper engine(s).
      */
     public void notifyWakingUp(int x, int y, @NonNull Bundle extras) {
         synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    data.connection.forEachDisplayConnector(displayConnector -> {
+                        if (displayConnector.mEngine != null) {
+                            try {
+                                displayConnector.mEngine.dispatchWallpaperCommand(
+                                        WallpaperManager.COMMAND_WAKING_UP, x, y, -1, extras);
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to dispatch COMMAND_WAKING_UP", e);
+                            }
+                        }
+                    });
+                }
+                return;
+            }
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
             if (data != null && data.connection != null) {
                 data.connection.forEachDisplayConnector(
@@ -2420,10 +2536,26 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     }
 
     /**
-     * Propagate a sleep event to the wallpaper engine.
+     * Propagate a sleep event to the wallpaper engine(s).
      */
     public void notifyGoingToSleep(int x, int y, @NonNull Bundle extras) {
         synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    data.connection.forEachDisplayConnector(displayConnector -> {
+                        if (displayConnector.mEngine != null) {
+                            try {
+                                displayConnector.mEngine.dispatchWallpaperCommand(
+                                        WallpaperManager.COMMAND_GOING_TO_SLEEP, x, y, -1,
+                                        extras);
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to dispatch COMMAND_GOING_TO_SLEEP", e);
+                            }
+                        }
+                    });
+                }
+                return;
+            }
             final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
             if (data != null && data.connection != null) {
                 data.connection.forEachDisplayConnector(
@@ -2442,6 +2574,86 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    /**
+     * Propagates screen turned on event to wallpaper engine(s).
+     */
+    @Override
+    public void notifyScreenTurnedOn(int displayId) {
+        synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    if (data.connection.containsDisplay(displayId)) {
+                        final IWallpaperEngine engine = data.connection
+                                .getDisplayConnectorOrCreate(displayId).mEngine;
+                        if (engine != null) {
+                            try {
+                                engine.onScreenTurnedOn();
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to notify that the screen turned on", e);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            if (data != null
+                    && data.connection != null
+                    && data.connection.containsDisplay(displayId)) {
+                final IWallpaperEngine engine = data.connection
+                        .getDisplayConnectorOrCreate(displayId).mEngine;
+                if (engine != null) {
+                    try {
+                        engine.onScreenTurnedOn();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    /**
+     * Propagate screen turning on event to wallpaper engine(s).
+     */
+    @Override
+    public void notifyScreenTurningOn(int displayId) {
+        synchronized (mLock) {
+            if (mIsLockscreenLiveWallpaperEnabled) {
+                for (WallpaperData data : getActiveWallpapers()) {
+                    if (data.connection.containsDisplay(displayId)) {
+                        final IWallpaperEngine engine = data.connection
+                                .getDisplayConnectorOrCreate(displayId).mEngine;
+                        if (engine != null) {
+                            try {
+                                engine.onScreenTurningOn();
+                            } catch (RemoteException e) {
+                                Slog.w(TAG, "Failed to notify that the screen is turning on", e);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+            final WallpaperData data = mWallpaperMap.get(mCurrentUserId);
+            if (data != null
+                    && data.connection != null
+                    && data.connection.containsDisplay(displayId)) {
+                final IWallpaperEngine engine = data.connection
+                        .getDisplayConnectorOrCreate(displayId).mEngine;
+                if (engine != null) {
+                    try {
+                        engine.onScreenTurningOn();
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public boolean setLockWallpaperCallback(IWallpaperManagerCallback cb) {
         checkPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW);
@@ -2449,6 +2661,17 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             mKeyguardListener = cb;
         }
         return true;
+    }
+
+    private WallpaperData[] getActiveWallpapers() {
+        WallpaperData systemWallpaper = mWallpaperMap.get(mCurrentUserId);
+        WallpaperData lockWallpaper = mLockWallpaperMap.get(mCurrentUserId);
+        boolean systemValid = systemWallpaper != null && systemWallpaper.connection != null;
+        boolean lockValid = lockWallpaper != null && lockWallpaper.connection != null;
+        return systemValid && lockValid ? new WallpaperData[]{systemWallpaper, lockWallpaper}
+                : systemValid ? new WallpaperData[]{systemWallpaper}
+                : lockValid ? new WallpaperData[]{lockWallpaper}
+                : new WallpaperData[0];
     }
 
     private IWallpaperEngine getEngine(int which, int userId, int displayId) {
@@ -2950,6 +3173,9 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                                 newWallpaper.userId);
                         if (lockedWallpaper != null) {
                             detachWallpaperLocked(lockedWallpaper);
+                            if (same) {
+                                updateEngineFlags(newWallpaper);
+                            }
                         }
                         mLockWallpaperMap.remove(newWallpaper.userId);
                     }
@@ -3285,6 +3511,27 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         }
     }
 
+    // Updates the given wallpaper's Engine so that its destination flags are the same as those of
+    // the wallpaper, e.g., after a wallpaper has been changed from displaying on home+lock to home
+    // or lock only.
+    private void updateEngineFlags(WallpaperData wallpaper) {
+        if (wallpaper.connection == null) {
+            return;
+        }
+        wallpaper.connection.forEachDisplayConnector(
+                connector -> {
+                    try {
+                        if (connector.mEngine != null) {
+                            connector.mEngine.setWallpaperFlags(wallpaper.mWhich);
+                            mWindowManagerInternal.setWallpaperShowWhenLocked(
+                                    connector.mToken, (wallpaper.mWhich & FLAG_LOCK) != 0);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to update wallpaper engine flags", e);
+                    }
+                });
+    }
+
     private void clearWallpaperComponentLocked(WallpaperData wallpaper) {
         wallpaper.wallpaperComponent = null;
         detachWallpaperLocked(wallpaper);
@@ -3569,6 +3816,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
     private void dumpWallpaper(WallpaperData wallpaper, PrintWriter pw) {
         if (wallpaper == null) {
             pw.println(" (null entry)");
+            return;
         }
         pw.print(" User "); pw.print(wallpaper.userId);
         pw.print(": id="); pw.print(wallpaper.wallpaperId);

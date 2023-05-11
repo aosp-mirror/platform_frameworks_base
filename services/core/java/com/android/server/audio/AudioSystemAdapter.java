@@ -162,6 +162,16 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
+     * Empties the routing cache if enabled.
+     */
+    public void clearRoutingCache() {
+        if (DEBUG_CACHE) {
+            Log.d(TAG, "---- routing cache clear (from java) ----------");
+        }
+        invalidateRoutingCache();
+    }
+
+    /**
      * @see AudioManager#addOnDevicesForAttributesChangedListener(
      *      AudioAttributes, Executor, OnDevicesForAttributesChangedListener)
      */
@@ -435,7 +445,7 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
     }
 
     /**
-     * Same as {@link AudioSystem#removeDevicesRoleForCapturePreset(int, int, int[], String[])}
+     * Same as {@link AudioSystem#removeDevicesRoleForCapturePreset(int, int, List)}
      * @param capturePreset
      * @param role
      * @param devicesToRemove
@@ -445,6 +455,19 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
             int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devicesToRemove) {
         invalidateRoutingCache();
         return AudioSystem.removeDevicesRoleForCapturePreset(capturePreset, role, devicesToRemove);
+    }
+
+    /**
+     * Same as {@link AudioSystem#addDevicesRoleForCapturePreset(int, int, List)}
+     * @param capturePreset the capture preset to configure
+     * @param role the role of the devices
+     * @param devices the list of devices to be added as role for the given capture preset
+     * @return {@link #SUCCESS} if successfully added
+     */
+    public int addDevicesRoleForCapturePreset(
+            int capturePreset, int role, @NonNull List<AudioDeviceAttributes> devices) {
+        invalidateRoutingCache();
+        return AudioSystem.addDevicesRoleForCapturePreset(capturePreset, role, devices);
     }
 
     /**
@@ -464,6 +487,7 @@ public class AudioSystemAdapter implements AudioSystem.RoutingUpdateCallback,
      * @return
      */
     public int setParameters(String keyValuePairs) {
+        invalidateRoutingCache();
         return AudioSystem.setParameters(keyValuePairs);
     }
 

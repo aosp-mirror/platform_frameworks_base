@@ -841,6 +841,19 @@ public final class KeyboardShortcutListSearch {
         BottomSheetBehavior<FrameLayout> behavior = BottomSheetBehavior.from(bottomSheet);
         behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
         behavior.setSkipCollapsed(true);
+        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+                    @Override
+                    public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                        if (newState == BottomSheetBehavior.STATE_DRAGGING) {
+                            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                        }
+                    }
+
+                    @Override
+                    public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                        // Do nothing.
+                    }
+                });
 
         mKeyboardShortcutsBottomSheetDialog.setCanceledOnTouchOutside(true);
         Window keyboardShortcutsWindow = mKeyboardShortcutsBottomSheetDialog.getWindow();

@@ -391,12 +391,6 @@ public class VisualQueryDetector {
         }
 
         @Override
-        public void onError(int status) throws RemoteException {
-            Slog.v(TAG, "Initialization Error: (" + status + ")");
-            // Do nothing
-        }
-
-        @Override
         public void onHotwordDetectionServiceFailure(
                 HotwordDetectionServiceFailure hotwordDetectionServiceFailure)
                 throws RemoteException {
@@ -417,6 +411,11 @@ public class VisualQueryDetector {
                     mCallback.onUnknownFailure("Error data is null");
                 }
             }));
+        }
+
+        @Override
+        public void onSoundTriggerFailure(SoundTriggerFailure soundTriggerFailure) {
+            Slog.wtf(TAG, "Unexpected STFailure in VisualQueryDetector" + soundTriggerFailure);
         }
 
         @Override

@@ -606,6 +606,7 @@ public abstract class IPackageManagerBase extends IPackageManager.Stub {
         final Computer snapshot = snapshot();
         // Return null for InstantApps.
         if (snapshot.getInstantAppPackageName(Binder.getCallingUid()) != null) {
+            Log.w(PackageManagerService.TAG, "Returning null PackageInstaller for InstantApps");
             return null;
         }
         return mInstallerService;

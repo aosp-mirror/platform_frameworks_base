@@ -38,8 +38,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.provider.Settings;
 import android.telephony.ServiceState;
 import android.telephony.SubscriptionInfo;
@@ -52,6 +50,8 @@ import android.text.TextUtils;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
+import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository;
+import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
 import com.android.systemui.telephony.TelephonyListenerManager;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
@@ -88,8 +88,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     private static final SubscriptionInfo TEST_SUBSCRIPTION_ROAMING = new SubscriptionInfo(0, "", 0,
             TEST_CARRIER, TEST_CARRIER, NAME_SOURCE_CARRIER_ID, 0xFFFFFF, "",
             DATA_ROAMING_ENABLE, null, null, null, null, false, null, "");
-    @Mock
-    private WifiManager mWifiManager;
+    private FakeWifiRepository mWifiRepository = new FakeWifiRepository();
     @Mock
     private WakefulnessLifecycle mWakefulnessLifecycle;
     @Mock
@@ -121,7 +120,6 @@ public class CarrierTextManagerTest extends SysuiTestCase {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        mContext.addMockSystemService(WifiManager.class, mWifiManager);
         mContext.addMockSystemService(PackageManager.class, mPackageManager);
         when(mPackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)).thenReturn(true);
         mContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
@@ -144,7 +142,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mTelephonyManager.getActiveModemCount()).thenReturn(3);
 
         mCarrierTextManager = new CarrierTextManager.Builder(
-                mContext, mContext.getResources(), mWifiManager,
+                mContext, mContext.getResources(), mWifiRepository,
                 mTelephonyManager, mTelephonyListenerManager, mWakefulnessLifecycle, mMainExecutor,
                 mBgExecutor, mKeyguardUpdateMonitor)
                 .setShowAirplaneMode(true)
@@ -364,7 +362,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         when(mKeyguardUpdateMonitor.getSimState(anyInt())).thenReturn(
                 TelephonyManager.SIM_STATE_READY);
         when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(list);
-        mockWifi();
+
+        assertFalse(mWifiRepository.isWifiConnectedWithValidSsid());
+        mWifiRepository.setWifiNetwork(
+                new WifiNetworkModel.Active(0, false, 0, "", false, false, null));
+        assertTrue(mWifiRepository.isWifiConnectedWithValidSsid());
 
         mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
         ServiceState ss = mock(ServiceState.class);
@@ -383,13 +385,6 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         // There's no airplane mode if at least one SIM is State.READY and there's wifi
         assertFalse("Device should not be in airplane mode", captor.getValue().airplaneMode);
         assertNotEquals(AIRPLANE_MODE_TEXT, captor.getValue().carrierText);
-    }
-
-    private void mockWifi() {
-        when(mWifiManager.isWifiEnabled()).thenReturn(true);
-        WifiInfo wifiInfo = mock(WifiInfo.class);
-        when(wifiInfo.getBSSID()).thenReturn("");
-        when(mWifiManager.getConnectionInfo()).thenReturn(wifiInfo);
     }
 
     @Test

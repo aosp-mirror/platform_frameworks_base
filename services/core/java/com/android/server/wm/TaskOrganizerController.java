@@ -18,6 +18,9 @@ package com.android.server.wm;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.TaskInfo.cameraCompatControlStateToString;
+import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NONE;
+import static android.window.StartingWindowRemovalInfo.DEFER_MODE_NORMAL;
+import static android.window.StartingWindowRemovalInfo.DEFER_MODE_ROTATION;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
 import static com.android.server.wm.ActivityTaskManagerService.enforceTaskPermission;
@@ -681,12 +684,24 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final StartingWindowRemovalInfo removalInfo = new StartingWindowRemovalInfo();
         removalInfo.taskId = task.mTaskId;
         removalInfo.playRevealAnimation = prepareAnimation
+                && task.getDisplayContent() != null
                 && task.getDisplayInfo().state == Display.STATE_ON;
         final boolean playShiftUpAnimation = !task.inMultiWindowMode();
         final ActivityRecord topActivity = task.topActivityContainsStartingWindow();
         if (topActivity != null) {
-            removalInfo.deferRemoveForIme = topActivity.mDisplayContent
-                    .mayImeShowOnLaunchingActivity(topActivity);
+            // Set defer remove mode for IME
+            final DisplayContent dc = topActivity.getDisplayContent();
+            final WindowState imeWindow = dc.mInputMethodWindow;
+            if (topActivity.isVisibleRequested() && imeWindow != null
+                    && dc.mayImeShowOnLaunchingActivity(topActivity)
+                    && dc.isFixedRotationLaunchingApp(topActivity)) {
+                removalInfo.deferRemoveForImeMode = DEFER_MODE_ROTATION;
+            } else if (dc.mayImeShowOnLaunchingActivity(topActivity)) {
+                removalInfo.deferRemoveForImeMode = DEFER_MODE_NORMAL;
+            } else {
+                removalInfo.deferRemoveForImeMode = DEFER_MODE_NONE;
+            }
+
             final WindowState mainWindow =
                     topActivity.findMainWindow(false/* includeStartingApp */);
             // No app window for this activity, app might be crashed.

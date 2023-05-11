@@ -213,9 +213,17 @@ public final class WallpaperColors implements Parcelable {
                     .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
                     .generate();
         } else {
+            // in any case, always use between 5 and 128 clusters
+            int minClusters = 5;
+            int maxClusters = 128;
+
+            // if the bitmap is very small, use bitmapArea/16 clusters instead of 128
+            int minPixelsPerCluster = 16;
+            int numberOfColors = Math.max(minClusters,
+                    Math.min(maxClusters, bitmapArea / minPixelsPerCluster));
             palette = Palette
                     .from(bitmap, new CelebiQuantizer())
-                    .maximumColorCount(128)
+                    .maximumColorCount(numberOfColors)
                     .resizeBitmapArea(MAX_WALLPAPER_EXTRACTION_AREA)
                     .generate();
         }

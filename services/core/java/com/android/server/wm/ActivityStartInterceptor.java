@@ -23,7 +23,6 @@ import static android.app.PendingIntent.FLAG_IMMUTABLE;
 import static android.app.PendingIntent.FLAG_ONE_SHOT;
 import static android.app.admin.DevicePolicyManager.EXTRA_RESTRICTION;
 import static android.app.admin.DevicePolicyManager.POLICY_SUSPEND_PACKAGES;
-import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.Context.KEYGUARD_SERVICE;
 import static android.content.Intent.EXTRA_INTENT;
 import static android.content.Intent.EXTRA_PACKAGE_NAME;
@@ -503,8 +502,7 @@ class ActivityStartInterceptor {
             @ActivityInterceptorCallback.OrderedId int orderId,
             @NonNull ActivityInterceptorCallback.ActivityInterceptorInfo info) {
         if (orderId == MAINLINE_SDK_SANDBOX_ORDER_ID) {
-            return info.getIntent() != null && info.getIntent().getAction() != null
-                    && info.getIntent().getAction().equals(ACTION_START_SANDBOXED_ACTIVITY);
+            return info.getIntent() != null && info.getIntent().isSandboxActivity(mServiceContext);
         }
         return true;
     }
@@ -513,8 +511,7 @@ class ActivityStartInterceptor {
             @ActivityInterceptorCallback.OrderedId int orderId,
             @NonNull ActivityInterceptorCallback.ActivityInterceptorInfo info) {
         if (orderId == MAINLINE_SDK_SANDBOX_ORDER_ID) {
-            return info.getIntent() != null && info.getIntent().getAction() != null
-                    && info.getIntent().getAction().equals(ACTION_START_SANDBOXED_ACTIVITY);
+            return info.getIntent() != null && info.getIntent().isSandboxActivity(mServiceContext);
         }
         return true;
     }

@@ -16,6 +16,7 @@
 
 package com.android.server.companion.datatransfer.contextsync;
 
+import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -32,21 +33,22 @@ import com.android.internal.annotations.VisibleForTesting;
 import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.UUID;
 
 /** Data holder for a telecom call and additional metadata. */
 public class CrossDeviceCall {
 
     private static final String TAG = "CrossDeviceCall";
 
+    public static final String EXTRA_CALL_ID =
+            "com.android.companion.datatransfer.contextsync.extra.CALL_ID";
     private static final int APP_ICON_BITMAP_DIMENSION = 256;
 
-    private static final AtomicLong sNextId = new AtomicLong(1);
-
-    private final long mId;
-    private final Call mCall;
+    private final String mId;
+    private Call mCall;
     @VisibleForTesting boolean mIsEnterprise;
     @VisibleForTesting boolean mIsOtt;
+    private final String mCallingAppPackageName;
     private String mCallingAppName;
     private byte[] mCallingAppIcon;
     private String mCallerDisplayName;
@@ -55,32 +57,36 @@ public class CrossDeviceCall {
     private boolean mIsMuted;
     private final Set<Integer> mControls = new HashSet<>();
 
-    public CrossDeviceCall(PackageManager packageManager, Call call,
+    public CrossDeviceCall(PackageManager packageManager, @NonNull Call call,
             CallAudioState callAudioState) {
-        mId = sNextId.getAndIncrement();
+        this(packageManager, call.getDetails(), callAudioState);
         mCall = call;
-        final String callingAppPackageName = call != null
-                ? call.getDetails().getAccountHandle().getComponentName().getPackageName() : null;
-        mIsOtt = call != null
-                && (call.getDetails().getCallCapabilities() & Call.Details.PROPERTY_SELF_MANAGED)
+        call.putExtra(EXTRA_CALL_ID, mId);
+    }
+
+    CrossDeviceCall(PackageManager packageManager, Call.Details callDetails,
+            CallAudioState callAudioState) {
+        final String predefinedId = callDetails.getIntentExtras() != null
+                ? callDetails.getIntentExtras().getString(EXTRA_CALL_ID) : null;
+        mId = predefinedId != null ? predefinedId : UUID.randomUUID().toString();
+        mCallingAppPackageName =
+                callDetails.getAccountHandle().getComponentName().getPackageName();
+        mIsOtt = (callDetails.getCallCapabilities() & Call.Details.PROPERTY_SELF_MANAGED)
                 == Call.Details.PROPERTY_SELF_MANAGED;
-        mIsEnterprise = call != null
-                && (call.getDetails().getCallProperties() & Call.Details.PROPERTY_ENTERPRISE_CALL)
+        mIsEnterprise = (callDetails.getCallProperties() & Call.Details.PROPERTY_ENTERPRISE_CALL)
                 == Call.Details.PROPERTY_ENTERPRISE_CALL;
         try {
             final ApplicationInfo applicationInfo = packageManager
-                    .getApplicationInfo(callingAppPackageName,
+                    .getApplicationInfo(mCallingAppPackageName,
                             PackageManager.ApplicationInfoFlags.of(0));
             mCallingAppName = packageManager.getApplicationLabel(applicationInfo).toString();
             mCallingAppIcon = renderDrawableToByteArray(
                     packageManager.getApplicationIcon(applicationInfo));
         } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "Could not get application info for package " + callingAppPackageName, e);
+            Slog.e(TAG, "Could not get application info for package " + mCallingAppPackageName, e);
         }
         mIsMuted = callAudioState != null && callAudioState.isMuted();
-        if (call != null) {
-            updateCallDetails(call.getDetails());
-        }
+        updateCallDetails(callDetails);
     }
 
     private byte[] renderDrawableToByteArray(Drawable drawable) {
@@ -105,10 +111,10 @@ public class CrossDeviceCall {
             final Canvas canvas = new Canvas(bitmap);
             drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
             drawable.draw(canvas);
+            return renderBitmapToByteArray(bitmap);
         } finally {
             bitmap.recycle();
         }
-        return renderBitmapToByteArray(bitmap);
     }
 
     private byte[] renderBitmapToByteArray(Bitmap bitmap) {
@@ -136,7 +142,7 @@ public class CrossDeviceCall {
         if (mStatus == android.companion.Telecom.Call.RINGING) {
             mStatus = android.companion.Telecom.Call.RINGING_SILENCED;
         }
-        mControls.remove(android.companion.Telecom.Call.SILENCE);
+        mControls.remove(android.companion.Telecom.SILENCE);
     }
 
     @VisibleForTesting
@@ -147,30 +153,31 @@ public class CrossDeviceCall {
         mControls.clear();
         if (mStatus == android.companion.Telecom.Call.RINGING
                 || mStatus == android.companion.Telecom.Call.RINGING_SILENCED) {
-            mControls.add(android.companion.Telecom.Call.ACCEPT);
-            mControls.add(android.companion.Telecom.Call.REJECT);
+            mControls.add(android.companion.Telecom.ACCEPT);
+            mControls.add(android.companion.Telecom.REJECT);
             if (mStatus == android.companion.Telecom.Call.RINGING) {
-                mControls.add(android.companion.Telecom.Call.SILENCE);
+                mControls.add(android.companion.Telecom.SILENCE);
             }
         }
         if (mStatus == android.companion.Telecom.Call.ONGOING
                 || mStatus == android.companion.Telecom.Call.ON_HOLD) {
-            mControls.add(android.companion.Telecom.Call.END);
+            mControls.add(android.companion.Telecom.END);
             if (callDetails.can(Call.Details.CAPABILITY_HOLD)) {
                 mControls.add(
                         mStatus == android.companion.Telecom.Call.ON_HOLD
-                                ? android.companion.Telecom.Call.TAKE_OFF_HOLD
-                                : android.companion.Telecom.Call.PUT_ON_HOLD);
+                                ? android.companion.Telecom.TAKE_OFF_HOLD
+                                : android.companion.Telecom.PUT_ON_HOLD);
             }
         }
         if (mStatus == android.companion.Telecom.Call.ONGOING && callDetails.can(
                 Call.Details.CAPABILITY_MUTE)) {
-            mControls.add(mIsMuted ? android.companion.Telecom.Call.UNMUTE
-                    : android.companion.Telecom.Call.MUTE);
+            mControls.add(mIsMuted ? android.companion.Telecom.UNMUTE
+                    : android.companion.Telecom.MUTE);
         }
     }
 
-    private int convertStateToStatus(int callState) {
+    /** Converts a Telecom call state to a Context Sync status. */
+    public static int convertStateToStatus(int callState) {
         switch (callState) {
             case Call.STATE_HOLDING:
                 return android.companion.Telecom.Call.ON_HOLD;
@@ -178,21 +185,31 @@ public class CrossDeviceCall {
                 return android.companion.Telecom.Call.ONGOING;
             case Call.STATE_RINGING:
                 return android.companion.Telecom.Call.RINGING;
-            case Call.STATE_NEW:
-            case Call.STATE_DIALING:
-            case Call.STATE_DISCONNECTED:
-            case Call.STATE_SELECT_PHONE_ACCOUNT:
-            case Call.STATE_CONNECTING:
-            case Call.STATE_DISCONNECTING:
-            case Call.STATE_PULLING_CALL:
-            case Call.STATE_AUDIO_PROCESSING:
-            case Call.STATE_SIMULATED_RINGING:
             default:
                 return android.companion.Telecom.Call.UNKNOWN_STATUS;
         }
     }
 
-    public long getId() {
+    /**
+     * Converts a Context Sync status to a Telecom call state. Note that this is lossy for
+     * and RINGING_SILENCED, as Telecom does not distinguish between RINGING and RINGING_SILENCED.
+     */
+    public static int convertStatusToState(int status) {
+        switch (status) {
+            case android.companion.Telecom.Call.ON_HOLD:
+                return Call.STATE_HOLDING;
+            case android.companion.Telecom.Call.ONGOING:
+                return Call.STATE_ACTIVE;
+            case android.companion.Telecom.Call.RINGING:
+            case android.companion.Telecom.Call.RINGING_SILENCED:
+                return Call.STATE_RINGING;
+            case android.companion.Telecom.Call.UNKNOWN_STATUS:
+            default:
+                return Call.STATE_NEW;
+        }
+    }
+
+    public String getId() {
         return mId;
     }
 
@@ -206,6 +223,10 @@ public class CrossDeviceCall {
 
     public byte[] getCallingAppIcon() {
         return mCallingAppIcon;
+    }
+
+    public String getCallingAppPackageName() {
+        return mCallingAppPackageName;
     }
 
     /**

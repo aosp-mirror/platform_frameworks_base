@@ -74,7 +74,6 @@ public class GnssMeasurementsProviderTest {
     private @Mock Context mContext;
     private @Mock LocationManagerInternal mInternal;
     private @Mock GnssConfiguration mMockConfiguration;
-    private @Mock GnssNative.GeofenceCallbacks mGeofenceCallbacks;
     private @Mock IGnssMeasurementsListener mListener1;
     private @Mock IGnssMeasurementsListener mListener2;
     private @Mock IBinder mBinder1;
@@ -98,7 +97,6 @@ public class GnssMeasurementsProviderTest {
         Injector injector = new TestInjector(mContext);
         mGnssNative = spy(Objects.requireNonNull(
                 GnssNative.create(injector, mMockConfiguration)));
-        mGnssNative.setGeofenceCallbacks(mGeofenceCallbacks);
         mTestProvider = new GnssMeasurementsProvider(injector, mGnssNative);
         mGnssNative.register();
     }

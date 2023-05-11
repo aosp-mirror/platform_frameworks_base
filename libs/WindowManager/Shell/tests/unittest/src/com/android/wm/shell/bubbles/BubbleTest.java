@@ -33,6 +33,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -42,6 +43,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.common.bubbles.BubbleInfo;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +79,7 @@ public class BubbleTest extends ShellTestCase {
         Intent target = new Intent(mContext, BubblesTestActivity.class);
         Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
                 PendingIntent.getActivity(mContext, 0, target, PendingIntent.FLAG_MUTABLE),
-                        Icon.createWithResource(mContext, R.drawable.bubble_ic_create_bubble))
+                Icon.createWithResource(mContext, R.drawable.bubble_ic_create_bubble))
                 .build();
         when(mSbn.getNotification()).thenReturn(mNotif);
         when(mNotif.getBubbleMetadata()).thenReturn(metadata);
@@ -177,6 +179,34 @@ public class BubbleTest extends ShellTestCase {
         Bubble bubble = new Bubble(mBubbleEntry, mBubbleMetadataFlagListener, null, mMainExecutor);
         assertThat(bubble.getShortcutInfo()).isNull();
         assertThat(bubble.isConversation()).isFalse();
+    }
+
+    @Test
+    public void testBubbleAsBubbleBarBubble_withShortcut() {
+        Bubble bubble = createBubbleWithShortcut();
+        BubbleInfo bubbleInfo = bubble.asBubbleBarBubble();
+
+        assertThat(bubble.getShortcutInfo()).isNotNull();
+        assertThat(bubbleInfo.getShortcutId()).isNotNull();
+        assertThat(bubbleInfo.getShortcutId()).isEqualTo(bubble.getShortcutId());
+        assertThat(bubbleInfo.getKey()).isEqualTo(bubble.getKey());
+        assertThat(bubbleInfo.getUserId()).isEqualTo(bubble.getUser().getIdentifier());
+        assertThat(bubbleInfo.getPackageName()).isEqualTo(bubble.getPackageName());
+    }
+
+    @Test
+    public void testBubbleAsBubbleBarBubble_withoutShortcut() {
+        Intent intent = new Intent(mContext, BubblesTestActivity.class);
+        intent.setPackage(mContext.getPackageName());
+        Bubble bubble = Bubble.createAppBubble(intent, new UserHandle(1 /* userId */),
+                null /* icon */, mMainExecutor);
+        BubbleInfo bubbleInfo = bubble.asBubbleBarBubble();
+
+        assertThat(bubble.getShortcutInfo()).isNull();
+        assertThat(bubbleInfo.getShortcutId()).isNull();
+        assertThat(bubbleInfo.getKey()).isEqualTo(bubble.getKey());
+        assertThat(bubbleInfo.getUserId()).isEqualTo(bubble.getUser().getIdentifier());
+        assertThat(bubbleInfo.getPackageName()).isEqualTo(bubble.getPackageName());
     }
 
     private Bubble createBubbleWithShortcut() {

@@ -21,14 +21,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"Մուտքագրեք PIN կոդը"</string>
-    <!-- no translation found for keyguard_enter_pin (8114529922480276834) -->
-    <skip />
+    <string name="keyguard_enter_pin" msgid="8114529922480276834">"Մուտքագրեք PIN կոդը"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"Մուտքագրեք նախշը"</string>
-    <!-- no translation found for keyguard_enter_pattern (7616595160901084119) -->
-    <skip />
+    <string name="keyguard_enter_pattern" msgid="7616595160901084119">"Գծեք նախշը"</string>
     <string name="keyguard_enter_your_password" msgid="7225626204122735501">"Մուտքագրեք գաղտնաբառը"</string>
-    <!-- no translation found for keyguard_enter_password (6483623792371009758) -->
-    <skip />
+    <string name="keyguard_enter_password" msgid="6483623792371009758">"Մուտքագրեք գաղտնաբառը"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"Սխալ քարտ"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"Լիցքավորված է"</string>
     <string name="keyguard_plugged_in_wireless" msgid="2537874724955057383">"<xliff:g id="PERCENTAGE">%s</xliff:g> • Անլար լիցքավորում"</string>
@@ -58,68 +55,38 @@
     <string name="error_disable_esim_msg" msgid="2441188596467999327">"Սխալի պատճառով չհաջողվեց անջատել eSIM-ը։"</string>
     <string name="keyboardview_keycode_enter" msgid="6727192265631761174">"Մուտքի ստեղն"</string>
     <string name="kg_wrong_pattern" msgid="5907301342430102842">"Նախշը սխալ է"</string>
-    <!-- no translation found for kg_wrong_pattern_try_again (3603524940234151881) -->
-    <skip />
+    <string name="kg_wrong_pattern_try_again" msgid="3603524940234151881">"Նախշը սխալ է։ Կրկնեք։"</string>
     <string name="kg_wrong_password" msgid="4143127991071670512">"Գաղտնաբառը սխալ է"</string>
-    <!-- no translation found for kg_wrong_password_try_again (6602878676125765920) -->
-    <skip />
+    <string name="kg_wrong_password_try_again" msgid="6602878676125765920">"Գաղտնաբառը սխալ է։ Կրկնեք։"</string>
     <string name="kg_wrong_pin" msgid="4160978845968732624">"PIN կոդը սխալ է"</string>
-    <!-- no translation found for kg_wrong_pin_try_again (3129729383303430190) -->
-    <skip />
-    <!-- no translation found for kg_wrong_input_try_fp_suggestion (3143861542242024833) -->
-    <skip />
-    <!-- no translation found for kg_fp_not_recognized (5183108260932029241) -->
-    <skip />
-    <!-- no translation found for bouncer_face_not_recognized (1666128054475597485) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pin (4752168242723808390) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_password (1473132729225398039) -->
-    <skip />
-    <!-- no translation found for kg_bio_try_again_or_pattern (4867893307468801501) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pin (5850845723433047605) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_password (5551690347827728042) -->
-    <skip />
-    <!-- no translation found for kg_bio_too_many_attempts_pattern (736884689355181602) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pin_or_fp (5635161174698729890) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_password_or_fp (2251295907826814237) -->
-    <skip />
-    <!-- no translation found for kg_unlock_with_pattern_or_fp (2391870539909135046) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_dpm_lock (6002804765868345917) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pin (5374732179740050373) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_password (9097968458291129795) -->
-    <skip />
-    <!-- no translation found for kg_prompt_after_user_lockdown_pattern (215072203613597906) -->
-    <skip />
-    <!-- no translation found for kg_prompt_unattended_update (8223448855578632202) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pin_auth_timeout (5868644725126275245) -->
-    <skip />
-    <!-- no translation found for kg_prompt_password_auth_timeout (5809110458491920871) -->
-    <skip />
-    <!-- no translation found for kg_prompt_pattern_auth_timeout (1860605401869262178) -->
-    <skip />
-    <!-- no translation found for kg_prompt_auth_timeout (6620679830980315048) -->
-    <skip />
-    <!-- no translation found for kg_face_locked_out (2751559491287575) -->
-    <skip />
-    <!-- no translation found for kg_fp_locked_out (6228277682396768830) -->
-    <skip />
-    <!-- no translation found for kg_trust_agent_disabled (5400691179958727891) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pin (5492230176361601475) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_pattern (8266214607346180952) -->
-    <skip />
-    <!-- no translation found for kg_primary_auth_locked_out_password (6170245108400198659) -->
-    <skip />
+    <string name="kg_wrong_pin_try_again" msgid="3129729383303430190">"PIN-ը սխալ է: Կրկնեք։"</string>
+    <string name="kg_wrong_input_try_fp_suggestion" msgid="3143861542242024833">"Կամ ապակողպեք մատնահետքով"</string>
+    <string name="kg_fp_not_recognized" msgid="5183108260932029241">"Մատնահետքը չի ճանաչվել"</string>
+    <string name="bouncer_face_not_recognized" msgid="1666128054475597485">"Դեմքը չի ճանաչվել"</string>
+    <string name="kg_bio_try_again_or_pin" msgid="4752168242723808390">"Նորից փորձեք կամ մուտքագրեք PIN կոդը"</string>
+    <string name="kg_bio_try_again_or_password" msgid="1473132729225398039">"Նորից փորձեք կամ մուտքագրեք գաղտնաբառը"</string>
+    <string name="kg_bio_try_again_or_pattern" msgid="4867893307468801501">"Նորից փորձեք կամ գծեք նախշը"</string>
+    <string name="kg_bio_too_many_attempts_pin" msgid="5850845723433047605">"Չափազանց շատ փորձեր են արվել․ մուտքագրեք PIN կոդը"</string>
+    <string name="kg_bio_too_many_attempts_password" msgid="5551690347827728042">"Չափազանց շատ փորձեր են արվել․ մուտքագրեք գաղտնաբառը"</string>
+    <string name="kg_bio_too_many_attempts_pattern" msgid="736884689355181602">"Չափազանց շատ փորձեր են արվել․ գծեք նախշը"</string>
+    <string name="kg_unlock_with_pin_or_fp" msgid="5635161174698729890">"Ապակողպեք PIN-ով/մատնահետքով"</string>
+    <string name="kg_unlock_with_password_or_fp" msgid="2251295907826814237">"Ապակողպեք գաղտնաբառով/մատնահետքով"</string>
+    <string name="kg_unlock_with_pattern_or_fp" msgid="2391870539909135046">"Ապակողպեք նախշով/մատնահետքով"</string>
+    <string name="kg_prompt_after_dpm_lock" msgid="6002804765868345917">"Լրացուցիչ պաշտպանության համար սարքը կողպվել է"</string>
+    <string name="kg_prompt_after_user_lockdown_pin" msgid="5374732179740050373">"Արգելափակումից հետո հարկավոր է մուտքագրել PIN կոդը"</string>
+    <string name="kg_prompt_after_user_lockdown_password" msgid="9097968458291129795">"Արգելափակումից հետո հարկավոր է մուտքագրել գաղտնաբառը"</string>
+    <string name="kg_prompt_after_user_lockdown_pattern" msgid="215072203613597906">"Արգելափակումից հետո հարկավոր է գծել նախշը"</string>
+    <string name="kg_prompt_unattended_update" msgid="8223448855578632202">"Թարմացումը կտեղադրվի ոչ ակտիվ ժամերին"</string>
+    <string name="kg_prompt_pin_auth_timeout" msgid="5868644725126275245">"PIN կոդը որոշ ժամանակ չի օգտագործվել։"</string>
+    <string name="kg_prompt_password_auth_timeout" msgid="5809110458491920871">"Գաղտնաբառը որոշ ժամանակ չի օգտագործվել։"</string>
+    <string name="kg_prompt_pattern_auth_timeout" msgid="1860605401869262178">"Նախշը որոշ ժամանակ չի օգտագործվել։"</string>
+    <string name="kg_prompt_auth_timeout" msgid="6620679830980315048">"Սարքը որոշ ժամանակ չի ապակողպվել։"</string>
+    <string name="kg_face_locked_out" msgid="2751559491287575">"Դեմքով ապակողպումը հասանելի չէ։ Շատ փորձեր են արվել։"</string>
+    <string name="kg_fp_locked_out" msgid="6228277682396768830">"Մատնահետքով ապակողպման փորձերի սահմանաչափը լրացել է։"</string>
+    <string name="kg_trust_agent_disabled" msgid="5400691179958727891">"Trust agent-ն անհասանելի է"</string>
+    <string name="kg_primary_auth_locked_out_pin" msgid="5492230176361601475">"Չափից շատ փորձեր են արվել սխալ PIN կոդով"</string>
+    <string name="kg_primary_auth_locked_out_pattern" msgid="8266214607346180952">"Չափից շատ փորձեր են արվել սխալ նախշով"</string>
+    <string name="kg_primary_auth_locked_out_password" msgid="6170245108400198659">"Չափից շատ փորձեր են արվել սխալ գաղտնաբառով"</string>
     <string name="kg_too_many_failed_attempts_countdown" msgid="2038195171919795529">"{count,plural, =1{Նորից փորձեք # վայրկյանից։}one{Նորից փորձեք # վայրկյանից։}other{Նորից փորձեք # վայրկյանից։}}"</string>
     <string name="kg_sim_pin_instructions" msgid="1942424305184242951">"Մուտքագրեք SIM քարտի PIN կոդը։"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="3639863309953109649">"Մուտքագրեք SIM քարտի PIN կոդը «<xliff:g id="CARRIER">%1$s</xliff:g>»-ի համար:"</string>
@@ -142,12 +109,9 @@
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUK կոդի գործողությունը ձախողվեց:"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"Փոխել ներածման եղանակը"</string>
     <string name="airplane_mode" msgid="2528005343938497866">"Ավիառեժիմ"</string>
-    <!-- no translation found for kg_prompt_reason_restart_pattern (3321211830602827742) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_pin (2672166323886110512) -->
-    <skip />
-    <!-- no translation found for kg_prompt_reason_restart_password (3967993994418885887) -->
-    <skip />
+    <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"Սարքը վերագործարկելուց հետո գծեք նախշը"</string>
+    <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"Սարքը վերագործարկելուց հետո մուտքագրեք PIN կոդը"</string>
+    <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"Սարքը վերագործարկելուց հետո մուտքագրեք գաղտնաբառը"</string>
     <string name="kg_prompt_reason_timeout_pattern" msgid="5514969660010197363">"Լրացուցիչ անվտանգության համար օգտագործեք նախշ"</string>
     <string name="kg_prompt_reason_timeout_pin" msgid="4227962059353859376">"Լրացուցիչ անվտանգության համար օգտագործեք PIN կոդ"</string>
     <string name="kg_prompt_reason_timeout_password" msgid="8810879144143933690">"Լրացուցիչ անվտանգության համար օգտագործեք գաղտնաբառ"</string>

@@ -29,6 +29,7 @@
 #include "Layer.h"
 #include "Properties.h"
 #include "RenderThread.h"
+#include "VulkanManager.h"
 #include "pipeline/skia/ATraceMemoryDump.h"
 #include "pipeline/skia/ShaderCache.h"
 #include "pipeline/skia/SkiaMemoryTracer.h"
@@ -117,12 +118,8 @@ void CacheManager::trimMemory(TrimLevel mode) {
     // flush and submit all work to the gpu and wait for it to finish
     mGrContext->flushAndSubmit(/*syncCpu=*/true);
 
-    if (!Properties::isHighEndGfx && mode >= TrimLevel::MODERATE) {
-        mode = TrimLevel::COMPLETE;
-    }
-
     switch (mode) {
-        case TrimLevel::COMPLETE:
+        case TrimLevel::BACKGROUND:
             mGrContext->freeGpuResources();
             SkGraphics::PurgeAllCaches();
             mRenderThread.destroyRenderingContext();
@@ -186,8 +183,14 @@ void CacheManager::dumpMemoryUsage(String8& log, const RenderState* renderState)
     }
     log.appendFormat("Contexts: %zu (stopped = %zu)\n", mCanvasContexts.size(), stoppedContexts);
 
+    auto vkInstance = VulkanManager::peekInstance();
     if (!mGrContext) {
-        log.appendFormat("No GPU context.\n");
+        if (!vkInstance) {
+            log.appendFormat("No GPU context.\n");
+        } else {
+            log.appendFormat("No GrContext; however %d remaining Vulkan refs",
+                             vkInstance->getStrongCount() - 1);
+        }
         return;
     }
     std::vector<skiapipeline::ResourcePair> cpuResourceMap = {

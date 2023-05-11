@@ -42,6 +42,9 @@ val LocalAndroidColorScheme =
 class AndroidColorScheme internal constructor(context: Context) {
     val colorSurfaceBright = getColor(context, R.attr.materialColorSurfaceBright)
     val colorSurfaceContainerHigh = getColor(context, R.attr.materialColorSurfaceContainerHigh)
+    val colorOutlineVariant = getColor(context, R.attr.materialColorOutlineVariant)
+    val colorOnSurface = getColor(context, R.attr.materialColorOnSurface)
+    val colorOnSurfaceVariant = getColor(context, R.attr.materialColorOnSurfaceVariant)
 
     companion object {
         fun getColor(context: Context, attr: Int): Color {

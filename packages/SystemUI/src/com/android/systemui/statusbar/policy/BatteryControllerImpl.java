@@ -21,6 +21,8 @@ import static android.os.BatteryManager.BATTERY_HEALTH_UNKNOWN;
 import static android.os.BatteryManager.EXTRA_HEALTH;
 import static android.os.BatteryManager.EXTRA_PRESENT;
 
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SAVER_ENABLED_QS;
+
 import android.annotation.WorkerThread;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -169,7 +171,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     @Override
     public void setPowerSaveMode(boolean powerSave, View view) {
         if (powerSave) mPowerSaverStartView.set(new WeakReference<>(view));
-        BatterySaverUtils.setPowerSaveMode(mContext, powerSave, /*needFirstTimeWarning*/ true);
+        BatterySaverUtils.setPowerSaveMode(mContext, powerSave, /*needFirstTimeWarning*/ true,
+                SAVER_ENABLED_QS);
     }
 
     @Override

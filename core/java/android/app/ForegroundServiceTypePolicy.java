@@ -473,7 +473,6 @@ public abstract class ForegroundServiceTypePolicy {
             new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
                 new RegularPermission(Manifest.permission.ACTIVITY_RECOGNITION),
                 new RegularPermission(Manifest.permission.BODY_SENSORS),
-                new RegularPermission(Manifest.permission.BODY_SENSORS_WRIST_TEMPERATURE),
                 new RegularPermission(Manifest.permission.HIGH_SAMPLING_RATE_SENSORS),
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_HEALTH /* permissionEnforcementFlag */,

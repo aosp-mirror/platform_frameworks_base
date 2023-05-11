@@ -100,7 +100,6 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         mNotificationTestHelper.setDefaultInflationFlags(FLAG_CONTENT_VIEW_ALL);
 
         FakeFeatureFlags fakeFeatureFlags = new FakeFeatureFlags();
-        fakeFeatureFlags.set(Flags.NOTIFICATION_ANIMATE_BIG_PICTURE, true);
         fakeFeatureFlags.set(Flags.SENSITIVE_REVEAL_ANIM, false);
         mNotificationTestHelper.setFeatureFlags(fakeFeatureFlags);
     }
@@ -618,24 +617,9 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void applyRoundnessAndInv_should_be_immediately_applied_on_childrenContainer_legacy()
-            throws Exception {
-        ExpandableNotificationRow group = mNotificationTestHelper.createGroup();
-        group.useRoundnessSourceTypes(false);
-        Assert.assertEquals(0f, group.getBottomRoundness(), 0.001f);
-        Assert.assertEquals(0f, group.getChildrenContainer().getBottomRoundness(), 0.001f);
-
-        group.requestBottomRoundness(1f, SourceType.from(""), false);
-
-        Assert.assertEquals(1f, group.getBottomRoundness(), 0.001f);
-        Assert.assertEquals(1f, group.getChildrenContainer().getBottomRoundness(), 0.001f);
-    }
-
-    @Test
     public void applyRoundnessAndInvalidate_should_be_immediately_applied_on_childrenContainer()
             throws Exception {
         ExpandableNotificationRow group = mNotificationTestHelper.createGroup();
-        group.useRoundnessSourceTypes(true);
         Assert.assertEquals(0f, group.getBottomRoundness(), 0.001f);
         Assert.assertEquals(0f, group.getChildrenContainer().getBottomRoundness(), 0.001f);
 

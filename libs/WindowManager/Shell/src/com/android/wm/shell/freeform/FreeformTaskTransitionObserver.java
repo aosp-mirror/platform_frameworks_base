@@ -153,6 +153,8 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
 
     @Override
     public void onTransitionMerged(@NonNull IBinder merged, @NonNull IBinder playing) {
+        mWindowDecorViewModel.onTransitionMerged(merged, playing);
+
         final List<ActivityManager.RunningTaskInfo> infoOfMerged =
                 mTransitionToTaskInfo.get(merged);
         if (infoOfMerged == null) {
@@ -169,8 +171,6 @@ public class FreeformTaskTransitionObserver implements Transitions.TransitionObs
         } else {
             mTransitionToTaskInfo.put(playing, infoOfMerged);
         }
-
-        mWindowDecorViewModel.onTransitionMerged(merged, playing);
     }
 
     @Override

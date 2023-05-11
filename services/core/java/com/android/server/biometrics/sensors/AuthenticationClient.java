@@ -133,10 +133,6 @@ public abstract class AuthenticationClient<T, O extends AuthenticateOptions>
         binderDiedInternal(clearListener);
     }
 
-    public boolean isBiometricPrompt() {
-        return getCookie() != 0;
-    }
-
     public long getOperationId() {
         return mOperationId;
     }

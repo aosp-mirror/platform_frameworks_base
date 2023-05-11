@@ -195,6 +195,7 @@ final class InkWindow extends PhoneWindow {
         Objects.requireNonNull(decor);
         final ViewRootImpl viewRoot = decor.getViewRootImpl();
         Objects.requireNonNull(viewRoot);
-        viewRoot.enqueueInputEvent(event);
+        // The view root will own the event that we enqueue, so provide a copy of the event.
+        viewRoot.enqueueInputEvent(MotionEvent.obtain(event));
     }
 }

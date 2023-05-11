@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.RESTRICTION_LEVEL_RESTRICTED_BUCKET;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_START_RECEIVER;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_EMPTY;
 import static android.os.Process.ZYGOTE_POLICY_FLAG_LATENCY_SENSITIVE;
 import static android.text.TextUtils.formatSimple;
@@ -37,7 +38,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_L
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
-import static com.android.server.am.OomAdjuster.OOM_ADJ_REASON_START_RECEIVER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -67,7 +67,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
@@ -78,6 +77,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.LocalServices;
+import com.android.server.pm.UserJourneyLogger;
 import com.android.server.pm.UserManagerInternal;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -1518,7 +1518,7 @@ public class BroadcastQueueImpl extends BroadcastQueue {
             final UserInfo userInfo =
                     (umInternal != null) ? umInternal.getUserInfo(r.userId) : null;
             if (userInfo != null) {
-                userType = UserManager.getUserTypeForStatsd(userInfo.userType);
+                userType = UserJourneyLogger.getUserTypeForStatsd(userInfo.userType);
             }
             Slog.i(TAG_BROADCAST,
                     "BOOT_COMPLETED_BROADCAST_COMPLETION_LATENCY_REPORTED action:"

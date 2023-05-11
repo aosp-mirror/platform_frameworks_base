@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Дозволува апликацијата да пристапува до податоци од телесните сензори, како што се пулс, температура и процент на кислород во телото, додека се користи апликацијата."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Пристап до податоци од телесните сензори, како пулсот, додека работи во заднина"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Дозволува апликацијата да пристапува до податоци од телесните сензори, како што се пулс, температура и процент на кислород во телото, додека апликацијата работи во заднина."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Пристап до податоците за температура на зглобот од телесниот сензор додека се користи апликацијата."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Дозволува апликацијата да пристапува до податоците за температура на зглобот од телесниот сензор додека се користи апликацијата."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Пристап до податоците за температура на зглобот од телесниот сензор додека апликацијата работи во заднина."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Дозволува апликацијата да пристапува до податоците за температура на зглобот од телесниот сензор додека апликацијата работи во заднина."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Чита настани и детали од календарот"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Апликацијава може да ги чита сите настани во календарот складирани во вашиот таблет и да ги споделува или зачувува податоците од календарот."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Апликацијава може да ги чита сите настани во календарот складирани во вашиот уред Android TV и да ги споделува или зачувува податоците од календарот."</string>
@@ -507,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Дозволува апликацијата да ги контролира вибрациите."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ѝ дозволува на апликацијата да пристапи до состојбата на вибрации."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"директно избирај телефонски броеви"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Овозможува апликацијата да повикува телефонски броеви без ваша интервенција. Ова може да предизвика неочекувани трошоци или повици. Имајте на ум дека ова не дозволува апликацијата да повикува броеви на служби за итна помош. Злонамерните апликации може да ве чинат пари поради повици без ваша потврда."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"пристапи до услугата за повици IMS"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Дозволува апликацијата да ја користи услугата IMS за повици без ваша интервенција."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"прочитај ги статусот и идентитетот  на телефонот"</string>
@@ -669,13 +666,13 @@
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Икона за отпечатоци"</string>
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"Отклучување со лик"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"Проблем со „Отклучување со лик“"</string>
-    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лице, а потоа повторно додајте го лицето"</string>
+    <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"Допрете за да го избришете вашиот модел на лик, а потоа повторно додајте го ликот"</string>
     <string name="face_setup_notification_title" msgid="8843461561970741790">"Поставете „Отклучување со лик“"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"Отклучете го телефонот со гледање во него"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"За да користите „Отклучување со лик“, вклучете "<b>"Пристап до камерата"</b>" во „Поставки &gt; Приватност“"</string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"Поставете уште начини за отклучување"</string>
     <string name="fingerprint_setup_notification_content" msgid="205578121848324852">"Допрете за да додадете отпечаток"</string>
-    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отклучување со отпечаток на прст"</string>
+    <string name="fingerprint_recalibrate_notification_name" msgid="1414578431898579354">"Отклучување со отпечаток"</string>
     <string name="fingerprint_recalibrate_notification_title" msgid="2406561052064558497">"Не може да се користи сензорот за отпечатоци"</string>
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Однесете го на поправка."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Не може да создаде модел на лик. Обидете се пак."</string>
@@ -688,7 +685,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Поместете го телефонот налево"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Поместете го телефонот надесно"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Погледнете подиректно во уредот."</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не ви се гледа лицето. Држете го телефонот во висина на очите."</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Не ви се гледа ликот. Држете го телефонот во висина на очите."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Премногу движење. Држете го телефонот стабилно."</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Повторно регистрирајте го лицето."</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Не се препознава ликот. Обидете се пак."</string>
@@ -713,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Операцијата со лице се откажа."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Корисникот го откажа „Отклучувањето со лик“"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Премногу обиди. Обидете се повторно подоцна."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Премногу обиди. „Отклучувањето со лик“ е оневозможено."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Премногу обиди. „Отклучување со лик“ е недостапна."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Премногу обиди. Наместо тоа, користете го заклучувањето на екранот."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Ликот не може да се потврди. Обидете се повторно."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Не сте поставиле „Отклучување со лик“"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"му дозволува на сопственикот да почне со прегледување на податоците за функциите за некоја апликација"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"пристапува до податоците со висока фреквенција на семпл"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Дозволува апликацијата да пристапува до податоците од сензорите со фреквенција на семпл поголема од 200 Hz"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"ажурирај ја апликацијата без дејство од корисникот"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Дозволува сопственикот да ја ажурира апликацијата што претходно ја инсталирал без дејство од корисникот"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Постави правила за лозинката"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Контролирај ги должината и знаците што се дозволени за лозинки и PIN-броеви за отклучување екран."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Следи ги обидите за отклучување на екранот"</string>
@@ -1288,13 +1283,13 @@
     <string name="volume_call" msgid="7625321655265747433">"Јачина на звук на дојдовен повик"</string>
     <string name="volume_bluetooth_call" msgid="2930204618610115061">"Јачина на звук на дојдовен повик преку Bluetooth"</string>
     <string name="volume_alarm" msgid="4486241060751798448">"Јачина на звук за аларм"</string>
-    <string name="volume_notification" msgid="6864412249031660057">"Јачина на звук на известување"</string>
+    <string name="volume_notification" msgid="6864412249031660057">"Јачина на звук за известување"</string>
     <string name="volume_unknown" msgid="4041914008166576293">"Јачина на звук"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Јачина на звук на Bluetooth"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Јачина на звук на мелодија"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Јачина на звук на повик"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"Јачина на аудио/видео звук"</string>
-    <string name="volume_icon_description_notification" msgid="579091344110747279">"Јачина на звук на известување"</string>
+    <string name="volume_icon_description_notification" msgid="579091344110747279">"Јачина на звук за известување"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Стандардна мелодија"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Стандардна (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="397111123930141876">"Ниедна"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Апликацијата <xliff:g id="APP_NAME_0">%1$s</xliff:g> не е достапна во моментов. Со ова управува <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Дознај повеќе"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Прекини ја паузата"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Да се вклучат работни апликации?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Добијте пристап до вашите работни апликации и известувања"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Вклучи"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Да се актив. работните аплик.?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Прекини ја паузата"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Итен случај"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Добијте пристап до вашите работни апликации и повици"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Апликацијата не е достапна"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> не е достапна во моментов."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> е недостапна"</string>
@@ -2166,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Овие содржини не може да се отвораат со работни апликации"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Овие содржини не може да се споделуваат со лични апликации"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Овие содржини не може да се отвораат со лични апликации"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Работниот профил е паузиран"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Допрете за да вклучите"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Нема работни апликации"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Нема лични апликации"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Да се отвори <xliff:g id="APP">%s</xliff:g> во личниот профил?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Да се отвори <xliff:g id="APP">%s</xliff:g> во работниот профил?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Отворање лична <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Отворање работна <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Користи личен прелистувач"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Користи работен прелистувач"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN за отклучување на мрежата на SIM-картичката"</string>

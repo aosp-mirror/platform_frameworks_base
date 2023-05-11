@@ -389,7 +389,7 @@
     <dimen name="navigation_key_width">70dp</dimen>
 
     <!-- The width/height of the icon of a navigation button -->
-    <dimen name="navigation_icon_size">32dp</dimen>
+    <dimen name="navigation_icon_size">24dp</dimen>
 
     <!-- The padding on the side of the navigation bar. Must be greater than or equal to
          navigation_extra_key_width -->
@@ -615,6 +615,7 @@
     <dimen name="qs_header_carrier_separator_width">6dp</dimen>
     <dimen name="qs_carrier_margin_width">4dp</dimen>
     <dimen name="qs_footer_icon_size">20dp</dimen>
+    <dimen name="qs_header_height">120dp</dimen>
     <dimen name="qs_header_row_min_height">48dp</dimen>
 
     <dimen name="qs_header_non_clickable_element_height">24dp</dimen>
@@ -807,6 +808,8 @@
     <!-- The width/height of the unlock icon view on keyguard. -->
     <dimen name="keyguard_lock_height">42dp</dimen>
     <dimen name="keyguard_lock_padding">20dp</dimen>
+
+    <dimen name="keyguard_security_container_padding_top">20dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
     <dimen name="lock_icon_margin_bottom">74dp</dimen>
@@ -1110,6 +1113,7 @@
     <!-- Chipbar -->
     <!-- (Used for media tap-to-transfer chip for sender device and active unlock) -->
     <dimen name="chipbar_outer_padding">16dp</dimen>
+    <dimen name="chipbar_outer_padding_half">8dp</dimen>
     <dimen name="chipbar_text_size">16sp</dimen>
     <dimen name="chipbar_start_icon_size">24dp</dimen>
     <dimen name="chipbar_end_icon_size">20dp</dimen>
@@ -1198,19 +1202,17 @@
     <dimen name="controls_top_margin">48dp</dimen>
     <dimen name="controls_content_margin_horizontal">0dp</dimen>
     <dimen name="control_header_text_size">24sp</dimen>
-    <dimen name="control_item_text_size">16sp</dimen>
+    <dimen name="control_item_text_size">14sp</dimen>
     <dimen name="control_menu_item_text_size">16sp</dimen>
-    <dimen name="control_menu_item_min_height">56dp</dimen>
+    <dimen name="control_menu_item_height">54dp</dimen>
     <dimen name="control_menu_vertical_padding">12dp</dimen>
-    <dimen name="control_menu_horizontal_padding">16dp</dimen>
-    <dimen name="control_popup_item_corner_radius">4dp</dimen>
-    <dimen name="control_popup_item_height">56dp</dimen>
-    <dimen name="control_popup_item_padding">16dp</dimen>
-    <dimen name="control_popup_items_divider_height">1dp</dimen>
+    <dimen name="control_menu_horizontal_padding">@dimen/notification_side_paddings</dimen>
+    <dimen name="control_apps_popup_item_height">56dp</dimen>
+    <dimen name="control_popup_item_corner_radius">@dimen/notification_corner_radius_small</dimen>
+    <dimen name="control_popup_items_divider_height">@dimen/controls_app_divider_height</dimen>
     <dimen name="control_popup_max_width">380dp</dimen>
-    <dimen name="control_popup_corner_radius">28dp</dimen>
+    <dimen name="control_popup_corner_radius">@dimen/notification_corner_radius</dimen>
     <dimen name="control_popup_horizontal_margin">16dp</dimen>
-    <dimen name="control_spinner_padding_vertical">24dp</dimen>
     <dimen name="control_spinner_padding_horizontal">20dp</dimen>
     <dimen name="control_text_size">14sp</dimen>
     <dimen name="control_icon_size">24dp</dimen>
@@ -1773,13 +1775,6 @@
     <dimen name="rear_display_animation_height">200dp</dimen>
     <dimen name="rear_display_title_top_padding">24dp</dimen>
     <dimen name="rear_display_title_bottom_padding">16dp</dimen>
-
-    <!--
-    Vertical distance between the pointer and the popup menu that shows up on the lock screen when
-    it is long-pressed.
-    -->
-    <dimen name="keyguard_long_press_settings_popup_vertical_offset">96dp</dimen>
-
 
     <!-- Bouncer user switcher margins -->
     <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>

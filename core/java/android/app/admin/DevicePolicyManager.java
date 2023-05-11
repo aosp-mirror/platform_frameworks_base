@@ -8394,8 +8394,7 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must have requested
      * {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} to be able to call this method; if it has
-     * not, a security exception will be thrown, or the caller must hold the permission
-     * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA}.
+     * not, a security exception will be thrown.
      * <p>
      * <b>Note</b>, this policy type is deprecated for legacy device admins since
      * {@link android.os.Build.VERSION_CODES#Q}. On Android
@@ -8411,8 +8410,7 @@ public class DevicePolicyManager {
                      the caller is not a device admin
      * @param disabled Whether or not the camera should be disabled.
      * @throws SecurityException if {@code admin} is not an active administrator or does not use
-     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA} and the caller does not hold
-     *             the permisisons {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_CAMERA}.
+     *             {@link DeviceAdminInfo#USES_POLICY_DISABLE_CAMERA}.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_CAMERA, conditional = true)
     public void setCameraDisabled(@Nullable ComponentName admin, boolean disabled) {
@@ -9601,6 +9599,7 @@ public class DevicePolicyManager {
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             } catch (IllegalArgumentException ex) {
+                Log.e(TAG, "IllegalArgumentException checking isPackageSuspended", ex);
                 throw new NameNotFoundException(packageName);
             }
         }
@@ -13402,11 +13401,10 @@ public class DevicePolicyManager {
     /**
      * Called by a device admin or holder of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE} to set the short
-     * support message. This will be displayed to the user
-     * in settings screens where funtionality has been disabled by the admin. The message should be
-     * limited to a short statement such as "This setting is disabled by your administrator. Contact
-     * someone@example.com for support." If the message is longer than 200 characters it may be
-     * truncated.
+     * support message. This will be displayed to the user in settings screens where functionality
+     * has been disabled by the admin. The message should be limited to a short statement such as
+     * "This setting is disabled by your administrator. Contact someone@example.com for support."
+     * If the message is longer than 200 characters it may be truncated.
      * <p>
      * If the short support message needs to be localized, it is the responsibility of the
      * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
@@ -13461,7 +13459,8 @@ public class DevicePolicyManager {
 
     /**
      * Called by a device admin to set the long support message. This will be displayed to the user
-     * in the device administators settings screen.
+     * in the device administrators settings screen. If the message is longer than 20000 characters
+     * it may be truncated.
      * <p>
      * If the long support message needs to be localized, it is the responsibility of the
      * {@link DeviceAdminReceiver} to listen to the {@link Intent#ACTION_LOCALE_CHANGED} broadcast
@@ -16818,6 +16817,23 @@ public class DevicePolicyManager {
         if (mService != null) {
             try {
                 mService.resetShouldAllowBypassingDevicePolicyManagementRoleQualificationState();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Recalculate the incompatible accounts cache.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void calculateHasIncompatibleAccounts() {
+        if (mService != null) {
+            try {
+                mService.calculateHasIncompatibleAccounts();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

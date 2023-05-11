@@ -1748,6 +1748,21 @@ public final class Settings {
     public static final String ACTION_DREAM_SETTINGS = "android.settings.DREAM_SETTINGS";
 
     /**
+     * Activity Action: Show Communal settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_COMMUNAL_SETTING = "android.settings.COMMUNAL_SETTINGS";
+
+    /**
      * Activity Action: Show Notification assistant settings.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
@@ -2585,7 +2600,7 @@ public final class Settings {
      * <p>
      * To start an activity with this intent, apps should set the wellbeing package explicitly in
      * the intent together with this action. The wellbeing package is defined in
-     * {@code com.android.internal.R.string.config_defaultWellbeingPackage}.
+     * {@code com.android.internal.R.string.config_systemWellbeing}.
      * <p>
      * Output: Nothing
      *
@@ -3022,12 +3037,21 @@ public final class Settings {
         public void destroy() {
             try {
                 // If this process is the system server process, mArray is the same object as
-                // the memory int array kept inside SetingsProvider, so skipping the close()
-                if (!Settings.isInSystemServer()) {
+                // the memory int array kept inside SettingsProvider, so skipping the close()
+                if (!Settings.isInSystemServer() && !mArray.isClosed()) {
                     mArray.close();
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Error closing backing array", e);
+            }
+        }
+
+        @Override
+        protected void finalize() throws Throwable {
+            try {
+                destroy();
+            } finally {
+                super.finalize();
             }
         }
     }
@@ -7151,6 +7175,13 @@ public final class Settings {
         public static final String CREDENTIAL_SERVICE = "credential_service";
 
         /**
+         * The currently selected primary credential service flattened ComponentName.
+         *
+         * @hide
+         */
+        public static final String CREDENTIAL_SERVICE_PRIMARY = "credential_service_primary";
+
+        /**
          * The currently selected autofill service flattened ComponentName.
          * @hide
          */
@@ -10178,9 +10209,7 @@ public final class Settings {
          *
          * Face unlock re enroll.
          *  0 = No re enrollment.
-         *  1 = Re enrollment is suggested.
-         *  2 = Re enrollment is required after a set time period.
-         *  3 = Re enrollment is required immediately.
+         *  1 = Re enrollment is required.
          *
          * @hide
          */
@@ -11480,6 +11509,8 @@ public final class Settings {
         public static final int DEVICE_STATE_ROTATION_KEY_HALF_FOLDED = 1;
         /** @hide */
         public static final int DEVICE_STATE_ROTATION_KEY_UNFOLDED = 2;
+        /** @hide */
+        public static final int DEVICE_STATE_ROTATION_KEY_REAR_DISPLAY = 3;
 
         /**
          * The different postures that can be used as keys with
@@ -11491,6 +11522,7 @@ public final class Settings {
                 DEVICE_STATE_ROTATION_KEY_FOLDED,
                 DEVICE_STATE_ROTATION_KEY_HALF_FOLDED,
                 DEVICE_STATE_ROTATION_KEY_UNFOLDED,
+                DEVICE_STATE_ROTATION_KEY_REAR_DISPLAY,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface DeviceStateRotationLockKey {
@@ -14889,6 +14921,14 @@ public final class Settings {
          * @hide
          */
         public static final String ENABLE_TARE = "enable_tare";
+
+        /**
+         * Whether to show the TARE page in Developer Options or not.
+         * 1 = true, everything else = false
+         *
+         * @hide
+         */
+        public static final String SHOW_TARE_DEVELOPER_OPTIONS = "show_tare_developer_options";
 
         /**
          * Settings for AlarmManager's TARE EconomicPolicy (list of its economic factors).

@@ -502,6 +502,8 @@ interface IPackageManager {
 
     boolean hasSystemFeature(String name, int version);
 
+    List<String> getInitialNonStoppedSystemPackages();
+
     void enterSafeMode();
     @UnsupportedAppUsage
     boolean isSafeMode();

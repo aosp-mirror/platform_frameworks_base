@@ -186,15 +186,16 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static DragAndDropController provideDragAndDropController(Context context,
+    static Optional<DragAndDropController> provideDragAndDropController(Context context,
             ShellInit shellInit,
             ShellController shellController,
+            ShellCommandHandler shellCommandHandler,
             DisplayController displayController,
             UiEventLogger uiEventLogger,
             IconProvider iconProvider,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return new DragAndDropController(context, shellInit, shellController, displayController,
-                uiEventLogger, iconProvider, mainExecutor);
+        return Optional.ofNullable(DragAndDropController.create(context, shellInit, shellController,
+                shellCommandHandler, displayController, uiEventLogger, iconProvider, mainExecutor));
     }
 
     @WMSingleton
@@ -544,13 +545,14 @@ public abstract class WMShellBaseModule {
             DisplayController displayController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
-            @ShellAnimationThread ShellExecutor animExecutor) {
+            @ShellAnimationThread ShellExecutor animExecutor,
+            ShellCommandHandler shellCommandHandler) {
         if (!context.getResources().getBoolean(R.bool.config_registerShellTransitionsOnInit)) {
             // TODO(b/238217847): Force override shell init if registration is disabled
             shellInit = new ShellInit(mainExecutor);
         }
         return new Transitions(context, shellInit, shellController, organizer, pool,
-                displayController, mainExecutor, mainHandler, animExecutor);
+                displayController, mainExecutor, mainHandler, animExecutor, shellCommandHandler);
     }
 
     @WMSingleton
@@ -796,7 +798,7 @@ public abstract class WMShellBaseModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropControllerOptional,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<BubbleController> bubblesOptional,
             Optional<SplitScreenController> splitScreenOptional,

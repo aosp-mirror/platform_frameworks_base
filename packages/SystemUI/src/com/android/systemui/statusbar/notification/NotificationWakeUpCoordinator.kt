@@ -21,14 +21,14 @@ import android.view.animation.Interpolator
 import androidx.annotation.VisibleForTesting
 import androidx.core.animation.ObjectAnimator
 import com.android.systemui.Dumpable
-import com.android.systemui.animation.Interpolators
-import com.android.systemui.animation.InterpolatorsAndroidX
+import com.android.app.animation.Interpolators
+import com.android.app.animation.InterpolatorsAndroidX
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
-import com.android.systemui.shade.NotificationPanelViewController.WAKEUP_ANIMATION_DELAY_MS
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
+import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
@@ -383,7 +383,7 @@ constructor(
             ObjectAnimator.ofFloat(this, delayedDozeAmount, 0.0f).apply {
                 interpolator = InterpolatorsAndroidX.LINEAR
                 duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
-                startDelay = WAKEUP_ANIMATION_DELAY_MS.toLong()
+                startDelay = ShadeViewController.WAKEUP_ANIMATION_DELAY_MS.toLong()
                 doOnStart {
                     wakeUpListeners.forEach { it.onDelayedDozeAmountAnimationRunning(true) }
                 }

@@ -19,13 +19,14 @@ package com.android.wm.shell.flicker.splitscreen
 import android.platform.test.annotations.FlakyTest
 import android.platform.test.annotations.IwTest
 import android.platform.test.annotations.Presubmit
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.common.datatypes.component.EdgeExtensionComponentMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.common.traces.component.EdgeExtensionComponentMatcher
 import android.tools.device.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.device.flicker.legacy.FlickerBuilder
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.flicker.legacy.FlickerTestFactory
 import androidx.test.filters.RequiresDevice
+import com.android.wm.shell.flicker.ICommonAssertions
 import com.android.wm.shell.flicker.SPLIT_SCREEN_DIVIDER_COMPONENT
 import com.android.wm.shell.flicker.appWindowIsVisibleAtEnd
 import com.android.wm.shell.flicker.appWindowIsVisibleAtStart
@@ -34,6 +35,7 @@ import com.android.wm.shell.flicker.layerKeepVisible
 import com.android.wm.shell.flicker.splitAppLayerBoundsKeepVisible
 import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtEnd
 import com.android.wm.shell.flicker.splitScreenDividerIsVisibleAtStart
+import com.android.wm.shell.flicker.splitscreen.benchmark.CopyContentInSplitBenchmark
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -49,29 +51,19 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CopyContentInSplit(flicker: FlickerTest) : SplitScreenBase(flicker) {
-    private val textEditApp = SplitScreenUtils.getIme(instrumentation)
-    private val MagnifierLayer = ComponentNameMatcher("", "magnifier surface bbq wrapper#")
-    private val PopupWindowLayer = ComponentNameMatcher("", "PopupWindow:")
-
+class CopyContentInSplit(override val flicker: FlickerTest) :
+    CopyContentInSplitBenchmark(flicker), ICommonAssertions {
     override val transition: FlickerBuilder.() -> Unit
         get() = {
-            super.transition(this)
-            setup { SplitScreenUtils.enterSplit(wmHelper, tapl, device, primaryApp, textEditApp) }
-            transitions {
-                SplitScreenUtils.copyContentInSplit(
-                    instrumentation,
-                    device,
-                    primaryApp,
-                    textEditApp
-                )
-            }
+            defaultSetup(this)
+            defaultTeardown(this)
+            thisTransition(this)
         }
 
     @IwTest(focusArea = "sysui")
     @Presubmit
     @Test
-    fun cujCompleted() {
+    override fun cujCompleted() {
         flicker.appWindowIsVisibleAtStart(primaryApp)
         flicker.appWindowIsVisibleAtStart(textEditApp)
         flicker.splitScreenDividerIsVisibleAtStart()
@@ -128,8 +120,8 @@ class CopyContentInSplit(flicker: FlickerTest) : SplitScreenBase(flicker) {
                         ComponentNameMatcher.SNAPSHOT,
                         ComponentNameMatcher.IME_SNAPSHOT,
                         EdgeExtensionComponentMatcher(),
-                        MagnifierLayer,
-                        PopupWindowLayer
+                        magnifierLayer,
+                        popupWindowLayer
                     )
             )
         }

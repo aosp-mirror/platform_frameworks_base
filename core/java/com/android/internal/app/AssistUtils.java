@@ -57,6 +57,8 @@ public class AssistUtils {
     public static final int INVOCATION_TYPE_HOME_BUTTON_LONG_PRESS = 5;
     /** value for INVOCATION_TYPE_KEY: long press on physical power button */
     public static final int INVOCATION_TYPE_POWER_BUTTON_LONG_PRESS = 6;
+    /** value for INVOCATION_TYPE_KEY: press on physcial assistant button */
+    public static final int INVOCATION_TYPE_ASSIST_BUTTON = 7;
 
     private final Context mContext;
     private final IVoiceInteractionManagerService mVoiceInteractionManagerService;

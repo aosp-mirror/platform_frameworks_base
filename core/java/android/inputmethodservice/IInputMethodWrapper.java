@@ -304,7 +304,9 @@ class IInputMethodWrapper extends IInputMethod.Stub
                 return;
             }
             case DO_SET_STYLUS_WINDOW_IDLE_TIMEOUT: {
-                inputMethod.setStylusWindowIdleTimeoutForTest((long) msg.obj);
+                if (isValid(inputMethod, target, "DO_SET_STYLUS_WINDOW_IDLE_TIMEOUT")) {
+                    inputMethod.setStylusWindowIdleTimeoutForTest((long) msg.obj);
+                }
                 return;
             }
         }

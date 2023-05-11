@@ -1127,6 +1127,31 @@ public class ValueAnimatorTests {
         mActivityRule.runOnUiThread(() -> {});
     }
 
+    @Test
+    public void restartValueAnimator() throws Throwable {
+        CountDownLatch latch = new CountDownLatch(1);
+        ValueAnimator.AnimatorUpdateListener listener = new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                if (((float) animation.getAnimatedValue()) != A1_START_VALUE) {
+                    latch.countDown();
+                }
+            }
+        };
+        a1.addUpdateListener(listener);
+
+        mActivityRule.runOnUiThread(() -> {
+            a1.start();
+        });
+
+        // wait for a change in the value
+        assertTrue(latch.await(2, TimeUnit.SECONDS));
+
+        mActivityRule.runOnUiThread(() -> {
+            a1.start();
+            assertEquals(A1_START_VALUE, a1.getAnimatedValue());
+        });
+    }
     class MyUpdateListener implements ValueAnimator.AnimatorUpdateListener {
         boolean wasRunning = false;
         long firstRunningFrameTime = -1;

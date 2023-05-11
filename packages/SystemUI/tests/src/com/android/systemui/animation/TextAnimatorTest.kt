@@ -39,10 +39,6 @@ import org.mockito.Mockito.verify
 
 import kotlin.math.ceil
 
-private val PAINT = TextPaint().apply {
-    textSize = 32f
-}
-
 @RunWith(AndroidTestingRunner::class)
 @SmallTest
 class TextAnimatorTest : SysuiTestCase() {

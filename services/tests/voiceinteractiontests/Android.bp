@@ -40,6 +40,7 @@ android_test {
         "platform-test-annotations",
         "services.core",
         "services.voiceinteraction",
+        "services.soundtrigger",
         "servicestests-core-utils",
         "servicestests-utils-mockito-extended",
         "truth-prebuilt",

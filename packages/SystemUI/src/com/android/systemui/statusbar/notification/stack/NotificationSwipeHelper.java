@@ -35,7 +35,6 @@ import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
@@ -69,7 +68,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     private boolean mIsExpanded;
     private boolean mPulsing;
     private final NotificationRoundnessManager mNotificationRoundnessManager;
-    private final boolean mUseRoundnessSourceTypes;
 
     NotificationSwipeHelper(
             Resources resources,
@@ -81,7 +79,6 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
             NotificationRoundnessManager notificationRoundnessManager) {
         super(callback, resources, viewConfiguration, falsingManager, featureFlags);
         mNotificationRoundnessManager = notificationRoundnessManager;
-        mUseRoundnessSourceTypes = featureFlags.isEnabled(Flags.USE_ROUNDNESS_SOURCETYPES);
         mMenuListener = menuListener;
         mCallback = callback;
         mFalsingCheck = () -> resetExposedMenuView(true /* animate */, true /* force */);
@@ -323,8 +320,7 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
     protected void prepareDismissAnimation(View view, Animator anim) {
         super.prepareDismissAnimation(view, anim);
 
-        if (mUseRoundnessSourceTypes
-                && view instanceof ExpandableNotificationRow
+        if (view instanceof ExpandableNotificationRow
                 && mNotificationRoundnessManager.isClearAllInProgress()) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             anim.addListener(new AnimatorListenerAdapter() {

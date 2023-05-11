@@ -21,6 +21,7 @@ import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManagerPolicyConstants.TYPE_LAYER_OFFSET;
 import static android.window.TransitionInfo.FLAG_IS_BEHIND_STARTING_WINDOW;
 
+import static com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationSpec.createShowSnapshotForClosingAnimation;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.addBackgroundToTransition;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.edgeExtendWindow;
 import static com.android.wm.shell.transition.TransitionAnimationHelper.getTransitionBackgroundColorIfSet;
@@ -42,6 +43,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationAdapter.SnapshotAdapter;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.util.TransitionUtil;
 
@@ -185,23 +187,23 @@ class ActivityEmbeddingAnimationRunner {
             return createChangeAnimationAdapters(info, startTransaction);
         }
         if (TransitionUtil.isClosingType(info.getType())) {
-            return createCloseAnimationAdapters(info);
+            return createCloseAnimationAdapters(info, startTransaction);
         }
-        return createOpenAnimationAdapters(info);
+        return createOpenAnimationAdapters(info, startTransaction);
     }
 
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createOpenAnimationAdapters(
-            @NonNull TransitionInfo info) {
+            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction) {
         return createOpenCloseAnimationAdapters(info, true /* isOpening */,
-                mAnimationSpec::loadOpenAnimation);
+                mAnimationSpec::loadOpenAnimation, startTransaction);
     }
 
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createCloseAnimationAdapters(
-            @NonNull TransitionInfo info) {
+            @NonNull TransitionInfo info, @NonNull SurfaceControl.Transaction startTransaction) {
         return createOpenCloseAnimationAdapters(info, false /* isOpening */,
-                mAnimationSpec::loadCloseAnimation);
+                mAnimationSpec::loadCloseAnimation, startTransaction);
     }
 
     /**
@@ -211,7 +213,8 @@ class ActivityEmbeddingAnimationRunner {
     @NonNull
     private List<ActivityEmbeddingAnimationAdapter> createOpenCloseAnimationAdapters(
             @NonNull TransitionInfo info, boolean isOpening,
-            @NonNull AnimationProvider animationProvider) {
+            @NonNull AnimationProvider animationProvider,
+            @NonNull SurfaceControl.Transaction startTransaction) {
         // We need to know if the change window is only a partial of the whole animation screen.
         // If so, we will need to adjust it to make the whole animation screen looks like one.
         final List<TransitionInfo.Change> openingChanges = new ArrayList<>();
@@ -224,6 +227,8 @@ class ActivityEmbeddingAnimationRunner {
                 openingWholeScreenBounds.union(change.getEndAbsBounds());
             } else {
                 closingChanges.add(change);
+                // Also union with the start bounds because the closing transition may be shrunk.
+                closingWholeScreenBounds.union(change.getStartAbsBounds());
                 closingWholeScreenBounds.union(change.getEndAbsBounds());
             }
         }
@@ -241,6 +246,17 @@ class ActivityEmbeddingAnimationRunner {
             adapters.add(adapter);
         }
         for (TransitionInfo.Change change : closingChanges) {
+            if (shouldUseSnapshotAnimationForClosingChange(change)) {
+                SurfaceControl screenshot = getOrCreateScreenshot(change, change, startTransaction);
+                if (screenshot != null) {
+                    final SnapshotAdapter snapshotAdapter = new SnapshotAdapter(
+                            createShowSnapshotForClosingAnimation(), change, screenshot);
+                    if (!isOpening) {
+                        snapshotAdapter.overrideLayer(offsetLayer++);
+                    }
+                    adapters.add(snapshotAdapter);
+                }
+            }
             final ActivityEmbeddingAnimationAdapter adapter = createOpenCloseAnimationAdapter(
                     info, change, animationProvider, closingWholeScreenBounds);
             if (!isOpening) {
@@ -249,6 +265,22 @@ class ActivityEmbeddingAnimationRunner {
             adapters.add(adapter);
         }
         return adapters;
+    }
+
+    /**
+     * Returns whether we should use snapshot animation for the closing change.
+     * It's usually because the end bounds of the closing change are shrunk, which leaves a black
+     * area in the transition.
+     */
+    static boolean shouldUseSnapshotAnimationForClosingChange(
+            @NonNull TransitionInfo.Change closingChange) {
+        // Only check closing type because we only take screenshot for closing bounds-changing
+        // changes.
+        if (!TransitionUtil.isClosingType(closingChange.getMode())) {
+            return false;
+        }
+        // Don't need to take screenshot if there's no bounds change.
+        return !closingChange.getStartAbsBounds().equals(closingChange.getEndAbsBounds());
     }
 
     /** Sets the first frame to the {@code startTransaction} to avoid any flicker on start. */

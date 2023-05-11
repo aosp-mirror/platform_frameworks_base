@@ -20,6 +20,7 @@ import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_DISMISSED;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_HIDDEN;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_APPLIED;
 import static android.app.TaskInfo.CAMERA_COMPAT_CONTROL_TREATMENT_SUGGESTED;
+import static android.window.TaskConstants.TASK_CHILD_LAYER_COMPAT_UI;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -45,11 +46,6 @@ import java.util.function.Consumer;
  * Window manager for the Size Compat restart button and Camera Compat control.
  */
 class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
-
-    /**
-     * The Compat UI should be below the Letterbox Education.
-     */
-    private static final int Z_ORDER = LetterboxEduWindowManager.Z_ORDER - 1;
 
     private final CompatUICallback mCallback;
 
@@ -92,7 +88,7 @@ class CompatUIWindowManager extends CompatUIWindowManagerAbstract {
 
     @Override
     protected int getZOrder() {
-        return Z_ORDER;
+        return TASK_CHILD_LAYER_COMPAT_UI + 1;
     }
 
     @Override

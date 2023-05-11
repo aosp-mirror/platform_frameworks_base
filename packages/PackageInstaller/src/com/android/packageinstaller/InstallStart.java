@@ -77,7 +77,21 @@ public class InstallStart extends Activity {
         }
 
         final ApplicationInfo sourceInfo = getSourceInfo(callingPackage);
-        final int originatingUid = getOriginatingUid(sourceInfo);
+        // Uid of the source package, coming from ActivityManager
+        int callingUid = getLaunchedFromUid();
+        if (callingUid == Process.INVALID_UID) {
+            // Cannot reach ActivityManager. Aborting install.
+            Log.e(LOG_TAG, "Could not determine the launching uid.");
+        }
+        // Uid of the source package, with a preference to uid from ApplicationInfo
+        final int originatingUid = sourceInfo != null ? sourceInfo.uid : callingUid;
+
+        if (callingUid == Process.INVALID_UID && sourceInfo == null) {
+            mAbortInstall = true;
+        }
+
+        boolean isDocumentsManager = checkPermission(Manifest.permission.MANAGE_DOCUMENTS,
+                -1, callingUid) == PackageManager.PERMISSION_GRANTED;
         boolean isTrustedSource = false;
         if (sourceInfo != null && sourceInfo.isPrivilegedApp()) {
             isTrustedSource = intent.getBooleanExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, false) || (
@@ -86,7 +100,8 @@ public class InstallStart extends Activity {
                             == PackageManager.PERMISSION_GRANTED);
         }
 
-        if (!isTrustedSource && originatingUid != Process.INVALID_UID) {
+        if (!isTrustedSource && !isSystemDownloadsProvider(callingUid) && !isDocumentsManager
+                && originatingUid != Process.INVALID_UID) {
             final int targetSdkVersion = getMaxTargetSdkVersionForUid(this, originatingUid);
             if (targetSdkVersion < 0) {
                 Log.w(LOG_TAG, "Cannot get target sdk version for uid " + originatingUid);
@@ -144,14 +159,15 @@ public class InstallStart extends Activity {
 
             if (packageUri != null
                     && packageUri.getScheme().equals(ContentResolver.SCHEME_CONTENT)
-                    && canPackageQuery(originatingUid, packageUri)) {
+                    && canPackageQuery(callingUid, packageUri)) {
                 // [IMPORTANT] This path is deprecated, but should still work. Only necessary
                 // features should be added.
 
-                // Copy file to prevent it from being changed underneath this process
+                // Stage a session with this file to prevent it from being changed underneath
+                // this process.
                 nextActivity.setClass(this, InstallStaging.class);
-            } else if (packageUri != null && packageUri.getScheme().equals(
-                    PackageInstallerActivity.SCHEME_PACKAGE)) {
+            } else if (packageUri != null && PackageInstallerActivity.SCHEME_PACKAGE.equals(
+                    packageUri.getScheme())) {
                 nextActivity.setClass(this, PackageInstallerActivity.class);
             } else {
                 Intent result = new Intent();
@@ -212,41 +228,6 @@ public class InstallStart extends Activity {
         return null;
     }
 
-    /**
-     * Get the originating uid if possible, or {@link Process#INVALID_UID} if not available
-     *
-     * @param sourceInfo The source of this installation
-     * @return The UID of the installation source or INVALID_UID
-     */
-    private int getOriginatingUid(@Nullable ApplicationInfo sourceInfo) {
-        // The originating uid from the intent. We only trust/use this if it comes from either
-        // the document manager app or the downloads provider
-        final int uidFromIntent = getIntent().getIntExtra(Intent.EXTRA_ORIGINATING_UID,
-                Process.INVALID_UID);
-
-        final int callingUid;
-        if (sourceInfo != null) {
-            callingUid = sourceInfo.uid;
-        } else {
-            callingUid = getLaunchedFromUid();
-            if (callingUid == Process.INVALID_UID) {
-                // Cannot reach ActivityManager. Aborting install.
-                Log.e(LOG_TAG, "Could not determine the launching uid.");
-                mAbortInstall = true;
-                return Process.INVALID_UID;
-            }
-        }
-        if (checkPermission(Manifest.permission.MANAGE_DOCUMENTS, -1, callingUid)
-                == PackageManager.PERMISSION_GRANTED) {
-            return uidFromIntent;
-        }
-        if (isSystemDownloadsProvider(callingUid)) {
-            return uidFromIntent;
-        }
-        // We don't trust uid from the intent. Use the calling uid instead.
-        return callingUid;
-    }
-
     private boolean isSystemDownloadsProvider(int uid) {
         final ProviderInfo downloadProviderPackage = getPackageManager().resolveContentProvider(
                 DOWNLOADS_AUTHORITY, 0);
@@ -260,8 +241,7 @@ public class InstallStart extends Activity {
     }
 
     @NonNull
-    private boolean canPackageQuery(int originatingUid, Uri packageUri) {
-        String callingPackage = mPackageManager.getPackagesForUid(originatingUid)[0];
+    private boolean canPackageQuery(int callingUid, Uri packageUri) {
         ProviderInfo info = mPackageManager.resolveContentProvider(packageUri.getAuthority(),
                 PackageManager.ComponentInfoFlags.of(0));
         if (info == null) {
@@ -269,11 +249,20 @@ public class InstallStart extends Activity {
         }
         String targetPackage = info.packageName;
 
-        try {
-            return mPackageManager.canPackageQuery(callingPackage, targetPackage);
-        } catch (PackageManager.NameNotFoundException e) {
+        String[] callingPackages = mPackageManager.getPackagesForUid(callingUid);
+        if (callingPackages == null) {
             return false;
         }
+        for (String callingPackage: callingPackages) {
+            try {
+                if (mPackageManager.canPackageQuery(callingPackage, targetPackage)) {
+                    return true;
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // no-op
+            }
+        }
+        return false;
     }
 
     private boolean isCallerSessionOwner(int originatingUid, int sessionId) {

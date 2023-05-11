@@ -27,8 +27,6 @@ package com.android.server.credentials.metrics;
  * though collection will begin in the candidate phase when the user begins browsing options.
  */
 public class CandidateBrowsingPhaseMetric {
-
-    private static final String TAG = "CandidateBrowsingPhaseMetric";
     // The session id associated with the API Call this candidate provider is a part of, default -1
     private int mSessionId = -1;
     // The EntryEnum that was pressed, defaults to -1

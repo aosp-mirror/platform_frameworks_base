@@ -87,7 +87,7 @@ public class PipTransition extends PipTransitionController {
     private final int mEnterExitAnimationDuration;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
     private final Optional<SplitScreenController> mSplitScreenOptional;
-    private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
+    private @PipAnimationController.AnimationType int mEnterAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
     private SurfaceControl.Transaction mFinishTransaction;
     private final Rect mExitDestinationBounds = new Rect();
@@ -130,20 +130,6 @@ public class PipTransition extends PipTransitionController {
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = pipSurfaceTransactionHelper;
         mSplitScreenOptional = splitScreenOptional;
-    }
-
-    @Override
-    public void setIsFullAnimation(boolean isFullAnimation) {
-        setOneShotAnimationType(isFullAnimation ? ANIM_TYPE_BOUNDS : ANIM_TYPE_ALPHA);
-    }
-
-    /**
-     * Sets the preferred animation type for one time.
-     * This is typically used to set the animation type to
-     * {@link PipAnimationController#ANIM_TYPE_ALPHA}.
-     */
-    private void setOneShotAnimationType(@PipAnimationController.AnimationType int animationType) {
-        mOneShotAnimationType = animationType;
     }
 
     @Override
@@ -288,7 +274,7 @@ public class PipTransition extends PipTransitionController {
         if (!requestHasPipEnter(request)) {
             throw new IllegalStateException("Called PiP augmentRequest when request has no PiP");
         }
-        if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+        if (mEnterAnimationType == ANIM_TYPE_ALPHA) {
             mRequestedEnterTransition = transition;
             mRequestedEnterTask = request.getTriggerTask().token;
             outWCT.setActivityWindowingMode(request.getTriggerTask().token,
@@ -308,7 +294,7 @@ public class PipTransition extends PipTransitionController {
     @Override
     public boolean handleRotateDisplay(int startRotation, int endRotation,
             WindowContainerTransaction wct) {
-        if (mRequestedEnterTransition != null && mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+        if (mRequestedEnterTransition != null && mEnterAnimationType == ANIM_TYPE_ALPHA) {
             // A fade-in was requested but not-yet started. In this case, just recalculate the
             // initial state under the new rotation.
             int rotationDelta = deltaRotation(startRotation, endRotation);
@@ -423,9 +409,31 @@ public class PipTransition extends PipTransitionController {
 
     @Override
     public void onFixedRotationStarted() {
+        fadeEnteredPipIfNeed(false /* show */);
+    }
+
+    @Override
+    public void onFixedRotationFinished() {
+        fadeEnteredPipIfNeed(true /* show */);
+    }
+
+    private void fadeEnteredPipIfNeed(boolean show) {
         // The transition with this fixed rotation may be handled by other handler before reaching
         // PipTransition, so we cannot do this in #startAnimation.
-        if (mPipTransitionState.getTransitionState() == ENTERED_PIP && !mHasFadeOut) {
+        if (!mPipTransitionState.hasEnteredPip()) {
+            return;
+        }
+        if (show && mHasFadeOut) {
+            // If there is a pending transition, then let startAnimation handle it. And if it is
+            // handled, mHasFadeOut will be set to false and this runnable will be no-op. Otherwise
+            // make sure the PiP will reshow, e.g. swipe-up with fixed rotation (fade-out) but
+            // return to the current app (only finish the recent transition).
+            mTransitions.runOnIdle(() -> {
+                if (mHasFadeOut && mPipTransitionState.hasEnteredPip()) {
+                    fadeExistingPip(true /* show */);
+                }
+            });
+        } else if (!show && !mHasFadeOut) {
             // Fade out the existing PiP to avoid jump cut during seamless rotation.
             fadeExistingPip(false /* show */);
         }
@@ -500,8 +508,16 @@ public class PipTransition extends PipTransitionController {
         currentBounds.offset(-offset.x, -offset.y);
         startTransaction.setPosition(pipLeash, currentBounds.left, currentBounds.top);
 
+        final WindowContainerToken pipTaskToken = pipChange.getContainer();
+        final boolean toFullscreen = pipChange.getEndAbsBounds().equals(
+                mPipBoundsState.getDisplayBounds());
         mFinishCallback = (wct, wctCB) -> {
             mPipOrganizer.onExitPipFinished(taskInfo);
+            if (!Transitions.SHELL_TRANSITIONS_ROTATION && toFullscreen) {
+                wct = wct != null ? wct : new WindowContainerTransaction();
+                wct.setBounds(pipTaskToken, null);
+                mPipOrganizer.applyWindowingModeChangeOnExit(wct, TRANSITION_DIRECTION_LEAVE_PIP);
+            }
             finishCallback.onTransitionFinished(wct, wctCB);
         };
         mFinishTransaction = finishTransaction;
@@ -625,6 +641,7 @@ public class PipTransition extends PipTransitionController {
                         0 /* startingAngle */, rotationDelta);
         animator.setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP)
                 .setPipAnimationCallback(mPipAnimationCallback)
+                .setPipTransactionHandler(mPipOrganizer.getPipTransactionHandler())
                 .setDuration(mEnterExitAnimationDuration)
                 .start();
     }
@@ -674,6 +691,11 @@ public class PipTransition extends PipTransitionController {
                     + transitTypeToString(transitType), new Throwable());
         }
         return false;
+    }
+
+    @Override
+    public void setEnterAnimationType(@PipAnimationController.AnimationType int type) {
+        mEnterAnimationType = type;
     }
 
     private void startEnterAnimation(@NonNull TransitionInfo info,
@@ -760,7 +782,6 @@ public class PipTransition extends PipTransitionController {
         if (taskInfo.pictureInPictureParams != null
                 && taskInfo.pictureInPictureParams.isAutoEnterEnabled()
                 && mPipTransitionState.getInSwipePipToHomeTransition()) {
-            mOneShotAnimationType = ANIM_TYPE_BOUNDS;
             final SurfaceControl swipePipToHomeOverlay = mPipOrganizer.mSwipePipToHomeOverlay;
             startTransaction.setMatrix(leash, Matrix.IDENTITY_MATRIX, new float[9])
                     .setPosition(leash, destinationBounds.left, destinationBounds.top)
@@ -796,17 +817,14 @@ public class PipTransition extends PipTransitionController {
             startTransaction.setMatrix(leash, tmpTransform, new float[9]);
         }
 
-        if (mPipOrganizer.shouldAlwaysFadeIn()) {
-            mOneShotAnimationType = ANIM_TYPE_ALPHA;
-        }
-
-        if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+        final int enterAnimationType = mEnterAnimationType;
+        if (enterAnimationType == ANIM_TYPE_ALPHA) {
             startTransaction.setAlpha(leash, 0f);
         }
         startTransaction.apply();
 
         PipAnimationController.PipTransitionAnimator animator;
-        if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
+        if (enterAnimationType == ANIM_TYPE_BOUNDS) {
             animator = mPipAnimationController.getAnimator(taskInfo, leash, currentBounds,
                     currentBounds, destinationBounds, sourceHintRect, TRANSITION_DIRECTION_TO_PIP,
                     0 /* startingAngle */, rotationDelta);
@@ -829,15 +847,14 @@ public class PipTransition extends PipTransitionController {
                     animator.setColorContentOverlay(mContext);
                 }
             }
-        } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
+        } else if (enterAnimationType == ANIM_TYPE_ALPHA) {
             animator = mPipAnimationController.getAnimator(taskInfo, leash, destinationBounds,
                     0f, 1f);
-            mOneShotAnimationType = ANIM_TYPE_BOUNDS;
         } else {
-            throw new RuntimeException("Unrecognized animation type: "
-                    + mOneShotAnimationType);
+            throw new RuntimeException("Unrecognized animation type: " + enterAnimationType);
         }
         animator.setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
+                .setPipTransactionHandler(mPipOrganizer.getPipTransactionHandler())
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(mEnterExitAnimationDuration);
         if (rotationDelta != Surface.ROTATION_0 && mInFixedRotation) {
@@ -897,7 +914,7 @@ public class PipTransition extends PipTransitionController {
                         .setWindowCrop(leash, endBounds.width(), endBounds.height());
             }
         }
-        mSplitScreenOptional.get().finishEnterSplitScreen(startTransaction);
+        mSplitScreenOptional.get().finishEnterSplitScreen(finishTransaction);
         startTransaction.apply();
 
         mPipOrganizer.onExitPipFinished(taskInfo);
@@ -964,7 +981,8 @@ public class PipTransition extends PipTransitionController {
     }
 
     private void finishResizeForMenu(Rect destinationBounds) {
-        mPipMenuController.movePipMenu(null, null, destinationBounds);
+        mPipMenuController.movePipMenu(null, null, destinationBounds,
+                PipMenuController.ALPHA_NO_CHANGE);
         mPipMenuController.updateMenuBounds(destinationBounds);
     }
 }

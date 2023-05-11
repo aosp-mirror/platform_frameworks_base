@@ -20,25 +20,31 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 
 @Composable
-fun CredentialListSectionHeader(text: String) {
-    InternalSectionHeader(text, MaterialTheme.colorScheme.onSurfaceVariant)
+fun CredentialListSectionHeader(text: String, isFirstSection: Boolean) {
+    InternalSectionHeader(
+        text = text,
+        color = LocalAndroidColorScheme.current.colorOnSurfaceVariant,
+        applyTopPadding = !isFirstSection
+    )
 }
 
 @Composable
 fun MoreAboutPasskeySectionHeader(text: String) {
-    InternalSectionHeader(text, MaterialTheme.colorScheme.onSurface)
+    InternalSectionHeader(text, LocalAndroidColorScheme.current.colorOnSurface)
 }
 
 @Composable
-private fun InternalSectionHeader(text: String, color: Color) {
-    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(top = 8.dp)) {
+private fun InternalSectionHeader(text: String, color: Color, applyTopPadding: Boolean = false) {
+    Row(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(
+        top = if (applyTopPadding) 8.dp else 0.dp
+    )) {
         SectionHeaderText(
             text,
             modifier = Modifier.padding(top = 20.dp, bottom = 8.dp),

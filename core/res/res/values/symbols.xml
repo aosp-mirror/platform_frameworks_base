@@ -283,7 +283,6 @@
   <java-symbol type="attr" name="autofillSaveCustomSubtitleMaxHeight"/>
   <java-symbol type="bool" name="action_bar_embed_tabs" />
   <java-symbol type="bool" name="action_bar_expanded_action_views_exclusive" />
-  <java-symbol type="bool" name="config_audio_csd_enabled_default" />
   <java-symbol type="integer" name="config_audio_notif_vol_default" />
   <java-symbol type="integer" name="config_audio_notif_vol_steps" />
   <java-symbol type="integer" name="config_audio_ring_vol_default" />
@@ -349,6 +348,7 @@
   <java-symbol type="bool" name="config_useDevInputEventForAudioJack" />
   <java-symbol type="bool" name="config_safe_media_volume_enabled" />
   <java-symbol type="bool" name="config_safe_media_disable_on_volume_up" />
+  <java-symbol type="bool" name="config_safe_sound_dosage_enabled" />
   <java-symbol type="bool" name="config_camera_sound_forced" />
   <java-symbol type="bool" name="config_dontPreferApn" />
   <java-symbol type="bool" name="config_restartRadioAfterProvisioning" />
@@ -1068,7 +1068,9 @@
   <java-symbol type="string" name="action_bar_home_subtitle_description_format" />
   <java-symbol type="string" name="wireless_display_route_description" />
   <java-symbol type="string" name="user_owner_label" />
+  <java-symbol type="string" name="user_owner_app_label" />
   <java-symbol type="string" name="managed_profile_label" />
+  <java-symbol type="string" name="managed_profile_app_label" />
   <java-symbol type="string" name="managed_profile_label_badge" />
   <java-symbol type="string" name="managed_profile_label_badge_2" />
   <java-symbol type="string" name="managed_profile_label_badge_3" />
@@ -1713,6 +1715,7 @@
   <java-symbol type="integer" name="config_motionPredictionOffsetNanos" />
   <java-symbol type="bool" name="config_showNavigationBar" />
   <java-symbol type="bool" name="config_supportAutoRotation" />
+  <java-symbol type="bool" name="config_allowRotationResolver" />
   <java-symbol type="bool" name="config_dockedStackDividerFreeSnapMode" />
   <java-symbol type="dimen" name="docked_stack_divider_thickness" />
   <java-symbol type="dimen" name="docked_stack_divider_insets" />
@@ -1944,7 +1947,7 @@
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromLidSwitch" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromDock" />
   <java-symbol type="bool" name="config_allowTheaterModeWakeFromWindowLayout" />
-  <java-symbol type="bool" name="config_keepDreamingWhenUndocking" />
+  <java-symbol type="bool" name="config_keepDreamingWhenUnplugging" />
   <java-symbol type="integer" name="config_keyguardDrawnTimeout" />
   <java-symbol type="bool" name="config_goToSleepOnButtonPressTheaterMode" />
   <java-symbol type="bool" name="config_supportLongPressPowerWhenNonInteractive" />
@@ -2017,6 +2020,7 @@
   <java-symbol type="integer" name="config_notificationsBatteryMediumARGB" />
   <java-symbol type="integer" name="config_notificationsBatteryNearlyFullLevel" />
   <java-symbol type="integer" name="config_notificationServiceArchiveSize" />
+  <java-symbol type="array" name="config_useFullScreenIntentPackages" />
   <java-symbol type="integer" name="config_previousVibrationsDumpLimit" />
   <java-symbol type="integer" name="config_defaultVibrationAmplitude" />
   <java-symbol type="dimen" name="config_hapticChannelMaxVibrationAmplitude" />
@@ -3138,10 +3142,8 @@
 
   <!--  Work profile unlaunchable app alert dialog-->
   <java-symbol type="style" name="AlertDialogWithEmergencyButton"/>
-  <java-symbol type="string" name="work_mode_dialer_off_message" />
   <java-symbol type="string" name="work_mode_emergency_call_button" />
   <java-symbol type="string" name="work_mode_off_title" />
-  <java-symbol type="string" name="work_mode_off_message" />
   <java-symbol type="string" name="work_mode_turn_on" />
 
   <java-symbol type="string" name="deprecated_target_sdk_message" />
@@ -3421,6 +3423,9 @@
   <java-symbol type="integer" name="config_displayWhiteBalanceColorTemperatureDefault" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayPrimaries" />
   <java-symbol type="array" name="config_displayWhiteBalanceDisplayNominalWhite" />
+  <java-symbol type="integer" name="config_displayWhiteBalanceDisplayNominalWhiteCct" />
+  <java-symbol type="array" name="config_displayWhiteBalanceDisplayRangeMinimums" />
+  <java-symbol type="array" name="config_displayWhiteBalanceDisplaySteps" />
   <java-symbol type="bool" name="config_displayWhiteBalanceLightModeAllowed" />
   <java-symbol type="integer" name="config_displayWhiteBalanceTransitionTime" />
 
@@ -5036,11 +5041,9 @@
   <java-symbol name="materialColorOnTertiary" type="attr"/>
   <java-symbol name="materialColorSurfaceDim" type="attr"/>
   <java-symbol name="materialColorSurfaceBright" type="attr"/>
-  <java-symbol name="materialColorSecondary" type="attr"/>
   <java-symbol name="materialColorOnError" type="attr"/>
   <java-symbol name="materialColorSurface" type="attr"/>
   <java-symbol name="materialColorSurfaceContainerHigh" type="attr"/>
-  <java-symbol name="materialColorTertiary" type="attr"/>
   <java-symbol name="materialColorSurfaceContainerHighest" type="attr"/>
   <java-symbol name="materialColorOnSurfaceVariant" type="attr"/>
   <java-symbol name="materialColorOutline" type="attr"/>
@@ -5048,8 +5051,71 @@
   <java-symbol name="materialColorOnPrimary" type="attr"/>
   <java-symbol name="materialColorOnSurface" type="attr"/>
   <java-symbol name="materialColorSurfaceContainer" type="attr"/>
-  <java-symbol name="materialColorSurfaceContainer" type="attr"/>
+  <java-symbol name="materialColorPrimary" type="attr"/>
+  <java-symbol name="materialColorSecondary" type="attr"/>
+  <java-symbol name="materialColorTertiary" type="attr"/>
 
   <java-symbol type="attr" name="actionModeUndoDrawable" />
   <java-symbol type="attr" name="actionModeRedoDrawable" />
+
+  <!-- Remaining symbols for Themes -->
+  <java-symbol type="style" name="Theme.DeviceDefault.Autofill.Save" />
+  <java-symbol type="style" name="Theme.DeviceDefault.AutofillHalfScreenDialogButton" />
+  <java-symbol type="style" name="Theme.DeviceDefault.AutofillHalfScreenDialogList" />
+  <java-symbol type="style" name="Theme.DeviceDefault.DayNight" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.Alert.DayNight" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.FixedSize" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.MinWidth" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.NoActionBar.FixedSize" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.NoActionBar.MinWidth" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog.Presentation" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.DialogWhenLarge.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.DialogWhenLarge" />
+  <java-symbol type="style" name="Theme.DeviceDefault.DocumentsUI" />
+  <java-symbol type="style" name="Theme.DeviceDefault.InputMethod" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.DarkActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.FixedSize" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.MinWidth" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar.FixedSize" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar.MinWidth" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog.Presentation" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.DialogWhenLarge.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.DialogWhenLarge" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.NoActionBar.Fullscreen" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.NoActionBar.Overscan" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.NoActionBar.TranslucentDecor" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Panel" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.SearchBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light.Voice" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Light" />
+  <java-symbol type="style" name="Theme.DeviceDefault.NoActionBar.Fullscreen" />
+  <java-symbol type="style" name="Theme.DeviceDefault.NoActionBar.Overscan" />
+  <java-symbol type="style" name="Theme.DeviceDefault.NoActionBar.TranslucentDecor" />
+  <java-symbol type="style" name="Theme.DeviceDefault.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Notification" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Panel" />
+  <java-symbol type="style" name="Theme.DeviceDefault.ResolverCommon" />
+  <java-symbol type="style" name="Theme.DeviceDefault.SearchBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.Dark.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.Dialog.Alert" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.Dialog.NoActionBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.DialogBase" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings.DialogWhenLarge" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Settings" />
+  <java-symbol type="style" name="Theme.DeviceDefault.System.Dialog.Alert" />
+  <java-symbol type="style" name="Theme.DeviceDefault.System.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.SystemUI.Dialog" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Wallpaper.NoTitleBar" />
+  <java-symbol type="style" name="Theme.DeviceDefault.Wallpaper" />
+  <java-symbol type="style" name="Theme.DeviceDefault" />
+  <java-symbol type="style" name="Theme.DeviceDefaultBase" />
+  <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Accent" />
+  <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Accent.Light" />
+  <java-symbol type="style" name="ThemeOverlay.DeviceDefault.Dark.ActionBar.Accent" />
 </resources>

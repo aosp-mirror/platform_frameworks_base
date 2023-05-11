@@ -18,6 +18,7 @@ package com.android.credentialmanager
 
 import android.app.Activity
 import android.os.IBinder
+import android.text.TextUtils
 import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
@@ -67,9 +68,9 @@ class CredentialSelectorViewModel(
 
     var uiMetrics: UIMetrics = UIMetrics()
 
-    init{
+    init {
         uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INIT,
-                credManRepo.requestInfo?.appPackageName)
+            credManRepo.requestInfo?.appPackageName)
     }
 
     /**************************************************************************/
@@ -100,7 +101,7 @@ class CredentialSelectorViewModel(
         if (this.credManRepo.requestInfo?.token != credManRepo.requestInfo?.token) {
             this.uiMetrics.resetInstanceId()
             this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_NEW_REQUEST,
-                    credManRepo.requestInfo?.appPackageName)
+                credManRepo.requestInfo?.appPackageName)
         }
     }
 
@@ -174,7 +175,7 @@ class CredentialSelectorViewModel(
     private fun onInternalError() {
         Log.w(Constants.LOG_TAG, "UI closed due to illegal internal state")
         this.uiMetrics.logNormal(LifecycleEvent.CREDMAN_ACTIVITY_INTERNAL_ERROR,
-                credManRepo.requestInfo?.appPackageName)
+            credManRepo.requestInfo?.appPackageName)
         credManRepo.onParsingFailureCancel()
         uiState = uiState.copy(dialogState = DialogState.COMPLETE)
     }
@@ -250,9 +251,16 @@ class CredentialSelectorViewModel(
             return
         }
         val newUiState = CreateFlowUtils.toCreateCredentialUiState(
-            prevUiState.enabledProviders, prevUiState.disabledProviders,
-            userConfigRepo.getDefaultProviderId(), prevUiState.requestDisplayInfo, true,
-            userConfigRepo.getIsPasskeyFirstUse())
+            enabledProviders = prevUiState.enabledProviders,
+            disabledProviders = prevUiState.disabledProviders,
+            defaultProviderIdPreferredByApp =
+            prevUiState.requestDisplayInfo.appPreferredDefaultProviderId,
+            defaultProviderIdsSetByUser =
+            prevUiState.requestDisplayInfo.userSetDefaultProviderIds,
+            requestDisplayInfo = prevUiState.requestDisplayInfo,
+            isOnPasskeyIntroStateAlready = true,
+            isPasskeyFirstUse = userConfigRepo.getIsPasskeyFirstUse()
+        )
         if (newUiState == null) {
             Log.d(Constants.LOG_TAG, "Unable to update create ui state")
             onInternalError()
@@ -262,28 +270,10 @@ class CredentialSelectorViewModel(
         userConfigRepo.setIsPasskeyFirstUse(false)
     }
 
-    fun createFlowOnMoreOptionsSelectedOnProviderSelection() {
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
-                isFromProviderSelection = true
-            )
-        )
-    }
-
     fun createFlowOnMoreOptionsSelectedOnCreationSelection() {
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState = CreateScreenState.MORE_OPTIONS_SELECTION,
-                isFromProviderSelection = false
-            )
-        )
-    }
-
-    fun createFlowOnBackProviderSelectionButtonSelected() {
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.PROVIDER_SELECTION,
             )
         )
     }
@@ -308,27 +298,20 @@ class CredentialSelectorViewModel(
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState =
-                if (activeEntry.activeProvider.id ==
-                    userConfigRepo.getDefaultProviderId())
+                if (uiState.createCredentialUiState?.requestDisplayInfo?.userSetDefaultProviderIds
+                        ?.contains(activeEntry.activeProvider.id) ?: true ||
+                    !(uiState.createCredentialUiState?.foundCandidateFromUserDefaultProvider
+                    ?: false) ||
+                    !TextUtils.isEmpty(uiState.createCredentialUiState?.requestDisplayInfo
+                        ?.appPreferredDefaultProviderId))
                     CreateScreenState.CREATION_OPTION_SELECTION
-                else CreateScreenState.MORE_OPTIONS_ROW_INTRO,
+                else CreateScreenState.DEFAULT_PROVIDER_CONFIRMATION,
                 activeEntry = activeEntry
             )
         )
     }
 
-    fun createFlowOnEntrySelectedFromFirstUseScreen(activeEntry: ActiveEntry) {
-        val providerId = activeEntry.activeProvider.id
-        createFlowOnDefaultChanged(providerId)
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-                activeEntry = activeEntry
-            )
-        )
-    }
-
-    fun createFlowOnDisabledProvidersSelected() {
+    fun createFlowOnLaunchSettings() {
         credManRepo.onSettingLaunchCancel()
         uiState = uiState.copy(dialogState = DialogState.CANCELED_FOR_SETTINGS)
     }
@@ -341,33 +324,12 @@ class CredentialSelectorViewModel(
         )
     }
 
-    fun createFlowOnChangeDefaultSelected() {
-        uiState = uiState.copy(
-            createCredentialUiState = uiState.createCredentialUiState?.copy(
-                currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
-            )
-        )
-        val providerId = uiState.createCredentialUiState?.activeEntry?.activeProvider?.id
-        createFlowOnDefaultChanged(providerId)
-    }
-
     fun createFlowOnUseOnceSelected() {
         uiState = uiState.copy(
             createCredentialUiState = uiState.createCredentialUiState?.copy(
                 currentScreenState = CreateScreenState.CREATION_OPTION_SELECTION,
             )
         )
-    }
-
-    fun createFlowOnDefaultChanged(providerId: String?) {
-        if (providerId != null) {
-            Log.d(
-                Constants.LOG_TAG, "Default provider changed to: " +
-                " {provider=$providerId")
-            userConfigRepo.setDefaultProvider(providerId)
-        } else {
-            Log.w(Constants.LOG_TAG, "Null provider is being changed")
-        }
     }
 
     fun createFlowOnEntrySelected(selectedEntry: BaseEntry) {

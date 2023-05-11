@@ -21,6 +21,7 @@ import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_NONE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
@@ -327,6 +328,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
 
         @ColorInt int backgroundColorForTransition = 0;
         final int wallpaperTransit = getWallpaperTransitType(info);
+        boolean isDisplayRotationAnimationStarted = false;
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change.hasAllFlags(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY
@@ -350,6 +352,7 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     if (!(isSeamlessDisplayChange || anim == ROTATION_ANIMATION_JUMPCUT)) {
                         startRotationAnimation(startTransaction, change, info, anim, animations,
                                 onAnimFinish);
+                        isDisplayRotationAnimationStarted = true;
                         continue;
                     }
                 } else {
@@ -403,6 +406,14 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             ROTATION_ANIMATION_ROTATE, animations, onAnimFinish);
                     continue;
                 }
+            }
+
+            // Hide the invisible surface directly without animating it if there is a display
+            // rotation animation playing.
+            if (isDisplayRotationAnimationStarted && TransitionUtil.isClosingType(
+                    change.getMode())) {
+                startTransaction.hide(change.getLeash());
+                continue;
             }
 
             // The back gesture has animated this change before transition happen, so here we don't
@@ -614,6 +625,9 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                     options.getTransitionBounds());
         } else if ((changeFlags & FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT) != 0 && isOpeningType) {
             // This received a transferred starting window, so don't animate
+            return null;
+        } else if (overrideType == ANIM_SCENE_TRANSITION) {
+            // If there's a scene-transition, then jump-cut.
             return null;
         } else {
             a = loadAttributeAnimation(info, change, wallpaperTransit, mTransitionAnimation);

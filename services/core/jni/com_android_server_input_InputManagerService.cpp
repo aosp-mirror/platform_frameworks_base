@@ -342,15 +342,15 @@ public:
     void notifySensorAccuracy(int32_t deviceId, InputDeviceSensorType sensorType,
                               InputDeviceSensorAccuracy accuracy) override;
     void notifyVibratorState(int32_t deviceId, bool isOn) override;
-    bool filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) override;
-    void getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) override;
-    void interceptKeyBeforeQueueing(const KeyEvent* keyEvent, uint32_t& policyFlags) override;
-    void interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
+    bool filterInputEvent(const InputEvent& inputEvent, uint32_t policyFlags) override;
+    InputDispatcherConfiguration getDispatcherConfiguration() override;
+    void interceptKeyBeforeQueueing(const KeyEvent& keyEvent, uint32_t& policyFlags) override;
+    void interceptMotionBeforeQueueing(int32_t displayId, nsecs_t when,
                                        uint32_t& policyFlags) override;
-    nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token, const KeyEvent* keyEvent,
+    nsecs_t interceptKeyBeforeDispatching(const sp<IBinder>& token, const KeyEvent& keyEvent,
                                           uint32_t policyFlags) override;
-    bool dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent* keyEvent,
-                              uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) override;
+    std::optional<KeyEvent> dispatchUnhandledKey(const sp<IBinder>& token, const KeyEvent& keyEvent,
+                                                 uint32_t policyFlags) override;
     void pokeUserActivity(nsecs_t eventTime, int32_t eventType, int32_t displayId) override;
     void onPointerDownOutsideFocus(const sp<IBinder>& touchedToken) override;
     void setPointerCapture(const PointerCaptureRequest& request) override;
@@ -450,7 +450,7 @@ NativeInputManager::NativeInputManager(jobject serviceObj, const sp<Looper>& loo
 
     mServiceObj = env->NewGlobalRef(serviceObj);
 
-    InputManager* im = new InputManager(this, this);
+    InputManager* im = new InputManager(this, *this);
     mInputManager = im;
     defaultServiceManager()->addService(String16("inputflinger"), im);
 }
@@ -485,17 +485,7 @@ void NativeInputManager::dump(std::string& dump) {
     }
     dump += "\n";
 
-    mInputManager->getReader().dump(dump);
-    dump += "\n";
-
-    mInputManager->getBlocker().dump(dump);
-    dump += "\n";
-
-    mInputManager->getProcessor().dump(dump);
-    dump += "\n";
-
-    mInputManager->getDispatcher().dump(dump);
-    dump += "\n";
+    mInputManager->dump(dump);
 }
 
 bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
@@ -539,7 +529,7 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 base::Result<std::unique_ptr<InputChannel>> NativeInputManager::createInputChannel(
@@ -760,7 +750,6 @@ void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
 
 void NativeInputManager::notifyInputDevicesChanged(const std::vector<InputDeviceInfo>& inputDevices) {
     ATRACE_CALL();
-    mInputManager->getBlocker().notifyInputDevicesChanged(inputDevices);
     JNIEnv* env = jniEnv();
 
     size_t count = inputDevices.size();
@@ -1018,21 +1007,22 @@ void NativeInputManager::notifyVibratorState(int32_t deviceId, bool isOn) {
     checkAndClearExceptionFromCallback(env, "notifyVibratorState");
 }
 
-void NativeInputManager::getDispatcherConfiguration(InputDispatcherConfiguration* outConfig) {
+InputDispatcherConfiguration NativeInputManager::getDispatcherConfiguration() {
     ATRACE_CALL();
+    InputDispatcherConfiguration config;
     JNIEnv* env = jniEnv();
 
-    jint keyRepeatTimeout = env->CallIntMethod(mServiceObj,
-            gServiceClassInfo.getKeyRepeatTimeout);
+    jint keyRepeatTimeout = env->CallIntMethod(mServiceObj, gServiceClassInfo.getKeyRepeatTimeout);
     if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatTimeout")) {
-        outConfig->keyRepeatTimeout = milliseconds_to_nanoseconds(keyRepeatTimeout);
+        config.keyRepeatTimeout = milliseconds_to_nanoseconds(keyRepeatTimeout);
     }
 
-    jint keyRepeatDelay = env->CallIntMethod(mServiceObj,
-            gServiceClassInfo.getKeyRepeatDelay);
+    jint keyRepeatDelay = env->CallIntMethod(mServiceObj, gServiceClassInfo.getKeyRepeatDelay);
     if (!checkAndClearExceptionFromCallback(env, "getKeyRepeatDelay")) {
-        outConfig->keyRepeatDelay = milliseconds_to_nanoseconds(keyRepeatDelay);
+        config.keyRepeatDelay = milliseconds_to_nanoseconds(keyRepeatDelay);
     }
+
+    return config;
 }
 
 void NativeInputManager::displayRemoved(JNIEnv* env, int32_t displayId) {
@@ -1090,7 +1080,7 @@ void NativeInputManager::setPointerDisplayId(int32_t displayId) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 void NativeInputManager::setPointerSpeed(int32_t speed) {
@@ -1106,7 +1096,7 @@ void NativeInputManager::setPointerSpeed(int32_t speed) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_POINTER_SPEED);
+            InputReaderConfiguration::Change::POINTER_SPEED);
 }
 
 void NativeInputManager::setPointerAcceleration(float acceleration) {
@@ -1122,7 +1112,7 @@ void NativeInputManager::setPointerAcceleration(float acceleration) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_POINTER_SPEED);
+            InputReaderConfiguration::Change::POINTER_SPEED);
 }
 
 void NativeInputManager::setTouchpadPointerSpeed(int32_t speed) {
@@ -1138,7 +1128,7 @@ void NativeInputManager::setTouchpadPointerSpeed(int32_t speed) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
 }
 
 void NativeInputManager::setTouchpadNaturalScrollingEnabled(bool enabled) {
@@ -1154,7 +1144,7 @@ void NativeInputManager::setTouchpadNaturalScrollingEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
 }
 
 void NativeInputManager::setTouchpadTapToClickEnabled(bool enabled) {
@@ -1170,7 +1160,7 @@ void NativeInputManager::setTouchpadTapToClickEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
 }
 
 void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
@@ -1186,7 +1176,7 @@ void NativeInputManager::setTouchpadRightClickZoneEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCHPAD_SETTINGS);
+            InputReaderConfiguration::Change::TOUCHPAD_SETTINGS);
 }
 
 void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) {
@@ -1204,7 +1194,7 @@ void NativeInputManager::setInputDeviceEnabled(uint32_t deviceId, bool enabled) 
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_ENABLED_STATE);
+            InputReaderConfiguration::Change::ENABLED_STATE);
 }
 
 void NativeInputManager::setShowTouches(bool enabled) {
@@ -1220,7 +1210,7 @@ void NativeInputManager::setShowTouches(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_SHOW_TOUCHES);
+            InputReaderConfiguration::Change::SHOW_TOUCHES);
 }
 
 void NativeInputManager::requestPointerCapture(const sp<IBinder>& windowToken, bool enabled) {
@@ -1233,7 +1223,7 @@ void NativeInputManager::setInteractive(bool interactive) {
 
 void NativeInputManager::reloadCalibration() {
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_TOUCH_AFFINE_TRANSFORMATION);
+            InputReaderConfiguration::Change::TOUCH_AFFINE_TRANSFORMATION);
 }
 
 void NativeInputManager::setPointerIconType(PointerIconStyle iconId) {
@@ -1305,110 +1295,112 @@ void NativeInputManager::notifyStylusGestureStarted(int32_t deviceId, nsecs_t ev
     checkAndClearExceptionFromCallback(env, "notifyStylusGestureStarted");
 }
 
-bool NativeInputManager::filterInputEvent(const InputEvent* inputEvent, uint32_t policyFlags) {
+bool NativeInputManager::filterInputEvent(const InputEvent& inputEvent, uint32_t policyFlags) {
     ATRACE_CALL();
-    jobject inputEventObj;
-
     JNIEnv* env = jniEnv();
-    switch (inputEvent->getType()) {
-    case AINPUT_EVENT_TYPE_KEY:
-        inputEventObj = android_view_KeyEvent_fromNative(env,
-                static_cast<const KeyEvent*>(inputEvent));
-        break;
-    case AINPUT_EVENT_TYPE_MOTION:
-        inputEventObj =
-                android_view_MotionEvent_obtainAsCopy(env,
-                                                      static_cast<const MotionEvent&>(*inputEvent));
-        break;
-    default:
-        return true; // dispatch the event normally
+
+    ScopedLocalRef<jobject> inputEventObj(env);
+    switch (inputEvent.getType()) {
+        case InputEventType::KEY:
+            inputEventObj.reset(
+                    android_view_KeyEvent_fromNative(env,
+                                                     static_cast<const KeyEvent&>(inputEvent)));
+            break;
+        case InputEventType::MOTION:
+            inputEventObj.reset(
+                    android_view_MotionEvent_obtainAsCopy(env,
+                                                          static_cast<const MotionEvent&>(
+                                                                  inputEvent)));
+            break;
+        default:
+            return true; // dispatch the event normally
     }
 
-    if (!inputEventObj) {
+    if (!inputEventObj.get()) {
         ALOGE("Failed to obtain input event object for filterInputEvent.");
         return true; // dispatch the event normally
     }
 
     // The callee is responsible for recycling the event.
-    jboolean pass = env->CallBooleanMethod(mServiceObj, gServiceClassInfo.filterInputEvent,
-            inputEventObj, policyFlags);
+    const jboolean continueEventDispatch =
+            env->CallBooleanMethod(mServiceObj, gServiceClassInfo.filterInputEvent,
+                                   inputEventObj.get(), policyFlags);
     if (checkAndClearExceptionFromCallback(env, "filterInputEvent")) {
-        pass = true;
+        return true; // dispatch the event normally
     }
-    env->DeleteLocalRef(inputEventObj);
-    return pass;
+    return continueEventDispatch;
 }
 
-void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent* keyEvent,
-        uint32_t& policyFlags) {
+void NativeInputManager::interceptKeyBeforeQueueing(const KeyEvent& keyEvent,
+                                                    uint32_t& policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and pass them along.
     // - Ask the window manager what to do with normal events and trusted injected events.
     // - For normal events wake and brighten the screen if currently off or dim.
-    bool interactive = mInteractive.load();
+    const bool interactive = mInteractive.load();
     if (interactive) {
         policyFlags |= POLICY_FLAG_INTERACTIVE;
     }
-    if ((policyFlags & POLICY_FLAG_TRUSTED)) {
-        nsecs_t when = keyEvent->getEventTime();
-        JNIEnv* env = jniEnv();
-        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
-        jint wmActions;
-        if (keyEventObj) {
-            wmActions = env->CallIntMethod(mServiceObj,
-                    gServiceClassInfo.interceptKeyBeforeQueueing,
-                    keyEventObj, policyFlags);
-            if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
-                wmActions = 0;
-            }
-            android_view_KeyEvent_recycle(env, keyEventObj);
-            env->DeleteLocalRef(keyEventObj);
-        } else {
-            ALOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
-            wmActions = 0;
-        }
 
-        handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
-    } else {
+    if ((policyFlags & POLICY_FLAG_TRUSTED) == 0) {
         if (interactive) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
         }
+        return;
     }
+
+    const nsecs_t when = keyEvent.getEventTime();
+    JNIEnv* env = jniEnv();
+    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_fromNative(env, keyEvent));
+    if (!keyEventObj.get()) {
+        ALOGE("Failed to obtain key event object for interceptKeyBeforeQueueing.");
+        return;
+    }
+
+    jint wmActions = env->CallIntMethod(mServiceObj, gServiceClassInfo.interceptKeyBeforeQueueing,
+                                        keyEventObj.get(), policyFlags);
+    if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeQueueing")) {
+        wmActions = 0;
+    }
+    android_view_KeyEvent_recycle(env, keyEventObj.get());
+    handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
 }
 
-void NativeInputManager::interceptMotionBeforeQueueing(const int32_t displayId, nsecs_t when,
-        uint32_t& policyFlags) {
+void NativeInputManager::interceptMotionBeforeQueueing(int32_t displayId, nsecs_t when,
+                                                       uint32_t& policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and pass them along.
     // - No special filtering for injected events required at this time.
     // - Filter normal events based on screen state.
     // - For normal events brighten (but do not wake) the screen if currently dim.
-    bool interactive = mInteractive.load();
+    const bool interactive = mInteractive.load();
     if (interactive) {
         policyFlags |= POLICY_FLAG_INTERACTIVE;
     }
-    if ((policyFlags & POLICY_FLAG_TRUSTED) && !(policyFlags & POLICY_FLAG_INJECTED)) {
-        if (policyFlags & POLICY_FLAG_INTERACTIVE) {
-            policyFlags |= POLICY_FLAG_PASS_TO_USER;
-        } else {
-            JNIEnv* env = jniEnv();
-            jint wmActions = env->CallIntMethod(mServiceObj,
-                        gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive,
-                        displayId, when, policyFlags);
-            if (checkAndClearExceptionFromCallback(env,
-                    "interceptMotionBeforeQueueingNonInteractive")) {
-                wmActions = 0;
-            }
 
-            handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
-        }
-    } else {
+    if ((policyFlags & POLICY_FLAG_TRUSTED) == 0 || (policyFlags & POLICY_FLAG_INJECTED)) {
         if (interactive) {
             policyFlags |= POLICY_FLAG_PASS_TO_USER;
         }
+        return;
     }
+
+    if (policyFlags & POLICY_FLAG_INTERACTIVE) {
+        policyFlags |= POLICY_FLAG_PASS_TO_USER;
+        return;
+    }
+
+    JNIEnv* env = jniEnv();
+    const jint wmActions =
+            env->CallIntMethod(mServiceObj,
+                               gServiceClassInfo.interceptMotionBeforeQueueingNonInteractive,
+                               displayId, when, policyFlags);
+    if (checkAndClearExceptionFromCallback(env, "interceptMotionBeforeQueueingNonInteractive")) {
+        return;
+    }
+    handleInterceptActions(wmActions, when, /*byref*/ policyFlags);
 }
 
 void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
@@ -1422,81 +1414,76 @@ void NativeInputManager::handleInterceptActions(jint wmActions, nsecs_t when,
     }
 }
 
-nsecs_t NativeInputManager::interceptKeyBeforeDispatching(
-        const sp<IBinder>& token,
-        const KeyEvent* keyEvent, uint32_t policyFlags) {
+nsecs_t NativeInputManager::interceptKeyBeforeDispatching(const sp<IBinder>& token,
+                                                          const KeyEvent& keyEvent,
+                                                          uint32_t policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and pass them along.
     // - Filter normal events and trusted injected events through the window manager policy to
     //   handle the HOME key and the like.
-    nsecs_t result = 0;
-    if (policyFlags & POLICY_FLAG_TRUSTED) {
-        JNIEnv* env = jniEnv();
-        ScopedLocalFrame localFrame(env);
-
-        // Token may be null
-        jobject tokenObj = javaObjectForIBinder(env, token);
-
-        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
-        if (keyEventObj) {
-            jlong delayMillis = env->CallLongMethod(mServiceObj,
-                    gServiceClassInfo.interceptKeyBeforeDispatching,
-                    tokenObj, keyEventObj, policyFlags);
-            bool error = checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching");
-            android_view_KeyEvent_recycle(env, keyEventObj);
-            env->DeleteLocalRef(keyEventObj);
-            if (!error) {
-                if (delayMillis < 0) {
-                    result = -1;
-                } else if (delayMillis > 0) {
-                    result = milliseconds_to_nanoseconds(delayMillis);
-                }
-            }
-        } else {
-            ALOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
-        }
+    if ((policyFlags & POLICY_FLAG_TRUSTED) == 0) {
+        return 0;
     }
-    return result;
+
+    JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
+
+    // Token may be null
+    ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
+    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_fromNative(env, keyEvent));
+    if (!keyEventObj.get()) {
+        ALOGE("Failed to obtain key event object for interceptKeyBeforeDispatching.");
+        return 0;
+    }
+
+    const jlong delayMillis =
+            env->CallLongMethod(mServiceObj, gServiceClassInfo.interceptKeyBeforeDispatching,
+                                tokenObj.get(), keyEventObj.get(), policyFlags);
+    android_view_KeyEvent_recycle(env, keyEventObj.get());
+    if (checkAndClearExceptionFromCallback(env, "interceptKeyBeforeDispatching")) {
+        return 0;
+    }
+    return delayMillis < 0 ? -1 : milliseconds_to_nanoseconds(delayMillis);
 }
 
-bool NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
-        const KeyEvent* keyEvent, uint32_t policyFlags, KeyEvent* outFallbackKeyEvent) {
+std::optional<KeyEvent> NativeInputManager::dispatchUnhandledKey(const sp<IBinder>& token,
+                                                                 const KeyEvent& keyEvent,
+                                                                 uint32_t policyFlags) {
     ATRACE_CALL();
     // Policy:
     // - Ignore untrusted events and do not perform default handling.
-    bool result = false;
-    if (policyFlags & POLICY_FLAG_TRUSTED) {
-        JNIEnv* env = jniEnv();
-        ScopedLocalFrame localFrame(env);
-
-        // Note: tokenObj may be null.
-        jobject tokenObj = javaObjectForIBinder(env, token);
-        jobject keyEventObj = android_view_KeyEvent_fromNative(env, keyEvent);
-        if (keyEventObj) {
-            jobject fallbackKeyEventObj = env->CallObjectMethod(mServiceObj,
-                    gServiceClassInfo.dispatchUnhandledKey,
-                    tokenObj, keyEventObj, policyFlags);
-            if (checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey")) {
-                fallbackKeyEventObj = nullptr;
-            }
-            android_view_KeyEvent_recycle(env, keyEventObj);
-            env->DeleteLocalRef(keyEventObj);
-
-            if (fallbackKeyEventObj) {
-                // Note: outFallbackKeyEvent may be the same object as keyEvent.
-                if (!android_view_KeyEvent_toNative(env, fallbackKeyEventObj,
-                        outFallbackKeyEvent)) {
-                    result = true;
-                }
-                android_view_KeyEvent_recycle(env, fallbackKeyEventObj);
-                env->DeleteLocalRef(fallbackKeyEventObj);
-            }
-        } else {
-            ALOGE("Failed to obtain key event object for dispatchUnhandledKey.");
-        }
+    if ((policyFlags & POLICY_FLAG_TRUSTED) == 0) {
+        return {};
     }
-    return result;
+
+    JNIEnv* env = jniEnv();
+    ScopedLocalFrame localFrame(env);
+
+    // Note: tokenObj may be null.
+    ScopedLocalRef<jobject> tokenObj(env, javaObjectForIBinder(env, token));
+    ScopedLocalRef<jobject> keyEventObj(env, android_view_KeyEvent_fromNative(env, keyEvent));
+    if (!keyEventObj.get()) {
+        ALOGE("Failed to obtain key event object for dispatchUnhandledKey.");
+        return {};
+    }
+
+    ScopedLocalRef<jobject>
+            fallbackKeyEventObj(env,
+                                env->CallObjectMethod(mServiceObj,
+                                                      gServiceClassInfo.dispatchUnhandledKey,
+                                                      tokenObj.get(), keyEventObj.get(),
+                                                      policyFlags));
+
+    android_view_KeyEvent_recycle(env, keyEventObj.get());
+    if (checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey") ||
+        !fallbackKeyEventObj.get()) {
+        return {};
+    }
+
+    const KeyEvent fallbackEvent = android_view_KeyEvent_toNative(env, fallbackKeyEventObj.get());
+    android_view_KeyEvent_recycle(env, fallbackKeyEventObj.get());
+    return fallbackEvent;
 }
 
 void NativeInputManager::pokeUserActivity(nsecs_t eventTime, int32_t eventType, int32_t displayId) {
@@ -1527,7 +1514,7 @@ void NativeInputManager::setPointerCapture(const PointerCaptureRequest& request)
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_POINTER_CAPTURE);
+            InputReaderConfiguration::Change::POINTER_CAPTURE);
 }
 
 void NativeInputManager::loadPointerIcon(SpriteIcon* icon, int32_t displayId) {
@@ -1637,7 +1624,7 @@ void NativeInputManager::setStylusButtonMotionEventsEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_STYLUS_BUTTON_REPORTING);
+            InputReaderConfiguration::Change::STYLUS_BUTTON_REPORTING);
 }
 
 FloatPoint NativeInputManager::getMouseCursorPosition() {
@@ -1660,7 +1647,7 @@ void NativeInputManager::setStylusPointerIconEnabled(bool enabled) {
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 // ----------------------------------------------------------------------------
@@ -1887,13 +1874,7 @@ static jint nativeInjectInputEvent(JNIEnv* env, jobject nativeImplObj, jobject i
     InputEventInjectionSync mode = static_cast<InputEventInjectionSync>(syncMode);
 
     if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
-        KeyEvent keyEvent;
-        status_t status = android_view_KeyEvent_toNative(env, inputEventObj, & keyEvent);
-        if (status) {
-            jniThrowRuntimeException(env, "Could not read contents of KeyEvent object.");
-            return static_cast<jint>(InputEventInjectionResult::FAILED);
-        }
-
+        const KeyEvent keyEvent = android_view_KeyEvent_toNative(env, inputEventObj);
         const InputEventInjectionResult result =
                 im->getInputManager()->getDispatcher().injectInputEvent(&keyEvent, targetUid, mode,
                                                                         std::chrono::milliseconds(
@@ -1924,13 +1905,7 @@ static jobject nativeVerifyInputEvent(JNIEnv* env, jobject nativeImplObj, jobjec
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     if (env->IsInstanceOf(inputEventObj, gKeyEventClassInfo.clazz)) {
-        KeyEvent keyEvent;
-        status_t status = android_view_KeyEvent_toNative(env, inputEventObj, &keyEvent);
-        if (status) {
-            jniThrowRuntimeException(env, "Could not read contents of KeyEvent object.");
-            return nullptr;
-        }
-
+        const KeyEvent keyEvent = android_view_KeyEvent_toNative(env, inputEventObj);
         std::unique_ptr<VerifiedInputEvent> verifiedEvent =
                 im->getInputManager()->getDispatcher().verifyInputEvent(keyEvent);
         if (verifiedEvent == nullptr) {
@@ -2311,14 +2286,14 @@ static void nativeReloadKeyboardLayouts(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUTS);
+            InputReaderConfiguration::Change::KEYBOARD_LAYOUTS);
 }
 
 static void nativeReloadDeviceAliases(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
 
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DEVICE_ALIAS);
+            InputReaderConfiguration::Change::DEVICE_ALIAS);
 }
 
 static void nativeSysfsNodeChanged(JNIEnv* env, jobject nativeImplObj, jstring path) {
@@ -2414,7 +2389,7 @@ static jboolean nativeCanDispatchToDisplay(JNIEnv* env, jobject nativeImplObj, j
 static void nativeNotifyPortAssociationsChanged(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 static void nativeSetDisplayEligibilityForPointerCapture(JNIEnv* env, jobject nativeImplObj,
@@ -2427,19 +2402,19 @@ static void nativeSetDisplayEligibilityForPointerCapture(JNIEnv* env, jobject na
 static void nativeChangeUniqueIdAssociation(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DISPLAY_INFO);
+            InputReaderConfiguration::Change::DISPLAY_INFO);
 }
 
 static void nativeChangeTypeAssociation(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_DEVICE_TYPE);
+            InputReaderConfiguration::Change::DEVICE_TYPE);
 }
 
 static void changeKeyboardLayoutAssociation(JNIEnv* env, jobject nativeImplObj) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
     im->getInputManager()->getReader().requestRefreshConfiguration(
-            InputReaderConfiguration::CHANGE_KEYBOARD_LAYOUT_ASSOCIATION);
+            InputReaderConfiguration::Change::KEYBOARD_LAYOUT_ASSOCIATION);
 }
 
 static void nativeSetMotionClassifierEnabled(JNIEnv* env, jobject nativeImplObj, jboolean enabled) {
@@ -2578,6 +2553,11 @@ static void nativeSetStylusPointerIconEnabled(JNIEnv* env, jobject nativeImplObj
     im->setStylusPointerIconEnabled(enabled);
 }
 
+static void nativeNotifyKeyGestureTimeoutsChanged(JNIEnv* env, jobject nativeImplObj) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->getInputManager()->getDispatcher().requestRefreshConfiguration();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gInputManagerMethods[] = {
@@ -2674,6 +2654,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetStylusButtonMotionEventsEnabled},
         {"getMouseCursorPosition", "()[F", (void*)nativeGetMouseCursorPosition},
         {"setStylusPointerIconEnabled", "(Z)V", (void*)nativeSetStylusPointerIconEnabled},
+        {"notifyKeyGestureTimeoutsChanged", "()V", (void*)nativeNotifyKeyGestureTimeoutsChanged},
 };
 
 #define FIND_CLASS(var, className) \

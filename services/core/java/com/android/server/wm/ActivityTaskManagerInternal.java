@@ -144,6 +144,13 @@ public abstract class ActivityTaskManagerInternal {
         void acquire(int displayId);
 
         /**
+         * Acquires a sleep token.
+         * @param displayId The display to apply to.
+         * @param isSwappingDisplay Whether the display is swapping to another physical display.
+         */
+        void acquire(int displayId, boolean isSwappingDisplay);
+
+        /**
          * Releases the sleep token.
          * @param displayId The display to apply to.
          */
@@ -465,7 +472,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean attachApplication(WindowProcessController wpc) throws RemoteException;
 
     /** @see IActivityManager#notifyLockedProfile(int) */
-    public abstract void notifyLockedProfile(@UserIdInt int userId, int currentUserId);
+    public abstract void notifyLockedProfile(@UserIdInt int userId);
 
     /** @see IActivityManager#startConfirmDeviceCredentialIntent(Intent, Bundle) */
     public abstract void startConfirmDeviceCredentialIntent(Intent intent, Bundle options);
@@ -748,4 +755,10 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Unregister a task stack listener so that it stops receiving callbacks. */;
     public abstract void unregisterTaskStackListener(ITaskStackListener listener);
+
+    /**
+     * Gets the id of the display the activity was launched on.
+     * @param token The activity token.
+     */
+    public abstract int getDisplayId(IBinder token);
 }

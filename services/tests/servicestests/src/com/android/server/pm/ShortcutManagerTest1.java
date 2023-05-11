@@ -201,7 +201,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         mInjectedCurrentTimeMillis = START_TIME + 4 * INTERVAL + 50;
         assertResetTimes(START_TIME + 4 * INTERVAL, START_TIME + 5 * INTERVAL);
 
-        mService.saveBaseStateLocked();
+        mService.saveBaseState();
 
         dumpBaseStateFile();
 

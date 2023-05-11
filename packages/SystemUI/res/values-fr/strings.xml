@@ -168,6 +168,34 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Si vous dessinez un schéma incorrect lors de la prochaine tentative, votre profil professionnel et les données associées seront supprimés."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Si vous saisissez un code incorrect lors de la prochaine tentative, votre profil professionnel et les données associées seront supprimés."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Si vous saisissez un mot de passe incorrect lors de la prochaine tentative, votre profil professionnel et les données associées seront supprimés."</string>
+    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
+    <skip />
+    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
+    <skip />
+    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Appuyez sur le lecteur d\'empreinte digitale"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Visage non reconnu. Utilisez votre empreinte."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -238,7 +266,7 @@
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotation automatique de l\'écran"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localisation"</string>
     <string name="quick_settings_screensaver_label" msgid="1495003469366524120">"Économiseur d\'écran"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à l\'appareil photo"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à la caméra"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accès au micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqué"</string>
@@ -299,6 +327,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Démarrer"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Arrêter"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode une main"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Contraste"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Standard"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Moyen"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Élevé"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Débloquer le micro de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer l\'appareil photo de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Débloquer l\'appareil photo et le micro de l\'appareil ?"</string>
@@ -398,7 +430,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historique"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nouvelles notifications"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Notifications silencieuses"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Silencieux"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notifications"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Effacer toutes les notifications silencieuses"</string>
@@ -458,10 +490,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"désactiver"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Son et vibreur"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Paramètres"</string>
-    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
-    <skip />
-    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
-    <skip />
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Volume réduit à un niveau plus sûr"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"La période pendant laquelle le volume est resté élevé est supérieure à celle recommandée"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"L\'application est épinglée"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Récents."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Accueil."</string>
@@ -822,7 +852,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"enregistrement écran"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sans titre"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Mode Veille imminent"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Taille de police"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Taille de la police"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"Réduire"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"Agrandir"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
@@ -883,17 +913,15 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"supprimer des favoris"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Déplacer l\'élément à la position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Sélectionnez les commandes qui seront accessibles depuis Réglages rapides"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Faites glisser les commandes pour les réorganiser"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Toutes les commandes ont été supprimées"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Les modifications n\'ont pas été enregistrées"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Afficher d\'autres applications"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Réorganiser"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Ajouter des commandes"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Retour à l\'édition"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Impossible de charger les commandes. Vérifiez l\'application <xliff:g id="APP">%s</xliff:g> pour vous assurer que les paramètres n\'ont pas changé."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Commandes compatibles indisponibles"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
@@ -953,7 +981,7 @@
     <string name="controls_menu_add" msgid="4447246119229920050">"Ajouter des commandes"</string>
     <string name="controls_menu_edit" msgid="890623986951347062">"Modifier des commandes"</string>
     <string name="controls_menu_add_another_app" msgid="8661172304650786705">"Ajouter une appli"</string>
-    <string name="controls_menu_remove" msgid="3006525275966023468">"Supprimer l\'application"</string>
+    <string name="controls_menu_remove" msgid="3006525275966023468">"Supprimer l\'appli"</string>
     <string name="media_output_dialog_add_output" msgid="5642703238877329518">"Ajouter des sorties"</string>
     <string name="media_output_dialog_group" msgid="5571251347877452212">"Groupe"</string>
     <string name="media_output_dialog_single_device" msgid="3102758980643351058">"1 appareil sélectionné"</string>
@@ -1123,11 +1151,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Votre règle professionnelle ne vous permet de passer des appels que depuis le profil professionnel"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Passer au profil professionnel"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Fermer"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Paramètres écran de verrouillage"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Personnaliser écran verrouillage"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Déverrouiller pour personnaliser l\'écran de verrouillage"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wi-Fi non disponible"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Caméra bloquée"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Caméra et micro bloqués"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Micro bloqué"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Mode Prioritaire activé"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Assistant à l\'écoute"</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Définir une appli de notes par défaut dans les paramètres"</string>
 </resources>

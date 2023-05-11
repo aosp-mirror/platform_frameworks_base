@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.Rect;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -305,6 +306,9 @@ public class HandwritingInitiator {
         mImm.startStylusHandwriting(view);
         mState.mHasInitiatedHandwriting = true;
         mState.mShouldInitHandwriting = false;
+        if (view instanceof TextView) {
+            ((TextView) view).hideHint();
+        }
     }
 
     /**
@@ -322,6 +326,9 @@ public class HandwritingInitiator {
             if (mState != null) {
                 mState.mHasInitiatedHandwriting = true;
                 mState.mShouldInitHandwriting = false;
+            }
+            if (view instanceof TextView) {
+                ((TextView) view).hideHint();
             }
             return true;
         }

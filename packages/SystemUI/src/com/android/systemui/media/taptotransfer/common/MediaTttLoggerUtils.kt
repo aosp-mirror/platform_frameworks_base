@@ -16,8 +16,8 @@
 
 package com.android.systemui.media.taptotransfer.common
 
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 
 /** A helper for logging media tap-to-transfer events. */
 object MediaTttLoggerUtils {

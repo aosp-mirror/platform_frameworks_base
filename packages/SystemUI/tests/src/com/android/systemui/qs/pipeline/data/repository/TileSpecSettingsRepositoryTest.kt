@@ -25,6 +25,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.qs.QSHost
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
+import com.android.systemui.retail.data.repository.FakeRetailModeRepository
 import com.android.systemui.util.settings.FakeSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +45,7 @@ import org.mockito.MockitoAnnotations
 class TileSpecSettingsRepositoryTest : SysuiTestCase() {
 
     private lateinit var secureSettings: FakeSettings
+    private lateinit var retailModeRepository: FakeRetailModeRepository
 
     @Mock private lateinit var logger: QSPipelineLogger
 
@@ -57,9 +59,12 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         secureSettings = FakeSettings()
+        retailModeRepository = FakeRetailModeRepository()
+        retailModeRepository.setRetailMode(false)
 
         with(context.orCreateTestableResources) {
             addOverride(R.string.quick_settings_tiles_default, DEFAULT_TILES)
+            addOverride(R.string.quick_settings_tiles_retail_mode, RETAIL_TILES)
         }
 
         underTest =
@@ -67,6 +72,7 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
                 secureSettings,
                 context.resources,
                 logger,
+                retailModeRepository,
                 testDispatcher,
             )
     }
@@ -170,6 +176,21 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
+    fun addTileAtPosition_tooLarge_addedAtEnd() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tilesSpecs(0))
+
+            val specs = "a,custom(b/c)"
+            storeTilesForUser(specs, 0)
+
+            underTest.addTile(userId = 0, TileSpec.create("d"), position = 100)
+
+            val expected = "a,custom(b/c),d"
+            assertThat(loadTilesForUser(0)).isEqualTo(expected)
+            assertThat(tiles).isEqualTo(expected.toTileSpecs())
+        }
+
+    @Test
     fun addTileForOtherUser_addedInThatUser() =
         testScope.runTest {
             val tilesUser0 by collectLastValue(underTest.tilesSpecs(0))
@@ -187,27 +208,27 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun removeTile() =
+    fun removeTiles() =
         testScope.runTest {
             val tiles by collectLastValue(underTest.tilesSpecs(0))
 
             storeTilesForUser("a,b", 0)
 
-            underTest.removeTile(userId = 0, TileSpec.create("a"))
+            underTest.removeTiles(userId = 0, listOf(TileSpec.create("a")))
 
             assertThat(loadTilesForUser(0)).isEqualTo("b")
             assertThat(tiles).isEqualTo("b".toTileSpecs())
         }
 
     @Test
-    fun removeTileNotThere_noop() =
+    fun removeTilesNotThere_noop() =
         testScope.runTest {
             val tiles by collectLastValue(underTest.tilesSpecs(0))
 
             val specs = "a,b"
             storeTilesForUser(specs, 0)
 
-            underTest.removeTile(userId = 0, TileSpec.create("c"))
+            underTest.removeTiles(userId = 0, listOf(TileSpec.create("c")))
 
             assertThat(loadTilesForUser(0)).isEqualTo(specs)
             assertThat(tiles).isEqualTo(specs.toTileSpecs())
@@ -221,7 +242,7 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
             val specs = "a,b"
             storeTilesForUser(specs, 0)
 
-            underTest.removeTile(userId = 0, TileSpec.Invalid)
+            underTest.removeTiles(userId = 0, listOf(TileSpec.Invalid))
 
             assertThat(loadTilesForUser(0)).isEqualTo(specs)
             assertThat(tiles).isEqualTo(specs.toTileSpecs())
@@ -237,12 +258,25 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
             storeTilesForUser(specs, 0)
             storeTilesForUser(specs, 1)
 
-            underTest.removeTile(userId = 1, TileSpec.create("a"))
+            underTest.removeTiles(userId = 1, listOf(TileSpec.create("a")))
 
             assertThat(loadTilesForUser(0)).isEqualTo(specs)
             assertThat(user0Tiles).isEqualTo(specs.toTileSpecs())
             assertThat(loadTilesForUser(1)).isEqualTo("b")
             assertThat(user1Tiles).isEqualTo("b".toTileSpecs())
+        }
+
+    @Test
+    fun removeMultipleTiles() =
+        testScope.runTest {
+            val tiles by collectLastValue(underTest.tilesSpecs(0))
+
+            storeTilesForUser("a,b,c,d", 0)
+
+            underTest.removeTiles(userId = 0, listOf(TileSpec.create("a"), TileSpec.create("c")))
+
+            assertThat(loadTilesForUser(0)).isEqualTo("b,d")
+            assertThat(tiles).isEqualTo("b,d".toTileSpecs())
         }
 
     @Test
@@ -310,12 +344,32 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
             storeTilesForUser(specs, 0)
 
             coroutineScope {
-                underTest.removeTile(userId = 0, TileSpec.create("c"))
-                underTest.removeTile(userId = 0, TileSpec.create("a"))
+                underTest.removeTiles(userId = 0, listOf(TileSpec.create("c")))
+                underTest.removeTiles(userId = 0, listOf(TileSpec.create("a")))
             }
 
             assertThat(loadTilesForUser(0)).isEqualTo("b")
             assertThat(tiles).isEqualTo("b".toTileSpecs())
+        }
+
+    @Test
+    fun retailMode_usesRetailTiles() =
+        testScope.runTest {
+            retailModeRepository.setRetailMode(true)
+
+            val tiles by collectLastValue(underTest.tilesSpecs(0))
+
+            assertThat(tiles).isEqualTo(RETAIL_TILES.toTileSpecs())
+        }
+
+    @Test
+    fun retailMode_cannotModifyTiles() =
+        testScope.runTest {
+            retailModeRepository.setRetailMode(true)
+
+            underTest.setTiles(0, DEFAULT_TILES.toTileSpecs())
+
+            assertThat(loadTilesForUser(0)).isNull()
         }
 
     private fun getDefaultTileSpecs(): List<TileSpec> {
@@ -332,6 +386,7 @@ class TileSpecSettingsRepositoryTest : SysuiTestCase() {
 
     companion object {
         private const val DEFAULT_TILES = "a,b,c"
+        private const val RETAIL_TILES = "d"
         private const val SETTING = Settings.Secure.QS_TILES
 
         private fun String.toTileSpecs(): List<TileSpec> {

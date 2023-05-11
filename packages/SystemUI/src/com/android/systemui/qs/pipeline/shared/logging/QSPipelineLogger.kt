@@ -17,8 +17,8 @@
 package com.android.systemui.qs.pipeline.shared.logging
 
 import android.annotation.UserIdInt
-import com.android.systemui.plugins.log.LogBuffer
-import com.android.systemui.plugins.log.LogLevel
+import com.android.systemui.log.LogBuffer
+import com.android.systemui.log.LogLevel
 import com.android.systemui.qs.pipeline.dagger.QSTileListLog
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import javax.inject.Inject
@@ -72,5 +72,64 @@ constructor(
             },
             { "Tiles changed in settings for user $int1: $str1" }
         )
+    }
+
+    /** Log when a tile is destroyed and its reason for destroying. */
+    fun logTileDestroyed(spec: TileSpec, reason: TileDestroyedReason) {
+        tileListLogBuffer.log(
+            TILE_LIST_TAG,
+            LogLevel.DEBUG,
+            {
+                str1 = spec.toString()
+                str2 = reason.readable
+            },
+            { "Tile $str1 destroyed. Reason: $str2" }
+        )
+    }
+
+    /** Log when a tile is created. */
+    fun logTileCreated(spec: TileSpec) {
+        tileListLogBuffer.log(
+            TILE_LIST_TAG,
+            LogLevel.DEBUG,
+            { str1 = spec.toString() },
+            { "Tile $str1 created" }
+        )
+    }
+
+    /** Ĺog when trying to create a tile, but it's not found in the factory. */
+    fun logTileNotFoundInFactory(spec: TileSpec) {
+        tileListLogBuffer.log(
+            TILE_LIST_TAG,
+            LogLevel.VERBOSE,
+            { str1 = spec.toString() },
+            { "Tile $str1 not found in factory" }
+        )
+    }
+
+    /** Log when the user is changed for a platform tile. */
+    fun logTileUserChanged(spec: TileSpec, user: Int) {
+        tileListLogBuffer.log(
+            TILE_LIST_TAG,
+            LogLevel.VERBOSE,
+            {
+                str1 = spec.toString()
+                int1 = user
+            },
+            { "User changed to $int1 for tile $str1" }
+        )
+    }
+
+    fun logUsingRetailTiles() {
+        tileListLogBuffer.log(TILE_LIST_TAG, LogLevel.DEBUG, {}, { "Using retail tiles" })
+    }
+
+    /** Reasons for destroying an existing tile. */
+    enum class TileDestroyedReason(val readable: String) {
+        TILE_REMOVED("Tile removed from  current set"),
+        CUSTOM_TILE_USER_CHANGED("User changed for custom tile"),
+        NEW_TILE_NOT_AVAILABLE("New tile not available"),
+        EXISTING_TILE_NOT_AVAILABLE("Existing tile not available"),
+        TILE_NOT_PRESENT_IN_NEW_USER("Tile not present in new user"),
     }
 }

@@ -30,6 +30,7 @@ import static com.android.systemui.screenshot.appclips.AppClipsTrampolineActivit
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -127,6 +128,9 @@ public final class AppClipsTrampolineActivityTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        assumeFalse("Skip test: does not apply to watches",
+            mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH));
+
         MockitoAnnotations.initMocks(this);
         mMainHandler = mContext.getMainThreadHandler();
 

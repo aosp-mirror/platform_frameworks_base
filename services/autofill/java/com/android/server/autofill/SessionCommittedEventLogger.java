@@ -18,6 +18,7 @@ package com.android.server.autofill;
 
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_ACTIVITY_FINISHED;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_SESSION_DESTROYED;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_CHANGED;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_CLICKED;
@@ -53,7 +54,8 @@ public final class SessionCommittedEventLogger {
       COMMIT_REASON_ACTIVITY_FINISHED,
       COMMIT_REASON_VIEW_COMMITTED,
       COMMIT_REASON_VIEW_CLICKED,
-      COMMIT_REASON_VIEW_CHANGED
+      COMMIT_REASON_VIEW_CHANGED,
+      COMMIT_REASON_SESSION_DESTROYED
   })
   @Retention(RetentionPolicy.SOURCE)
   public @interface CommitReason {
@@ -69,6 +71,8 @@ public final class SessionCommittedEventLogger {
       AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_CLICKED;
   public static final int COMMIT_REASON_VIEW_CHANGED =
       AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_VIEW_CHANGED;
+  public static final int COMMIT_REASON_SESSION_DESTROYED =
+      AUTOFILL_SESSION_COMMITTED__COMMIT_REASON__COMMIT_REASON_SESSION_DESTROYED;
 
   private final int mSessionId;
   private Optional<SessionCommittedEventInternal> mEventInternal;

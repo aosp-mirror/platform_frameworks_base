@@ -168,6 +168,34 @@
     <string name="biometric_dialog_last_pattern_attempt_before_wipe_profile" msgid="6045224069529284686">"Hurrengo saiakeran eredua oker marrazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
     <string name="biometric_dialog_last_pin_attempt_before_wipe_profile" msgid="545567685899091757">"Hurrengo saiakeran PINa oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"Hurrengo saiakeran pasahitza oker idazten baduzu, laneko profila eta bertako datuak ezabatuko dira."</string>
+    <!-- no translation found for biometric_re_enroll_dialog_confirm (3049858021857801836) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_dialog_cancel (93760939407091417) -->
+    <skip />
+    <!-- no translation found for biometric_re_enroll_notification_content (8685925877186288180) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_title (4539432429683916604) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_notification_name (630798657797645704) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_title (3526033128113925780) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content (4866561176695984879) -->
+    <skip />
+    <!-- no translation found for fingerprint_re_enroll_dialog_content_singular (3083663339787381218) -->
+    <skip />
+    <!-- no translation found for fingerprint_reenroll_failure_dialog_content (4733768492747300666) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_title (1850838867718410520) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_notification_name (7384545252206120659) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_title (6392173708176069994) -->
+    <skip />
+    <!-- no translation found for face_re_enroll_dialog_content (7353502359464038511) -->
+    <skip />
+    <!-- no translation found for face_reenroll_failure_dialog_content (7073947334397236935) -->
+    <skip />
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"Sakatu hatz-marken sentsorea"</string>
     <string name="fingerprint_dialog_use_fingerprint_instead" msgid="6178228876763024452">"Ezin da hauteman aurpegia. Erabili hatz-marka."</string>
     <!-- no translation found for keyguard_face_failed_use_fp (7140293906176164263) -->
@@ -299,6 +327,10 @@
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Hasi"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Gelditu"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Esku bakarreko modua"</string>
+    <string name="quick_settings_contrast_label" msgid="988087460210159123">"Kontrastea"</string>
+    <string name="quick_settings_contrast_standard" msgid="2538227821968061832">"Arrunta"</string>
+    <string name="quick_settings_contrast_medium" msgid="5158352575583902566">"Tartekoa"</string>
+    <string name="quick_settings_contrast_high" msgid="656049259587494499">"Altua"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Gailuaren mikrofonoa desblokeatu nahi duzu?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Gailuaren kamera desblokeatu nahi duzu?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Gailuaren kamera eta mikrofonoa desblokeatu nahi dituzu?"</string>
@@ -458,10 +490,8 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desgaitu"</string>
     <string name="sound_settings" msgid="8874581353127418308">"Audioa eta dardara"</string>
     <string name="volume_panel_dialog_settings_button" msgid="2513228491513390310">"Ezarpenak"</string>
-    <!-- no translation found for csd_lowered_title (1786173629015030856) -->
-    <skip />
-    <!-- no translation found for csd_system_lowered_text (2001603282316829500) -->
-    <skip />
+    <string name="csd_lowered_title" product="default" msgid="1786173629015030856">"Bolumena jaitsi da entzumena babesteko"</string>
+    <string name="csd_system_lowered_text" product="default" msgid="2001603282316829500">"Gomendatutakoa baino denbora gehiagoan eduki da bolumena ozen"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikazioa ainguratuta dago"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Atzera\" eta \"Ikuspegi orokorra\" botoiak."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Atzera eta Hasiera botoiak."</string>
@@ -517,13 +547,13 @@
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"Pantaila blokeatuaren ezarpenak"</string>
     <string name="qr_code_scanner_title" msgid="1938155688725760702">"QR kodeen eskanerra"</string>
     <string name="qr_code_scanner_updating_secondary_label" msgid="8344598017007876352">"Eguneratzen"</string>
-    <string name="status_bar_work" msgid="5238641949837091056">"Work profila"</string>
+    <string name="status_bar_work" msgid="5238641949837091056">"Laneko profila"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"Hegaldi modua"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"Ez duzu entzungo hurrengo alarma (<xliff:g id="WHEN">%1$s</xliff:g>)"</string>
     <string name="alarm_template" msgid="2234991538018805736">"ordua: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Wifi-gunea"</string>
-    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Work profila"</string>
+    <string name="accessibility_managed_profile" msgid="4703836746209377356">"Laneko profila"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Dibertsioa batzuentzat, baina ez guztientzat"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Sistemaren erabiltzaile-interfazearen konfiguratzaileak Android erabiltzaile-interfazea moldatzeko eta pertsonalizatzeko modu gehiago eskaintzen dizkizu. Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Baliteke eginbide esperimental horiek hurrengo kaleratzeetan aldatuta, etenda edo desagertuta egotea. Kontuz erabili."</string>
@@ -822,7 +852,7 @@
     <string name="privacy_type_media_projection" msgid="8136723828804251547">"pantaila-grabaketa"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Ez du izenik"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Egonean"</string>
-    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Letraren tamaina"</string>
+    <string name="font_scaling_dialog_title" msgid="6273107303850248375">"Letra-tamaina"</string>
     <string name="font_scaling_smaller" msgid="1012032217622008232">"Txikitu"</string>
     <string name="font_scaling_larger" msgid="5476242157436806760">"Handitu"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Lupa-leihoa"</string>
@@ -883,17 +913,15 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"kendu gogokoetatik"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Eraman <xliff:g id="NUMBER">%d</xliff:g>garren postura"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrolatzeko aukerak"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Aukeratu Ezarpen bizkorrak menutik atzitu nahi dituzunak"</string>
+    <!-- no translation found for controls_favorite_subtitle (5818709315630850796) -->
+    <skip />
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolatzeko aukerak antolatzeko, eduki itzazu sakatuta, eta arrastatu"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Kendu dira kontrolatzeko aukera guztiak"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ez dira gorde aldaketak"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ikusi beste aplikazio batzuk"</string>
-    <!-- no translation found for controls_favorite_rearrange_button (2942788904364641185) -->
-    <skip />
-    <!-- no translation found for controls_favorite_add_controls (1221420435546694004) -->
-    <skip />
-    <!-- no translation found for controls_favorite_back_to_editing (184125114090062713) -->
-    <skip />
+    <string name="controls_favorite_rearrange_button" msgid="2942788904364641185">"Berrantolatu"</string>
+    <string name="controls_favorite_add_controls" msgid="1221420435546694004">"Gehitu kontrolatzeko aukerak"</string>
+    <string name="controls_favorite_back_to_editing" msgid="184125114090062713">"Itzuli editatzeko pantailara"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Ezin izan dira kargatu kontrolatzeko aukerak. Joan <xliff:g id="APP">%s</xliff:g> aplikaziora, eta ziurtatu aplikazioaren ezarpenak ez direla aldatu."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Ez dago erabilgarri kontrolatzeko aukera bateragarririk"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Beste bat"</string>
@@ -917,7 +945,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pasatu hatza aukera gehiago ikusteko"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Gomendioak kargatzen"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimedia-edukia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"<xliff:g id="APP_NAME">%1$s</xliff:g> aplikazioaren multimedia kontr. aukerak ezkutatu?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Multimedia kontrolatzeko aukerak (<xliff:g id="APP_NAME">%1$s</xliff:g>) ezkutatu?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"Ezin da ezkutatu multimedia-saioa."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ezkutatu"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Berrekin"</string>
@@ -1055,7 +1083,7 @@
     <string name="fgs_manager_footer_label" msgid="8276763570622288231">"{count,plural, =1{# aplikazio aktibo dago}other{# aplikazio aktibo daude}}"</string>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"Informazio berria"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"Aktibo dauden aplikazioak"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Aplikazio hauek aktibo daude eta funtzionatzen ari dira, nahiz eta zu haiek erabiltzen ez aritu. Aukera honek haien funtzioa hobetzen du, baina baliteke bateriaren iraupenari ere eragitea."</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"Aplikazio hauek aktibo daude eta funtzionatzen ari dira, nahiz eta zu haiek erabiltzen ez aritu. Aukera honek haien funtzionamendua hobetzen du, baina baliteke bateriaren iraupenari ere eragitea."</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"Gelditu"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"Geldituta"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"Eginda"</string>
@@ -1123,11 +1151,13 @@
     <string name="call_from_work_profile_text" msgid="3458704745640229638">"Deiak laneko profiletik soilik egiteko baimena ematen dizute laneko gidalerroek"</string>
     <string name="call_from_work_profile_action" msgid="2937701298133010724">"Aldatu laneko profilera"</string>
     <string name="call_from_work_profile_close" msgid="7927067108901068098">"Itxi"</string>
-    <string name="lock_screen_settings" msgid="9197175446592718435">"Pantaila blokeatuaren ezarpenak"</string>
+    <string name="lock_screen_settings" msgid="6152703934761402399">"Pertsonalizatu pantaila blokeatua"</string>
+    <string name="keyguard_unlock_to_customize_ls" msgid="2068542308086253819">"Desblokeatu eta pertsonalizatu pantaila blokeatua"</string>
     <string name="wifi_unavailable_dream_overlay_content_description" msgid="2024166212194640100">"Wifi-konexioa ez dago erabilgarri"</string>
     <string name="camera_blocked_dream_overlay_content_description" msgid="4074759493559418130">"Kamera blokeatuta dago"</string>
     <string name="camera_and_microphone_blocked_dream_overlay_content_description" msgid="7891078093416249764">"Kamera eta mikrofonoa blokeatuta daude"</string>
     <string name="microphone_blocked_dream_overlay_content_description" msgid="5466897982130007033">"Mikrofonoa blokeatuta dago"</string>
     <string name="priority_mode_dream_overlay_content_description" msgid="6044561000253314632">"Lehentasun modua aktibatuta dago"</string>
     <string name="assistant_attention_content_description" msgid="6830215897604642875">"Laguntzailea zerbitzuak arreta jarrita dauka"</string>
+    <string name="set_default_notes_app_toast_content" msgid="2812374329662610753">"Ezarri oharren aplikazio lehenetsia ezarpenetan"</string>
 </resources>

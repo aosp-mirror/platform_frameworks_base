@@ -22,7 +22,7 @@
     <string name="next_button_content_description" msgid="6810058269847364406">"Към следващия екран"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"Менюто за достъпност предоставя голямо екранно меню за управление на устройството ви. Можете да заключвате устройството си, да управлявате яркостта и силата на звука, да правите екранни снимки и др."</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"Управление на устройството чрез голямо меню"</string>
-    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Настр. за меню за дост."</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Настройки за менюто за достъпност"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Големи бутони"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Увеличаване на размера на бутоните в менюто за достъпност"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"Помощ"</string>

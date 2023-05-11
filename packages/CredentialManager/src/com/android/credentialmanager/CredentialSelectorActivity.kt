@@ -16,14 +16,16 @@
 
 package com.android.credentialmanager
 
+import android.app.Activity
 import android.content.Intent
 import android.credentials.ui.BaseDialogResult
 import android.credentials.ui.RequestInfo
+import android.net.Uri
 import android.os.Bundle
 import android.os.ResultReceiver
-import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -40,9 +42,7 @@ import com.android.credentialmanager.common.ui.Snackbar
 import com.android.credentialmanager.createflow.CreateCredentialScreen
 import com.android.credentialmanager.createflow.hasContentToDisplay
 import com.android.credentialmanager.getflow.GetCredentialScreen
-import com.android.credentialmanager.getflow.GetGenericCredentialScreen
 import com.android.credentialmanager.getflow.hasContentToDisplay
-import com.android.credentialmanager.getflow.isFallbackScreen
 import com.android.credentialmanager.ui.theme.PlatformTheme
 
 @ExperimentalMaterialApi
@@ -50,6 +50,11 @@ class CredentialSelectorActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d(Constants.LOG_TAG, "Creating new CredentialSelectorActivity")
+        overrideActivityTransition(Activity.OVERRIDE_TRANSITION_OPEN,
+            0, 0)
+        overrideActivityTransition(Activity.OVERRIDE_TRANSITION_CLOSE,
+            0, 0)
+
         try {
             val (isCancellationRequest, shouldShowCancellationUi, _) =
                 maybeCancelUIUponRequest(intent)
@@ -58,6 +63,18 @@ class CredentialSelectorActivity : ComponentActivity() {
             }
             val userConfigRepo = UserConfigRepo(this)
             val credManRepo = CredentialManagerRepo(this, intent, userConfigRepo)
+
+            val backPressedCallback = object : OnBackPressedCallback(
+                true // default to enabled
+            ) {
+                override fun handleOnBackPressed() {
+                    credManRepo.onUserCancel()
+                    Log.d(Constants.LOG_TAG, "Activity back triggered: finish the activity.")
+                    this@CredentialSelectorActivity.finish()
+                }
+            }
+            onBackPressedDispatcher.addCallback(this, backPressedCallback)
+
             setContent {
                 PlatformTheme {
                     CredentialManagerBottomSheet(
@@ -161,19 +178,11 @@ class CredentialSelectorActivity : ComponentActivity() {
                 providerActivityLauncher = launcher
             )
         } else if (getCredentialUiState != null && hasContentToDisplay(getCredentialUiState)) {
-            if (isFallbackScreen(getCredentialUiState)) {
-                GetGenericCredentialScreen(
-                    viewModel = viewModel,
-                    getCredentialUiState = getCredentialUiState,
-                    providerActivityLauncher = launcher
-                )
-            } else {
-                GetCredentialScreen(
-                    viewModel = viewModel,
-                    getCredentialUiState = getCredentialUiState,
-                    providerActivityLauncher = launcher
-                )
-            }
+            GetCredentialScreen(
+                viewModel = viewModel,
+                getCredentialUiState = getCredentialUiState,
+                providerActivityLauncher = launcher
+            )
         } else {
             Log.d(Constants.LOG_TAG, "UI wasn't able to render neither get nor create flow")
             reportInstantiationErrorAndFinishActivity(credManRepo)
@@ -192,7 +201,9 @@ class CredentialSelectorActivity : ComponentActivity() {
             this@CredentialSelectorActivity.finish()
         } else if (dialogState == DialogState.CANCELED_FOR_SETTINGS) {
             Log.d(Constants.LOG_TAG, "Received signal to finish the activity and launch settings.")
-            this@CredentialSelectorActivity.startActivity(Intent(Settings.ACTION_SYNC_SETTINGS))
+            val settingsIntent = Intent(ACTION_CREDENTIAL_PROVIDER)
+            settingsIntent.data = Uri.parse("package:" + this.getPackageName())
+            this@CredentialSelectorActivity.startActivity(settingsIntent)
             this@CredentialSelectorActivity.finish()
         }
     }
@@ -221,5 +232,9 @@ class CredentialSelectorActivity : ComponentActivity() {
             onDismiss = { this@CredentialSelectorActivity.finish() },
             dismissOnTimeout = true,
         )
+    }
+
+    companion object {
+        const val ACTION_CREDENTIAL_PROVIDER = "android.settings.CREDENTIAL_PROVIDER"
     }
 }

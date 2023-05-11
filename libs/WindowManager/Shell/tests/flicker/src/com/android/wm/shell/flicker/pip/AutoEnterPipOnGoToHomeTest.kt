@@ -54,7 +54,6 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 238367575)
 class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipViaAppUiButtonTest(flicker) {
     /** Defines the transition used to run the test */
     override val transition: FlickerBuilder.() -> Unit
@@ -71,7 +70,7 @@ class AutoEnterPipOnGoToHomeTest(flicker: FlickerTest) : EnterPipViaAppUiButtonT
             transitions { tapl.goHome() }
         }
 
-    @FlakyTest(bugId = 256863309)
+    @Presubmit
     @Test
     override fun pipLayerReduces() {
         flicker.assertLayers {

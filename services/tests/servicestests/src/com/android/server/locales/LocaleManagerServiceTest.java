@@ -105,6 +105,7 @@ public class LocaleManagerServiceTest {
         mMockPackageManager = mock(PackageManager.class);
         mMockPackageMonitor = mock(PackageMonitor.class);
 
+        doReturn(mMockContext).when(mMockContext).createContextAsUser(any(), anyInt());
         // For unit tests, set the default installer info
         doReturn(DEFAULT_INSTALL_SOURCE_INFO).when(mMockPackageManager)
                 .getInstallSourceInfo(anyString());

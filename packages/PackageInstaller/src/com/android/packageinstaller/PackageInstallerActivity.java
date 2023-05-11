@@ -82,6 +82,7 @@ public class PackageInstallerActivity extends AlertActivity {
     static final String EXTRA_CALLING_PACKAGE = "EXTRA_CALLING_PACKAGE";
     static final String EXTRA_CALLING_ATTRIBUTION_TAG = "EXTRA_CALLING_ATTRIBUTION_TAG";
     static final String EXTRA_ORIGINAL_SOURCE_INFO = "EXTRA_ORIGINAL_SOURCE_INFO";
+    static final String EXTRA_STAGED_SESSION_ID = "EXTRA_STAGED_SESSION_ID";
     private static final String ALLOW_UNKNOWN_SOURCES_KEY =
             PackageInstallerActivity.class.getName() + "ALLOW_UNKNOWN_SOURCES_KEY";
 
@@ -375,16 +376,15 @@ public class PackageInstallerActivity extends AlertActivity {
             final int sessionId = intent.getIntExtra(PackageInstaller.EXTRA_SESSION_ID,
                     -1 /* defaultValue */);
             final SessionInfo info = mInstaller.getSessionInfo(sessionId);
-            final String resolvedBaseCodePath = intent.getStringExtra(
-                    PackageInstaller.EXTRA_RESOLVED_BASE_PATH);
-            if (info == null || !info.isSealed() || resolvedBaseCodePath == null) {
+            String resolvedPath = info.getResolvedBaseApkPath();
+            if (info == null || !info.isSealed() || resolvedPath == null) {
                 Log.w(TAG, "Session " + mSessionId + " in funky state; ignoring");
                 finish();
                 return;
             }
 
             mSessionId = sessionId;
-            packageSource = Uri.fromFile(new File(resolvedBaseCodePath));
+            packageSource = Uri.fromFile(new File(resolvedPath));
             mOriginatingURI = null;
             mReferrerURI = null;
             mPendingUserActionReason = info.getPendingUserActionReason();
@@ -404,6 +404,10 @@ public class PackageInstallerActivity extends AlertActivity {
             mReferrerURI = null;
             mPendingUserActionReason = info.getPendingUserActionReason();
         } else {
+            // Two possible callers:
+            // 1. InstallStart with "SCHEME_PACKAGE".
+            // 2. InstallStaging with "SCHEME_FILE" and EXTRA_STAGED_SESSION_ID with staged
+            // session id.
             mSessionId = -1;
             packageSource = intent.getData();
             mOriginatingURI = intent.getParcelableExtra(Intent.EXTRA_ORIGINATING_URI);
@@ -722,14 +726,16 @@ public class PackageInstallerActivity extends AlertActivity {
     }
 
     private void startInstall() {
+        String installerPackageName = getIntent().getStringExtra(
+                Intent.EXTRA_INSTALLER_PACKAGE_NAME);
+        int stagedSessionId = getIntent().getIntExtra(EXTRA_STAGED_SESSION_ID, 0);
+
         // Start subactivity to actually install the application
         Intent newIntent = new Intent();
         newIntent.putExtra(PackageUtil.INTENT_ATTR_APPLICATION_INFO,
                 mPkgInfo.applicationInfo);
         newIntent.setData(mPackageURI);
         newIntent.setClass(this, InstallInstalling.class);
-        String installerPackageName = getIntent().getStringExtra(
-                Intent.EXTRA_INSTALLER_PACKAGE_NAME);
         if (mOriginatingURI != null) {
             newIntent.putExtra(Intent.EXTRA_ORIGINATING_URI, mOriginatingURI);
         }
@@ -745,6 +751,9 @@ public class PackageInstallerActivity extends AlertActivity {
         }
         if (getIntent().getBooleanExtra(Intent.EXTRA_RETURN_RESULT, false)) {
             newIntent.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+        }
+        if (stagedSessionId > 0) {
+            newIntent.putExtra(EXTRA_STAGED_SESSION_ID, stagedSessionId);
         }
         newIntent.addFlags(Intent.FLAG_ACTIVITY_FORWARD_RESULT);
         if (mLocalLOGV) Log.i(TAG, "downloaded app uri=" + mPackageURI);

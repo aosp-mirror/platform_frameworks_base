@@ -1148,8 +1148,22 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             info.userId = userId;
             info.installerPackageName = mInstallSource.mInstallerPackageName;
             info.installerAttributionTag = mInstallSource.mInstallerAttributionTag;
-            info.resolvedBaseCodePath = (mResolvedBaseFile != null) ?
-                    mResolvedBaseFile.getAbsolutePath() : null;
+            info.resolvedBaseCodePath = null;
+            if (mContext.checkCallingOrSelfPermission(
+                    Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+                    == PackageManager.PERMISSION_GRANTED) {
+                File file = mResolvedBaseFile;
+                if (file == null) {
+                    // Try to guess mResolvedBaseFile file.
+                    final List<File> addedFiles = getAddedApksLocked();
+                    if (addedFiles.size() > 0) {
+                        file = addedFiles.get(0);
+                    }
+                }
+                if (file != null) {
+                    info.resolvedBaseCodePath = file.getAbsolutePath();
+                }
+            }
             info.progress = progress;
             info.sealed = mSealed;
             info.isCommitted = isCommitted();
@@ -1350,9 +1364,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private String[] getStageDirContentsLocked() {
+        if (stageDir == null) {
+            return EmptyArray.STRING;
+        }
         String[] result = stageDir.list();
         if (result == null) {
-            result = EmptyArray.STRING;
+            return EmptyArray.STRING;
         }
         return result;
     }
@@ -2754,11 +2771,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         : PackageInstaller.ACTION_CONFIRM_INSTALL);
         intent.setPackage(mPm.getPackageInstallerPackageName());
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
-        synchronized (mLock) {
-            intent.putExtra(PackageInstaller.EXTRA_RESOLVED_BASE_PATH,
-                    mResolvedBaseFile != null ? mResolvedBaseFile.getAbsolutePath() : null);
-        }
-
         sendOnUserActionRequired(mContext, target, sessionId, intent);
     }
 

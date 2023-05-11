@@ -25,7 +25,6 @@ import android.hardware.fingerprint.FingerprintSensorPropertiesInternal
 import android.os.Handler
 import android.os.IBinder
 import android.os.UserManager
-import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import android.testing.ViewUtils
@@ -34,21 +33,28 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.ScrollView
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.FakePromptRepository
+import com.android.systemui.biometrics.data.repository.FakeRearDisplayStateRepository
 import com.android.systemui.biometrics.domain.interactor.FakeCredentialInteractor
 import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor
+import com.android.systemui.biometrics.domain.interactor.DisplayStateInteractorImpl
+import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestScope
 import org.junit.After
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -62,7 +68,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
-@RunWith(AndroidTestingRunner::class)
+@RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 @SmallTest
 class AuthContainerViewTest : SysuiTestCase() {
@@ -85,12 +91,25 @@ class AuthContainerViewTest : SysuiTestCase() {
     @Mock
     lateinit var interactionJankMonitor: InteractionJankMonitor
 
+    private val testScope = TestScope(StandardTestDispatcher())
+    private val fakeExecutor = FakeExecutor(FakeSystemClock())
     private val biometricPromptRepository = FakePromptRepository()
+    private val rearDisplayStateRepository = FakeRearDisplayStateRepository()
     private val credentialInteractor = FakeCredentialInteractor()
     private val bpCredentialInteractor = BiometricPromptCredentialInteractor(
         Dispatchers.Main.immediate,
         biometricPromptRepository,
         credentialInteractor
+    )
+    private val displayStateInteractor = DisplayStateInteractorImpl(
+        testScope.backgroundScope,
+        mContext,
+        fakeExecutor,
+        rearDisplayStateRepository
+    )
+
+    private val authBiometricFingerprintViewModel = AuthBiometricFingerprintViewModel(
+        displayStateInteractor
     )
     private val credentialViewModel = CredentialViewModel(mContext, bpCredentialInteractor)
 
@@ -170,23 +189,15 @@ class AuthContainerViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun testFocusLossAfterRotating() {
+    fun testActionCancel_panelInteractionDetectorDisable() {
         val container = initializeFingerprintContainer()
-        waitForIdleSync()
-
-        val requestID = authContainer?.requestId ?: 0L
-
-        verify(callback).onDialogAnimatedIn(requestID)
-        container.onOrientationChanged()
-        container.onWindowFocusChanged(false)
-        waitForIdleSync()
-
-        verify(callback, never()).onDismissed(
-                eq(AuthDialogCallback.DISMISSED_USER_CANCELED),
-                eq<ByteArray?>(null), /* credentialAttestation */
-                eq(requestID)
+        container.mBiometricCallback.onAction(
+                AuthBiometricView.Callback.ACTION_USER_CANCELED
         )
+        waitForIdleSync()
+        verify(panelInteractionDetector).disable()
     }
+
 
     @Test
     fun testActionAuthenticated_sendsDismissedAuthenticated() {
@@ -269,6 +280,7 @@ class AuthContainerViewTest : SysuiTestCase() {
         assertThat(authContainer!!.parent).isNull()
     }
 
+    @Ignore("b/279650412")
     @Test
     fun testActionUseDeviceCredential_sendsOnDeviceCredentialPressed() {
         val container = initializeFingerprintContainer(
@@ -475,9 +487,10 @@ class AuthContainerViewTest : SysuiTestCase() {
         lockPatternUtils,
         interactionJankMonitor,
         { bpCredentialInteractor },
+        { authBiometricFingerprintViewModel },
         { credentialViewModel },
         Handler(TestableLooper.get(this).looper),
-        FakeExecutor(FakeSystemClock())
+        fakeExecutor
     ) {
         override fun postOnAnimation(runnable: Runnable) {
             runnable.run()
@@ -489,7 +502,7 @@ class AuthContainerViewTest : SysuiTestCase() {
     private fun AuthContainerView.addToView() {
         ViewUtils.attachView(this)
         waitForIdleSync()
-        assertThat(isAttachedToWindow).isTrue()
+        assertThat(isAttachedToWindow()).isTrue()
     }
 }
 

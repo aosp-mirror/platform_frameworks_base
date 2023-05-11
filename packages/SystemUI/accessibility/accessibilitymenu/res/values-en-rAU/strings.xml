@@ -22,7 +22,7 @@
     <string name="next_button_content_description" msgid="6810058269847364406">"Go to next screen"</string>
     <string name="accessibility_menu_description" msgid="4458354794093858297">"The Accessibility menu provides a large on-screen menu to control your device. You can lock your device, control volume and brightness, take screenshots and more."</string>
     <string name="accessibility_menu_summary" msgid="340071398148208130">"Control device via large menu"</string>
-    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Accessibility menu settings"</string>
+    <string name="accessibility_menu_settings_name" msgid="1716888058785672611">"Accessibility Menu settings"</string>
     <string name="accessibility_menu_large_buttons_title" msgid="8978499601044961736">"Large buttons"</string>
     <string name="accessibility_menu_large_buttons_summary" msgid="236873938502785311">"Increase size of Accessibility menu buttons"</string>
     <string name="pref_help_title" msgid="6871558837025010641">"Help"</string>

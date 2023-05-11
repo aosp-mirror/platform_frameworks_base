@@ -449,6 +449,7 @@ public class SettingsBackupTest {
                     Settings.Global.SHOW_PEOPLE_SPACE,
                     Settings.Global.SHOW_NEW_NOTIF_DISMISS,
                     Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
+                    Settings.Global.SHOW_TARE_DEVELOPER_OPTIONS,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
                     Settings.Global.SHOW_USB_TEMPERATURE_ALARM,
                     Settings.Global.SIGNED_CONFIG_VERSION,
@@ -840,7 +841,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
                  Settings.Secure.ACCESSIBILITY_FLOATING_MENU_MIGRATION_TOOLTIP_PROMPT,
                  Settings.Secure.UI_TRANSLATION_ENABLED,
-                 Settings.Secure.CREDENTIAL_SERVICE);
+                 Settings.Secure.CREDENTIAL_SERVICE,
+                 Settings.Secure.CREDENTIAL_SERVICE_PRIMARY);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {

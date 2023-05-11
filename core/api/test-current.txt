@@ -8,8 +8,6 @@ package android {
     field public static final String APPROVE_INCIDENT_REPORTS = "android.permission.APPROVE_INCIDENT_REPORTS";
     field public static final String BACKGROUND_CAMERA = "android.permission.BACKGROUND_CAMERA";
     field public static final String BIND_CELL_BROADCAST_SERVICE = "android.permission.BIND_CELL_BROADCAST_SERVICE";
-    field public static final String BODY_SENSORS_WRIST_TEMPERATURE = "android.permission.BODY_SENSORS_WRIST_TEMPERATURE";
-    field public static final String BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND = "android.permission.BODY_SENSORS_WRIST_TEMPERATURE_BACKGROUND";
     field public static final String BRIGHTNESS_SLIDER_USAGE = "android.permission.BRIGHTNESS_SLIDER_USAGE";
     field public static final String BROADCAST_CLOSE_SYSTEM_DIALOGS = "android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS";
     field public static final String CHANGE_APP_IDLE_STATE = "android.permission.CHANGE_APP_IDLE_STATE";
@@ -538,8 +536,15 @@ package android.app.admin {
     field @NonNull public static final android.app.admin.DeviceAdminAuthority DEVICE_ADMIN_AUTHORITY;
   }
 
+  public final class DevicePolicyIdentifiers {
+    field public static final String PERMITTED_INPUT_METHODS_POLICY = "permittedInputMethods";
+    field public static final String PERSONAL_APPS_SUSPENDED_POLICY = "personalAppsSuspended";
+    field public static final String SCREEN_CAPTURE_DISABLED_POLICY = "screenCaptureDisabled";
+  }
+
   public class DevicePolicyManager {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS}) public void acknowledgeNewUserDisclaimer();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void calculateHasIncompatibleAccounts();
     method @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS) public void clearOrganizationId();
     method @RequiresPermission(android.Manifest.permission.CLEAR_FREEZE_PERIOD) public void clearSystemUpdatePolicyFreezePeriodRecord();
     method @RequiresPermission(android.Manifest.permission.FORCE_DEVICE_POLICY_MANAGER_LOGS) public long forceNetworkLogs();
@@ -775,6 +780,17 @@ package android.app.prediction {
 
   public final class AppPredictor {
     method public android.app.prediction.AppPredictionSessionId getSessionId();
+  }
+
+}
+
+package android.app.tare {
+
+  public class EconomyManager {
+    method public int getEnabledMode();
+    field public static final int ENABLED_MODE_OFF = 0; // 0x0
+    field public static final int ENABLED_MODE_SHADOW = 2; // 0x2
+    field public static final String KEY_ENABLE_TARE_MODE = "enable_tare_mode";
   }
 
 }
@@ -1651,6 +1667,11 @@ package android.hardware.soundtrigger {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.KeyphraseMetadata> CREATOR;
   }
 
+  public class SoundTrigger {
+    field public static final int MODEL_PARAM_INVALID = -1; // 0xffffffff
+    field public static final int MODEL_PARAM_THRESHOLD_FACTOR = 0; // 0x0
+  }
+
   public static final class SoundTrigger.KeyphraseRecognitionExtra implements android.os.Parcelable {
     ctor public SoundTrigger.KeyphraseRecognitionExtra(int, int, int);
   }
@@ -1661,6 +1682,19 @@ package android.hardware.soundtrigger {
 
   public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
     ctor public SoundTrigger.ModuleProperties(int, @NonNull String, @NonNull String, @NonNull String, int, @NonNull String, int, int, int, int, boolean, int, boolean, int, boolean, int);
+  }
+
+  public static final class SoundTrigger.RecognitionConfig implements android.os.Parcelable {
+    ctor public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[], int);
+    ctor public SoundTrigger.RecognitionConfig(boolean, boolean, @Nullable android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[], @Nullable byte[]);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.RecognitionConfig> CREATOR;
+    field public final boolean allowMultipleTriggers;
+    field public final int audioCapabilities;
+    field public final boolean captureRequested;
+    field @NonNull public final byte[] data;
+    field @NonNull public final android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra[] keyphrases;
   }
 
   public static class SoundTrigger.RecognitionEvent {
@@ -2000,6 +2034,65 @@ package android.media.metrics {
 
 }
 
+package android.media.soundtrigger {
+
+  public final class SoundTriggerInstrumentation {
+    method public void setResourceContention(boolean);
+    method public void triggerOnResourcesAvailable();
+    method public void triggerRestart();
+  }
+
+  public static interface SoundTriggerInstrumentation.GlobalCallback {
+    method public default void onClientAttached();
+    method public default void onClientDetached();
+    method public default void onFrameworkDetached();
+    method public void onModelLoaded(@NonNull android.media.soundtrigger.SoundTriggerInstrumentation.ModelSession);
+    method public default void onPreempted();
+    method public default void onRestarted();
+  }
+
+  public static interface SoundTriggerInstrumentation.ModelCallback {
+    method public default void onModelUnloaded();
+    method public default void onParamSet(int, int);
+    method public void onRecognitionStarted(@NonNull android.media.soundtrigger.SoundTriggerInstrumentation.RecognitionSession);
+  }
+
+  public class SoundTriggerInstrumentation.ModelSession {
+    method public void clearModelCallback();
+    method @NonNull public java.util.List<android.hardware.soundtrigger.SoundTrigger.Keyphrase> getPhrases();
+    method @NonNull public android.media.soundtrigger.SoundTriggerManager.Model getSoundModel();
+    method public boolean isKeyphrase();
+    method public void setModelCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.soundtrigger.SoundTriggerInstrumentation.ModelCallback);
+    method public void triggerUnloadModel();
+  }
+
+  public static interface SoundTriggerInstrumentation.RecognitionCallback {
+    method public void onRecognitionStopped();
+  }
+
+  public class SoundTriggerInstrumentation.RecognitionSession {
+    method public void clearRecognitionCallback();
+    method public int getAudioSession();
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.RecognitionConfig getRecognitionConfig();
+    method public void setRecognitionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.soundtrigger.SoundTriggerInstrumentation.RecognitionCallback);
+    method public void triggerAbortRecognition();
+    method public void triggerRecognitionEvent(@NonNull byte[], @Nullable java.util.List<android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra>);
+  }
+
+  public final class SoundTriggerManager {
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public static android.media.soundtrigger.SoundTriggerInstrumentation attachInstrumentation(@NonNull java.util.concurrent.Executor, @NonNull android.media.soundtrigger.SoundTriggerInstrumentation.GlobalCallback);
+    method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForModule(@NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties);
+    method @NonNull public android.media.soundtrigger.SoundTriggerManager createManagerForTestModule();
+    method @NonNull public static java.util.List<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> listModuleProperties();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SOUND_TRIGGER) public int loadSoundModel(@NonNull android.hardware.soundtrigger.SoundTrigger.SoundModel);
+  }
+
+  public static class SoundTriggerManager.Model {
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.SoundModel getSoundModel();
+  }
+
+}
+
 package android.media.tv {
 
   public final class TvInputManager {
@@ -2020,6 +2113,14 @@ package android.media.tv.tuner {
     method public static int getMinorVersion(int);
     method public static boolean isHigherOrEqualVersionTo(int);
     method public static boolean supportTunerVersion(int);
+  }
+
+}
+
+package android.media.voice {
+
+  public final class KeyphraseModelManager {
+    method @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public void setModelDatabaseForTestEnabled(boolean);
   }
 
 }
@@ -2944,6 +3045,7 @@ package android.service.voice {
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(@NonNull String, @NonNull java.util.Locale, @NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_HOTWORD_DETECTION) public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetectorForTest(@NonNull String, @NonNull java.util.Locale, @Nullable android.os.PersistableBundle, @Nullable android.os.SharedMemory, @NonNull android.hardware.soundtrigger.SoundTrigger.ModuleProperties, @NonNull java.util.concurrent.Executor, @NonNull android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull public final java.util.List<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> listModuleProperties();
+    method public final void setTestModuleForAlwaysOnHotwordDetectorEnabled(boolean);
   }
 
   public static class VoiceInteractionSession.ActivityId {
@@ -3351,8 +3453,14 @@ package android.view {
     method @NonNull public android.hardware.input.InputDeviceIdentifier getIdentifier();
   }
 
+  public abstract class InputEvent implements android.os.Parcelable {
+    method public abstract int getDisplayId();
+    method public abstract void setDisplayId(int);
+  }
+
   public class KeyEvent extends android.view.InputEvent implements android.os.Parcelable {
     method public static String actionToString(int);
+    method public final int getDisplayId();
     method public final void setDisplayId(int);
     field public static final int FLAG_IS_ACCESSIBILITY_EVENT = 2048; // 0x800
     field public static final int LAST_KEYCODE = 316; // 0x13c
@@ -3524,16 +3632,10 @@ package android.view.autofill {
   }
 
   public final class AutofillManager {
-    method public void clearAutofillRequestCallback();
-    method @RequiresPermission(android.Manifest.permission.PROVIDE_OWN_AUTOFILL_SUGGESTIONS) public void setAutofillRequestCallback(@NonNull java.util.concurrent.Executor, @NonNull android.view.autofill.AutofillRequestCallback);
     field public static final String ANY_HINT = "any";
     field public static final int FLAG_SMART_SUGGESTION_OFF = 0; // 0x0
     field public static final int FLAG_SMART_SUGGESTION_SYSTEM = 1; // 0x1
     field public static final int MAX_TEMP_AUGMENTED_SERVICE_DURATION_MS = 120000; // 0x1d4c0
-  }
-
-  public interface AutofillRequestCallback {
-    method public void onFillRequest(@Nullable android.view.inputmethod.InlineSuggestionsRequest, @NonNull android.os.CancellationSignal, @NonNull android.service.autofill.FillCallback);
   }
 
 }
@@ -3659,11 +3761,6 @@ package android.view.inputmethod {
     method @NonNull public static android.view.inputmethod.InlineSuggestionInfo newInlineSuggestionInfo(@NonNull android.widget.inline.InlinePresentationSpec, @NonNull String, @Nullable String[], @NonNull String, boolean);
   }
 
-  public static final class InlineSuggestionsRequest.Builder {
-    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setClientSupported(boolean);
-    method @NonNull public android.view.inputmethod.InlineSuggestionsRequest.Builder setServiceSupported(boolean);
-  }
-
   public final class InlineSuggestionsResponse implements android.os.Parcelable {
     method @NonNull public static android.view.inputmethod.InlineSuggestionsResponse newInlineSuggestionsResponse(@NonNull java.util.List<android.view.inputmethod.InlineSuggestion>);
   }
@@ -3681,6 +3778,7 @@ package android.view.inputmethod {
     method @NonNull @RequiresPermission(value=android.Manifest.permission.INTERACT_ACROSS_USERS_FULL, conditional=true) public java.util.List<android.view.inputmethod.InputMethodInfo> getInputMethodListAsUser(int);
     method public boolean hasActiveInputConnection(@Nullable android.view.View);
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean hasPendingImeVisibilityRequests();
+    method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean isCurrentRootView(@NonNull android.view.View);
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public boolean isInputMethodPickerShown();
     method @RequiresPermission(android.Manifest.permission.TEST_INPUT_METHOD) public void setStylusWindowIdleTimeoutForTest(long);
     field public static final long CLEAR_SHOW_FORCED_FLAG_WHEN_LEAVING = 214016041L; // 0xcc1a029L

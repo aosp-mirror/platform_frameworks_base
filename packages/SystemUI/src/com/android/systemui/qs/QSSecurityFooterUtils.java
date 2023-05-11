@@ -719,7 +719,8 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
                 String name = vpnName != null ? vpnName : vpnNameWorkProfile;
                 String namedVp = mDpm.getResources().getString(
                         QS_DIALOG_MANAGEMENT_NAMED_VPN,
-                        () -> mContext.getString(R.string.monitoring_description_named_vpn, name),
+                        () -> mContext.getString(
+                                R.string.monitoring_description_managed_device_named_vpn, name),
                         name);
                 message.append(namedVp);
             }

@@ -21,6 +21,7 @@ import static android.app.ActivityOptions.ANIM_CUSTOM;
 import static android.app.ActivityOptions.ANIM_FROM_STYLE;
 import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
 import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
 import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
@@ -152,8 +153,14 @@ public final class TransitionInfo implements Parcelable {
     /** The task became the top-most task even if it didn't change visibility. */
     public static final int FLAG_MOVED_TO_TOP = 1 << 20;
 
+    /**
+     * This transition must be the only transition when it starts (ie. it must wait for all other
+     * transition animations to finish).
+     */
+    public static final int FLAG_SYNC = 1 << 21;
+
     /** The first unused bit. This can be used by remotes to attach custom flags to this change. */
-    public static final int FLAG_FIRST_CUSTOM = 1 << 21;
+    public static final int FLAG_FIRST_CUSTOM = 1 << 22;
 
     /** The change belongs to a window that won't contain activities. */
     public static final int FLAGS_IS_NON_APP_WINDOW =
@@ -183,12 +190,14 @@ public final class TransitionInfo implements Parcelable {
             FLAG_NO_ANIMATION,
             FLAG_TASK_LAUNCHING_BEHIND,
             FLAG_MOVED_TO_TOP,
+            FLAG_SYNC,
             FLAG_FIRST_CUSTOM
     })
     public @interface ChangeFlags {}
 
     private final @TransitionType int mType;
-    private final @TransitionFlags int mFlags;
+    private @TransitionFlags int mFlags;
+    private int mTrack = 0;
     private final ArrayList<Change> mChanges = new ArrayList<>();
     private final ArrayList<Root> mRoots = new ArrayList<>();
 
@@ -210,6 +219,7 @@ public final class TransitionInfo implements Parcelable {
         in.readTypedList(mRoots, Root.CREATOR);
         mOptions = in.readTypedObject(AnimationOptions.CREATOR);
         mDebugId = in.readInt();
+        mTrack = in.readInt();
     }
 
     @Override
@@ -221,6 +231,7 @@ public final class TransitionInfo implements Parcelable {
         dest.writeTypedList(mRoots, flags);
         dest.writeTypedObject(mOptions, flags);
         dest.writeInt(mDebugId);
+        dest.writeInt(mTrack);
     }
 
     @NonNull
@@ -260,6 +271,10 @@ public final class TransitionInfo implements Parcelable {
 
     public @TransitionType int getType() {
         return mType;
+    }
+
+    public void setFlags(int flags) {
+        mFlags = flags;
     }
 
     public int getFlags() {
@@ -356,6 +371,16 @@ public final class TransitionInfo implements Parcelable {
         return (mFlags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0;
     }
 
+    /** Gets which animation track this transition should run on. */
+    public int getTrack() {
+        return mTrack;
+    }
+
+    /** Sets which animation track this transition should run on. */
+    public void setTrack(int track) {
+        mTrack = track;
+    }
+
     /**
      * Set an arbitrary "debug" id for this info. This id will not be used for any "real work",
      * it is just for debugging and logging.
@@ -373,7 +398,8 @@ public final class TransitionInfo implements Parcelable {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("{id=").append(mDebugId).append(" t=").append(transitTypeToString(mType))
-                .append(" f=0x").append(Integer.toHexString(mFlags)).append(" r=[");
+                .append(" f=0x").append(Integer.toHexString(mFlags)).append(" trk=").append(mTrack)
+                .append(" r=[");
         for (int i = 0; i < mRoots.size(); ++i) {
             if (i > 0) {
                 sb.append(',');
@@ -461,6 +487,9 @@ public final class TransitionInfo implements Parcelable {
         if ((flags & FLAG_TASK_LAUNCHING_BEHIND) != 0) {
             sb.append((sb.length() == 0 ? "" : "|") + "TASK_LAUNCHING_BEHIND");
         }
+        if ((flags & FLAG_SYNC) != 0) {
+            sb.append((sb.length() == 0 ? "" : "|") + "SYNC");
+        }
         if ((flags & FLAG_FIRST_CUSTOM) != 0) {
             sb.append(sb.length() == 0 ? "" : "|").append("FIRST_CUSTOM");
         }
@@ -532,6 +561,7 @@ public final class TransitionInfo implements Parcelable {
      */
     public TransitionInfo localRemoteCopy() {
         final TransitionInfo out = new TransitionInfo(mType, mFlags);
+        out.mTrack = mTrack;
         out.mDebugId = mDebugId;
         for (int i = 0; i < mChanges.size(); ++i) {
             out.mChanges.add(mChanges.get(i).localRemoteCopy());
@@ -1035,6 +1065,11 @@ public final class TransitionInfo implements Parcelable {
 
         public static AnimationOptions makeCrossProfileAnimOptions() {
             AnimationOptions options = new AnimationOptions(ANIM_OPEN_CROSS_PROFILE_APPS);
+            return options;
+        }
+
+        public static AnimationOptions makeSceneTransitionAnimOptions() {
+            AnimationOptions options = new AnimationOptions(ANIM_SCENE_TRANSITION);
             return options;
         }
 

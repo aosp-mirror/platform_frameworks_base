@@ -23,8 +23,9 @@ import static org.mockito.Mockito.doReturn;
 
 import android.app.ActivityManagerInternal;
 import android.os.SystemClock;
+import android.platform.test.annotations.Presubmit;
 
-import androidx.test.filters.MediumTest;
+import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import org.junit.Before;
@@ -39,13 +40,14 @@ import org.mockito.MockitoAnnotations;
  * Build/Install/Run:
  *  atest FrameworksServicesTests:ActivityManagerInternalTest
  */
+@Presubmit
+@SmallTest
 public class ActivityManagerInternalTest {
     private static final int TEST_UID1 = 111;
     private static final int TEST_UID2 = 112;
 
     private static final long TEST_PROC_STATE_SEQ1 = 1111;
     private static final long TEST_PROC_STATE_SEQ2 = 1112;
-    private static final long TEST_PROC_STATE_SEQ3 = 1113;
 
     @Rule public ServiceThreadRule mServiceThreadRule = new ServiceThreadRule();
 
@@ -68,7 +70,6 @@ public class ActivityManagerInternalTest {
         mAmi = mAms.new LocalService();
     }
 
-    @MediumTest
     @Test
     public void testNotifyNetworkPolicyRulesUpdated() throws Exception {
         // Check there is no crash when there are no active uid records.
@@ -88,14 +89,6 @@ public class ActivityManagerInternalTest {
                 TEST_PROC_STATE_SEQ1, // curProcStateSeq
                 TEST_PROC_STATE_SEQ1, // lastNetworkUpdateProcStateSeq
                 TEST_PROC_STATE_SEQ1, // procStateSeq to notify
-                false); // expectNotify
-
-        // Notify that network policy rules are updated for TEST_UID1 with procStateSeq older
-        // than it's UidRecord.curProcStateSeq and verify that there is no notify call.
-        verifyNetworkUpdatedProcStateSeq(
-                TEST_PROC_STATE_SEQ3, // curProcStateSeq
-                TEST_PROC_STATE_SEQ1, // lastNetworkUpdateProcStateSeq
-                TEST_PROC_STATE_SEQ2, // procStateSeq to notify
                 false); // expectNotify
     }
 

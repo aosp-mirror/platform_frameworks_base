@@ -37,8 +37,9 @@ import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.keyguard.domain.interactor.BurnInInteractor;
 import com.android.systemui.shade.NotificationShadeWindowViewController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.StatusBarState;
@@ -50,16 +51,18 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 import com.android.systemui.util.Assert;
 
+import dagger.Lazy;
+
 import java.util.ArrayList;
 
 import javax.inject.Inject;
 
-import dagger.Lazy;
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
 
 /**
  * Implementation of DozeHost for SystemUI.
  */
-@SysUISingleton
+@ExperimentalCoroutinesApi @SysUISingleton
 public final class DozeServiceHost implements DozeHost {
     private static final String TAG = "DozeServiceHost";
     private final ArrayList<Callback> mCallbacks = new ArrayList<>();
@@ -89,8 +92,9 @@ public final class DozeServiceHost implements DozeHost {
     private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private final AuthController mAuthController;
     private final NotificationIconAreaController mNotificationIconAreaController;
+    private final BurnInInteractor mBurnInInteractor;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
-    private NotificationPanelViewController mNotificationPanel;
+    private ShadeViewController mNotificationPanel;
     private View mAmbientIndicationContainer;
     private CentralSurfaces mCentralSurfaces;
     private boolean mAlwaysOnSuppressed;
@@ -110,7 +114,8 @@ public final class DozeServiceHost implements DozeHost {
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
             AuthController authController,
-            NotificationIconAreaController notificationIconAreaController) {
+            NotificationIconAreaController notificationIconAreaController,
+            BurnInInteractor burnInInteractor) {
         super();
         mDozeLog = dozeLog;
         mPowerManager = powerManager;
@@ -129,6 +134,7 @@ public final class DozeServiceHost implements DozeHost {
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
         mAuthController = authController;
         mNotificationIconAreaController = notificationIconAreaController;
+        mBurnInInteractor = burnInInteractor;
         mHeadsUpManagerPhone.addListener(mOnHeadsUpChangedListener);
     }
 
@@ -141,7 +147,7 @@ public final class DozeServiceHost implements DozeHost {
             CentralSurfaces centralSurfaces,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager,
             NotificationShadeWindowViewController notificationShadeWindowViewController,
-            NotificationPanelViewController notificationPanel,
+            ShadeViewController notificationPanel,
             View ambientIndicationContainer) {
         mCentralSurfaces = centralSurfaces;
         mStatusBarKeyguardViewManager = statusBarKeyguardViewManager;
@@ -304,6 +310,7 @@ public final class DozeServiceHost implements DozeHost {
         if (mAmbientIndicationContainer instanceof DozeReceiver) {
             ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
         }
+        mBurnInInteractor.dozeTimeTick();
     }
 
     @Override

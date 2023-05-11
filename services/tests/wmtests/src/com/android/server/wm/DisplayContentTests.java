@@ -24,6 +24,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
@@ -1061,6 +1062,51 @@ public class DisplayContentTests extends WindowTestsBase {
         rootTask.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
         freeformRootTask.getTopNonFinishingActivity().setOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, dc.getOrientation());
+    }
+
+    private void updateAllDisplayContentAndRotation(DisplayContent dc) {
+        // NB updateOrientation will not revert the user orientation until a settings change
+        // takes effect.
+        dc.updateOrientation();
+        dc.onDisplayChanged(dc);
+        dc.mWmService.updateRotation(true /* alwaysSendConfiguration */,
+                false /* forceRelayout */);
+        waitUntilHandlersIdle();
+    }
+
+    @Test
+    public void testNoSensorRevert() {
+        final DisplayContent dc = mDisplayContent;
+        spyOn(dc);
+        doReturn(true).when(dc).getIgnoreOrientationRequest();
+        final DisplayRotation dr = dc.getDisplayRotation();
+        spyOn(dr);
+        doReturn(false).when(dr).useDefaultSettingsProvider();
+        final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        app.setOrientation(SCREEN_ORIENTATION_LANDSCAPE, app);
+
+        assertFalse(dc.getRotationReversionController().isAnyOverrideActive());
+        dc.getDisplayRotation().setUserRotation(WindowManagerPolicy.USER_ROTATION_LOCKED,
+                ROTATION_90);
+        updateAllDisplayContentAndRotation(dc);
+        assertEquals(ROTATION_90, dc.getDisplayRotation()
+                .rotationForOrientation(SCREEN_ORIENTATION_UNSPECIFIED, ROTATION_90));
+
+        app.setOrientation(SCREEN_ORIENTATION_NOSENSOR);
+        updateAllDisplayContentAndRotation(dc);
+        assertTrue(dc.getRotationReversionController().isAnyOverrideActive());
+        assertEquals(ROTATION_0, dc.getRotation());
+
+        app.setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
+        updateAllDisplayContentAndRotation(dc);
+        assertFalse(dc.getRotationReversionController().isAnyOverrideActive());
+        assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED,
+                dc.getDisplayRotation().getUserRotationMode());
+        assertEquals(ROTATION_90, dc.getDisplayRotation().getUserRotation());
+        assertEquals(ROTATION_90, dc.getDisplayRotation()
+                .rotationForOrientation(SCREEN_ORIENTATION_UNSPECIFIED, ROTATION_0));
+        dc.getDisplayRotation().setUserRotation(WindowManagerPolicy.USER_ROTATION_FREE,
+                ROTATION_0);
     }
 
     @Test

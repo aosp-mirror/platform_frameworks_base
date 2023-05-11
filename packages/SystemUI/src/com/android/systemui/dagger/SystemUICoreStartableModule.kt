@@ -17,7 +17,6 @@
 package com.android.systemui.dagger
 
 import com.android.keyguard.KeyguardBiometricLockoutLogger
-import com.android.systemui.ChooserPinMigration
 import com.android.systemui.ChooserSelector
 import com.android.systemui.CoreStartable
 import com.android.systemui.LatencyTester
@@ -26,19 +25,20 @@ import com.android.systemui.SliceBroadcastRelayHandler
 import com.android.systemui.accessibility.SystemActions
 import com.android.systemui.accessibility.WindowMagnification
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.biometrics.BiometricNotificationService
 import com.android.systemui.clipboardoverlay.ClipboardListener
 import com.android.systemui.controls.dagger.StartControlsStartableModule
 import com.android.systemui.dagger.qualifiers.PerUser
 import com.android.systemui.dreams.AssistantAttentionMonitor
 import com.android.systemui.dreams.DreamMonitor
 import com.android.systemui.globalactions.GlobalActionsComponent
-import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyboard.KeyboardUI
+import com.android.systemui.keyboard.PhysicalKeyboardCoreStartable
 import com.android.systemui.keyguard.KeyguardViewMediator
 import com.android.systemui.keyguard.data.quickaffordance.MuteQuickAffordanceCoreStartable
 import com.android.systemui.log.SessionTracker
-import com.android.systemui.media.dialog.MediaOutputSwitcherDialogUI
 import com.android.systemui.media.RingtonePlayer
+import com.android.systemui.media.dialog.MediaOutputSwitcherDialogUI
 import com.android.systemui.media.taptotransfer.MediaTttCommandLineHelper
 import com.android.systemui.media.taptotransfer.receiver.MediaTttChipControllerReceiver
 import com.android.systemui.media.taptotransfer.sender.MediaTttSenderCoordinator
@@ -67,7 +67,7 @@ import dagger.multibindings.IntoMap
  */
 @Module(includes = [
     MultiUserUtilsModule::class,
-    StartControlsStartableModule::class
+    StartControlsStartableModule::class,
 ])
 abstract class SystemUICoreStartableModule {
     /** Inject into AuthController.  */
@@ -76,12 +76,13 @@ abstract class SystemUICoreStartableModule {
     @ClassKey(AuthController::class)
     abstract fun bindAuthController(service: AuthController): CoreStartable
 
-    /** Inject into ChooserPinMigration. */
+    /** Inject into BiometricNotificationService */
     @Binds
     @IntoMap
-    @ClassKey(ChooserPinMigration::class)
-    @PerUser
-    abstract fun bindChooserPinMigration(sysui: ChooserPinMigration): CoreStartable
+    @ClassKey(BiometricNotificationService::class)
+    abstract fun bindBiometricNotificationService(
+        service: BiometricNotificationService
+    ): CoreStartable
 
     /** Inject into ChooserCoreStartable. */
     @Binds

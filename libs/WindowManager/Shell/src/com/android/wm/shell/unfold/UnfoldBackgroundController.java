@@ -19,14 +19,12 @@ package com.android.wm.shell.unfold;
 import static android.graphics.Color.blue;
 import static android.graphics.Color.green;
 import static android.graphics.Color.red;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.NonNull;
 import android.content.Context;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 
 /**
  * Controls background color layer for the unfold animations
@@ -34,15 +32,10 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 public class UnfoldBackgroundController {
 
     private static final int BACKGROUND_LAYER_Z_INDEX = -1;
-
-    private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private final float[] mBackgroundColor;
     private SurfaceControl mBackgroundLayer;
 
-    public UnfoldBackgroundController(
-            @NonNull Context context,
-            @NonNull RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
-        mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
+    public UnfoldBackgroundController(@NonNull Context context) {
         mBackgroundColor = getBackgroundColor(context);
     }
 
@@ -57,7 +50,6 @@ public class UnfoldBackgroundController {
                 .setName("app-unfold-background")
                 .setCallsite("AppUnfoldTransitionController")
                 .setColorLayer();
-        mRootTaskDisplayAreaOrganizer.attachToDisplayArea(DEFAULT_DISPLAY, colorLayerBuilder);
         mBackgroundLayer = colorLayerBuilder.build();
 
         transaction

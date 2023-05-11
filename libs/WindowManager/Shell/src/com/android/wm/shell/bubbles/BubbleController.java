@@ -24,7 +24,6 @@ import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 
-import static com.android.wm.shell.bubbles.Bubble.KEY_APP_BUBBLE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_CONTROLLER;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_GESTURE;
 import static com.android.wm.shell.bubbles.BubbleDebugConfig.TAG_BUBBLES;
@@ -89,7 +88,6 @@ import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.IStatusBarService;
-import com.android.launcher3.icons.BubbleBadgeIconFactory;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -209,7 +207,6 @@ public class BubbleController implements ConfigurationChangeListener,
     @Nullable private BubbleStackView mStackView;
     @Nullable private BubbleBarLayerView mLayerView;
     private BubbleIconFactory mBubbleIconFactory;
-    private BubbleBadgeIconFactory mBubbleBadgeIconFactory;
     private BubblePositioner mBubblePositioner;
     private Bubbles.SysuiProxy mSysuiProxy;
 
@@ -263,7 +260,7 @@ public class BubbleController implements ConfigurationChangeListener,
     /** One handed mode controller to register transition listener. */
     private Optional<OneHandedController> mOneHandedOptional;
     /** Drag and drop controller to register listener for onDragStarted. */
-    private DragAndDropController mDragAndDropController;
+    private Optional<DragAndDropController> mDragAndDropController;
     /** Used to send bubble events to launcher. */
     private Bubbles.BubbleStateListener mBubbleStateListener;
 
@@ -289,7 +286,7 @@ public class BubbleController implements ConfigurationChangeListener,
             BubblePositioner positioner,
             DisplayController displayController,
             Optional<OneHandedController> oneHandedOptional,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
@@ -321,8 +318,7 @@ public class BubbleController implements ConfigurationChangeListener,
         mBubbleData = data;
         mSavedUserBubbleData = new SparseArray<>();
         mBubbleIconFactory = new BubbleIconFactory(context,
-                context.getResources().getDimensionPixelSize(R.dimen.bubble_size));
-        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(context,
+                context.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                 context.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
                 context.getResources().getColor(R.color.important_conversation),
                 context.getResources().getDimensionPixelSize(
@@ -473,7 +469,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 });
 
         mOneHandedOptional.ifPresent(this::registerOneHandedState);
-        mDragAndDropController.addListener(this::collapseStack);
+        mDragAndDropController.ifPresent(controller -> controller.addListener(this::collapseStack));
 
         // Clear out any persisted bubbles on disk that no longer have a valid user.
         List<UserInfo> users = mUserManager.getAliveUsers();
@@ -698,6 +694,10 @@ public class BubbleController implements ConfigurationChangeListener,
     @VisibleForTesting
     public BubblePositioner getPositioner() {
         return mBubblePositioner;
+    }
+
+    BubbleIconFactory getIconFactory() {
+        return mBubbleIconFactory;
     }
 
     public Bubbles.SysuiProxy getSysuiProxy() {
@@ -936,8 +936,7 @@ public class BubbleController implements ConfigurationChangeListener,
             mStackView.onThemeChanged();
         }
         mBubbleIconFactory = new BubbleIconFactory(mContext,
-                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size));
-        mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext,
+                mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                 mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
                 mContext.getResources().getColor(R.color.important_conversation),
                 mContext.getResources().getDimensionPixelSize(
@@ -951,7 +950,6 @@ public class BubbleController implements ConfigurationChangeListener,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
-                    mBubbleBadgeIconFactory,
                     false /* skipInflation */);
         }
         for (Bubble b : mBubbleData.getOverflowBubbles()) {
@@ -961,7 +959,6 @@ public class BubbleController implements ConfigurationChangeListener,
                     mStackView,
                     mLayerView,
                     mBubbleIconFactory,
-                    mBubbleBadgeIconFactory,
                     false /* skipInflation */);
         }
     }
@@ -978,8 +975,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 mScreenBounds.set(newConfig.windowConfiguration.getBounds());
                 mBubbleData.onMaxBubblesChanged();
                 mBubbleIconFactory = new BubbleIconFactory(mContext,
-                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size));
-                mBubbleBadgeIconFactory = new BubbleBadgeIconFactory(mContext,
+                        mContext.getResources().getDimensionPixelSize(R.dimen.bubble_size),
                         mContext.getResources().getDimensionPixelSize(R.dimen.bubble_badge_size),
                         mContext.getResources().getColor(R.color.important_conversation),
                         mContext.getResources().getDimensionPixelSize(
@@ -1196,14 +1192,15 @@ public class BubbleController implements ConfigurationChangeListener,
             return;
         }
 
+        String appBubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(), user);
         PackageManager packageManager = getPackageManagerForUser(mContext, user.getIdentifier());
-        if (!isResizableActivity(intent, packageManager, KEY_APP_BUBBLE)) return;
+        if (!isResizableActivity(intent, packageManager, appBubbleKey)) return;
 
-        Bubble existingAppBubble = mBubbleData.getBubbleInStackWithKey(KEY_APP_BUBBLE);
+        Bubble existingAppBubble = mBubbleData.getBubbleInStackWithKey(appBubbleKey);
         if (existingAppBubble != null) {
             BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
             if (isStackExpanded()) {
-                if (selectedBubble != null && KEY_APP_BUBBLE.equals(selectedBubble.getKey())) {
+                if (selectedBubble != null && appBubbleKey.equals(selectedBubble.getKey())) {
                     // App bubble is expanded, lets collapse
                     collapseStack();
                 } else {
@@ -1217,7 +1214,7 @@ public class BubbleController implements ConfigurationChangeListener,
             }
         } else {
             // App bubble does not exist, lets add and expand it
-            Bubble b = new Bubble(intent, user, icon, mMainExecutor);
+            Bubble b = Bubble.createAppBubble(intent, user, icon, mMainExecutor);
             b.setShouldAutoExpand(true);
             inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
         }
@@ -1250,8 +1247,8 @@ public class BubbleController implements ConfigurationChangeListener,
     }
 
     /** Sets the app bubble's taskId which is cached for SysUI. */
-    public void setAppBubbleTaskId(int taskId) {
-        mImpl.mCachedState.setAppBubbleTaskId(taskId);
+    public void setAppBubbleTaskId(String key, int taskId) {
+        mImpl.mCachedState.setAppBubbleTaskId(key, taskId);
     }
 
     /**
@@ -1275,7 +1272,6 @@ public class BubbleController implements ConfigurationChangeListener,
                         mStackView,
                         mLayerView,
                         mBubbleIconFactory,
-                        mBubbleBadgeIconFactory,
                         true /* skipInflation */);
             });
             return null;
@@ -1351,7 +1347,7 @@ public class BubbleController implements ConfigurationChangeListener,
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.inflate(b -> mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade),
                 mContext, this, mStackView,  mLayerView,
-                mBubbleIconFactory, mBubbleBadgeIconFactory,
+                mBubbleIconFactory,
                 false /* skipInflation */);
     }
 
@@ -2049,7 +2045,8 @@ public class BubbleController implements ConfigurationChangeListener,
             private HashSet<String> mSuppressedBubbleKeys = new HashSet<>();
             private HashMap<String, String> mSuppressedGroupToNotifKeys = new HashMap<>();
             private HashMap<String, Bubble> mShortcutIdToBubble = new HashMap<>();
-            private int mAppBubbleTaskId = INVALID_TASK_ID;
+
+            private HashMap<String, Integer> mAppBubbleTaskIds = new HashMap();
 
             private ArrayList<Bubble> mTmpBubbles = new ArrayList<>();
 
@@ -2081,20 +2078,20 @@ public class BubbleController implements ConfigurationChangeListener,
 
                 mSuppressedBubbleKeys.clear();
                 mShortcutIdToBubble.clear();
-                mAppBubbleTaskId = INVALID_TASK_ID;
+                mAppBubbleTaskIds.clear();
                 for (Bubble b : mTmpBubbles) {
                     mShortcutIdToBubble.put(b.getShortcutId(), b);
                     updateBubbleSuppressedState(b);
 
-                    if (KEY_APP_BUBBLE.equals(b.getKey())) {
-                        mAppBubbleTaskId = b.getTaskId();
+                    if (b.isAppBubble()) {
+                        mAppBubbleTaskIds.put(b.getKey(), b.getTaskId());
                     }
                 }
             }
 
             /** Sets the app bubble's taskId which is cached for SysUI. */
-            synchronized void setAppBubbleTaskId(int taskId) {
-                mAppBubbleTaskId = taskId;
+            synchronized void setAppBubbleTaskId(String key, int taskId) {
+                mAppBubbleTaskIds.put(key, taskId);
             }
 
             /**
@@ -2147,7 +2144,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     pw.println("   suppressing: " + key);
                 }
 
-                pw.print("mAppBubbleTaskId: " + mAppBubbleTaskId);
+                pw.print("mAppBubbleTaskIds: " + mAppBubbleTaskIds.values());
             }
         }
 
@@ -2209,7 +2206,7 @@ public class BubbleController implements ConfigurationChangeListener,
 
         @Override
         public boolean isAppBubbleTaskId(int taskId) {
-            return mCachedState.mAppBubbleTaskId == taskId;
+            return mCachedState.mAppBubbleTaskIds.values().contains(taskId);
         }
 
         @Override

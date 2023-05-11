@@ -74,7 +74,7 @@ public class BiometricLoggerTest {
 
     @Before
     public void setUp() {
-        mOpContext = new OperationContextExt();
+        mOpContext = new OperationContextExt(false);
         mContext.addMockSystemService(SensorManager.class, mSensorManager);
         when(mSensorManager.getDefaultSensor(Sensor.TYPE_LIGHT)).thenReturn(
                 new Sensor(new InputSensorInfo("", "", 0, 0, Sensor.TYPE_LIGHT, 0, 0, 0, 0, 0, 0,

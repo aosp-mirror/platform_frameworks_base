@@ -19,7 +19,10 @@ package com.android.systemui.qs.dagger
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
 import com.android.systemui.qs.QSHost
+import com.android.systemui.qs.QSHostAdapter
 import com.android.systemui.qs.QSTileHost
+import com.android.systemui.qs.QsEventLogger
+import com.android.systemui.qs.QsEventLoggerImpl
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedRepository
 import com.android.systemui.qs.pipeline.data.repository.CustomTileAddedSharedPrefsRepository
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor
@@ -31,15 +34,19 @@ import dagger.Provides
 @Module
 interface QSHostModule {
 
-    @Binds fun provideQsHost(controllerImpl: QSTileHost): QSHost
+    @Binds fun provideQsHost(controllerImpl: QSHostAdapter): QSHost
+
+    @Binds fun provideEventLogger(impl: QsEventLoggerImpl): QsEventLogger
 
     @Module
     companion object {
+        private const val MAX_QS_INSTANCE_ID = 1 shl 20
+
         @Provides
         @JvmStatic
         fun providePanelInteractor(
             featureFlags: FeatureFlags,
-            qsHost: QSHost,
+            qsHost: QSTileHost,
             panelInteractorImpl: PanelInteractorImpl
         ): PanelInteractor {
             return if (featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {
@@ -53,7 +60,7 @@ interface QSHostModule {
         @JvmStatic
         fun provideCustomTileAddedRepository(
             featureFlags: FeatureFlags,
-            qsHost: QSHost,
+            qsHost: QSTileHost,
             customTileAddedRepository: CustomTileAddedSharedPrefsRepository
         ): CustomTileAddedRepository {
             return if (featureFlags.isEnabled(Flags.QS_PIPELINE_NEW_HOST)) {

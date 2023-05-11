@@ -1780,6 +1780,21 @@ public class RemoteViews implements Parcelable, Filter {
             Object value = getParameterValue(view);
             try {
                 MethodHandle method = getMethod(view, this.methodName, param, true /* async */);
+                // Upload the bitmap to GPU if the parameter is of type Bitmap or Icon.
+                // Since bitmaps in framework are seldomly modified, this is supposed to accelerate
+                // the operations.
+                if (value instanceof Bitmap bitmap) {
+                    bitmap.prepareToDraw();
+                }
+
+                if (value instanceof Icon icon
+                        && (icon.getType() == Icon.TYPE_BITMAP
+                                || icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP)) {
+                    Bitmap bitmap = icon.getBitmap();
+                    if (bitmap != null) {
+                        bitmap.prepareToDraw();
+                    }
+                }
 
                 if (method != null) {
                     Runnable endAction = (Runnable) method.invoke(view, value);

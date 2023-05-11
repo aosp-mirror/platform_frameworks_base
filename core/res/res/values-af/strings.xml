@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Gee die program toegang tot liggaamsensordata, soos polsslag, temperatuur en bloedsuurstofpersentasie, terwyl die program gebruik word."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Kry toegang tot liggaamsensordata, soos polsslag, terwyl program op agtergrond is"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Gee die program toegang tot liggaamsensordata, soos polsslag, temperatuur en bloedsuurstofpersentasie, terwyl dit op die agtergrond is."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Het toegang tot liggaamsensordata oor polstermperatuur terwyl die app gebruik word."</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Gee die app toegang tot liggaamsensordata oor polstermperatuur terwyl die app gebruik word."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Het toegang tot liggaamsensordata oor polstermperatuur terwyl die app op die agtergrond is."</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Gee die app toegang tot liggaamsensordata oor polstermperatuur terwyl die app op die agtergrond is."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Lees kalendergebeurtenisse en -besonderhede"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Hierdie program kan alle kalendergebeurtenisse lees wat op jou tablet geberg is of jou kalenderdata stoor."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Hierdie program kan alle kalendergeleenthede wat op jou Android TV-toestel geberg is, lees of jou kalenderdata stoor."</string>
@@ -507,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Laat die program toe om die vibrator te beheer."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Stel die program in staat om toegang tot die vibreerderstand te kry."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"skakel foonnommers direk"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Laat die program toe om telefoonnommers sonder jou tussentrede te bel. Dit kan tot onverwagte heffings of oproepe lei. Let daarop dat dit nie die program toelaat om noodnommers te bel nie. Kwaadwillige programme kan jou geld kos deur oproepe sonder jou bevestiging te maak."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"toegang tot kitsboodskapoproepdiens"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Laat die program toe om die kitsboodskapdiens te gebruik om oproepe sonder jou ingryping te maak."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"lees foonstatus en identiteit"</string>
@@ -713,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Gesighandeling is gekanselleer."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Gebruiker het Gesigslot gekanselleer"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Te veel pogings. Probeer later weer."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Te veel pogings. Gesigslot is gedeaktiveer."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Te veel pogings. Gesigslot is onbeskikbaar."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Te veel pogings. Gebruik eerder skermslot."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Kan nie gesig verifieer nie. Probeer weer."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Jy het nie Gesigslot opgestel nie"</string>
@@ -1954,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> is nie nou onmiddellik beskikbaar nie. Dit word bestuur deur <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Kom meer te wete"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Hervat program"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Skakel werkprogramme aan?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Kry toegang tot jou werkprogramme en -kennisgewings"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Skakel aan"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Hervat werkapps?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Hervat"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Noodgeval"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Kry toegang tot jou werkapps en -oproepe"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Program is nie beskikbaar nie"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> is nie op die oomblik beskikbaar nie."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> is nie beskikbaar nie"</string>
@@ -2164,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Hierdie inhoud kan nie met werkprogramme oopgemaak word nie"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Hierdie inhoud kan nie met persoonlike programme gedeel word nie"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Hierdie inhoud kan nie met persoonlike programme oopgemaak word nie"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Werkprofiel is onderbreek"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Tik om aan te skakel"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Geen werkprogramme nie"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Geen persoonlike programme nie"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Maak <xliff:g id="APP">%s</xliff:g> in jou persoonlike profiel oop?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Maak <xliff:g id="APP">%s</xliff:g> in jou werkprofiel oop?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Maak persoonlike <xliff:g id="APP">%s</xliff:g> oop"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Maak werk-<xliff:g id="APP">%s</xliff:g> oop"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gebruik persoonlike blaaier"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gebruik werkblaaier"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM se netwerkontsluiting-PIN"</string>

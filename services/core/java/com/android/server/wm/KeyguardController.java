@@ -269,6 +269,8 @@ class KeyguardController {
                     TRANSIT_TO_BACK, transitFlags, null /* trigger */, dc);
             updateKeyguardSleepToken();
 
+            // Make the home wallpaper visible
+            dc.mWallpaperController.showHomeWallpaperInTransition();
             // Some stack visibility might change (e.g. docked stack)
             mRootWindowContainer.resumeFocusedTasksTopActivities();
             mRootWindowContainer.ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);

@@ -52,8 +52,9 @@ import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.battery.BatteryMeterViewController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.shade.NotificationPanelViewController;
+import com.android.systemui.shade.ShadeViewStateProvider;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.events.SystemStatusAnimationScheduler;
 import com.android.systemui.statusbar.policy.BatteryController;
@@ -120,14 +121,16 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
     @Mock private CommandQueue mCommandQueue;
     @Mock private KeyguardLogger mLogger;
 
-    private TestNotificationPanelViewStateProvider mNotificationPanelViewStateProvider;
+    @Mock private NotificationMediaManager mNotificationMediaManager;
+
+    private TestShadeViewStateProvider mShadeViewStateProvider;
     private KeyguardStatusBarView mKeyguardStatusBarView;
     private KeyguardStatusBarViewController mController;
     private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setup() throws Exception {
-        mNotificationPanelViewStateProvider = new TestNotificationPanelViewStateProvider();
+        mShadeViewStateProvider = new TestShadeViewStateProvider();
 
         MockitoAnnotations.initMocks(this);
 
@@ -155,7 +158,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mStatusBarIconController,
                 mIconManagerFactory,
                 mBatteryMeterViewController,
-                mNotificationPanelViewStateProvider,
+                mShadeViewStateProvider,
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mKeyguardUpdateMonitor,
@@ -167,7 +170,8 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
                 mSecureSettings,
                 mCommandQueue,
                 mFakeExecutor,
-                mLogger
+                mLogger,
+                mNotificationMediaManager
         );
     }
 
@@ -354,7 +358,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
         updateStateToKeyguard();
 
-        mNotificationPanelViewStateProvider.setPanelViewExpandedHeight(0);
+        mShadeViewStateProvider.setPanelViewExpandedHeight(0);
 
         mController.updateViewState();
 
@@ -366,7 +370,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         mController.onViewAttached();
         updateStateToKeyguard();
 
-        mNotificationPanelViewStateProvider.setLockscreenShadeDragProgress(1f);
+        mShadeViewStateProvider.setLockscreenShadeDragProgress(1f);
 
         mController.updateViewState();
 
@@ -447,7 +451,7 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         updateStateToKeyguard();
         mKeyguardStatusBarView.setVisibility(View.VISIBLE);
 
-        mNotificationPanelViewStateProvider.setShouldHeadsUpBeVisible(true);
+        mShadeViewStateProvider.setShouldHeadsUpBeVisible(true);
         mController.updateForHeadsUp(/* animate= */ false);
 
         assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.INVISIBLE);
@@ -459,10 +463,10 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         updateStateToKeyguard();
 
         // Start with the opposite state.
-        mNotificationPanelViewStateProvider.setShouldHeadsUpBeVisible(true);
+        mShadeViewStateProvider.setShouldHeadsUpBeVisible(true);
         mController.updateForHeadsUp(/* animate= */ false);
 
-        mNotificationPanelViewStateProvider.setShouldHeadsUpBeVisible(false);
+        mShadeViewStateProvider.setShouldHeadsUpBeVisible(false);
         mController.updateForHeadsUp(/* animate= */ false);
 
         assertThat(mKeyguardStatusBarView.getVisibility()).isEqualTo(View.VISIBLE);
@@ -587,10 +591,10 @@ public class KeyguardStatusBarViewControllerTest extends SysuiTestCase {
         return captor.getValue();
     }
 
-    private static class TestNotificationPanelViewStateProvider
-            implements NotificationPanelViewController.NotificationPanelViewStateProvider {
+    private static class TestShadeViewStateProvider
+            implements ShadeViewStateProvider {
 
-        TestNotificationPanelViewStateProvider() {}
+        TestShadeViewStateProvider() {}
 
         private float mPanelViewExpandedHeight = 100f;
         private boolean mShouldHeadsUpBeVisible = false;

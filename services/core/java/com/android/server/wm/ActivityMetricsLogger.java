@@ -397,9 +397,21 @@ class ActivityMetricsLogger {
 
         /** Returns {@code true} if the incoming activity can belong to this transition. */
         boolean canCoalesce(ActivityRecord r) {
-            return mLastLaunchedActivity.mDisplayContent == r.mDisplayContent
-                    && mLastLaunchedActivity.getTask().getBounds().equals(r.getTask().getBounds())
-                    && mLastLaunchedActivity.getWindowingMode() == r.getWindowingMode();
+            if (mLastLaunchedActivity.mDisplayContent != r.mDisplayContent
+                    || mLastLaunchedActivity.getWindowingMode() != r.getWindowingMode()) {
+                return false;
+            }
+            // The current task should be non-null because it is just launched. While the
+            // last task can be cleared when starting activity with FLAG_ACTIVITY_CLEAR_TASK.
+            final Task lastTask = mLastLaunchedActivity.getTask();
+            final Task currentTask = r.getTask();
+            if (lastTask != null && currentTask != null) {
+                if (lastTask == currentTask) {
+                    return true;
+                }
+                return lastTask.getBounds().equals(currentTask.getBounds());
+            }
+            return mLastLaunchedActivity.isUid(r.launchedFromUid);
         }
 
         /** @return {@code true} if the activity matches a launched activity in this transition. */

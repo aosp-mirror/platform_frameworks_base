@@ -22,15 +22,16 @@ import android.os.Looper;
 
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.log.LogBuffer;
 import com.android.systemui.log.LogBufferFactory;
+import com.android.systemui.log.LogcatEchoTracker;
+import com.android.systemui.log.LogcatEchoTrackerDebug;
+import com.android.systemui.log.LogcatEchoTrackerProd;
 import com.android.systemui.log.table.TableLogBuffer;
 import com.android.systemui.log.table.TableLogBufferFactory;
-import com.android.systemui.plugins.log.LogBuffer;
-import com.android.systemui.plugins.log.LogcatEchoTracker;
-import com.android.systemui.plugins.log.LogcatEchoTrackerDebug;
-import com.android.systemui.plugins.log.LogcatEchoTrackerProd;
 import com.android.systemui.statusbar.notification.NotifPipelineFlags;
 import com.android.systemui.util.Compile;
+import com.android.systemui.util.wakelock.WakeLockLog;
 
 import dagger.Module;
 import dagger.Provides;
@@ -135,6 +136,14 @@ public class LogModule {
         return factory.create("NotifRemoteInputLog", 50 /* maxSize */, false /* systrace */);
     }
 
+    /** Provides a logging buffer for all logs related to unseen notifications. */
+    @Provides
+    @SysUISingleton
+    @UnseenNotificationLog
+    public static LogBuffer provideUnseenNotificationLogBuffer(LogBufferFactory factory) {
+        return factory.create("UnseenNotifLog", 20 /* maxSize */, false /* systrace */);
+    }
+
     /** Provides a logging buffer for all logs related to the data layer of notifications. */
     @Provides
     @SysUISingleton
@@ -168,6 +177,14 @@ public class LogModule {
                 false /* systrace */);
     }
 
+    /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastSender} */
+    @Provides
+    @SysUISingleton
+    @WakeLockLog
+    public static LogBuffer provideWakeLockLog(LogBufferFactory factory) {
+        return factory.create("WakeLockLog", 500 /* maxSize */, false /* systrace */);
+    }
+
     /** Provides a logging buffer for all logs related to Toasts shown by SystemUI. */
     @Provides
     @SysUISingleton
@@ -192,7 +209,7 @@ public class LogModule {
     @SysUISingleton
     @CollapsedSbFragmentLog
     public static LogBuffer provideCollapsedSbFragmentLogBuffer(LogBufferFactory factory) {
-        return factory.create("CollapsedSbFragmentLog", 20);
+        return factory.create("CollapsedSbFragmentLog", 40);
     }
 
     /**
@@ -422,5 +439,15 @@ public class LogModule {
     @KeyguardLog
     public static LogBuffer provideKeyguardLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardLog", 250);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for dream-related logs.
+     */
+    @Provides
+    @SysUISingleton
+    @DreamLog
+    public static LogBuffer provideDreamLogBuffer(LogBufferFactory factory) {
+        return factory.create("DreamLog", 250);
     }
 }

@@ -801,6 +801,34 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
+    public void onShadeClosesWithAnimationWillResetSwipeState() {
+        // GIVEN shade is expanded
+        mStackScroller.setIsExpanded(true);
+        clearInvocations(mNotificationSwipeHelper);
+
+        // WHEN closing the shade with the animations
+        mStackScroller.onExpansionStarted();
+        mStackScroller.setIsExpanded(false);
+        mStackScroller.onExpansionStopped();
+
+        // VERIFY swipe is reset
+        verify(mNotificationSwipeHelper).resetSwipeState();
+    }
+
+    @Test
+    public void onShadeClosesWithoutAnimationWillResetSwipeState() {
+        // GIVEN shade is expanded
+        mStackScroller.setIsExpanded(true);
+        clearInvocations(mNotificationSwipeHelper);
+
+        // WHEN closing the shade without the animation
+        mStackScroller.setIsExpanded(false);
+
+        // VERIFY swipe is reset
+        verify(mNotificationSwipeHelper).resetSwipeState();
+    }
+
+    @Test
     public void testSplitShade_hasTopOverscroll() {
         mTestableResources
                 .addOverride(R.bool.config_use_split_notification_shade, /* value= */ true);

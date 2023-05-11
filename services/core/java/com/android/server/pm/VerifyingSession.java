@@ -353,15 +353,15 @@ final class VerifyingSession {
             PackageInfoLite pkgLite,
             PackageVerificationState verificationState) {
 
-        // TODO: http://b/22976637
-        // Apps installed for "all" users use the device owner to verify the app
+        // Apps installed for "all" users use the current user to verify the app
         UserHandle verifierUser = getUser();
         if (verifierUser == UserHandle.ALL) {
-            verifierUser = UserHandle.SYSTEM;
+            verifierUser = UserHandle.of(mPm.mUserManager.getCurrentUserId());
         }
         final int verifierUserId = verifierUser.getIdentifier();
 
-        List<String> requiredVerifierPackages = Arrays.asList(mPm.mRequiredVerifierPackages);
+        List<String> requiredVerifierPackages = new ArrayList<>(
+                Arrays.asList(mPm.mRequiredVerifierPackages));
         boolean requiredVerifierPackagesOverridden = false;
 
         // Allow verifier override for ADB installations which could already be unverified using

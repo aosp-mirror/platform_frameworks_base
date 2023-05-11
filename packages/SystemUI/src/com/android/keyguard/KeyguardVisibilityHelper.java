@@ -18,22 +18,23 @@ package com.android.keyguard;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
 
+import android.util.Property;
 import android.view.View;
-import android.view.ViewPropertyAnimator;
 
-import com.android.systemui.animation.Interpolators;
-import com.android.systemui.plugins.log.LogBuffer;
-import com.android.systemui.plugins.log.LogLevel;
+import com.android.app.animation.Interpolators;
+import com.android.systemui.log.LogBuffer;
+import com.android.systemui.log.LogLevel;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.phone.AnimatorHandle;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import com.google.errorprone.annotations.CompileTimeConstant;
+
+import java.util.function.Consumer;
 
 /**
  * Helper class for updating visibility of keyguard views based on keyguard and status bar state.
@@ -48,7 +49,6 @@ public class KeyguardVisibilityHelper {
     private final ScreenOffAnimationController mScreenOffAnimationController;
     private boolean mAnimateYPos;
     private boolean mKeyguardViewVisibilityAnimating;
-    private AnimatorHandle mKeyguardAnimatorHandle;
     private boolean mLastOccludedState = false;
     private final AnimationProperties mAnimationProperties = new AnimationProperties();
     private final LogBuffer mLogBuffer;
@@ -85,51 +85,49 @@ public class KeyguardVisibilityHelper {
             boolean keyguardFadingAway,
             boolean goingToFullShade,
             int oldStatusBarState) {
-        if (mKeyguardAnimatorHandle != null) {
-            mKeyguardAnimatorHandle.cancel();
-            mKeyguardAnimatorHandle = null;
-        }
-        mView.animate().cancel();
+        PropertyAnimator.cancelAnimation(mView, AnimatableProperty.ALPHA);
         boolean isOccluded = mKeyguardStateController.isOccluded();
         mKeyguardViewVisibilityAnimating = false;
 
         if ((!keyguardFadingAway && oldStatusBarState == KEYGUARD
                 && statusBarState != KEYGUARD) || goingToFullShade) {
             mKeyguardViewVisibilityAnimating = true;
-            mView.animate()
-                    .alpha(0f)
-                    .setStartDelay(0)
-                    .setDuration(160)
-                    .setInterpolator(Interpolators.ALPHA_OUT)
-                    .withEndAction(
-                            mAnimateKeyguardStatusViewGoneEndRunnable);
+
+            AnimationProperties animProps = new AnimationProperties()
+                    .setCustomInterpolator(View.ALPHA, Interpolators.ALPHA_OUT)
+                    .setAnimationEndAction(mSetGoneEndAction);
             if (keyguardFadingAway) {
-                mView.animate()
-                        .setStartDelay(mKeyguardStateController.getKeyguardFadingAwayDelay())
-                        .setDuration(mKeyguardStateController.getShortenedFadingAwayDuration())
-                        .start();
+                animProps
+                        .setDelay(mKeyguardStateController.getKeyguardFadingAwayDelay())
+                        .setDuration(mKeyguardStateController.getShortenedFadingAwayDuration());
                 log("goingToFullShade && keyguardFadingAway");
             } else {
+                animProps.setDelay(0).setDuration(160);
                 log("goingToFullShade && !keyguardFadingAway");
             }
+            PropertyAnimator.setProperty(
+                    mView, AnimatableProperty.ALPHA, 0f, animProps, true /* animate */);
         } else if (oldStatusBarState == StatusBarState.SHADE_LOCKED && statusBarState == KEYGUARD) {
             mView.setVisibility(View.VISIBLE);
             mKeyguardViewVisibilityAnimating = true;
             mView.setAlpha(0f);
-            mView.animate()
-                    .alpha(1f)
-                    .setStartDelay(0)
-                    .setDuration(320)
-                    .setInterpolator(Interpolators.ALPHA_IN)
-                    .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
-            log("keyguardFadingAway transition w/ Y Animation");
+            PropertyAnimator.setProperty(
+                    mView, AnimatableProperty.ALPHA, 1f,
+                    new AnimationProperties()
+                            .setDelay(0)
+                            .setDuration(320)
+                            .setCustomInterpolator(View.ALPHA, Interpolators.ALPHA_IN)
+                            .setAnimationEndAction(
+                                    property -> mSetVisibleEndRunnable.run()),
+                    true /* animate */);
+            log("keyguardFadingAway transition w/ Y Aniamtion");
         } else if (statusBarState == KEYGUARD) {
             if (keyguardFadingAway) {
                 mKeyguardViewVisibilityAnimating = true;
-                ViewPropertyAnimator animator = mView.animate()
-                        .alpha(0)
-                        .setInterpolator(Interpolators.FAST_OUT_LINEAR_IN)
-                        .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable);
+                AnimationProperties animProps = new AnimationProperties()
+                        .setDelay(0)
+                        .setCustomInterpolator(View.ALPHA, Interpolators.FAST_OUT_LINEAR_IN)
+                        .setAnimationEndAction(mSetInvisibleEndAction);
                 if (mAnimateYPos) {
                     float target = mView.getY() - mView.getHeight() * 0.05f;
                     int delay = 0;
@@ -141,21 +139,24 @@ public class KeyguardVisibilityHelper {
                     PropertyAnimator.setProperty(mView, AnimatableProperty.Y, target,
                             mAnimationProperties,
                             true /* animate */);
-                    animator.setDuration(duration)
-                            .setStartDelay(delay);
+                    animProps.setDuration(duration)
+                            .setDelay(delay);
                     log("keyguardFadingAway transition w/ Y Aniamtion");
                 } else {
                     log("keyguardFadingAway transition w/o Y Animation");
                 }
-                animator.start();
+                PropertyAnimator.setProperty(
+                        mView, AnimatableProperty.ALPHA, 0f,
+                        animProps,
+                        true /* animate */);
             } else if (mScreenOffAnimationController.shouldAnimateInKeyguard()) {
                 log("ScreenOff transition");
                 mKeyguardViewVisibilityAnimating = true;
 
                 // Ask the screen off animation controller to animate the keyguard visibility for us
                 // since it may need to be cancelled due to keyguard lifecycle events.
-                mKeyguardAnimatorHandle = mScreenOffAnimationController.animateInKeyguard(
-                        mView, mAnimateKeyguardStatusViewVisibleEndRunnable);
+                mScreenOffAnimationController.animateInKeyguard(
+                        mView, mSetVisibleEndRunnable);
             } else {
                 log("Direct set Visibility to VISIBLE");
                 mView.setVisibility(View.VISIBLE);
@@ -169,19 +170,25 @@ public class KeyguardVisibilityHelper {
         mLastOccludedState = isOccluded;
     }
 
-    private final Runnable mAnimateKeyguardStatusViewInvisibleEndRunnable = () -> {
-        mKeyguardViewVisibilityAnimating = false;
-        mView.setVisibility(View.INVISIBLE);
-        log("Callback Set Visibility to INVISIBLE");
+    private final Consumer<Property> mSetInvisibleEndAction = new Consumer<>() {
+        @Override
+        public void accept(Property property) {
+            mKeyguardViewVisibilityAnimating = false;
+            mView.setVisibility(View.INVISIBLE);
+            log("Callback Set Visibility to INVISIBLE");
+        }
     };
 
-    private final Runnable mAnimateKeyguardStatusViewGoneEndRunnable = () -> {
-        mKeyguardViewVisibilityAnimating = false;
-        mView.setVisibility(View.GONE);
-        log("CallbackSet Visibility to GONE");
+    private final Consumer<Property> mSetGoneEndAction = new Consumer<>() {
+        @Override
+        public void accept(Property property) {
+            mKeyguardViewVisibilityAnimating = false;
+            mView.setVisibility(View.GONE);
+            log("CallbackSet Visibility to GONE");
+        }
     };
 
-    private final Runnable mAnimateKeyguardStatusViewVisibleEndRunnable = () -> {
+    private final Runnable mSetVisibleEndRunnable = () -> {
         mKeyguardViewVisibilityAnimating = false;
         mView.setVisibility(View.VISIBLE);
         log("Callback Set Visibility to VISIBLE");

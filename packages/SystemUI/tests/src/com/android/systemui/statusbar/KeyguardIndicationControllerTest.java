@@ -325,6 +325,21 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void createController_setIndicationAreaAgain_destroysPreviousRotateTextViewController() {
+        // GIVEN a controller with a mocked rotate text view controlller
+        final KeyguardIndicationRotateTextViewController mockedRotateTextViewController =
+                mock(KeyguardIndicationRotateTextViewController.class);
+        createController();
+        mController.mRotateTextViewController = mockedRotateTextViewController;
+
+        // WHEN a new indication area is set
+        mController.setIndicationArea(mIndicationArea);
+
+        // THEN the previous rotateTextViewController is destroyed
+        verify(mockedRotateTextViewController).destroy();
+    }
+
+    @Test
     public void createController_addsAlignmentListener() {
         createController();
 
@@ -614,9 +629,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void onBiometricHelp_coEx_faceFailure() {
         createController();
 
-        // GIVEN unlocking with fingerprint is possible
-        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(anyInt()))
-                .thenReturn(true);
+        // GIVEN unlocking with fingerprint is possible and allowed
+        fingerprintUnlockIsPossibleAndAllowed();
 
         String message = "A message";
         mController.setVisible(true);
@@ -641,9 +655,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void onBiometricHelp_coEx_faceUnavailable() {
         createController();
 
-        // GIVEN unlocking with fingerprint is possible
-        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(anyInt()))
-                .thenReturn(true);
+        // GIVEN unlocking with fingerprint is possible and allowed
+        fingerprintUnlockIsPossibleAndAllowed();
 
         String message = "A message";
         mController.setVisible(true);
@@ -662,6 +675,35 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         verifyIndicationMessage(
                 INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
                 mContext.getString(R.string.keyguard_suggest_fingerprint));
+    }
+
+
+    @Test
+    public void onBiometricHelp_coEx_faceUnavailable_fpNotAllowed() {
+        createController();
+
+        // GIVEN unlocking with fingerprint is possible but not allowed
+        setupFingerprintUnlockPossible(true);
+        when(mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed())
+                .thenReturn(false);
+
+        String message = "A message";
+        mController.setVisible(true);
+
+        // WHEN there's a face unavailable message
+        mController.getKeyguardCallback().onBiometricHelp(
+                BIOMETRIC_HELP_FACE_NOT_AVAILABLE,
+                message,
+                BiometricSourceType.FACE);
+
+        // THEN show sequential messages such as: 'face unlock unavailable' and
+        // 'try fingerprint instead'
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE,
+                message);
+        verifyIndicationMessage(
+                INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
+                mContext.getString(R.string.keyguard_unlock));
     }
 
     @Test
@@ -818,8 +860,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void faceErrorTimeout_whenFingerprintEnrolled_doesNotShowMessage() {
         createController();
-        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                getCurrentUser())).thenReturn(true);
+        fingerprintUnlockIsPossibleAndAllowed();
         String message = "A message";
 
         mController.setVisible(true);
@@ -832,9 +873,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void sendFaceHelpMessages_fingerprintEnrolled() {
         createController();
 
-        // GIVEN fingerprint enrolled
-        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                getCurrentUser())).thenReturn(true);
+        // GIVEN unlocking with fingerprint is possible and allowed
+        fingerprintUnlockIsPossibleAndAllowed();
 
         // WHEN help messages received that are allowed to show
         final String helpString = "helpString";
@@ -859,9 +899,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void doNotSendMostFaceHelpMessages_fingerprintEnrolled() {
         createController();
 
-        // GIVEN fingerprint enrolled
-        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                getCurrentUser())).thenReturn(true);
+        // GIVEN unlocking with fingerprint is possible and allowed
+        fingerprintUnlockIsPossibleAndAllowed();
 
         // WHEN help messages received that aren't supposed to show
         final String helpString = "helpString";
@@ -886,9 +925,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void sendAllFaceHelpMessages_fingerprintNotEnrolled() {
         createController();
 
-        // GIVEN fingerprint NOT enrolled
-        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                getCurrentUser())).thenReturn(false);
+        // GIVEN fingerprint NOT possible
+        fingerprintUnlockIsNotPossible();
 
         // WHEN help messages received
         final Set<CharSequence> helpStrings = new HashSet<>();
@@ -917,9 +955,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void sendTooDarkFaceHelpMessages_onTimeout_noFpEnrolled() {
         createController();
 
-        // GIVEN fingerprint NOT enrolled
-        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                getCurrentUser())).thenReturn(false);
+        // GIVEN fingerprint not possible
+        fingerprintUnlockIsNotPossible();
 
         // WHEN help message received and deferred message is valid
         final String helpString = "helpMsg";
@@ -948,9 +985,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void sendTooDarkFaceHelpMessages_onTimeout_fingerprintEnrolled() {
         createController();
 
-        // GIVEN fingerprint enrolled
-        when(mKeyguardUpdateMonitor.getCachedIsUnlockWithFingerprintPossible(
-                getCurrentUser())).thenReturn(true);
+        // GIVEN unlocking with fingerprint is possible and allowed
+        fingerprintUnlockIsPossibleAndAllowed();
 
         // WHEN help message received and deferredMessage is valid
         final String helpString = "helpMsg";
@@ -1500,7 +1536,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void onBiometricError_faceLockedOutFirstTimeAndFpAllowed_showsTheFpFollowupMessage() {
         createController();
-        fingerprintUnlockIsPossible();
+        fingerprintUnlockIsPossibleAndAllowed();
         onFaceLockoutError("first lockout");
 
         verifyIndicationShown(INDICATION_TYPE_BIOMETRIC_MESSAGE_FOLLOW_UP,
@@ -1559,7 +1595,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void onBiometricError_faceLockedOutAgainAndFpAllowed_showsTheFpFollowupMessage() {
         createController();
-        fingerprintUnlockIsPossible();
+        fingerprintUnlockIsPossibleAndAllowed();
         onFaceLockoutError("first lockout");
         clearInvocations(mRotateTextViewController);
 
@@ -1668,7 +1704,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     public void onBiometricError_screenIsTurningOn_faceLockedOutFpIsAvailable_showsMessage() {
         createController();
         screenIsTurningOn();
-        fingerprintUnlockIsPossible();
+        fingerprintUnlockIsPossibleAndAllowed();
 
         onFaceLockoutError("lockout error");
         verifyNoMoreInteractions(mRotateTextViewController);
@@ -1746,8 +1782,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
         setupFingerprintUnlockPossible(false);
     }
 
-    private void fingerprintUnlockIsPossible() {
+    private void fingerprintUnlockIsPossibleAndAllowed() {
         setupFingerprintUnlockPossible(true);
+        when(mKeyguardUpdateMonitor.isUnlockingWithFingerprintAllowed()).thenReturn(true);
     }
 
     private void setupFingerprintUnlockPossible(boolean possible) {

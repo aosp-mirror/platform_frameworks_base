@@ -42,6 +42,7 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 
@@ -54,7 +55,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
     private final Context mContext;
     private final Transitions mTransitions;
     private final List<IBinder> mPendingTransitionTokens = new ArrayList<>();
-
+    private Consumer<SurfaceControl.Transaction> mOnAnimationFinishedCallback;
     private Supplier<SurfaceControl.Transaction> mTransactionSupplier;
 
     public ExitDesktopTaskTransitionHandler(
@@ -76,9 +77,12 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
      * Starts Transition of a given type
      * @param type Transition type
      * @param wct WindowContainerTransaction for transition
+     * @param onAnimationEndCallback to be called after animation
      */
     public void startTransition(@WindowManager.TransitionType int type,
-            @NonNull WindowContainerTransaction wct) {
+            @NonNull WindowContainerTransaction wct,
+            Consumer<SurfaceControl.Transaction> onAnimationEndCallback) {
+        mOnAnimationFinishedCallback = onAnimationEndCallback;
         final IBinder token = mTransitions.startTransition(type, wct, this);
         mPendingTransitionTokens.add(token);
     }
@@ -101,7 +105,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
 
             if (change.getMode() == WindowManager.TRANSIT_CHANGE) {
                 transitionHandled |= startChangeTransition(
-                        transition, info.getType(), change, startT, finishCallback);
+                        transition, info.getType(), change, startT, finishT, finishCallback);
             }
         }
 
@@ -116,6 +120,7 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             @WindowManager.TransitionType int type,
             @NonNull TransitionInfo.Change change,
             @NonNull SurfaceControl.Transaction startT,
+            @NonNull SurfaceControl.Transaction finishT,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (!mPendingTransitionTokens.contains(transition)) {
             return false;
@@ -129,8 +134,12 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
             final int screenWidth = metrics.widthPixels;
             final int screenHeight = metrics.heightPixels;
             final SurfaceControl sc = change.getLeash();
-            startT.setCrop(sc, null);
-            startT.apply();
+            final Rect endBounds = change.getEndAbsBounds();
+            // Hide the first (fullscreen) frame because the animation will start from the freeform
+            // size.
+            startT.hide(sc)
+                    .setWindowCrop(sc, endBounds.width(), endBounds.height())
+                    .apply();
             final ValueAnimator animator = new ValueAnimator();
             animator.setFloatValues(0f, 1f);
             animator.setDuration(FULLSCREEN_ANIMATION_DURATION);
@@ -144,13 +153,17 @@ public class ExitDesktopTaskTransitionHandler implements Transitions.TransitionH
                 float fraction = animation.getAnimatedFraction();
                 float currentScaleX = scaleX + ((1 - scaleX) * fraction);
                 float currentScaleY = scaleY + ((1 - scaleY) * fraction);
-                t.setPosition(sc, startPos.x * (1 - fraction), startPos.y * (1 - fraction));
-                t.setScale(sc, currentScaleX, currentScaleY);
-                t.apply();
+                t.setPosition(sc, startPos.x * (1 - fraction), startPos.y * (1 - fraction))
+                        .setScale(sc, currentScaleX, currentScaleY)
+                        .show(sc)
+                        .apply();
             });
             animator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
+                    if (mOnAnimationFinishedCallback != null) {
+                        mOnAnimationFinishedCallback.accept(finishT);
+                    }
                     mTransitions.getMainExecutor().execute(
                             () -> finishCallback.onTransitionFinished(null, null));
                 }

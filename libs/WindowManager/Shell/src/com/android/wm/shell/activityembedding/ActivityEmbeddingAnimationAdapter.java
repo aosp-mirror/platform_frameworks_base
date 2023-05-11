@@ -19,6 +19,8 @@ package com.android.wm.shell.activityembedding;
 import static android.graphics.Matrix.MTRANS_X;
 import static android.graphics.Matrix.MTRANS_Y;
 
+import static com.android.wm.shell.activityembedding.ActivityEmbeddingAnimationRunner.shouldUseSnapshotAnimationForClosingChange;
+
 import android.annotation.CallSuper;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -97,10 +99,17 @@ class ActivityEmbeddingAnimationAdapter {
             final Rect startBounds = change.getStartAbsBounds();
             final Rect endBounds = change.getEndAbsBounds();
             mContentBounds.set(startBounds);
-            mContentRelOffset.set(change.getEndRelOffset());
-            mContentRelOffset.offset(
-                    startBounds.left - endBounds.left,
-                    startBounds.top - endBounds.top);
+            // Put the transition to the top left for snapshot animation.
+            if (shouldUseSnapshotAnimationForClosingChange(mChange)) {
+                // TODO(b/275034335): Fix an issue that black hole when closing the right container
+                //  in bounds change transition.
+                mContentRelOffset.set(0, 0);
+            } else {
+                mContentRelOffset.set(change.getEndRelOffset());
+                mContentRelOffset.offset(
+                        startBounds.left - endBounds.left,
+                        startBounds.top - endBounds.top);
+            }
         } else {
             mContentBounds.set(change.getEndAbsBounds());
             mContentRelOffset.set(change.getEndRelOffset());

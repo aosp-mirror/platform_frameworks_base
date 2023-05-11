@@ -19,9 +19,9 @@ package com.android.wm.shell.flicker.splitscreen
 import android.app.Instrumentation
 import android.graphics.Point
 import android.os.SystemClock
-import android.tools.common.datatypes.component.ComponentNameMatcher
-import android.tools.common.datatypes.component.IComponentMatcher
-import android.tools.common.datatypes.component.IComponentNameMatcher
+import android.tools.common.traces.component.ComponentNameMatcher
+import android.tools.common.traces.component.IComponentMatcher
+import android.tools.common.traces.component.IComponentNameMatcher
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.traces.parsers.WindowManagerStateHelper
 import android.tools.device.traces.parsers.toFlickerComponent
@@ -293,7 +293,7 @@ internal object SplitScreenUtils {
             wmHelper.currentState.layerState.displays.firstOrNull { !it.isVirtual }?.layerStackSpace
                 ?: error("Display not found")
         val dividerBar = device.wait(Until.findObject(dividerBarSelector), TIMEOUT_MS)
-        dividerBar.drag(Point(displayBounds.width * 1 / 3, displayBounds.height * 2 / 3), 2000)
+        dividerBar.drag(Point(displayBounds.width * 1 / 3, displayBounds.height * 2 / 3), 200)
 
         wmHelper
             .StateSyncBuilder()

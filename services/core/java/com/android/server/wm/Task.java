@@ -188,7 +188,6 @@ import android.window.WindowContainerToken;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IVoiceInteractor;
-import com.android.internal.protolog.ProtoLogGroup;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -2363,6 +2362,22 @@ class Task extends TaskFragment {
         return parentTask == null ? null : parentTask.getCreatedByOrganizerTask();
     }
 
+    /** @return the first adjacent task of this task or its parent. */
+    @Nullable
+    Task getAdjacentTask() {
+        final TaskFragment adjacentTaskFragment = getAdjacentTaskFragment();
+        if (adjacentTaskFragment != null && adjacentTaskFragment.asTask() != null) {
+            return adjacentTaskFragment.asTask();
+        }
+
+        final WindowContainer parent = getParent();
+        if (parent == null || parent.asTask() == null) {
+            return null;
+        }
+
+        return parent.asTask().getAdjacentTask();
+    }
+
     // TODO(task-merge): Figure out what's the right thing to do for places that used it.
     boolean isRootTask() {
         return getRootTask() == this;
@@ -2748,7 +2763,7 @@ class Task extends TaskFragment {
             Rect outSurfaceInsets) {
         // If this task has its adjacent task, it means they should animate together. Use display
         // bounds for them could move same as full screen task.
-        if (getAdjacentTaskFragment() != null && getAdjacentTaskFragment().asTask() != null) {
+        if (getAdjacentTask() != null) {
             super.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
             return;
         }
@@ -3006,7 +3021,8 @@ class Task extends TaskFragment {
 
     /** Checking if self or its child tasks are animated by recents animation. */
     boolean isAnimatingByRecents() {
-        return isAnimating(CHILDREN, ANIMATION_TYPE_RECENTS);
+        return isAnimating(CHILDREN, ANIMATION_TYPE_RECENTS)
+                || mTransitionController.isTransientHide(this);
     }
 
     WindowState getTopVisibleAppMainWindow() {
@@ -3252,9 +3268,10 @@ class Task extends TaskFragment {
 
     @Override
     void prepareSurfaces() {
-        final Rect dimBounds = mDimmer.resetDimStates();
+        mDimmer.resetDimStates();
         super.prepareSurfaces();
 
+        final Rect dimBounds = mDimmer.getDimBounds();
         if (dimBounds != null) {
             getDimBounds(dimBounds);
 
@@ -4687,7 +4704,7 @@ class Task extends TaskFragment {
         if (!isAttached()) {
             return;
         }
-        mTransitionController.collect(this);
+        mTransitionController.recordTaskOrder(this);
 
         final TaskDisplayArea taskDisplayArea = getDisplayArea();
 
@@ -5631,30 +5648,20 @@ class Task extends TaskFragment {
             final Transition transition = new Transition(TRANSIT_TO_BACK, 0 /* flags */,
                     mTransitionController, mWmService.mSyncEngine);
             // Guarantee that this gets its own transition by queueing on SyncEngine
-            if (mWmService.mSyncEngine.hasActiveSync()) {
-                ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
-                        "Creating Pending Move-to-back: %s", transition);
-                mWmService.mSyncEngine.queueSyncSet(
-                        () -> mTransitionController.moveToCollecting(transition),
-                        () -> {
-                            // Need to check again since this happens later and the system might
-                            // be in a different state.
-                            if (!canMoveTaskToBack(tr)) {
-                                Slog.e(TAG, "Failed to move task to back after saying we could: "
-                                        + tr.mTaskId);
-                                transition.abort();
-                                return;
-                            }
-                            mTransitionController.requestStartTransition(transition, tr,
-                                    null /* remoteTransition */, null /* displayChange */);
-                            moveTaskToBackInner(tr);
-                        });
-            } else {
-                mTransitionController.moveToCollecting(transition);
-                mTransitionController.requestStartTransition(transition, tr,
-                        null /* remoteTransition */, null /* displayChange */);
-                moveTaskToBackInner(tr);
-            }
+            mTransitionController.startCollectOrQueue(transition,
+                    (deferred) -> {
+                        // Need to check again if deferred since the system might
+                        // be in a different state.
+                        if (!isAttached() || (deferred && !canMoveTaskToBack(tr))) {
+                            Slog.e(TAG, "Failed to move task to back after saying we could: "
+                                    + tr.mTaskId);
+                            transition.abort();
+                            return;
+                        }
+                        mTransitionController.requestStartTransition(transition, tr,
+                                null /* remoteTransition */, null /* displayChange */);
+                        moveTaskToBackInner(tr);
+                    });
         } else {
             // Skip the transition for pinned task.
             if (!inPinnedWindowingMode()) {
@@ -5683,6 +5690,7 @@ class Task extends TaskFragment {
             // Usually resuming a top activity triggers the next app transition, but nothing's got
             // resumed in this case, so we need to execute it explicitly.
             mDisplayContent.executeAppTransition();
+            mDisplayContent.setFocusedApp(topActivity);
         } else {
             mRootWindowContainer.resumeFocusedTasksTopActivities();
         }

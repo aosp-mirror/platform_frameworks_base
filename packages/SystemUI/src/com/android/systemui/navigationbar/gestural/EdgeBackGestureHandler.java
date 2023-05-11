@@ -15,6 +15,8 @@
  */
 package com.android.systemui.navigationbar.gestural;
 
+import static android.view.InputDevice.SOURCE_MOUSE;
+import static android.view.InputDevice.SOURCE_TOUCHPAD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
 
 import static com.android.systemui.classifier.Classifier.BACK_GESTURE;
@@ -55,6 +57,7 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
+import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 import android.view.WindowInsets;
 import android.view.WindowManager;
@@ -88,6 +91,7 @@ import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.systemui.util.Assert;
 import com.android.wm.shell.back.BackAnimation;
+import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.pip.Pip;
 
 import java.io.PrintWriter;
@@ -173,7 +177,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 }
             };
 
-
+    private final VelocityTracker mVelocityTracker = VelocityTracker.obtain();
     private final Context mContext;
     private final UserTracker mUserTracker;
     private final OverviewProxyService mOverviewProxyService;
@@ -189,6 +193,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private final WindowManager mWindowManager;
     private final IWindowManager mWindowManagerService;
     private final Optional<Pip> mPipOptional;
+    private final Optional<DesktopMode> mDesktopModeOptional;
     private final FalsingManager mFalsingManager;
     private final Configuration mLastReportedConfig = new Configuration();
     // Activities which should not trigger Back gesture.
@@ -203,6 +208,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private final Rect mPipExcludedBounds = new Rect();
     private final Rect mNavBarOverlayExcludedBounds = new Rect();
     private final Region mExcludeRegion = new Region();
+    private final Region mDesktopModeExcludeRegion = new Region();
     private final Region mUnrestrictedExcludeRegion = new Region();
     private final Provider<NavigationBarEdgePanel> mNavBarEdgePanelProvider;
     private final Provider<BackGestureTfClassifierProvider>
@@ -327,6 +333,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private final Consumer<Boolean> mOnIsInPipStateChangedListener =
             (isInPip) -> mIsInPip = isInPip;
 
+    private final Consumer<Region> mDesktopCornersChangedListener =
+            (desktopExcludeRegion) -> mDesktopModeExcludeRegion.set(desktopExcludeRegion);
+
     private final UserTracker.Callback mUserChangedCallback =
             new UserTracker.Callback() {
                 @Override
@@ -351,6 +360,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             WindowManager windowManager,
             IWindowManager windowManagerService,
             Optional<Pip> pipOptional,
+            Optional<DesktopMode> desktopModeOptional,
             FalsingManager falsingManager,
             Provider<NavigationBarEdgePanel> navigationBarEdgePanelProvider,
             Provider<BackGestureTfClassifierProvider> backGestureTfClassifierProviderProvider,
@@ -371,6 +381,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mWindowManager = windowManager;
         mWindowManagerService = windowManagerService;
         mPipOptional = pipOptional;
+        mDesktopModeOptional = desktopModeOptional;
         mFalsingManager = falsingManager;
         mNavBarEdgePanelProvider = navigationBarEdgePanelProvider;
         mBackGestureTfClassifierProviderProvider = backGestureTfClassifierProviderProvider;
@@ -579,6 +590,9 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     mMainExecutor::execute, mOnPropertiesChangedListener);
             mPipOptional.ifPresent(
                     pip -> pip.setOnIsInPipStateChangedListener(mOnIsInPipStateChangedListener));
+            mDesktopModeOptional.ifPresent(
+                    dm -> dm.addDesktopGestureExclusionRegionListener(
+                            mDesktopCornersChangedListener, mMainExecutor));
 
             try {
                 mWindowManagerService.registerSystemGestureExclusionListener(
@@ -801,11 +815,17 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 mDisplaySize.y - insets.bottom);
     }
 
+    private boolean desktopExcludeRegionContains(int x, int y) {
+        return mDesktopModeExcludeRegion.contains(x, y);
+    }
+
     private boolean isWithinTouchRegion(int x, int y) {
         // If the point is inside the PiP or Nav bar overlay excluded bounds, then ignore the back
         // gesture
         final boolean isInsidePip = mIsInPip && mPipExcludedBounds.contains(x, y);
-        if (isInsidePip || mNavBarOverlayExcludedBounds.contains(x, y)) {
+        final boolean isInDesktopExcludeRegion = desktopExcludeRegionContains(x, y);
+        if (isInsidePip || isInDesktopExcludeRegion
+                || mNavBarOverlayExcludedBounds.contains(x, y)) {
             return false;
         }
 
@@ -901,6 +921,10 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                 Log.d(DEBUG_MISSING_GESTURE_TAG, "Start gesture: " + ev);
             }
 
+            // ACTION_UP or ACTION_CANCEL is not guaranteed to be called before a new
+            // ACTION_DOWN, in that case we should just reuse the old instance.
+            mVelocityTracker.clear();
+
             // Verify if this is in within the touch region and we aren't in immersive mode, and
             // either the bouncer is showing or the notification panel is hidden
             mInputEventReceiver.setBatchingEnabled(false);
@@ -915,10 +939,12 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mMLResults = 0;
             mLogGesture = false;
             mInRejectedExclusion = false;
-            boolean isWithinInsets = isWithinInsets((int) ev.getX(), (int) ev.getY());
             // Trackpad back gestures don't have zones, so we don't need to check if the down event
-            // is within insets.
+            // is within insets. Also we don't allow back for button press from the trackpad, and
+            // yet we do with a mouse.
+            boolean isWithinInsets = isWithinInsets((int) ev.getX(), (int) ev.getY());
             mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed
+                    && !isButtonPressFromTrackpad(ev)
                     && (isTrackpadMultiFingerSwipe || isWithinInsets)
                     && !mGestureBlockingActivityRunning
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
@@ -1025,13 +1051,37 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         mProtoTracer.scheduleFrameUpdate();
     }
 
+    private boolean isButtonPressFromTrackpad(MotionEvent ev) {
+        int sources = InputManager.getInstance().getInputDevice(ev.getDeviceId()).getSources();
+        return (sources & (SOURCE_MOUSE | SOURCE_TOUCHPAD)) == sources && ev.getButtonState() != 0;
+    }
+
     private void dispatchToBackAnimation(MotionEvent event) {
         if (mBackAnimation != null) {
+            mVelocityTracker.addMovement(event);
+
+            final float velocityX;
+            final float velocityY;
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                // Compute the current velocity is expensive (see computeCurrentVelocity), so we
+                // are only doing it when the user completes the gesture.
+                int unitPixelPerSecond = 1000;
+                int maxVelocity = mViewConfiguration.getScaledMaximumFlingVelocity();
+                mVelocityTracker.computeCurrentVelocity(unitPixelPerSecond, maxVelocity);
+                velocityX = mVelocityTracker.getXVelocity();
+                velocityY = mVelocityTracker.getYVelocity();
+            } else {
+                velocityX = Float.NaN;
+                velocityY = Float.NaN;
+            }
+
             mBackAnimation.onBackMotion(
-                    event.getX(),
-                    event.getY(),
-                    event.getActionMasked(),
-                    mIsOnLeftEdge ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
+                    /* touchX = */ event.getX(),
+                    /* touchY = */ event.getY(),
+                    /* velocityX = */ velocityX,
+                    /* velocityY = */ velocityY,
+                    /* keyAction = */ event.getActionMasked(),
+                    /* swipeEdge = */ mIsOnLeftEdge ? BackEvent.EDGE_LEFT : BackEvent.EDGE_RIGHT);
         }
     }
 
@@ -1112,6 +1162,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);
         pw.println("  mIsInPip=" + mIsInPip);
         pw.println("  mPipExcludedBounds=" + mPipExcludedBounds);
+        pw.println("  mDesktopModeExclusionRegion=" + mDesktopModeExcludeRegion);
         pw.println("  mNavBarOverlayExcludedBounds=" + mNavBarOverlayExcludedBounds);
         pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);
         pw.println("  mEdgeWidthRight=" + mEdgeWidthRight);
@@ -1182,6 +1233,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         private final WindowManager mWindowManager;
         private final IWindowManager mWindowManagerService;
         private final Optional<Pip> mPipOptional;
+        private final Optional<DesktopMode> mDesktopModeOptional;
         private final FalsingManager mFalsingManager;
         private final Provider<NavigationBarEdgePanel> mNavBarEdgePanelProvider;
         private final Provider<BackGestureTfClassifierProvider>
@@ -1203,6 +1255,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                        WindowManager windowManager,
                        IWindowManager windowManagerService,
                        Optional<Pip> pipOptional,
+                       Optional<DesktopMode> desktopModeOptional,
                        FalsingManager falsingManager,
                        Provider<NavigationBarEdgePanel> navBarEdgePanelProvider,
                        Provider<BackGestureTfClassifierProvider>
@@ -1222,6 +1275,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             mWindowManager = windowManager;
             mWindowManagerService = windowManagerService;
             mPipOptional = pipOptional;
+            mDesktopModeOptional = desktopModeOptional;
             mFalsingManager = falsingManager;
             mNavBarEdgePanelProvider = navBarEdgePanelProvider;
             mBackGestureTfClassifierProviderProvider = backGestureTfClassifierProviderProvider;
@@ -1246,6 +1300,7 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
                     mWindowManager,
                     mWindowManagerService,
                     mPipOptional,
+                    mDesktopModeOptional,
                     mFalsingManager,
                     mNavBarEdgePanelProvider,
                     mBackGestureTfClassifierProviderProvider,

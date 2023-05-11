@@ -686,13 +686,7 @@ public class InputManagerService extends IInputManager.Stub
 
     @NonNull
     private InputChannel createSpyWindowGestureMonitor(IBinder monitorToken, String name,
-            int displayId, int pid, int uid) {
-        final SurfaceControl sc = mWindowManagerCallbacks.createSurfaceForGestureMonitor(name,
-                displayId);
-        if (sc == null) {
-            throw new IllegalArgumentException(
-                    "Could not create gesture monitor surface on display: " + displayId);
-        }
+            SurfaceControl sc, int displayId, int pid, int uid) {
         final InputChannel channel = createInputChannel(name);
 
         try {
@@ -749,9 +743,18 @@ public class InputManagerService extends IInputManager.Stub
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            final InputChannel inputChannel =
-                            createSpyWindowGestureMonitor(monitorToken, name, displayId, pid, uid);
-            return new InputMonitor(inputChannel, new InputMonitorHost(inputChannel.getToken()));
+            final SurfaceControl sc = mWindowManagerCallbacks.createSurfaceForGestureMonitor(name,
+                    displayId);
+            if (sc == null) {
+                throw new IllegalArgumentException(
+                        "Could not create gesture monitor surface on display: " + displayId);
+            }
+
+            final InputChannel inputChannel = createSpyWindowGestureMonitor(
+                    monitorToken, name, sc, displayId, pid, uid);
+            return new InputMonitor(inputChannel,
+                new InputMonitorHost(inputChannel.getToken()),
+                new SurfaceControl(sc, "IMS.monitorGestureInput"));
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

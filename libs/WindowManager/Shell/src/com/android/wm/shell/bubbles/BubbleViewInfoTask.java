@@ -42,7 +42,6 @@ import android.view.LayoutInflater;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
 import com.android.launcher3.icons.BitmapInfo;
-import com.android.launcher3.icons.BubbleBadgeIconFactory;
 import com.android.launcher3.icons.BubbleIconFactory;
 import com.android.wm.shell.R;
 import com.android.wm.shell.bubbles.bar.BubbleBarExpandedView;
@@ -75,7 +74,6 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
     private WeakReference<BubbleStackView> mStackView;
     private WeakReference<BubbleBarLayerView> mLayerView;
     private BubbleIconFactory mIconFactory;
-    private BubbleBadgeIconFactory mBadgeIconFactory;
     private boolean mSkipInflation;
     private Callback mCallback;
     private Executor mMainExecutor;
@@ -90,7 +88,6 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             @Nullable BubbleStackView stackView,
             @Nullable BubbleBarLayerView layerView,
             BubbleIconFactory factory,
-            BubbleBadgeIconFactory badgeFactory,
             boolean skipInflation,
             Callback c,
             Executor mainExecutor) {
@@ -100,7 +97,6 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         mStackView = new WeakReference<>(stackView);
         mLayerView = new WeakReference<>(layerView);
         mIconFactory = factory;
-        mBadgeIconFactory = badgeFactory;
         mSkipInflation = skipInflation;
         mCallback = c;
         mMainExecutor = mainExecutor;
@@ -110,10 +106,10 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
     protected BubbleViewInfo doInBackground(Void... voids) {
         if (mController.get().isShowingAsBubbleBar()) {
             return BubbleViewInfo.populateForBubbleBar(mContext.get(), mController.get(),
-                    mLayerView.get(), mBadgeIconFactory, mBubble, mSkipInflation);
+                    mLayerView.get(), mIconFactory, mBubble, mSkipInflation);
         } else {
             return BubbleViewInfo.populate(mContext.get(), mController.get(), mStackView.get(),
-                    mIconFactory, mBadgeIconFactory, mBubble, mSkipInflation);
+                    mIconFactory, mBubble, mSkipInflation);
         }
     }
 
@@ -156,7 +152,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
         @Nullable
         public static BubbleViewInfo populateForBubbleBar(Context c, BubbleController controller,
-                BubbleBarLayerView layerView, BubbleBadgeIconFactory badgeIconFactory, Bubble b,
+                BubbleBarLayerView layerView, BubbleIconFactory iconFactory, Bubble b,
                 boolean skipInflation) {
             BubbleViewInfo info = new BubbleViewInfo();
 
@@ -195,7 +191,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 return null;
             }
 
-            info.rawBadgeBitmap = badgeIconFactory.getBadgeBitmap(badgedIcon, false).icon;
+            info.rawBadgeBitmap = iconFactory.getBadgeBitmap(badgedIcon, false).icon;
 
             return info;
         }
@@ -203,8 +199,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         @VisibleForTesting
         @Nullable
         public static BubbleViewInfo populate(Context c, BubbleController controller,
-                BubbleStackView stackView, BubbleIconFactory iconFactory,
-                BubbleBadgeIconFactory badgeIconFactory, Bubble b,
+                BubbleStackView stackView, BubbleIconFactory iconFactory, Bubble b,
                 boolean skipInflation) {
             BubbleViewInfo info = new BubbleViewInfo();
 
@@ -256,16 +251,16 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 bubbleDrawable = appIcon;
             }
 
-            BitmapInfo badgeBitmapInfo = badgeIconFactory.getBadgeBitmap(badgedIcon,
+            BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon,
                     b.isImportantConversation());
             info.badgeBitmap = badgeBitmapInfo.icon;
             // Raw badge bitmap never includes the important conversation ring
             info.rawBadgeBitmap = b.isImportantConversation()
-                    ? badgeIconFactory.getBadgeBitmap(badgedIcon, false).icon
+                    ? iconFactory.getBadgeBitmap(badgedIcon, false).icon
                     : badgeBitmapInfo.icon;
 
             float[] bubbleBitmapScale = new float[1];
-            info.bubbleBitmap = iconFactory.createIconBitmap(bubbleDrawable, bubbleBitmapScale);
+            info.bubbleBitmap = iconFactory.getBubbleBitmap(bubbleDrawable, bubbleBitmapScale);
 
             // Dot color & placement
             Path iconPath = PathParser.createPathFromPathData(

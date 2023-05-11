@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_DESTINATION;
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_PARAMETER;
+import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_PARAMETER_LONG;
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_PARAMETER_SHORT;
 import static com.android.server.hdmi.HdmiCecMessageValidator.ERROR_SOURCE;
 import static com.android.server.hdmi.HdmiCecMessageValidator.OK;
@@ -145,11 +146,12 @@ public class HdmiCecMessageValidatorTest {
     @Test
     public void isValid_systemAudioModeStatus() {
         assertMessageValidity("40:7E:00").isEqualTo(OK);
-        assertMessageValidity("40:7E:01:01").isEqualTo(OK);
+        assertMessageValidity("40:7E:01").isEqualTo(OK);
 
         assertMessageValidity("0F:7E:00").isEqualTo(ERROR_DESTINATION);
         assertMessageValidity("F0:7E").isEqualTo(ERROR_SOURCE);
         assertMessageValidity("40:7E").isEqualTo(ERROR_PARAMETER_SHORT);
+        assertMessageValidity("40:7E:01:1F:28").isEqualTo(ERROR_PARAMETER_LONG);
         assertMessageValidity("40:7E:02").isEqualTo(ERROR_PARAMETER);
     }
 

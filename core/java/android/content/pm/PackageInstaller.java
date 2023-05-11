@@ -2072,6 +2072,25 @@ public class PackageInstaller {
         return new InstallInfo(result);
     }
 
+    /**
+     * Parse a single APK file passed as an FD to get install relevant information about
+     * the package wrapped in {@link InstallInfo}.
+     * @throws PackageParsingException if the package source file(s) provided is(are) not valid,
+     * or the parser isn't able to parse the supplied source(s).
+     * @hide
+     */
+    @NonNull
+    public InstallInfo readInstallInfo(@NonNull ParcelFileDescriptor pfd,
+            @Nullable String debugPathName, int flags) throws PackageParsingException {
+        final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+        final ParseResult<PackageLite> result = ApkLiteParseUtils.parseMonolithicPackageLite(input,
+                pfd.getFileDescriptor(), debugPathName, flags);
+        if (result.isError()) {
+            throw new PackageParsingException(result.getErrorCode(), result.getErrorMessage());
+        }
+        return new InstallInfo(result);
+    }
+
     // (b/239722738) This class serves as a bridge between the PackageLite class, which
     // is a hidden class, and the consumers of this class. (e.g. InstallInstalling.java)
     // This is a part of an effort to remove dependency on hidden APIs and use SystemAPIs or
@@ -2124,6 +2143,21 @@ public class PackageInstaller {
          */
         public long calculateInstalledSize(@NonNull SessionParams params) throws IOException {
             return InstallLocationUtils.calculateInstalledSize(mPkg, params.abiOverride);
+        }
+
+        /**
+         * @param params {@link SessionParams} of the installation
+         * @param pfd of an APK opened for read
+         * @return Total disk space occupied by an application after installation.
+         * Includes the size of the raw APKs, possibly unpacked resources, raw dex metadata files,
+         * and all relevant native code.
+         * @throws IOException when size of native binaries cannot be calculated.
+         * @hide
+         */
+        public long calculateInstalledSize(@NonNull SessionParams params,
+                @NonNull ParcelFileDescriptor pfd) throws IOException {
+            return InstallLocationUtils.calculateInstalledSize(mPkg, params.abiOverride,
+                    pfd.getFileDescriptor());
         }
     }
 
@@ -3551,6 +3585,18 @@ public class PackageInstaller {
          */
         public @Nullable Uri getReferrerUri() {
             return referrerUri;
+        }
+
+        /**
+         * @return the path to the validated base APK for this session, which may point at an
+         * APK inside the session (when the session defines the base), or it may
+         * point at the existing base APK (when adding splits to an existing app).
+         *
+         * @hide
+         */
+        @RequiresPermission(Manifest.permission.READ_INSTALLED_SESSION_PATHS)
+        public @Nullable String getResolvedBaseApkPath() {
+            return resolvedBaseCodePath;
         }
 
         /**

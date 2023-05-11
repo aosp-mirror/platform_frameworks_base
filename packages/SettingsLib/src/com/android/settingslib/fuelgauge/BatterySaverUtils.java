@@ -16,6 +16,11 @@
 
 package com.android.settingslib.fuelgauge;
 
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.ACTION_SAVER_STATE_MANUAL_UPDATE;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED_REASON;
+import static com.android.settingslib.fuelgauge.BatterySaverLogging.SaverManualEnabledReason;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -116,9 +121,9 @@ public class BatterySaverUtils {
      * @return true if the request succeeded.
      */
     public static synchronized boolean setPowerSaveMode(Context context,
-            boolean enable, boolean needFirstTimeWarning) {
+            boolean enable, boolean needFirstTimeWarning, @SaverManualEnabledReason int reason) {
         if (DEBUG) {
-            Log.d(TAG, "Battery saver turning " + (enable ? "ON" : "OFF"));
+            Log.d(TAG, "Battery saver turning " + (enable ? "ON" : "OFF") + ", reason: " + reason);
         }
         final ContentResolver cr = context.getContentResolver();
 
@@ -145,10 +150,11 @@ public class BatterySaverUtils {
                         && Global.getInt(cr, Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0) == 0
                         && Secure.getInt(cr,
                         Secure.SUPPRESS_AUTO_BATTERY_SAVER_SUGGESTION, 0) == 0) {
-                    showAutoBatterySaverSuggestion(context, confirmationExtras);
+                    sendSystemUiBroadcast(context, ACTION_SHOW_AUTO_SAVER_SUGGESTION,
+                            confirmationExtras);
                 }
             }
-
+            recordBatterySaverEnabledReason(context, enable, reason);
             return true;
         }
         return false;
@@ -175,21 +181,24 @@ public class BatterySaverUtils {
             // Already shown.
             return false;
         }
-        context.sendBroadcast(
-                getSystemUiBroadcast(ACTION_SHOW_START_SAVER_CONFIRMATION, extras));
+        sendSystemUiBroadcast(context, ACTION_SHOW_START_SAVER_CONFIRMATION, extras);
         return true;
     }
 
-    private static void showAutoBatterySaverSuggestion(Context context, Bundle extras) {
-        context.sendBroadcast(getSystemUiBroadcast(ACTION_SHOW_AUTO_SAVER_SUGGESTION, extras));
+    private static void recordBatterySaverEnabledReason(Context context, boolean enable,
+            @SaverManualEnabledReason int reason) {
+        final Bundle enabledReasonExtras = new Bundle(2);
+        enabledReasonExtras.putInt(EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED_REASON, reason);
+        enabledReasonExtras.putBoolean(EXTRA_POWER_SAVE_MODE_MANUAL_ENABLED, enable);
+        sendSystemUiBroadcast(context, ACTION_SAVER_STATE_MANUAL_UPDATE, enabledReasonExtras);
     }
 
-    private static Intent getSystemUiBroadcast(String action, Bundle extras) {
-        final Intent i = new Intent(action);
-        i.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        i.setPackage(SYSUI_PACKAGE);
-        i.putExtras(extras);
-        return i;
+    private static void sendSystemUiBroadcast(Context context, String action, Bundle extras) {
+        final Intent intent = new Intent(action);
+        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+        intent.setPackage(SYSUI_PACKAGE);
+        intent.putExtras(extras);
+        context.sendBroadcast(intent);
     }
 
     private static void setBatterySaverConfirmationAcknowledged(Context context) {

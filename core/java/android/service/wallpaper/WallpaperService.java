@@ -112,6 +112,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 /**
@@ -168,6 +169,7 @@ public abstract class WallpaperService extends Service {
     private static final int MSG_ZOOM = 10100;
     private static final int MSG_RESIZE_PREVIEW = 10110;
     private static final int MSG_REPORT_SHOWN = 10150;
+    private static final int MSG_UPDATE_SCREEN_TURNING_ON = 10170;
     private static final int MSG_UPDATE_DIMMING = 10200;
     private static final int MSG_WALLPAPER_FLAGS_CHANGED = 10210;
 
@@ -213,6 +215,16 @@ public abstract class WallpaperService extends Service {
 
         boolean mInitializing = true;
         boolean mVisible;
+        /**
+         * Whether the screen is turning on.
+         * After the display is powered on, brightness is initially off. It is turned on only after
+         * all windows have been drawn, and sysui notifies that it's ready (See
+         * {@link com.android.internal.policy.IKeyguardDrawnCallback}).
+         * As some wallpapers use visibility as a signal to start animations, this makes sure
+         * {@link Engine#onVisibilityChanged} is invoked only when the display is both on and
+         * visible (with brightness on).
+         */
+        private boolean mIsScreenTurningOn;
         boolean mReportedVisible;
         boolean mDestroyed;
         // Set to true after receiving WallpaperManager#COMMAND_FREEZE. It's reset back to false
@@ -420,6 +432,7 @@ public abstract class WallpaperService extends Service {
                 Message msg = mCaller.obtainMessageIO(MSG_WINDOW_RESIZED,
                         reportDraw ? 1 : 0,
                         mergedConfiguration);
+                mIWallpaperEngine.mPendingResizeCount.incrementAndGet();
                 mCaller.sendMessage(msg);
             }
 
@@ -1018,6 +1031,7 @@ public abstract class WallpaperService extends Service {
                     out.print(" mDestroyed="); out.println(mDestroyed);
             out.print(prefix); out.print("mVisible="); out.print(mVisible);
                     out.print(" mReportedVisible="); out.println(mReportedVisible);
+                    out.print(" mIsScreenTurningOn="); out.println(mIsScreenTurningOn);
             out.print(prefix); out.print("mDisplay="); out.println(mDisplay);
             out.print(prefix); out.print("mCreated="); out.print(mCreated);
                     out.print(" mSurfaceCreated="); out.print(mSurfaceCreated);
@@ -1039,6 +1053,10 @@ public abstract class WallpaperService extends Service {
             out.print(prefix); out.print("mZoom="); out.println(mZoom);
             out.print(prefix); out.print("mPreviewSurfacePosition=");
                     out.println(mPreviewSurfacePosition);
+            final int pendingCount = mIWallpaperEngine.mPendingResizeCount.get();
+            if (pendingCount != 0) {
+                out.print(prefix); out.print("mPendingResizeCount="); out.println(pendingCount);
+            }
             synchronized (mLock) {
                 out.print(prefix); out.print("mPendingXOffset="); out.print(mPendingXOffset);
                         out.print(" mPendingXOffset="); out.println(mPendingXOffset);
@@ -1101,10 +1119,6 @@ public abstract class WallpaperService extends Service {
             }
         }
 
-        private void updateConfiguration(MergedConfiguration mergedConfiguration) {
-            mMergedConfiguration.setTo(mergedConfiguration);
-        }
-
         void updateSurface(boolean forceRelayout, boolean forceReport, boolean redrawNeeded) {
             if (mDestroyed) {
                 Log.w(TAG, "Ignoring updateSurface due to destroyed");
@@ -1153,7 +1167,7 @@ public abstract class WallpaperService extends Service {
                             | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 
                     final Configuration config = mMergedConfiguration.getMergedConfiguration();
-                    final Rect maxBounds = config.windowConfiguration.getMaxBounds();
+                    final Rect maxBounds = new Rect(config.windowConfiguration.getMaxBounds());
                     if (myWidth == ViewGroup.LayoutParams.MATCH_PARENT
                             && myHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
                         mLayout.width = myWidth;
@@ -1209,6 +1223,17 @@ public abstract class WallpaperService extends Service {
                     final int relayoutResult = mSession.relayout(mWindow, mLayout, mWidth, mHeight,
                             View.VISIBLE, 0, 0, 0, mWinFrames, mMergedConfiguration,
                             mSurfaceControl, mInsetsState, mTempControls, mSyncSeqIdBundle);
+                    final Rect outMaxBounds = mMergedConfiguration.getMergedConfiguration()
+                            .windowConfiguration.getMaxBounds();
+                    if (!outMaxBounds.equals(maxBounds)) {
+                        Log.i(TAG, "Retry updateSurface because bounds changed from relayout: "
+                                + maxBounds + " -> " + outMaxBounds);
+                        mSurfaceHolder.mSurfaceLock.unlock();
+                        mDrawingAllowed = false;
+                        mCaller.sendMessage(mCaller.obtainMessageI(MSG_WINDOW_RESIZED,
+                                redrawNeeded ? 1 : 0));
+                        return;
+                    }
 
                     final int transformHint = SurfaceControl.rotationToBufferTransform(
                             (mDisplay.getInstallOrientation() + mDisplay.getRotation()) % 4);
@@ -1476,6 +1501,8 @@ public abstract class WallpaperService extends Service {
             mWallpaperDimAmount = mDefaultDimAmount;
             mPreviousWallpaperDimAmount = mWallpaperDimAmount;
             mDisplayState = mDisplay.getCommittedState();
+            mMergedConfiguration.setOverrideConfiguration(
+                    mDisplayContext.getResources().getConfiguration());
 
             if (DEBUG) Log.v(TAG, "onCreate(): " + this);
             Trace.beginSection("WPMS.Engine.onCreate");
@@ -1549,6 +1576,13 @@ public abstract class WallpaperService extends Service {
             }
         }
 
+        void onScreenTurningOnChanged(boolean isScreenTurningOn) {
+            if (!mDestroyed) {
+                mIsScreenTurningOn = isScreenTurningOn;
+                reportVisibility(false);
+            }
+        }
+
         void doVisibilityChanged(boolean visible) {
             if (!mDestroyed) {
                 mVisible = visible;
@@ -1565,9 +1599,10 @@ public abstract class WallpaperService extends Service {
                 return;
             }
             if (!mDestroyed) {
-                mDisplayState = mDisplay == null ? Display.STATE_UNKNOWN :
-                        mDisplay.getCommittedState();
-                boolean visible = mVisible && mDisplayState != Display.STATE_OFF;
+                mDisplayState =
+                        mDisplay == null ? Display.STATE_UNKNOWN : mDisplay.getCommittedState();
+                boolean displayVisible = Display.isOnState(mDisplayState) && !mIsScreenTurningOn;
+                boolean visible = mVisible && displayVisible;
                 if (DEBUG) {
                     Log.v(
                             TAG,
@@ -2304,6 +2339,8 @@ public abstract class WallpaperService extends Service {
         final IBinder mWindowToken;
         final int mWindowType;
         final boolean mIsPreview;
+        final AtomicInteger mPendingResizeCount = new AtomicInteger();
+        boolean mReportDraw;
         boolean mShownReported;
         int mReqWidth;
         int mReqHeight;
@@ -2486,6 +2523,20 @@ public abstract class WallpaperService extends Service {
             }
         }
 
+        public void updateScreenTurningOn(boolean isScreenTurningOn) {
+            Message msg = mCaller.obtainMessageBO(MSG_UPDATE_SCREEN_TURNING_ON, isScreenTurningOn,
+                    null);
+            mCaller.sendMessage(msg);
+        }
+
+        public void onScreenTurningOn() throws RemoteException {
+            updateScreenTurningOn(true);
+        }
+
+        public void onScreenTurnedOn() throws RemoteException {
+            updateScreenTurningOn(false);
+        }
+
         @Override
         public void executeMessage(Message message) {
             switch (message.what) {
@@ -2530,6 +2581,13 @@ public abstract class WallpaperService extends Service {
                             + ": " + message.arg1);
                     mEngine.doVisibilityChanged(message.arg1 != 0);
                     break;
+                case MSG_UPDATE_SCREEN_TURNING_ON:
+                    if (DEBUG) {
+                        Log.v(TAG,
+                                message.arg1 != 0 ? "Screen turning on" : "Screen turned on");
+                    }
+                    mEngine.onScreenTurningOnChanged(/* isScreenTurningOn= */ message.arg1 != 0);
+                    break;
                 case MSG_WALLPAPER_OFFSETS: {
                     mEngine.doOffsetsChanged(true);
                 } break;
@@ -2538,11 +2596,7 @@ public abstract class WallpaperService extends Service {
                     mEngine.doCommand(cmd);
                 } break;
                 case MSG_WINDOW_RESIZED: {
-                    final boolean reportDraw = message.arg1 != 0;
-                    mEngine.updateConfiguration(((MergedConfiguration) message.obj));
-                    mEngine.updateSurface(true, false, reportDraw);
-                    mEngine.doOffsetsChanged(true);
-                    mEngine.scaleAndCropScreenshot();
+                    handleResized((MergedConfiguration) message.obj, message.arg1 != 0);
                 } break;
                 case MSG_WINDOW_MOVED: {
                     // Do nothing. What does it mean for a Wallpaper to move?
@@ -2589,6 +2643,40 @@ public abstract class WallpaperService extends Service {
                 default :
                     Log.w(TAG, "Unknown message type " + message.what);
             }
+        }
+
+        /**
+         * In general this performs relayout for IWindow#resized. If there are several pending
+         * (in the message queue) MSG_WINDOW_RESIZED from server side, only the last one will be
+         * handled (ignore intermediate states). Note that this procedure cannot be skipped if the
+         * configuration is not changed because this is also used to dispatch insets changes.
+         */
+        private void handleResized(MergedConfiguration config, boolean reportDraw) {
+            // The config can be null when retrying for a changed config from relayout, otherwise
+            // it is from IWindow#resized which always sends non-null config.
+            final int pendingCount = config != null ? mPendingResizeCount.decrementAndGet() : -1;
+            if (reportDraw) {
+                mReportDraw = true;
+            }
+            if (pendingCount > 0) {
+                if (DEBUG) {
+                    Log.d(TAG, "Skip outdated resize, bounds="
+                            + config.getMergedConfiguration().windowConfiguration.getMaxBounds()
+                            + " pendingCount=" + pendingCount);
+                }
+                return;
+            }
+            if (config != null) {
+                if (DEBUG) {
+                    Log.d(TAG, "Update config from resized, bounds="
+                            + config.getMergedConfiguration().windowConfiguration.getMaxBounds());
+                }
+                mEngine.mMergedConfiguration.setTo(config);
+            }
+            mEngine.updateSurface(true /* forceRelayout */, false /* forceReport */, mReportDraw);
+            mReportDraw = false;
+            mEngine.doOffsetsChanged(true);
+            mEngine.scaleAndCropScreenshot();
         }
     }
 
@@ -2650,7 +2738,12 @@ public abstract class WallpaperService extends Service {
             engineWrapper.destroy();
         }
         mActiveEngines.clear();
-        mBackgroundThread.quitSafely();
+        if (mBackgroundThread != null) {
+            // onDestroy might be called without a previous onCreate if WallpaperService was
+            // instantiated manually. While this is a misuse of the API, some things break
+            // if here we don't take into consideration this scenario.
+            mBackgroundThread.quitSafely();
+        }
         Trace.endSection();
     }
 

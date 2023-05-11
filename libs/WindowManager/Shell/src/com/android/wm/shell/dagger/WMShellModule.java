@@ -171,7 +171,7 @@ public abstract class WMShellModule {
             BubblePositioner positioner,
             DisplayController displayController,
             @DynamicOverride Optional<OneHandedController> oneHandedOptional,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellMainThread Handler mainHandler,
             @ShellBackgroundThread ShellExecutor bgExecutor,
@@ -320,7 +320,7 @@ public abstract class WMShellModule {
             DisplayController displayController,
             DisplayImeController displayImeController,
             DisplayInsetsController displayInsetsController,
-            DragAndDropController dragAndDropController,
+            Optional<DragAndDropController> dragAndDropController,
             Transitions transitions,
             TransactionPool transactionPool,
             IconProvider iconProvider,
@@ -634,14 +634,8 @@ public abstract class WMShellModule {
 
     @WMSingleton
     @Provides
-    static UnfoldBackgroundController provideUnfoldBackgroundController(
-            RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer,
-            Context context
-    ) {
-        return new UnfoldBackgroundController(
-                context,
-                rootTaskDisplayAreaOrganizer
-        );
+    static UnfoldBackgroundController provideUnfoldBackgroundController(Context context) {
+        return new UnfoldBackgroundController(context);
     }
 
     //

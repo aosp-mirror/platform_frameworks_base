@@ -93,7 +93,6 @@ import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArraySet;
-import android.util.AtomicFile;
 import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
@@ -149,6 +148,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -321,8 +321,7 @@ public class ShortcutService extends IShortcutService.Stub {
     private final ArrayList<LauncherApps.ShortcutChangeCallback> mShortcutChangeCallbacks =
             new ArrayList<>(1);
 
-    @GuardedBy("mLock")
-    private long mRawLastResetTime;
+    private final AtomicLong mRawLastResetTime = new AtomicLong(0);
 
     /**
      * User ID -> UserShortcuts
@@ -756,10 +755,15 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     /** Return the base state file name */
-    private AtomicFile getBaseStateFile() {
-        final File path = new File(injectSystemDataPath(), FILENAME_BASE_STATE);
-        path.mkdirs();
-        return new AtomicFile(path);
+    final ResilientAtomicFile getBaseStateFile() {
+        File mainFile = new File(injectSystemDataPath(), FILENAME_BASE_STATE);
+        File temporaryBackup = new File(injectSystemDataPath(),
+                FILENAME_BASE_STATE + ".backup");
+        File reserveCopy = new File(injectSystemDataPath(),
+                FILENAME_BASE_STATE + ".reservecopy");
+        int fileMode = FileUtils.S_IRWXU | FileUtils.S_IRWXG | FileUtils.S_IXOTH;
+        return new ResilientAtomicFile(mainFile, temporaryBackup, reserveCopy, fileMode,
+                "base shortcut", null);
     }
 
     /**
@@ -976,80 +980,91 @@ public class ShortcutService extends IShortcutService.Stub {
         writeAttr(out, name, intent.toUri(/* flags =*/ 0));
     }
 
-    @GuardedBy("mLock")
     @VisibleForTesting
-    void saveBaseStateLocked() {
-        final AtomicFile file = getBaseStateFile();
-        if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "Saving to " + file.getBaseFile());
-        }
+    void saveBaseState() {
+        try (ResilientAtomicFile file = getBaseStateFile()) {
+            if (DEBUG || DEBUG_REBOOT) {
+                Slog.d(TAG, "Saving to " + file.getBaseFile());
+            }
 
-        FileOutputStream outs = null;
-        try {
-            outs = file.startWrite();
+            FileOutputStream outs = null;
+            try {
+                synchronized (mLock) {
+                    outs = file.startWrite();
+                }
 
-            // Write to XML
-            TypedXmlSerializer out = Xml.resolveSerializer(outs);
-            out.startDocument(null, true);
-            out.startTag(null, TAG_ROOT);
+                // Write to XML
+                TypedXmlSerializer out = Xml.resolveSerializer(outs);
+                out.startDocument(null, true);
+                out.startTag(null, TAG_ROOT);
 
-            // Body.
-            writeTagValue(out, TAG_LAST_RESET_TIME, mRawLastResetTime);
+                // Body.
+                // No locking required. Ok to add lock later if we save more data.
+                writeTagValue(out, TAG_LAST_RESET_TIME, mRawLastResetTime.get());
 
-            // Epilogue.
-            out.endTag(null, TAG_ROOT);
-            out.endDocument();
+                // Epilogue.
+                out.endTag(null, TAG_ROOT);
+                out.endDocument();
 
-            // Close.
-            file.finishWrite(outs);
-        } catch (IOException e) {
-            Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
-            file.failWrite(outs);
+                // Close.
+                file.finishWrite(outs);
+            } catch (IOException e) {
+                Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
+                file.failWrite(outs);
+            }
         }
     }
 
     @GuardedBy("mLock")
     private void loadBaseStateLocked() {
-        mRawLastResetTime = 0;
+        mRawLastResetTime.set(0);
 
-        final AtomicFile file = getBaseStateFile();
-        if (DEBUG || DEBUG_REBOOT) {
-            Slog.d(TAG, "Loading from " + file.getBaseFile());
-        }
-        try (FileInputStream in = file.openRead()) {
-            TypedXmlPullParser parser = Xml.resolvePullParser(in);
-
-            int type;
-            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
-                if (type != XmlPullParser.START_TAG) {
-                    continue;
-                }
-                final int depth = parser.getDepth();
-                // Check the root tag
-                final String tag = parser.getName();
-                if (depth == 1) {
-                    if (!TAG_ROOT.equals(tag)) {
-                        Slog.e(TAG, "Invalid root tag: " + tag);
-                        return;
-                    }
-                    continue;
-                }
-                // Assume depth == 2
-                switch (tag) {
-                    case TAG_LAST_RESET_TIME:
-                        mRawLastResetTime = parseLongAttribute(parser, ATTR_VALUE);
-                        break;
-                    default:
-                        Slog.e(TAG, "Invalid tag: " + tag);
-                        break;
-                }
+        try (ResilientAtomicFile file = getBaseStateFile()) {
+            if (DEBUG || DEBUG_REBOOT) {
+                Slog.d(TAG, "Loading from " + file.getBaseFile());
             }
-        } catch (FileNotFoundException e) {
-            // Use the default
-        } catch (IOException | XmlPullParserException e) {
-            Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
+            FileInputStream in = null;
+            try {
+                in = file.openRead();
+                if (in == null) {
+                    throw new FileNotFoundException(file.getBaseFile().getAbsolutePath());
+                }
 
-            mRawLastResetTime = 0;
+                TypedXmlPullParser parser = Xml.resolvePullParser(in);
+
+                int type;
+                while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                    if (type != XmlPullParser.START_TAG) {
+                        continue;
+                    }
+                    final int depth = parser.getDepth();
+                    // Check the root tag
+                    final String tag = parser.getName();
+                    if (depth == 1) {
+                        if (!TAG_ROOT.equals(tag)) {
+                            Slog.e(TAG, "Invalid root tag: " + tag);
+                            return;
+                        }
+                        continue;
+                    }
+                    // Assume depth == 2
+                    switch (tag) {
+                        case TAG_LAST_RESET_TIME:
+                            mRawLastResetTime.set(parseLongAttribute(parser, ATTR_VALUE));
+                            break;
+                        default:
+                            Slog.e(TAG, "Invalid tag: " + tag);
+                            break;
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                // Use the default
+            } catch (IOException | XmlPullParserException e) {
+                // Remove corrupted file and retry.
+                file.failRead(in, e);
+                loadBaseStateLocked();
+                return;
+            }
         }
         // Adjust the last reset time.
         getLastResetTimeLocked();
@@ -1067,8 +1082,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 "user shortcut", null);
     }
 
-    @GuardedBy("mLock")
-    private void saveUserLocked(@UserIdInt int userId) {
+    private void saveUser(@UserIdInt int userId) {
         try (ResilientAtomicFile file = getUserFile(userId)) {
             FileOutputStream os = null;
             try {
@@ -1076,9 +1090,10 @@ public class ShortcutService extends IShortcutService.Stub {
                     Slog.d(TAG, "Saving to " + file);
                 }
 
-                os = file.startWrite();
-
-                saveUserInternalLocked(userId, os, /* forBackup= */ false);
+                synchronized (mLock) {
+                    os = file.startWrite();
+                    saveUserInternalLocked(userId, os, /* forBackup= */ false);
+                }
 
                 file.finishWrite(os);
 
@@ -1215,16 +1230,19 @@ public class ShortcutService extends IShortcutService.Stub {
         }
         try {
             Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "shortcutSaveDirtyInfo");
+            List<Integer> dirtyUserIds = new ArrayList<>();
             synchronized (mLock) {
-                for (int i = mDirtyUserIds.size() - 1; i >= 0; i--) {
-                    final int userId = mDirtyUserIds.get(i);
-                    if (userId == UserHandle.USER_NULL) { // USER_NULL for base state.
-                        saveBaseStateLocked();
-                    } else {
-                        saveUserLocked(userId);
-                    }
+                List<Integer> tmp = mDirtyUserIds;
+                mDirtyUserIds = dirtyUserIds;
+                dirtyUserIds = tmp;
+            }
+            for (int i = dirtyUserIds.size() - 1; i >= 0; i--) {
+                final int userId = dirtyUserIds.get(i);
+                if (userId == UserHandle.USER_NULL) { // USER_NULL for base state.
+                    saveBaseState();
+                } else {
+                    saveUser(userId);
                 }
-                mDirtyUserIds.clear();
             }
         } catch (Exception e) {
             wtf("Exception in saveDirtyInfo", e);
@@ -1237,14 +1255,14 @@ public class ShortcutService extends IShortcutService.Stub {
     @GuardedBy("mLock")
     long getLastResetTimeLocked() {
         updateTimesLocked();
-        return mRawLastResetTime;
+        return mRawLastResetTime.get();
     }
 
     /** Return the next reset time. */
     @GuardedBy("mLock")
     long getNextResetTimeLocked() {
         updateTimesLocked();
-        return mRawLastResetTime + mResetInterval;
+        return mRawLastResetTime.get() + mResetInterval;
     }
 
     static boolean isClockValid(long time) {
@@ -1259,25 +1277,26 @@ public class ShortcutService extends IShortcutService.Stub {
 
         final long now = injectCurrentTimeMillis();
 
-        final long prevLastResetTime = mRawLastResetTime;
+        final long prevLastResetTime = mRawLastResetTime.get();
+        long newLastResetTime = prevLastResetTime;
 
-        if (mRawLastResetTime == 0) { // first launch.
+        if (newLastResetTime == 0) { // first launch.
             // TODO Randomize??
-            mRawLastResetTime = now;
-        } else if (now < mRawLastResetTime) {
+            newLastResetTime = now;
+        } else if (now < newLastResetTime) {
             // Clock rewound.
             if (isClockValid(now)) {
                 Slog.w(TAG, "Clock rewound");
                 // TODO Randomize??
-                mRawLastResetTime = now;
+                newLastResetTime = now;
             }
-        } else {
-            if ((mRawLastResetTime + mResetInterval) <= now) {
-                final long offset = mRawLastResetTime % mResetInterval;
-                mRawLastResetTime = ((now / mResetInterval) * mResetInterval) + offset;
-            }
+        } else if ((newLastResetTime + mResetInterval) <= now) {
+            final long offset = newLastResetTime % mResetInterval;
+            newLastResetTime = ((now / mResetInterval) * mResetInterval) + offset;
         }
-        if (prevLastResetTime != mRawLastResetTime) {
+
+        mRawLastResetTime.set(newLastResetTime);
+        if (prevLastResetTime != newLastResetTime) {
             scheduleSaveBaseState();
         }
     }
@@ -1716,6 +1735,11 @@ public class ShortcutService extends IShortcutService.Stub {
         if (si == null) {
             return;
         }
+
+        if (isCallerSystem()) {
+            return; // no check
+        }
+
         if (!Objects.equals(callerPackage, si.getPackage())) {
             android.util.EventLog.writeEvent(0x534e4554, "109824443", -1, "");
             throw new SecurityException("Shortcut package name mismatch");
@@ -2700,9 +2724,7 @@ public class ShortcutService extends IShortcutService.Stub {
     }
 
     void resetAllThrottlingInner() {
-        synchronized (mLock) {
-            mRawLastResetTime = injectCurrentTimeMillis();
-        }
+        mRawLastResetTime.set(injectCurrentTimeMillis());
         scheduleSaveBaseState();
         Slog.i(TAG, "ShortcutManager: throttling counter reset for all users");
     }
@@ -2720,8 +2742,8 @@ public class ShortcutService extends IShortcutService.Stub {
             }
             getPackageShortcutsLocked(packageName, userId)
                     .resetRateLimitingForCommandLineNoSaving();
-            saveUserLocked(userId);
         }
+        saveUser(userId);
     }
 
     // We override this method in unit tests to do a simpler check.
@@ -4500,8 +4522,8 @@ public class ShortcutService extends IShortcutService.Stub {
                 dumpCurrentTime(pw);
                 pw.println();
             });
-            saveUserLocked(userId);
         }
+        saveUser(userId);
     }
 
     // === Dump ===
@@ -4712,9 +4734,9 @@ public class ShortcutService extends IShortcutService.Stub {
                 pw.print(formatTime(now));
 
                 pw.print("  Raw last reset: [");
-                pw.print(mRawLastResetTime);
+                pw.print(mRawLastResetTime.get());
                 pw.print("] ");
-                pw.print(formatTime(mRawLastResetTime));
+                pw.print(formatTime(mRawLastResetTime.get()));
 
                 final long last = getLastResetTimeLocked();
                 pw.print("  Last reset: [");

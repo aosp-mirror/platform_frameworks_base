@@ -19,10 +19,13 @@ package com.android.server.display.brightness;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -66,25 +69,27 @@ public final class DisplayBrightnessControllerTest {
     @Mock
     private HandlerExecutor mBrightnessChangeExecutor;
 
+    private final DisplayBrightnessController.Injector mInjector = new
+            DisplayBrightnessController.Injector() {
+        @Override
+        DisplayBrightnessStrategySelector getDisplayBrightnessStrategySelector(
+                Context context, int displayId) {
+            return mDisplayBrightnessStrategySelector;
+        }
+    };
+
     private DisplayBrightnessController mDisplayBrightnessController;
 
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
         when(mContext.getResources()).thenReturn(mResources);
-        DisplayBrightnessController.Injector injector = new DisplayBrightnessController.Injector() {
-            @Override
-            DisplayBrightnessStrategySelector getDisplayBrightnessStrategySelector(
-                    Context context, int displayId) {
-                return mDisplayBrightnessStrategySelector;
-            }
-        };
         when(mBrightnessSetting.getBrightness()).thenReturn(Float.NaN);
         when(mBrightnessSetting.getBrightnessNitsForDefaultDisplay()).thenReturn(-1f);
         when(mResources.getBoolean(
                 com.android.internal.R.bool.config_persistBrightnessNitsForDefaultDisplay))
                 .thenReturn(true);
-        mDisplayBrightnessController = new DisplayBrightnessController(mContext, injector,
+        mDisplayBrightnessController = new DisplayBrightnessController(mContext, mInjector,
                 DISPLAY_ID, DEFAULT_BRIGHTNESS, mBrightnessSetting, mOnBrightnessChangeRunnable,
                 mBrightnessChangeExecutor);
     }
@@ -257,42 +262,28 @@ public final class DisplayBrightnessControllerTest {
     }
 
     @Test
-    public void testBrightnessNitsForDefaultDisplay() {
-        float brightness = 0.3f;
-        float nits = 500;
-        AutomaticBrightnessController automaticBrightnessController =
-                mock(AutomaticBrightnessController.class);
-        when(automaticBrightnessController.convertToFloatScale(nits)).thenReturn(brightness);
-        when(mBrightnessSetting.getBrightnessNitsForDefaultDisplay()).thenReturn(nits);
-
-        mDisplayBrightnessController.setAutomaticBrightnessController(
-                automaticBrightnessController);
-        assertEquals(brightness, mDisplayBrightnessController.getCurrentBrightness(),
-                /* delta= */ 0);
-
-        float newBrightness = 0.5f;
-        float newNits = 700;
-        when(automaticBrightnessController.convertToNits(newBrightness)).thenReturn(newNits);
-        mDisplayBrightnessController.setBrightness(newBrightness);
-        verify(mBrightnessSetting).setBrightnessNitsForDefaultDisplay(newNits);
-    }
-
-    @Test
     public void testConvertToNits() {
-        float brightness = 0.5f;
-        float nits = 300;
+        final float brightness = 0.5f;
+        final float nits = 300;
+        final float adjustedNits = 200;
 
         // ABC is null
         assertEquals(-1f, mDisplayBrightnessController.convertToNits(brightness),
+                /* delta= */ 0);
+        assertEquals(-1f, mDisplayBrightnessController.convertToAdjustedNits(brightness),
                 /* delta= */ 0);
 
         AutomaticBrightnessController automaticBrightnessController =
                 mock(AutomaticBrightnessController.class);
         when(automaticBrightnessController.convertToNits(brightness)).thenReturn(nits);
+        when(automaticBrightnessController.convertToAdjustedNits(brightness))
+                .thenReturn(adjustedNits);
         mDisplayBrightnessController.setAutomaticBrightnessController(
                 automaticBrightnessController);
 
         assertEquals(nits, mDisplayBrightnessController.convertToNits(brightness), /* delta= */ 0);
+        assertEquals(adjustedNits, mDisplayBrightnessController.convertToAdjustedNits(brightness),
+                /* delta= */ 0);
     }
 
     @Test
@@ -322,5 +313,49 @@ public final class DisplayBrightnessControllerTest {
                 brightnessSettingListener);
         mDisplayBrightnessController.stop();
         verify(mBrightnessSetting).unregisterListener(brightnessSettingListener);
+    }
+
+    @Test
+    public void testLoadNitBasedBrightnessSetting() {
+        // When the nits value is valid, the brightness is set from the old default display nits
+        // value
+        float nits = 200f;
+        float brightness = 0.3f;
+        AutomaticBrightnessController automaticBrightnessController =
+                mock(AutomaticBrightnessController.class);
+        when(automaticBrightnessController.convertToFloatScale(nits)).thenReturn(brightness);
+        when(mBrightnessSetting.getBrightnessNitsForDefaultDisplay()).thenReturn(nits);
+        mDisplayBrightnessController.setAutomaticBrightnessController(
+                automaticBrightnessController);
+        verify(mBrightnessSetting).setBrightness(brightness);
+        assertEquals(brightness, mDisplayBrightnessController.getCurrentBrightness(), 0.01f);
+        clearInvocations(automaticBrightnessController, mBrightnessSetting);
+
+        // When the nits value is invalid, the brightness is resumed from where it was last set
+        nits = -1;
+        brightness = 0.4f;
+        when(automaticBrightnessController.convertToFloatScale(nits)).thenReturn(brightness);
+        when(mBrightnessSetting.getBrightnessNitsForDefaultDisplay()).thenReturn(nits);
+        when(mBrightnessSetting.getBrightness()).thenReturn(brightness);
+        mDisplayBrightnessController.setAutomaticBrightnessController(
+                automaticBrightnessController);
+        verify(mBrightnessSetting, never()).setBrightness(brightness);
+        assertEquals(brightness, mDisplayBrightnessController.getCurrentBrightness(), 0.01f);
+        clearInvocations(automaticBrightnessController, mBrightnessSetting);
+
+        // When the display is a non-default display, the brightness is resumed from where it was
+        // last set
+        int nonDefaultDisplayId = 1;
+        mDisplayBrightnessController = new DisplayBrightnessController(mContext, mInjector,
+                nonDefaultDisplayId, DEFAULT_BRIGHTNESS, mBrightnessSetting,
+                mOnBrightnessChangeRunnable, mBrightnessChangeExecutor);
+        brightness = 0.5f;
+        when(mBrightnessSetting.getBrightness()).thenReturn(brightness);
+        mDisplayBrightnessController.setAutomaticBrightnessController(
+                automaticBrightnessController);
+        assertEquals(brightness, mDisplayBrightnessController.getCurrentBrightness(), 0.01f);
+        verifyZeroInteractions(automaticBrightnessController);
+        verify(mBrightnessSetting, never()).getBrightnessNitsForDefaultDisplay();
+        verify(mBrightnessSetting, never()).setBrightness(brightness);
     }
 }

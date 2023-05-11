@@ -108,6 +108,7 @@ public class SystemActionPerformerTest {
     @Mock private StatusBarManager mMockStatusBarManager;
     @Mock private ScreenshotHelper mMockScreenshotHelper;
     @Mock private SystemActionPerformer.SystemActionsChangedListener mMockListener;
+    @Mock private SystemActionPerformer.DisplayUpdateCallBack mMockCallback;
 
     @Before
     public void setup() {
@@ -125,7 +126,7 @@ public class SystemActionPerformerTest {
                 mMockContext,
                 mMockWindowManagerInternal,
                 () -> mMockScreenshotHelper,
-                mMockListener);
+                mMockListener, mMockCallback);
     }
 
     private void setupWithRealContext() {
@@ -133,7 +134,7 @@ public class SystemActionPerformerTest {
                 InstrumentationRegistry.getContext(),
                 mMockWindowManagerInternal,
                 () -> mMockScreenshotHelper,
-                mMockListener);
+                mMockListener, mMockCallback);
     }
 
     // We need below two help functions because AccessbilityAction.equals function only compares

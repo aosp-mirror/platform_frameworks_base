@@ -2328,19 +2328,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // this as a signal to the transition-player.
                 final Transition transition = new Transition(TRANSIT_SLEEP, 0 /* flags */,
                         display.mTransitionController, mWmService.mSyncEngine);
-                final Runnable sendSleepTransition = () -> {
+                final TransitionController.OnStartCollect sendSleepTransition = (deferred) -> {
                     display.mTransitionController.requestStartTransition(transition,
                             null /* trigger */, null /* remote */, null /* display */);
                     // Force playing immediately so that unrelated ops can't be collected.
                     transition.playNow();
                 };
-                if (display.mTransitionController.isCollecting()) {
-                    mWmService.mSyncEngine.queueSyncSet(
-                            () -> display.mTransitionController.moveToCollecting(transition),
-                            sendSleepTransition);
-                } else {
+                if (!display.mTransitionController.isCollecting()) {
+                    // Since this bypasses sync, submit directly ignoring whether sync-engine
+                    // is active.
+                    if (mWindowManager.mSyncEngine.hasActiveSync()) {
+                        Slog.w(TAG, "Ongoing sync outside of a transition.");
+                    }
                     display.mTransitionController.moveToCollecting(transition);
-                    sendSleepTransition.run();
+                    sendSleepTransition.onCollectStarted(false /* deferred */);
+                } else {
+                    display.mTransitionController.startCollectOrQueue(transition,
+                            sendSleepTransition);
                 }
             }
 
@@ -2597,6 +2601,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     SleepToken createSleepToken(String tag, int displayId) {
+        return createSleepToken(tag, displayId, false /* isSwappingDisplay */);
+    }
+
+    SleepToken createSleepToken(String tag, int displayId, boolean isSwappingDisplay) {
         final DisplayContent display = getDisplayContent(displayId);
         if (display == null) {
             throw new IllegalArgumentException("Invalid display: " + displayId);
@@ -2605,7 +2613,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         final int tokenKey = makeSleepTokenKey(tag, displayId);
         SleepToken token = mSleepTokens.get(tokenKey);
         if (token == null) {
-            token = new SleepToken(tag, displayId);
+            token = new SleepToken(tag, displayId, isSwappingDisplay);
             mSleepTokens.put(tokenKey, token);
             display.mAllSleepTokens.add(token);
             ProtoLog.d(WM_DEBUG_STATES, "Create sleep token: tag=%s, displayId=%d", tag, displayId);
@@ -3231,7 +3239,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (task.getActivity(activity -> !activity.finishing && activity.mUserId == userId)
                     != null) {
                 mService.getTaskChangeNotificationController().notifyTaskProfileLocked(
-                        task.getTaskInfo());
+                        task.getTaskInfo(), userId);
             }
         }, true /* traverseTopToBottom */);
     }
@@ -3514,18 +3522,34 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         private final String mTag;
         private final long mAcquireTime;
         private final int mDisplayId;
+        private final boolean mIsSwappingDisplay;
         final int mHashKey;
 
-        SleepToken(String tag, int displayId) {
+        // The display could remain in sleep after the physical display swapped, adding a 1
+        // seconds display swap timeout to prevent activities staying in PAUSED state.
+        // Otherwise, the sleep token should be removed once display turns back on after swapped.
+        private static final long DISPLAY_SWAP_TIMEOUT = 1000;
+
+        SleepToken(String tag, int displayId, boolean isSwappingDisplay) {
             mTag = tag;
             mDisplayId = displayId;
             mAcquireTime = SystemClock.uptimeMillis();
+            mIsSwappingDisplay = isSwappingDisplay;
             mHashKey = makeSleepTokenKey(mTag, mDisplayId);
+        }
+
+        public boolean isDisplaySwapping() {
+            long now = SystemClock.uptimeMillis();
+            if (now - mAcquireTime > DISPLAY_SWAP_TIMEOUT) {
+                return false;
+            }
+            return mIsSwappingDisplay;
         }
 
         @Override
         public String toString() {
             return "{\"" + mTag + "\", display " + mDisplayId
+                    + (mIsSwappingDisplay ? " is swapping " : "")
                     + ", acquire at " + TimeUtils.formatUptime(mAcquireTime) + "}";
         }
 

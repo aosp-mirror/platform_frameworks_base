@@ -67,6 +67,7 @@ import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import com.android.systemui.util.traceSection
 import java.io.PrintWriter
+import java.util.Locale
 import java.util.TreeMap
 import javax.inject.Inject
 import javax.inject.Provider
@@ -166,6 +167,9 @@ constructor(
             }
         }
 
+    private var carouselLocale: Locale? = null
+
+    /** Whether the media card currently has the "expanded" layout */
     @VisibleForTesting
     var currentlyExpanded = true
         set(value) {
@@ -217,6 +221,15 @@ constructor(
                 updatePlayers(recreateMedia = false)
                 inflateSettingsButton()
             }
+
+            override fun onLocaleListChanged() {
+                // Update players only if system primary language changes.
+                if (carouselLocale != context.resources.configuration.locales.get(0)) {
+                    carouselLocale = context.resources.configuration.locales.get(0)
+                    updatePlayers(recreateMedia = true)
+                    inflateSettingsButton()
+                }
+            }
         }
 
     private val keyguardUpdateMonitorCallback =
@@ -261,6 +274,7 @@ constructor(
                 this::logSmartspaceImpression,
                 logger
             )
+        carouselLocale = context.resources.configuration.locales.get(0)
         isRtl = context.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
         inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
@@ -501,6 +515,7 @@ constructor(
         mediaHostStatesManager.addCallback(
             object : MediaHostStatesManager.Callback {
                 override fun onHostStateChanged(location: Int, mediaHostState: MediaHostState) {
+                    updateUserVisibility()
                     if (location == desiredLocation) {
                         onDesiredLocationChanged(desiredLocation, mediaHostState, animate = false)
                     }

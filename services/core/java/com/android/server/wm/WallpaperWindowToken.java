@@ -128,27 +128,25 @@ class WallpaperWindowToken extends WindowToken {
         }
     }
 
+    /**
+     * Update the visibility of the token to {@param visible}. If a transition will collect the
+     * wallpaper, then the visibility will be committed during the execution of the transition.
+     *
+     * waitingToShow is reset at the beginning of the transition:
+     * {@link Transition#onTransactionReady(int, SurfaceControl.Transaction)}
+     */
+    void updateWallpaperWindowsInTransition(boolean visible) {
+        if (mTransitionController.isCollecting() && mVisibleRequested != visible) {
+            waitingToShow = true;
+        }
+        updateWallpaperWindows(visible);
+    }
+
     void updateWallpaperWindows(boolean visible) {
-        boolean changed = false;
         if (mVisibleRequested != visible) {
             ProtoLog.d(WM_DEBUG_WALLPAPER, "Wallpaper token %s visible=%b",
                     token, visible);
             setVisibility(visible);
-            changed = true;
-        }
-        if (mTransitionController.isShellTransitionsEnabled()) {
-            // Apply legacy fixed rotation to wallpaper if it is becoming visible
-            if (!mTransitionController.useShellTransitionsRotation() && changed && visible) {
-                final WindowState wallpaperTarget =
-                        mDisplayContent.mWallpaperController.getWallpaperTarget();
-                if (wallpaperTarget != null && wallpaperTarget.mToken.hasFixedRotationTransform()) {
-                    linkFixedRotationTransform(wallpaperTarget.mToken);
-                }
-            }
-            // If wallpaper is in transition, setVisible() will be called from commitVisibility()
-            // when finishing transition. Otherwise commitVisibility() is already called from above
-            // setVisibility().
-            return;
         }
 
         final WindowState wallpaperTarget =
@@ -171,6 +169,12 @@ class WallpaperWindowToken extends WindowToken {
                 // rotation
                 linkFixedRotationTransform(wallpaperTarget.mToken);
             }
+        }
+        if (mTransitionController.isShellTransitionsEnabled()) {
+            // If wallpaper is in transition, setVisible() will be called from commitVisibility()
+            // when finishing transition. Otherwise commitVisibility() is already called from above
+            // setVisibility().
+            return;
         }
 
         setVisible(visible);
@@ -209,11 +213,11 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     /**
-     * Commits the visibility of this token. This will directly update the visibility without
-     * regard for other state (like being in a transition).
+     * Commits the visibility of this token. This will directly update the visibility unless the
+     * wallpaper is in a transition.
      */
     void commitVisibility(boolean visible) {
-        if (visible == isVisible()) return;
+        if (visible == isVisible() || waitingToShow) return;
 
         ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                 "commitVisibility: %s: visible=%b mVisibleRequested=%b", this,

@@ -34,6 +34,7 @@ import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_CAMERA;
+import static android.app.AppOpsManager.OP_CAMERA_SANDBOXED;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
@@ -42,6 +43,7 @@ import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_RECORD_AUDIO_HOTWORD;
+import static android.app.AppOpsManager.OP_RECORD_AUDIO_SANDBOXED;
 import static android.app.AppOpsManager.OP_VIBRATE;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_FAILED;
 import static android.app.AppOpsManager.OnOpStartedListener.START_TYPE_STARTED;
@@ -3027,17 +3029,29 @@ public class AppOpsService extends IAppOpsService.Stub {
                     packageName);
         }
 
-        // As a special case for OP_RECORD_AUDIO_HOTWORD, which we use only for attribution
-        // purposes and not as a check, also make sure that the caller is allowed to access
-        // the data gated by OP_RECORD_AUDIO.
+        // As a special case for OP_RECORD_AUDIO_HOTWORD, OP_RECEIVE_AMBIENT_TRIGGER_AUDIO and
+        // OP_RECORD_AUDIO_SANDBOXED which we use only for attribution purposes and not as a check,
+        // also make sure that the caller is allowed to access the data gated by OP_RECORD_AUDIO.
         //
         // TODO: Revert this change before Android 12.
-        if (code == OP_RECORD_AUDIO_HOTWORD || code == OP_RECEIVE_AMBIENT_TRIGGER_AUDIO) {
-            int result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
+        int result = MODE_DEFAULT;
+        if (code == OP_RECORD_AUDIO_HOTWORD || code == OP_RECEIVE_AMBIENT_TRIGGER_AUDIO
+                || code == OP_RECORD_AUDIO_SANDBOXED) {
+            result = checkOperation(OP_RECORD_AUDIO, uid, packageName);
+            // Check result
             if (result != AppOpsManager.MODE_ALLOWED) {
                 return new SyncNotedAppOp(result, code, attributionTag, packageName);
             }
         }
+        // As a special case for OP_CAMERA_SANDBOXED.
+        if (code == OP_CAMERA_SANDBOXED) {
+            result = checkOperation(OP_CAMERA, uid, packageName);
+            // Check result
+            if (result != AppOpsManager.MODE_ALLOWED) {
+                return new SyncNotedAppOp(result, code, attributionTag, packageName);
+            }
+        }
+
         return startOperationUnchecked(clientId, code, uid, packageName, attributionTag,
                 Process.INVALID_UID, null, null, OP_FLAG_SELF, startIfModeDefault,
                 shouldCollectAsyncNotedOp, message, shouldCollectMessage, attributionFlags,

@@ -29,12 +29,14 @@ import android.accessibilityservice.AccessibilityTrace;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Handler;
 import android.view.accessibility.AccessibilityEvent;
 
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -79,12 +81,15 @@ public class ProxyAccessibilityServiceConnectionTest {
     WindowManagerInternal mMockWindowManagerInternal;
     ProxyAccessibilityServiceConnection mProxyConnection;
     AccessibilityServiceInfo mAccessibilityServiceInfo;
+    private int mFocusStrokeWidthDefaultValue;
+    private int mFocusColorDefaultValue;
 
     @Before
     public void setup() {
         final Resources resources = getInstrumentation().getContext().getResources();
         MockitoAnnotations.initMocks(this);
         when(mMockContext.getResources()).thenReturn(resources);
+        when(mMockSecurityPolicy.checkAccessibilityAccess(any())).thenReturn(true);
 
         mAccessibilityServiceInfo = new AccessibilityServiceInfo();
         mProxyConnection = new ProxyAccessibilityServiceConnection(mMockContext, COMPONENT_NAME,
@@ -92,15 +97,29 @@ public class ProxyAccessibilityServiceConnectionTest {
                         getInstrumentation().getContext().getMainLooper()),
                 mMockLock, mMockSecurityPolicy, mMockSystemSupport, mMockA11yTrace,
                 mMockWindowManagerInternal, mMockA11yWindowManager, DISPLAY_ID, DEVICE_ID);
+
+        mFocusStrokeWidthDefaultValue = mProxyConnection.getFocusStrokeWidthLocked();
+        mFocusColorDefaultValue = mProxyConnection.getFocusColorLocked();
     }
 
     @Test
-    public void testSetInstalledAndEnabledServices_clientChanged() {
+    public void testSetInstalledAndEnabledServices_updateInfos_notifiesSystemOfProxyChange() {
         final List<AccessibilityServiceInfo> infos = new ArrayList<>();
         final AccessibilityServiceInfo info1 = new AccessibilityServiceInfo();
         infos.add(info1);
 
         mProxyConnection.setInstalledAndEnabledServices(infos);
+
+        verify(mMockSystemSupport).onProxyChanged(DEVICE_ID);
+    }
+
+    @Test
+    public void testSetFocusAppearance_updateAppearance_notifiesSystemOfProxyChange() {
+        final int updatedWidth = mFocusStrokeWidthDefaultValue + 10;
+        final int updatedColor = mFocusColorDefaultValue
+                == Color.BLUE ? Color.RED : Color.BLUE;
+
+        mProxyConnection.setFocusAppearance(updatedWidth, updatedColor);
 
         verify(mMockSystemSupport).onProxyChanged(DEVICE_ID);
     }
@@ -196,7 +215,7 @@ public class ProxyAccessibilityServiceConnectionTest {
     }
 
     @Test
-    public void testSetServiceInfo_setIllegalOperationExceptionThrown_() {
+    public void testSetServiceInfo_setIllegalOperationExceptionThrown() {
         UnsupportedOperationException thrown =
                 assertThrows(
                         UnsupportedOperationException.class,

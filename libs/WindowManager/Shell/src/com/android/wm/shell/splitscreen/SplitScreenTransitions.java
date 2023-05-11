@@ -22,6 +22,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
+import static com.android.wm.shell.common.split.SplitScreenConstants.FLAG_IS_DIVIDER_BAR;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 import static com.android.wm.shell.splitscreen.SplitScreen.stageTypeToString;
@@ -29,15 +30,12 @@ import static com.android.wm.shell.splitscreen.SplitScreenController.EXIT_REASON
 import static com.android.wm.shell.splitscreen.SplitScreenController.exitReasonToString;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS;
 import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_DISMISS_SNAP;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.SurfaceControl;
@@ -138,25 +136,20 @@ class SplitScreenTransitions {
                     t.setAlpha(parentChange.getLeash(), 1.f);
                     // and then animate this layer outside the parent (since, for example, this is
                     // the home task animating from fullscreen to part-screen).
-                    t.reparent(leash, info.getRoot(rootIdx).getLeash());
-                    t.setLayer(leash, info.getChanges().size() - i);
+                    t.reparent(parentChange.getLeash(), info.getRoot(rootIdx).getLeash());
+                    t.setLayer(parentChange.getLeash(), info.getChanges().size() - i);
                     // build the finish reparent/reposition
                     mFinishTransaction.reparent(leash, parentChange.getLeash());
                     mFinishTransaction.setPosition(leash,
                             change.getEndRelOffset().x, change.getEndRelOffset().y);
                 }
-                // TODO(shell-transitions): screenshot here
-                final Rect startBounds = new Rect(change.getStartAbsBounds());
-                final Rect endBounds = new Rect(change.getEndAbsBounds());
-                final Point rootOffset = info.getRoot(rootIdx).getOffset();
-                startBounds.offset(-rootOffset.x, -rootOffset.y);
-                endBounds.offset(-rootOffset.x, -rootOffset.y);
-                startExampleResizeAnimation(leash, startBounds, endBounds);
             }
             boolean isRootOrSplitSideRoot = change.getParent() == null
                     || topRoot.equals(change.getParent());
-            // For enter or exit, we only want to animate the side roots but not the top-root.
-            if (!isRootOrSplitSideRoot || topRoot.equals(change.getContainer())) {
+            boolean isDivider = change.getFlags() == FLAG_IS_DIVIDER_BAR;
+            // For enter or exit, we only want to animate side roots and the divider but not the
+            // top-root.
+            if (!isRootOrSplitSideRoot || topRoot.equals(change.getContainer()) || isDivider) {
                 continue;
             }
 
@@ -165,8 +158,12 @@ class SplitScreenTransitions {
                 t.setPosition(leash, change.getEndAbsBounds().left, change.getEndAbsBounds().top);
                 t.setWindowCrop(leash, change.getEndAbsBounds().width(),
                         change.getEndAbsBounds().height());
+            } else if (isDivider) {
+                t.setPosition(leash, change.getEndAbsBounds().left, change.getEndAbsBounds().top);
+                t.setLayer(leash, Integer.MAX_VALUE);
+                t.show(leash);
             }
-            boolean isOpening = isOpeningTransition(info);
+            boolean isOpening = TransitionUtil.isOpeningType(info.getType());
             if (isOpening && (mode == TRANSIT_OPEN || mode == TRANSIT_TO_FRONT)) {
                 // fade in
                 startExampleAnimation(leash, true /* show */);
@@ -282,6 +279,12 @@ class SplitScreenTransitions {
         return null;
     }
 
+    void startFullscreenTransition(WindowContainerTransaction wct,
+            @Nullable RemoteTransition handler) {
+        mTransitions.startTransition(TRANSIT_OPEN, wct,
+                new OneShotRemoteHandler(mTransitions.getMainExecutor(), handler));
+    }
+
 
     /** Starts a transition to enter split with a remote transition animator. */
     IBinder startEnterTransition(
@@ -290,14 +293,16 @@ class SplitScreenTransitions {
             @Nullable RemoteTransition remoteTransition,
             Transitions.TransitionHandler handler,
             @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback) {
+            @Nullable TransitionFinishedCallback finishedCallback,
+            int extraTransitType) {
         if (mPendingEnter != null) {
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                     + " skip to start enter split transition since it already exist. ");
             return null;
         }
         final IBinder transition = mTransitions.startTransition(transitType, wct, handler);
-        setEnterTransition(transition, remoteTransition, consumedCallback, finishedCallback);
+        setEnterTransition(transition, remoteTransition, consumedCallback, finishedCallback,
+                extraTransitType);
         return transition;
     }
 
@@ -305,9 +310,10 @@ class SplitScreenTransitions {
     void setEnterTransition(@NonNull IBinder transition,
             @Nullable RemoteTransition remoteTransition,
             @Nullable TransitionConsumedCallback consumedCallback,
-            @Nullable TransitionFinishedCallback finishedCallback) {
+            @Nullable TransitionFinishedCallback finishedCallback,
+            int extraTransitType) {
         mPendingEnter = new TransitSession(
-                transition, consumedCallback, finishedCallback, remoteTransition);
+                transition, consumedCallback, finishedCallback, remoteTransition, extraTransitType);
 
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "  splitTransition "
                 + " deduced Enter split screen");
@@ -508,12 +514,6 @@ class SplitScreenTransitions {
         mTransitions.getAnimExecutor().execute(va::start);
     }
 
-    private boolean isOpeningTransition(TransitionInfo info) {
-        return TransitionUtil.isOpeningType(info.getType())
-                || info.getType() == TRANSIT_SPLIT_SCREEN_OPEN_TO_SIDE
-                || info.getType() == TRANSIT_SPLIT_SCREEN_PAIR_OPEN;
-    }
-
     /** Calls when the transition got consumed. */
     interface TransitionConsumedCallback {
         void onConsumed(boolean aborted);
@@ -534,16 +534,19 @@ class SplitScreenTransitions {
         /** Whether the transition was canceled. */
         boolean mCanceled;
 
+        /** A note for extra transit type, to help indicate custom transition. */
+        final int mExtraTransitType;
+
         TransitSession(IBinder transition,
                 @Nullable TransitionConsumedCallback consumedCallback,
                 @Nullable TransitionFinishedCallback finishedCallback) {
-            this(transition, consumedCallback, finishedCallback, null /* remoteTransition */);
+            this(transition, consumedCallback, finishedCallback, null /* remoteTransition */, 0);
         }
 
         TransitSession(IBinder transition,
                 @Nullable TransitionConsumedCallback consumedCallback,
                 @Nullable TransitionFinishedCallback finishedCallback,
-                @Nullable RemoteTransition remoteTransition) {
+                @Nullable RemoteTransition remoteTransition, int extraTransitType) {
             mTransition = transition;
             mConsumedCallback = consumedCallback;
             mFinishedCallback = finishedCallback;
@@ -555,6 +558,7 @@ class SplitScreenTransitions {
                         mTransitions.getMainExecutor(), remoteTransition);
                 mRemoteHandler.setTransition(transition);
             }
+            mExtraTransitType = extraTransitType;
         }
 
         /** Sets transition consumed callback. */

@@ -28,7 +28,6 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.dagger.KeyguardBouncerScope;
 import com.android.systemui.R;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.util.ViewController;
 
 import java.util.ArrayList;
@@ -54,23 +53,19 @@ public class KeyguardSecurityViewFlipperController
     private final Factory mKeyguardSecurityViewControllerFactory;
     private final FeatureFlags mFeatureFlags;
 
-    private final ViewMediatorCallback mViewMediatorCallback;
-
     @Inject
     protected KeyguardSecurityViewFlipperController(KeyguardSecurityViewFlipper view,
             LayoutInflater layoutInflater,
             AsyncLayoutInflater asyncLayoutInflater,
             KeyguardInputViewController.Factory keyguardSecurityViewControllerFactory,
             EmergencyButtonController.Factory emergencyButtonControllerFactory,
-            FeatureFlags featureFlags,
-            ViewMediatorCallback viewMediatorCallback) {
+            FeatureFlags featureFlags) {
         super(view);
         mKeyguardSecurityViewControllerFactory = keyguardSecurityViewControllerFactory;
         mLayoutInflater = layoutInflater;
         mEmergencyButtonControllerFactory = emergencyButtonControllerFactory;
         mAsyncLayoutInflater = asyncLayoutInflater;
         mFeatureFlags = featureFlags;
-        mViewMediatorCallback = viewMediatorCallback;
     }
 
     @Override
@@ -97,40 +92,17 @@ public class KeyguardSecurityViewFlipperController
 
 
     @VisibleForTesting
-    KeyguardInputViewController<KeyguardInputView> getSecurityView(SecurityMode securityMode,
-            KeyguardSecurityCallback keyguardSecurityCallback) {
-        KeyguardInputViewController<KeyguardInputView> childController = null;
+    void getSecurityView(SecurityMode securityMode,
+            KeyguardSecurityCallback keyguardSecurityCallback,
+            OnViewInflatedCallback onViewInflatedCallback) {
         for (KeyguardInputViewController<KeyguardInputView> child : mChildren) {
             if (child.getSecurityMode() == securityMode) {
-                childController = child;
-                break;
+                onViewInflatedCallback.onViewInflated(child);
+                return;
             }
         }
 
-        if (!mFeatureFlags.isEnabled(Flags.ASYNC_INFLATE_BOUNCER) && childController == null
-                && securityMode != SecurityMode.None && securityMode != SecurityMode.Invalid) {
-            int layoutId = getLayoutIdFor(securityMode);
-            KeyguardInputView view = null;
-            if (layoutId != 0) {
-                if (DEBUG) Log.v(TAG, "inflating on main thread id = " + layoutId);
-                view = (KeyguardInputView) mLayoutInflater.inflate(
-                        layoutId, mView, false);
-                mView.addView(view);
-                childController = mKeyguardSecurityViewControllerFactory.create(
-                        view, securityMode, keyguardSecurityCallback);
-                childController.init();
-
-                mChildren.add(childController);
-            }
-        }
-
-        if (childController == null) {
-            childController = new NullKeyguardInputViewController(
-                    securityMode, keyguardSecurityCallback,
-                    mEmergencyButtonControllerFactory.create(null));
-        }
-
-        return childController;
+        asynchronouslyInflateView(securityMode, keyguardSecurityCallback, onViewInflatedCallback);
     }
 
     /**
@@ -143,7 +115,7 @@ public class KeyguardSecurityViewFlipperController
      */
     public void asynchronouslyInflateView(SecurityMode securityMode,
             KeyguardSecurityCallback keyguardSecurityCallback,
-            @Nullable OnViewInflatedListener onViewInflatedListener) {
+            @Nullable OnViewInflatedCallback onViewInflatedListener) {
         int layoutId = getLayoutIdFor(securityMode);
         if (layoutId != 0) {
             if (DEBUG) Log.v(TAG, "inflating on bg thread id = " + layoutId);
@@ -156,9 +128,8 @@ public class KeyguardSecurityViewFlipperController
                                         keyguardSecurityCallback);
                         childController.init();
                         mChildren.add(childController);
-                        mViewMediatorCallback.setNeedsInput(childController.needsInput());
                         if (onViewInflatedListener != null) {
-                            onViewInflatedListener.onViewInflated();
+                            onViewInflatedListener.onViewInflated(childController);
                         }
                     });
         }
@@ -184,33 +155,9 @@ public class KeyguardSecurityViewFlipperController
         }
     }
 
-    private static class NullKeyguardInputViewController
-            extends KeyguardInputViewController<KeyguardInputView> {
-        protected NullKeyguardInputViewController(SecurityMode securityMode,
-                KeyguardSecurityCallback keyguardSecurityCallback,
-                EmergencyButtonController emergencyButtonController) {
-            super(null, securityMode, keyguardSecurityCallback, emergencyButtonController,
-                    null);
-        }
-
-        @Override
-        public boolean needsInput() {
-            return false;
-        }
-
-        @Override
-        public void onStartingToHide() {
-        }
-
-        @Override
-        protected int getInitialMessageResId() {
-            return 0;
-        }
-    }
-
     /** Listener to when view has finished inflation. */
-    public interface OnViewInflatedListener {
+    public interface OnViewInflatedCallback {
         /** Notifies that view has been inflated */
-        void onViewInflated();
+        void onViewInflated(KeyguardInputViewController<KeyguardInputView> controller);
     }
 }

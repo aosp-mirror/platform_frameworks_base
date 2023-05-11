@@ -26,7 +26,7 @@ import static com.android.server.credentials.ProviderGetSession.AUTHENTICATION_A
 import static com.android.server.credentials.ProviderGetSession.CREDENTIAL_ENTRY_KEY;
 import static com.android.server.credentials.ProviderGetSession.REMOTE_ENTRY_KEY;
 
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -56,7 +56,7 @@ public enum EntryEnum {
     );
 
     EntryEnum(int innerMetricCode) {
-        this.mInnerMetricCode = innerMetricCode;
+        mInnerMetricCode = innerMetricCode;
     }
 
     /**
@@ -65,7 +65,7 @@ public enum EntryEnum {
      * @return a code corresponding to the west world metric name
      */
     public int getMetricCode() {
-        return this.mInnerMetricCode;
+        return mInnerMetricCode;
     }
 
     /**
@@ -77,7 +77,7 @@ public enum EntryEnum {
      */
     public static int getMetricCodeFromString(String stringKey) {
         if (!sKeyToEntryCode.containsKey(stringKey)) {
-            Log.w(TAG, "Attempted to use an unsupported string key entry type");
+            Slog.i(TAG, "Attempted to use an unsupported string key entry type");
             return UNKNOWN.mInnerMetricCode;
         }
         return sKeyToEntryCode.get(stringKey);

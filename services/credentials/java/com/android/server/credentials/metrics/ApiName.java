@@ -27,7 +27,7 @@ import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INI
 import static com.android.internal.util.FrameworkStatsLog.CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_UNKNOWN;
 
 import android.credentials.ui.RequestInfo;
-import android.util.Log;
+import android.util.Slog;
 
 import java.util.AbstractMap;
 import java.util.Map;
@@ -57,7 +57,7 @@ CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_IS_ENABLED_CREDENT
     );
 
     ApiName(int innerMetricCode) {
-        this.mInnerMetricCode = innerMetricCode;
+        mInnerMetricCode = innerMetricCode;
     }
 
     /**
@@ -66,7 +66,7 @@ CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_IS_ENABLED_CREDENT
      * @return a code corresponding to the west world metric name
      */
     public int getMetricCode() {
-        return this.mInnerMetricCode;
+        return mInnerMetricCode;
     }
 
     /**
@@ -79,7 +79,7 @@ CREDENTIAL_MANAGER_INITIAL_PHASE_REPORTED__API_NAME__API_NAME_IS_ENABLED_CREDENT
      */
     public static int getMetricCodeFromRequestInfo(String stringKey) {
         if (!sRequestInfoToMetric.containsKey(stringKey)) {
-            Log.w(TAG, "Attempted to use an unsupported string key request info");
+            Slog.i(TAG, "Attempted to use an unsupported string key request info");
             return UNKNOWN.mInnerMetricCode;
         }
         return sRequestInfoToMetric.get(stringKey);

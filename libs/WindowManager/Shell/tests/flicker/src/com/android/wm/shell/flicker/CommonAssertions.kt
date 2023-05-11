@@ -20,9 +20,9 @@ package com.android.wm.shell.flicker
 
 import android.tools.common.Rotation
 import android.tools.common.datatypes.Region
-import android.tools.common.datatypes.component.IComponentMatcher
 import android.tools.common.flicker.subject.layers.LayerTraceEntrySubject
 import android.tools.common.flicker.subject.layers.LayersTraceSubject
+import android.tools.common.traces.component.IComponentMatcher
 import android.tools.device.flicker.legacy.FlickerTest
 import android.tools.device.helpers.WindowUtils
 
@@ -218,20 +218,11 @@ fun FlickerTest.splitAppLayerBoundsChanges(
     assertLayers {
         if (landscapePosLeft) {
             splitAppLayerBoundsSnapToDivider(
-                    component,
-                    landscapePosLeft,
-                    portraitPosTop,
-                    scenario.endRotation
-                )
-                .then()
-                .isInvisible(component)
-                .then()
-                .splitAppLayerBoundsSnapToDivider(
-                    component,
-                    landscapePosLeft,
-                    portraitPosTop,
-                    scenario.endRotation
-                )
+                component,
+                landscapePosLeft,
+                portraitPosTop,
+                scenario.endRotation
+            )
         } else {
             splitAppLayerBoundsSnapToDivider(
                     component,

@@ -1351,6 +1351,12 @@ public class InternalResourceService extends SystemService {
         }
 
         @Override
+        @EconomyManager.EnabledMode
+        public int getEnabledMode() {
+            return InternalResourceService.this.getEnabledMode();
+        }
+
+        @Override
         public int handleShellCommand(@NonNull ParcelFileDescriptor in,
                 @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
                 @NonNull String[] args) {

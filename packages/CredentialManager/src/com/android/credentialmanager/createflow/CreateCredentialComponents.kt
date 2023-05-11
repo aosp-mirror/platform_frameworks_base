@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Divider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NewReleases
 import androidx.compose.material.icons.filled.Add
@@ -67,6 +66,7 @@ import com.android.credentialmanager.common.ui.SheetContainerCard
 import com.android.credentialmanager.common.ui.PasskeyBenefitRow
 import com.android.credentialmanager.common.ui.HeadlineText
 import com.android.credentialmanager.logging.CreateCredentialEvent
+import com.android.credentialmanager.ui.theme.LocalAndroidColorScheme
 import com.android.internal.logging.UiEventLogger.UiEventEnum
 
 @Composable
@@ -88,27 +88,11 @@ fun CreateCredentialScreen(
                                 onLearnMore = viewModel::createFlowOnLearnMore,
                                 onLog = { viewModel.logUiEvent(it) },
                         )
-                        CreateScreenState.PROVIDER_SELECTION -> ProviderSelectionCard(
-                                requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
-                                disabledProviderList = createCredentialUiState
-                                        .disabledProviders,
-                                sortedCreateOptionsPairs =
-                                createCredentialUiState.sortedCreateOptionsPairs,
-                                hasRemoteEntry = createCredentialUiState.remoteEntry != null,
-                                onOptionSelected =
-                                viewModel::createFlowOnEntrySelectedFromFirstUseScreen,
-                                onDisabledProvidersSelected =
-                                viewModel::createFlowOnDisabledProvidersSelected,
-                                onMoreOptionsSelected =
-                                viewModel::createFlowOnMoreOptionsSelectedOnProviderSelection,
-                                onLog = { viewModel.logUiEvent(it) },
-                        )
                         CreateScreenState.CREATION_OPTION_SELECTION -> CreationSelectionCard(
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
                                 enabledProviderList = createCredentialUiState.enabledProviders,
                                 providerInfo = createCredentialUiState
                                         .activeEntry?.activeProvider!!,
-                                hasDefaultProvider = createCredentialUiState.hasDefaultProvider,
                                 createOptionInfo =
                                 createCredentialUiState.activeEntry.activeEntryInfo
                                         as CreateOptionInfo,
@@ -121,34 +105,28 @@ fun CreateCredentialScreen(
                         CreateScreenState.MORE_OPTIONS_SELECTION -> MoreOptionsSelectionCard(
                                 requestDisplayInfo = createCredentialUiState.requestDisplayInfo,
                                 enabledProviderList = createCredentialUiState.enabledProviders,
-                                disabledProviderList = createCredentialUiState
-                                        .disabledProviders,
+                                disabledProviderList = createCredentialUiState.disabledProviders,
                                 sortedCreateOptionsPairs =
                                 createCredentialUiState.sortedCreateOptionsPairs,
-                                hasDefaultProvider = createCredentialUiState.hasDefaultProvider,
-                                isFromProviderSelection =
-                                createCredentialUiState.isFromProviderSelection!!,
-                                onBackProviderSelectionButtonSelected =
-                                viewModel::createFlowOnBackProviderSelectionButtonSelected,
                                 onBackCreationSelectionButtonSelected =
                                 viewModel::createFlowOnBackCreationSelectionButtonSelected,
                                 onOptionSelected =
                                 viewModel::createFlowOnEntrySelectedFromMoreOptionScreen,
                                 onDisabledProvidersSelected =
-                                viewModel::createFlowOnDisabledProvidersSelected,
+                                viewModel::createFlowOnLaunchSettings,
                                 onRemoteEntrySelected = viewModel::createFlowOnEntrySelected,
                                 onLog = { viewModel.logUiEvent(it) },
                         )
-                        CreateScreenState.MORE_OPTIONS_ROW_INTRO -> {
+                        CreateScreenState.DEFAULT_PROVIDER_CONFIRMATION -> {
                             if (createCredentialUiState.activeEntry == null) {
                                 viewModel.onIllegalUiState("Expect active entry to be non-null" +
                                         " upon default provider dialog.")
                             } else {
-                                MoreOptionsRowIntroCard(
+                                NonDefaultUsageConfirmationCard(
                                         selectedEntry = createCredentialUiState.activeEntry,
                                         onIllegalScreenState = viewModel::onIllegalUiState,
-                                        onChangeDefaultSelected =
-                                        viewModel::createFlowOnChangeDefaultSelected,
+                                        onLaunchSettings =
+                                        viewModel::createFlowOnLaunchSettings,
                                         onUseOnceSelected = viewModel::createFlowOnUseOnceSelected,
                                         onLog = { viewModel.logUiEvent(it) },
                                 )
@@ -263,94 +241,11 @@ fun PasskeyIntroCard(
 }
 
 @Composable
-fun ProviderSelectionCard(
-    requestDisplayInfo: RequestDisplayInfo,
-    disabledProviderList: List<DisabledProviderInfo>?,
-    sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-    hasRemoteEntry: Boolean,
-    onOptionSelected: (ActiveEntry) -> Unit,
-    onDisabledProvidersSelected: () -> Unit,
-    onMoreOptionsSelected: () -> Unit,
-    onLog: @Composable (UiEventEnum) -> Unit,
-) {
-    SheetContainerCard {
-        item { HeadlineIcon(bitmap = requestDisplayInfo.typeIcon.toBitmap().asImageBitmap()) }
-        item { Divider(thickness = 16.dp, color = Color.Transparent) }
-        item {
-            HeadlineText(
-                text = stringResource(
-                    R.string.choose_provider_title,
-                    when (requestDisplayInfo.type) {
-                        CredentialType.PASSKEY ->
-                            stringResource(R.string.passkeys)
-                        CredentialType.PASSWORD ->
-                            stringResource(R.string.passwords)
-                        CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
-                    }
-                )
-            )
-        }
-        item { Divider(thickness = 24.dp, color = Color.Transparent) }
-
-        item {
-            Row(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-                BodyMediumText(text = stringResource(R.string.choose_provider_body))
-            }
-        }
-        item { Divider(thickness = 16.dp, color = Color.Transparent) }
-        item {
-            CredentialContainerCard {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                ) {
-                    sortedCreateOptionsPairs.forEach { entry ->
-                        MoreOptionsInfoRow(
-                            requestDisplayInfo = requestDisplayInfo,
-                            providerInfo = entry.second,
-                            createOptionInfo = entry.first,
-                            onOptionSelected = {
-                                onOptionSelected(
-                                    ActiveEntry(
-                                        entry.second,
-                                        entry.first
-                                    )
-                                )
-                            }
-                        )
-                    }
-                    MoreOptionsDisabledProvidersRow(
-                        disabledProviders = disabledProviderList,
-                        onDisabledProvidersSelected = onDisabledProvidersSelected,
-                    )
-                }
-            }
-        }
-        if (hasRemoteEntry) {
-            item { Divider(thickness = 24.dp, color = Color.Transparent) }
-            item {
-                CtaButtonRow(
-                    leftButton = {
-                        ActionButton(
-                            stringResource(R.string.string_more_options),
-                            onMoreOptionsSelected
-                        )
-                    }
-                )
-            }
-        }
-    }
-    onLog(CreateCredentialEvent.CREDMAN_CREATE_CRED_PROVIDER_SELECTION)
-}
-
-@Composable
 fun MoreOptionsSelectionCard(
         requestDisplayInfo: RequestDisplayInfo,
         enabledProviderList: List<EnabledProviderInfo>,
         disabledProviderList: List<DisabledProviderInfo>?,
         sortedCreateOptionsPairs: List<Pair<CreateOptionInfo, EnabledProviderInfo>>,
-        hasDefaultProvider: Boolean,
-        isFromProviderSelection: Boolean,
-        onBackProviderSelectionButtonSelected: () -> Unit,
         onBackCreationSelectionButtonSelected: () -> Unit,
         onOptionSelected: (ActiveEntry) -> Unit,
         onDisabledProvidersSelected: () -> Unit,
@@ -369,9 +264,7 @@ fun MoreOptionsSelectionCard(
                     CredentialType.UNKNOWN -> stringResource(R.string.sign_in_info)
                 }
             ),
-            onNavigationIconClicked =
-            if (isFromProviderSelection) onBackProviderSelectionButtonSelected
-            else onBackCreationSelectionButtonSelected,
+            onNavigationIconClicked = onBackCreationSelectionButtonSelected,
             bottomPadding = 16.dp,
         )
     }) {
@@ -379,30 +272,26 @@ fun MoreOptionsSelectionCard(
         item {
             CredentialContainerCard {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    // Only in the flows with default provider(not first time use) we can show the
-                    // createOptions here, or they will be shown on ProviderSelectionCard
-                    if (hasDefaultProvider) {
-                        sortedCreateOptionsPairs.forEach { entry ->
-                            MoreOptionsInfoRow(
-                                requestDisplayInfo = requestDisplayInfo,
-                                providerInfo = entry.second,
-                                createOptionInfo = entry.first,
-                                onOptionSelected = {
-                                    onOptionSelected(
-                                        ActiveEntry(
-                                            entry.second,
-                                            entry.first
-                                        )
+                    sortedCreateOptionsPairs.forEach { entry ->
+                        MoreOptionsInfoRow(
+                            requestDisplayInfo = requestDisplayInfo,
+                            providerInfo = entry.second,
+                            createOptionInfo = entry.first,
+                            onOptionSelected = {
+                                onOptionSelected(
+                                    ActiveEntry(
+                                        entry.second,
+                                        entry.first
                                     )
-                                }
-                            )
-                        }
-                        MoreOptionsDisabledProvidersRow(
-                            disabledProviders = disabledProviderList,
-                            onDisabledProvidersSelected =
-                            onDisabledProvidersSelected,
+                                )
+                            }
                         )
                     }
+                    MoreOptionsDisabledProvidersRow(
+                        disabledProviders = disabledProviderList,
+                        onDisabledProvidersSelected =
+                        onDisabledProvidersSelected,
+                    )
                     enabledProviderList.forEach {
                         if (it.remoteEntry != null) {
                             RemoteEntryRow(
@@ -420,10 +309,10 @@ fun MoreOptionsSelectionCard(
 }
 
 @Composable
-fun MoreOptionsRowIntroCard(
+fun NonDefaultUsageConfirmationCard(
         selectedEntry: ActiveEntry,
         onIllegalScreenState: (String) -> Unit,
-        onChangeDefaultSelected: () -> Unit,
+        onLaunchSettings: () -> Unit,
         onUseOnceSelected: () -> Unit,
         onLog: @Composable (UiEventEnum) -> Unit,
 ) {
@@ -435,7 +324,7 @@ fun MoreOptionsRowIntroCard(
     }
     SheetContainerCard {
         item { HeadlineIcon(imageVector = Icons.Outlined.NewReleases) }
-        item { Divider(thickness = 24.dp, color = Color.Transparent) }
+        item { Divider(thickness = 16.dp, color = Color.Transparent) }
         item {
             HeadlineText(
                 text = stringResource(
@@ -454,14 +343,14 @@ fun MoreOptionsRowIntroCard(
             CtaButtonRow(
                 leftButton = {
                     ActionButton(
-                        stringResource(R.string.use_once),
-                        onClick = onUseOnceSelected
+                        stringResource(R.string.settings),
+                        onClick = onLaunchSettings,
                     )
                 },
                 rightButton = {
                     ConfirmButton(
-                        stringResource(R.string.set_as_default),
-                        onClick = onChangeDefaultSelected
+                        stringResource(R.string.use_once),
+                        onClick = onUseOnceSelected,
                     )
                 },
             )
@@ -479,7 +368,6 @@ fun CreationSelectionCard(
         onOptionSelected: (BaseEntry) -> Unit,
         onConfirm: () -> Unit,
         onMoreOptionsSelected: () -> Unit,
-        hasDefaultProvider: Boolean,
         onLog: @Composable (UiEventEnum) -> Unit,
 ) {
     SheetContainerCard {
@@ -527,16 +415,9 @@ fun CreationSelectionCard(
             if (enabledProvider.remoteEntry != null) {
                 remoteEntry = enabledProvider.remoteEntry
             }
-            createOptionsSize += enabledProvider.createOptions.size
+            createOptionsSize += enabledProvider.sortedCreateOptions.size
         }
-        val shouldShowMoreOptionsButton = if (!hasDefaultProvider) {
-            // User has already been presented with all options on the default provider
-            // selection screen. Don't show them again. Therefore, only show the more option
-            // button if remote option is present.
-            remoteEntry != null
-        } else {
-            createOptionsSize > 1 || remoteEntry != null
-        }
+        val shouldShowMoreOptionsButton = createOptionsSize > 1 || remoteEntry != null
         item {
             CtaButtonRow(
                 leftButton = if (shouldShowMoreOptionsButton) {
@@ -559,7 +440,7 @@ fun CreationSelectionCard(
             item {
                 Divider(
                     thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant,
+                    color = LocalAndroidColorScheme.current.colorOutlineVariant,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
             }
@@ -584,7 +465,17 @@ fun ExternalOnlySelectionCard(
     SheetContainerCard {
         item { HeadlineIcon(imageVector = Icons.Outlined.QrCodeScanner) }
         item { Divider(thickness = 16.dp, color = Color.Transparent) }
-        item { HeadlineText(text = stringResource(R.string.create_passkey_in_other_device_title)) }
+        item {
+            HeadlineText(
+                text = stringResource(
+                    when (requestDisplayInfo.type) {
+                        CredentialType.PASSKEY -> R.string.create_passkey_in_other_device_title
+                        CredentialType.PASSWORD -> R.string.save_password_on_other_device_title
+                        else -> R.string.save_sign_in_on_other_device_title
+                    }
+                )
+            )
+        }
         item { Divider(thickness = 24.dp, color = Color.Transparent) }
         item {
             CredentialContainerCard {
@@ -633,6 +524,7 @@ fun MoreAboutPasskeysIntroCard(
             }
         }
         item {
+            Divider(thickness = 8.dp, color = Color.Transparent)
             MoreAboutPasskeySectionHeader(
                 text = stringResource(R.string.public_key_cryptography_title)
             )
@@ -641,6 +533,7 @@ fun MoreAboutPasskeysIntroCard(
             }
         }
         item {
+            Divider(thickness = 8.dp, color = Color.Transparent)
             MoreAboutPasskeySectionHeader(
                 text = stringResource(R.string.improved_account_security_title)
             )
@@ -649,6 +542,7 @@ fun MoreAboutPasskeysIntroCard(
             }
         }
         item {
+            Divider(thickness = 8.dp, color = Color.Transparent)
             MoreAboutPasskeySectionHeader(
                 text = stringResource(R.string.seamless_transition_title)
             )

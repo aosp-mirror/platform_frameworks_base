@@ -18,10 +18,12 @@ package com.android.systemui.qs.pipeline.dagger
 
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
-import com.android.systemui.plugins.log.LogBuffer
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository
 import com.android.systemui.qs.pipeline.data.repository.TileSpecSettingsRepository
+import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
+import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractorImpl
 import com.android.systemui.qs.pipeline.prototyping.PrototypeCoreStartable
 import com.android.systemui.qs.pipeline.shared.logging.QSPipelineLogger
 import dagger.Binds
@@ -30,12 +32,17 @@ import dagger.Provides
 import dagger.multibindings.ClassKey
 import dagger.multibindings.IntoMap
 
-@Module
+@Module(includes = [QSAutoAddModule::class])
 abstract class QSPipelineModule {
 
     /** Implementation for [TileSpecRepository] */
     @Binds
     abstract fun provideTileSpecRepository(impl: TileSpecSettingsRepository): TileSpecRepository
+
+    @Binds
+    abstract fun bindCurrentTilesInteractor(
+        impl: CurrentTilesInteractorImpl
+    ): CurrentTilesInteractor
 
     @Binds
     @IntoMap

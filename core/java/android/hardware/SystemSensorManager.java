@@ -222,6 +222,12 @@ public class SystemSensorManager extends SensorManager {
 
     /** @hide */
     @Override
+    public Sensor getSensorByHandle(int sensorHandle) {
+        return mHandleToSensor.get(sensorHandle);
+    }
+
+    /** @hide */
+    @Override
     protected List<Sensor> getFullDynamicSensorList() {
         // only set up broadcast receiver if the application tries to find dynamic sensors or
         // explicitly register a DynamicSensorCallback

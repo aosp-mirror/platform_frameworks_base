@@ -68,7 +68,6 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="2107626346109206352">"ചുവടെ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubbles_app_settings" msgid="3617224938701566416">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ക്രമീകരണം"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"ബബിൾ ഡിസ്മിസ് ചെയ്യൂ"</string>
-    <string name="bubbles_dont_bubble" msgid="3216183855437329223">"ബബിൾ ചെയ്യരുത്"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"സംഭാഷണം ബബിൾ ചെയ്യരുത്"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"ബബിളുകൾ ഉപയോഗിച്ച് ചാറ്റ് ചെയ്യുക"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"പുതിയ സംഭാഷണങ്ങൾ ഫ്ലോട്ടിംഗ് ഐക്കണുകളോ ബബിളുകളോ ആയി ദൃശ്യമാവുന്നു. ബബിൾ തുറക്കാൻ ടാപ്പ് ചെയ്യൂ. ഇത് നീക്കാൻ വലിച്ചിടുക."</string>
@@ -94,7 +93,7 @@
     <string name="letterbox_restart_cancel" msgid="1342209132692537805">"റദ്ദാക്കുക"</string>
     <string name="letterbox_restart_restart" msgid="8529976234412442973">"റീസ്റ്റാർട്ട് ചെയ്യൂ"</string>
     <string name="letterbox_restart_dialog_checkbox_title" msgid="5252918008140768386">"വീണ്ടും കാണിക്കരുത്"</string>
-    <string name="letterbox_reachability_reposition_text" msgid="4507890186297500893">"ഈ ആപ്പ് നീക്കാൻ ഡബിൾ ടാപ്പ് ചെയ്യുക"</string>
+    <string name="letterbox_reachability_reposition_text" msgid="3522042240665748268">"ഈ ആപ്പ് നീക്കാൻ\nഡബിൾ ടാപ്പ് ചെയ്യുക"</string>
     <string name="maximize_button_text" msgid="1650859196290301963">"വലുതാക്കുക"</string>
     <string name="minimize_button_text" msgid="271592547935841753">"ചെറുതാക്കുക"</string>
     <string name="close_button_text" msgid="2913281996024033299">"അടയ്ക്കുക"</string>
@@ -110,6 +109,5 @@
     <string name="screenshot_text" msgid="1477704010087786671">"സ്ക്രീൻഷോട്ട്"</string>
     <string name="close_text" msgid="4986518933445178928">"അടയ്ക്കുക"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"മെനു അടയ്ക്കുക"</string>
-    <!-- no translation found for expand_menu_text (3847736164494181168) -->
-    <skip />
+    <string name="expand_menu_text" msgid="3847736164494181168">"മെനു തുറക്കുക"</string>
 </resources>

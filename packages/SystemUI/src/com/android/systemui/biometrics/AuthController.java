@@ -73,6 +73,7 @@ import com.android.settingslib.udfps.UdfpsUtils;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.BiometricPromptCredentialInteractor;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
+import com.android.systemui.biometrics.ui.viewmodel.AuthBiometricFingerprintViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -127,6 +128,9 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
 
     // TODO: these should be migrated out once ready
     @NonNull private final Provider<BiometricPromptCredentialInteractor> mBiometricPromptInteractor;
+
+    @NonNull private final Provider<AuthBiometricFingerprintViewModel>
+            mAuthBiometricFingerprintViewModelProvider;
     @NonNull private final Provider<CredentialViewModel> mCredentialViewModelProvider;
     @NonNull private final LogContextInteractor mLogContextInteractor;
 
@@ -722,7 +726,6 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         }
         onDialogDismissed(reason);
     }
-
     @Inject
     public AuthController(Context context,
             Execution execution,
@@ -741,6 +744,8 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
             @NonNull UdfpsLogger udfpsLogger,
             @NonNull LogContextInteractor logContextInteractor,
             @NonNull Provider<BiometricPromptCredentialInteractor> biometricPromptInteractor,
+            @NonNull Provider<AuthBiometricFingerprintViewModel>
+                    authBiometricFingerprintViewModelProvider,
             @NonNull Provider<CredentialViewModel> credentialViewModelProvider,
             @NonNull InteractionJankMonitor jankMonitor,
             @Main Handler handler,
@@ -771,6 +776,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
 
         mLogContextInteractor = logContextInteractor;
         mBiometricPromptInteractor = biometricPromptInteractor;
+        mAuthBiometricFingerprintViewModelProvider = authBiometricFingerprintViewModelProvider;
         mCredentialViewModelProvider = credentialViewModelProvider;
 
         mOrientationListener = new BiometricDisplayListener(
@@ -823,9 +829,9 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
 
             final Rect overlayBounds = new Rect(
                     0, /* left */
-                    0, /* top */
+                    mCachedDisplayInfo.getNaturalHeight() / 2, /* top */
                     mCachedDisplayInfo.getNaturalWidth(), /* right */
-                    mCachedDisplayInfo.getNaturalHeight() /* botom */);
+                    mCachedDisplayInfo.getNaturalHeight() /* bottom */);
 
             mUdfpsOverlayParams = new UdfpsOverlayParams(
                     mUdfpsBounds,
@@ -1005,9 +1011,11 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
      * not enrolled sfps. This may be false if called before onAllAuthenticatorsRegistered.
      */
     public boolean isRearFpsSupported() {
-        for (FingerprintSensorPropertiesInternal prop: mFpProps) {
-            if (prop.sensorType == TYPE_REAR) {
-                return true;
+        if (mFpProps != null) {
+            for (FingerprintSensorPropertiesInternal prop: mFpProps) {
+                if (prop.sensorType == TYPE_REAR) {
+                    return true;
+                }
             }
         }
         return false;
@@ -1297,7 +1305,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
                 .build(bgExecutor, sensorIds, mFpProps, mFaceProps, wakefulnessLifecycle,
                         panelInteractionDetector, userManager, lockPatternUtils,
                         mInteractionJankMonitor, mBiometricPromptInteractor,
-                        mCredentialViewModelProvider);
+                        mAuthBiometricFingerprintViewModelProvider, mCredentialViewModelProvider);
     }
 
     @Override
@@ -1347,7 +1355,7 @@ public class AuthController implements CoreStartable,  CommandQueue.Callbacks,
         default void onEnrollmentsChanged(@Modality int modality) {}
 
         /**
-         * Called when UDFPS enrollments have changed. This is called after boot and on changes to
+         * Called when enrollments have changed. This is called after boot and on changes to
          * enrollment.
          */
         default void onEnrollmentsChanged(

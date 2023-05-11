@@ -28,7 +28,9 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -40,6 +42,9 @@ import kotlinx.coroutines.flow.shareIn
 interface TrustRepository {
     /** Flow representing whether the current user is trusted. */
     val isCurrentUserTrusted: Flow<Boolean>
+
+    /** Flow representing whether active unlock is available for the current user. */
+    val isCurrentUserActiveUnlockAvailable: StateFlow<Boolean>
 }
 
 @SysUISingleton
@@ -89,11 +94,13 @@ constructor(
             }
             .shareIn(applicationScope, started = SharingStarted.Eagerly, replay = 1)
 
-    override val isCurrentUserTrusted: Flow<Boolean>
-        get() =
-            combine(trust, userRepository.selectedUserInfo, ::Pair)
-                .map { latestTrustModelForUser[it.second.id]?.isTrusted ?: false }
-                .distinctUntilChanged()
-                .onEach { logger.isCurrentUserTrusted(it) }
-                .onStart { emit(false) }
+    override val isCurrentUserTrusted: Flow<Boolean> =
+        combine(trust, userRepository.selectedUserInfo, ::Pair)
+            .map { latestTrustModelForUser[it.second.id]?.isTrusted ?: false }
+            .distinctUntilChanged()
+            .onEach { logger.isCurrentUserTrusted(it) }
+            .onStart { emit(false) }
+
+    // TODO: Implement based on TrustManager callback b/267322286
+    override val isCurrentUserActiveUnlockAvailable: StateFlow<Boolean> = MutableStateFlow(true)
 }

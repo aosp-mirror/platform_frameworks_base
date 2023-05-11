@@ -38,6 +38,7 @@ import static org.mockito.Mockito.verify;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.view.Display;
 import android.view.inputmethod.InputMethodManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -142,6 +143,26 @@ public class DefaultImeVisibilityApplierTest extends InputMethodManagerServiceTe
             verify(mInputMethodManagerService.mWindowManagerInternal).hideIme(
                     eq(mWindowToken), eq(displayIdToShowIme), eq(null));
         }
+    }
+
+    @Test
+    public void testShowImeScreenshot() {
+        synchronized (ImfLock.class) {
+            mVisibilityApplier.showImeScreenshot(mWindowToken, Display.DEFAULT_DISPLAY,
+                    null /* statsToken */);
+        }
+
+        verify(mMockImeTargetVisibilityPolicy).showImeScreenshot(eq(mWindowToken),
+                eq(Display.DEFAULT_DISPLAY));
+    }
+
+    @Test
+    public void testRemoveImeScreenshot() {
+        synchronized (ImfLock.class) {
+            mVisibilityApplier.removeImeScreenshot(Display.DEFAULT_DISPLAY);
+        }
+
+        verify(mMockImeTargetVisibilityPolicy).removeImeScreenshot(eq(Display.DEFAULT_DISPLAY));
     }
 
     private InputBindResult startInputOrWindowGainedFocus(IBinder windowToken, int softInputMode) {

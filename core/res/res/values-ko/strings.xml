@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"앱이 사용 중에 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"백그라운드에서 심박수와 같은 생체 신호 센서 데이터에 액세스"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"앱이 백그라운드에서 심박수, 체온, 혈중 산소 농도와 같은 생체 신호 센서 데이터에 액세스하도록 허용합니다."</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"앱 사용 중에 생체 신호 센서 손목 온도 데이터에 액세스합니다"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"앱이 사용 중에 생체 신호 센서 손목 온도 데이터에 액세스하도록 허용합니다."</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"앱이 백그라운드에 있을 때 생체 신호 센서 손목 온도 데이터에 액세스합니다"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"앱이 백그라운드에서 생체 신호 센서 손목 온도 데이터에 액세스하도록 허용합니다."</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"캘린더 일정 및 세부정보 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"이 앱은 태블릿에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"앱이 Android TV 기기에 저장된 모든 캘린더 일정을 읽고 캘린더 데이터를 공유하거나 저장할 수 있습니다."</string>
@@ -507,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"앱이 진동을 제어할 수 있도록 허용합니다."</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"앱이 진동 상태에 액세스하도록 허용합니다."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"전화번호 자동 연결"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"앱이 사용자의 조작 없이 전화번호로 전화를 걸 수 있도록 허용합니다. 이 경우 예상치 못한 통화 요금이 부과될 수 있습니다. 앱이 비상 전화를 걸도록 하는 권한은 주어지지 않습니다. 악성 앱이 사용자의 확인 없이 전화를 걸어 요금이 부과될 수 있습니다."</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"IMS 통화 서비스에 접근"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"앱이 IMS 서비스를 사용하여 자동으로 전화를 걸 수 있도록 허용합니다."</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"휴대전화 상태 및 ID 읽기"</string>
@@ -713,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"얼굴 인식 작업이 취소되었습니다."</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"사용자가 얼굴 인식 잠금 해제를 취소했습니다."</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"시도 횟수가 너무 많습니다. 얼굴 인식 잠금 해제가 사용 중지되었습니다."</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"시도 횟수가 너무 많습니다. 얼굴 인식 잠금 해제를 사용할 수 없습니다."</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"시도 횟수가 너무 많습니다. 화면 잠금을 대신 사용하세요."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"얼굴을 확인할 수 없습니다. 다시 시도하세요."</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"얼굴 인식 잠금 해제를 설정하지 않았습니다."</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"권한을 보유한 앱에서 앱의 기능 정보를 보도록 허용합니다."</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"더 높은 샘플링 레이트로 센서 데이터 액세스"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"앱에서 200Hz보다 빠른 속도로 센서 데이터를 샘플링하도록 허용합니다."</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"사용자 작업 없이 앱 업데이트"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"홀더가 사용자 작업 없이 이전에 설치된 앱을 업데이트하도록 허용합니다."</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"화면 잠금 비밀번호와 PIN에 허용되는 길이와 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"화면 잠금 해제 시도 모니터링"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g>은(는) 현재 사용할 수 없습니다. <xliff:g id="APP_NAME_1">%2$s</xliff:g>에서 관리하는 앱입니다."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"자세히 알아보기"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"앱 일시중지 해제"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"직장 앱을 사용 설정하시겠습니까?"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"직장 앱 및 알림에 액세스하세요."</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"사용 설정"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"직장 앱 일시중지를 해제하시겠습니까?"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"일시중지 해제"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"긴급 전화"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"직장 앱 및 전화 통화에 대한 액세스를 요청하세요."</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"앱을 사용할 수 없습니다"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"현재 <xliff:g id="APP_NAME">%1$s</xliff:g> 앱을 사용할 수 없습니다."</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 사용할 수 없음"</string>
@@ -2166,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"이 콘텐츠는 직장 앱으로 열 수 없습니다."</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"이 콘텐츠는 개인 앱을 통해 공유할 수 없습니다."</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"이 콘텐츠는 개인 앱으로 열 수 없습니다."</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"직장 프로필이 일시중지됨"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"탭하여 사용 설정"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"직장 앱 없음"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"개인 앱 없음"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"개인 프로필에서 <xliff:g id="APP">%s</xliff:g> 앱을 여시겠습니까?"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"직장 프로필에서 <xliff:g id="APP">%s</xliff:g> 앱을 여시겠습니까?"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"개인 <xliff:g id="APP">%s</xliff:g> 열기"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"직장 <xliff:g id="APP">%s</xliff:g> 앱 열기"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"개인 브라우저 사용"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"직장 브라우저 사용"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM 네트워크 잠금 해제 PIN"</string>

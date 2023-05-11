@@ -26,7 +26,6 @@ import android.credentials.ui.ProviderPendingIntentResponse;
 import android.os.ICancellationSignal;
 import android.service.credentials.CallingAppInfo;
 import android.service.credentials.ClearCredentialStateRequest;
-import android.util.Log;
 import android.util.Slog;
 
 /**
@@ -81,7 +80,7 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
 
     @Override
     public void onProviderResponseSuccess(@Nullable Void response) {
-        Log.i(TAG, "in onProviderResponseSuccess");
+        Slog.i(TAG, "Remote provider responded with a valid response: " + mComponentName);
         mProviderResponseSet = true;
         updateStatusAndInvokeCallback(Status.COMPLETE,
                 /*source=*/ CredentialsSource.REMOTE_PROVIDER);
@@ -92,6 +91,8 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
     public void onProviderResponseFailure(int errorCode, Exception exception) {
         if (exception instanceof ClearCredentialStateException) {
             mProviderException = (ClearCredentialStateException) exception;
+            // TODO(b/271135048) : Decide on exception type length
+            mProviderSessionMetric.collectCandidateFrameworkException(mProviderException.getType());
         }
         mProviderSessionMetric.collectCandidateExceptionStatus(/*hasException=*/true);
         updateStatusAndInvokeCallback(toStatus(errorCode),
@@ -105,7 +106,7 @@ public final class ProviderClearSession extends ProviderSession<ClearCredentialS
             updateStatusAndInvokeCallback(Status.SERVICE_DEAD,
                     /*source=*/ CredentialsSource.REMOTE_PROVIDER);
         } else {
-            Slog.i(TAG, "Component names different in onProviderServiceDied - "
+            Slog.w(TAG, "Component names different in onProviderServiceDied - "
                     + "this should not happen");
         }
     }

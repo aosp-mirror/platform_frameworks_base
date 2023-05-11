@@ -42,6 +42,37 @@ namespace android {
 namespace uirenderer {
 namespace renderthread {
 
+static std::array<std::string_view, 19> sEnableExtensions{
+        VK_KHR_BIND_MEMORY_2_EXTENSION_NAME,
+        VK_KHR_DEDICATED_ALLOCATION_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_MEMORY_EXTENSION_NAME,
+        VK_KHR_GET_MEMORY_REQUIREMENTS_2_EXTENSION_NAME,
+        VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME,
+        VK_KHR_MAINTENANCE1_EXTENSION_NAME,
+        VK_KHR_MAINTENANCE2_EXTENSION_NAME,
+        VK_KHR_MAINTENANCE3_EXTENSION_NAME,
+        VK_KHR_SAMPLER_YCBCR_CONVERSION_EXTENSION_NAME,
+        VK_KHR_SURFACE_EXTENSION_NAME,
+        VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+        VK_EXT_BLEND_OPERATION_ADVANCED_EXTENSION_NAME,
+        VK_KHR_IMAGE_FORMAT_LIST_EXTENSION_NAME,
+        VK_EXT_IMAGE_DRM_FORMAT_MODIFIER_EXTENSION_NAME,
+        VK_ANDROID_EXTERNAL_MEMORY_ANDROID_HARDWARE_BUFFER_EXTENSION_NAME,
+        VK_EXT_QUEUE_FAMILY_FOREIGN_EXTENSION_NAME,
+        VK_KHR_EXTERNAL_SEMAPHORE_FD_EXTENSION_NAME,
+        VK_KHR_ANDROID_SURFACE_EXTENSION_NAME,
+};
+
+static bool shouldEnableExtension(const std::string_view& extension) {
+    for (const auto& it : sEnableExtensions) {
+        if (it == extension) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static void free_features_extensions_structs(const VkPhysicalDeviceFeatures2& features) {
     // All Vulkan structs that could be part of the features chain will start with the
     // structure type followed by the pNext pointer. We cast to the CommonVulkanHeader
@@ -76,11 +107,11 @@ GrVkGetProc VulkanManager::sSkiaGetProp = [](const char* proc_name, VkInstance i
 #define GET_INST_PROC(F) m##F = (PFN_vk##F)vkGetInstanceProcAddr(mInstance, "vk" #F)
 #define GET_DEV_PROC(F) m##F = (PFN_vk##F)vkGetDeviceProcAddr(mDevice, "vk" #F)
 
-sp<VulkanManager> VulkanManager::getInstance() {
-    // cache a weakptr to the context to enable a second thread to share the same vulkan state
-    static wp<VulkanManager> sWeakInstance = nullptr;
-    static std::mutex sLock;
+// cache a weakptr to the context to enable a second thread to share the same vulkan state
+static wp<VulkanManager> sWeakInstance = nullptr;
+static std::mutex sLock;
 
+sp<VulkanManager> VulkanManager::getInstance() {
     std::lock_guard _lock{sLock};
     sp<VulkanManager> vulkanManager = sWeakInstance.promote();
     if (!vulkanManager.get()) {
@@ -89,6 +120,11 @@ sp<VulkanManager> VulkanManager::getInstance() {
     }
 
     return vulkanManager;
+}
+
+sp<VulkanManager> VulkanManager::peekInstance() {
+    std::lock_guard _lock{sLock};
+    return sWeakInstance.promote();
 }
 
 VulkanManager::~VulkanManager() {
@@ -139,6 +175,11 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         bool hasKHRSurfaceExtension = false;
         bool hasKHRAndroidSurfaceExtension = false;
         for (const VkExtensionProperties& extension : mInstanceExtensionsOwner) {
+            if (!shouldEnableExtension(extension.extensionName)) {
+                ALOGV("Not enabling instance extension %s", extension.extensionName);
+                continue;
+            }
+            ALOGV("Enabling instance extension %s", extension.extensionName);
             mInstanceExtensions.push_back(extension.extensionName);
             if (!strcmp(extension.extensionName, VK_KHR_SURFACE_EXTENSION_NAME)) {
                 hasKHRSurfaceExtension = true;
@@ -219,6 +260,11 @@ void VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         LOG_ALWAYS_FATAL_IF(VK_SUCCESS != err);
         bool hasKHRSwapchainExtension = false;
         for (const VkExtensionProperties& extension : mDeviceExtensionsOwner) {
+            if (!shouldEnableExtension(extension.extensionName)) {
+                ALOGV("Not enabling device extension %s", extension.extensionName);
+                continue;
+            }
+            ALOGV("Enabling device extension %s", extension.extensionName);
             mDeviceExtensions.push_back(extension.extensionName);
             if (!strcmp(extension.extensionName, VK_KHR_SWAPCHAIN_EXTENSION_NAME)) {
                 hasKHRSwapchainExtension = true;
@@ -363,9 +409,13 @@ void VulkanManager::initialize() {
     }
 }
 
-sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& options,
-                                                    ContextType contextType) {
+static void onGrContextReleased(void* context) {
+    VulkanManager* manager = (VulkanManager*)context;
+    manager->decStrong((void*)onGrContextReleased);
+}
 
+sk_sp<GrDirectContext> VulkanManager::createContext(GrContextOptions& options,
+                                                    ContextType contextType) {
     GrVkBackendContext backendContext;
     backendContext.fInstance = mInstance;
     backendContext.fPhysicalDevice = mPhysicalDevice;
@@ -376,6 +426,11 @@ sk_sp<GrDirectContext> VulkanManager::createContext(const GrContextOptions& opti
     backendContext.fVkExtensions = &mExtensions;
     backendContext.fDeviceFeatures2 = &mPhysicalDeviceFeatures2;
     backendContext.fGetProc = sSkiaGetProp;
+
+    LOG_ALWAYS_FATAL_IF(options.fContextDeleteProc != nullptr, "Conflicting fContextDeleteProcs!");
+    this->incStrong((void*)onGrContextReleased);
+    options.fContextDeleteContext = this;
+    options.fContextDeleteProc = onGrContextReleased;
 
     return GrDirectContext::MakeVulkan(backendContext, options);
 }

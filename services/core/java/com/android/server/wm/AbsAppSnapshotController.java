@@ -239,7 +239,17 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
             }
             return null;
         }
-        source.getBounds(mTmpRect);
+        mTmpRect.setEmpty();
+        if (source.mTransitionController.inFinishingTransition(source)) {
+            final Transition.ChangeInfo changeInfo = source.mTransitionController
+                    .mFinishingTransition.mChanges.get(source);
+            if (changeInfo != null) {
+                mTmpRect.set(changeInfo.mAbsoluteBounds);
+            }
+        }
+        if (mTmpRect.isEmpty()) {
+            source.getBounds(mTmpRect);
+        }
         mTmpRect.offsetTo(0, 0);
         SurfaceControl[] excludeLayers;
         final WindowState imeWindow = source.getDisplayContent().mInputMethodWindow;
@@ -466,8 +476,7 @@ abstract class AbsAppSnapshotController<TYPE extends WindowContainer,
     }
 
     boolean isAnimatingByRecents(@NonNull Task task) {
-        return task.isAnimatingByRecents()
-                || mService.mAtmService.getTransitionController().inRecentsTransition(task);
+        return task.isAnimatingByRecents();
     }
 
     void dump(PrintWriter pw, String prefix) {

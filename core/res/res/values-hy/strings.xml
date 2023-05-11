@@ -463,10 +463,6 @@
     <string name="permdesc_bodySensors" product="default" msgid="7652650410295512140">"Հավելվածին հասանելի է դարձնում մարմնի սենսորների տվյալները (օրինակ՝ սրտի զարկերի հաճախականությունը, ջերմաստիճանը, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշները) հավելվածի օգտագործման ժամանակ։"</string>
     <string name="permlab_bodySensors_background" msgid="4912560779957760446">"Մարմնի սենսորների տվյալների հասանելիություն ֆոնային ռեժիմում"</string>
     <string name="permdesc_bodySensors_background" product="default" msgid="8870726027557749417">"Հավելվածին հասանելի է դարձնում մարմնի սենսորների տվյալները (օրինակ՝ սրտի զարկերի հաճախականությունը, ջերմաստիճանը, արյան մեջ թթվածնի տոկոսային պարունակության ցուցանիշները), երբ հավելվածն աշխատում է ֆոնային ռեժիմում։"</string>
-    <string name="permlab_bodySensorsWristTemperature" msgid="5007987988922337657">"Մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալների հասանելիություն հավելվածի օգտագործման ընթացքում։"</string>
-    <string name="permdesc_bodySensorsWristTemperature" product="default" msgid="4978345709781045181">"Գործարկված հավելվածին հասանելի է դարձնում մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալները։"</string>
-    <string name="permlab_bodySensors_wristTemperature_background" msgid="7692772783509074356">"Մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալների հասանելիություն ֆոնային ռեժիմում։"</string>
-    <string name="permdesc_bodySensors_wristTemperature_background" product="default" msgid="3170369705518699219">"Ֆոնային ռեժիմում գործարկված հավելվածին հասանելի է դարձնում մարմնի սենսորների՝ դաստակի ջերմաստիճանի մասին տվյալները։"</string>
     <string name="permlab_readCalendar" msgid="6408654259475396200">"Կարդալ օրացույցի միջոցառումները և տվյալները"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="515452384059803326">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր պլանշետում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
     <string name="permdesc_readCalendar" product="tv" msgid="5811726712981647628">"Այս հավելվածը կարող է կարդալ օրացույցի՝ ձեր Android TV սարքում պահված բոլոր միջոցառումները, ինչպես նաև հրապարակել կամ պահել ձեր օրացույցի տվյալները:"</string>
@@ -507,7 +503,8 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Թույլ է տալիս հավելվածին կառավարել թրթռոցը:"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Հավելվածին թույլ է տալիս օգտագործել սարքի թրթռալու ռեժիմը։"</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"ուղղակիորեն զանգել հեռախոսահամարներին"</string>
-    <string name="permdesc_callPhone" msgid="5439809516131609109">"Թույլ է տալիս հավելվածին զանգել հեռախոսահամարներին առանց ձեր միջամտության: Սա կարող է հանգեցնել անկանխատեսելի գանձումների կամ զանգերի: Նկատի ունեցեք, որ սա թույլ չի տալիս հավելվածին զանգել արտակարգ իրավիճակների համարներին: Վնասարար հավելվածները կարող են ձեր հաշվից զանգեր կատարել` առանց ձեր հաստատման:"</string>
+    <!-- no translation found for permdesc_callPhone (7892422187827695656) -->
+    <skip />
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"օգտվել IMS զանգերի ծառայությունից"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Թույլ է տալիս հավելվածին IMS ծառայության միջոցով կատարել զանգեր՝ առանց ձեր միջամտության:"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"կարդալ հեռախոսի կարգավիճակը և ինքնությունը"</string>
@@ -688,7 +685,7 @@
     <string name="face_acquired_too_right" msgid="6245286514593540859">"Տեղափոխեք հեռախոսը ձախ"</string>
     <string name="face_acquired_too_left" msgid="9201762240918405486">"Տեղափոխեք հեռախոսը աջ"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Նայեք ուղիղ էկրանին։"</string>
-    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Ձեր դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մակարդակում։"</string>
+    <string name="face_acquired_not_detected" msgid="1057966913397548150">"Դեմքը չի երևում։ Հեռախոսը պահեք աչքերի մակարդակում։"</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"Շատ եք շարժում։ Հեռախոսն անշարժ պահեք։"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"Նորից փորձեք։"</string>
     <string name="face_acquired_too_different" msgid="2520389515612972889">"Դեմքը չի հաջողվում ճանաչել։ Նորից փորձեք։"</string>
@@ -713,7 +710,7 @@
     <string name="face_error_canceled" msgid="2164434737103802131">"Դեմքի ճանաչումը չեղարկվել է։"</string>
     <string name="face_error_user_canceled" msgid="5766472033202928373">"Դեմքով ապակողմումը չեղարկվել է օգտատիրոջ կողմից"</string>
     <string name="face_error_lockout" msgid="7864408714994529437">"Չափից շատ փորձեր եք կատարել: Փորձեք ավելի ուշ:"</string>
-    <string name="face_error_lockout_permanent" msgid="3277134834042995260">"Չափազանց շատ փորձեր են արվել։ Դեմքով ապակողպումն անջատված է։"</string>
+    <string name="face_error_lockout_permanent" msgid="8533257333130473422">"Չափազանց շատ փորձեր են արվել։ Դեմքով ապակողպումն անհասանելի է։"</string>
     <string name="face_error_lockout_screen_lock" msgid="5062609811636860928">"Չափազանց շատ փորձեր են արվել։ Օգտագործեք էկրանի կողպումը։"</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Չհաջողվեց հաստատել դեմքը։ Նորից փորձեք։"</string>
     <string name="face_error_not_enrolled" msgid="1134739108536328412">"Դուք չեք կարգավորել դեմքով ապակողպումը։"</string>
@@ -800,10 +797,8 @@
     <string name="permdesc_startViewAppFeatures" msgid="7207240860165206107">"Թույլ է տալիս դիտել հավելվածի գործառույթների մասին տեղեկությունները։"</string>
     <string name="permlab_highSamplingRateSensors" msgid="3941068435726317070">"օգտագործել սենսորների տվյալները բարձր հաճախականության վրա"</string>
     <string name="permdesc_highSamplingRateSensors" msgid="8430061978931155995">"Թույլ է տալիս հավելվածին փորձել սենսորների տվյալները 200 Հց-ից բարձր հաճախականության վրա"</string>
-    <!-- no translation found for permlab_updatePackagesWithoutUserAction (3363272609642618551) -->
-    <skip />
-    <!-- no translation found for permdesc_updatePackagesWithoutUserAction (4567739631260526366) -->
-    <skip />
+    <string name="permlab_updatePackagesWithoutUserAction" msgid="3363272609642618551">"թարմացնել հավելվածն առանց օգտատիրոջ գործողության"</string>
+    <string name="permdesc_updatePackagesWithoutUserAction" msgid="4567739631260526366">"Թույլ է տալիս թարմացնել նախկինում տեղադրված հավելվածները՝ առանց օգտատիրոջ գործողության"</string>
     <string name="policylab_limitPassword" msgid="4851829918814422199">"Սահմանել գաղտնաբառի կանոնները"</string>
     <string name="policydesc_limitPassword" msgid="4105491021115793793">"Կառավարել էկրանի ապակողպման գաղտնաբառերի և PIN կոդերի թույլատրելի երկարությունն ու գրանշանները:"</string>
     <string name="policylab_watchLogin" msgid="7599669460083719504">"Վերահսկել էկրանի ապակողպման փորձերը"</string>
@@ -1956,11 +1951,9 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> հավելվածը հասանելի չէ։ Դրա աշխատանքը սահմանափակում է <xliff:g id="APP_NAME_1">%2$s</xliff:g> հավելվածը։"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Մանրամասն"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Չեղարկել դադարեցումը"</string>
-    <string name="work_mode_off_title" msgid="961171256005852058">"Միացնե՞լ հավելվածները"</string>
-    <string name="work_mode_off_message" msgid="7319580997683623309">"Ձեզ հասանելի կդառնան ձեր աշխատանքային հավելվածներն ու ծանուցումները"</string>
-    <string name="work_mode_turn_on" msgid="3662561662475962285">"Միացնել"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Վերսկսե՞լ աշխ. հավելվածները"</string>
+    <string name="work_mode_turn_on" msgid="5316648862401307800">"Վերսկսել"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Արտակարգ իրավիճակ"</string>
-    <string name="work_mode_dialer_off_message" msgid="2193299184850387465">"Ստացեք ձեր աշխատանքային հավելվածների և զանգերի հասանելիություն"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"Հավելվածը հասանելի չէ"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածն այս պահին հասանելի չէ։"</string>
     <string name="app_streaming_blocked_title" msgid="6090945835898766139">"<xliff:g id="ACTIVITY">%1$s</xliff:g>՝ անհասանելի է"</string>
@@ -2166,12 +2159,14 @@
     <string name="resolver_cant_access_work_apps_explanation" msgid="1129960195389373279">"Այս բովանդակությունը հնարավոր չէ բացել աշխատանքային հավելվածներով"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="6349766201904601544">"Այս բովանդակությունը հնարավոր չէ ուղարկել անձնական հավելվածներով"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="1679399548862724359">"Այս բովանդակությունը հնարավոր չէ բացել անձնական հավելվածներով"</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"Աշխատանքային պրոֆիլի ծառայությունը դադարեցված է"</string>
-    <string name="resolver_switch_on_work" msgid="463709043650610420">"Հպեք միացնելու համար"</string>
+    <!-- no translation found for resolver_turn_on_work_apps (1535946298236678122) -->
+    <skip />
+    <!-- no translation found for resolver_switch_on_work (4527096360772311894) -->
+    <skip />
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Աշխատանքային հավելվածներ չկան"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Անձնական հավելվածներ չկան"</string>
-    <string name="miniresolver_open_in_personal" msgid="3874522693661065566">"Բացե՞լ <xliff:g id="APP">%s</xliff:g> հավելվածը ձեր անձնական պրոֆիլում"</string>
-    <string name="miniresolver_open_in_work" msgid="4415223793669536559">"Բացե՞լ <xliff:g id="APP">%s</xliff:g> հավելվածը ձեր աշխատանքային պրոֆիլում"</string>
+    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Անձնական <xliff:g id="APP">%s</xliff:g> պրոֆիլի բացում"</string>
+    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Աշխատանքային <xliff:g id="APP">%s</xliff:g> պրոֆիլի բացում"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Օգտագործել անձնական դիտարկիչը"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Օգտագործել աշխատանքային դիտարկիչը"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM Network քարտի ապակողպման PIN"</string>

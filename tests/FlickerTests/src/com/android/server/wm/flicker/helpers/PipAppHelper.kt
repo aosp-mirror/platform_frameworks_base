@@ -21,8 +21,8 @@ import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.tools.common.datatypes.Rect
 import android.tools.common.datatypes.Region
-import android.tools.common.datatypes.component.IComponentMatcher
 import android.tools.common.traces.ConditionsFactory
+import android.tools.common.traces.component.IComponentMatcher
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.device.helpers.FIND_TIMEOUT
 import android.tools.device.helpers.SYSTEMUI_PACKAGE
@@ -250,7 +250,11 @@ open class PipAppHelper(instrumentation: Instrumentation) :
             waitConditions = arrayOf(ConditionsFactory.hasPipWindow())
         )
 
-        wmHelper.StateSyncBuilder().withPipShown().waitForAndVerify()
+        wmHelper
+            .StateSyncBuilder()
+            .withWindowSurfaceAppeared(this)
+            .withPipShown()
+            .waitForAndVerify()
     }
 
     /** Expand the PIP window back to full screen via intent and wait until the app is visible */

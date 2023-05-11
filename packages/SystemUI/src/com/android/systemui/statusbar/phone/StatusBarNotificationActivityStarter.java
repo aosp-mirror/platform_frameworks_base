@@ -55,11 +55,10 @@ import com.android.systemui.EventLogTags;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
-import com.android.systemui.shade.NotificationPanelViewController;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -122,7 +121,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
 
     private final CentralSurfaces mCentralSurfaces;
     private final NotificationPresenter mPresenter;
-    private final NotificationPanelViewController mNotificationPanel;
+    private final ShadeViewController mNotificationPanel;
     private final ActivityLaunchAnimator mActivityLaunchAnimator;
     private final NotificationLaunchAnimatorControllerProvider mNotificationAnimationProvider;
     private final UserTracker mUserTracker;
@@ -157,7 +156,7 @@ class StatusBarNotificationActivityStarter implements NotificationActivityStarte
             OnUserInteractionCallback onUserInteractionCallback,
             CentralSurfaces centralSurfaces,
             NotificationPresenter presenter,
-            NotificationPanelViewController panel,
+            ShadeViewController panel,
             ActivityLaunchAnimator activityLaunchAnimator,
             NotificationLaunchAnimatorControllerProvider notificationAnimationProvider,
             LaunchFullScreenIntentProvider launchFullScreenIntentProvider,

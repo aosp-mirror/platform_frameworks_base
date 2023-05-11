@@ -187,7 +187,7 @@ public interface BcSmartspaceDataPlugin extends Plugin {
                 if (action.getIntent() != null) {
                     startIntent(v, action.getIntent(), showOnLockscreen);
                 } else if (action.getPendingIntent() != null) {
-                    startPendingIntent(action.getPendingIntent(), showOnLockscreen);
+                    startPendingIntent(v, action.getPendingIntent(), showOnLockscreen);
                 }
             } catch (ActivityNotFoundException e) {
                 Log.w(TAG, "Could not launch intent for action: " + action, e);
@@ -199,7 +199,7 @@ public interface BcSmartspaceDataPlugin extends Plugin {
                 if (action.getIntent() != null) {
                     startIntent(v, action.getIntent(), showOnLockscreen);
                 } else if (action.getPendingIntent() != null) {
-                    startPendingIntent(action.getPendingIntent(), showOnLockscreen);
+                    startPendingIntent(v, action.getPendingIntent(), showOnLockscreen);
                 }
             } catch (ActivityNotFoundException e) {
                 Log.w(TAG, "Could not launch intent for action: " + action, e);
@@ -210,6 +210,6 @@ public interface BcSmartspaceDataPlugin extends Plugin {
         void startIntent(View v, Intent i, boolean showOnLockscreen);
 
         /** Start the PendingIntent */
-        void startPendingIntent(PendingIntent pi, boolean showOnLockscreen);
+        void startPendingIntent(View v, PendingIntent pi, boolean showOnLockscreen);
     }
 }

@@ -10784,8 +10784,8 @@ com.android.internal.dynamicanimation.animation.DynamicAnimation
 com.android.internal.dynamicanimation.animation.Force
 com.android.internal.dynamicanimation.animation.SpringAnimation
 com.android.internal.dynamicanimation.animation.SpringForce
-com.android.internal.expresslog.Counter
-com.android.internal.expresslog.Utils
+com.android.modules.expresslog.Counter
+com.android.modules.expresslog.Utils
 com.android.internal.graphics.ColorUtils$ContrastCalculator
 com.android.internal.graphics.ColorUtils
 com.android.internal.graphics.SfVsyncFrameCallbackProvider

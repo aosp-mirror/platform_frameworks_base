@@ -68,7 +68,7 @@ constructor(
                     }
                     launch {
                         val label = labelLoader.loadLabel(task.userId, component)
-                        root.contentDescription = label
+                        root.contentDescription = label ?: root.context.getString(R.string.unknown)
                     }
                 }
                 launch {

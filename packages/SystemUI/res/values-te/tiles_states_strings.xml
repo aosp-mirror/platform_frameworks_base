@@ -169,12 +169,12 @@
   <string-array name="tile_states_onehanded">
     <item msgid="8189342855739930015">"అందుబాటులో లేదు"</item>
     <item msgid="146088982397753810">"ఆఫ్"</item>
-    <item msgid="460891964396502657">"ఆన్"</item>
+    <item msgid="460891964396502657">"ఆన్‌లో ఉంది"</item>
   </string-array>
   <string-array name="tile_states_dream">
     <item msgid="6184819793571079513">"అందుబాటులో లేరు"</item>
     <item msgid="8014986104355098744">"ఆఫ్"</item>
-    <item msgid="5966994759929723339">"ఆన్"</item>
+    <item msgid="5966994759929723339">"ఆన్‌లో ఉంది"</item>
   </string-array>
   <string-array name="tile_states_font_scaling">
     <item msgid="3173069902082305985">"అందుబాటులో లేదు"</item>

@@ -19,13 +19,23 @@ package com.android.systemui.keyguard.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class FakeTrustRepository : TrustRepository {
     private val _isCurrentUserTrusted = MutableStateFlow(false)
     override val isCurrentUserTrusted: Flow<Boolean>
         get() = _isCurrentUserTrusted
 
+    private val _isCurrentUserActiveUnlockAvailable = MutableStateFlow(false)
+    override val isCurrentUserActiveUnlockAvailable: StateFlow<Boolean> =
+        _isCurrentUserActiveUnlockAvailable.asStateFlow()
+
     fun setCurrentUserTrusted(trust: Boolean) {
         _isCurrentUserTrusted.value = trust
+    }
+
+    fun setCurrentUserActiveUnlockAvailable(available: Boolean) {
+        _isCurrentUserActiveUnlockAvailable.value = available
     }
 }
