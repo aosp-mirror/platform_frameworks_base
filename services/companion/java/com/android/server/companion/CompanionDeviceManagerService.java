@@ -309,6 +309,7 @@ public class CompanionDeviceManagerService extends SystemService {
         } else if (phase == PHASE_BOOT_COMPLETED) {
             // Run the Inactive Association Removal job service daily.
             InactiveAssociationsRemovalService.schedule(getContext());
+            mCrossDeviceSyncController.onBootCompleted();
         }
     }
 
