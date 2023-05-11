@@ -93,9 +93,8 @@ public class PackageParserLegacyCoreTest {
     private static final int PLATFORM_VERSION = 20;
     private static final int NEWER_VERSION = 30;
 
-    // STOPSHIP: hack for the pre-release SDK
-    private static final int DISALLOW_PRERELEASE = Build.VERSION_CODES.CUR_DEVELOPMENT;
-    private static final int DISALLOW_RELEASED = Build.VERSION.SDK_INT;
+    private static final int DISALLOW_PRERELEASE = -1;
+    private static final int DISALLOW_RELEASED = -1;
 
     @Rule public final Expect expect = Expect.create();
 

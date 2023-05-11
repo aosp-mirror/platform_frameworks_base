@@ -316,16 +316,6 @@ public class FrameworkParsingPackageUtils {
             return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
         }
 
-        // STOPSHIP: hack for the pre-release SDK
-        if (platformSdkCodenames.length == 0) {
-            Slog.w(TAG, "Parsed package requires min development platform " + minCode
-                    + ", returning current version " + Build.VERSION.SDK_INT);
-            return input.success(Build.VERSION.SDK_INT);
-        }
-        if (UnboundedSdkLevel.isAtMost(minCode)) {
-            return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
-        }
-
         // Otherwise, we're looking at an incompatible pre-release SDK.
         if (platformSdkCodenames.length > 0) {
             return input.error(PackageManager.INSTALL_FAILED_OLDER_SDK,
@@ -390,16 +380,6 @@ public class FrameworkParsingPackageUtils {
         // If it's a pre-release SDK and the codename matches this platform, it
         // definitely targets this SDK.
         if (matchTargetCode(platformSdkCodenames, targetCode)) {
-            return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
-        }
-
-        // STOPSHIP: hack for the pre-release SDK
-        if (platformSdkCodenames.length == 0) {
-            Slog.w(TAG, "Parsed package requires development platform " + targetCode
-                    + ", returning current version " + Build.VERSION.SDK_INT);
-            return input.success(Build.VERSION.SDK_INT);
-        }
-        if (UnboundedSdkLevel.isAtMost(targetCode)) {
             return input.success(Build.VERSION_CODES.CUR_DEVELOPMENT);
         }
 
