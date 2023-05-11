@@ -30,8 +30,6 @@ import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
 import android.util.Slog;
 
-import com.android.server.credentials.metrics.ProviderSessionMetric;
-
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -95,12 +93,8 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     public void onFinalResponseReceived(
             ComponentName componentName,
             Void response) {
-        if (mProviders.get(componentName.flattenToString()) != null) {
-            ProviderSessionMetric providerSessionMetric =
-                    mProviders.get(componentName.flattenToString()).mProviderSessionMetric;
-            mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(providerSessionMetric
-                    .getCandidatePhasePerProviderMetric());
-        }
+        mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
+                isPrimaryProviderViaProviderInfo(componentName));
         respondToClientWithResponseAndFinish(null);
     }
 
