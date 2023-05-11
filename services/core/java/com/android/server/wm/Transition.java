@@ -1473,7 +1473,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                         "Calling onTransitionReady: %s", info);
                 mLogger.mSendTimeNs = SystemClock.elapsedRealtimeNanos();
                 mLogger.mInfo = info;
-                mController.mTransitionTracer.logSentTransition(this, mTargets, info);
                 mController.getTransitionPlayer().onTransitionReady(
                         mToken, info, transaction, mFinishTransaction);
                 if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
@@ -1501,13 +1500,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
             postCleanupOnFailure();
         }
-        mController.mLoggerHandler.post(mLogger::logOnSend);
         mOverrideOptions = null;
 
         reportStartReasonsToLogger();
 
         // Since we created root-leash but no longer reference it from core, release it now
         info.releaseAnimSurfaces();
+
+        mController.mLoggerHandler.post(mLogger::logOnSend);
+        if (mLogger.mInfo != null) {
+            mController.mTransitionTracer.logSentTransition(this, mTargets, info);
+        }
     }
 
     /**
@@ -2245,6 +2248,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             info.mReadyMode = change.getMode();
             change.setStartAbsBounds(info.mAbsoluteBounds);
             change.setFlags(info.getChangeFlags(target));
+            info.mReadyFlags = change.getFlags();
             change.setDisplayId(info.mDisplayId, getDisplayId(target));
 
             final Task task = target.asTask();
@@ -2627,6 +2631,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         /** The mode which is set when the transition is ready. */
         @TransitionInfo.TransitionMode
         int mReadyMode;
+
+        /** The flags which is set when the transition is ready. */
+        @TransitionInfo.ChangeFlags
+        int mReadyFlags;
 
         ChangeInfo(@NonNull WindowContainer origState) {
             mContainer = origState;
