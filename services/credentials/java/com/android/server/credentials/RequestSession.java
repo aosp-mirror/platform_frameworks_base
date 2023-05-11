@@ -304,6 +304,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
      * @param response the response associated with the API call that just completed
      */
     protected void respondToClientWithResponseAndFinish(V response) {
+        mRequestSessionMetric.logCandidateAggregateMetrics(mProviders);
         mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(/*has_exception=*/ false,
                 ProviderStatusForMetrics.FINAL_SUCCESS);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
@@ -337,6 +338,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
      * @param errorMsg  the error message given back in the flow
      */
     protected void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
+        mRequestSessionMetric.logCandidateAggregateMetrics(mProviders);
         mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(
                 /*has_exception=*/ true, ProviderStatusForMetrics.FINAL_FAILURE);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
@@ -358,5 +360,17 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         boolean isUserCanceled = errorType.contains(MetricUtilities.USER_CANCELED_SUBSTRING);
         mRequestSessionMetric.logFailureOrUserCancel(isUserCanceled);
         finishSession(/*propagateCancellation=*/false);
+    }
+
+    /**
+     * Reveals if a certain provider is primary after ensuring it exists at all in the designated
+     * provider info.
+     *
+     * @param componentName used to identify the provider we want to check primary status for
+     */
+    protected boolean isPrimaryProviderViaProviderInfo(ComponentName componentName) {
+        var chosenProviderSession = mProviders.get(componentName.flattenToString());
+        return chosenProviderSession != null && chosenProviderSession.mProviderInfo != null
+                && chosenProviderSession.mProviderInfo.isPrimary();
     }
 }

@@ -25,10 +25,9 @@ import java.util.Map;
  * Contains information about what was collected from the authentication entry output.
  */
 public class BrowsedAuthenticationMetric {
-    private static final String TAG = "BrowsedAuthenticationMetric";
+    private static final String TAG = "AuthenticationMetric";
     // The session id of this provider known flow related metric
     private final int mSessionIdProvider;
-
     // The provider associated with the press, defaults to -1
     private int mProviderUid = -1;
 
@@ -42,7 +41,7 @@ public class BrowsedAuthenticationMetric {
     // The status of this particular provider
     private int mProviderStatus = -1;
     // Indicates if this provider returned from the authentication entry query, default false
-    private boolean mQueryReturned = false;
+    private boolean mAuthReturned = false;
 
     // TODO(b/271135048) - Match the atom and provide a clean per provider session metric
     // encapsulation.
@@ -84,12 +83,12 @@ public class BrowsedAuthenticationMetric {
         mProviderStatus = providerStatus;
     }
 
-    public void setQueryReturned(boolean queryReturned) {
-        mQueryReturned = queryReturned;
+    public void setAuthReturned(boolean authReturned) {
+        mAuthReturned = authReturned;
     }
 
-    public boolean isQueryReturned() {
-        return mQueryReturned;
+    public boolean isAuthReturned() {
+        return mAuthReturned;
     }
 
     public int getProviderStatus() {
