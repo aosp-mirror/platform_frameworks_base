@@ -27,7 +27,6 @@ import android.annotation.PluralsRes;
 import android.annotation.RawRes;
 import android.annotation.StyleRes;
 import android.annotation.StyleableRes;
-import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ActivityInfo.Config;
@@ -409,24 +408,17 @@ public class ResourcesImpl {
 
                 if ((configChanges & ActivityInfo.CONFIG_LOCALE) != 0) {
                     if (locales.size() > 1) {
-                        String[] availableLocales;
-
-                        LocaleList localeList = ResourcesManager.getInstance().getLocaleList();
-                        if (!localeList.isEmpty()) {
-                            availableLocales = localeList.toLanguageTags().split(",");
-                        } else {
-                            // The LocaleList has changed. We must query the AssetManager's
-                            // available Locales and figure out the best matching Locale in the new
-                            // LocaleList.
-                            availableLocales = mAssets.getNonSystemLocales();
+                        // The LocaleList has changed. We must query the AssetManager's available
+                        // Locales and figure out the best matching Locale in the new LocaleList.
+                        String[] availableLocales = mAssets.getNonSystemLocales();
+                        if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
+                            // No app defined locales, so grab the system locales.
+                            availableLocales = mAssets.getLocales();
                             if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
-                                // No app defined locales, so grab the system locales.
-                                availableLocales = mAssets.getLocales();
-                                if (LocaleList.isPseudoLocalesOnly(availableLocales)) {
-                                    availableLocales = null;
-                                }
+                                availableLocales = null;
                             }
                         }
+
                         if (availableLocales != null) {
                             final Locale bestLocale = locales.getFirstMatchWithEnglishSupported(
                                     availableLocales);
