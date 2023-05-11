@@ -323,7 +323,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private final Executor mExternalExecutor;
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
-    private final int mTargetSdkVersion;
     private final boolean mSupportSandboxedDetectionService;
 
     @GuardedBy("mLock")
@@ -866,7 +865,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 new Handler(Looper.myLooper()));
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
-        mTargetSdkVersion = targetSdkVersion;
         mSupportSandboxedDetectionService = supportSandboxedDetectionService;
     }
 
@@ -1392,6 +1390,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
      *
      * @hide
      */
+    // TODO(b/281608561): remove the enrollment flow from AlwaysOnHotwordDetector
     void onSoundModelsChanged() {
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID
@@ -1411,14 +1410,28 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 return;
             }
 
-            // Stop the recognition before proceeding.
-            // This is done because we want to stop the recognition on an older model if it changed
-            // or was deleted.
-            // The availability change callback should ensure that the client starts recognition
-            // again if needed.
+            // Stop the recognition before proceeding if we are in the enrolled state.
+            // The framework makes the guarantee that an actively used model is present in the
+            // system server's enrollment database. For this reason we much stop an actively running
+            // model when the underlying sound model in enrollment database no longer match.
             if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
+                // A SoundTriggerFailure will be sent to the client if the model state was
+                // changed. This is an overloading of the onFailure usage because we are sending a
+                // callback even in the successful stop case. If stopRecognition is successful,
+                // suggested next action RESTART_RECOGNITION will be sent.
+                // TODO(b/281608561): This code path will be removed with other enrollment flows in
+                //  this class.
                 try {
-                    stopRecognitionLocked();
+                    int result = stopRecognitionLocked();
+                    if (result == STATUS_OK) {
+                        sendSoundTriggerFailure(new SoundTriggerFailure(ERROR_CODE_UNKNOWN,
+                                "stopped recognition because of enrollment update",
+                                FailureSuggestedAction.RESTART_RECOGNITION));
+                    }
+                    // only log to logcat here because many failures can be false positives such as
+                    // calling stopRecognition where there is no started session.
+                    Log.w(TAG, "Failed to stop recognition after enrollment update: code="
+                            + result);
                 } catch (Exception e) {
                     Slog.w(TAG, "Failed to stop recognition after enrollment update", e);
                     if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
@@ -1608,6 +1621,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                             .build())
                     .sendToTarget();
         }
+
         @Override
         public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
             Slog.w(TAG, "Generic sound trigger event detected at AOHD: " + event);
