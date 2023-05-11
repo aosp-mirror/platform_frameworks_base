@@ -115,7 +115,8 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD audio: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD audio"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Slušni aparati"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE zvuk"</string>
+    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
+    <skip />
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Povezan na slušne aparate"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Povezano s LE zvukom"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Povezano sa zvukom medija"</string>
@@ -597,8 +598,8 @@
     <string name="add_user_failed" msgid="4809887794313944872">"Kreiranje novog korisnika nije uspjelo"</string>
     <string name="add_guest_failed" msgid="8074548434469843443">"Kreiranje novog gosta nije uspjelo"</string>
     <string name="user_nickname" msgid="262624187455825083">"Nadimak"</string>
-    <string name="user_add_user" msgid="7876449291500212468">"Dodajte korisnika"</string>
-    <string name="guest_new_guest" msgid="3482026122932643557">"Dodajte gosta"</string>
+    <string name="user_add_user" msgid="7876449291500212468">"Dodavanje korisnika"</string>
+    <string name="guest_new_guest" msgid="3482026122932643557">"Dodavanje gosta"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_reset_guest" msgid="6110013010356013758">"Poništi sesiju gosta"</string>
     <string name="guest_reset_guest_dialog_title" msgid="8047270010895437534">"Poništiti sesiju gosta?"</string>

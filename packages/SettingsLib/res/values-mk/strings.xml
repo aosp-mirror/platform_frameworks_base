@@ -115,7 +115,8 @@
     <string name="bluetooth_profile_a2dp_high_quality" msgid="4739440941324792775">"HD-аудио: <xliff:g id="CODEC_NAME">%1$s</xliff:g>"</string>
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"HD-аудио"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Слушни помагала"</string>
-    <string name="bluetooth_profile_le_audio" msgid="3237854988278539061">"LE-аудио"</string>
+    <!-- no translation found for bluetooth_profile_le_audio (6125267378720026515) -->
+    <skip />
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Поврзано со слушни помагала"</string>
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Поврзано на LE-аудио"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Поврзан со аудио на медиуми"</string>
@@ -224,7 +225,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Поставките за името на пристапната точка не се достапни за овој корисник"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Отстранување грешки преку USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Режим за отстранување грешки кога е поврзано USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Отповикај овластувања за отстранување грешки преку USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Повлечи овластувања за отстранување грешки преку USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Безжично отстранување грешки"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим за отстранување грешки кога е поврзано Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Грешка"</string>
@@ -253,13 +254,13 @@
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Скенирајте QR-код за да го спарите уредот преку Wi‑Fi"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Поврзете се на Wi-Fi мрежа"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, отстранува грешка, програмер"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Кратенка за извештај за грешка"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Прикажи копче во менито за вклучување за да се направи извештај за грешка"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Кратенка за извештај за грешки"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Прикажи копче за создавање извештај за грешки во менито на копчето за вклучување"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Остани во активен режим"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Екранот никогаш нема да биде во режим на спиење додека се полни"</string>
-    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Овозможи Bluetooth HCI за евиденција на пресретнување пакети"</string>
+    <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Овозможи евиденција за Bluetooth HCI"</string>
     <string name="bt_hci_snoop_log_summary" msgid="6808538971394092284">"Снимај Bluetooth-пакети. (Вклучи Bluetooth по промената на поставкава)"</string>
-    <string name="oem_unlock_enable" msgid="5334869171871566731">"Отклучување со OEM"</string>
+    <string name="oem_unlock_enable" msgid="5334869171871566731">"Отклучување OEM"</string>
     <string name="oem_unlock_enable_summary" msgid="5857388174390953829">"Дозволи да се отклучи подигнувачот"</string>
     <string name="confirm_enable_oem_unlock_title" msgid="8249318129774367535">"Дозволете отклучување со OEM?"</string>
     <string name="confirm_enable_oem_unlock_text" msgid="854131050791011970">"ПРЕДУПРЕДУВАЊЕ: функциите за заштита на уредот нема да работат на овој уред додека е вклучена оваа поставка."</string>
@@ -322,7 +323,7 @@
     <string name="adb_warning_message" msgid="8145270656419669221">"Отстранувањето грешки на USB е наменето само за целите на развој. Користете го за копирање податоци меѓу вашиот компјутер и вашиот уред, за инсталирање апликации на вашиот уред без известување и за читање евиденција на податоци."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Да се дозволи безжично отстранување грешки?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Безжичното отстранување грешки е наменето само за програмирање. Користете го за копирање податоци помеѓу компјутерот и уредот, за инсталирање апликации на уредот без известување и за читање податоци од евиденцијата."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Отповикај пристап кон отстранување грешка од USB од сите претходно овластени компјутери?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Да се повлече пристапот за сите компјутери што претходно сте ги овластиле за отстранување грешки преку USB?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Дозволи поставки за развој?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Овие поставки се наменети само за употреба за развој. Тие може да предизвикаат уредот и апликациите во него да се расипат или да се однесуваат необично."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Потврди апликации преку USB"</string>
@@ -333,7 +334,7 @@
     <string name="enhanced_connectivity_summary" msgid="1576414159820676330">"Ја овозможува функцијата „Подобрена поврзливост“."</string>
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Овозможи апликација на терминал што овозможува локален пристап кон школка."</string>
-    <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверување HDCP"</string>
+    <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверка со HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Постави однесување на проверка на HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Отстранување грешки"</string>
     <string name="debug_app" msgid="8903350241392391766">"Изберете апликација за отстранување грешки"</string>
@@ -356,10 +357,10 @@
     <string name="show_touches_summary" msgid="3692861665994502193">"Прикажувај визуелни повратни информации за допири"</string>
     <string name="show_screen_updates" msgid="2078782895825535494">"Прикажи ажурир. површина"</string>
     <string name="show_screen_updates_summary" msgid="2126932969682087406">"Осветли површ. на прозорци при нивно ажурирање"</string>
-    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Прикажи ажурирања на прегледи"</string>
-    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Осветли прегледи во прозорците при цртање"</string>
-    <string name="show_hw_layers_updates" msgid="5268370750002509767">"Ажурир. слоеви на хардвер"</string>
-    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Осветли слоеви на хардвер со зелено кога се ажур."</string>
+    <string name="show_hw_screen_updates" msgid="2021286231267747506">"Покажувај ажурирања на приказот"</string>
+    <string name="show_hw_screen_updates_summary" msgid="3539770072741435691">"Осветлувај го приказот при повлекување во прозорците"</string>
+    <string name="show_hw_layers_updates" msgid="5268370750002509767">"Покажувај ажурирања на хардверски слоеви"</string>
+    <string name="show_hw_layers_updates_summary" msgid="5850955890493054618">"Осветлувај ги хардверските слоеви со зелено кога се ажурираат"</string>
     <string name="debug_hw_overdraw" msgid="8944851091008756796">"Отстр. греш. на GPU"</string>
     <string name="disable_overlays" msgid="4206590799671557143">"Оневозможи HW-преклопувања"</string>
     <string name="disable_overlays_summary" msgid="1954852414363338166">"Секогаш користи GPU за составување екран"</string>
@@ -613,15 +614,15 @@
     <string name="grant_admin" msgid="4323199171790522574">"Да, направи да биде администратор"</string>
     <string name="not_grant_admin" msgid="3557849576157702485">"Не, не прави да биде администратори"</string>
     <string name="guest_exit_dialog_button" msgid="1736401897067442044">"Излези"</string>
-    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Да се зачува активност на гостин?"</string>
-    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Може да зачувате активност од тековната сесија или да ги избришете сите апликации и податоци"</string>
+    <string name="guest_exit_dialog_title_non_ephemeral" msgid="7675327443743162986">"Да се зачува гостинската активност?"</string>
+    <string name="guest_exit_dialog_message_non_ephemeral" msgid="223385323235719442">"Може да ја зачувате активноста од тековната сесија или да ги избришете сите апликации и податоци"</string>
     <string name="guest_exit_clear_data_button" msgid="3425812652180679014">"Избриши"</string>
     <string name="guest_exit_save_data_button" msgid="3690974510644963547">"Зачувај"</string>
     <string name="guest_exit_button" msgid="5774985819191803960">"Излези од режим на гостин"</string>
     <string name="guest_reset_button" msgid="2515069346223503479">"Ресетирај ја гостинската сесија"</string>
     <string name="guest_exit_quick_settings_button" msgid="1912362095913765471">"Излези од режим на гостин"</string>
     <string name="guest_notification_ephemeral" msgid="7263252466950923871">"Целата активност ќе се избрише при излегувањето"</string>
-    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Можете да ја зачувате или избришете вашата активност при излегувањето"</string>
+    <string name="guest_notification_non_ephemeral" msgid="6843799963012259330">"Може да ја зачувате или избришете вашата активност при излегувањето"</string>
     <string name="guest_notification_non_ephemeral_non_first_login" msgid="8009307983766934876">"Ресетирајте за да ја избришете активноста на сесијата сега или може да ја зачувате или избришете активноста при излегувањето"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"Фотографирајте"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"Одберете слика"</string>
