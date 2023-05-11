@@ -421,6 +421,14 @@ public class LogModule {
         return factory.create("BouncerLog", 250);
     }
 
+    /** Provides a table logging buffer for the Monitor. */
+    @Provides
+    @SysUISingleton
+    @MonitorLog
+    public static TableLogBuffer provideMonitorTableLogBuffer(TableLogBufferFactory factory) {
+        return factory.create("MonitorLog", 250);
+    }
+
     /**
      * Provides a {@link LogBuffer} for Udfps logs.
      */
