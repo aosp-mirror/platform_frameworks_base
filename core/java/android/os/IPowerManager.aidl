@@ -55,6 +55,7 @@ interface IPowerManager
     float getBrightnessConstraint(int constraint);
     @UnsupportedAppUsage
     boolean isInteractive();
+    boolean isDisplayInteractive(int displayId);
     boolean areAutoPowerSaveModesEnabled();
     boolean isPowerSaveMode();
     PowerSaveState getPowerSaveState(int serviceType);
