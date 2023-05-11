@@ -5557,7 +5557,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (isPermissionCheckFlagEnabled()) {
                 CallerIdentity caller = getCallerIdentity(who, callerPackageName);
                 ap = enforcePermissionAndGetEnforcingAdmin(
-                        who, MANAGE_DEVICE_POLICY_WIPE_DATA,
+                        who,
+                        /*permission=*/ MANAGE_DEVICE_POLICY_WIPE_DATA,
+                        /* adminPolicy=*/ DeviceAdminInfo.USES_POLICY_WIPE_DATA,
                         caller.getPackageName(), affectedUserId).getActiveAdmin();
             } else {
                 // This API can only be called by an active device admin,
@@ -5839,9 +5841,11 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             ActiveAdmin ap;
             if (isPermissionCheckFlagEnabled()) {
                 CallerIdentity caller = getCallerIdentity(who, callerPackageName);
-                // TODO: Allow use of USES_POLICY_FORCE_LOCK
                 ap = enforcePermissionAndGetEnforcingAdmin(
-                        who, MANAGE_DEVICE_POLICY_LOCK, caller.getPackageName(),
+                        who,
+                        /*permission=*/ MANAGE_DEVICE_POLICY_LOCK,
+                        /*AdminPolicy=*/DeviceAdminInfo.USES_POLICY_FORCE_LOCK,
+                        caller.getPackageName(),
                         affectedUserId).getActiveAdmin();
             } else {
                 ap = getActiveAdminForCallerLocked(
@@ -11806,9 +11810,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             if (isPermissionCheckFlagEnabled()) {
                 CallerIdentity caller = getCallerIdentity(admin, callerPackageName);
                 int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
-                // TODO: Support USES_POLICY_DISABLE_KEYGUARD_FEATURES
                 ap = enforcePermissionAndGetEnforcingAdmin(
-                        admin, MANAGE_DEVICE_POLICY_KEYGUARD,
+                        admin,
+                        /*permission=*/MANAGE_DEVICE_POLICY_KEYGUARD,
+                        /*adminPolicy=*/DeviceAdminInfo.USES_POLICY_DISABLE_KEYGUARD_FEATURES,
                         caller.getPackageName(), affectedUserId).getActiveAdmin();
             } else {
                 ap = getActiveAdminForCallerLocked(admin,
@@ -13354,23 +13359,23 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             caller = getCallerIdentity(who);
         }
         int userId = caller.getUserId();
+        int affectedUserId = parent ? getProfileParentId(userId) : userId;
 
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_USER_RESTRICTION);
 
         if (isPolicyEngineForFinanceFlagEnabled()) {
             if (!isDeviceOwner(caller) && !isProfileOwner(caller)) {
+                EnforcingAdmin admin = enforcePermissionForUserRestriction(
+                        who,
+                        key,
+                        caller.getPackageName(),
+                        affectedUserId);
                 if (!mInjector.isChangeEnabled(ENABLE_COEXISTENCE_CHANGE, callerPackage, userId)) {
                     throw new IllegalStateException("Calling package is not targeting Android U.");
                 }
                 if (!UserRestrictionsUtils.isValidRestriction(key)) {
                     throw new IllegalArgumentException("Invalid restriction key: " + key);
                 }
-                int affectedUserId = parent ? getProfileParentId(userId) : userId;
-                EnforcingAdmin admin = enforcePermissionForUserRestriction(
-                        who,
-                        key,
-                        caller.getPackageName(),
-                        affectedUserId);
                 PolicyDefinition<Boolean> policyDefinition =
                         PolicyDefinition.getPolicyDefinitionForUserRestriction(key);
                 if (enabledFromThisOwner) {
@@ -23007,6 +23012,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_FACTORY_RESET,
             MANAGE_DEVICE_POLICY_INSTALL_UNKNOWN_SOURCES,
             MANAGE_DEVICE_POLICY_KEYGUARD,
+            MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS,
             MANAGE_DEVICE_POLICY_LOCK_TASK,
             MANAGE_DEVICE_POLICY_ORGANIZATION_IDENTITY,
             MANAGE_DEVICE_POLICY_RUNTIME_PERMISSIONS,
@@ -23014,7 +23020,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             MANAGE_DEVICE_POLICY_SUPPORT_MESSAGE,
             MANAGE_DEVICE_POLICY_TIME,
             MANAGE_DEVICE_POLICY_USERS,
-            MANAGE_DEVICE_POLICY_LOCK_CREDENTIALS
+            MANAGE_DEVICE_POLICY_WIPE_DATA
     );
 
     /**
@@ -23534,14 +23540,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
      *
      * @param callerPackageName The package name  of the calling application.
      * @param adminPolicy The admin policy that should grant holders permission.
-     * @param permission The name of the permission being checked.
+     * @param permissions The names of the permissions being checked.
      * @param targetUserId The userId of the user which the caller needs permission to act on.
      * @throws SecurityException if the caller has not been granted the given permission,
      * the associated cross-user permission if the caller's user is different to the target user.
      */
     private void enforcePermissions(String[] permissions, int adminPolicy,
             String callerPackageName, int targetUserId) throws SecurityException {
-        if (hasAdminPolicy(adminPolicy, callerPackageName)) {
+        if (hasAdminPolicy(adminPolicy, callerPackageName)
+                && mInjector.userHandleGetCallingUserId() == targetUserId) {
             return;
         }
         enforcePermissions(permissions, callerPackageName, targetUserId);
@@ -23570,8 +23577,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private boolean hasAdminPolicy(int adminPolicy, String callerPackageName) {
         CallerIdentity caller = getCallerIdentity(callerPackageName);
-        ActiveAdmin deviceAdmin = getActiveAdminForCaller(null, caller);
-        return deviceAdmin != null && deviceAdmin.info.usesPolicy(adminPolicy);
+        ActiveAdmin deviceAdmin = getActiveAdminWithPolicyForUidLocked(
+                null, adminPolicy, caller.getUid());
+        return deviceAdmin != null;
     }
 
     /**
