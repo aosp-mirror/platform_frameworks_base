@@ -33,6 +33,7 @@ import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -53,8 +54,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,18 +127,17 @@ public class HdmiCecLocalDeviceTest {
     private boolean isControlEnabled;
     private int mPowerStatus;
 
-    @Mock
-    private AudioManager mAudioManager;
+    private AudioManagerWrapper mAudioManager;
 
     @Before
     public void SetUp() {
-        MockitoAnnotations.initMocks(this);
-
         Context context = InstrumentationRegistry.getTargetContext();
 
+        FakeAudioFramework audioFramework = new FakeAudioFramework();
+        mAudioManager = spy(audioFramework.getAudioManager());
         mHdmiControlService =
                 new HdmiControlService(context, Collections.emptyList(),
-                        new FakeAudioDeviceVolumeManagerWrapper()) {
+                        mAudioManager, audioFramework.getAudioDeviceVolumeManager()) {
                     @Override
                     boolean isCecControlEnabled() {
                         return isControlEnabled;
@@ -170,11 +168,6 @@ public class HdmiCecLocalDeviceTest {
                     @Override
                     void wakeUp() {
                         mWakeupMessageReceived = true;
-                    }
-
-                    @Override
-                    AudioManager getAudioManager() {
-                        return mAudioManager;
                     }
                 };
         mHdmiControlService.setIoLooper(mTestLooper.getLooper());
