@@ -18,6 +18,7 @@ package android.service.voice;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.service.voice.SoundTriggerFailure.ERROR_CODE_UNKNOWN;
 import static android.service.voice.VoiceInteractionService.MULTIPLE_ACTIVE_HOTWORD_DETECTORS;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -268,6 +269,15 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     @ChangeId
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     static final long THROW_ON_INITIALIZE_IF_NO_DSP = 269165460L;
+
+    /**
+     * Gates returning {@link Callback#onFailure} and {@link Callback#onUnknownFailure}
+     * when asynchronous exceptions are propagated to the client. If the change is not enabled,
+     * the existing behavior of delivering {@link #STATE_ERROR} is retained.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS = 280471513L;
 
     /**
      * Controls the sensitivity threshold adjustment factor for a given model.
@@ -1408,12 +1418,16 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
             if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
                 try {
                     stopRecognitionLocked();
-                } catch (SecurityException e) {
-                    Slog.w(TAG, "Failed to Stop the recognition", e);
-                    if (mTargetSdkVersion <= Build.VERSION_CODES.R) {
-                        throw e;
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failed to stop recognition after enrollment update", e);
+                    if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
+                        sendSoundTriggerFailure(new SoundTriggerFailure(ERROR_CODE_UNKNOWN,
+                                "Failed to stop recognition after enrollment update: "
+                                        + Log.getStackTraceString(e),
+                                FailureSuggestedAction.RECREATE_DETECTOR));
+                    } else {
+                        updateAndNotifyStateChangedLocked(STATE_ERROR);
                     }
-                    updateAndNotifyStateChangedLocked(STATE_ERROR);
                     return;
                 }
             }
@@ -1537,6 +1551,12 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
 
     @GuardedBy("mLock")
     private void updateAndNotifyStateChangedLocked(int availability) {
+        updateAvailabilityLocked(availability);
+        notifyStateChangedLocked();
+    }
+
+    @GuardedBy("mLock")
+    private void updateAvailabilityLocked(int availability) {
         if (DBG) {
             Slog.d(TAG, "Hotword availability changed from " + mAvailability
                     + " -> " + availability);
@@ -1544,7 +1564,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         if (!mIsAvailabilityOverriddenByTestApi) {
             mAvailability = availability;
         }
-        notifyStateChangedLocked();
     }
 
     @GuardedBy("mLock")
@@ -1552,6 +1571,18 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         Message message = Message.obtain(mHandler, MSG_AVAILABILITY_CHANGED);
         message.arg1 = mAvailability;
         message.sendToTarget();
+    }
+
+    @GuardedBy("mLock")
+    private void sendUnknownFailure(String failureMessage) {
+        // update but do not call onAvailabilityChanged callback for STATE_ERROR
+        updateAvailabilityLocked(STATE_ERROR);
+        Message.obtain(mHandler, MSG_DETECTION_UNKNOWN_FAILURE, failureMessage).sendToTarget();
+    }
+
+    private void sendSoundTriggerFailure(@NonNull SoundTriggerFailure soundTriggerFailure) {
+        Message.obtain(mHandler, MSG_DETECTION_SOUND_TRIGGER_FAILURE, soundTriggerFailure)
+                .sendToTarget();
     }
 
     /** @hide */
@@ -1725,6 +1756,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
     }
 
+    // TODO(b/267681692): remove the AsyncTask usage
     class RefreshAvailabilityTask extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -1743,13 +1775,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     }
                     updateAndNotifyStateChangedLocked(availability);
                 }
-            } catch (SecurityException e) {
+            } catch (Exception e) {
+                // Any exception here not caught will crash the process because AsyncTask does not
+                // bubble up the exceptions to the client app, so we must propagate it to the app.
                 Slog.w(TAG, "Failed to refresh availability", e);
-                if (mTargetSdkVersion <= Build.VERSION_CODES.R) {
-                    throw e;
-                }
                 synchronized (mLock) {
-                    updateAndNotifyStateChangedLocked(STATE_ERROR);
+                    if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
+                        sendUnknownFailure(
+                                "Failed to refresh availability: " + Log.getStackTraceString(e));
+                    } else {
+                        updateAndNotifyStateChangedLocked(STATE_ERROR);
+                    }
                 }
             }
 
