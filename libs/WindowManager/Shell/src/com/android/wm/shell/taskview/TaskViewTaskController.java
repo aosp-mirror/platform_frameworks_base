@@ -31,6 +31,7 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.util.CloseGuard;
+import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
@@ -48,6 +49,8 @@ import java.util.concurrent.Executor;
  * The reverse communication is done via the {@link TaskViewBase} interface.
  */
 public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
+
+    private static final String TAG = TaskViewTaskController.class.getSimpleName();
 
     private final CloseGuard mGuard = new CloseGuard();
 
@@ -405,6 +408,11 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
      * Call to remove the task from window manager. This task will not appear in recents.
      */
     void removeTask() {
+        if (mTaskToken == null) {
+            // Call to remove task before we have one, do nothing
+            Slog.w(TAG, "Trying to remove a task that was never added? (no taskToken)");
+            return;
+        }
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.removeTask(mTaskToken);
         mTaskViewTransitions.closeTaskView(wct, this);
@@ -493,11 +501,14 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                     .show(mTaskLeash);
             // Also reparent on finishTransaction since the finishTransaction will reparent back
             // to its "original" parent by default.
+            Rect boundsOnScreen = mTaskViewBase.getCurrentBoundsOnScreen();
             finishTransaction.reparent(mTaskLeash, mSurfaceControl)
-                    .setPosition(mTaskLeash, 0, 0);
-            mTaskViewTransitions.updateBoundsState(this, mTaskViewBase.getCurrentBoundsOnScreen());
+                    .setPosition(mTaskLeash, 0, 0)
+                    // TODO: maybe once b/280900002 is fixed this will be unnecessary
+                    .setWindowCrop(mTaskLeash, boundsOnScreen.width(), boundsOnScreen.height());
+            mTaskViewTransitions.updateBoundsState(this, boundsOnScreen);
             mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
-            wct.setBounds(mTaskToken, mTaskViewBase.getCurrentBoundsOnScreen());
+            wct.setBounds(mTaskToken, boundsOnScreen);
         } else {
             // The surface has already been destroyed before the task has appeared,
             // so go ahead and hide the task entirely

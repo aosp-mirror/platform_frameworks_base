@@ -17,6 +17,7 @@
 package com.android.systemui.dump
 
 import android.content.Context
+import android.icu.text.SimpleDateFormat
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
@@ -30,7 +31,6 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption.CREATE
 import java.nio.file.StandardOpenOption.TRUNCATE_EXISTING
 import java.nio.file.attribute.BasicFileAttributes
-import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject

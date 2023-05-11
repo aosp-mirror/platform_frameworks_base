@@ -531,7 +531,7 @@ Frame CanvasContext::getFrame() {
     }
 }
 
-void CanvasContext::draw() {
+void CanvasContext::draw(bool solelyTextureViewUpdates) {
     if (auto grContext = getGrContext()) {
         if (grContext->abandoned()) {
             LOG_ALWAYS_FATAL("GrContext is abandoned/device lost at start of CanvasContext::draw");
@@ -604,7 +604,8 @@ void CanvasContext::draw() {
                     static_cast<int32_t>(mCurrentFrameInfo->get(FrameInfoIndex::InputEventId));
             native_window_set_frame_timeline_info(
                     mNativeSurface->getNativeWindow(), frameCompleteNr, vsyncId, inputEventId,
-                    mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime));
+                    mCurrentFrameInfo->get(FrameInfoIndex::FrameStartTime),
+                    solelyTextureViewUpdates);
         }
     }
 
@@ -885,7 +886,7 @@ void CanvasContext::prepareAndDraw(RenderNode* node) {
     TreeInfo info(TreeInfo::MODE_RT_ONLY, *this);
     prepareTree(info, frameInfo, systemTime(SYSTEM_TIME_MONOTONIC), node);
     if (info.out.canDrawThisFrame) {
-        draw();
+        draw(info.out.solelyTextureViewUpdates);
     } else {
         // wait on fences so tasks don't overlap next frame
         waitOnFences();

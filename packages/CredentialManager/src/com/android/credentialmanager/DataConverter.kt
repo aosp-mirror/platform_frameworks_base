@@ -62,7 +62,6 @@ import androidx.credentials.provider.RemoteEntry
 import org.json.JSONObject
 import java.time.Instant
 
-// TODO: remove all !! checks
 fun getAppLabel(
     pm: PackageManager,
     appPackageName: String
@@ -88,7 +87,7 @@ private fun getServiceLabelAndIcon(
     val component = ComponentName.unflattenFromString(providerFlattenedComponentName)
     if (component == null) {
         // Test data has only package name not component name.
-        // TODO: remove once test data is removed
+        // For test data usage only.
         try {
             val pkgInfo = pm.getPackageInfo(
                 providerFlattenedComponentName,
@@ -303,7 +302,6 @@ class GetFlowUtils {
                     )
                 }
             }
-            // TODO: handle empty list due to parsing error.
             return result
         }
 
@@ -392,7 +390,6 @@ class GetFlowUtils {
                     subTitle = actionEntryUi.subtitle?.toString(),
                 ))
             }
-            // TODO: handle empty list
             return result
         }
     }
@@ -483,7 +480,10 @@ class CreateFlowUtils {
                     createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                     appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                     userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
-                    isAutoSelectRequest = createCredentialRequestJetpack.isAutoSelectAllowed,
+                    // The jetpack library requires a fix to parse this value correctly for
+                    // the password type. For now, directly parse it ourselves.
+                    isAutoSelectRequest = createCredentialRequest.credentialData.getBoolean(
+                        Constants.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS, false),
                 )
                 is CreatePublicKeyCredentialRequest -> {
                     newRequestDisplayInfoFromPasskeyJson(
@@ -494,7 +494,10 @@ class CreateFlowUtils {
                         createCredentialRequestJetpack.preferImmediatelyAvailableCredentials,
                         appPreferredDefaultProviderId = appPreferredDefaultProviderId,
                         userSetDefaultProviderIds = requestInfo.defaultProviderIds.toSet(),
-                        isAutoSelectRequest = createCredentialRequestJetpack.isAutoSelectAllowed,
+                        // The jetpack library requires a fix to parse this value correctly for
+                        // the passkey type. For now, directly parse it ourselves.
+                        isAutoSelectRequest = createCredentialRequest.credentialData.getBoolean(
+                            Constants.BUNDLE_KEY_PREFER_IMMEDIATELY_AVAILABLE_CREDENTIALS, false),
                     )
                 }
                 is CreateCustomCredentialRequest -> {
