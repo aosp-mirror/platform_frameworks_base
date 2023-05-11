@@ -40,4 +40,5 @@ interface ITrustManager {
     boolean isTrustUsuallyManaged(int userId);
     void unlockedByBiometricForUser(int userId, in BiometricSourceType source);
     void clearAllBiometricRecognized(in BiometricSourceType target, int unlockedUser);
+    boolean isActiveUnlockRunning(int userId);
 }
