@@ -214,7 +214,7 @@ final class LetterboxConfiguration {
     // otherwise the apps get blacked out when they are resumed and do not have focus yet.
     private boolean mIsCompatFakeFocusEnabled;
 
-    // Whether should use split screen aspect ratio for the activity when camera compat treatment
+    // Whether we should use split screen aspect ratio for the activity when camera compat treatment
     // is enabled and activity is connected to the camera in fullscreen.
     private final boolean mIsCameraCompatSplitScreenAspectRatioEnabled;
 
@@ -1118,7 +1118,7 @@ final class LetterboxConfiguration {
     }
 
     /**
-     * Whether should use split screen aspect ratio for the activity when camera compat treatment
+     * Whether we should use split screen aspect ratio for the activity when camera compat treatment
      * is enabled and activity is connected to the camera in fullscreen.
      */
     boolean isCameraCompatSplitScreenAspectRatioEnabled() {
