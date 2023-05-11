@@ -19,10 +19,6 @@ package com.android.server.companion.datatransfer.contextsync;
 import android.annotation.NonNull;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
 import android.telecom.VideoProfile;
@@ -30,7 +26,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -42,7 +37,6 @@ public class CrossDeviceCall {
 
     public static final String EXTRA_CALL_ID =
             "com.android.companion.datatransfer.contextsync.extra.CALL_ID";
-    private static final int APP_ICON_BITMAP_DIMENSION = 256;
 
     private final String mId;
     private Call mCall;
@@ -80,47 +74,13 @@ public class CrossDeviceCall {
                     .getApplicationInfo(mCallingAppPackageName,
                             PackageManager.ApplicationInfoFlags.of(0));
             mCallingAppName = packageManager.getApplicationLabel(applicationInfo).toString();
-            mCallingAppIcon = renderDrawableToByteArray(
+            mCallingAppIcon = BitmapUtils.renderDrawableToByteArray(
                     packageManager.getApplicationIcon(applicationInfo));
         } catch (PackageManager.NameNotFoundException e) {
             Slog.e(TAG, "Could not get application info for package " + mCallingAppPackageName, e);
         }
         mIsMuted = callAudioState != null && callAudioState.isMuted();
         updateCallDetails(callDetails);
-    }
-
-    private byte[] renderDrawableToByteArray(Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            // Can't recycle the drawable's bitmap, so handle separately
-            final Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-            if (bitmap.getWidth() > APP_ICON_BITMAP_DIMENSION
-                    || bitmap.getHeight() > APP_ICON_BITMAP_DIMENSION) {
-                // Downscale, as the original drawable bitmap is too large.
-                final Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap,
-                        APP_ICON_BITMAP_DIMENSION, APP_ICON_BITMAP_DIMENSION, /* filter= */ true);
-                final byte[] renderedBitmap = renderBitmapToByteArray(scaledBitmap);
-                scaledBitmap.recycle();
-                return renderedBitmap;
-            }
-            return renderBitmapToByteArray(bitmap);
-        }
-        final Bitmap bitmap = Bitmap.createBitmap(APP_ICON_BITMAP_DIMENSION,
-                APP_ICON_BITMAP_DIMENSION,
-                Bitmap.Config.ARGB_8888);
-        try {
-            final Canvas canvas = new Canvas(bitmap);
-            drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
-            drawable.draw(canvas);
-            return renderBitmapToByteArray(bitmap);
-        } finally {
-            bitmap.recycle();
-        }
-    }
-
-    private byte[] renderBitmapToByteArray(Bitmap bitmap) {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream(bitmap.getByteCount());
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        return baos.toByteArray();
     }
 
     /**
