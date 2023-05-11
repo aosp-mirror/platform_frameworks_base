@@ -93,22 +93,6 @@ final class EnforcingAdmin {
                 activeAdmin);
     }
 
-
-    static EnforcingAdmin createEnterpriseEnforcingAdmin(
-            @NonNull String packageName, int userId) {
-        Objects.requireNonNull(packageName);
-        return new EnforcingAdmin(
-                packageName, /* componentName= */ null, Set.of(DPC_AUTHORITY), userId,
-                /* activeAdmin= */ null);
-    }
-
-    static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName, int userId) {
-        Objects.requireNonNull(componentName);
-        return new EnforcingAdmin(
-                componentName.getPackageName(), componentName, Set.of(DEVICE_ADMIN_AUTHORITY),
-                userId, /* activeAdmin=*/ null);
-    }
-
     static EnforcingAdmin createDeviceAdminEnforcingAdmin(ComponentName componentName, int userId,
             ActiveAdmin activeAdmin) {
         Objects.requireNonNull(componentName);
@@ -190,10 +174,16 @@ final class EnforcingAdmin {
     }
 
     private Set<String> getAuthorities() {
-        if (mAuthorities == null) {
+        if (mAuthorities == null && mIsRoleAuthority) {
             mAuthorities = getRoleAuthoritiesOrDefault(mPackageName, mUserId);
         }
         return mAuthorities;
+    }
+
+    void reloadRoleAuthorities() {
+        if (mIsRoleAuthority) {
+            mAuthorities = getRoleAuthoritiesOrDefault(mPackageName, mUserId);
+        }
     }
 
     boolean hasAuthority(String authority) {
@@ -304,6 +294,7 @@ final class EnforcingAdmin {
         int userId = parser.getAttributeInt(/* namespace= */ null, ATTR_USER_ID);
 
         if (isRoleAuthority) {
+            // TODO(b/281697976): load active admin
             return new EnforcingAdmin(packageName, userId, null);
         } else {
             String className = parser.getAttributeValue(/* namespace= */ null, ATTR_CLASS_NAME);

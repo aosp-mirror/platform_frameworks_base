@@ -16,6 +16,7 @@
 
 package com.android.server.credentials;
 
+import android.Manifest;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
@@ -30,9 +31,9 @@ import android.credentials.ui.RequestInfo;
 import android.os.CancellationSignal;
 import android.os.RemoteException;
 import android.service.credentials.CallingAppInfo;
+import android.service.credentials.PermissionUtils;
 import android.util.Slog;
 
-import com.android.server.credentials.metrics.ProviderSessionMetric;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 
 import java.util.ArrayList;
@@ -101,7 +102,9 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
         try {
             mPendingIntent = mCredentialManagerUi.createPendingIntent(
                     RequestInfo.newGetRequestInfo(
-                            mRequestId, mClientRequest, mClientAppInfo.getPackageName()),
+                            mRequestId, mClientRequest, mClientAppInfo.getPackageName(),
+                            PermissionUtils.hasPermission(mContext, mClientAppInfo.getPackageName(),
+                                    Manifest.permission.CREDENTIAL_MANAGER_SET_ALLOWED_PROVIDERS)),
                     providerDataList);
             mClientCallback.onPendingIntent(mPendingIntent);
         } catch (RemoteException e) {
@@ -130,13 +133,8 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
         Slog.i(TAG, "onFinalResponseReceived from: " + componentName.flattenToString());
-        mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
-        if (mProviders.get(componentName.flattenToString()) != null) {
-            ProviderSessionMetric providerSessionMetric =
-                    mProviders.get(componentName.flattenToString()).mProviderSessionMetric;
-            mRequestSessionMetric.collectChosenMetricViaCandidateTransfer(providerSessionMetric
-                    .getCandidatePhasePerProviderMetric());
-        }
+        mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
+                isPrimaryProviderViaProviderInfo(componentName));
         if (response != null) {
             mRequestSessionMetric.collectChosenProviderStatus(
                     ProviderStatusForMetrics.FINAL_SUCCESS.getMetricCode());

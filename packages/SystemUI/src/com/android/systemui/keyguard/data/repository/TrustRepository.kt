@@ -95,6 +95,11 @@ constructor(
                                 "onTrustManagedChanged"
                             )
                         }
+
+                        override fun onIsActiveUnlockRunningChanged(
+                            isRunning: Boolean,
+                            userId: Int
+                        ) = Unit
                     }
                 trustManager.registerTrustListener(callback)
                 logger.trustListenerRegistered()

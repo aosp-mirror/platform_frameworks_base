@@ -269,6 +269,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
             case AUTHENTICATION_ACTION_ENTRY_KEY:
                 Action authenticationEntry = mProviderResponseDataHandler
                         .getAuthenticationAction(entryKey);
+                mProviderSessionMetric.createAuthenticationBrowsingMetric();
                 if (authenticationEntry == null) {
                     Slog.i(TAG, "Unexpected authenticationEntry key");
                     invokeCallbackOnInternalInvalidState();
@@ -423,6 +424,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
                 providerPendingIntentResponse);
         if (exception != null) {
             // TODO (b/271135048), for AuthenticationEntry callback selection, set error
+            mProviderSessionMetric.collectAuthenticationExceptionStatus(/*hasException*/true);
             invokeCallbackWithError(exception.getType(),
                     exception.getMessage());
             // Additional content received is in the form of an exception which ends the flow.

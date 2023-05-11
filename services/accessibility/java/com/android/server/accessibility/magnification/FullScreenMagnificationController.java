@@ -56,7 +56,6 @@ import com.android.internal.R;
 import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
@@ -65,6 +64,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import java.util.ArrayList;
 import java.util.Locale;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 /**
@@ -774,7 +774,8 @@ public class FullScreenMagnificationController implements
     public FullScreenMagnificationController(@NonNull Context context,
             @NonNull AccessibilityTraceManager traceManager, @NonNull Object lock,
             @NonNull MagnificationInfoChangedCallback magnificationInfoChangedCallback,
-            @NonNull MagnificationScaleProvider scaleProvider) {
+            @NonNull MagnificationScaleProvider scaleProvider,
+            @NonNull Executor backgroundExecutor) {
         this(
                 new ControllerContext(
                         context,
@@ -785,7 +786,8 @@ public class FullScreenMagnificationController implements
                 lock,
                 magnificationInfoChangedCallback,
                 scaleProvider,
-                /* thumbnailSupplier= */ null);
+                /* thumbnailSupplier= */ null,
+                backgroundExecutor);
     }
 
     /** Constructor for tests */
@@ -795,7 +797,8 @@ public class FullScreenMagnificationController implements
             @NonNull Object lock,
             @NonNull MagnificationInfoChangedCallback magnificationInfoChangedCallback,
             @NonNull MagnificationScaleProvider scaleProvider,
-            Supplier<MagnificationThumbnail> thumbnailSupplier) {
+            Supplier<MagnificationThumbnail> thumbnailSupplier,
+            @NonNull Executor backgroundExecutor) {
         mControllerCtx = ctx;
         mLock = lock;
         mMainThreadId = mControllerCtx.getContext().getMainLooper().getThread().getId();
@@ -805,7 +808,7 @@ public class FullScreenMagnificationController implements
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mMagnificationThumbnailFeatureFlag = new MagnificationThumbnailFeatureFlag();
         mMagnificationThumbnailFeatureFlag.addOnChangedListener(
-                ConcurrentUtils.DIRECT_EXECUTOR, this::onMagnificationThumbnailFeatureFlagChanged);
+                backgroundExecutor, this::onMagnificationThumbnailFeatureFlagChanged);
         if (thumbnailSupplier != null) {
             mThumbnailSupplier = thumbnailSupplier;
         } else {

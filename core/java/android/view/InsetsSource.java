@@ -293,16 +293,23 @@ public class InsetsSource implements Parcelable {
      * @see #createId(Object, int, int)
      */
     public static int getIndex(int id) {
-        return (id % (1 << 16)) >> 5;
+        //   start: ????????????????***********?????
+        // & 65535: 0000000000000000***********?????
+        //    >> 5: 000000000000000000000***********
+        return (id & 65535) >> 5;
     }
 
     /**
      * Gets the {@link InsetsType} from the ID.
      *
      * @see #createId(Object, int, int)
+     * @see WindowInsets.Type#indexOf(int)
      */
     public static int getType(int id) {
-        return 1 << (id % 32);
+        // start: ???????????????????????????*****
+        //  & 31: 000000000000000000000000000*****
+        //  1 <<: See WindowInsets.Type#indexOf
+        return 1 << (id & 31);
     }
 
     public static String flagsToString(@Flags int flags) {

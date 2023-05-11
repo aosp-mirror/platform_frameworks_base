@@ -1257,7 +1257,7 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"Iniciando apps."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"Concluindo a inicialização."</string>
     <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela durante a configuração da impressão digital."</string>
-    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Desligue a tela para encerrar a configuração"</string>
+    <string name="fp_power_button_enrollment_title" msgid="6976841690455338563">"Desligue a tela para encerrar a configuração."</string>
     <string name="fp_power_button_enrollment_button_text" msgid="3199783266386029200">"Desativar"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"Continuar a verificação da digital?"</string>
     <string name="fp_power_button_bp_message" msgid="2983163038168903393">"Você pressionou o botão liga/desliga. Normalmente, essa ação desliga a tela.\n\nToque levemente na tela para verificar sua impressão digital."</string>
@@ -2165,8 +2165,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reativar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nenhum app de trabalho"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nenhum app pessoal"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Abrir <xliff:g id="APP">%s</xliff:g> no perfil pessoal"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Abrir <xliff:g id="APP">%s</xliff:g> no perfil do trabalho"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar o navegador pessoal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar o navegador de trabalho"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para desbloqueio da rede do chip"</string>
@@ -2326,7 +2330,7 @@
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"O recurso Dual Screen está indisponível"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"O recurso Dual Screen está indisponível porque a Economia de bateria está ativada. É possível desativar essa opção nas configurações."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Ir para Configurações"</string>
-    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desativar"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Desligar"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"Dispositivo <xliff:g id="DEVICE_NAME">%s</xliff:g> configurado"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Layout do teclado definido como <xliff:g id="LAYOUT_1">%s</xliff:g>. Toque para mudar."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Layout do teclado definido como <xliff:g id="LAYOUT_1">%1$s</xliff:g> e <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Toque para mudar."</string>

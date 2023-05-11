@@ -111,6 +111,7 @@ public class WallpaperBackupAgent extends BackupAgent {
 
     private WallpaperManager mWallpaperManager;
     private WallpaperEventLogger mEventLogger;
+    private BackupManager mBackupManager;
 
     private boolean mSystemHasLiveComponent;
     private boolean mLockHasLiveComponent;
@@ -129,8 +130,8 @@ public class WallpaperBackupAgent extends BackupAgent {
             Slog.v(TAG, "quota file " + mQuotaFile.getPath() + " exists=" + mQuotaExceeded);
         }
 
-        BackupManager backupManager = new BackupManager(getApplicationContext());
-        mEventLogger = new WallpaperEventLogger(backupManager, /* wallpaperAgent */ this);
+        mBackupManager = new BackupManager(getBaseContext());
+        mEventLogger = new WallpaperEventLogger(mBackupManager, /* wallpaperAgent */ this);
     }
 
     @Override
@@ -564,21 +565,44 @@ public class WallpaperBackupAgent extends BackupAgent {
                 if (!isDeviceInRestore()) {
                     // We don't want to reapply the wallpaper outside a restore.
                     unregister();
+
+                    // We have finished restore and not succeeded, so let's log that as an error.
+                    WallpaperEventLogger logger = new WallpaperEventLogger(
+                            mBackupManager.getDelayedRestoreLogger());
+                    logger.onSystemLiveWallpaperRestoreFailed(
+                            WallpaperEventLogger.ERROR_LIVE_PACKAGE_NOT_INSTALLED);
+                    if (applyToLock) {
+                        logger.onLockLiveWallpaperRestoreFailed(
+                                WallpaperEventLogger.ERROR_LIVE_PACKAGE_NOT_INSTALLED);
+                    }
+                    mBackupManager.reportDelayedRestoreResult(logger.getBackupRestoreLogger());
+
                     return;
                 }
 
                 if (componentName.getPackageName().equals(packageName)) {
                     Slog.d(TAG, "Applying component " + componentName);
-                    mWallpaperManager.setWallpaperComponent(componentName);
+                    boolean sysResult = mWallpaperManager.setWallpaperComponent(componentName);
+                    WallpaperEventLogger logger = new WallpaperEventLogger(
+                            mBackupManager.getDelayedRestoreLogger());
+                    if (sysResult) {
+                        logger.onSystemLiveWallpaperRestored(componentName);
+                    } else {
+                        logger.onSystemLiveWallpaperRestoreFailed(
+                                WallpaperEventLogger.ERROR_SET_COMPONENT_EXCEPTION);
+                    }
                     if (applyToLock) {
                         try {
                             mWallpaperManager.clear(FLAG_LOCK);
+                            logger.onLockLiveWallpaperRestored(componentName);
                         } catch (IOException e) {
                             Slog.w(TAG, "Failed to apply live wallpaper to lock screen: " + e);
+                            logger.onLockLiveWallpaperRestoreFailed(e.getClass().getName());
                         }
                     }
                     // We're only expecting to restore the wallpaper component once.
                     unregister();
+                    mBackupManager.reportDelayedRestoreResult(logger.getBackupRestoreLogger());
                 }
             }
         };
@@ -598,5 +622,10 @@ public class WallpaperBackupAgent extends BackupAgent {
             Slog.w(TAG, "Failed to check if the user is in restore: " + e);
             return false;
         }
+    }
+
+    @VisibleForTesting
+    void setBackupManagerForTesting(BackupManager backupManager) {
+        mBackupManager = backupManager;
     }
 }

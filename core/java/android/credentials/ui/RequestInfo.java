@@ -113,6 +113,21 @@ public final class RequestInfo implements Parcelable {
                 hasPermissionToOverrideDefault, defaultProviderIds);
     }
 
+    /**
+     * Creates new {@code RequestInfo} for a get-credential flow.
+     *
+     * @hide
+     */
+    @NonNull
+    public static RequestInfo newGetRequestInfo(
+            @NonNull IBinder token, @NonNull GetCredentialRequest getCredentialRequest,
+            @NonNull String appPackageName, boolean hasPermissionToOverrideDefault) {
+        return new RequestInfo(
+                token, TYPE_GET, appPackageName, null, getCredentialRequest,
+                hasPermissionToOverrideDefault,
+                /*defaultProviderIds=*/ new ArrayList<>());
+    }
+
     /** Creates new {@code RequestInfo} for a get-credential flow. */
     @NonNull
     public static RequestInfo newGetRequestInfo(

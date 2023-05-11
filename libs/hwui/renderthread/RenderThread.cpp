@@ -133,12 +133,23 @@ void RenderThread::frameCallback(int64_t vsyncId, int64_t frameDeadline, int64_t
     if (timeLord().vsyncReceived(frameTimeNanos, frameTimeNanos, vsyncId, frameDeadline,
                                  frameInterval) &&
         !mFrameCallbackTaskPending) {
-        ATRACE_NAME("queue mFrameCallbackTask");
         mFrameCallbackTaskPending = true;
 
-        nsecs_t timeUntilDeadline = frameDeadline - frameTimeNanos;
-        nsecs_t runAt = (frameTimeNanos + (timeUntilDeadline * 0.25f));
-        queue().postAt(runAt, [=]() { dispatchFrameCallbacks(); });
+        using SteadyClock = std::chrono::steady_clock;
+        using Nanos = std::chrono::nanoseconds;
+        using toNsecs_t = std::chrono::duration<nsecs_t, std::nano>;
+        using toFloatMillis = std::chrono::duration<float, std::milli>;
+
+        const auto frameTimeTimePoint = SteadyClock::time_point(Nanos(frameTimeNanos));
+        const auto deadlineTimePoint = SteadyClock::time_point(Nanos(frameDeadline));
+
+        const auto timeUntilDeadline = deadlineTimePoint - frameTimeTimePoint;
+        const auto runAt = (frameTimeTimePoint + (timeUntilDeadline / 4));
+
+        ATRACE_FORMAT("queue mFrameCallbackTask to run after %.2fms",
+                      toFloatMillis(runAt - SteadyClock::now()).count());
+        queue().postAt(toNsecs_t(runAt.time_since_epoch()).count(),
+                       [=]() { dispatchFrameCallbacks(); });
     }
 }
 

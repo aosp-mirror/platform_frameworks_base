@@ -46,7 +46,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.TransactionTooLargeException;
 import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -68,9 +67,6 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     @Overridable
     private static final long DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER = 244637991;
-    private static final String ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER =
-            "DefaultRescindBalPrivilegesFromPendingIntentSender__"
-                    + "enable_default_rescind_bal_privileges_from_pending_intent_sender";
 
     public static final int FLAG_ACTIVITY_SENDER = 1 << 0;
     public static final int FLAG_BROADCAST_SENDER = 1 << 1;
@@ -373,13 +369,6 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 : BackgroundStartPrivileges.NONE;
     }
 
-    private static boolean isDefaultRescindBalPrivilegesFromPendingIntentSenderEnabled() {
-        return DeviceConfig.getBoolean(
-                DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-                ENABLE_DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER,
-                false); // assume false if the property is unknown
-    }
-
     /**
      * Default {@link BackgroundStartPrivileges} to be used if the intent sender has not made an
      * explicit choice.
@@ -393,10 +382,9 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
             })
     public static BackgroundStartPrivileges getDefaultBackgroundStartPrivileges(
             int callingUid) {
-        boolean isFlagEnabled = isDefaultRescindBalPrivilegesFromPendingIntentSenderEnabled();
         boolean isChangeEnabledForApp = CompatChanges.isChangeEnabled(
                 DEFAULT_RESCIND_BAL_PRIVILEGES_FROM_PENDING_INTENT_SENDER, callingUid);
-        if (isFlagEnabled && isChangeEnabledForApp) {
+        if (isChangeEnabledForApp) {
             return BackgroundStartPrivileges.ALLOW_FGS;
         } else {
             return BackgroundStartPrivileges.ALLOW_BAL;

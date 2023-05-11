@@ -20,11 +20,11 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"ନିଜର PIN ଲେଖନ୍ତୁ"</string>
+    <string name="keyguard_enter_your_pin" msgid="5429932527814874032">"ଆପଣଙ୍କ PIN ଲେଖନ୍ତୁ"</string>
     <string name="keyguard_enter_pin" msgid="8114529922480276834">"PIN ଲେଖନ୍ତୁ"</string>
     <string name="keyguard_enter_your_pattern" msgid="351503370332324745">"ଆପଣଙ୍କ ପାଟର୍ନ ଲେଖନ୍ତୁ"</string>
     <string name="keyguard_enter_pattern" msgid="7616595160901084119">"ପାଟର୍ନ ଡ୍ର କରନ୍ତୁ"</string>
-    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ନିଜ ପାସ୍‌ୱର୍ଡ ଲେଖନ୍ତୁ"</string>
+    <string name="keyguard_enter_your_password" msgid="7225626204122735501">"ଆପଣଙ୍କ ପାସୱାର୍ଡ ଲେଖନ୍ତୁ"</string>
     <string name="keyguard_enter_password" msgid="6483623792371009758">"ପାସୱାର୍ଡ ଲେଖନ୍ତୁ"</string>
     <string name="keyguard_sim_error_message_short" msgid="633630844240494070">"ଅମାନ୍ୟ କାର୍ଡ।"</string>
     <string name="keyguard_charged" msgid="5478247181205188995">"ଚାର୍ଜ ହୋଇଗଲା"</string>
@@ -108,7 +108,7 @@
     <string name="kg_password_pin_failed" msgid="5136259126330604009">"SIM PIN କାମ ବିଫଳ ହେଲା!"</string>
     <string name="kg_password_puk_failed" msgid="6778867411556937118">"SIM PUKର କାମ ବିଫଳ ହେଲା!"</string>
     <string name="accessibility_ime_switch_button" msgid="9082358310194861329">"ଇନପୁଟ୍‌ ପଦ୍ଧତି ବଦଳାନ୍ତୁ"</string>
-    <string name="airplane_mode" msgid="2528005343938497866">"ଏରୋପ୍ଲେନ ମୋଡ"</string>
+    <string name="airplane_mode" msgid="2528005343938497866">"ଏୟାରପ୍ଲେନ ମୋଡ"</string>
     <string name="kg_prompt_reason_restart_pattern" msgid="3321211830602827742">"ଡିଭାଇସ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାଟର୍ନ ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_reason_restart_pin" msgid="2672166323886110512">"ଡିଭାଇସ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ PIN ଆବଶ୍ୟକ"</string>
     <string name="kg_prompt_reason_restart_password" msgid="3967993994418885887">"ଡିଭାଇସ ରିଷ୍ଟାର୍ଟ ହେବା ପରେ ପାସୱାର୍ଡ ଆବଶ୍ୟକ"</string>

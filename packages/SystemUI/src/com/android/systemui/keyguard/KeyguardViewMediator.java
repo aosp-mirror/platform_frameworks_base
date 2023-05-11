@@ -159,6 +159,7 @@ import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 /**
@@ -2710,9 +2711,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                                 CUJ_LOCKSCREEN_UNLOCK_ANIMATION, "DismissPanel"));
 
                 // Pass the surface and metadata to the unlock animation controller.
+                RemoteAnimationTarget[] openingWallpapers = Arrays.stream(wallpapers).filter(
+                        w -> w.mode == RemoteAnimationTarget.MODE_OPENING).toArray(
+                        RemoteAnimationTarget[]::new);
                 mKeyguardUnlockAnimationControllerLazy.get()
                         .notifyStartSurfaceBehindRemoteAnimation(
-                                apps, startTime, mSurfaceBehindRemoteAnimationRequested);
+                                apps, openingWallpapers, startTime,
+                                mSurfaceBehindRemoteAnimationRequested);
             } else {
                 mInteractionJankMonitor.begin(
                         createInteractionJankMonitorConf(
@@ -2961,6 +2966,19 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mSurfaceBehindRemoteAnimationRequested = false;
         mSurfaceBehindRemoteAnimationRunning = false;
         mKeyguardStateController.notifyKeyguardGoingAway(false);
+        finishExitRemoteAnimation();
+    }
+
+    void finishExitRemoteAnimation() {
+        if (mKeyguardUnlockAnimationControllerLazy.get().isAnyKeyguyardAnimatorPlaying()
+                || mKeyguardStateController.isDismissingFromSwipe()) {
+            // If the animation is ongoing, or we are not done with the swipe gesture,
+            // it's too early to terminate the animation
+            Log.d(TAG, "finishAnimation not executing now because "
+                    + "not all animations have finished");
+            return;
+        }
+        Log.d(TAG, "finishAnimation executing");
 
         if (mSurfaceBehindRemoteAnimationFinishedCallback != null) {
             try {

@@ -17,6 +17,7 @@
 
 package com.android.systemui.keyboard.data.repository
 
+import com.android.systemui.keyboard.data.model.Keyboard
 import com.android.systemui.keyboard.shared.model.BacklightModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,18 +25,25 @@ import kotlinx.coroutines.flow.filterNotNull
 
 class FakeKeyboardRepository : KeyboardRepository {
 
-    private val _keyboardConnected = MutableStateFlow(false)
-    override val keyboardConnected: Flow<Boolean> = _keyboardConnected
+    private val _isAnyKeyboardConnected = MutableStateFlow(false)
+    override val isAnyKeyboardConnected: Flow<Boolean> = _isAnyKeyboardConnected
 
     private val _backlightState: MutableStateFlow<BacklightModel?> = MutableStateFlow(null)
     // filtering to make sure backlight doesn't have default initial value
     override val backlight: Flow<BacklightModel> = _backlightState.filterNotNull()
 
+    private val _newlyConnectedKeyboard: MutableStateFlow<Keyboard?> = MutableStateFlow(null)
+    override val newlyConnectedKeyboard: Flow<Keyboard> = _newlyConnectedKeyboard.filterNotNull()
+
     fun setBacklight(state: BacklightModel) {
         _backlightState.value = state
     }
 
-    fun setKeyboardConnected(connected: Boolean) {
-        _keyboardConnected.value = connected
+    fun setIsAnyKeyboardConnected(connected: Boolean) {
+        _isAnyKeyboardConnected.value = connected
+    }
+
+    fun setNewlyConnectedKeyboard(keyboard: Keyboard) {
+        _newlyConnectedKeyboard.value = keyboard
     }
 }

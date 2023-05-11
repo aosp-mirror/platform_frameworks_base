@@ -337,13 +337,15 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                             consumer.accept(stateStatus);
                         }
                     });
-
+            RearDisplayPresentationRequestCallback deviceStateCallback =
+                    new RearDisplayPresentationRequestCallback(activity,
+                            mRearDisplayPresentationController);
             DeviceStateRequest concurrentDisplayStateRequest = DeviceStateRequest.newBuilder(
                     mConcurrentDisplayState).build();
             mDeviceStateManager.requestState(
                     concurrentDisplayStateRequest,
                     mExecutor,
-                    mRearDisplayPresentationController
+                    deviceStateCallback
             );
         }
     }

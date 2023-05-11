@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.drawable.toBitmap
 import com.android.credentialmanager.CredentialSelectorViewModel
@@ -50,6 +51,7 @@ import com.android.credentialmanager.R
 import com.android.credentialmanager.common.BaseEntry
 import com.android.credentialmanager.common.CredentialType
 import com.android.credentialmanager.common.ProviderActivityState
+import com.android.credentialmanager.common.material.ModalBottomSheetDefaults
 import com.android.credentialmanager.common.ui.ActionButton
 import com.android.credentialmanager.common.ui.ActionEntry
 import com.android.credentialmanager.common.ui.ConfirmButton
@@ -132,6 +134,13 @@ fun GetCredentialScreen(
                         }
                     }
                     ProviderActivityState.READY_TO_LAUNCH -> {
+                        // This is a native bug from ModalBottomSheet. For now, use the temporary
+                        // solution of not having an empty state.
+                        if (viewModel.uiState.isAutoSelectFlow) {
+                            Divider(
+                                thickness = Dp.Hairline, color = ModalBottomSheetDefaults.scrimColor
+                            )
+                        }
                         // Launch only once per providerActivityState change so that the provider
                         // UI will not be accidentally launched twice.
                         LaunchedEffect(viewModel.uiState.providerActivityState) {
@@ -141,6 +150,11 @@ fun GetCredentialScreen(
                                 .CREDMAN_GET_CRED_PROVIDER_ACTIVITY_READY_TO_LAUNCH)
                     }
                     ProviderActivityState.PENDING -> {
+                        if (viewModel.uiState.isAutoSelectFlow) {
+                            Divider(
+                                thickness = Dp.Hairline, color = ModalBottomSheetDefaults.scrimColor
+                            )
+                        }
                         // Hide our content when the provider activity is active.
                         viewModel.uiMetrics.log(GetCredentialEvent
                                 .CREDMAN_GET_CRED_PROVIDER_ACTIVITY_PENDING)

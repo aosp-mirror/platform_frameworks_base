@@ -21,6 +21,7 @@ import static org.junit.Assert.assertNotNull;
 
 import android.graphics.PointF;
 import android.os.CancellationSignal;
+import android.os.CancellationSignalBeamer;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
@@ -53,5 +54,16 @@ public class InsertModeGestureTest {
         assertEquals(INSERTION_POINT, gesture.getInsertionPoint());
         assertEquals(FALLBACK_TEXT, gesture.getFallbackText());
         assertEquals(CANCELLATION_SIGNAL, gesture.getCancellationSignal());
+    }
+
+    @Test
+    public void testCancellationSignal() {
+        var cs = CANCELLATION_SIGNAL;
+        var gesture = new InsertModeGesture.Builder().setInsertionPoint(INSERTION_POINT)
+                .setCancellationSignal(CANCELLATION_SIGNAL)
+                .setFallbackText(FALLBACK_TEXT).build();
+        gesture.unbeamCancellationSignal(
+                new CancellationSignalBeamer.Receiver(true /* cancelOnSenderDeath */));
+        assertEquals(gesture.getCancellationSignal(), cs);
     }
 }
