@@ -280,7 +280,7 @@ final class InstallPackageHelper {
             SharedUserSetting requestSharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(
                     request.getScanRequestPackageSetting());
             SharedUserSetting resultSharedUserSetting = mPm.mSettings.getSharedUserSettingLPr(
-                    request.getScanRequestPackageSetting());
+                    request.getScannedPackageSetting());
             if (requestSharedUserSetting != null
                     && requestSharedUserSetting != resultSharedUserSetting) {
                 // shared user changed, remove from old shared user
