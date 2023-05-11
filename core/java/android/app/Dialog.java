@@ -694,12 +694,22 @@ public class Dialog implements DialogInterface, Window.Callback,
      */
     @Override
     public boolean onKeyUp(int keyCode, @NonNull KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
-                && event.isTracking()
-                && !event.isCanceled()
-                && !WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
-            onBackPressed();
-            return true;
+        if (event.isTracking() && !event.isCanceled()) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_BACK:
+                    if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(mContext)) {
+                        onBackPressed();
+                        return true;
+                    }
+                    break;
+                case KeyEvent.KEYCODE_ESCAPE:
+                    if (mCancelable) {
+                        cancel();
+                    } else {
+                        dismiss();
+                    }
+                    return true;
+            }
         }
         return false;
     }
