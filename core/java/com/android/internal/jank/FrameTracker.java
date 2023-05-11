@@ -275,7 +275,7 @@ public class FrameTracker extends SurfaceControl.OnJankDataListener
         }
     }
 
-    @VisibleForTesting
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public Handler getHandler() {
         return mHandler;
     }
