@@ -101,6 +101,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.modules.expresslog.Counter;
 import com.android.server.am.BatteryStatsService;
 import com.android.server.deviceidle.ConstraintController;
 import com.android.server.deviceidle.DeviceIdleConstraintTracker;
@@ -300,6 +301,12 @@ import java.util.stream.Collectors;
 public class DeviceIdleController extends SystemService
         implements AnyMotionDetector.DeviceIdleCallback {
     private static final String TAG = "DeviceIdleController";
+
+    private static final String USER_ALLOWLIST_ADDITION_METRIC_ID =
+            "battery.value_app_added_to_power_allowlist";
+
+    private static final String USER_ALLOWLIST_REMOVAL_METRIC_ID =
+            "battery.value_app_removed_from_power_allowlist";
 
     private static final boolean DEBUG = false;
 
@@ -2784,6 +2791,7 @@ public class DeviceIdleController extends SystemService
                     if (mPowerSaveWhitelistUserApps.put(name, UserHandle.getAppId(ai.uid))
                             == null) {
                         numAdded++;
+                        Counter.logIncrement(USER_ALLOWLIST_ADDITION_METRIC_ID);
                     }
                 } catch (PackageManager.NameNotFoundException e) {
                     Slog.e(TAG, "Tried to add unknown package to power save whitelist: " + name);
@@ -2805,6 +2813,7 @@ public class DeviceIdleController extends SystemService
                 reportPowerSaveWhitelistChangedLocked();
                 updateWhitelistAppIdsLocked();
                 writeConfigFileLocked();
+                Counter.logIncrement(USER_ALLOWLIST_REMOVAL_METRIC_ID);
                 return true;
             }
         }
