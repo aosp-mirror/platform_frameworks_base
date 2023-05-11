@@ -145,7 +145,7 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
     private boolean mExported;
     private boolean mNoPerms;
     private boolean mSingleUser;
-    private SparseBooleanArray mUsersRedirectedToOwner = new SparseBooleanArray();
+    private SparseBooleanArray mUsersRedirectedToOwnerForMedia = new SparseBooleanArray();
 
     private ThreadLocal<AttributionSource> mCallingAttributionSource;
 
@@ -874,34 +874,42 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
             return true;
         }
 
-        if (isAuthorityRedirectedForCloneProfile(mAuthority)) {
-            if (mUsersRedirectedToOwner.indexOfKey(callingUserId) >= 0) {
-                return mUsersRedirectedToOwner.get(callingUserId);
+        // Provider user-id will be determined from User Space of the calling app.
+        return isContentRedirectionAllowedForUser(callingUserId);
+    }
+
+    /**
+     * Verify that content redirection is allowed or not.
+     * We check:
+     * 1. Type of Authority
+     * 2. UserProperties allow content sharing
+     *
+     * @param incomingUserId - Provider's user-id to be passed should be based upon:
+     *                       1. If client is a cloned app running in user 10, it should be that (10)
+     *                       2. If client is accessing content by hinting user space of content,
+     *                       like sysUi (residing in user 0) accessing 'content://11@media/external'
+     *                       then it should be 11.
+     */
+    private boolean isContentRedirectionAllowedForUser(int incomingUserId) {
+        if (MediaStore.AUTHORITY.equals(mAuthority)) {
+            if (mUsersRedirectedToOwnerForMedia.indexOfKey(incomingUserId) >= 0) {
+                return mUsersRedirectedToOwnerForMedia.valueAt(incomingUserId);
             }
 
             // Haven't seen this user yet, look it up
-            try {
-                UserHandle callingUser = UserHandle.getUserHandleForUid(uid);
-                Context callingUserContext = mContext.createPackageContextAsUser("system",
-                        0, callingUser);
-                UserManager um = callingUserContext.getSystemService(UserManager.class);
-
-                if (um != null && um.isCloneProfile()) {
-                    UserHandle parent = um.getProfileParent(callingUser);
-
-                    if (parent != null && parent.equals(myUserHandle())) {
-                        mUsersRedirectedToOwner.put(callingUserId, true);
-                        return true;
-                    }
+            UserManager um = mContext.getSystemService(UserManager.class);
+            if (um != null && um.getUserProperties(UserHandle.of(incomingUserId))
+                    .isMediaSharedWithParent()) {
+                UserHandle parent = um.getProfileParent(UserHandle.of(incomingUserId));
+                if (parent != null && parent.equals(myUserHandle())) {
+                    mUsersRedirectedToOwnerForMedia.put(incomingUserId, true);
+                    return true;
                 }
-            } catch (PackageManager.NameNotFoundException e) {
-                // ignore
             }
 
-            mUsersRedirectedToOwner.put(callingUserId, false);
+            mUsersRedirectedToOwnerForMedia.put(incomingUserId, false);
             return false;
         }
-
         return false;
     }
 
@@ -2734,7 +2742,11 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
         String auth = uri.getAuthority();
         if (!mSingleUser) {
             int userId = getUserIdFromAuthority(auth, UserHandle.USER_CURRENT);
-            if (userId != UserHandle.USER_CURRENT && userId != mContext.getUserId()) {
+            if (userId != UserHandle.USER_CURRENT
+                    && userId != mContext.getUserId()
+                    // Since userId specified in content uri, the provider userId would be
+                    // determined from it.
+                    && !isContentRedirectionAllowedForUser(userId)) {
                 throw new SecurityException("trying to query a ContentProvider in user "
                         + mContext.getUserId() + " with a uri belonging to user " + userId);
             }
