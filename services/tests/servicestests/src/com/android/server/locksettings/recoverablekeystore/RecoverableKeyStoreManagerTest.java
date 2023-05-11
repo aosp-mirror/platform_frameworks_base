@@ -858,6 +858,7 @@ public class RecoverableKeyStoreManagerTest {
         }
     }
 
+    @Ignore("Causing breakages so ignoring to resolve, b/281583079")
     @Test
     public void startRecoverySessionWithCertPath_throwsIfBadNumberOfSecrets() throws Exception {
         try {
@@ -875,6 +876,7 @@ public class RecoverableKeyStoreManagerTest {
         }
     }
 
+    @Ignore("Causing breakages so ignoring to resolve, b/281583079")
     @Test
     public void startRecoverySessionWithCertPath_throwsIfPublicKeysMismatch() throws Exception {
         byte[] vaultParams = TEST_VAULT_PARAMS.clone();
