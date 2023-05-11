@@ -16,7 +16,6 @@
 
 package com.android.server.appop;
 
-import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
 import static android.app.AppOpsManager.OP_USE_FULL_SCREEN_INTENT;
 import static android.app.AppOpsManager._NUM_OP;
