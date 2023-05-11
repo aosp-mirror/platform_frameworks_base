@@ -158,6 +158,7 @@ import android.app.PictureInPictureUiState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.admin.DevicePolicyCache;
+import android.app.admin.DeviceStateCache;
 import android.app.assist.ActivityId;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -782,6 +783,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private int[] mAccessibilityServiceUids = new int[0];
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
+
+    private Set<Integer> mProfileOwnerUids = new ArraySet<Integer>();
 
     private final class SettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
@@ -5360,6 +5363,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mDeviceOwnerUid = uid;
     }
 
+    boolean isAffiliatedProfileOwner(int uid) {
+        return uid >= 0 && mProfileOwnerUids.contains(uid)
+            && DeviceStateCache.getInstance().hasAffiliationWithDevice(UserHandle.getUserId(uid));
+    }
+
+    void setProfileOwnerUids(Set<Integer> uids) {
+        mProfileOwnerUids = uids;
+    }
+
     /**
      * Saves the current activity manager state and includes the saved state in the next dump of
      * activity manager.
@@ -6912,6 +6924,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void setDeviceOwnerUid(int uid) {
             synchronized (mGlobalLock) {
                 ActivityTaskManagerService.this.setDeviceOwnerUid(uid);
+            }
+        }
+
+        @Override
+        public void setProfileOwnerUids(Set<Integer> uids) {
+            synchronized (mGlobalLock) {
+                ActivityTaskManagerService.this.setProfileOwnerUids(uids);
             }
         }
 
