@@ -28,8 +28,7 @@ import javax.inject.Inject
 class DreamOverlayLifecycleOwner @Inject constructor() : LifecycleOwner {
     val registry: LifecycleRegistry = LifecycleRegistry(this)
 
-    override val lifecycle: Lifecycle
-        get() {
-            return registry
-        }
+    override fun getLifecycle(): Lifecycle {
+        return registry
+    }
 }
