@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Այս սարքում տեղադրված է վկայագրման կենտրոն։ Ձեր ցանցի ապահով թրաֆիկը կարող է վերահսկվել կամ փոփոխվել։"</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Ձեր ադմինիստրատորը միացրել է ցանցային իրադարձությունների գրանցումը, որը վերահսկում է ձեր սարքի թրաֆիկը։"</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Ձեր ադմինիստրատորը միացրել է ցանցային իրադարձությունների գրանցումը, որը վերահսկում է ձեր աշխատանքային պրոֆիլի թրաֆիկը (այլ ոչ անձնական պրոֆիլը)։"</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Այս սարքը միացած է համացանցին <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով։ Ձեր ցանցային ակտիվությունը՝ ներառյալ էլփոստում և դիտարկիչում արված գործողությունների տվյալները, տեսանելի են VPN պրովայդերին։"</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Այս սարքը միացած է համացանցին <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով։ Ձեր ցանցային ակտիվությունը՝ ներառյալ էլփոստում և դիտարկիչում արված գործողությունների տվյալները, տեսանելի են ձեր ՏՏ ադմինիստրատորին։"</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Այս սարքը համացանցին միացած է <xliff:g id="VPN_APP_0">%1$s</xliff:g>-ի և <xliff:g id="VPN_APP_1">%2$s</xliff:g>-ի միջոցով։ Ձեր ցանցային ակտիվությունը աշխատանքային հավելվածներում, ներառյալ էլփոստում և դիտարկիչում արված գործողությունների տվյալները, տեսանելի են ձեր ՏՏ ադմինիստրատորին։"</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Աշխատանքային հավելվածները համացանցին միացած են <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով։ Ձեր ցանցային ակտիվությունը աշխատանքային հավելվածներում, ներառյալ էլփոստում և դիտարկիչում արված գործողությունների տվյալները, տեսանելի են ձեր ՏՏ ադմինիստրատորին և VPN-ի մատակարարին։"</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Անձնական հավելվածները համացանցին միացած են <xliff:g id="VPN_APP">%1$s</xliff:g>-ի միջոցով։ Ձեր ցանցային ակտիվությունը անձնական հավելվածներում, ներառյալ էլփոստում և դիտարկիչում արված գործողությունների տվյալները, տեսանելի են ձեր VPN-ի մատակարարին։"</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Բարձրախոսներ և էկրաններ"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Առաջարկվող սարքեր"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Ինչպես է աշխատում հեռարձակումը"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Հեռարձակում"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Ձեր մոտակայքում գտնվող՝ համատեղելի Bluetooth սարքերով մարդիկ կարող են լսել մեդիա ֆայլերը, որոնք դուք հեռարձակում եք։"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• «Տեսախցիկ» հավելվածը տեղադրված է"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Հավելվածը կարգավորված է"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Հասանելի է առնվազն մեկ սարք"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Ընտրեք նշումների կանխադրված հավելված՝ նշումների ստեղծման դյուրանցումն օգտագործելու համար"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Ընտրել հավելված"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Հպեք դյուրանցմանը և պահեք"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Չեղարկել"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Փոխել էկրանը հիմա"</string>

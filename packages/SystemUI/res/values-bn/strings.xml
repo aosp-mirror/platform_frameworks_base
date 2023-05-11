@@ -985,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"স্পিকার &amp; ডিসপ্লে"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"সাজেস্ট করা ডিভাইস"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"ব্রডকাস্ট কীভাবে কাজ করে"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"সম্প্রচার করুন"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"আশপাশে লোকজন যাদের মানানসই ব্লুটুথ ডিভাইস আছে, তারা আপনার ব্রডকাস্ট করা মিডিয়া শুনতে পারবেন"</string>
@@ -1122,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• ক্যামেরা অ্যাপ ইনস্টল করুন"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• অ্যাপ সেট-আপ করা হয়ে গেছে"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• অন্তত একটি ডিভাইস উপলভ্য"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"নোট নেওয়ার শর্টকাট ব্যবহার করতে, ডিফল্ট কোনও নোট অ্যাপ বেছে নিন"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"অ্যাপ বেছে নিন"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"শর্টকাট টাচ করে ধরে রাখুন"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"বাতিল করুন"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"এখন স্ক্রিন পাল্টান"</string>

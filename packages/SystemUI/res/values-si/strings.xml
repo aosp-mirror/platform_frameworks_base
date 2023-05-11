@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"මෙම උපාංගය තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"ඔබගේ පරිපාලක ඔබගේ උපාංගය මත තදබදය නිරීක්ෂණය කරන ජාල ලොග් කිරීම ක්‍රියාත්මක කර ඇත."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"ඔබගේ පරිපාලක ඔබගේ පුද්ගලික පැතිකඩෙහි නොව කාර්යාල පැතිකඩෙහි තදබදය නිරීක්ෂණය කරන, ජාල පිරීම ක්‍රියාත්මක කර ඇත."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"මෙම උපාංගය <xliff:g id="VPN_APP">%1$s</xliff:g> හරහා අන්තර්ජාලයට සම්බන්ධ කර ඇත. ඉ-තැපැල් සහ බ්‍රවුස් කිරීමේ දත්ත ඇතුළුව, ඔබේ ජාල ක්‍රියාකාරකම්, VPN සැපයුම්කරුට දෘශ්‍යමාන වේ."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"මෙම උපාංගය <xliff:g id="VPN_APP">%1$s</xliff:g> හරහා අන්තර්ජාලයට සම්බන්ධ කර ඇත. ඉ-තැපැල් සහ බ්‍රවුස් කිරීමේ දත්ත ඇතුළුව, ඔබේ ජාල ක්‍රියාකාරකම්, ඔබේ IT පරිපාලකට දෘශ්‍යමාන වේ."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"මෙම උපාංගය <xliff:g id="VPN_APP_0">%1$s</xliff:g> සහ <xliff:g id="VPN_APP_1">%2$s</xliff:g> හරහා අන්තර්ජාලයට සම්බන්ධ කර ඇත. ඉ-තැපැල් සහ බ්‍රවුස් කිරීමේ දත්ත ඇතුළුව, ඔබගේ ජාල ක්‍රියාකාරකම්, ඔබගේ IT පරිපාලකට දෘශ්‍යමාන වේ."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"ඔබගේ කාර්යාල යෙදුම් <xliff:g id="VPN_APP">%1$s</xliff:g> හරහා අන්තර්ජාලයට සම්බන්ධ කර ඇත. ඉ-තැපැල් සහ බ්‍රවුස් කිරීමේ දත්ත ඇතුළුව, කාර්යාල යෙදුම්වල ඔබගේ ජාල ක්‍රියාකාරකම්, ඔබගේ IT පරිපාලක සහ VPN සැපයුම්කරුට දෘශ්‍යමාන වේ."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"ඔබගේ පුද්ගලික යෙදුම් <xliff:g id="VPN_APP">%1$s</xliff:g> හරහා අන්තර්ජාලයට සම්බන්ධ කර ඇත. ඉ-තැපැල් සහ බ්‍රවුස් කිරීමේ දත්ත ඇතුළුව, ඔබගේ ජාල ක්‍රියාකාරකම්, ඔබගේ VPN සැපයුම්කරුට දෘශ්‍යමාන වේ."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ස්පීකර් සහ සංදර්ශක"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"යෝජිත උපාංග"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"විකාශනය ක්‍රියා කරන ආකාරය"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"විකාශනය"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"ගැළපෙන බ්ලූටූත් උපාංග සහිත ඔබ අවට සිටින පුද්ගලයින්ට ඔබ විකාශනය කරන මාධ්‍යයට සවන් දිය හැකිය"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• කැමරා යෙදුමක් ස්ථාපන කරන්න"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• යෙදුම සකසා ඇත"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• අවම වශයෙන් එක උපාංගයක් ලැබේ"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"සටහන් ගැනීමේ කෙටිමඟ භාවිතා කිරීමට පෙරනිමි සටහන් යෙදුමක් තෝරන්න"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"යෙදුම තෝරන්න"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"ස්පර්ශ කර අල්ලා සිටීමේ කෙටිමඟ"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"අවලංගු කරන්න"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"දැන් තිර මාරු කරන්න"</string>

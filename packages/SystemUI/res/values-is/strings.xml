@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"CA-vottorð er uppsett á þessu tæki. Eftirlit kann að vera haft með öruggri netnotkun þinni eða henni kann að vera breytt."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Kerfisstjóri hefur kveikt á eftirliti netkerfa, sem fylgist með netumferð á tækinu þínu."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Stjórnandinn kveikti á eftirliti netkerfa sem fylgist með netumferð á vinnusniðinu þínu en ekki á eigin sniði."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Þetta tæki er nettengt í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>. VPN-þjónustuaðilinn getur séð netvirkni þína í vinnuforritum, þar á meðal tölvupóst og vefskoðunargögn."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Þetta tæki er nettengt í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>. Kerfisstjórinn þinn getur séð netvirkni þína í vinnuforritum, þar á meðal tölvupóst og vefskoðunargögn."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Þetta tæki er nettengt í gegnum <xliff:g id="VPN_APP_0">%1$s</xliff:g> og <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Kerfisstjórinn þinn getur séð netvirkni þína í vinnuforritum, þar á meðal tölvupósta og vefskoðunargögn."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vinnuforritin þín eru nettengd í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>. Kerfisstjórinn þinn og VPN-þjónustuaðilinn geta séð netvirkni þína í vinnuforritum, þar á meðal tölvupósta og vefskoðunargögn."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Forritin þín til einkanota eru nettengd í gegnum <xliff:g id="VPN_APP">%1$s</xliff:g>. VPN-þjónustuaðilinn þinn getur séð netvirkni þína í vinnuforritum, þar á meðal tölvupósta og vefskoðunargögn."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Hátalarar og skjáir"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Tillögur að tækjum"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Svona virkar útsending"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Útsending"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Fólk nálægt þér með samhæf Bluetooth-tæki getur hlustað á efnið sem þú sendir út"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Setja upp myndavélarforrit"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Forritið er uppsett"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Að minnsta kosti eitt tæki er tiltækt"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Veldu sjálfgefið glósuforrit til að nota flýtileið fyrir glósugerð"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Velja forrit"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Haltu flýtilyklinum inni"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Hætta við"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Skipta um skjá núna"</string>

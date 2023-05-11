@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V zařízení je nainstalována certifikační autorita. Zabezpečený síťový provoz může být sledován nebo upravován."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz v zařízení."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrátor zapnul protokolování sítě, které monitoruje síťový provoz ve vašem pracovním profilu (ale ne v osobním)."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"Toto zařízení je připojeno k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí poskytovatel VPN."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"Toto zařízení je připojeno k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí administrátor IT."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"Toto zařízení je připojeno k internetu prostřednictvím aplikací <xliff:g id="VPN_APP_0">%1$s</xliff:g> a <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí administrátor IT."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Vaše pracovní aplikace jsou připojeny k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu v pracovních aplikacích (jako jsou e-maily a údaje o prohlížení) vidí administrátor IT a poskytovatel VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Vaše osobní aplikace jsou připojeny k internetu prostřednictvím aplikace <xliff:g id="VPN_APP">%1$s</xliff:g>. Vaší síťovou aktivitu (jako jsou e-maily a údaje o prohlížení) vidí poskytovatel VPN."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g> %%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Reproduktory a displeje"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Navrhovaná zařízení"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jak vysílání funguje"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Vysílání"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Lidé ve vašem okolí s kompatibilními zařízeními Bluetooth mohou poslouchat média, která vysíláte"</string>
@@ -1027,7 +1029,7 @@
     <string name="audio_status" msgid="4237055636967709208">"Poslouchá"</string>
     <string name="game_status" msgid="1340694320630973259">"Hraji hru"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Přátelé"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Pojďme chatovat!"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Proberem to večer?"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Obsah se brzy zobrazí"</string>
     <string name="missed_call" msgid="4228016077700161689">"Zmeškaný hovor"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"<xliff:g id="NUMBER">%d</xliff:g>+"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Je nainstalována aplikace pro fotoaparát"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikace je nastavena"</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Je k dispozici alespoň jedno zařízení"</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Vyberte výchozí aplikaci k psaní poznámek, ke které přidružíte zkratku pro poznámky"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Vyberte aplikaci"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Podržte zkratku"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Zrušit"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Přepnout obrazovky"</string>
