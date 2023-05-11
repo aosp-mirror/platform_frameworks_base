@@ -226,9 +226,7 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
         IGsiService gsiService = getGsiService();
         if (enable) {
             try {
-                if (mDsuSlot == null) {
-                    mDsuSlot = gsiService.getActiveDsuSlot();
-                }
+                getActiveDsuSlot();
                 GsiServiceCallback callback = new GsiServiceCallback();
                 synchronized (callback) {
                     gsiService.enableGsiAsync(oneShot, mDsuSlot, callback);
@@ -286,5 +284,16 @@ public class DynamicSystemService extends IDynamicSystemService.Stub {
         super.suggestScratchSize_enforcePermission();
 
         return getGsiService().suggestScratchSize();
+    }
+
+    @Override
+    @EnforcePermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public String getActiveDsuSlot() throws RemoteException {
+        super.getActiveDsuSlot_enforcePermission();
+
+        if (mDsuSlot == null) {
+            mDsuSlot = getGsiService().getActiveDsuSlot();
+        }
+        return mDsuSlot;
     }
 }
