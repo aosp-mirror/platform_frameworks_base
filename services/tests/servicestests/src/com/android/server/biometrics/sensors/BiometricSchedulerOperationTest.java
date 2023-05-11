@@ -62,18 +62,15 @@ public class BiometricSchedulerOperationTest {
             super(null, null, null, null, 0, null, 0, 0,
                     mock(BiometricLogger.class), mock(BiometricContext.class));
         }
-
-        @Override
-        public boolean isInterruptable() {
-            return true;
-        }
     }
 
     @Rule
     public final MockitoRule mockito = MockitoJUnit.rule();
 
     @Mock
-    private InterruptableMonitor<FakeHal> mClientMonitor;
+    private InterruptableMonitor<FakeHal> mInterruptableClientMonitor;
+    @Mock
+    private BaseClientMonitor mNonInterruptableClientMonitor;
     @Mock
     private ClientMonitorCallback mClientCallback;
     @Mock
@@ -84,149 +81,159 @@ public class BiometricSchedulerOperationTest {
     ArgumentCaptor<ClientMonitorCallback> mStartedCallbackCaptor;
 
     private Handler mHandler;
-    private BiometricSchedulerOperation mOperation;
+    private BiometricSchedulerOperation mInterruptableOperation;
+    private BiometricSchedulerOperation mNonInterruptableOperation;
     private boolean mIsDebuggable;
 
     @Before
     public void setUp() {
         mHandler = new Handler(TestableLooper.get(this).getLooper());
         mIsDebuggable = false;
-        mOperation = new BiometricSchedulerOperation(mClientMonitor, mClientCallback,
-                () -> mIsDebuggable);
+        mInterruptableOperation = new BiometricSchedulerOperation(mInterruptableClientMonitor,
+                mClientCallback, () -> mIsDebuggable);
+        mNonInterruptableOperation = new BiometricSchedulerOperation(mNonInterruptableClientMonitor,
+                mClientCallback, () -> mIsDebuggable);
+
+        when(mInterruptableClientMonitor.isInterruptable()).thenReturn(true);
+        when(mNonInterruptableClientMonitor.isInterruptable()).thenReturn(false);
     }
 
     @Test
     public void testStartWithCookie() {
         final int cookie = 200;
-        when(mClientMonitor.getCookie()).thenReturn(cookie);
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getCookie()).thenReturn(cookie);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        assertThat(mOperation.isReadyToStart(mOnStartCallback)).isEqualTo(cookie);
-        assertThat(mOperation.isStarted()).isFalse();
-        assertThat(mOperation.isCanceling()).isFalse();
-        assertThat(mOperation.isFinished()).isFalse();
-        verify(mClientMonitor).waitForCookie(any());
+        assertThat(mInterruptableOperation.isReadyToStart(mOnStartCallback)).isEqualTo(cookie);
+        assertThat(mInterruptableOperation.isStarted()).isFalse();
+        assertThat(mInterruptableOperation.isCanceling()).isFalse();
+        assertThat(mInterruptableOperation.isFinished()).isFalse();
+        verify(mInterruptableClientMonitor).waitForCookie(any());
 
-        final boolean started = mOperation.startWithCookie(mOnStartCallback, cookie);
+        final boolean started = mInterruptableOperation.startWithCookie(mOnStartCallback, cookie);
 
         assertThat(started).isTrue();
-        verify(mClientMonitor).start(mStartedCallbackCaptor.capture());
-        mStartedCallbackCaptor.getValue().onClientStarted(mClientMonitor);
-        assertThat(mOperation.isStarted()).isTrue();
+        verify(mInterruptableClientMonitor).start(mStartedCallbackCaptor.capture());
+        mStartedCallbackCaptor.getValue().onClientStarted(mInterruptableClientMonitor);
+        assertThat(mInterruptableOperation.isStarted()).isTrue();
     }
 
     @Test
     public void testNoStartWithoutCookie() {
         final int goodCookie = 20;
         final int badCookie = 22;
-        when(mClientMonitor.getCookie()).thenReturn(goodCookie);
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getCookie()).thenReturn(goodCookie);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        assertThat(mOperation.isReadyToStart(mOnStartCallback)).isEqualTo(goodCookie);
-        final boolean started = mOperation.startWithCookie(mOnStartCallback, badCookie);
+        assertThat(mInterruptableOperation.isReadyToStart(mOnStartCallback)).isEqualTo(goodCookie);
+        final boolean started = mInterruptableOperation.startWithCookie(mOnStartCallback,
+                badCookie);
 
         assertThat(started).isFalse();
-        assertThat(mOperation.isStarted()).isFalse();
-        assertThat(mOperation.isCanceling()).isFalse();
-        assertThat(mOperation.isFinished()).isFalse();
-        verify(mClientMonitor).waitForCookie(any());
-        verify(mClientMonitor, never()).start(any());
+        assertThat(mInterruptableOperation.isStarted()).isFalse();
+        assertThat(mInterruptableOperation.isCanceling()).isFalse();
+        assertThat(mInterruptableOperation.isFinished()).isFalse();
+        verify(mInterruptableClientMonitor).waitForCookie(any());
+        verify(mInterruptableClientMonitor, never()).start(any());
     }
 
     @Test
     public void testSecondStartWithCookieCrashesWhenDebuggable() {
         final int cookie = 5;
         mIsDebuggable = true;
-        when(mClientMonitor.getCookie()).thenReturn(cookie);
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getCookie()).thenReturn(cookie);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        final boolean started = mOperation.startWithCookie(mOnStartCallback, cookie);
+        final boolean started = mInterruptableOperation.startWithCookie(mOnStartCallback, cookie);
         assertThat(started).isTrue();
 
         assertThrows(IllegalStateException.class,
-                () -> mOperation.startWithCookie(mOnStartCallback, cookie));
+                () -> mInterruptableOperation.startWithCookie(mOnStartCallback, cookie));
     }
 
     @Test
     public void testSecondStartWithCookieFailsNicelyWhenNotDebuggable() {
         final int cookie = 5;
         mIsDebuggable = false;
-        when(mClientMonitor.getCookie()).thenReturn(cookie);
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getCookie()).thenReturn(cookie);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        final boolean started = mOperation.startWithCookie(mOnStartCallback, cookie);
+        final boolean started = mInterruptableOperation.startWithCookie(mOnStartCallback, cookie);
         assertThat(started).isTrue();
 
-        final boolean startedAgain = mOperation.startWithCookie(mOnStartCallback, cookie);
+        final boolean startedAgain = mInterruptableOperation.startWithCookie(mOnStartCallback,
+                cookie);
         assertThat(startedAgain).isFalse();
     }
 
     @Test
     public void startsWhenReadyAndHalAvailable() {
-        when(mClientMonitor.getCookie()).thenReturn(0);
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getCookie()).thenReturn(0);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.start(mOnStartCallback);
-        verify(mClientMonitor).start(mStartedCallbackCaptor.capture());
-        mStartedCallbackCaptor.getValue().onClientStarted(mClientMonitor);
+        mInterruptableOperation.start(mOnStartCallback);
+        verify(mInterruptableClientMonitor).start(mStartedCallbackCaptor.capture());
+        mStartedCallbackCaptor.getValue().onClientStarted(mInterruptableClientMonitor);
 
-        assertThat(mOperation.isStarted()).isTrue();
-        assertThat(mOperation.isCanceling()).isFalse();
-        assertThat(mOperation.isFinished()).isFalse();
+        assertThat(mInterruptableOperation.isStarted()).isTrue();
+        assertThat(mInterruptableOperation.isCanceling()).isFalse();
+        assertThat(mInterruptableOperation.isFinished()).isFalse();
 
-        verify(mClientCallback).onClientStarted(eq(mClientMonitor));
-        verify(mOnStartCallback).onClientStarted(eq(mClientMonitor));
+        verify(mClientCallback).onClientStarted(eq(mInterruptableClientMonitor));
+        verify(mOnStartCallback).onClientStarted(eq(mInterruptableClientMonitor));
         verify(mClientCallback, never()).onClientFinished(any(), anyBoolean());
         verify(mOnStartCallback, never()).onClientFinished(any(), anyBoolean());
 
-        mStartedCallbackCaptor.getValue().onClientFinished(mClientMonitor, true);
+        mStartedCallbackCaptor.getValue().onClientFinished(mInterruptableClientMonitor,
+                true);
 
-        assertThat(mOperation.isFinished()).isTrue();
-        assertThat(mOperation.isCanceling()).isFalse();
-        verify(mClientMonitor).destroy();
-        verify(mOnStartCallback).onClientFinished(eq(mClientMonitor), eq(true));
+        assertThat(mInterruptableOperation.isFinished()).isTrue();
+        assertThat(mInterruptableOperation.isCanceling()).isFalse();
+        verify(mInterruptableClientMonitor).destroy();
+        verify(mOnStartCallback).onClientFinished(eq(mInterruptableClientMonitor), eq(true));
     }
 
     @Test
     public void startFailsWhenReadyButHalNotAvailable() {
-        when(mClientMonitor.getCookie()).thenReturn(0);
-        when(mClientMonitor.getFreshDaemon()).thenReturn(null);
+        when(mInterruptableClientMonitor.getCookie()).thenReturn(0);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(null);
 
-        mOperation.start(mOnStartCallback);
-        verify(mClientMonitor, never()).start(any());
+        mInterruptableOperation.start(mOnStartCallback);
+        verify(mInterruptableClientMonitor, never()).start(any());
 
-        assertThat(mOperation.isStarted()).isFalse();
-        assertThat(mOperation.isCanceling()).isFalse();
-        assertThat(mOperation.isFinished()).isTrue();
+        assertThat(mInterruptableOperation.isStarted()).isFalse();
+        assertThat(mInterruptableOperation.isCanceling()).isFalse();
+        assertThat(mInterruptableOperation.isFinished()).isTrue();
 
-        verify(mClientCallback, never()).onClientStarted(eq(mClientMonitor));
-        verify(mOnStartCallback, never()).onClientStarted(eq(mClientMonitor));
-        verify(mClientCallback).onClientFinished(eq(mClientMonitor), eq(false));
-        verify(mOnStartCallback).onClientFinished(eq(mClientMonitor), eq(false));
+        verify(mClientCallback, never()).onClientStarted(eq(mInterruptableClientMonitor));
+        verify(mOnStartCallback, never()).onClientStarted(eq(mInterruptableClientMonitor));
+        verify(mClientCallback).onClientFinished(eq(mInterruptableClientMonitor), eq(false));
+        verify(mOnStartCallback).onClientFinished(eq(mInterruptableClientMonitor), eq(false));
     }
 
     @Test
     public void secondStartCrashesWhenDebuggable() {
         mIsDebuggable = true;
-        when(mClientMonitor.getCookie()).thenReturn(0);
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getCookie()).thenReturn(0);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        final boolean started = mOperation.start(mOnStartCallback);
+        final boolean started = mInterruptableOperation.start(mOnStartCallback);
         assertThat(started).isTrue();
 
-        assertThrows(IllegalStateException.class, () -> mOperation.start(mOnStartCallback));
+        assertThrows(IllegalStateException.class, () -> mInterruptableOperation.start(
+                mOnStartCallback));
     }
 
     @Test
     public void secondStartFailsNicelyWhenNotDebuggable() {
         mIsDebuggable = false;
-        when(mClientMonitor.getCookie()).thenReturn(0);
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getCookie()).thenReturn(0);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        final boolean started = mOperation.start(mOnStartCallback);
+        final boolean started = mInterruptableOperation.start(mOnStartCallback);
         assertThat(started).isTrue();
 
-        final boolean startedAgain = mOperation.start(mOnStartCallback);
+        final boolean startedAgain = mInterruptableOperation.start(mOnStartCallback);
         assertThat(startedAgain).isFalse();
     }
 
@@ -234,77 +241,78 @@ public class BiometricSchedulerOperationTest {
     public void doesNotStartWithCookie() {
         // This class only throws exceptions when debuggable.
         mIsDebuggable = true;
-        when(mClientMonitor.getCookie()).thenReturn(9);
+        when(mInterruptableClientMonitor.getCookie()).thenReturn(9);
         assertThrows(IllegalStateException.class,
-                () -> mOperation.start(mock(ClientMonitorCallback.class)));
+                () -> mInterruptableOperation.start(mock(ClientMonitorCallback.class)));
     }
 
     @Test
     public void cannotRestart() {
         // This class only throws exceptions when debuggable.
         mIsDebuggable = true;
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.start(mOnStartCallback);
+        mInterruptableOperation.start(mOnStartCallback);
 
         assertThrows(IllegalStateException.class,
-                () -> mOperation.start(mock(ClientMonitorCallback.class)));
+                () -> mInterruptableOperation.start(mock(ClientMonitorCallback.class)));
     }
 
     @Test
     public void abortsNotRunning() {
         // This class only throws exceptions when debuggable.
         mIsDebuggable = true;
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.abort();
+        mInterruptableOperation.abort();
 
-        assertThat(mOperation.isFinished()).isTrue();
-        verify(mClientMonitor).unableToStart();
-        verify(mClientMonitor).destroy();
+        assertThat(mInterruptableOperation.isFinished()).isTrue();
+        verify(mInterruptableClientMonitor).unableToStart();
+        verify(mInterruptableClientMonitor).destroy();
         assertThrows(IllegalStateException.class,
-                () -> mOperation.start(mock(ClientMonitorCallback.class)));
+                () -> mInterruptableOperation.start(mock(ClientMonitorCallback.class)));
     }
 
     @Test
     public void abortCrashesWhenDebuggableIfOperationIsRunning() {
         mIsDebuggable = true;
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.start(mOnStartCallback);
+        mInterruptableOperation.start(mOnStartCallback);
 
-        assertThrows(IllegalStateException.class, () -> mOperation.abort());
+        assertThrows(IllegalStateException.class, () -> mInterruptableOperation.abort());
     }
 
     @Test
     public void abortFailsNicelyWhenNotDebuggableIfOperationIsRunning() {
         mIsDebuggable = false;
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.start(mOnStartCallback);
+        mInterruptableOperation.start(mOnStartCallback);
 
-        mOperation.abort();
+        mInterruptableOperation.abort();
     }
 
     @Test
     public void cancel() {
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
         final ClientMonitorCallback cancelCb = mock(ClientMonitorCallback.class);
-        mOperation.start(mOnStartCallback);
-        verify(mClientMonitor).start(mStartedCallbackCaptor.capture());
-        mStartedCallbackCaptor.getValue().onClientStarted(mClientMonitor);
-        mOperation.cancel(mHandler, cancelCb);
+        mInterruptableOperation.start(mOnStartCallback);
+        verify(mInterruptableClientMonitor).start(mStartedCallbackCaptor.capture());
+        mStartedCallbackCaptor.getValue().onClientStarted(mInterruptableClientMonitor);
+        mInterruptableOperation.cancel(mHandler, cancelCb);
 
-        assertThat(mOperation.isCanceling()).isTrue();
-        verify(mClientMonitor).cancel();
-        verify(mClientMonitor, never()).destroy();
+        assertThat(mInterruptableOperation.isCanceling()).isTrue();
+        verify(mInterruptableClientMonitor).cancel();
+        verify(mInterruptableClientMonitor, never()).destroy();
 
-        mStartedCallbackCaptor.getValue().onClientFinished(mClientMonitor, true);
+        mStartedCallbackCaptor.getValue().onClientFinished(mInterruptableClientMonitor,
+                true);
 
-        assertThat(mOperation.isFinished()).isTrue();
-        assertThat(mOperation.isCanceling()).isFalse();
-        verify(mClientMonitor).destroy();
+        assertThat(mInterruptableOperation.isFinished()).isTrue();
+        assertThat(mInterruptableOperation.isCanceling()).isFalse();
+        verify(mInterruptableClientMonitor).destroy();
 
         // should be unused since the operation was started
         verify(cancelCb, never()).onClientStarted(any());
@@ -313,61 +321,84 @@ public class BiometricSchedulerOperationTest {
 
     @Test
     public void cancelWithoutStarting() {
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
         final ClientMonitorCallback cancelCb = mock(ClientMonitorCallback.class);
-        mOperation.cancel(mHandler, cancelCb);
+        mInterruptableOperation.cancel(mHandler, cancelCb);
 
-        assertThat(mOperation.isCanceling()).isTrue();
+        assertThat(mInterruptableOperation.isCanceling()).isTrue();
         ArgumentCaptor<ClientMonitorCallback> cbCaptor =
                 ArgumentCaptor.forClass(ClientMonitorCallback.class);
-        verify(mClientMonitor).cancelWithoutStarting(cbCaptor.capture());
+        verify(mInterruptableClientMonitor).cancelWithoutStarting(cbCaptor.capture());
 
-        cbCaptor.getValue().onClientFinished(mClientMonitor, true);
-        verify(cancelCb).onClientFinished(eq(mClientMonitor), eq(true));
-        verify(mClientMonitor, never()).start(any());
-        verify(mClientMonitor, never()).cancel();
-        verify(mClientMonitor).destroy();
+        cbCaptor.getValue().onClientFinished(mInterruptableClientMonitor, true);
+        verify(cancelCb).onClientFinished(eq(mInterruptableClientMonitor), eq(true));
+        verify(mInterruptableClientMonitor, never()).start(any());
+        verify(mInterruptableClientMonitor, never()).cancel();
+        verify(mInterruptableClientMonitor).destroy();
     }
 
     @Test
     public void cancelCrashesWhenDebuggableIfOperationIsFinished() {
         mIsDebuggable = true;
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.abort();
-        assertThat(mOperation.isFinished()).isTrue();
+        mInterruptableOperation.abort();
+        assertThat(mInterruptableOperation.isFinished()).isTrue();
 
         final ClientMonitorCallback cancelCb = mock(ClientMonitorCallback.class);
-        assertThrows(IllegalStateException.class, () -> mOperation.cancel(mHandler, cancelCb));
+        assertThrows(IllegalStateException.class, () -> mInterruptableOperation.cancel(mHandler,
+                cancelCb));
     }
 
     @Test
     public void cancelFailsNicelyWhenNotDebuggableIfOperationIsFinished() {
         mIsDebuggable = false;
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.abort();
-        assertThat(mOperation.isFinished()).isTrue();
+        mInterruptableOperation.abort();
+        assertThat(mInterruptableOperation.isFinished()).isTrue();
 
         final ClientMonitorCallback cancelCb = mock(ClientMonitorCallback.class);
-        mOperation.cancel(mHandler, cancelCb);
+        mInterruptableOperation.cancel(mHandler, cancelCb);
     }
 
     @Test
-    public void markCanceling() {
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+    public void markCanceling_interruptableClient() {
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.markCanceling();
+        mInterruptableOperation.markCanceling();
 
-        assertThat(mOperation.isMarkedCanceling()).isTrue();
-        assertThat(mOperation.isCanceling()).isFalse();
-        assertThat(mOperation.isFinished()).isFalse();
-        verify(mClientMonitor, never()).start(any());
-        verify(mClientMonitor, never()).cancel();
-        verify(mClientMonitor, never()).cancelWithoutStarting(any());
-        verify(mClientMonitor, never()).unableToStart();
-        verify(mClientMonitor, never()).destroy();
+        assertThat(mInterruptableOperation.isMarkedCanceling()).isTrue();
+        assertThat(mInterruptableOperation.isCanceling()).isFalse();
+        assertThat(mInterruptableOperation.isFinished()).isFalse();
+        verify(mInterruptableClientMonitor, never()).start(any());
+        verify(mInterruptableClientMonitor, never()).cancel();
+        verify(mInterruptableClientMonitor, never()).cancelWithoutStarting(any());
+        verify(mInterruptableClientMonitor, never()).unableToStart();
+        verify(mInterruptableClientMonitor, never()).destroy();
+    }
+
+    @Test
+    public void markCanceling_nonInterruptableClient() {
+        mNonInterruptableOperation.markCanceling();
+
+        assertThat(mNonInterruptableOperation.isMarkedCanceling()).isFalse();
+        assertThat(mNonInterruptableOperation.isCanceling()).isFalse();
+        assertThat(mNonInterruptableOperation.isFinished()).isFalse();
+        verify(mNonInterruptableClientMonitor, never()).start(any());
+        verify(mNonInterruptableClientMonitor, never()).cancel();
+        verify(mNonInterruptableClientMonitor, never()).cancelWithoutStarting(any());
+        verify(mNonInterruptableClientMonitor, never()).destroy();
+    }
+
+    @Test
+    public void markCancelingForWatchdog() {
+        mNonInterruptableOperation.markCancelingForWatchdog();
+        mInterruptableOperation.markCancelingForWatchdog();
+
+        assertThat(mInterruptableOperation.isMarkedCanceling()).isTrue();
+        assertThat(mNonInterruptableOperation.isMarkedCanceling()).isTrue();
     }
 
     @Test
@@ -381,26 +412,26 @@ public class BiometricSchedulerOperationTest {
     }
 
     private void markCancellingAndStart(Integer withCookie) {
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
         if (withCookie != null) {
-            when(mClientMonitor.getCookie()).thenReturn(withCookie);
+            when(mInterruptableClientMonitor.getCookie()).thenReturn(withCookie);
         }
 
-        mOperation.markCanceling();
+        mInterruptableOperation.markCanceling();
         final ClientMonitorCallback cb = mock(ClientMonitorCallback.class);
         if (withCookie != null) {
-            mOperation.startWithCookie(cb, withCookie);
+            mInterruptableOperation.startWithCookie(cb, withCookie);
         } else {
-            mOperation.start(cb);
+            mInterruptableOperation.start(cb);
         }
 
-        assertThat(mOperation.isFinished()).isTrue();
-        verify(cb).onClientFinished(eq(mClientMonitor), eq(true));
-        verify(mClientMonitor, never()).start(any());
-        verify(mClientMonitor, never()).cancel();
-        verify(mClientMonitor, never()).cancelWithoutStarting(any());
-        verify(mClientMonitor, never()).unableToStart();
-        verify(mClientMonitor).destroy();
+        assertThat(mInterruptableOperation.isFinished()).isTrue();
+        verify(cb).onClientFinished(eq(mInterruptableClientMonitor), eq(true));
+        verify(mInterruptableClientMonitor, never()).start(any());
+        verify(mInterruptableClientMonitor, never()).cancel();
+        verify(mInterruptableClientMonitor, never()).cancelWithoutStarting(any());
+        verify(mInterruptableClientMonitor, never()).unableToStart();
+        verify(mInterruptableClientMonitor).destroy();
     }
 
     @Test
@@ -414,23 +445,23 @@ public class BiometricSchedulerOperationTest {
     }
 
     private void cancelWatchdog(boolean start) {
-        when(mClientMonitor.getFreshDaemon()).thenReturn(mHal);
+        when(mInterruptableClientMonitor.getFreshDaemon()).thenReturn(mHal);
 
-        mOperation.start(mOnStartCallback);
+        mInterruptableOperation.start(mOnStartCallback);
         if (start) {
-            verify(mClientMonitor).start(mStartedCallbackCaptor.capture());
-            mStartedCallbackCaptor.getValue().onClientStarted(mClientMonitor);
+            verify(mInterruptableClientMonitor).start(mStartedCallbackCaptor.capture());
+            mStartedCallbackCaptor.getValue().onClientStarted(mInterruptableClientMonitor);
         }
-        mOperation.cancel(mHandler, mock(ClientMonitorCallback.class));
+        mInterruptableOperation.cancel(mHandler, mock(ClientMonitorCallback.class));
 
-        assertThat(mOperation.isCanceling()).isTrue();
+        assertThat(mInterruptableOperation.isCanceling()).isTrue();
 
         // omit call to onClientFinished and trigger watchdog
-        mOperation.mCancelWatchdog.run();
+        mInterruptableOperation.mCancelWatchdog.run();
 
-        assertThat(mOperation.isFinished()).isTrue();
-        assertThat(mOperation.isCanceling()).isFalse();
-        verify(mOnStartCallback).onClientFinished(eq(mClientMonitor), eq(false));
-        verify(mClientMonitor).destroy();
+        assertThat(mInterruptableOperation.isFinished()).isTrue();
+        assertThat(mInterruptableOperation.isCanceling()).isFalse();
+        verify(mOnStartCallback).onClientFinished(eq(mInterruptableClientMonitor), eq(false));
+        verify(mInterruptableClientMonitor).destroy();
     }
 }
