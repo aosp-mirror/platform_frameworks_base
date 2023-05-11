@@ -677,7 +677,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // to decide whether an existing policy in the {@link #DEVICE_POLICIES_XML} needs to
     // be upgraded. See {@link PolicyVersionUpgrader} on instructions how to add an upgrade
     // step.
-    static final int DPMS_VERSION = 4;
+    static final int DPMS_VERSION = 5;
 
     static {
         SECURE_SETTINGS_ALLOWLIST = new ArraySet<>();
@@ -874,7 +874,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     // TODO(b/265683382) remove the flag after rollout.
     private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
-    private static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = true;
+    public static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = true;
 
     private static final String ENABLE_WORK_PROFILE_TELEPHONY_FLAG =
             "enable_work_profile_telephony";
@@ -887,12 +887,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // TODO(b/266831522) remove the flag after rollout.
     private static final String APPLICATION_EXEMPTIONS_FLAG = "application_exemptions";
     private static final boolean DEFAULT_APPLICATION_EXEMPTIONS_FLAG = true;
-
-    /**
-     * This feature flag is checked once after boot and this value us used until the next reboot to
-     * avoid needing to handle the flag changing on the fly.
-     */
-    private boolean mKeepProfilesRunning = isKeepProfilesRunningFlagEnabled();
 
     /**
      * For apps targeting U+
@@ -2096,12 +2090,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             performPolicyVersionUpgrade();
         }
 
-        // TODO(b/265683382) move it into an upgrade step when removing the flag, so that it is
-        // executed only once on upgrading devices, not every boot.
-        if (mKeepProfilesRunning) {
-            suspendAppsForQuietProfiles();
-        }
-
         mUserData = new SparseArray<>();
         mOwners = makeOwners(injector, pathProvider);
 
@@ -2202,12 +2190,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return packageNameAndSignature;
     }
 
-    private void suspendAppsForQuietProfiles() {
+    private void suspendAppsForQuietProfiles(boolean toSuspend) {
         PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
         List<UserInfo> users = mUserManager.getUsers();
         for (UserInfo user : users) {
             if (user.isManagedProfile() && user.isQuietModeEnabled()) {
-                pmi.setPackagesSuspendedForQuietMode(user.id, true);
+                pmi.setPackagesSuspendedForQuietMode(user.id, toSuspend);
             }
         }
     }
@@ -3486,6 +3474,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             revertTransferOwnershipIfNecessaryLocked();
         }
         updateUsbDataSignal();
+
+        // In case flag value has changed, we apply it during boot to avoid doing it concurrently
+        // with user toggling quiet mode.
+        setKeepProfileRunningEnabledUnchecked(isKeepProfilesRunningFlagEnabled());
     }
 
     // TODO(b/230841522) Make it static.
@@ -11328,7 +11320,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                             (size == 1 ? "" : "s"));
                 }
                 pw.println();
-                pw.println("Keep profiles running: " + mKeepProfilesRunning);
+                pw.println("Keep profiles running: "
+                        + getUserData(UserHandle.USER_SYSTEM).mEffectiveKeepProfilesRunning);
                 pw.println();
 
                 mPolicyCache.dump(pw);
@@ -16278,7 +16271,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         @Override
         public boolean isKeepProfilesRunningEnabled() {
-            return mKeepProfilesRunning;
+            return getUserDataUnchecked(UserHandle.USER_SYSTEM).mEffectiveKeepProfilesRunning;
         }
 
         private @Mode int findInteractAcrossProfilesResetMode(String packageName) {
@@ -23771,6 +23764,18 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return false;
     }
 
+    private void setKeepProfileRunningEnabledUnchecked(boolean keepProfileRunning) {
+        synchronized (getLockObject()) {
+            DevicePolicyData policyData = getUserDataUnchecked(UserHandle.USER_SYSTEM);
+            if (policyData.mEffectiveKeepProfilesRunning == keepProfileRunning) {
+                return;
+            }
+            policyData.mEffectiveKeepProfilesRunning = keepProfileRunning;
+            saveSettingsLocked(UserHandle.USER_SYSTEM);
+        }
+        suspendAppsForQuietProfiles(keepProfileRunning);
+    }
+
     private boolean isWorkProfileTelephonyEnabled() {
         return isWorkProfileTelephonyDevicePolicyManagerFlagEnabled()
                 && isWorkProfileTelephonySubscriptionManagerFlagEnabled();
@@ -23795,7 +23800,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     public void setOverrideKeepProfilesRunning(boolean enabled) {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(MANAGE_PROFILE_AND_DEVICE_OWNERS));
-        mKeepProfilesRunning = enabled;
+        setKeepProfileRunningEnabledUnchecked(enabled);
         Slog.i(LOG_TAG, "Keep profiles running overridden to: " + enabled);
     }
 
