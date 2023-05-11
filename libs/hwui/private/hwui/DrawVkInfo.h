@@ -76,6 +76,9 @@ struct VkFunctorDrawParams {
   // be baked into the color_space_ptr, so this is just to indicate the amount of extended
   // range is available if desired
   float currentHdrSdrRatio;
+
+  // Whether or not dithering is globally enabled
+  bool shouldDither;
 };
 
 }  // namespace uirenderer
