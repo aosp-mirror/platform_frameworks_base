@@ -6412,7 +6412,7 @@ public class AudioService extends IAudioService.Stub
         final String eventSource = new StringBuilder("setA2dpSuspended(").append(enable)
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
                 .append(Binder.getCallingPid()).toString();
-        mDeviceBroker.postSetA2dpSuspended(enable, eventSource);
+        mDeviceBroker.setA2dpSuspended(enable, false /*internal*/, eventSource);
     }
 
     /** @see AudioManager#setA2dpSuspended(boolean) */
@@ -6422,7 +6422,7 @@ public class AudioService extends IAudioService.Stub
         final String eventSource = new StringBuilder("setLeAudioSuspended(").append(enable)
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
                 .append(Binder.getCallingPid()).toString();
-        mDeviceBroker.postSetLeAudioSuspended(enable, eventSource);
+        mDeviceBroker.setLeAudioSuspended(enable, false /*internal*/, eventSource);
     }
 
     /** @see AudioManager#isBluetoothScoOn()
