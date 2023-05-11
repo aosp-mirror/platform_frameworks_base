@@ -158,7 +158,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
 
     @Override
     public void onUiCancellation(boolean isUserCancellation) {
-        String exception = GetCredentialException.TYPE_NO_CREDENTIAL;
+        String exception = GetCredentialException.TYPE_USER_CANCELED;
         String message = "User cancelled the selector";
         if (!isUserCancellation) {
             exception = GetCredentialException.TYPE_INTERRUPTED;
