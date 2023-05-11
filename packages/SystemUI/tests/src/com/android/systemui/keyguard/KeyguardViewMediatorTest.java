@@ -530,6 +530,12 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testWakeAndUnlocking() {
+        mViewMediator.onWakeAndUnlocking();
+        verify(mStatusBarKeyguardViewManager).notifyKeyguardAuthenticated(anyBoolean());
+    }
+
+    @Test
     @TestableLooper.RunWithLooper(setAsMainLooper = true)
     public void testDoKeyguardWhileInteractive_resets() {
         mViewMediator.setShowingLocked(true);
