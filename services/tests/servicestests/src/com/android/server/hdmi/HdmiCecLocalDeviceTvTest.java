@@ -33,9 +33,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.hardware.hdmi.HdmiControlManager;
@@ -55,8 +55,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -122,20 +120,21 @@ public class HdmiCecLocalDeviceTvTest {
         }
     }
 
-    @Mock
-    private AudioManager mAudioManager;
+    private FakeAudioFramework mAudioFramework;
+    private AudioManagerWrapper mAudioManager;
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
-
         Context context = InstrumentationRegistry.getTargetContext();
         mMyLooper = mTestLooper.getLooper();
+
+        mAudioFramework = new FakeAudioFramework();
+        mAudioManager = spy(mAudioFramework.getAudioManager());
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext(),
                         Collections.singletonList(HdmiDeviceInfo.DEVICE_TV),
-                        new FakeAudioDeviceVolumeManagerWrapper()) {
+                        mAudioManager, mAudioFramework.getAudioDeviceVolumeManager()) {
                     @Override
                     void wakeUp() {
                         mWokenUp = true;
@@ -164,11 +163,6 @@ public class HdmiCecLocalDeviceTvTest {
                     @Override
                     boolean isPowerStandbyOrTransient() {
                         return false;
-                    }
-
-                    @Override
-                    AudioManager getAudioManager() {
-                        return mAudioManager;
                     }
 
                     @Override
@@ -967,7 +961,7 @@ public class HdmiCecLocalDeviceTvTest {
 
     @Test
     public void receiveSetAudioVolumeLevel_samNotActivated_noFeatureAbort_volumeChanges() {
-        when(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)).thenReturn(25);
+        mAudioFramework.setStreamMaxVolume(AudioManager.STREAM_MUSIC, 25);
 
         // Max volume of STREAM_MUSIC is retrieved on boot
         mHdmiControlService.onBootPhase(PHASE_SYSTEM_SERVICES_READY);
