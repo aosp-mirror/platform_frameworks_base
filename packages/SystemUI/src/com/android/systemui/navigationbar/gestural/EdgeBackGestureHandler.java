@@ -224,8 +224,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
     private float mBottomGestureHeight;
     // The slop to distinguish between horizontal and vertical motion
     private float mTouchSlop;
-    // The threshold for triggering back
-    private float mBackSwipeTriggerThreshold;
     // The threshold for back swipe full progress.
     private float mBackSwipeProgressThreshold;
     // Duration after which we consider the event as longpress.
@@ -473,8 +471,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
         final float backGestureSlop = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                         SystemUiDeviceConfigFlags.BACK_GESTURE_SLOP_MULTIPLIER, 0.75f);
         mTouchSlop = mViewConfiguration.getScaledTouchSlop() * backGestureSlop;
-        mBackSwipeTriggerThreshold = res.getDimension(
-                R.dimen.navigation_edge_action_drag_threshold);
         mBackSwipeProgressThreshold = res.getDimension(
                 R.dimen.navigation_edge_action_progress_threshold);
         updateBackAnimationThresholds();
@@ -1121,7 +1117,6 @@ public class EdgeBackGestureHandler implements PluginListener<NavigationEdgeBack
             return;
         }
         mBackAnimation.setSwipeThresholds(
-                mBackSwipeTriggerThreshold,
                 Math.min(mDisplaySize.x, mBackSwipeProgressThreshold));
     }
 
