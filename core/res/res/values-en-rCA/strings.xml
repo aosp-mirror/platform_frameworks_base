@@ -590,6 +590,8 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Allows the app to get preferred nfc payment service information like registered aids and route destination."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"control Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Allows the app to communicate with Near Field Communication (NFC) tags, cards, and readers."</string>
+    <string name="permlab_nfcTransactionEvent" msgid="5868209446710407679">"Secure Element transaction event"</string>
+    <string name="permdesc_nfcTransactionEvent" msgid="1904286701876487397">"Allows the app to receive information about transactions happening on a Secure Element."</string>
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"disable your screen lock"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Allows the app to disable the keylock and any associated password security. For example, the phone disables the keylock when receiving an incoming phone call, then re-enables the keylock when the call is finished."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"request screen lock complexity"</string>
@@ -2164,8 +2166,9 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Unpause"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"No work apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"No personal apps"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Open personal <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Open work <xliff:g id="APP">%s</xliff:g>"</string>
+    <string name="miniresolver_open_work" msgid="6286176185835401931">"Open work <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_personal" msgid="807427577794490375">"Open in personal <xliff:g id="APP">%s</xliff:g>?"</string>
+    <string name="miniresolver_open_in_work" msgid="941341494673509916">"Open in work <xliff:g id="APP">%s</xliff:g>?"</string>
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Use personal browser"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Use work browser"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"SIM network unlock PIN"</string>

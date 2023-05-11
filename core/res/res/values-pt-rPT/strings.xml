@@ -591,6 +591,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permite que a app obtenha informações de serviços de pagamento com NFC preferenciais, como apoios registados e destino da rota."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controlo Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Permite que a app comunique com etiquetas, cartões e leitores Near Field Communication (NFC)."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"desativar o bloqueio do ecrã"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Permite que a app desative o bloqueio de teclas e qualquer segurança por palavra-passe associada. Por exemplo, o telemóvel desativa o bloqueio de teclas quando recebe uma chamada e reativa o bloqueio de teclas ao terminar a chamada."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"solicitar a complexidade do bloqueio de ecrã"</string>
@@ -1620,7 +1624,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telemóvel"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Altif. estação ancoragem"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Altif. estação carregamento"</string>
     <string name="default_audio_route_name_external_device" msgid="8124229858618975">"Dispositivo externo"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Auscultadores"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -2165,8 +2169,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Retomar"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Sem apps de trabalho"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Sem apps pessoais"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Abra a app <xliff:g id="APP">%s</xliff:g> pessoal"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Abra a app <xliff:g id="APP">%s</xliff:g> de trabalho"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usar navegador pessoal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usar navegador de trabalho"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN para desbloqueio de rede do cartão SIM"</string>

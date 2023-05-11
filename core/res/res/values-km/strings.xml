@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"អនុញ្ញាតឱ្យ​កម្មវិធី​ទទួលបាន​ព័ត៌មានអំពី​សេវាបង់ប្រាក់តាម nfc ជាអាទិភាព​ដូចជា គោលដៅផ្លូវ និង​ព័ត៌មាន​កំណត់អត្តសញ្ញាណ​កម្មវិធី ដែលបានចុះឈ្មោះ​ជាដើម។"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ពិនិត្យ​ការ​ទាក់ទង​នៅ​ក្បែរ (NFC)"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ឲ្យ​កម្មវិធី​ទាក់ទង​ជា​មួយ​ស្លាក (NFC) កាត និង​កម្មវិធី​អាន។"</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"បិទ​ការ​ចាក់​សោ​អេក្រង់​របស់​អ្នក"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ឲ្យ​កម្មវិធី​បិទ​ការ​ចាក់សោ​សុវត្ថិភាព​ពាក្យ​សម្ងាត់​ដែល​បាន​ភ្ជាប់​ណា​មួយ។ ​ឧទាហរណ៍​ត្រឹមត្រូវ​​​នៃ​ការ​បិទ​ទូរស័ព្ទ​ពេល​ទទួលការ​ហៅ​ចូល បន្ទាប់​ម​បើក​សោ​ពេល​ការ​ហៅ​បាន​បញ្ចប់។"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ស្នើ​សុំកម្រិត​​ស្មុគស្មាញ​នៃការចាក់សោអេក្រង់"</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ឈប់ផ្អាក"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"គ្មាន​កម្មវិធី​ការងារ​ទេ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"គ្មាន​កម្មវិធី​ផ្ទាល់ខ្លួន​ទេ"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"បើក <xliff:g id="APP">%s</xliff:g> ផ្ទាល់ខ្លួន"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"បើក <xliff:g id="APP">%s</xliff:g> សម្រាប់ការងារ"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​ផ្ទាល់ខ្លួន"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ប្រើ​កម្មវិធីរុករក​តាមអ៊ីនធឺណិត​សម្រាប់​ការងារ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"កូដ PIN ដោះ​សោ​បណ្ដាញ​ស៊ីម"</string>

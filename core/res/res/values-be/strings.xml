@@ -592,6 +592,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Дазваляе праграме атрымаць доступ да інфармацыі пра прыярытэтны сэрвіс аплаты NFC, напрыклад зарэгістраваныя ідэнтыфікатары праграм і маршруты адпраўкі даных."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"кантроль Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Дазваляе прыкладаннzv спалучацца з тэгамі, картамі і счытваючымі прыладамі Near Field Communication (NFC)."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"адключэнне блакiроўкi экрана"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Дазваляе прыкладанням адключаць блакiроўку клавіятуры і любыя сродкі абароны, звязаныя з паролем. Прыкладам гэтага з\'яўляецца адключэнне тэлефонам блакiроўкi клавіятуры пры атрыманні ўваходнага выкліку і паўторнае ўключэнне блакiроўкi клавіятуры, калі выклік завершаны."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"запытваць узровень складанасці блакіроўкі экрана"</string>
@@ -2166,8 +2170,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Уключыць"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Няма працоўных праграм"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Няма асабістых праграм"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Адкрыць асабістую праграму <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Адкрыць працоўную праграму <xliff:g id="APP">%s</xliff:g>"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Скарыстаць асабісты браўзер"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Скарыстаць працоўны браўзер"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-код разблакіроўкі сеткі для SIM-карты"</string>

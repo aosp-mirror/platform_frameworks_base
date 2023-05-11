@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ivuemela uhlelo lokusebenza ukuthola ulwazi lesevisi yenkokhelo ye-nfc njengezinsiza zokubhalisa nezindawo zomzila."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lawula Uxhumano Lwenkambu Eseduze"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ivuela uhlelo lokusebenza ukuthi ixhumane ne-Near Field Communication (NFC) amathegi, amakhadi kanye nezinhlelo zokufunda."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"khubaza ukukhiya kwakho iskrini"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ivumela uhlelo lokusebenza ukukhubaza ukuvala ukhiye nanoma yikuphi ukuphepha kwephasiwedi okuhlobene. Isibonelo, ifoni ikhubaza ukuvala ukhiye lapho ithola ikholi yefoni engenayo, bese inike amandla kabusha ukuvala ukhiye lapho ikholi isiqedile."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"cela ubunkimbinkimbi kokukhiya isikrini"</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Qhubekisa"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Awekho ama-app womsebenzi"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Awekho ama-app womuntu siqu"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Vula i-<xliff:g id="APP">%s</xliff:g> yomuntu siqu"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Vula i-<xliff:g id="APP">%s</xliff:g> yomsebenzi"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Sebenzisa isiphequluli somuntu siqu"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Sebenzisa isiphequluli somsebenzi"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Iphinikhodi yokuvula inethiwekhi ye-SIM"</string>

@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Membenarkan apl mendapatkan maklumat perkhidmatan pembayaran nfc pilihan seperti bantuan berdaftar dan destinasi laluan."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"mengawal Komunikasi Medan Dekat"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Membenarkan apl berkomunikasi dengan teg, kad dan pembaca Komunikasi Medan Dekat (NFC)."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"lumpuhkan kunci skrin anda"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Membenarkan apl melumpuhkan kunci kekunci dan sebarang keselamatan kata laluan yang berkaitan. Sebagai contoh, telefon melumpuhkan kunci kekunci apabila menerima panggilan telefon masuk kemudian mendayakan semula kunci kekunci apabila panggilan selesai."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"minta kerumitan kunci skrin"</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Nyahjeda"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Tiada apl kerja"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Tiada apl peribadi"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Buka <xliff:g id="APP">%s</xliff:g> peribadi"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Buka <xliff:g id="APP">%s</xliff:g> kerja"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Gunakan penyemak imbas peribadi"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Gunakan penyemak imbas kerja"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN buka kunci rangkaian SIM"</string>

@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ਐਪ ਨੂੰ ਤਰਜੀਹੀ NFC ਭੁਗਤਾਨਸ਼ੁਦਾ ਸੇਵਾ ਜਾਣਕਾਰੀ ਪ੍ਰਾਪਤ ਕਰਨ ਦਿੰਦਾ ਹੈ ਜਿਵੇਂ ਕਿ ਰਜਿਸਟਰ ਕੀਤੇ ਸਾਧਨ ਅਤੇ ਮੰਜ਼ਿਲ ਰਸਤਾ।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ ਤੇ ਨਿਯੰਤਰਣ ਪਾਓ"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"ਐਪ ਨੂੰ ਨਜ਼ਦੀਕੀ ਖੇਤਰ ਸੰਚਾਰ (NFC) ਟੈਗਾਂ, ਕਾਰਡਾਂ ਅਤੇ ਰੀਡਰਾਂ ਨਾਲ ਸੰਚਾਰ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ।"</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ਆਪਣਾ ਸਕ੍ਰੀਨ  ਲਾਕ  ਅਸਮਰੱਥ ਬਣਾਓ"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"ਐਪ ਨੂੰ ਕੀਲਾਕ ਅਤੇ ਕਿਸੇ ਵੀ ਸੰਬੰਧਿਤ ਪਾਸਵਰਡ ਸੁਰੱਖਿਆ ਨੂੰ ਬੰਦ ਕਰਨ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਉਦਾਹਰਨ ਲਈ, ਫ਼ੋਨ ਇੱਕ ਇਨਕਮਿੰਗ ਫ਼ੋਨ ਕਾਲ ਪ੍ਰਾਪਤ ਕਰਨ ਵੇਲੇ ਬੰਦ ਕਰਦਾ ਹੈ, ਫਿਰ ਜਦੋਂ ਕਾਲ ਖਤਮ ਹੁੰਦੀ ਹੈ ਤਾਂ ਕੀਲਾਕ ਨੂੰ ਮੁੜ-ਚਾਲੂ ਕਰਦਾ ਹੈ।"</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"ਸਕ੍ਰੀਨ ਲਾਕ ਦੀ ਜਟਿਲਤਾ ਲਈ ਬੇਨਤੀ ਕਰੋ"</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ਰੋਕ ਹਟਾਓ"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"ਕੋਈ ਕੰਮ ਸੰਬੰਧੀ ਐਪ ਨਹੀਂ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ਕੋਈ ਨਿੱਜੀ ਐਪ ਨਹੀਂ"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ਨਿੱਜੀ <xliff:g id="APP">%s</xliff:g> ਖੋਲ੍ਹੋ"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"ਕਾਰਜ <xliff:g id="APP">%s</xliff:g> ਖੋਲ੍ਹੋ"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ਨਿੱਜੀ ਬ੍ਰਾਊਜ਼ਰ ਵਰਤੋ"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"ਕੰਮ ਸੰਬੰਧੀ ਬ੍ਰਾਊਜ਼ਰ ਵਰਤੋ"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ਸਿਮ ਨੈੱਟਵਰਕ ਅਣਲਾਕ ਪਿੰਨ"</string>

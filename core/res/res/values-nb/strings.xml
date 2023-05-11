@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Gir appen tilgang til informasjon om prioritert NFC-betalingstjeneste, for eksempel registrerte hjelpemidler og destinasjon."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontroller overføring av data med NFC-teknologi"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Lar appen kommunisere med etiketter, kort og lesere som benytter NFC-teknologi."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"deaktivere skjermlåsen"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Lar appen deaktivere tastelåsen og eventuell tilknyttet passordsikkerhet. Et eksempel er at telefonen deaktiverer tastelåsen når du mottar et innkommende anrop, og deretter aktiverer tastelåsen igjen når samtalen er ferdig."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"be om skjermlåsens kompleksitet"</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Slå av pausen"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Ingen jobbapper"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Ingen personlige apper"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Åpne <xliff:g id="APP">%s</xliff:g> personlig"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Åpne <xliff:g id="APP">%s</xliff:g> for jobb"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Bruk den personlige nettleseren"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Bruk jobbnettleseren"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-kode for å fjerne operatørlåser"</string>

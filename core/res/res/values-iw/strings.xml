@@ -591,6 +591,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"‏מאפשרת לאפליקציה לקבל פרטים על שירות תשלום מועדף ב-NFC, כמו עזרים רשומים ויעד של נתיב."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"שליטה בתקשורת מטווח קצר"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"‏מאפשרת לאפליקציה נהל תקשורת עם תגים, כרטיסים וקוראים מסוג \'תקשורת מטווח קצר\' (NFC)."</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"ביטול נעילת המסך שלך"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"מאפשרת לאפליקציה להשבית את נעילת המקשים וכל אמצעי אבטחה משויך המבוסס על סיסמה. לדוגמה, הטלפון ישבית את נעילת המקשים במהלך שיחת טלפון נכנסת, ויפעיל מחדש את נעילת המקשים עם סיום השיחה."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"בקשת מידע לגבי מידת המורכבות של נעילת המסך"</string>
@@ -626,11 +630,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"שגיאה באימות"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"שימוש בנעילת מסך"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"יש לבטל את נעילת המסך כדי להמשיך"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"לוחצים לחיצה חזקה על החיישן"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"צריך ללחוץ לחיצה חזקה על החיישן"</string>
     <string name="fingerprint_acquired_insufficient" msgid="623888149088216458">"לא ניתן לזהות את טביעת האצבע. יש לנסות שוב."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"עליך לנקות את חיישן טביעות האצבע ולנסות שוב"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"עליך לנקות את החיישן ולנסות שוב"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"לוחצים לחיצה חזקה על החיישן"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"צריך ללחוץ חזק על החיישן"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"הזזת את האצבע לאט מדי. יש לנסות שוב."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"יש להשתמש בטביעת אצבע אחרת"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"בהיר מדי"</string>
@@ -2165,8 +2169,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ביטול ההשהיה"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"אין אפליקציות לעבודה"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"אין אפליקציות לשימוש אישי"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"פתיחת <xliff:g id="APP">%s</xliff:g> בפרופיל האישי"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"פתיחת <xliff:g id="APP">%s</xliff:g> בפרופיל העבודה"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"בדפדפן האישי"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"בדפדפן של העבודה"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"‏קוד אימות לביטול הנעילה של רשת SIM"</string>

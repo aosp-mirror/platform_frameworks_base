@@ -505,7 +505,7 @@
     <string name="permdesc_vibrate" msgid="8733343234582083721">"Ermöglicht der App, den Vibrationsalarm zu steuern"</string>
     <string name="permdesc_vibrator_state" msgid="7050024956594170724">"Ermöglicht der App, auf den Vibrationsstatus zuzugreifen."</string>
     <string name="permlab_callPhone" msgid="1798582257194643320">"Telefonnummern direkt anrufen"</string>
-    <string name="permdesc_callPhone" msgid="7892422187827695656">"Ermöglicht der App, ohne dein Zutun Telefonnummern zu wählen. Das kann zu unerwarteten Anrufen bzw. Kosten führen. Beachte, dass die App keine Notrufnummer anrufen darf. Es gibt schädliche Apps, die Kosten verursachen können, weil sie eigenmächtig Anrufe starten, oder die bestimmte Anbietercodes wählen, woraufhin eingehende Anrufe automatisch an eine andere Nummer weitergeleitet werden."</string>
+    <string name="permdesc_callPhone" msgid="7892422187827695656">"Ermöglicht der App, ohne dein Zutun Telefonnummern zu wählen. Das kann zu unerwarteten Anrufen bzw. Kosten führen. Beachte, dass die App keine Notrufnummer anrufen darf. Es gibt schädliche Apps, die Kosten verursachen können, indem sie eigenmächtig Anrufe starten, oder die bestimmte Betreiberkennzahlen wählen, woraufhin eingehende Anrufe automatisch an eine andere Nummer weitergeleitet werden."</string>
     <string name="permlab_accessImsCallService" msgid="442192920714863782">"Zugriff auf IMS-Anrufdienst"</string>
     <string name="permdesc_accessImsCallService" msgid="6328551241649687162">"Ermöglicht der App die Verwendung des IMS-Dienstes zum Tätigen von Anrufen ohne Nutzereingriffe"</string>
     <string name="permlab_readPhoneState" msgid="8138526903259297969">"Telefonstatus und Identität abrufen"</string>
@@ -590,6 +590,10 @@
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ermöglicht der App, Informationen zum bevorzugten NFC-Zahlungsdienst abzurufen, etwa registrierte Hilfsmittel oder das Routenziel."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Nahfeldkommunikation steuern"</string>
     <string name="permdesc_nfc" msgid="8352737680695296741">"Ermöglicht der App die Kommunikation mit Tags für die Nahfeldkommunikation, Karten und Readern"</string>
+    <!-- no translation found for permlab_nfcTransactionEvent (5868209446710407679) -->
+    <skip />
+    <!-- no translation found for permdesc_nfcTransactionEvent (1904286701876487397) -->
+    <skip />
     <string name="permlab_disableKeyguard" msgid="3605253559020928505">"Displaysperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="3223710003098573038">"Ermöglicht der App, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. Das Telefon deaktiviert die Tastensperre beispielsweise, wenn ein Anruf eingeht, und aktiviert sie wieder, nachdem das Gespräch beendet wurde."</string>
     <string name="permlab_requestPasswordComplexity" msgid="1808977190557794109">"Komplexitätsstufe der Displaysperre anfragen"</string>
@@ -2164,8 +2168,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Nicht mehr pausieren"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Keine geschäftlichen Apps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Keine privaten Apps"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Private App „<xliff:g id="APP">%s</xliff:g>“ öffnen"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Geschäftliche App „<xliff:g id="APP">%s</xliff:g>“ öffnen"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Privaten Browser verwenden"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Arbeitsbrowser verwenden"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Entsperr-PIN für netzgebundenes Gerät"</string>
