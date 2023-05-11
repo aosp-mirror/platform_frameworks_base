@@ -570,6 +570,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+    @Override
+    public void onIsActiveUnlockRunningChanged(boolean isRunning, int userId) {
+    }
+
     /**
      * Whether the trust granted call with its passed flags should dismiss keyguard.
      * It's assumed that the trust was granted for the current user.
