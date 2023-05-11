@@ -551,9 +551,6 @@ public final class JobServiceContext implements ServiceConnection {
         if (CompatChanges.isChangeEnabled(
                 JobSchedulerService.REQUIRE_NETWORK_PERMISSIONS_FOR_CONNECTIVITY_JOBS, uid)) {
             final String pkgName = job.getServiceComponent().getPackageName();
-            if (!hasPermissionForDelivery(uid, pkgName, Manifest.permission.INTERNET)) {
-                return false;
-            }
             if (!hasPermissionForDelivery(uid, pkgName, Manifest.permission.ACCESS_NETWORK_STATE)) {
                 return false;
             }
