@@ -22,6 +22,11 @@ import com.android.systemui.dagger.SysUISingleton
 /** Returns whether the touch coordinates are within the sensor's bounding box. */
 @SysUISingleton
 class BoundingBoxOverlapDetector : OverlapDetector {
-    override fun isGoodOverlap(touchData: NormalizedTouchData, nativeSensorBounds: Rect): Boolean =
-        touchData.isWithinSensor(nativeSensorBounds)
+    override fun isGoodOverlap(
+        touchData: NormalizedTouchData,
+        nativeSensorBounds: Rect,
+        nativeOverlayBounds: Rect,
+    ): Boolean =
+        touchData.isWithinBounds(nativeOverlayBounds) &&
+            touchData.isWithinBounds(nativeSensorBounds)
 }
