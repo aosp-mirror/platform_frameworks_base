@@ -435,6 +435,23 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                         backgroundColorForTransition =
                                 uiContext.getColor(R.color.overview_background);
                     }
+                    if (wallpaperTransit == WALLPAPER_TRANSITION_OPEN
+                            && TransitionUtil.isOpeningType(info.getType())) {
+                        // Need to flip the z-order of opening/closing because the WALLPAPER_OPEN
+                        // always animates the closing task over the opening one while
+                        // traditionally, an OPEN transition animates the opening over the closing.
+
+                        // See Transitions#setupAnimHierarchy for details about these variables.
+                        final int numChanges = info.getChanges().size();
+                        final int zSplitLine = numChanges + 1;
+                        if (TransitionUtil.isOpeningType(mode)) {
+                            final int layer = zSplitLine - i;
+                            startTransaction.setLayer(change.getLeash(), layer);
+                        } else if (TransitionUtil.isClosingType(mode)) {
+                            final int layer = zSplitLine + numChanges - i;
+                            startTransaction.setLayer(change.getLeash(), layer);
+                        }
+                    }
                 }
 
                 final float cornerRadius;
