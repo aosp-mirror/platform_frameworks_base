@@ -642,7 +642,7 @@
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Telefon nekoliko odmaknite."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Bolj približajte telefon."</string>
     <string name="face_acquired_too_high" msgid="4868033653626081839">"Telefon pomaknite višje."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Telefon premaknite nižje."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Telefon premaknite nižje"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Telefon premaknite v levo."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Telefon premaknite v desno."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Glejte bolj naravnost v napravo."</string>
@@ -1608,7 +1608,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablični računalnik"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Televizor"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Telefon"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Zvočniki stojala"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Zvočniki nosilca"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Slušalke"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>

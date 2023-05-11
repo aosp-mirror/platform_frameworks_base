@@ -299,7 +299,7 @@
     <string name="managed_profile_label" msgid="7316778766973512382">"Բացել աշխատանքային պրոֆիլը"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Կոնտակտներ"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"օգտագործել ձեր կոնտակտները"</string>
-    <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղորոշում"</string>
+    <string name="permgrouplab_location" msgid="1858277002233964394">"Տեղադրություն"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"տեղորոշել այս սարքը"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Օրացույց"</string>
     <string name="permgroupdesc_calendar" msgid="6762751063361489379">"օգտագործել օրացույցը"</string>
@@ -594,7 +594,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Փորձեք մեկ այլ մատնահետք"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Շատ լուսավոր է"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Փորձեք փոխել մատի դիրքը"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Ամեն անգամ թեթևա­­կի փոխեք մատի դիրքը"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Թեթևակի փոխեք մատի դիրքն ամեն անգամ"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Մատնահետքը չի ճանաչվել"</string>
@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Գլուխն ուղիղ պահեք։"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Գլուխը մի փոքր իջեցրեք։"</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Գլուխն ուղիղ պահեք։"</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Հեռացրեք այն ամենը, ինչը թաքցնում է ձեր երեսը:"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Հեռացրեք այն ամենը, ինչը փակում է ձեր դեմքը։"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Մաքրեք էկրանի վերևի մասը, ներառյալ սև գոտին"</string>
   <string-array name="face_acquired_vendor">
   </string-array>

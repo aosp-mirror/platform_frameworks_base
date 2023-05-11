@@ -350,7 +350,7 @@
       <item quantity="other">మీరు <xliff:g id="COUNT">%d</xliff:g> వినియోగదారుల వరకు జోడించవచ్చు.</item>
       <item quantity="one">ఒక్క వినియోగదారుని మాత్రమే క్రియేట్ చేయవచ్చు.</item>
     </plurals>
-    <string name="user_remove_user_title" msgid="9124124694835811874">"వినియోగదారుని తీసివేయాలా?"</string>
+    <string name="user_remove_user_title" msgid="9124124694835811874">"యూజర్‌ను తీసివేయాలా?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"ఈ వినియోగదారుకు సంబంధించిన అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"తీసివేయండి"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"రికార్డ్ చేస్తున్నప్పుడు లేదా ప్రసారం చేస్తున్నప్పుడు, మీ స్క్రీన్‌పై ప్రదర్శించబడిన లేదా మీ పరికరం నుండి ప్లే చేయబడిన సమాచారం మొత్తాన్ని, <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> యాక్సెస్ చేయగలుగుతుంది. ఈ సమాచారంలో, పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, ఫోటోలు, మెసేజ్‌లు, మీరు ప్లే చేసే ఆడియో వంటివి ఉంటాయి."</string>
