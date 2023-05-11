@@ -19,16 +19,20 @@ package com.android.server.appop;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.OP_SCHEDULE_EXACT_ALARM;
+import static android.app.AppOpsManager.OP_USE_FULL_SCREEN_INTENT;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.Mode;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserPackage;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.UserHandle;
+import android.permission.PermissionManager;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
 import android.util.Slog;
@@ -80,7 +84,7 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
      * {@link #upgradeLocked(int)} below. The first version was 1.
      */
     @VisibleForTesting
-    static final int CURRENT_VERSION = 3;
+    static final int CURRENT_VERSION = 4;
 
     /**
      * This stores the version of appops.xml seen at boot. If this is smaller than
@@ -556,7 +560,12 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
                 upgradeScheduleExactAlarmLocked();
                 // fall through
             case 2:
-                // for future upgrades
+                // split the appops.xml into appops.xml to store appop state and apppops_access.xml
+                // to store app-op access.
+                // fall through
+            case 3:
+                resetUseFullScreenIntentLocked();
+                // fall through
         }
         scheduleFastWriteLocked();
     }
@@ -624,6 +633,38 @@ public class AppOpsCheckingServiceImpl implements AppOpsCheckingServiceInterface
             }
             // This appop is meant to be controlled at a uid level. So we leave package modes as
             // they are.
+        }
+    }
+
+    /**
+     * A cleanup step for U Beta 2 that reverts the OP_USE_FULL_SCREEN_INTENT's mode to MODE_DEFAULT
+     * if the permission flags for the USE_FULL_SCREEN_INTENT permission does not have USER_SET.
+     */
+    @VisibleForTesting
+    @GuardedBy("mLock")
+    void resetUseFullScreenIntentLocked() {
+        final PermissionManagerServiceInternal pmsi = LocalServices.getService(
+                PermissionManagerServiceInternal.class);
+        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
+        final PackageManagerInternal pmi = LocalServices.getService(PackageManagerInternal.class);
+        final PermissionManager permissionManager =
+                mContext.getSystemService(PermissionManager.class);
+
+        final String permissionName = AppOpsManager.opToPermission(OP_USE_FULL_SCREEN_INTENT);
+        final String[] packagesDeclaringPermission =
+            pmsi.getAppOpPermissionPackages(permissionName);
+        final int[] userIds = umi.getUserIds();
+
+        for (final String pkg : packagesDeclaringPermission) {
+            for (int userId : userIds) {
+                final int uid = pmi.getPackageUid(pkg, 0, userId);
+                final int flags = permissionManager.getPermissionFlags(pkg, permissionName,
+                        UserHandle.of(userId));
+                if ((flags & PackageManager.FLAG_PERMISSION_USER_SET) == 0) {
+                    setUidMode(uid, OP_USE_FULL_SCREEN_INTENT,
+                            AppOpsManager.opToDefaultMode(OP_USE_FULL_SCREEN_INTENT));
+                }
+            }
         }
     }
 
