@@ -2079,6 +2079,7 @@ public final class PowerManagerService extends SystemService
             int opUid, String opPackageName, String details) {
         mPowerGroups.get(groupId).setWakefulnessLocked(wakefulness, eventTime, uid, reason, opUid,
                 opPackageName, details);
+        mInjector.invalidateIsInteractiveCaches();
     }
 
     @SuppressWarnings("deprecation")
@@ -3743,9 +3744,29 @@ public final class PowerManagerService extends SystemService
         }
     }
 
-    private boolean isInteractiveInternal() {
+    private boolean isGloballyInteractiveInternal() {
         synchronized (mLock) {
             return PowerManagerInternal.isInteractive(getGlobalWakefulnessLocked());
+        }
+    }
+
+    private boolean isInteractiveInternal(int displayId, int uid) {
+        synchronized (mLock) {
+            DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(displayId);
+            if (displayInfo == null) {
+                Slog.w(TAG, "Did not find DisplayInfo for displayId " + displayId);
+                return false;
+            }
+            if (!displayInfo.hasAccess(uid)) {
+                throw new SecurityException(
+                        "uid " + uid + " does not have access to display " + displayId);
+            }
+            PowerGroup powerGroup = mPowerGroups.get(displayInfo.displayGroupId);
+            if (powerGroup == null) {
+                Slog.w(TAG, "Did not find PowerGroup for displayId " + displayId);
+                return false;
+            }
+            return PowerManagerInternal.isInteractive(powerGroup.getWakefulnessLocked());
         }
     }
 
@@ -5805,7 +5826,18 @@ public final class PowerManagerService extends SystemService
         public boolean isInteractive() {
             final long ident = Binder.clearCallingIdentity();
             try {
-                return isInteractiveInternal();
+                return isGloballyInteractiveInternal();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean isDisplayInteractive(int displayId) {
+            int uid = Binder.getCallingUid();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return isInteractiveInternal(displayId, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

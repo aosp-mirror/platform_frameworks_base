@@ -8,6 +8,7 @@ import android.database.ContentObserver
 import android.os.Handler
 import android.os.PowerManager
 import android.provider.Settings
+import android.view.Display
 import android.view.Surface
 import android.view.View
 import android.view.WindowManager.fixScale
@@ -272,7 +273,7 @@ class UnlockedScreenOffAnimationController @Inject constructor(
                 // dispatched, a race condition could make it possible for this callback to be run
                 // as the device is waking up. That results in the AOD UI being shown while we wake
                 // up, with unpredictable consequences.
-                if (!powerManager.isInteractive) {
+                if (!powerManager.isInteractive(Display.DEFAULT_DISPLAY)) {
                     aodUiAnimationPlaying = true
 
                     // Show AOD. That'll cause the KeyguardVisibilityHelper to call
