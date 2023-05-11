@@ -585,6 +585,11 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void setDeviceOwnerUid(int uid);
 
     /**
+     * Called by DevicePolicyManagerService to set the uids of the profile owners.
+     */
+    public abstract void setProfileOwnerUids(Set<Integer> uids);
+
+    /**
      * Set all associated companion app that belongs to a userId.
      * @param userId
      * @param companionAppUids ActivityTaskManager will take ownership of this Set, the caller
