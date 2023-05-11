@@ -2551,6 +2551,9 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
     @Override
     public void attachAccessibilityOverlayToWindow(int accessibilityWindowId, SurfaceControl sc)
             throws RemoteException {
+        SurfaceControl.Transaction t = new SurfaceControl.Transaction();
+        t.setTrustedOverlay(sc, true).apply();
+        t.close();
         synchronized (mLock) {
             RemoteAccessibilityConnection connection =
                     mA11yWindowManager.getConnectionLocked(
