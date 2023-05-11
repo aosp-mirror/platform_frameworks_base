@@ -103,6 +103,8 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         whenever(context.packageManager).thenReturn(packageManager)
         whenever(resolver.resolveInfo(any(), any(), any())).thenReturn(NOTE_TASK_INFO)
         whenever(userManager.isUserUnlocked).thenReturn(true)
+        whenever(userManager.isUserUnlocked(any<Int>())).thenReturn(true)
+        whenever(userManager.isUserUnlocked(any<UserHandle>())).thenReturn(true)
         whenever(
                 devicePolicyManager.getKeyguardDisabledFeatures(
                     /* admin= */ eq(null),

@@ -250,6 +250,11 @@ constructor(
      * Widget Picker to all users.
      */
     fun setNoteTaskShortcutEnabled(value: Boolean, user: UserHandle) {
+        if (!userManager.isUserUnlocked(user)) {
+            debugLog { "setNoteTaskShortcutEnabled call but user locked: user=$user" }
+            return
+        }
+
         val componentName = ComponentName(context, CreateNoteTaskShortcutActivity::class.java)
 
         val enabledState =
@@ -305,6 +310,10 @@ constructor(
     /** @see OnRoleHoldersChangedListener */
     fun onRoleHoldersChanged(roleName: String, user: UserHandle) {
         if (roleName != ROLE_NOTES) return
+        if (!userManager.isUserUnlocked(user)) {
+            debugLog { "onRoleHoldersChanged call but user locked: role=$roleName, user=$user" }
+            return
+        }
 
         if (user == userTracker.userHandle) {
             updateNoteTaskAsUser(user)
