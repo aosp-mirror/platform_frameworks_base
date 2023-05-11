@@ -5244,6 +5244,7 @@ public final class ActiveServices {
                     final IApplicationThread thread = app.getThread();
                     final int pid = app.getPid();
                     final UidRecord uidRecord = app.getUidRecord();
+                    r.isolationHostProc = app;
                     if (thread != null) {
                         try {
                             if (Trace.isTagEnabled(Trace.TRACE_TAG_ACTIVITY_MANAGER)) {
