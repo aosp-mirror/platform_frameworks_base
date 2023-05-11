@@ -274,11 +274,12 @@ public final class SensorPrivacyService extends SystemService {
             mHandler = new SensorPrivacyHandler(FgThread.get().getLooper(), mContext);
             mSensorPrivacyStateController = SensorPrivacyStateController.getInstance();
 
+            correctStateIfNeeded();
+
             int[] micAndCameraOps = new int[]{OP_RECORD_AUDIO, OP_PHONE_CALL_MICROPHONE,
                     OP_CAMERA, OP_PHONE_CALL_CAMERA, OP_RECEIVE_EXPLICIT_USER_INTERACTION_AUDIO};
             mAppOpsManager.startWatchingNoted(micAndCameraOps, this);
             mAppOpsManager.startWatchingStarted(micAndCameraOps, this);
-
 
 
             mContext.registerReceiver(new BroadcastReceiver() {
@@ -311,6 +312,20 @@ public final class SensorPrivacyService extends SystemService {
                     mHandler,
                     (toggleType, userId, sensor, state) -> mHandler.handleSensorPrivacyChanged(
                             userId, toggleType, sensor, state.isEnabled()));
+        }
+
+        // If sensor privacy is enabled for a sensor, but the device doesn't support sensor privacy
+        // for that sensor, then disable privacy
+        private void correctStateIfNeeded() {
+            mSensorPrivacyStateController.forEachState((type, user, sensor, state) -> {
+                if (type != TOGGLE_TYPE_SOFTWARE) {
+                    return;
+                }
+                if (!supportsSensorToggle(TOGGLE_TYPE_SOFTWARE, sensor) && state.isEnabled()) {
+                    setToggleSensorPrivacyUnchecked(
+                            TOGGLE_TYPE_SOFTWARE, user, OTHER, sensor, false);
+                }
+            });
         }
 
         @Override
@@ -721,7 +736,12 @@ public final class SensorPrivacyService extends SystemService {
             if (userId == UserHandle.USER_CURRENT) {
                 userId = mCurrentUser;
             }
+
             if (!canChangeToggleSensorPrivacy(userId, sensor)) {
+                return;
+            }
+            if (enable && !supportsSensorToggle(TOGGLE_TYPE_SOFTWARE, sensor)) {
+                // Do not enable sensor privacy if the device doesn't support it
                 return;
             }
 
@@ -730,6 +750,16 @@ public final class SensorPrivacyService extends SystemService {
 
         private void setToggleSensorPrivacyUnchecked(int toggleType, int userId, int source,
                 int sensor, boolean enable) {
+            if (DEBUG) {
+                Log.d(TAG, "callingUid=" + Binder.getCallingUid()
+                        + " callingPid=" + Binder.getCallingPid()
+                        + " setToggleSensorPrivacyUnchecked("
+                        + "userId=" + userId
+                        + " source=" + source
+                        + " sensor=" + sensor
+                        + " enable=" + enable
+                        + ")");
+            }
             final long[] lastChange = new long[1];
             mSensorPrivacyStateController.atomic(() -> {
                 SensorState sensorState = mSensorPrivacyStateController
