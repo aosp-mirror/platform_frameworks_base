@@ -72,7 +72,7 @@ void AutoBackendTextureRelease::unref(bool releaseImage) {
 
 // releaseProc is invoked by SkImage, when texture is no longer in use.
 // "releaseContext" contains an "AutoBackendTextureRelease*".
-static void releaseProc(SkImage::ReleaseContext releaseContext) {
+static void releaseProc(SkImages::ReleaseContext releaseContext) {
     AutoBackendTextureRelease* textureRelease =
             reinterpret_cast<AutoBackendTextureRelease*>(releaseContext);
     textureRelease->unref(false);
