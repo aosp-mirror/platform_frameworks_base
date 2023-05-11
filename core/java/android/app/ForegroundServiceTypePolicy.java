@@ -18,6 +18,7 @@ package android.app;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
+import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CAMERA;
@@ -1078,9 +1079,9 @@ public abstract class ForegroundServiceTypePolicy {
         int checkPermission(@NonNull Context context, @NonNull String name, int callerUid,
                 int callerPid, String packageName, boolean allowWhileInUse) {
             // Simple case, check if it's already granted.
-            @PackageManager.PermissionResult int result;
-            if ((result = PermissionChecker.checkPermissionForPreflight(context, name,
-                    callerPid, callerUid, packageName)) == PERMISSION_GRANTED) {
+            @PermissionCheckerManager.PermissionResult int result;
+            if ((result = PermissionChecker.checkPermissionForPreflight(context, name, callerPid,
+                    callerUid, packageName)) == PermissionCheckerManager.PERMISSION_GRANTED) {
                 return PERMISSION_GRANTED;
             }
             if (allowWhileInUse && result == PermissionCheckerManager.PERMISSION_SOFT_DENIED) {
@@ -1092,6 +1093,13 @@ public abstract class ForegroundServiceTypePolicy {
                             packageName);
                     if (currentMode == MODE_FOREGROUND) {
                         // It's in foreground only mode and we're allowing while-in-use.
+                        return PERMISSION_GRANTED;
+                    } else if (currentMode == MODE_IGNORED) {
+                       // If it's soft denied with the mode "ignore", semantically it's a silent
+                       // failure and no exception should be thrown, we might not want to allow
+                       // the FGS. However, since the user has agreed with this permission
+                       // (otherwise it's going to be a hard denial), and we're allowing
+                       // while-in-use here, it's safe to allow the FGS run here.
                         return PERMISSION_GRANTED;
                     }
                 }
