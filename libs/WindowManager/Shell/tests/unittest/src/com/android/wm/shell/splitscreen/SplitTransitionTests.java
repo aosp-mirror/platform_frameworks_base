@@ -376,8 +376,7 @@ public class SplitTransitionTests extends ShellTestCase {
         IBinder transition = mock(IBinder.class);
         WindowContainerTransaction result = mStageCoordinator.handleRequest(transition, request);
 
-        // Don't reparent tasks until the animation is complete.
-        assertFalse(containsSplitExit(result));
+        assertTrue(containsSplitExit(result));
 
         // make sure we haven't made any local changes yet (need to wait until transition is ready)
         assertTrue(mStageCoordinator.isSplitScreenVisible());
