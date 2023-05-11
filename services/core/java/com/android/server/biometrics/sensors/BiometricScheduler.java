@@ -555,7 +555,7 @@ public class BiometricScheduler {
         for (BiometricSchedulerOperation pendingOperation : mPendingOperations) {
             Slog.d(getTag(), "[Watchdog cancelling pending] "
                     + pendingOperation.getClientMonitor());
-            pendingOperation.markCanceling();
+            pendingOperation.markCancelingForWatchdog();
         }
         Slog.d(getTag(), "[Watchdog cancelling current] "
                 + mCurrentOperation.getClientMonitor());
