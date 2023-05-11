@@ -30,6 +30,7 @@ import android.testing.TestableLooper
 import android.view.SurfaceControlViewHost
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
+import com.android.systemui.R
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogLaunchAnimator
@@ -67,6 +68,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -103,6 +105,7 @@ class CustomizationProviderTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
+        overrideResource(R.bool.custom_lockscreen_shortcuts_enabled, true)
         whenever(previewRenderer.surfacePackage).thenReturn(previewSurfacePackage)
         whenever(previewRendererFactory.create(any())).thenReturn(previewRenderer)
         whenever(backgroundHandler.looper).thenReturn(TestableLooper.get(this).looper)
@@ -195,6 +198,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                 devicePolicyManager = devicePolicyManager,
                 dockManager = dockManager,
                 backgroundDispatcher = testDispatcher,
+                appContext = mContext,
             )
         underTest.previewManager =
             KeyguardRemotePreviewManager(
@@ -214,6 +218,13 @@ class CustomizationProviderTest : SysuiTestCase() {
             Contract.PERMISSION,
             PackageManager.PERMISSION_GRANTED,
         )
+    }
+
+    @After
+    fun tearDown() {
+        mContext
+            .getOrCreateTestableResources()
+            .removeOverride(R.bool.custom_lockscreen_shortcuts_enabled)
     }
 
     @Test
