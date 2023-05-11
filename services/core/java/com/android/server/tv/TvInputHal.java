@@ -19,6 +19,7 @@ package com.android.server.tv;
 import android.hardware.tv.input.V1_0.Constants;
 import android.media.tv.TvInputHardwareInfo;
 import android.media.tv.TvStreamConfig;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.MessageQueue;
@@ -45,12 +46,15 @@ final class TvInputHal implements Handler.Callback {
             Constants.EVENT_STREAM_CONFIGURATIONS_CHANGED;
     public static final int EVENT_FIRST_FRAME_CAPTURED = 4;
 
+    public static final int EVENT_TV_MESSAGE = 5;
+
     public interface Callback {
         void onDeviceAvailable(TvInputHardwareInfo info, TvStreamConfig[] configs);
         void onDeviceUnavailable(int deviceId);
         void onStreamConfigurationChanged(int deviceId, TvStreamConfig[] configs,
                 int cableConnectionStatus);
         void onFirstFrameCaptured(int deviceId, int streamId);
+        void onTvMessage(int deviceId, int type, Bundle data);
     }
 
     private native long nativeOpen(MessageQueue queue);
@@ -171,6 +175,10 @@ final class TvInputHal implements Handler.Callback {
                 mHandler.obtainMessage(EVENT_STREAM_CONFIGURATION_CHANGED, deviceId, streamId));
     }
 
+    private void tvMessageReceivedFromNative(int deviceId, int type, Bundle data) {
+        mHandler.obtainMessage(EVENT_TV_MESSAGE, deviceId, type, data).sendToTarget();
+    }
+
     // Handler.Callback implementation
 
     @Override
@@ -219,6 +227,13 @@ final class TvInputHal implements Handler.Callback {
                 int streamId = msg.arg2;
                 mCallback.onFirstFrameCaptured(deviceId, streamId);
                 break;
+            }
+
+            case EVENT_TV_MESSAGE: {
+                int deviceId = msg.arg1;
+                int type = msg.arg2;
+                Bundle data = (Bundle) msg.obj;
+                mCallback.onTvMessage(deviceId, type, data);
             }
 
             default:
