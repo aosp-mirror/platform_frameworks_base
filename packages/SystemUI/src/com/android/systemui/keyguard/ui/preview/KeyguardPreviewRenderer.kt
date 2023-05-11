@@ -41,6 +41,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.shared.clocks.ClockRegistry
+import com.android.systemui.shared.clocks.DefaultClockController
 import com.android.systemui.shared.clocks.shared.model.ClockPreviewConstants
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
@@ -312,6 +313,36 @@ constructor(
             },
         )
         disposables.add(DisposableHandle { broadcastDispatcher.unregisterReceiver(receiver) })
+
+        val layoutChangeListener =
+            object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int
+                ) {
+                    if (clockController.clock !is DefaultClockController) {
+                        clockController.clock
+                            ?.largeClock
+                            ?.events
+                            ?.onTargetRegionChanged(
+                                KeyguardClockSwitch.getLargeClockRegion(parentView)
+                            )
+                    }
+                }
+            }
+
+        parentView.addOnLayoutChangeListener(layoutChangeListener)
+
+        disposables.add(
+            DisposableHandle { parentView.removeOnLayoutChangeListener(layoutChangeListener) }
+        )
 
         onClockChanged(parentView)
     }
