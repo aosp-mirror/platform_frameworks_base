@@ -1012,9 +1012,13 @@ public class PowerManagerServiceTest {
     @SuppressWarnings("GuardedBy")
     @Test
     public void testScreensaverActivateOnSleepEnabled_powered_afterTimeout_goesToDreaming() {
+        when(mResourcesSpy.getBoolean(com.android.internal.R.bool.config_dreamsSupported))
+                .thenReturn(true);
         when(mBatteryManagerInternalMock.isPowered(anyInt())).thenReturn(true);
         Settings.Secure.putInt(mContextSpy.getContentResolver(),
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP, 1);
+        Settings.Secure.putInt(mContextSpy.getContentResolver(),
+                Settings.Secure.SCREENSAVER_ENABLED, 1);
 
         doAnswer(inv -> {
             when(mDreamManagerInternalMock.isDreaming()).thenReturn(true);
