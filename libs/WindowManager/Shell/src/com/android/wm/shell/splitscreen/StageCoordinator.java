@@ -311,6 +311,9 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         transitions.addHandler(this);
         mSplitUnsupportedToast = Toast.makeText(mContext,
                 R.string.dock_non_resizeble_failed_to_dock_text, Toast.LENGTH_SHORT);
+        // With shell transition, we should update recents tile each callback so set this to true by
+        // default.
+        mShouldUpdateRecents = ENABLE_SHELL_TRANSITIONS;
     }
 
     @VisibleForTesting
@@ -1464,18 +1467,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
     private void prepareExitSplitScreen(@StageType int stageToTop,
             @NonNull WindowContainerTransaction wct) {
         if (!mMainStage.isActive()) return;
-        // Set the dismiss-to-top side to fullscreen for dismiss transition.
-        // Reparent the non-dismiss-to-top side to properly update its visibility.
-        if (stageToTop == STAGE_TYPE_MAIN) {
-            wct.setBounds(mMainStage.mRootTaskInfo.token, null /* bounds */);
-            mSideStage.removeAllTasks(wct, false /* toTop */);
-        } else if (stageToTop == STAGE_TYPE_SIDE) {
-            wct.setBounds(mSideStage.mRootTaskInfo.token, null /* bounds */);
-            mMainStage.deactivate(wct, false /* toTop */);
-        } else {
-            mSideStage.removeAllTasks(wct, false /* toTop */);
-            mMainStage.deactivate(wct, false /* toTop */);
-        }
+        mSideStage.removeAllTasks(wct, stageToTop == STAGE_TYPE_SIDE);
+        mMainStage.deactivate(wct, stageToTop == STAGE_TYPE_MAIN);
         wct.setReparentLeafTaskIfRelaunch(mRootTaskInfo.token,
                 false /* reparentLeafTaskIfRelaunch */);
     }
@@ -1554,7 +1547,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         updateSurfaceBounds(mSplitLayout, t, false /* applyResizingOffset */);
         t.show(mRootTaskLeash);
         setSplitsVisible(true);
-        mShouldUpdateRecents = true;
         updateRecentTasksSplitPair();
         if (!mLogger.hasStartedSession()) {
             mLogger.logEnter(mSplitLayout.getDividerPositionAsFraction(),
@@ -2565,13 +2557,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         } else if (mSplitTransitions.isPendingDismiss(transition)) {
             shouldAnimate = startPendingDismissAnimation(
                     mSplitTransitions.mPendingDismiss, info, startTransaction, finishTransaction);
-            if (shouldAnimate) {
-                mSplitTransitions.applyDismissTransition(transition, info,
-                        startTransaction, finishTransaction, finishCallback, mRootTaskInfo.token,
-                        mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token,
-                        mMainStage.getSplitDecorManager(), mSideStage.getSplitDecorManager());
-                return true;
-            }
         } else if (mSplitTransitions.isPendingResize(transition)) {
             mSplitTransitions.playResizeAnimation(transition, info, startTransaction,
                     finishTransaction, finishCallback, mMainStage.mRootTaskInfo.token,
@@ -2760,8 +2745,7 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         mRecentTasks.ifPresent(recentTasks -> {
             // Notify recents if we are exiting in a way that breaks the pair, and disable further
             // updates to splits in the recents until we enter split again
-            if (shouldBreakPairedTaskInRecents(dismissReason) && mShouldUpdateRecents) {
-                if (toStage == STAGE_TYPE_UNDEFINED) {
+            if (shouldBreakPairedTaskInRecents(dismissReason)) {
                     for (TransitionInfo.Change change : info.getChanges()) {
                         final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
                         if (taskInfo != null
@@ -2769,13 +2753,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                             recentTasks.removeSplitPair(taskInfo.taskId);
                         }
                     }
-                } else {
-                    recentTasks.removeSplitPair(mMainStage.getTopVisibleChildTaskId());
-                    recentTasks.removeSplitPair(mSideStage.getTopVisibleChildTaskId());
-                }
             }
         });
-        mShouldUpdateRecents = false;
         mSplitRequest = null;
 
         // Update local states.
@@ -2817,18 +2796,6 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             mSplitLayout.release(t);
             mSplitTransitions.mPendingDismiss = null;
             return false;
-        } else {
-            final @SplitScreen.StageType int dismissTop = dismissTransition.mDismissTop;
-            // Reparent all tasks after dismiss transition finished.
-            dismissTransition.setFinishedCallback(
-                    new SplitScreenTransitions.TransitionFinishedCallback() {
-                        @Override
-                        public void onFinished(WindowContainerTransaction wct,
-                                SurfaceControl.Transaction t) {
-                            mSideStage.removeAllTasks(wct, dismissTop == STAGE_TYPE_SIDE);
-                            mMainStage.deactivate(wct, dismissTop == STAGE_TYPE_MAIN);
-                        }
-                    });
         }
 
         addDividerBarToTransition(info, false /* show */);
@@ -2868,6 +2835,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
 
     private void addDividerBarToTransition(@NonNull TransitionInfo info, boolean show) {
         final SurfaceControl leash = mSplitLayout.getDividerLeash();
+        if (leash == null || !leash.isValid()) {
+            Slog.w(TAG, "addDividerBarToTransition but leash was released or not be created");
+            return;
+        }
+
         final TransitionInfo.Change barChange = new TransitionInfo.Change(null /* token */, leash);
         mSplitLayout.getRefDividerBounds(mTempRect1);
         barChange.setParent(mRootTaskInfo.token);
