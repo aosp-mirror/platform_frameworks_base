@@ -18,7 +18,6 @@ package com.android.systemui.keyguard.data.repository
 
 import android.os.Build
 import android.util.Log
-import com.android.keyguard.ViewMediatorCallback
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
@@ -104,7 +103,6 @@ interface KeyguardBouncerRepository {
 class KeyguardBouncerRepositoryImpl
 @Inject
 constructor(
-    private val viewMediatorCallback: ViewMediatorCallback,
     private val clock: SystemClock,
     @Application private val applicationScope: CoroutineScope,
     @BouncerLog private val buffer: TableLogBuffer,

@@ -42,7 +42,6 @@ internal fun isFlowAutoSelectable(
       // applicable.
       uiState.currentScreenState != CreateScreenState.PASSKEY_INTRO &&
       uiState.currentScreenState != CreateScreenState.MORE_ABOUT_PASSKEYS_INTRO &&
-      uiState.remoteEntry == null &&
       uiState.sortedCreateOptionsPairs.size == 1 &&
       uiState.activeEntry?.activeEntryInfo?.let {
         it is CreateOptionInfo && it.allowAutoSelect

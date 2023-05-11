@@ -5226,7 +5226,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             isActivityResultType)) {
                         boolean isChangeEnabled = CompatChanges.isChangeEnabled(
                                         PendingIntent.BLOCK_MUTABLE_IMPLICIT_PENDING_INTENT,
-                                        owningUid);
+                                        packageName, UserHandle.of(userId));
                         String resolvedType = resolvedTypes == null
                                 || i >= resolvedTypes.length ? null : resolvedTypes[i];
                         ActivityManagerUtils.logUnsafeIntentEvent(

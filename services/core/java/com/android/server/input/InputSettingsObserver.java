@@ -43,13 +43,16 @@ class InputSettingsObserver extends ContentObserver {
 
     private final Context mContext;
     private final Handler mHandler;
+    private final InputManagerService mService;
     private final NativeInputManagerService mNative;
     private final Map<Uri, Consumer<String /* reason*/>> mObservers;
 
-    InputSettingsObserver(Context context, Handler handler, NativeInputManagerService nativeIms) {
+    InputSettingsObserver(Context context, Handler handler, InputManagerService service,
+            NativeInputManagerService nativeIms) {
         super(handler);
         mContext = context;
         mHandler = handler;
+        mService = service;
         mNative = nativeIms;
         mObservers = Map.ofEntries(
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SPEED),
@@ -72,7 +75,9 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(
                         Settings.Global.getUriFor(
                                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH),
-                        (reason) -> updateMaximumObscuringOpacityForTouch()));
+                        (reason) -> updateMaximumObscuringOpacityForTouch()),
+                Map.entry(Settings.System.getUriFor(Settings.System.SHOW_KEY_PRESSES),
+                        (reason) -> updateShowKeyPresses()));
     }
 
     /**
@@ -143,6 +148,11 @@ class InputSettingsObserver extends ContentObserver {
 
     private void updateShowTouches() {
         mNative.setShowTouches(getBoolean(Settings.System.SHOW_TOUCHES, false));
+    }
+
+    private void updateShowKeyPresses() {
+        mService.updateFocusEventDebugViewEnabled(
+                getBoolean(Settings.System.SHOW_KEY_PRESSES, false));
     }
 
     private void updateAccessibilityLargePointer() {

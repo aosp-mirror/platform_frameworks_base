@@ -79,6 +79,11 @@ object Flags {
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
 
+    // TODO(b/260335638): Tracking Bug
+    @JvmField
+    val NOTIFICATION_INLINE_REPLY_ANIMATION =
+        unreleasedFlag(174148361, "notification_inline_reply_animation")
+
     /** Makes sure notification panel is updated before the user switch is complete. */
     // TODO(b/278873737): Tracking Bug
     @JvmField
@@ -201,7 +206,7 @@ object Flags {
     // TODO(b/267722622): Tracking Bug
     @JvmField
     val WALLPAPER_PICKER_UI_FOR_AIWP =
-            releasedFlag(
+            unreleasedFlag(
                     229,
                     "wallpaper_picker_ui_for_aiwp"
             )
@@ -415,12 +420,6 @@ object Flags {
 
     // TODO(b/265045965): Tracking Bug
     val SHOW_LOWLIGHT_ON_DIRECT_BOOT = releasedFlag(1003, "show_lowlight_on_direct_boot")
-
-    @JvmField
-    // TODO(b/271428141): Tracking Bug
-    val ENABLE_LOW_LIGHT_CLOCK_UNDOCKED = releasedFlag(
-        1004,
-        "enable_low_light_clock_undocked")
 
     // TODO(b/273509374): Tracking Bug
     @JvmField
@@ -685,8 +684,7 @@ object Flags {
 
     // TODO(b/259428678): Tracking Bug
     @JvmField
-    val KEYBOARD_BACKLIGHT_INDICATOR =
-            unreleasedFlag(2601, "keyboard_backlight_indicator", teamfood = true)
+    val KEYBOARD_BACKLIGHT_INDICATOR = releasedFlag(2601, "keyboard_backlight_indicator")
 
     // TODO(b/277192623): Tracking Bug
     @JvmField

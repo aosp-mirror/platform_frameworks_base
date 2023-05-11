@@ -64,6 +64,7 @@ import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService;
@@ -199,7 +200,8 @@ public class MagnificationControllerTest {
                 new Object(),
                 mScreenMagnificationInfoChangedCallbackDelegate,
                 mScaleProvider,
-                () -> null
+                () -> null,
+                ConcurrentUtils.DIRECT_EXECUTOR
         ));
         mScreenMagnificationController.register(TEST_DISPLAY);
 
@@ -209,7 +211,8 @@ public class MagnificationControllerTest {
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
 
         mMagnificationController = spy(new MagnificationController(mService, globalLock, mContext,
-                mScreenMagnificationController, mWindowMagnificationManager, mScaleProvider));
+                mScreenMagnificationController, mWindowMagnificationManager, mScaleProvider,
+                ConcurrentUtils.DIRECT_EXECUTOR));
         mMagnificationController.setMagnificationCapabilities(
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
 
@@ -593,6 +596,10 @@ public class MagnificationControllerTest {
         // The second time is triggered when magnification spec is changed.
         verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_FULLSCREEN));
+        // Never call removeMagnificationSettingsPanel if it is allowed to show the settings panel
+        // in current capability and mode, and the magnification is activated.
+        verify(mWindowMagnificationManager, never()).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test
@@ -758,6 +765,10 @@ public class MagnificationControllerTest {
         // The second time is triggered when accessibility action performed.
         verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
+        // Never call removeMagnificationSettingsPanel if it is allowed to show the settings panel
+        // in current capability and mode, and the magnification is activated.
+        verify(mWindowMagnificationManager, never()).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test
@@ -772,6 +783,10 @@ public class MagnificationControllerTest {
         // The first time is triggered when window mode is activated.
         // The second time is triggered when accessibility action performed.
         verify(mWindowMagnificationManager, times(2)).removeMagnificationButton(eq(TEST_DISPLAY));
+        // Never call removeMagnificationSettingsPanel if it is allowed to show the settings panel
+        // in current capability and mode, and the magnification is activated.
+        verify(mWindowMagnificationManager, never()).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test public void activateWindowMagnification_triggerCallback() throws RemoteException {
@@ -952,6 +967,10 @@ public class MagnificationControllerTest {
         // The third time is triggered when user interaction changed.
         verify(mWindowMagnificationManager, times(3)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_FULLSCREEN));
+        // Never call removeMagnificationSettingsPanel if it is allowed to show the settings panel
+        // in current capability and mode, and the magnification is activated.
+        verify(mWindowMagnificationManager, never()).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test
@@ -966,6 +985,10 @@ public class MagnificationControllerTest {
         // The third time is triggered when user interaction changed.
         verify(mWindowMagnificationManager, times(3)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_FULLSCREEN));
+        // Never call removeMagnificationSettingsPanel if it is allowed to show the settings panel
+        // in current capability and mode, and the magnification is activated.
+        verify(mWindowMagnificationManager, never()).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test
@@ -979,6 +1002,10 @@ public class MagnificationControllerTest {
         // The second time is triggered when user interaction changed.
         verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
+        // Never call removeMagnificationSettingsPanel if it is allowed to show the settings panel
+        // in current capability and mode, and the magnification is activated.
+        verify(mWindowMagnificationManager, never()).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test
@@ -992,6 +1019,10 @@ public class MagnificationControllerTest {
         // The second time is triggered when user interaction changed.
         verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
+        // Never call removeMagnificationSettingsPanel if it is allowed to show the settings panel
+        // in current capability and mode, and the magnification is activated.
+        verify(mWindowMagnificationManager, never()).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test
@@ -1006,11 +1037,16 @@ public class MagnificationControllerTest {
 
         verify(mWindowMagnificationManager, never()).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_FULLSCREEN));
+        // The first time is triggered when fullscreen mode is activated.
+        // The second time is triggered when magnification spec is changed.
+        verify(mWindowMagnificationManager, times(2)).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
 
     @Test
-    public void onTouchInteractionChanged_fullscreenNotActivated_notShowMagnificationButton()
+    public void
+            onTouchInteractionChanged_fullscreenNotActivated_notShowMagnificationButton()
             throws RemoteException {
         setMagnificationModeSettings(MODE_FULLSCREEN);
 
@@ -1019,6 +1055,8 @@ public class MagnificationControllerTest {
 
         verify(mWindowMagnificationManager, never()).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_FULLSCREEN));
+        verify(mWindowMagnificationManager, times(2)).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test
@@ -1028,6 +1066,10 @@ public class MagnificationControllerTest {
 
         verify(mWindowMagnificationManager).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
+        // Never call removeMagnificationSettingsPanel if it is allowed to show the settings panel
+        // in current capability and mode, and the magnification is activated.
+        verify(mWindowMagnificationManager, never()).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test
@@ -1042,25 +1084,32 @@ public class MagnificationControllerTest {
         // The third time is triggered when fullscreen mode activation state is updated.
         verify(mWindowMagnificationManager, times(3)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_FULLSCREEN));
+        // Never call removeMagnificationSettingsPanel if it is allowed to show the settings panel
+        // in current capability and mode, and the magnification is activated.
+        verify(mWindowMagnificationManager, never()).removeMagnificationSettingsPanel(
+                eq(TEST_DISPLAY));
     }
 
     @Test
-    public void disableWindowMode_windowEnabled_removeMagnificationButton()
+    public void disableWindowMode_windowEnabled_removeMagnificationButtonAndSettingsPanel()
             throws RemoteException {
         setMagnificationEnabled(MODE_WINDOW);
 
         mWindowMagnificationManager.disableWindowMagnification(TEST_DISPLAY, false);
 
         verify(mWindowMagnificationManager).removeMagnificationButton(eq(TEST_DISPLAY));
+        verify(mWindowMagnificationManager).removeMagnificationSettingsPanel(eq(TEST_DISPLAY));
     }
 
     @Test
-    public void onFullScreenDeactivated_fullScreenEnabled_removeMagnificationButton()
+    public void
+            onFullScreenDeactivated_fullScreenEnabled_removeMagnificationButtonAneSettingsPanel()
             throws RemoteException {
         setMagnificationEnabled(MODE_FULLSCREEN);
         mScreenMagnificationController.reset(TEST_DISPLAY, /* animate= */ true);
 
         verify(mWindowMagnificationManager).removeMagnificationButton(eq(TEST_DISPLAY));
+        verify(mWindowMagnificationManager).removeMagnificationSettingsPanel(eq(TEST_DISPLAY));
     }
 
     @Test
@@ -1077,6 +1126,8 @@ public class MagnificationControllerTest {
         // The third time is triggered when the disable-magnification callback is triggered.
         verify(mWindowMagnificationManager, times(3)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_FULLSCREEN));
+        // It is triggered when the disable-magnification callback is triggered.
+        verify(mWindowMagnificationManager).removeMagnificationSettingsPanel(eq(TEST_DISPLAY));
     }
 
     @Test
@@ -1096,6 +1147,8 @@ public class MagnificationControllerTest {
         // The second time is triggered when the disable-magnification callback is triggered.
         verify(mWindowMagnificationManager, times(2)).showMagnificationButton(eq(TEST_DISPLAY),
                 eq(MODE_WINDOW));
+        // It is triggered when the disable-magnification callback is triggered.
+        verify(mWindowMagnificationManager).removeMagnificationSettingsPanel(eq(TEST_DISPLAY));
     }
 
     @Test

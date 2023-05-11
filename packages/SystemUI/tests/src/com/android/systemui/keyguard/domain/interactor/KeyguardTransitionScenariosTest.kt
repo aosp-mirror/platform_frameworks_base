@@ -871,7 +871,6 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     private fun startingToWake() =
         WakefulnessModel(
             WakefulnessState.STARTING_TO_WAKE,
-            true,
             WakeSleepReason.OTHER,
             WakeSleepReason.OTHER
         )
@@ -879,7 +878,6 @@ class KeyguardTransitionScenariosTest : SysuiTestCase() {
     private fun startingToSleep() =
         WakefulnessModel(
             WakefulnessState.STARTING_TO_SLEEP,
-            true,
             WakeSleepReason.OTHER,
             WakeSleepReason.OTHER
         )

@@ -159,6 +159,7 @@ import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.Executor;
 
 /**
@@ -724,6 +725,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 synchronized (KeyguardViewMediator.this) {
                     notifyTrustedChangedLocked(mUpdateMonitor.getUserHasTrust(userId));
                 }
+            }
+        }
+
+        @Override
+        public void onStrongAuthStateChanged(int userId) {
+            if (mLockPatternUtils.isUserInLockdown(KeyguardUpdateMonitor.getCurrentUser())) {
+                doKeyguardLocked(null);
             }
         }
     };
@@ -1949,8 +1957,9 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
      * Enable the keyguard if the settings are appropriate.
      */
     private void doKeyguardLocked(Bundle options) {
-        // if another app is disabling us, don't show
-        if (!mExternallyEnabled) {
+        // if another app is disabling us, don't show unless we're in lockdown mode
+        if (!mExternallyEnabled
+                && !mLockPatternUtils.isUserInLockdown(KeyguardUpdateMonitor.getCurrentUser())) {
             if (DEBUG) Log.d(TAG, "doKeyguard: not showing because externally disabled");
 
             mNeedToReshowWhenReenabled = true;
@@ -2702,9 +2711,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                                 CUJ_LOCKSCREEN_UNLOCK_ANIMATION, "DismissPanel"));
 
                 // Pass the surface and metadata to the unlock animation controller.
+                RemoteAnimationTarget[] openingWallpapers = Arrays.stream(wallpapers).filter(
+                        w -> w.mode == RemoteAnimationTarget.MODE_OPENING).toArray(
+                        RemoteAnimationTarget[]::new);
                 mKeyguardUnlockAnimationControllerLazy.get()
                         .notifyStartSurfaceBehindRemoteAnimation(
-                                apps, startTime, mSurfaceBehindRemoteAnimationRequested);
+                                apps, openingWallpapers, startTime,
+                                mSurfaceBehindRemoteAnimationRequested);
             } else {
                 mInteractionJankMonitor.begin(
                         createInteractionJankMonitorConf(
@@ -2953,6 +2966,19 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mSurfaceBehindRemoteAnimationRequested = false;
         mSurfaceBehindRemoteAnimationRunning = false;
         mKeyguardStateController.notifyKeyguardGoingAway(false);
+        finishExitRemoteAnimation();
+    }
+
+    void finishExitRemoteAnimation() {
+        if (mKeyguardUnlockAnimationControllerLazy.get().isAnyKeyguyardAnimatorPlaying()
+                || mKeyguardStateController.isDismissingFromSwipe()) {
+            // If the animation is ongoing, or we are not done with the swipe gesture,
+            // it's too early to terminate the animation
+            Log.d(TAG, "finishAnimation not executing now because "
+                    + "not all animations have finished");
+            return;
+        }
+        Log.d(TAG, "finishAnimation executing");
 
         if (mSurfaceBehindRemoteAnimationFinishedCallback != null) {
             try {
