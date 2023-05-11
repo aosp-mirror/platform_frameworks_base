@@ -167,9 +167,10 @@ class ViewLifecycleOwner(
         registry.currentState = Lifecycle.State.DESTROYED
     }
 
-    override fun getLifecycle(): Lifecycle {
-        return registry
-    }
+    override val lifecycle: Lifecycle
+        get() {
+            return registry
+        }
 
     private fun updateState() {
         registry.currentState =
