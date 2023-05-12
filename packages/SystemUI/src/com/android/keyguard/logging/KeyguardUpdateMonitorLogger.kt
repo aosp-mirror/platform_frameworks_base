@@ -95,10 +95,6 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
         logBuffer.log(TAG, ERROR, {}, { logMsg }, exception = ex)
     }
 
-    fun logFaceAcquired(acquireInfo: Int) {
-        logBuffer.log(TAG, DEBUG, { int1 = acquireInfo }, { "Face acquired acquireInfo=$int1" })
-    }
-
     fun logFaceAuthDisabledForUser(userId: Int) {
         logBuffer.log(
             TAG,
@@ -125,18 +121,6 @@ constructor(@KeyguardUpdateMonitorLog private val logBuffer: LogBuffer) {
             DEBUG,
             { int1 = authUserId },
             { "Face authenticated for wrong user: $int1" }
-        )
-    }
-
-    fun logFaceAuthHelpMsg(msgId: Int, helpMsg: String?) {
-        logBuffer.log(
-            TAG,
-            DEBUG,
-            {
-                int1 = msgId
-                str1 = helpMsg
-            },
-            { "Face help received, msgId: $int1 msg: $str1" }
         )
     }
 
