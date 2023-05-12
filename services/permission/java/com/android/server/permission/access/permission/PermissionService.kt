@@ -241,7 +241,7 @@ class PermissionService(
             val opPackage = snapshot.getPackageState(opPackageName)?.androidPackage
             targetSdkVersion = when {
                 // System sees all flags.
-                isRootOrSystemOrShell(callingUid) -> Build.VERSION_CODES.CUR_DEVELOPMENT
+                isRootOrSystemOrShellUid(callingUid) -> Build.VERSION_CODES.CUR_DEVELOPMENT
                 opPackage != null -> opPackage.targetSdkVersion
                 else -> Build.VERSION_CODES.CUR_DEVELOPMENT
             }
@@ -726,7 +726,7 @@ class PermissionService(
             return
         }
 
-        val canManageRolePermission = isRootOrSystem(callingUid) ||
+        val canManageRolePermission = isRootOrSystemUid(callingUid) ||
             UserHandle.getAppId(callingUid) == permissionControllerPackageState!!.appId
         val overridePolicyFixed = context.checkCallingOrSelfPermission(
             Manifest.permission.ADJUST_RUNTIME_PERMISSIONS_POLICY
@@ -780,6 +780,15 @@ class PermissionService(
                                 packageState, userId, permissionName, isGranted = true,
                                 canManageRolePermission = false, overridePolicyFixed = false,
                                 reportError = false, "setRequestedPermissionStates"
+                            )
+                            updatePermissionFlags(
+                                packageState.appId, userId, permissionName,
+                                PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED or
+                                    PackageManager.FLAG_PERMISSION_REVOKED_COMPAT, 0,
+                                canUpdateSystemFlags = false,
+                                reportErrorForUnknownPermission = false,
+                                isPermissionRequested = true, "setRequestedPermissionStates",
+                                packageState.packageName
                             )
                         }
                     }
@@ -1128,7 +1137,7 @@ class PermissionService(
         // POLICY_FIXED flag if the caller is system or root UID, now we do allow that since system
         // and root UIDs are supposed to have all permissions including
         // ADJUST_RUNTIME_PERMISSIONS_POLICY.
-        if (!isRootOrSystem(callingUid)) {
+        if (!isRootOrSystemUid(callingUid)) {
             if (flagMask.hasBits(PackageManager.FLAG_PERMISSION_POLICY_FIXED)) {
                 if (enforceAdjustPolicyPermission) {
                     context.enforceCallingOrSelfPermission(
@@ -1163,6 +1172,11 @@ class PermissionService(
             return
         }
 
+        // Different from the old implementation, which only allowed the system UID to modify the
+        // following flags, we now allow the root UID as well since both should have all
+        // permissions.
+        val canUpdateSystemFlags = isRootOrSystemUid(callingUid)
+
         val isPermissionRequested = if (permissionName in androidPackage.requestedPermissions) {
             // Fast path, the current package has requested the permission.
             true
@@ -1180,7 +1194,7 @@ class PermissionService(
         val appId = packageState.appId
         service.mutateState {
             updatePermissionFlags(
-                appId, userId, permissionName, flagMask, flagValues,
+                appId, userId, permissionName, flagMask, flagValues, canUpdateSystemFlags,
                 reportErrorForUnknownPermission = true, isPermissionRequested,
                 "updatePermissionFlags", packageName
             )
@@ -1218,18 +1232,20 @@ class PermissionService(
             Manifest.permission.REVOKE_RUNTIME_PERMISSIONS
         )
 
+        // Different from the old implementation, which only sanitized the SYSTEM_FIXED
+        // flag, we now properly sanitize all flags as in updatePermissionFlags().
+        val canUpdateSystemFlags = isRootOrSystemUid(callingUid)
+
         val packageStates = packageManagerLocal.withUnfilteredSnapshot()
             .use { it.packageStates }
         service.mutateState {
             packageStates.forEach { (packageName, packageState) ->
                 val androidPackage = packageState.androidPackage ?: return@forEach
                 androidPackage.requestedPermissions.forEach { permissionName ->
-                    // Different from the old implementation, which only sanitized the SYSTEM_FIXED
-                    // flag, we now properly sanitize all flags as in updatePermissionFlags().
                     updatePermissionFlags(
                         packageState.appId, userId, permissionName, flagMask, flagValues,
-                        reportErrorForUnknownPermission = false, isPermissionRequested = true,
-                        "updatePermissionFlagsForAllApps", packageName
+                        canUpdateSystemFlags, reportErrorForUnknownPermission = false,
+                        isPermissionRequested = true, "updatePermissionFlagsForAllApps", packageName
                     )
                 }
             }
@@ -1237,8 +1253,7 @@ class PermissionService(
     }
 
     /**
-     * Shared internal implementation that should only be called by [updatePermissionFlags] and
-     * [updatePermissionFlagsForAllApps].
+     * Update flags for a permission, without any validation on caller.
      */
     private fun MutateStateScope.updatePermissionFlags(
         appId: Int,
@@ -1246,21 +1261,18 @@ class PermissionService(
         permissionName: String,
         flagMask: Int,
         flagValues: Int,
+        canUpdateSystemFlags: Boolean,
         reportErrorForUnknownPermission: Boolean,
         isPermissionRequested: Boolean,
         methodName: String,
         packageName: String
     ) {
-        // Different from the old implementation, which only allowed the system UID to modify the
-        // following flags, we now allow the root UID as well since both should have all
-        // permissions.
-        // Only the system can change these flags and nothing else.
-        val callingUid = Binder.getCallingUid()
         @Suppress("NAME_SHADOWING")
         var flagMask = flagMask
         @Suppress("NAME_SHADOWING")
         var flagValues = flagValues
-        if (!isRootOrSystem(callingUid)) {
+        // Only the system can change these flags and nothing else.
+        if (!canUpdateSystemFlags) {
             // Different from the old implementation, which allowed non-system UIDs to remove (but
             // not add) permission restriction flags, we now consistently ignore them altogether.
             val ignoredMask = PackageManager.FLAG_PERMISSION_SYSTEM_FIXED or
@@ -2084,23 +2096,23 @@ class PermissionService(
     }
 
     /**
-     * Check whether a UID is root or system.
+     * Check whether a UID is root or system UID.
      */
-    private fun isRootOrSystem(uid: Int) =
+    private fun isRootOrSystemUid(uid: Int) =
         when (UserHandle.getAppId(uid)) {
             Process.ROOT_UID, Process.SYSTEM_UID -> true
             else -> false
         }
 
     /**
-     * Check whether a UID is shell.
+     * Check whether a UID is shell UID.
      */
-    private fun isShell(uid: Int) = UserHandle.getAppId(uid) == Process.SHELL_UID
+    private fun isShellUid(uid: Int) = UserHandle.getAppId(uid) == Process.SHELL_UID
 
     /**
-     * Check whether a UID is root, system or shell.
+     * Check whether a UID is root, system or shell UID.
      */
-    private fun isRootOrSystemOrShell(uid: Int) = isRootOrSystem(uid) || isShell(uid)
+    private fun isRootOrSystemOrShellUid(uid: Int) = isRootOrSystemUid(uid) || isShellUid(uid)
 
     /**
      * This method should typically only be used when granting or revoking permissions, since the
@@ -2208,7 +2220,7 @@ class PermissionService(
                         append(": ")
                     }
                     append("Neither user ")
-                    append(Binder.getCallingUid())
+                    append(callingUid)
                     append(" nor current process has ")
                     append(permissionName)
                     append(" to access user ")
@@ -2217,7 +2229,7 @@ class PermissionService(
                 throw SecurityException(exceptionMessage)
             }
         }
-        if (enforceShellRestriction && isShell(callingUid)) {
+        if (enforceShellRestriction && isShellUid(callingUid)) {
             val isShellRestricted = userManagerInternal.hasUserRestriction(
                 UserManager.DISALLOW_DEBUGGING_FEATURES, userId
             )
