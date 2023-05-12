@@ -37,8 +37,8 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
+import android.os.Process;
 import android.os.ResultReceiver;
-import android.os.UserHandle;
 import android.testing.AndroidTestingRunner;
 import android.widget.ImageView;
 
@@ -120,7 +120,8 @@ public final class AppClipsActivityTest extends SysuiTestCase {
         ImageExporter.Result result = new ImageExporter.Result();
         result.uri = TEST_URI;
         when(mImageExporter.export(any(Executor.class), any(UUID.class), any(Bitmap.class),
-                any(UserHandle.class))).thenReturn(Futures.immediateFuture(result));
+                eq(Process.myUserHandle())))
+                .thenReturn(Futures.immediateFuture(result));
     }
 
     @After
