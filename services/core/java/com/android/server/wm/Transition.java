@@ -1194,6 +1194,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (asyncRotationController != null && containsChangeFor(dc, mTargets)) {
                 asyncRotationController.onTransitionFinished();
             }
+            if (hasParticipatedDisplay && dc.mDisplayRotationCompatPolicy != null) {
+                final ChangeInfo changeInfo = mChanges.get(dc);
+                if (changeInfo != null
+                        && changeInfo.mRotation != dc.getWindowConfiguration().getRotation()) {
+                    dc.mDisplayRotationCompatPolicy.onScreenRotationAnimationFinished();
+                }
+            }
             if (mTransientLaunches != null) {
                 InsetsControlTarget prevImeTarget = dc.getImeTarget(
                         DisplayContent.IME_TARGET_CONTROL);
