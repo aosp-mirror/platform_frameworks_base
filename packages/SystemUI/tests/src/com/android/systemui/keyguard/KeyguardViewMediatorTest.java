@@ -95,6 +95,7 @@ import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -135,6 +136,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
     private @Mock ScreenOffAnimationController mScreenOffAnimationController;
     private @Mock InteractionJankMonitor mInteractionJankMonitor;
     private @Mock ScreenOnCoordinator mScreenOnCoordinator;
+    private @Mock KeyguardTransitions mKeyguardTransitions;
     private @Mock ShadeController mShadeController;
     private NotificationShadeWindowController mNotificationShadeWindowController;
     private @Mock DreamOverlayStateController mDreamOverlayStateController;
@@ -620,6 +622,7 @@ public class KeyguardViewMediatorTest extends SysuiTestCase {
                 mScreenOffAnimationController,
                 () -> mNotificationShadeDepthController,
                 mScreenOnCoordinator,
+                mKeyguardTransitions,
                 mInteractionJankMonitor,
                 mDreamOverlayStateController,
                 () -> mShadeController,
