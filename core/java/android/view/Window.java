@@ -1482,6 +1482,11 @@ public abstract class Window {
     }
 
     /** @hide */
+    public boolean shouldCloseOnTouchOutside() {
+        return mCloseOnTouchOutside;
+    }
+
+    /** @hide */
     @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract void alwaysReadCloseOnTouchAttr();
