@@ -58,7 +58,7 @@ class MutableIntReferenceMap<I : Immutable<M>, M : I>(
 
     fun put(key: Int, value: M): I? = array.putReturnOld(key, MutableReference(value))?.get()
 
-    fun remove(key: Int): I? = array.removeReturnOld(key)?.get()
+    fun remove(key: Int): I? = array.removeReturnOld(key).also { array.gc() }?.get()
 
     fun clear() {
         array.clear()
@@ -69,5 +69,5 @@ class MutableIntReferenceMap<I : Immutable<M>, M : I>(
     fun putAt(index: Int, value: M): I =
         array.setValueAtReturnOld(index, MutableReference(value)).get()
 
-    fun removeAt(index: Int): I = array.removeAtReturnOld(index).get()
+    fun removeAt(index: Int): I = array.removeAtReturnOld(index).also { array.gc() }.get()
 }

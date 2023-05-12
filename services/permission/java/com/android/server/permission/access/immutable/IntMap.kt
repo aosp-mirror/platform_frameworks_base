@@ -48,7 +48,7 @@ class MutableIntMap<T>(
 
     fun put(key: Int, value: T): T? = array.putReturnOld(key, value)
 
-    fun remove(key: Int): T? = array.removeReturnOld(key)
+    fun remove(key: Int): T? = array.removeReturnOld(key).also { array.gc() }
 
     fun clear() {
         array.clear()
@@ -56,7 +56,7 @@ class MutableIntMap<T>(
 
     fun putAt(index: Int, value: T): T = array.setValueAtReturnOld(index, value)
 
-    fun removeAt(index: Int): T = array.removeAtReturnOld(index)
+    fun removeAt(index: Int): T = array.removeAtReturnOld(index).also { array.gc() }
 }
 
 internal fun <T> SparseArray<T>.putReturnOld(key: Int, value: T): T? {
@@ -94,4 +94,8 @@ internal fun <T> SparseArray<T>.removeAtReturnOld(index: Int): T {
     val oldValue = valueAt(index)
     removeAt(index)
     return oldValue
+}
+
+internal fun <T> SparseArray<T>.gc() {
+    size()
 }
