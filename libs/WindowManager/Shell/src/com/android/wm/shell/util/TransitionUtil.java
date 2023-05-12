@@ -235,11 +235,20 @@ public class TransitionUtil {
     public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
             TransitionInfo info, SurfaceControl.Transaction t,
             @Nullable ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
+        return newTarget(change, order, false /* forceTranslucent */, info, t, leashMap);
+    }
+
+    /**
+     * Creates a new RemoteAnimationTarget from the provided change info
+     */
+    public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
+            boolean forceTranslucent, TransitionInfo info, SurfaceControl.Transaction t,
+            @Nullable ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         final SurfaceControl leash = createLeash(info, change, order, t);
         if (leashMap != null) {
             leashMap.put(change.getLeash(), leash);
         }
-        return newTarget(change, order, leash);
+        return newTarget(change, order, leash, forceTranslucent);
     }
 
     /**
@@ -247,6 +256,14 @@ public class TransitionUtil {
      */
     public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
             SurfaceControl leash) {
+        return newTarget(change, order, leash, false /* forceTranslucent */);
+    }
+
+    /**
+     * Creates a new RemoteAnimationTarget from the provided change and leash
+     */
+    public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
+            SurfaceControl leash, boolean forceTranslucent) {
         if (isDividerBar(change)) {
             return getDividerTarget(change, leash);
         }
@@ -276,7 +293,7 @@ public class TransitionUtil {
                 // TODO: once we can properly sync transactions across process,
                 // then get rid of this leash.
                 leash,
-                (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0,
+                forceTranslucent || (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0,
                 null,
                 // TODO(shell-transitions): we need to send content insets? evaluate how its used.
                 new Rect(0, 0, 0, 0),
