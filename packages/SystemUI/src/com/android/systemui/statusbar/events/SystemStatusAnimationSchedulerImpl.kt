@@ -153,6 +153,7 @@ constructor(
                 )
             }
             currentlyDisplayedEvent?.updateFromEvent(event)
+            if (event.forceVisible) hasPersistentDot = true
         } else if (scheduledEvent.value?.shouldUpdateFromEvent(event) == true) {
             if (DEBUG) {
                 Log.d(
