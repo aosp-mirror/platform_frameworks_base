@@ -120,7 +120,12 @@ object Flags {
         resourceBooleanFlag(204, R.bool.config_enableBouncerUserSwitcher, "bouncer_user_switcher")
 
     // TODO(b/254512676): Tracking Bug
-    @JvmField val LOCKSCREEN_CUSTOM_CLOCKS = releasedFlag(207, "lockscreen_custom_clocks")
+    @JvmField
+    val LOCKSCREEN_CUSTOM_CLOCKS = resourceBooleanFlag(
+        207,
+        R.bool.config_enableLockScreenCustomClocks,
+        "lockscreen_custom_clocks"
+    )
 
     // TODO(b/275694445): Tracking Bug
     @JvmField
