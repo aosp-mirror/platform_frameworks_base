@@ -38,13 +38,13 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.modules.utils.testing.TestableDeviceConfig;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.List;
@@ -86,7 +86,7 @@ public class ScreenUndimDetectorTest {
 
     @Before
     public void setup() {
-        MockitoAnnotations.initMocks(this);
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
 
         DeviceConfig.setProperty(NAMESPACE_ATTENTION_MANAGER_SERVICE,
                 KEY_UNDIMS_REQUIRED,
@@ -98,6 +98,11 @@ public class ScreenUndimDetectorTest {
 
         mScreenUndimDetector = new ScreenUndimDetector(mClock);
         mScreenUndimDetector.systemReady(sContext);
+    }
+
+    @After
+    public void tearDown() {
+        InstrumentationRegistry.getInstrumentation().waitForIdleSync();
     }
 
     @Test
