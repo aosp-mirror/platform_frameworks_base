@@ -53,6 +53,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.android.internal.accessibility.common.MagnificationConstants;
 import com.android.internal.annotations.VisibleForTesting;
@@ -87,6 +88,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
 
     private SeekBarWithIconButtonsView mZoomSeekbar;
     private LinearLayout mAllowDiagonalScrollingView;
+    private TextView mAllowDiagonalScrollingTitle;
     private Switch mAllowDiagonalScrollingSwitch;
     private LinearLayout mPanelView;
     private LinearLayout mSettingView;
@@ -467,6 +469,8 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mDoneButton = mSettingView.findViewById(R.id.magnifier_done_button);
         mEditButton = mSettingView.findViewById(R.id.magnifier_edit_button);
         mFullScreenButton = mSettingView.findViewById(R.id.magnifier_full_button);
+        mAllowDiagonalScrollingTitle =
+                mSettingView.findViewById(R.id.magnifier_horizontal_lock_title);
 
         mZoomSeekbar = mSettingView.findViewById(R.id.magnifier_zoom_slider);
         float scale = mSecureSettings.getFloatForUser(
@@ -490,6 +494,7 @@ class WindowMagnificationSettings implements MagnificationGestureDetector.OnGest
         mDoneButton.setOnClickListener(mButtonClickListener);
         mFullScreenButton.setOnClickListener(mButtonClickListener);
         mEditButton.setOnClickListener(mButtonClickListener);
+        mAllowDiagonalScrollingTitle.setSelected(true);
 
         mSettingView.setOnApplyWindowInsetsListener((v, insets) -> {
             // Adds a pending post check to avoiding redundant calculation because this callback
