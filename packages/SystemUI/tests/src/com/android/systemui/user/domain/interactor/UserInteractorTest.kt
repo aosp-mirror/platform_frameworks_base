@@ -482,30 +482,17 @@ class UserInteractorTest : SysuiTestCase() {
         }
 
     @Test
-    fun executeAction_addUser_dialogShown() =
+    fun executeAction_addUser_dismissesDialogAndStartsActivity() =
         testScope.runTest {
             val userInfos = createUserInfos(count = 2, includeGuest = false)
             userRepository.setUserInfos(userInfos)
             userRepository.setSelectedUserInfo(userInfos[0])
             keyguardRepository.setKeyguardShowing(false)
-            val dialogRequest = collectLastValue(underTest.dialogShowRequests)
-            val dialogShower: UserSwitchDialogController.DialogShower = mock()
 
-            underTest.executeAction(UserActionModel.ADD_USER, dialogShower)
+            underTest.executeAction(UserActionModel.ADD_USER)
             verify(uiEventLogger, times(1))
                 .log(MultiUserActionsEvent.CREATE_USER_FROM_USER_SWITCHER)
-            assertThat(dialogRequest())
-                .isEqualTo(
-                    ShowDialogRequestModel.ShowAddUserDialog(
-                        userHandle = userInfos[0].userHandle,
-                        isKeyguardShowing = false,
-                        showEphemeralMessage = false,
-                        dialogShower = dialogShower,
-                    )
-                )
-
             underTest.onDialogShown()
-            assertThat(dialogRequest()).isNull()
         }
 
     @Test
@@ -862,7 +849,7 @@ class UserInteractorTest : SysuiTestCase() {
 
             // Dialog is shown.
             assertThat(dialogRequest())
-                    .isEqualTo(ShowDialogRequestModel.ShowUserSwitcherFullscreenDialog(expandable))
+                .isEqualTo(ShowDialogRequestModel.ShowUserSwitcherFullscreenDialog(expandable))
 
             underTest.onDialogShown()
             assertThat(dialogRequest()).isNull()
