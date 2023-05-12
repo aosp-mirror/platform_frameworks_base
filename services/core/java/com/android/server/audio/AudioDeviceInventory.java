@@ -1478,7 +1478,7 @@ public class AudioDeviceInventory {
         }
 
         // Reset A2DP suspend state each time a new sink is connected
-        mAudioSystem.setParameters("A2dpSuspended=false");
+        mDeviceBroker.clearA2dpSuspended();
 
         // The convention for head tracking sensors associated with A2DP devices is to
         // use a UUID derived from the MAC address as follows:
@@ -1751,7 +1751,8 @@ public class AudioDeviceInventory {
     private void makeA2dpDeviceUnavailableLater(String address, int delayMs) {
         // prevent any activity on the A2DP audio output to avoid unwanted
         // reconnection of the sink.
-        mAudioSystem.setParameters("A2dpSuspended=true");
+        mDeviceBroker.setA2dpSuspended(
+                true /*enable*/, true /*internal*/, "makeA2dpDeviceUnavailableLater");
         // retrieve DeviceInfo before removing device
         final String deviceKey =
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, address);
@@ -1898,7 +1899,7 @@ public class AudioDeviceInventory {
                         "LE Audio device addr=" + address + " now available").printLog(TAG));
             }
             // Reset LEA suspend state each time a new sink is connected
-            mAudioSystem.setParameters("LeAudioSuspended=false");
+            mDeviceBroker.clearLeAudioSuspended();
 
             UUID sensorUuid = UuidUtils.uuidFromAudioDeviceAttributes(ada);
             mConnectedDevices.put(DeviceInfo.makeDeviceListKey(device, address),
@@ -1953,7 +1954,8 @@ public class AudioDeviceInventory {
     private void makeLeAudioDeviceUnavailableLater(String address, int device, int delayMs) {
         // prevent any activity on the LEA output to avoid unwanted
         // reconnection of the sink.
-        mAudioSystem.setParameters("LeAudioSuspended=true");
+        mDeviceBroker.setLeAudioSuspended(
+                true /*enable*/, true /*internal*/, "makeLeAudioDeviceUnavailableLater");
         // the device will be made unavailable later, so consider it disconnected right away
         mConnectedDevices.remove(DeviceInfo.makeDeviceListKey(device, address));
         // send the delayed message to make the device unavailable later
