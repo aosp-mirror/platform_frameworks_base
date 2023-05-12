@@ -36,6 +36,7 @@ import android.os.Build;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.UserManager.EnforcingUser;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
@@ -118,12 +119,13 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             return enforcedAdmin;
         }
 
-        final int restrictionSource = enforcingUsers.get(0).getUserRestrictionSource();
+        final EnforcingUser enforcingUser = enforcingUsers.get(0);
+        final int restrictionSource = enforcingUser.getUserRestrictionSource();
         if (restrictionSource == UserManager.RESTRICTION_SOURCE_SYSTEM) {
             return null;
         }
 
-        final EnforcedAdmin admin = getProfileOrDeviceOwner(context, userHandle);
+        final EnforcedAdmin admin = getProfileOrDeviceOwner(context, enforcingUser.getUserHandle());
         if (admin != null) {
             return admin;
         }
