@@ -1516,7 +1516,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         mController.mLoggerHandler.post(mLogger::logOnSend);
         if (mLogger.mInfo != null) {
-            mController.mTransitionTracer.logSentTransition(this, mTargets, info);
+            mController.mTransitionTracer.logSentTransition(this, mTargets);
         }
     }
 
