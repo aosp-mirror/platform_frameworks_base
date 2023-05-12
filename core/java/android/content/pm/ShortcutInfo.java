@@ -276,6 +276,12 @@ public final class ShortcutInfo implements Parcelable {
      */
     public static final int DISABLED_REASON_OTHER_RESTORE_ISSUE = 103;
 
+    /**
+     * The maximum length of Shortcut ID. IDs will be truncated at this limit.
+     * @hide
+     */
+    public static final int MAX_ID_LENGTH = 1000;
+
     /** @hide */
     @IntDef(prefix = { "DISABLED_REASON_" }, value = {
             DISABLED_REASON_NOT_DISABLED,
@@ -453,8 +459,7 @@ public final class ShortcutInfo implements Parcelable {
 
     private ShortcutInfo(Builder b) {
         mUserId = b.mContext.getUserId();
-
-        mId = Preconditions.checkStringNotEmpty(b.mId, "Shortcut ID must be provided");
+        mId = getSafeId(Preconditions.checkStringNotEmpty(b.mId, "Shortcut ID must be provided"));
 
         // Note we can't do other null checks here because SM.updateShortcuts() takes partial
         // information.
@@ -556,6 +561,14 @@ public final class ShortcutInfo implements Parcelable {
             }
         }
         return ret;
+    }
+
+    @NonNull
+    private static String getSafeId(@NonNull String id) {
+        if (id.length() > MAX_ID_LENGTH) {
+            return id.substring(0, MAX_ID_LENGTH);
+        }
+        return id;
     }
 
     /**
@@ -2141,7 +2154,8 @@ public final class ShortcutInfo implements Parcelable {
         final ClassLoader cl = getClass().getClassLoader();
 
         mUserId = source.readInt();
-        mId = source.readString8();
+        mId = getSafeId(Preconditions.checkStringNotEmpty(source.readString8(),
+                "Shortcut ID must be provided"));
         mPackageName = source.readString8();
         mActivity = source.readParcelable(cl);
         mFlags = source.readInt();
