@@ -16,8 +16,11 @@
 
 package android.app.backup;
 
+import android.annotation.Nullable;
 import android.os.Bundle;
 import android.os.RemoteException;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Wrapper around {@link BackupManagerMonitor} that helps with IPC between the caller of backup
@@ -26,16 +29,24 @@ import android.os.RemoteException;
  * The caller implements {@link BackupManagerMonitor} and passes it into framework APIs that run on
  * the caller's process. Those framework APIs will then wrap it around this class when doing the
  * actual IPC.
+ *
+ * @hide
  */
-class BackupManagerMonitorWrapper extends IBackupManagerMonitor.Stub {
+@VisibleForTesting
+public class BackupManagerMonitorWrapper extends IBackupManagerMonitor.Stub {
+    @Nullable
     private final BackupManagerMonitor mMonitor;
 
-    BackupManagerMonitorWrapper(BackupManagerMonitor monitor) {
+    public BackupManagerMonitorWrapper(@Nullable BackupManagerMonitor monitor) {
         mMonitor = monitor;
     }
 
     @Override
     public void onEvent(final Bundle event) throws RemoteException {
+        if (mMonitor == null) {
+            // It's valid for the underlying monitor to be null, so just return.
+            return;
+        }
         mMonitor.onEvent(event);
     }
 }
