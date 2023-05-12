@@ -43,6 +43,7 @@ import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Parcelable
 import android.os.Process
+import android.os.RemoteException
 import android.os.UserHandle
 import android.provider.Settings
 import android.service.notification.StatusBarNotification
@@ -52,6 +53,7 @@ import android.util.Log
 import android.util.Pair as APair
 import androidx.media.utils.MediaConstants
 import com.android.internal.logging.InstanceId
+import com.android.internal.statusbar.IStatusBarService
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.systemui.Dumpable
 import com.android.systemui.R
@@ -137,6 +139,8 @@ internal val EMPTY_SMARTSPACE_MEDIA_DATA =
         expiryTimeMs = 0,
     )
 
+const val MEDIA_TITLE_ERROR_MESSAGE = "Invalid media data: title is null or blank."
+
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
     return sbn.notification.isMediaNotification()
 }
@@ -181,6 +185,7 @@ class MediaDataManager(
     private val logger: MediaUiEventLogger,
     private val smartspaceManager: SmartspaceManager,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val statusBarService: IStatusBarService,
 ) : Dumpable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
 
     companion object {
@@ -252,6 +257,7 @@ class MediaDataManager(
         mediaFlags: MediaFlags,
         logger: MediaUiEventLogger,
         smartspaceManager: SmartspaceManager,
+        statusBarService: IStatusBarService,
         keyguardUpdateMonitor: KeyguardUpdateMonitor,
     ) : this(
         context,
@@ -277,6 +283,7 @@ class MediaDataManager(
         logger,
         smartspaceManager,
         keyguardUpdateMonitor,
+        statusBarService,
     )
 
     private val appChangeReceiver =
@@ -378,21 +385,21 @@ class MediaDataManager(
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
         if (useQsMediaPlayer && isMediaNotification(sbn)) {
-            var logEvent = false
+            var isNewlyActiveEntry = false
             Assert.isMainThread()
             val oldKey = findExistingEntry(key, sbn.packageName)
             if (oldKey == null) {
                 val instanceId = logger.getNewInstanceId()
                 val temp = LOADING.copy(packageName = sbn.packageName, instanceId = instanceId)
                 mediaEntries.put(key, temp)
-                logEvent = true
+                isNewlyActiveEntry = true
             } else if (oldKey != key) {
                 // Resume -> active conversion; move to new key
                 val oldData = mediaEntries.remove(oldKey)!!
-                logEvent = true
+                isNewlyActiveEntry = true
                 mediaEntries.put(key, oldData)
             }
-            loadMediaData(key, sbn, oldKey, logEvent)
+            loadMediaData(key, sbn, oldKey, isNewlyActiveEntry)
         } else {
             onNotificationRemoved(key)
         }
@@ -475,9 +482,9 @@ class MediaDataManager(
         key: String,
         sbn: StatusBarNotification,
         oldKey: String?,
-        logEvent: Boolean = false
+        isNewlyActiveEntry: Boolean = false,
     ) {
-        backgroundExecutor.execute { loadMediaDataInBg(key, sbn, oldKey, logEvent) }
+        backgroundExecutor.execute { loadMediaDataInBg(key, sbn, oldKey, isNewlyActiveEntry) }
     }
 
     /** Add a listener for changes in this class */
@@ -601,9 +608,11 @@ class MediaDataManager(
         }
     }
 
-    private fun removeEntry(key: String) {
+    private fun removeEntry(key: String, logEvent: Boolean = true) {
         mediaEntries.remove(key)?.let {
-            logger.logMediaRemoved(it.appUid, it.packageName, it.instanceId)
+            if (logEvent) {
+                logger.logMediaRemoved(it.appUid, it.packageName, it.instanceId)
+            }
         }
         notifyMediaDataRemoved(key)
     }
@@ -751,7 +760,7 @@ class MediaDataManager(
         key: String,
         sbn: StatusBarNotification,
         oldKey: String?,
-        logEvent: Boolean = false
+        isNewlyActiveEntry: Boolean = false,
     ) {
         val token =
             sbn.notification.extras.getParcelable(
@@ -772,6 +781,42 @@ class MediaDataManager(
             )
                 ?: getAppInfoFromPackage(sbn.packageName)
 
+        // App name
+        val appName = getAppName(sbn, appInfo)
+
+        // Song name
+        var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
+        if (song == null) {
+            song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
+        }
+        if (song == null) {
+            song = HybridGroupManager.resolveTitle(notif)
+        }
+        if (song.isNullOrBlank()) {
+            if (mediaFlags.isMediaTitleRequired(sbn.packageName, sbn.user)) {
+                // App is required to provide a title: cancel the underlying notification
+                try {
+                    statusBarService.onNotificationError(
+                        sbn.packageName,
+                        sbn.tag,
+                        sbn.id,
+                        sbn.uid,
+                        sbn.initialPid,
+                        MEDIA_TITLE_ERROR_MESSAGE,
+                        sbn.user.identifier
+                    )
+                } catch (e: RemoteException) {
+                    Log.e(TAG, "cancelNotification failed: $e")
+                }
+                // Only add log for media removed if active media is updated with invalid title.
+                foregroundExecutor.execute { removeEntry(key, !isNewlyActiveEntry) }
+                return
+            } else {
+                // For apps that don't have the title requirement yet, add a placeholder
+                song = context.getString(R.string.controls_media_empty_title, appName)
+            }
+        }
+
         // Album art
         var artworkBitmap = metadata?.let { loadBitmapFromUri(it) }
         if (artworkBitmap == null) {
@@ -787,20 +832,8 @@ class MediaDataManager(
                 Icon.createWithBitmap(artworkBitmap)
             }
 
-        // App name
-        val appName = getAppName(sbn, appInfo)
-
         // App Icon
         val smallIcon = sbn.notification.smallIcon
-
-        // Song name
-        var song: CharSequence? = metadata?.getString(MediaMetadata.METADATA_KEY_DISPLAY_TITLE)
-        if (song == null) {
-            song = metadata?.getString(MediaMetadata.METADATA_KEY_TITLE)
-        }
-        if (song == null) {
-            song = HybridGroupManager.resolveTitle(notif)
-        }
 
         // Explicit Indicator
         var isExplicit = false
@@ -873,7 +906,7 @@ class MediaDataManager(
         val instanceId = currentEntry?.instanceId ?: logger.getNewInstanceId()
         val appUid = appInfo?.uid ?: Process.INVALID_UID
 
-        if (logEvent) {
+        if (isNewlyActiveEntry) {
             logSingleVsMultipleMediaAdded(appUid, sbn.packageName, instanceId)
             logger.logActiveMediaAdded(appUid, sbn.packageName, instanceId, playbackLocation)
         } else if (playbackLocation != currentEntry?.playbackLocation) {
