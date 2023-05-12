@@ -468,7 +468,8 @@ public final class AutofillManager {
             COMMIT_REASON_ACTIVITY_FINISHED,
             COMMIT_REASON_VIEW_COMMITTED,
             COMMIT_REASON_VIEW_CLICKED,
-            COMMIT_REASON_VIEW_CHANGED
+            COMMIT_REASON_VIEW_CHANGED,
+            COMMIT_REASON_SESSION_DESTROYED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AutofillCommitReason {}
@@ -507,6 +508,12 @@ public final class AutofillManager {
      * @hide
      */
     public static final int COMMIT_REASON_VIEW_CHANGED = 4;
+    /**
+     * Autofill context was committed because of the session was destroyed.
+     *
+     * @hide
+     */
+    public static final int COMMIT_REASON_SESSION_DESTROYED = 5;
 
     /**
      * Makes an authentication id from a request id and a dataset id.
