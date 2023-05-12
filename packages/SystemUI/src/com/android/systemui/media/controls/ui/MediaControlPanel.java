@@ -1235,6 +1235,8 @@ public class MediaControlPanel {
         if ((buttonId == R.id.actionPrev && semanticActions.getReservePrev())
                 || (buttonId == R.id.actionNext && semanticActions.getReserveNext())) {
             notVisibleValue = ConstraintSet.INVISIBLE;
+            mMediaViewHolder.getAction(buttonId).setFocusable(visible);
+            mMediaViewHolder.getAction(buttonId).setClickable(visible);
         } else {
             notVisibleValue = ConstraintSet.GONE;
         }
