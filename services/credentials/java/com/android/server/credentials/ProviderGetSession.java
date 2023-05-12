@@ -150,7 +150,7 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         List<CredentialOption> filteredOptions = new ArrayList<>();
         for (CredentialOption option : clientRequest.getCredentialOptions()) {
             if (providerCapabilities.contains(option.getType())
-                    && isProviderAllowed(option, info.getComponentName())
+                    && isProviderAllowed(option, info)
                     && checkSystemProviderRequirement(option, info.isSystemProvider())) {
                 Slog.i(TAG, "Option of type: " + option.getType() + " meets all filtering"
                         + "conditions");
@@ -167,9 +167,14 @@ public final class ProviderGetSession extends ProviderSession<BeginGetCredential
         return null;
     }
 
-    private static boolean isProviderAllowed(CredentialOption option, ComponentName componentName) {
+    private static boolean isProviderAllowed(CredentialOption option,
+            CredentialProviderInfo providerInfo) {
+        if (providerInfo.isSystemProvider()) {
+            // Always allow system providers , including the remote provider
+            return true;
+        }
         if (!option.getAllowedProviders().isEmpty() && !option.getAllowedProviders().contains(
-                componentName)) {
+                providerInfo.getComponentName())) {
             Slog.i(TAG, "Provider allow list specified but does not contain this provider");
             return false;
         }
