@@ -20,7 +20,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.keyguard.domain.interactor.LockScreenSceneInteractor
+import com.android.systemui.keyguard.domain.interactor.LockscreenSceneInteractor
 import com.android.systemui.scene.SceneTestUtils
 import com.android.systemui.scene.SceneTestUtils.Companion.CONTAINER_1
 import com.android.systemui.scene.shared.model.SceneKey
@@ -50,9 +50,9 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
     private val underTest =
         ShadeSceneViewModel(
             applicationScope = testScope.backgroundScope,
-            lockScreenSceneInteractorFactory =
-                object : LockScreenSceneInteractor.Factory {
-                    override fun create(containerName: String): LockScreenSceneInteractor {
+            lockscreenSceneInteractorFactory =
+                object : LockscreenSceneInteractor.Factory {
+                    override fun create(containerName: String): LockscreenSceneInteractor {
                         return utils.lockScreenSceneInteractor(
                             authenticationInteractor = authenticationInteractor,
                             sceneInteractor = sceneInteractor,
@@ -74,7 +74,7 @@ class ShadeSceneViewModelTest : SysuiTestCase() {
             authenticationInteractor.setAuthenticationMethod(AuthenticationMethodModel.PIN(1234))
             authenticationInteractor.lockDevice()
 
-            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.LockScreen)
+            assertThat(upTransitionSceneKey).isEqualTo(SceneKey.Lockscreen)
         }
 
     @Test
