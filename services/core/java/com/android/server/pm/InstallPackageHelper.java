@@ -324,7 +324,6 @@ final class InstallPackageHelper {
         InstallSource installSource = request.getInstallSource();
         final boolean isApex = (scanFlags & SCAN_AS_APEX) != 0;
         final boolean pkgAlreadyExists = oldPkgSetting != null;
-        final boolean isAllowUpdateOwnership = parsedPackage.isAllowUpdateOwnership();
         final String oldUpdateOwner =
                 pkgAlreadyExists ? oldPkgSetting.getInstallSource().mUpdateOwnerPackageName : null;
         final String updateOwnerFromSysconfig = isApex || !pkgSetting.isSystem() ? null
@@ -346,11 +345,7 @@ final class InstallPackageHelper {
             }
 
             // Handle the update ownership enforcement for APK
-            if (!isAllowUpdateOwnership) {
-                // If the app wants to opt-out of the update ownership enforcement via manifest,
-                // it overrides the installer's use of #setRequestUpdateOwnership.
-                installSource = installSource.setUpdateOwnerPackageName(null);
-            } else if (!isApex) {
+            if (!isApex) {
                 // User installer UID as "current" userId if present; otherwise, use the userId
                 // from InstallRequest.
                 final int userId = installSource.mInstallerPackageUid != Process.INVALID_UID
@@ -391,22 +386,18 @@ final class InstallPackageHelper {
         // For non-standard install (addForInit), installSource is null.
         } else if (pkgSetting.isSystem()) {
             // We still honor the manifest attr if the system app wants to opt-out of it.
-            if (!isAllowUpdateOwnership) {
-                pkgSetting.setUpdateOwnerPackage(null);
-            } else {
-                final boolean isSameUpdateOwner = isUpdateOwnershipEnabled
-                        && TextUtils.equals(oldUpdateOwner, updateOwnerFromSysconfig);
+            final boolean isSameUpdateOwner = isUpdateOwnershipEnabled
+                    && TextUtils.equals(oldUpdateOwner, updateOwnerFromSysconfig);
 
-                // Here we handle the update owner for the system package, and the rules are:
-                // -. We use the update owner from sysconfig as the initial value.
-                // -. Once an app becomes to system app later via OTA, only retains the update
-                //    owner if it's consistence with sysconfig.
-                // -. Clear the update owner when update owner changes from sysconfig.
-                if (!pkgAlreadyExists || isSameUpdateOwner) {
-                    pkgSetting.setUpdateOwnerPackage(updateOwnerFromSysconfig);
-                } else {
-                    pkgSetting.setUpdateOwnerPackage(null);
-                }
+            // Here we handle the update owner for the system package, and the rules are:
+            // -. We use the update owner from sysconfig as the initial value.
+            // -. Once an app becomes to system app later via OTA, only retains the update
+            //    owner if it's consistence with sysconfig.
+            // -. Clear the update owner when update owner changes from sysconfig.
+            if (!pkgAlreadyExists || isSameUpdateOwner) {
+                pkgSetting.setUpdateOwnerPackage(updateOwnerFromSysconfig);
+            } else {
+                pkgSetting.setUpdateOwnerPackage(null);
             }
         }
 
