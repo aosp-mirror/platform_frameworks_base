@@ -220,7 +220,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"输入"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"助听器"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"正在开启…"</string>
-    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自动旋转屏幕"</string>
+    <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自动屏幕旋转"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"自动旋转屏幕"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置信息"</string>
     <string name="quick_settings_camera_label" msgid="5612076679385269339">"摄像头使用权限"</string>
@@ -623,8 +623,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"向右键码"</string>
     <string name="left_icon" msgid="5036278531966897006">"向左图标"</string>
     <string name="right_icon" msgid="1103955040645237425">"向右图标"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加图块"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列图块"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"按住并拖动即可添加功能块"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"按住并拖动即可重新排列功能块"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"拖动到此处即可移除"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"您至少需要 <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> 个卡片"</string>
     <string name="qs_edit" msgid="5583565172803472437">"编辑"</string>
@@ -641,15 +641,15 @@
   </string-array>
     <string name="tuner_low_priority" msgid="8412666814123009820">"显示低优先级的通知图标"</string>
     <string name="other" msgid="429768510980739978">"其他"</string>
-    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"移除图块"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"将图块添加到末尾"</string>
-    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"移动图块"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"添加图块"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"移除功能块"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"将功能块添加到末尾"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"移动功能块"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"添加功能块"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"移至 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"添加到位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"已添加卡片"</string>
-    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"已移除卡片"</string>
+    <string name="accessibility_qs_edit_tile_added" msgid="9067146040380836334">"已添加功能块"</string>
+    <string name="accessibility_qs_edit_tile_removed" msgid="1175925632436612036">"已移除功能块"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"快捷设置编辑器。"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g>通知：<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_settings" msgid="7098489591715844713">"打开设置。"</string>
@@ -777,8 +777,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"取消收藏"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"移至位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控制"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"选择要从“快捷设置”菜单访问的控制项"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控制器"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"选择要显示在“快捷设置”菜单中的控件"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住并拖动即可重新排列控件"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"已移除所有控制器"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"未保存更改"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"查看其他应用"</string>
@@ -791,8 +791,8 @@
     <string name="controls_tile_locked" msgid="731547768182831938">"设备已锁定"</string>
     <string name="controls_settings_show_controls_dialog_title" msgid="3357852503553809554">"要从锁定屏幕上显示和控制设备吗？"</string>
     <string name="controls_settings_show_controls_dialog_message" msgid="7666211700524587969">"您可以在锁定屏幕上添加用于控制外部设备的控件。\n\n您的设备应用可能会允许您在不解锁手机或平板电脑的情况下控制某些设备。\n\n您可以随时在“设置”中进行更改。"</string>
-    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"要从锁定屏幕上控制设备吗？"</string>
-    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"您可以在不解锁手机或平板电脑的情况下控制某些设备。\n\n您的设备应用将决定哪些设备可以通过这种方式进行控制。"</string>
+    <string name="controls_settings_trivial_controls_dialog_title" msgid="7593188157655036677">"要在锁屏状态下控制设备吗？"</string>
+    <string name="controls_settings_trivial_controls_dialog_message" msgid="237183787721917586">"您可以在不解锁手机或平板电脑的情况下控制某些设备。\n\n哪些设备可以通过这种方式进行控制取决于您的设备配套应用。"</string>
     <string name="controls_settings_dialog_neutral_button" msgid="4514446354793124140">"不用了"</string>
     <string name="controls_settings_dialog_positive_button" msgid="436070672551674863">"是"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN 码由字母或符号组成"</string>
@@ -857,8 +857,8 @@
     <string name="media_output_broadcast_start_failed" msgid="3670835946856129775">"无法广播"</string>
     <string name="media_output_broadcast_update_error" msgid="1420868236079122521">"无法保存，请重试。"</string>
     <string name="media_output_broadcast_last_update_error" msgid="5484328807296895491">"无法保存。"</string>
-    <string name="build_number_clip_data_label" msgid="3623176728412560914">"版本号"</string>
-    <string name="build_number_copy_toast" msgid="877720921605503046">"已将版本号复制到剪贴板。"</string>
+    <string name="build_number_clip_data_label" msgid="3623176728412560914">"Build 号"</string>
+    <string name="build_number_copy_toast" msgid="877720921605503046">"已将 Build 号复制到剪贴板。"</string>
     <string name="basic_status" msgid="2315371112182658176">"开放式对话"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"对话微件"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"点按对话即可将其添加到主屏幕"</string>
@@ -921,9 +921,9 @@
     <string name="to_switch_networks_disconnect_ethernet" msgid="6698111101156951955">"如要切换网络，请断开以太网连接"</string>
     <string name="wifi_scan_notify_message" msgid="3753839537448621794">"为了提升设备的使用体验，即使 WLAN 已关闭，应用和服务仍可以随时扫描 WLAN 网络。您可以在 WLAN 扫描设置中更改此设置。"<annotation id="link">"更改"</annotation></string>
     <string name="turn_off_airplane_mode" msgid="8425587763226548579">"关闭飞行模式"</string>
-    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"“<xliff:g id="APPNAME">%1$s</xliff:g>”希望将以下图块添加到“快捷设置”"</string>
-    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加图块"</string>
-    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加图块"</string>
+    <string name="qs_tile_request_dialog_text" msgid="3501359944139877694">"“<xliff:g id="APPNAME">%1$s</xliff:g>”希望将以下功能块添加到“快捷设置”"</string>
+    <string name="qs_tile_request_dialog_add" msgid="4888460910694986304">"添加功能块"</string>
+    <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"不添加功能块"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"选择用户"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> 个应用正在运行</item>

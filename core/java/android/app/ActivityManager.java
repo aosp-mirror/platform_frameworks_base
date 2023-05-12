@@ -642,9 +642,17 @@ public class ActivityManager {
     @TestApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 2;
 
-    /** @hide Process can access network despite any power saving resrictions */
+    /** @hide Process can access network despite any power saving restrictions */
     @TestApi
-    public static final int PROCESS_CAPABILITY_NETWORK = 1 << 3;
+    public static final int PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK = 1 << 3;
+    /**
+     * @hide
+     * @deprecated Use {@link #PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK} instead.
+     */
+    @TestApi
+    @Deprecated
+    public static final int PROCESS_CAPABILITY_NETWORK =
+            PROCESS_CAPABILITY_POWER_RESTRICTED_NETWORK;
 
     /** @hide all capabilities, the ORing of all flags in {@link ProcessCapability}*/
     @TestApi
@@ -3933,6 +3941,9 @@ public class ActivityManager {
      * with the given package.  This is the same as the kernel killing those
      * processes to reclaim memory; the system will take care of restarting
      * these processes in the future as needed.
+     *
+     * <p class="note">Third party applications can only use this API to kill their own processes.
+     * </p>
      *
      * @param packageName The name of the package whose processes are to
      * be killed.

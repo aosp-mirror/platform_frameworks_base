@@ -1,0 +1,160 @@
+//########################################################################
+// Build PackageManagerServiceServerTests package
+//########################################################################
+
+package {
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "PackageManagerServiceServerTests",
+
+    // Include all test java files.
+    srcs: [
+        "src/**/*.java",
+        "src/**/*.kt",
+    ],
+    static_libs: [
+        "frameworks-base-testutils",
+        "services.accessibility",
+        "services.appwidget",
+        "services.autofill",
+        "services.backup",
+        "services.companion",
+        "services.core",
+        "services.devicepolicy",
+        "services.net",
+        "services.people",
+        "services.usage",
+        "guava",
+        "guava-android-testlib",
+        "androidx.test.core",
+        "androidx.test.ext.truth",
+        "androidx.test.runner",
+        "androidx.test.rules",
+        "cts-wm-util",
+        "platform-compat-test-rules",
+        "mockito-target-minus-junit4",
+        "platform-test-annotations",
+        "ShortcutManagerTestUtils",
+        "truth-prebuilt",
+        "testables",
+        "ub-uiautomator",
+        "platformprotosnano",
+        "framework-protos",
+        "hamcrest-library",
+        "servicestests-core-utils",
+        "servicestests-dpm-utils",
+        "servicestests-utils",
+        "service-permission.impl",
+        "testng",
+        "truth-prebuilt",
+        "junit",
+        "junit-params",
+        "platform-compat-test-rules",
+        "ActivityContext",
+        "coretests-aidl",
+    ],
+
+    libs: [
+        "android.hardware.power-V1-java",
+        "android.hardware.tv.cec-V1.0-java",
+        "android.hardware.vibrator-V2-java",
+        "android.hidl.manager-V1.0-java",
+        "android.test.mock",
+        "android.test.base",
+        "android.test.runner",
+    ],
+
+    platform_apis: true,
+
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
+
+    certificate: "platform",
+
+    // These are not normally accessible from apps so they must be explicitly included.
+    jni_libs: [
+        "libbase",
+        "libbinder",
+        "libc++",
+        "libcutils",
+        "liblog",
+        "liblzma",
+        "libnativehelper",
+        "libpsi",
+        "libui",
+        "libunwindstack",
+        "libutils",
+        "netd_aidl_interface-V5-cpp",
+    ],
+
+    dxflags: ["--multi-dex"],
+
+    java_resources: [
+        ":PackageParserTestApp1",
+        ":PackageParserTestApp2",
+        ":PackageParserTestApp3",
+        ":PackageParserTestApp4",
+        ":PackageParserTestApp5",
+    ],
+    resource_zips: [":PackageManagerServiceServerTests_apks_as_resources"],
+}
+
+// Rules to copy all the test apks to the intermediate raw resource directory
+java_genrule {
+    name: "PackageManagerServiceServerTests_apks_as_resources",
+    srcs: [
+        ":FrameworksServicesTests_install",
+        ":FrameworksServicesTests_install_bad_dex",
+        ":FrameworksServicesTests_install_complete_package_info",
+        ":FrameworksServicesTests_install_decl_perm",
+        ":FrameworksServicesTests_install_intent_filters",
+        ":FrameworksServicesTests_install_loc_auto",
+        ":FrameworksServicesTests_install_loc_internal",
+        ":FrameworksServicesTests_install_loc_sdcard",
+        ":FrameworksServicesTests_install_loc_unspecified",
+        ":FrameworksServicesTests_install_use_perm_good",
+        ":FrameworksServicesTests_install_uses_feature",
+        ":FrameworksServicesTests_install_uses_sdk_0",
+        ":FrameworksServicesTests_install_uses_sdk_q0",
+        ":FrameworksServicesTests_install_uses_sdk_q0_r0",
+        ":FrameworksServicesTests_install_uses_sdk_r0",
+        ":FrameworksServicesTests_install_uses_sdk_r5",
+        ":FrameworksServicesTests_install_uses_sdk_r1000",
+        ":FrameworksServicesTests_install_uses_sdk_r_none",
+        ":FrameworksServicesTests_install_uses_sdk_r0_s0",
+        ":FrameworksServicesTests_install_uses_sdk_r0_s5",
+        ":FrameworksServicesTests_install_uses_sdk_r0_s1000",
+        ":FrameworksServicesTests_keyset_permdef_sa_unone",
+        ":FrameworksServicesTests_keyset_permuse_sa_ua_ub",
+        ":FrameworksServicesTests_keyset_permuse_sb_ua_ub",
+        ":FrameworksServicesTests_keyset_sa_ua",
+        ":FrameworksServicesTests_keyset_sa_ua_ub",
+        ":FrameworksServicesTests_keyset_sa_uab",
+        ":FrameworksServicesTests_keyset_sa_ub",
+        ":FrameworksServicesTests_keyset_sa_unone",
+        ":FrameworksServicesTests_keyset_sab_ua",
+        ":FrameworksServicesTests_keyset_sau_ub",
+        ":FrameworksServicesTests_keyset_sb_ua",
+        ":FrameworksServicesTests_keyset_sb_ub",
+        ":FrameworksServicesTests_keyset_splat_api",
+        ":FrameworksServicesTests_keyset_splata_api",
+    ],
+    out: ["PackageManagerServiceServerTests_apks_as_resources.res.zip"],
+    tools: ["soong_zip"],
+
+    cmd: "mkdir -p $(genDir)/res/raw && " +
+        "for i in $(in); do " +
+        "  x=$${i##*FrameworksCoreTests_}; cp $$i $(genDir)/res/raw/$${x%.apk};" +
+        "  x=$${i##*FrameworksServicesTests_}; cp $$i $(genDir)/res/raw/$${x%.apk};" +
+        "done && " +
+        "$(location soong_zip) -o $(out) -C $(genDir)/res -D $(genDir)/res",
+}

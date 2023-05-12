@@ -599,6 +599,15 @@ public class ComputerEngine implements Computer {
                 resolveForStart, userId, intent);
     }
 
+    @NonNull
+    @Override
+    public final List<ResolveInfo> queryIntentActivitiesInternal(Intent intent, String resolvedType,
+            @PackageManager.ResolveInfoFlagsBits long flags, int filterCallingUid, int userId) {
+        return queryIntentActivitiesInternal(
+                intent, resolvedType, flags, 0 /*privateResolveFlags*/, filterCallingUid,
+                userId, false /*resolveForStart*/, true /*allowDynamicSplits*/);
+    }
+
     public final @NonNull List<ResolveInfo> queryIntentActivitiesInternal(Intent intent,
             String resolvedType, @PackageManager.ResolveInfoFlagsBits long flags, int userId) {
         return queryIntentActivitiesInternal(

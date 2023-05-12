@@ -19,8 +19,8 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="8898068901680117589">"Sim App Dialog"</string>
     <string name="install_carrier_app_title" msgid="334729104862562585">"啟動流動服務"</string>
-    <string name="install_carrier_app_description" msgid="4014303558674923797">"為確保新的 SIM 卡正常運作，您必須先安裝「<xliff:g id="ID_1">%1$s</xliff:g>」應用程式"</string>
-    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"為確保新的 SIM 卡正常運作，您必須先安裝流動網絡供應商應用程式"</string>
+    <string name="install_carrier_app_description" msgid="4014303558674923797">"為確保新的 SIM 卡正常運作，你必須先安裝「<xliff:g id="ID_1">%1$s</xliff:g>」應用程式"</string>
+    <string name="install_carrier_app_description_default" msgid="7356830245205847840">"為確保新的 SIM 卡正常運作，你必須先安裝流動網絡供應商應用程式"</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"暫時不要"</string>
     <string name="install_carrier_app_download_action" msgid="7859229305958538064">"下載應用程式"</string>
 </resources>

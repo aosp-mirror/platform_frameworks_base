@@ -357,7 +357,7 @@
     <string name="user_remove_user_message" msgid="6702834122128031833">"כל האפליקציות והנתונים של המשתמש הזה יימחקו."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"הסרה"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"‏לאפליקציית <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> תהיה גישה לכל המידע הגלוי במסך שלך ולכל תוכן שמופעל במכשיר שלך בזמן הקלטה או העברה (casting). המידע הזה כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל הפרטים שגלויים במסך שלך או מופעלים מהמכשיר שלך בזמן הקלטה או העברה (cast) – כולל פרטים כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"‏לשירות שמספק את הפונקציה הזו תהיה גישה לכל המידע שגלוי במסך שלך או מופעל מהמכשיר שלך בזמן הקלטה או העברה (cast) – כולל מידע כמו סיסמאות, פרטי תשלום, תמונות, הודעות ואודיו שמושמע מהמכשיר."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"‏להתחיל להקליט או להעביר (cast)?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"‏להתחיל להקליט או להעביר (cast) באמצעות <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ניקוי הכול"</string>
@@ -827,7 +827,7 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"הפעלת <xliff:g id="SONG_NAME">%1$s</xliff:g> של <xliff:g id="ARTIST_NAME">%2$s</xliff:g> מ-<xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"הפעלת <xliff:g id="SONG_NAME">%1$s</xliff:g> מ-<xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"ביטול"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"צריך להתקרב כדי להפעיל מוזיקה במכשיר <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"צריך להתקרב כדי להפעיל מדיה במכשיר <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"צריך להתקרב אל <xliff:g id="DEVICENAME">%1$s</xliff:g> כדי להפעיל כאן"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"פועלת ב-<xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"משהו השתבש. יש לנסות שוב."</string>
@@ -835,7 +835,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"לא נמצא"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"הפקד לא זמין"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"לא ניתן להתחבר אל <xliff:g id="DEVICE">%1$s</xliff:g>. יש לבדוק את האפליקציה <xliff:g id="APPLICATION">%2$s</xliff:g> כדי לוודא שהפקד עדיין זמין ושהגדרות האפליקציה לא השתנו."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"לפתיחת האפליקציה"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"פתיחת האפליקציה"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"לא ניתן לטעון את הסטטוס"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"שגיאה, יש לנסות שוב"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"הוספת פקדים"</string>

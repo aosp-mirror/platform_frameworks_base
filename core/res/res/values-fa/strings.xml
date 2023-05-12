@@ -233,8 +233,8 @@
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"ساعت شما خاموش می‌شود."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"گوشی شما خاموش می‌شود."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"‏آیا می‎خواهید تلفن خاموش شود؟"</string>
-    <string name="reboot_safemode_title" msgid="5853949122655346734">"راه‌اندازی مجدد در حالت امن"</string>
-    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید با حالت امن راه‌اندازی مجدد کنید؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با راه‌اندازی دوباره سیستم این برنامه‌ها دوباره بازیابی می‌شوند."</string>
+    <string name="reboot_safemode_title" msgid="5853949122655346734">"بازراه‌اندازی به حالت امن"</string>
+    <string name="reboot_safemode_confirm" msgid="1658357874737219624">"آیا می‌خواهید به حالت امن بازراه‌اندازی شود؟ با این کار همهٔ برنامه‌های شخص ثالثی که نصب کرده‌اید غیرفعال می‌شوند. با بازراه‌اندازی سیستم، این برنامه‌ها دوباره بازیابی می‌شوند."</string>
     <string name="recent_tasks_title" msgid="8183172372995396653">"اخیر"</string>
     <string name="no_recent_tasks" msgid="9063946524312275906">"برنامه‌های جدید موجود نیست."</string>
     <string name="global_actions" product="tablet" msgid="4412132498517933867">"گزینه‌های رایانهٔ لوحی"</string>
@@ -296,7 +296,7 @@
     <string name="safeMode" msgid="8974401416068943888">"حالت ایمن"</string>
     <string name="android_system_label" msgid="5974767339591067210">"‏سیستم Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"جابه‌جا شدن به نمایه شخصی"</string>
-    <string name="managed_profile_label" msgid="7316778766973512382">"جابه‌جا شدن به نمایه کاری"</string>
+    <string name="managed_profile_label" msgid="7316778766973512382">"رفتن به نمایه کاری"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"مخاطبین"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"دسترسی به مخاطبین شما"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"مکان"</string>
@@ -566,7 +566,7 @@
     <string name="permdesc_useFingerprint" msgid="412463055059323742">"به برنامه امکان می‌دهد از سخت‌افزار اثر انگشت برای اصالت‌سنجی استفاده کند"</string>
     <string name="permlab_audioWrite" msgid="8501705294265669405">"تغییر مجموعه موسیقی شما"</string>
     <string name="permdesc_audioWrite" msgid="8057399517013412431">"به برنامه اجازه می‌دهد مجموعه موسیقی‌تان را تغییر دهد."</string>
-    <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیوی شما"</string>
+    <string name="permlab_videoWrite" msgid="5940738769586451318">"تغییر مجموعه ویدیو  شما"</string>
     <string name="permdesc_videoWrite" msgid="6124731210613317051">"به برنامه اجازه می‌دهد مجموعه ویدیویتان را تغییر دهد."</string>
     <string name="permlab_imagesWrite" msgid="1774555086984985578">"تغییر مجموعه عکس شما"</string>
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"به برنامه اجازه می‌دهد مجموعه عکستان را تغییر دهد."</string>
@@ -574,7 +574,7 @@
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"به برنامه اجازه می‌دهد مکان‌ها را از مجموعه رسانه‌تان بخواند."</string>
     <string name="biometric_app_setting_name" msgid="3339209978734534457">"استفاده از زیست‌سنجشی"</string>
     <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"استفاده از زیست‌سنجشی یا قفل صفحه"</string>
-    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شما هستید"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"تأیید کنید این شمایید"</string>
     <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"برای ادامه، از زیست‌سنجشی استفاده کنید"</string>
     <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"برای ادامه، از زیست‌سنجشی یا قفل صفحه استفاده کنید"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"سخت‌افزار زیست‌سنجی دردسترس نیست"</string>
@@ -1007,7 +1007,7 @@
     <string name="factorytest_failed" msgid="3190979160945298006">"تست کارخانه انجام نشد"</string>
     <string name="factorytest_not_system" msgid="5658160199925519869">"‏عملکرد FACTORY_TEST تنها برای بسته‌های نصب شده در /system/app پشتیبانی می‌شود."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"‏بسته‌ای یافت نشد که عملکرد FACTORY_TEST را ارائه کند."</string>
-    <string name="factorytest_reboot" msgid="2050147445567257365">"راه‌اندازی مجدد"</string>
+    <string name="factorytest_reboot" msgid="2050147445567257365">"بازراه‌اندازی"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"‏صفحه در \"<xliff:g id="TITLE">%s</xliff:g>\" می‎گوید:"</string>
     <string name="js_dialog_title_default" msgid="3769524569903332476">"جاوا اسکریپت"</string>
     <string name="js_dialog_before_unload_title" msgid="7012587995876771246">"تأیید پیمایش"</string>
@@ -1244,11 +1244,11 @@
     <string name="android_upgrading_starting_apps" msgid="6206161195076057075">"درحال آغاز کردن برنامه‌ها."</string>
     <string name="android_upgrading_complete" msgid="409800058018374746">"درحال اتمام راه‌اندازی."</string>
     <string name="fp_power_button_enrollment_title" msgid="3574363228413259548">"ادامه راه‌اندازی؟"</string>
-    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_enrollment_message" msgid="5648173517663246140">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nهنگام راه‌اندازی اثر انگشت، آرام ضربه بزنید."</string>
     <string name="fp_power_button_enrollment_positive_button" msgid="2095415838459356833">"خاموش کردن صفحه"</string>
     <string name="fp_power_button_enrollment_negative_button" msgid="6558436406362486747">"ادامه راه‌اندازی"</string>
     <string name="fp_power_button_bp_title" msgid="5585506104526820067">"تأیید اثر انگشت را ادامه می‌دهید؟"</string>
-    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/ خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام ضربه بزنید."</string>
+    <string name="fp_power_button_bp_message" msgid="2983163038168903393">"دکمه روشن/خاموش را فشار دادید — این کار معمولاً صفحه‌نمایش را خاموش می‌کند.\n\nبرای تأیید اثر انگشتتان، آرام ضربه بزنید."</string>
     <string name="fp_power_button_bp_positive_button" msgid="728945472408552251">"خاموش کردن صفحه"</string>
     <string name="fp_power_button_bp_negative_button" msgid="3971364246496775178">"ادامه"</string>
     <string name="heavy_weight_notification" msgid="8382784283600329576">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
@@ -1368,7 +1368,7 @@
     <string name="console_running_notification_title" msgid="6087888939261635904">"کنسول سریال فعال است"</string>
     <string name="console_running_notification_message" msgid="7892751888125174039">"‏عملکرد تحت‌تأثیر قرار گرفته است. برای غیرفعال کردن، bootloader را بررسی کنید."</string>
     <string name="mte_override_notification_title" msgid="4731115381962792944">"‏MTE آزمایشی فعال شد"</string>
-    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏شاید عملکرد و پایداری تحت تأثیر قرار بگیرند. برای غیرفعال کردن، راه‌اندازی مجدد کنید. اگر بااستفاده ازarm64.memtag.bootctl فعال شده است، پیش‌از راه‌اندازی مقدار آن را روی هیچ‌کدام تنظیم کنید."</string>
+    <string name="mte_override_notification_message" msgid="2441170442725738942">"‏شاید عملکرد و پایداری تحت تأثیر قرار بگیرند. برای غیرفعال کردن، بازراه‌اندازی کنید. اگر بااستفاده از arm64.memtag.bootctl فعال شده است، پیش‌از بازراه‌اندازی مقدار آن را روی هیچ‌کدام تنظیم کنید."</string>
     <string name="usb_contaminant_detected_title" msgid="4359048603069159678">"‏مایعات یا خاکروبه در درگاه USB"</string>
     <string name="usb_contaminant_detected_message" msgid="7346100585390795743">"‏درگاه USB به‌طور خودکار غیرفعال شده است. برای اطلاعات بیشتر، ضربه بزنید."</string>
     <string name="usb_contaminant_not_detected_title" msgid="2651167729563264053">"‏می‌توان از درگاه USB استفاده کرد"</string>
@@ -1464,7 +1464,7 @@
     <string name="ime_action_default" msgid="8265027027659800121">"اجرا کردن"</string>
     <string name="dial_number_using" msgid="6060769078933953531">"شماره گیری \nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="create_contact_using" msgid="6200708808003692594">"ایجاد مخاطب\nبا استفاده از <xliff:g id="NUMBER">%s</xliff:g>"</string>
-    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست مجوز کرده‌اند."</string>
+    <string name="grant_credentials_permission_message_header" msgid="5365733888842570481">"یک یا چند برنامه زیر برای دسترسی به حساب شما در زمان حال و آینده درخواست اجازه کرده‌اند."</string>
     <string name="grant_credentials_permission_message_footer" msgid="1886710210516246461">"می‌خواهید به این درخواست اجازه دهید؟"</string>
     <string name="grant_permissions_header_text" msgid="3420736827804657201">"درخواست دسترسی"</string>
     <string name="allow" msgid="6195617008611933762">"ارزیابی‌شده"</string>
@@ -1927,7 +1927,7 @@
     <string name="app_suspended_title" msgid="888873445010322650">"برنامه در دسترس نیست"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> درحال‌حاضر در دسترس نیست. <xliff:g id="APP_NAME_1">%2$s</xliff:g> آن را مدیریت می‌کند."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"بیشتر بدانید"</string>
-    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو توقف موقت برنامه"</string>
+    <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"لغو مکث برنامه"</string>
     <string name="work_mode_off_title" msgid="961171256005852058">"برنامه‌های کاری روشن شود؟"</string>
     <string name="work_mode_off_message" msgid="7319580997683623309">"دسترسی به اعلان‌ها و برنامه‌های کاری"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"روشن کردن"</string>
@@ -2029,7 +2029,7 @@
     <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> مجوز لازم را ندارد"</string>
     <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> مجاز نیست"</string>
     <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"سیم‌کارت <xliff:g id="SIMNUMBER">%d</xliff:g> مجاز نیست"</string>
-    <string name="popup_window_default_title" msgid="6907717596694826919">"پنجره بازشو"</string>
+    <string name="popup_window_default_title" msgid="6907717596694826919">"پنجره بالاپر"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"‎+ <xliff:g id="NUMBER">%1$d</xliff:g>‎"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"نسخه برنامه تنزل داده شده است یا با این میان‌بر سازگار نیست"</string>
     <string name="shortcut_restore_not_supported" msgid="4763198938588468400">"نمی‌توان میان‌بر را بازیابی کرد زیرا برنامه از پشتیبان‌گیری و بازیابی پشتیبانی نمی‌کند"</string>

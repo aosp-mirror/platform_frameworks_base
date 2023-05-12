@@ -24,7 +24,7 @@ import android.content.pm.PackageManager;
 import android.platform.test.annotations.Presubmit;
 import android.test.InstrumentationTestCase;
 
-import com.android.frameworks.servicestests.R;
+import com.android.server.pm.test.service.server.R;
 
 import org.mockito.Mock;
 

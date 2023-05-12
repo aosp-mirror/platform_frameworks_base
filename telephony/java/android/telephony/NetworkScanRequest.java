@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Defines a request to peform a network scan.
+ * Defines a request to perform a network scan.
  *
  * This class defines whether the network scan will be performed only once or periodically until
  * cancelled, when the scan is performed periodically, the time interval is not controlled by the

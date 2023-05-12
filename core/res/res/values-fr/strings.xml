@@ -52,7 +52,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Échec de l\'opération. Veuillez activer le verrouillage de la carte SIM/RUIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentative avant que votre carte SIM ne soit verrouillée.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée.</item>
       <item quantity="other">Il vous reste <xliff:g id="NUMBER_1">%d</xliff:g> tentatives avant que votre carte SIM ne soit verrouillée.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"Code IMEI"</string>
@@ -316,7 +316,7 @@
     <string name="permgroupdesc_microphone" msgid="1047786732792487722">"enregistrer des fichiers audio"</string>
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Activité physique"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"accéder aux données d\'activité physique"</string>
-    <string name="permgrouplab_camera" msgid="9090413408963547706">"Appareil photo"</string>
+    <string name="permgrouplab_camera" msgid="9090413408963547706">"Caméra"</string>
     <string name="permgroupdesc_camera" msgid="7585150538459320326">"prendre des photos et enregistrer des vidéos"</string>
     <string name="permgrouplab_nearby_devices" msgid="5529147543651181991">"Appareils à proximité"</string>
     <string name="permgroupdesc_nearby_devices" msgid="3213561597116913508">"détecter des appareils à proximité et s\'y connecter"</string>
@@ -640,7 +640,7 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Trop sombre. Essayez une éclairage plus lumineux."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Éloignez le téléphone."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Rapprochez le téléphone."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Montez le téléphone."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Levez le téléphone."</string>
     <string name="face_acquired_too_low" msgid="1512237819632165945">"Baissez le téléphone."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Déplacez le téléphone vers la gauche."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Déplacez le téléphone vers la droite."</string>
@@ -1347,14 +1347,14 @@
     <string name="no_permissions" msgid="5729199278862516390">"Aucune autorisation requise"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"Cela peut engendrer des frais"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Appareil en charge via USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Recharge de cet appareil via USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Recharge via USB de l\'appareil connecté"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Transfert de fichiers via USB activé"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP via USB activé"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Partage de connexion via USB activé"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB activé"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accessoire USB connecté"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Appuyez ici pour plus d\'options."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Appuyez pour plus d\'options."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Recharge de l\'appareil connecté. Appuyez ici pour plus d\'options."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Accessoire audio analogique détecté"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"L\'appareil connecté n\'est pas compatible avec ce téléphone. Appuyez ici pour en savoir plus."</string>
@@ -1607,7 +1607,7 @@
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablette"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Téléviseur"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Téléphone"</string>
-    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Haut-parleurs de la station d\'accueil"</string>
+    <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"Haut-parleur de la station de recharge"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Écouteurs"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
@@ -1634,7 +1634,7 @@
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Schéma incorrect."</string>
     <string name="kg_wrong_password" msgid="2384677900494439426">"Mot de passe incorrect."</string>
     <string name="kg_wrong_pin" msgid="3680925703673166482">"Code PIN incorrect."</string>
-    <string name="kg_pattern_instructions" msgid="8366024510502517748">"Dessinez votre schéma."</string>
+    <string name="kg_pattern_instructions" msgid="8366024510502517748">"Tracez votre schéma"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Saisissez le code PIN de la carte SIM."</string>
     <string name="kg_pin_instructions" msgid="7355933174673539021">"Saisissez le code PIN."</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Saisissez votre mot de passe."</string>
@@ -1852,7 +1852,7 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Mis à jour par votre administrateur"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Supprimé par votre administrateur"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"L\'économiseur de batterie active le thème sombre et limite ou désactive l\'activité en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"L\'économiseur de batterie active le thème sombre et limite ou désactive les activités en arrière-plan ainsi que certains effets visuels, fonctionnalités et connexions réseau."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Pour réduire la consommation des données, l\'Économiseur de données empêche certaines applis d\'envoyer ou de recevoir des données en arrière-plan. Les applis que vous utiliserez pourront toujours accéder aux données, mais le feront moins fréquemment. Par exemple, les images pourront ne pas s\'afficher tant que vous n\'aurez pas appuyé dessus."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Activer l\'Économiseur de données ?"</string>
@@ -1868,7 +1868,7 @@
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Jusqu\'à <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (alarme suivante)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Jusqu\'à la désactivation"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Jusqu\'à ce que vous le désactiviez"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Jusqu\'à ce que vous désactiviez la fonctionnalité \"Ne pas déranger\""</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Réduire"</string>
@@ -2041,7 +2041,7 @@
     <string name="harmful_app_warning_open_anyway" msgid="5963657791740211807">"OUVRIR QUAND MÊME"</string>
     <string name="harmful_app_warning_title" msgid="8794823880881113856">"Application dangereuse détectée"</string>
     <string name="log_access_confirmation_title" msgid="2343578467290592708">"Autoriser <xliff:g id="LOG_ACCESS_APP_NAME">%s</xliff:g> à accéder à tous les journaux de l\'appareil ?"</string>
-    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Autoriser un accès unique"</string>
+    <string name="log_access_confirmation_allow" msgid="5302517782599389507">"Autoriser un accès ponctuel"</string>
     <string name="log_access_confirmation_deny" msgid="7685790957455099845">"Ne pas autoriser"</string>
     <string name="log_access_confirmation_body" msgid="6581985716241928135">"Les journaux enregistrent ce qui se passe sur votre appareil. Les applis peuvent les utiliser pour rechercher et résoudre les problèmes.\n\nCertains journaux pouvant contenir des infos sensibles, autorisez uniquement les applis de confiance à accéder à tous les journaux de l\'appareil. \n\nSi vous refusez à cette appli l\'accès à tous les journaux de l\'appareil, elle a quand même accès aux siens. Le fabricant de l\'appareil peut accéder à certains journaux ou certaines infos sur votre appareil. En savoir plus"</string>
     <string name="log_access_do_not_show_again" msgid="1058690599083091552">"Ne plus afficher"</string>
@@ -2074,7 +2074,7 @@
     <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Désactiver"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"En savoir plus"</string>
-    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées remplacent les notifications intelligentes dans Android 12. Cette fonctionnalité affiche les suggestions d\'actions et de réponses, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris aux informations personnelles tels que les noms des contacts et les messages. Elle peut aussi fermer les notifications ou effectuer des actions comme répondre à un appel téléphonique et contrôler le mode Ne pas déranger."</string>
+    <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Les notifications améliorées ont remplacé les notifications intelligentes dans Android 12. Cette fonctionnalité affiche des suggestions d\'actions et de réponses, et organise vos notifications.\n\nElle a accès au contenu des notifications, y compris à des infos personnelles tels que les noms et les messages des contacts. Elle peut aussi fermer les notifications, ou y répondre (répondre aux appels téléphoniques, par exemple), et contrôler Ne pas déranger."</string>
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Vous risquez d\'être à court de batterie plus tôt que prévu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Économiseur de batterie activé pour prolonger l\'autonomie"</string>
@@ -2266,7 +2266,7 @@
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Activer dans les paramètres"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Fermer"</string>
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Débloquer le micro de l\'appareil"</string>
-    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Débloquer l\'appareil photo de l\'appareil"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Débloquer la caméra de l\'appareil"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"Pour &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; et tous les services et applis"</string>
     <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Débloquer"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Confidentialité du capteur"</string>

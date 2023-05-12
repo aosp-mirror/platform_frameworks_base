@@ -470,7 +470,7 @@
     <string name="wallet_secondary_label_device_locked" msgid="5175862019125370506">"解鎖即可使用"</string>
     <string name="wallet_error_generic" msgid="257704570182963611">"擷取卡片時發生問題，請稍後再試"</string>
     <string name="wallet_lockscreen_settings_label" msgid="3539105300870383570">"螢幕鎖定設定"</string>
-    <string name="qr_code_scanner_title" msgid="5290201053875420785">"掃描 QR 圖碼"</string>
+    <string name="qr_code_scanner_title" msgid="5290201053875420785">"掃描 QR code"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"工作資料夾"</string>
     <string name="status_bar_airplane" msgid="4848702508684541009">"飛航模式"</string>
     <string name="zen_alarm_warning" msgid="7844303238486849503">"你不會聽到下一個<xliff:g id="WHEN">%1$s</xliff:g> 的鬧鐘"</string>
@@ -587,7 +587,7 @@
     <string name="keyboard_shortcut_group_applications_music" msgid="9032078456666204025">"音樂"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="4229602992120154157">"日曆"</string>
     <string name="volume_and_do_not_disturb" msgid="502044092739382832">"零打擾"</string>
-    <string name="volume_dnd_silent" msgid="4154597281458298093">"音量按鈕快速鍵"</string>
+    <string name="volume_dnd_silent" msgid="4154597281458298093">"音量鍵快速鍵"</string>
     <string name="battery" msgid="769686279459897127">"電池"</string>
     <string name="headset" msgid="4485892374984466437">"耳機"</string>
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"開啟設定"</string>
@@ -931,7 +931,7 @@
     </plurals>
     <string name="fgs_dot_content_description" msgid="2865071539464777240">"新資訊"</string>
     <string name="fgs_manager_dialog_title" msgid="5879184257257718677">"運作中的應用程式"</string>
-    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"即使您並未使用，這些應用程式仍會持續運作。這可提升應用程式效能，但也可能影響電池續航力。"</string>
+    <string name="fgs_manager_dialog_message" msgid="2670045017200730076">"即使你並未使用，這些應用程式仍會持續運作。這可提升應用程式效能，但也可能影響電池續航力。"</string>
     <string name="fgs_manager_app_item_stop_button_label" msgid="7188317969020801156">"停止"</string>
     <string name="fgs_manager_app_item_stop_button_stopped_label" msgid="6950382004441263922">"已停止"</string>
     <string name="clipboard_edit_text_done" msgid="4551887727694022409">"完成"</string>

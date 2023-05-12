@@ -20,7 +20,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="config_pdp_reject_dialog_title" msgid="41208110171880430"></string>
-    <string name="config_pdp_reject_user_authentication_failed" msgid="4683454131283459978">"ПОТВРДА ИДЕНТИТЕТА НИЈЕ УСПЕЛА -29-"</string>
-    <string name="config_pdp_reject_service_not_subscribed" msgid="9021140729932308119">"НИСТЕ ПРЕТПЛАЋЕНИ НА УСЛУГУ -33-"</string>
-    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="3838388706348367865">"Није дозвољено више PDN веза за одређени APN -55-"</string>
+    <string name="config_pdp_reject_user_authentication_failed" msgid="4683454131283459978">"POTVRDA IDENTITETA NIJE USPELA -29-"</string>
+    <string name="config_pdp_reject_service_not_subscribed" msgid="9021140729932308119">"NISTE PRETPLAĆENI NA USLUGU -33-"</string>
+    <string name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" msgid="3838388706348367865">"Nije dozvoljeno više PDN veza za određeni APN -55-"</string>
 </resources>

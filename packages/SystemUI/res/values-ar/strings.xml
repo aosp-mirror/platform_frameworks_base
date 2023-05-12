@@ -418,7 +418,7 @@
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"‏تطبيقات العمل الخاصة بك متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. يمكن لمشرف تكنولوجيا المعلومات ومزوّد خدمة الشبكة الافتراضية الخاصة (VPN) رؤية أنشطة الشبكة في تطبيقات العمل، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"‏تطبيقاتك الشخصية متّصلة بالإنترنت من خلال <xliff:g id="VPN_APP">%1$s</xliff:g>. تظهر أنشطة الشبكة، بما في ذلك الرسائل الإلكترونية وبيانات التصفُّح، لمزوّد خدمة الشبكة الافتراضية الخاصة (VPN)."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="8292589617720435430">" "</string>
-    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏فتح إعدادات الشبكة الافتراضية الخاصة (VPN)"</string>
+    <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"‏فتح إعدادات شبكة VPN"</string>
     <string name="monitoring_description_parental_controls" msgid="8184693528917051626">"يتولّى أحد الوالدين إدارة هذا الجهاز. يمكن للوالدين عرض وإدارة معلوماتك، مثلاً التطبيقات التي تستخدمها وموقعك الجغرافي ووقت النظر إلى الشاشة."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"شبكة افتراضية خاصة"</string>
     <string name="keyguard_indication_trust_unlocked" msgid="7395154975733744547">"‏فتح القفل باستمرار بواسطة TrustAgent"</string>
@@ -643,7 +643,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"رمز مفتاح اليمين"</string>
     <string name="left_icon" msgid="5036278531966897006">"رمز اليسار"</string>
     <string name="right_icon" msgid="1103955040645237425">"رمز اليمين"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"اضغط باستمرار مع السحب لإضافة الميزات."</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"اضغط باستمرار مع السحب لإضافة المربّعات"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"اضغط باستمرار مع السحب لإعادة ترتيب الميزات."</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"اسحب هنا للإزالة"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"الحدّ الأدنى من عدد المربعات الذي تحتاج إليه هو <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g>"</string>
@@ -749,8 +749,8 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"تستخدم التطبيقات <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"، "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" و "</string>
-    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"يجري الاستخدام الآن من قِبل <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>."</string>
-    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"تم الاستخدام مؤخرًا من قِبل <xliff:g id="APPLICATION_NAME">%1$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="426635338010011796">"يجري الاستخدام الآن من قِبل \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\"."</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="2736290123662790026">"تم الاستخدام مؤخرًا من قِبل \"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g>\"."</string>
     <string name="ongoing_privacy_dialog_enterprise" msgid="3003314125311966061">"(العمل)"</string>
     <string name="ongoing_privacy_dialog_phonecall" msgid="4487370562589839298">"المكالمات الهاتفية"</string>
     <string name="ongoing_privacy_dialog_attribution_text" msgid="4738795925380373994">"(من خلال <xliff:g id="APPLICATION_NAME_S_">%s</xliff:g>)"</string>
@@ -776,11 +776,11 @@
     <string name="magnification_mode_switch_click_label" msgid="2786203505805898199">"تبديل"</string>
     <string name="accessibility_floating_button_migration_tooltip" msgid="5217151214439341902">"انقر لفتح ميزات تسهيل الاستخدام. يمكنك تخصيص هذا الزر أو استبداله من الإعدادات.\n\n"<annotation id="link">"عرض الإعدادات"</annotation></string>
     <string name="accessibility_floating_button_docking_tooltip" msgid="6814897496767461517">"يمكنك نقل الزر إلى الحافة لإخفائه مؤقتًا."</string>
-    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"نقل إلى أعلى يمين الشاشة"</string>
-    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"نقل إلى أعلى يسار الشاشة"</string>
-    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"نقل إلى أسفل يمين الشاشة"</string>
-    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"نقل إلى أسفل يسار الشاشة"</string>
-    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"نقله إلى الحافة وإخفاؤه"</string>
+    <string name="accessibility_floating_button_action_move_top_left" msgid="6253520703618545705">"النقل إلى أعلى يمين الشاشة"</string>
+    <string name="accessibility_floating_button_action_move_top_right" msgid="6106225581993479711">"النقل إلى أعلى يسار الشاشة"</string>
+    <string name="accessibility_floating_button_action_move_bottom_left" msgid="8063394111137429725">"النقل إلى أسفل يمين الشاشة"</string>
+    <string name="accessibility_floating_button_action_move_bottom_right" msgid="6196904373227440500">"النقل إلى أسفل يسار الشاشة"</string>
+    <string name="accessibility_floating_button_action_move_to_edge_and_hide_to_half" msgid="662401168245782658">"النقل إلى الحافة والإخفاء"</string>
     <string name="accessibility_floating_button_action_move_out_edge_and_show" msgid="8354760891651663326">"نقله إلى خارج الحافة وإظهاره"</string>
     <string name="accessibility_floating_button_action_double_tap_to_toggle" msgid="7976492639670692037">"إيقاف/تفعيل"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"التحكم بالجهاز"</string>
@@ -884,7 +884,7 @@
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"رقم الإصدار"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"تم نسخ رقم الإصدار إلى الحافظة."</string>
     <string name="basic_status" msgid="2315371112182658176">"محادثة مفتوحة"</string>
-    <string name="select_conversation_title" msgid="6716364118095089519">"أدوات المحادثة"</string>
+    <string name="select_conversation_title" msgid="6716364118095089519">"التطبيقات المصغّرة للمحادثات"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"انقر على محادثة لإضافتها إلى \"الشاشة الرئيسية\"."</string>
     <string name="no_conversations_text" msgid="5354115541282395015">"ستظهر هنا المحادثات الحديثة."</string>
     <string name="priority_conversations" msgid="3967482288896653039">"المحادثات ذات الأولوية"</string>

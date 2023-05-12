@@ -340,7 +340,7 @@
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"Fingeravtrycksrörelser"</string>
     <string name="capability_desc_canCaptureFingerprintGestures" msgid="6861869337457461274">"Kan registrera rörelser som utförs med hjälp av enhetens fingeravtryckssensor."</string>
     <string name="capability_title_canTakeScreenshot" msgid="3895812893130071930">"Ta skärmbild"</string>
-    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Du kan ta en skärmbild av skärmen."</string>
+    <string name="capability_desc_canTakeScreenshot" msgid="7762297374317934052">"Kan ta en skärmbild av skärmen."</string>
     <string name="permlab_statusBar" msgid="8798267849526214017">"inaktivera eller ändra statusfält"</string>
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Tillåter att appen inaktiverar statusfältet eller lägger till och tar bort systemikoner."</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"visas i statusfältet"</string>
@@ -639,10 +639,10 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Det är för mörkt. Testa med bättre belysning."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Flytta telefonen längre bort."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"För mobilen närmare."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Höj mobilen."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Sänk mobilen."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Höj telefonen."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Sänk telefonen."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Flytta mobilen åt vänster."</string>
-    <string name="face_acquired_too_left" msgid="8882499346502714350">"Flytta mobilen åt höger."</string>
+    <string name="face_acquired_too_left" msgid="8882499346502714350">"Flytta telefonen åt höger."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Titta rakt på enheten."</string>
     <string name="face_acquired_not_detected" msgid="2945945257956443257">"Ha ansiktet direkt framför telefonen."</string>
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"För mycket rörelse. Håll mobilen stilla."</string>
@@ -1165,7 +1165,7 @@
     <string name="selected" msgid="6614607926197755875">"valt"</string>
     <string name="not_selected" msgid="410652016565864475">"inte valt"</string>
     <string name="in_progress" msgid="2149208189184319441">"pågår"</string>
-    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd genom att använda"</string>
+    <string name="whichApplication" msgid="5432266899591255759">"Slutför åtgärd med"</string>
     <string name="whichApplicationNamed" msgid="6969946041713975681">"Slutför åtgärden med %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"Slutför åtgärd"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"Öppna med"</string>
@@ -2267,7 +2267,7 @@
     <string name="sensor_privacy_start_use_mic_notification_content_title" msgid="2420858361276370367">"Återaktivera enhetens mikrofon"</string>
     <string name="sensor_privacy_start_use_camera_notification_content_title" msgid="7287720213963466672">"Återaktivera enhetens kamera"</string>
     <string name="sensor_privacy_start_use_notification_content_text" msgid="7595608891015777346">"För &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; och alla appar och tjänster"</string>
-    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Avblockera"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7089318886628390827">"Återaktivera"</string>
     <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Sensorintegritet"</string>
     <string name="splash_screen_view_icon_description" msgid="180638751260598187">"Appikon"</string>
     <string name="splash_screen_view_branding_description" msgid="7911129347402728216">"Appens varumärkesbild"</string>

@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.interruption;
 
 import static com.android.systemui.statusbar.StatusBarState.SHADE;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.database.ContentObserver;
@@ -201,6 +202,17 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             final int uid = entry.getSbn().getUid();
             android.util.EventLog.writeEvent(0x534e4554, "231322873", uid, "groupAlertBehavior");
             mLogger.logNoFullscreenWarning(entry, "GroupAlertBehavior will prevent HUN");
+            return false;
+        }
+
+        // If the notification has suppressive BubbleMetadata, block FSI and warn.
+        Notification.BubbleMetadata bubbleMetadata = sbn.getNotification().getBubbleMetadata();
+        if (bubbleMetadata != null && bubbleMetadata.isNotificationSuppressed()) {
+            // b/274759612: Detect and report an event when a notification has both an FSI and a
+            // suppressive BubbleMetadata, and now correctly block the FSI from firing.
+            final int uid = entry.getSbn().getUid();
+            android.util.EventLog.writeEvent(0x534e4554, "274759612", uid, "bubbleMetadata");
+            mLogger.logNoFullscreenWarning(entry, "BubbleMetadata may prevent HUN");
             return false;
         }
 

@@ -114,7 +114,7 @@
     <string name="accessibility_menu" msgid="2701163794470513040">"Menu"</string>
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"Accessibilité"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"Faire pivoter l\'écran"</string>
-    <string name="accessibility_recent" msgid="901641734769533575">"Aperçu"</string>
+    <string name="accessibility_recent" msgid="901641734769533575">"Récents"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"Appareil photo"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Téléphoner"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistance vocale"</string>
@@ -204,7 +204,7 @@
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> autres"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> autre notification à l\'intérieur.</item>
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> autres notifications à l\'intérieur.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> autres notifications à l\'intérieur.</item>
     </plurals>
     <string name="accessibility_rotation_lock_on_landscape" msgid="936972553861524360">"L\'écran est verrouillé en mode paysage."</string>
@@ -224,7 +224,7 @@
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Rotation automatique"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Rotation automatique de l\'écran"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localisation"</string>
-    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à l\'appareil photo"</string>
+    <string name="quick_settings_camera_label" msgid="5612076679385269339">"Accès à la caméra"</string>
     <string name="quick_settings_mic_label" msgid="8392773746295266375">"Accès au micro"</string>
     <string name="quick_settings_camera_mic_available" msgid="1453719768420394314">"Disponible"</string>
     <string name="quick_settings_camera_mic_blocked" msgid="4710884905006788281">"Bloqué"</string>
@@ -255,7 +255,7 @@
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Écon. données activé"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="one">%d appareil</item>
-      <item quantity="many">%d devices</item>
+      <item quantity="many">%d appareils</item>
       <item quantity="other">%d appareils</item>
     </plurals>
     <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampe de poche"</string>
@@ -289,11 +289,11 @@
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Arrêter"</string>
     <string name="quick_settings_onehanded_label" msgid="2416537930246274991">"Mode une main"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Débloquer le micro de l\'appareil ?"</string>
-    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer l\'appareil photo de l\'appareil ?"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Débloquer la caméra de l\'appareil ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Débloquer l\'appareil photo et le micro de l\'appareil ?"</string>
-    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"Cette action débloque l\'accès à tous les services et applis autorisés à utiliser votre micro."</string>
-    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"Cette action débloque l\'accès à tous les services et applis autorisés à utiliser votre appareil photo."</string>
-    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"Cette action débloque l\'accès pour tous les services et applis autorisés à utiliser votre appareil photo ou votre micro."</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="1624701280680913717">"L\'accès sera débloqué pour tous les services et applis autorisés à utiliser votre micro."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="4704948062372435963">"L\'accès sera débloqué pour tous les services et applis autorisés à utiliser votre caméra."</string>
+    <string name="sensor_privacy_start_use_mic_camera_dialog_content" msgid="3577642558418404919">"L\'accès sera débloqué pour tous les services et applis autorisés à utiliser votre caméra ou votre micro."</string>
     <string name="sensor_privacy_start_use_mic_blocked_dialog_title" msgid="2640140287496469689">"Le micro est bloqué"</string>
     <string name="sensor_privacy_start_use_camera_blocked_dialog_title" msgid="7398084286822440384">"La caméra est bloquée"</string>
     <string name="sensor_privacy_start_use_mic_camera_blocked_dialog_title" msgid="195236134743281973">"Le micro et la caméra sont bloqués"</string>
@@ -304,7 +304,7 @@
     <string name="sensor_privacy_camera_unblocked_toast_content" msgid="7843105715964332311">"Caméra accessible"</string>
     <string name="sensor_privacy_mic_camera_unblocked_toast_content" msgid="7339355093282661115">"Micro et caméra accessibles"</string>
     <string name="media_seamless_other_device" msgid="4654849800789196737">"Autre appareil"</string>
-    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'aperçu"</string>
+    <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Activer/Désactiver l\'écran Récents"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes, des rappels, des événements et des appels des contacts de votre choix. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Vous ne serez dérangé par aucun son ni aucune vibration, hormis ceux des alarmes. Le son continuera de fonctionner notamment pour la musique, les vidéos et les jeux."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personnaliser"</string>
@@ -312,7 +312,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Cette option permet de bloquer TOUS les sons et les vibrations, y compris pour les alarmes, la musique, les vidéos et les jeux."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Appuyer à nouveau pour ouvrir"</string>
     <string name="tap_again" msgid="1315420114387908655">"Appuyer à nouveau"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Balayer vers le haut pour ouvrir"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Balayez vers le haut pour ouvrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Appuyez sur l\'icône de déverrouillage pour ouvrir"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Déverrouillé par visage. Appuyez sur icône déverrouillage pour ouvrir."</string>
   <string-array name="udfps_accessibility_touch_hints">
@@ -350,7 +350,7 @@
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite nombre utilisateurs atteinte"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
       <item quantity="one">Vous pouvez ajouter <xliff:g id="COUNT">%d</xliff:g> profil utilisateur.</item>
-      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
+      <item quantity="many">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> profils utilisateur.</item>
       <item quantity="other">Vous pouvez ajouter jusqu\'à <xliff:g id="COUNT">%d</xliff:g> profils utilisateur.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Supprimer l\'utilisateur ?"</string>
@@ -364,7 +364,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gérer"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historique"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Nouvelles notifications"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Notifications silencieuses"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Silencieux"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notifications"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversations"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Effacer toutes les notifications silencieuses"</string>
@@ -421,14 +421,14 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activer"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"désactiver"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"L\'application est épinglée"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Aperçu."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Récents."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur les boutons Retour et Accueil."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, balayez-la vers le haut et gardez le doigt appuyé."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur le bouton Aperçu."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur le bouton Récents."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Elle restera visible jusqu\'à ce que vous la retiriez. Pour la retirer, appuyez de manière prolongée sur le bouton Accueil."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Des données à caractère personnel, comme des contacts et le contenu d\'e-mails, peuvent être accessibles."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"D\'autres applications peuvent être ouvertes depuis une application épinglée."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Pour que l\'appli ne soit plus épinglée, appuyez de manière prolongée sur les boutons Retour et Aperçu"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Pour que l\'appli ne soit plus épinglée, appuyez de manière prolongée sur les boutons Retour et Récents"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Pour que l\'appli ne soit plus épinglée, appuyez de manière prolongée sur les boutons Retour et Accueil"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Pour que l\'appli ne soit plus épinglée, balayez-la vers le haut et maintenez le doigt appuyé"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
@@ -460,7 +460,7 @@
     <string name="volume_dialog_ringer_guidance_ring" msgid="9143194270463146858">"Les appels et les notifications sonneront (<xliff:g id="VOLUME_LEVEL">%1$s</xliff:g>)"</string>
     <string name="system_ui_tuner" msgid="1471348823289954729">"System UI Tuner"</string>
     <string name="status_bar" msgid="4357390266055077437">"Barre d\'état"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Mode de démonstration de l\'interface du système"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Mode démo de l\'UI du système"</string>
     <string name="enable_demo_mode" msgid="3180345364745966431">"Activer le mode de démonstration"</string>
     <string name="show_demo_mode" msgid="3677956462273059726">"Afficher le mode de démonstration"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
@@ -534,18 +534,18 @@
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Désactiver l\'affichage sous forme de bulles"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> : <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"paramètres des notifications"</string>
-    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"options de répétition des notifications"</string>
+    <string name="notification_menu_snooze_description" msgid="4740133348901973244">"options de mise en attente des notifications"</string>
     <string name="notification_menu_snooze_action" msgid="5415729610393475019">"M\'envoyer un rappel"</string>
     <string name="snooze_undo" msgid="2738844148845992103">"Annuler"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Répétée après <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
       <item quantity="one">%d heure</item>
-      <item quantity="many">%d hours</item>
+      <item quantity="many">%d heures</item>
       <item quantity="other">%d heures</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
       <item quantity="one">%d minute</item>
-      <item quantity="many">%d minutes</item>
+      <item quantity="many">%d minutes</item>
       <item quantity="other">%d minutes</item>
     </plurals>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"Économiseur de batterie"</string>
@@ -772,7 +772,7 @@
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'appli pour laquelle ajouter des commandes"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> commande ajoutée.</item>
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
     </plurals>
     <string name="controls_removed" msgid="3731789252222856959">"Supprimé"</string>
@@ -827,15 +827,15 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Mets <xliff:g id="SONG_NAME">%1$s</xliff:g> par <xliff:g id="ARTIST_NAME">%2$s</xliff:g> depuis <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Mets <xliff:g id="SONG_NAME">%1$s</xliff:g> depuis <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Annuler"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Rapprochez-vous pour lire sur <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Rapprochez l\'appareil pour transférer la diffusion à votre <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
-    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Lecture sur <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Rapprochez-vous de votre <xliff:g id="DEVICENAME">%1$s</xliff:g> pour y lire le contenu"</string>
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Rapprochez l\'appareil de votre <xliff:g id="DEVICENAME">%1$s</xliff:g> pour lire le contenu ici"</string>
+    <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Lecture sur <xliff:g id="DEVICENAME">%1$s</xliff:g>…"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Un problème est survenu. Réessayez."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Délai expiré, vérifier l\'appli"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Introuvable"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Commande indisponible"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"Impossible d\'accéder à \"<xliff:g id="DEVICE">%1$s</xliff:g>\". Vérifiez l\'application <xliff:g id="APPLICATION">%2$s</xliff:g> pour vous assurer que la commande est toujours disponible et que les paramètres de l\'application n\'ont pas changé."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"Ouvrir l\'application"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Ouvrir l\'appli"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Impossible de charger l\'état"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erreur. Veuillez réessayer."</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Ajouter des commandes"</string>
@@ -890,11 +890,11 @@
     <string name="audio_status" msgid="4237055636967709208">"Écoute du contenu"</string>
     <string name="game_status" msgid="1340694320630973259">"Joue"</string>
     <string name="empty_user_name" msgid="3389155775773578300">"Amis"</string>
-    <string name="empty_status" msgid="5938893404951307749">"Bavardons ce soir !"</string>
+    <string name="empty_status" msgid="5938893404951307749">"Parlons-en ce soir !"</string>
     <string name="status_before_loading" msgid="1500477307859631381">"Le contenu s\'affichera bientôt"</string>
     <string name="missed_call" msgid="4228016077700161689">"Appel manqué"</string>
     <string name="messages_count_overflow_indicator" msgid="7850934067082006043">"+ de <xliff:g id="NUMBER">%d</xliff:g>"</string>
-    <string name="people_tile_description" msgid="8154966188085545556">"Voir les messages récents, les appels manqués et les notifications d\'état"</string>
+    <string name="people_tile_description" msgid="8154966188085545556">"Voir les messages récents, les appels manqués et les changements d\'état"</string>
     <string name="people_tile_title" msgid="6589377493334871272">"Conversation"</string>
     <string name="paused_by_dnd" msgid="7856941866433556428">"Mise en pause par Ne pas déranger"</string>
     <string name="new_notification_text_content_description" msgid="2915029960094389291">"<xliff:g id="NAME">%1$s</xliff:g> a envoyé un message : <xliff:g id="NOTIFICATION">%2$s</xliff:g>"</string>

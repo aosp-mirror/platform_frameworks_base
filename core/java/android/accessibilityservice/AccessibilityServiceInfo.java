@@ -40,6 +40,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Build;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
@@ -1126,6 +1127,15 @@ public class AccessibilityServiceInfo implements Parcelable {
      */
     public int describeContents() {
         return 0;
+    }
+
+    /** @hide */
+    public final boolean isWithinParcelableSize() {
+        final Parcel parcel = Parcel.obtain();
+        writeToParcel(parcel, 0);
+        final boolean result = parcel.dataSize() <= IBinder.MAX_IPC_SIZE;
+        parcel.recycle();
+        return result;
     }
 
     public void writeToParcel(Parcel parcel, int flagz) {

@@ -51,6 +51,8 @@ public class ClipboardOverlayEventTest extends SysuiTestCase {
     @Mock
     private ClipboardOverlayController mOverlayController;
     @Mock
+    private ClipboardToast mClipboardToast;
+    @Mock
     private UiEventLogger mUiEventLogger;
 
     private final String mSampleSource = "Example source";
@@ -75,7 +77,8 @@ public class ClipboardOverlayEventTest extends SysuiTestCase {
                 "true", false);
 
         mClipboardListener = new ClipboardListener(getContext(), deviceConfigProxy,
-                mClipboardOverlayControllerFactory, mClipboardManager, mUiEventLogger);
+                mClipboardOverlayControllerFactory, mClipboardManager, mClipboardToast,
+                mUiEventLogger);
     }
 
     @Test

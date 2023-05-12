@@ -17,7 +17,7 @@
 package android.database.sqlite;
 
 /**
- * An exception that indicates that an IO error occured while accessing the 
+ * Indicates that an IO error occurred while accessing the
  * SQLite database file.
  */
 public class SQLiteDiskIOException extends SQLiteException {

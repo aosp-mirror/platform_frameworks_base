@@ -203,7 +203,7 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Esborra totes les notificacions."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> notificacions més a l\'interior.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificacions més a l\'interior.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificació més a l\'interior.</item>
     </plurals>
@@ -236,7 +236,7 @@
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Xarxes no disponibles"</string>
     <string name="quick_settings_wifi_detail_empty_text" msgid="483130889414601732">"No hi ha cap xarxa Wi-Fi disponible"</string>
     <string name="quick_settings_wifi_secondary_label_transient" msgid="7501659015509357887">"S\'està activant…"</string>
-    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Emet pantalla"</string>
+    <string name="quick_settings_cast_title" msgid="2279220930629235211">"Emet la pantalla"</string>
     <string name="quick_settings_casting" msgid="1435880708719268055">"En emissió"</string>
     <string name="quick_settings_cast_device_default_name" msgid="6988469571141331700">"Dispositiu sense nom"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="2846282280014617785">"No hi ha cap dispositiu disponible."</string>
@@ -254,7 +254,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"S\'està activant…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Estalvi dades activat"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="many">%d devices</item>
+      <item quantity="many">%d dispositius</item>
       <item quantity="other">%d dispositius</item>
       <item quantity="one">%d dispositiu</item>
     </plurals>
@@ -349,15 +349,15 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continua"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"S\'ha assolit el límit d\'usuaris"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
+      <item quantity="many">Pots afegir fins a <xliff:g id="COUNT">%d</xliff:g> usuaris.</item>
       <item quantity="other">Pots afegir fins a <xliff:g id="COUNT">%d</xliff:g> usuaris.</item>
       <item quantity="one">Només es pot crear un usuari.</item>
     </plurals>
     <string name="user_remove_user_title" msgid="9124124694835811874">"Vols suprimir l\'usuari?"</string>
     <string name="user_remove_user_message" msgid="6702834122128031833">"Totes les aplicacions i les dades d\'aquest usuari se suprimiran."</string>
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Suprimeix"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tindrà accés a tota la informació que es veu en pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servei que ofereix aquesta funció tindrà accés a tota la informació visible a la teva pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio que reprodueixis."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tindrà accés a tota la informació que es mostri a la pantalla o que es reprodueixi al dispositiu mentre graves o emets contingut. Això inclou contrasenyes, dades de pagament, fotos, missatges i àudio."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servei que ofereix aquesta funció tindrà accés a tota la informació que es mostri a la pantalla o que es reprodueixi al dispositiu mentre graves o emets contingut. Això inclou contrasenyes, dades de pagament, fotos, missatges i àudio."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vols començar a gravar o emetre contingut?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"Vols començar a gravar o emetre contingut amb <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Esborra-ho tot"</string>
@@ -539,12 +539,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Desfés"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"S\'ha posposat <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="many">%d hours</item>
+      <item quantity="many">%d hores</item>
       <item quantity="other">%d hores</item>
       <item quantity="one">%d hora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="many">%d minutes</item>
+      <item quantity="many">%d minuts</item>
       <item quantity="other">%d minuts</item>
       <item quantity="one">%d minut</item>
     </plurals>
@@ -628,8 +628,8 @@
     <string name="right_keycode" msgid="2480715509844798438">"Codi de tecla de la dreta"</string>
     <string name="left_icon" msgid="5036278531966897006">"Icona de l\'esquerra"</string>
     <string name="right_icon" msgid="1103955040645237425">"Icona de la dreta"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén premut i arrossega per afegir icones"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén premut i arrossega per reorganitzar els mosaics"</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Mantén premudes les icones i arrossega-les per afegir-les"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Mantén premudes les icones i arrossega-les per reordenar-les"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrossega aquí per suprimir"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necessites com a mínim <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> mosaics"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Edita"</string>
@@ -649,7 +649,7 @@
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"suprimir el mosaic"</string>
     <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"afegir un mosaic al final"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mou el mosaic"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Afegeix un mosaic"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Afegeix una icona"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mou a la posició <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Afegeix a la posició <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posició <xliff:g id="POSITION">%1$d</xliff:g>"</string>
@@ -771,7 +771,7 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Controls de dispositius"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Selecciona l\'aplicació per afegir controls"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
+      <item quantity="many">S\'han afegit <xliff:g id="NUMBER_1">%s</xliff:g> controls.</item>
       <item quantity="other">S\'han afegit <xliff:g id="NUMBER_1">%s</xliff:g> controls.</item>
       <item quantity="one">S\'ha afegit <xliff:g id="NUMBER_0">%s</xliff:g> control.</item>
     </plurals>
@@ -783,8 +783,8 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"suprimir dels preferits"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mou a la posició <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controls"</string>
-    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Tria els controls a què vols accedir des de la configuració ràpida"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premut i arrossega per reorganitzar els controls"</string>
+    <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Tria a quins controls vols accedir des de la configuració ràpida"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premuts els controls i arrossega\'ls per reordenar-los"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"S\'han suprimit tots els controls"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Els canvis no s\'han desat"</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Mostra altres aplicacions"</string>
@@ -810,7 +810,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Llisca per veure\'n més"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Carregant les recomanacions"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Multimèdia"</string>
-    <string name="controls_media_close_session" msgid="4780485355795635052">"Vols amagar aquest control multimèdia per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="controls_media_close_session" msgid="4780485355795635052">"Amagar aquest control multimèdia per a <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="controls_media_active_session" msgid="3146882316024153337">"La sessió multimèdia actual no es pot amagar."</string>
     <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Amaga"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reprèn"</string>
@@ -903,7 +903,7 @@
     <string name="person_available" msgid="2318599327472755472">"Disponible"</string>
     <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"Hi ha hagut un problema en llegir el mesurador de la bateria"</string>
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"Toca per obtenir més informació"</string>
-    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Cap alarma configurada"</string>
+    <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"Cap alarma definida"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"Sensor d\'empremtes digitals"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"autenticar"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"accedir al dispositiu"</string>
@@ -932,7 +932,7 @@
     <string name="qs_tile_request_dialog_not_add" msgid="4168716573114067296">"No afegeixis la icona"</string>
     <string name="qs_user_switch_dialog_title" msgid="3045189293587781366">"Selecciona un usuari"</string>
     <plurals name="fgs_manager_footer_label" formatted="false" msgid="790443735462280164">
-      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> apps are active</item>
+      <item quantity="many"><xliff:g id="COUNT_1">%s</xliff:g> aplicacions estan actives</item>
       <item quantity="other"><xliff:g id="COUNT_1">%s</xliff:g> aplicacions estan actives</item>
       <item quantity="one"><xliff:g id="COUNT_0">%s</xliff:g> aplicació està activa</item>
     </plurals>
@@ -963,5 +963,5 @@
     <string name="dream_overlay_status_bar_priority_mode" msgid="5428462123314728739">"Mode Prioritat"</string>
     <string name="dream_overlay_status_bar_alarm_set" msgid="566707328356590886">"Alarma definida"</string>
     <string name="dream_overlay_status_bar_camera_mic_off" msgid="3199425257833773569">"Càmera i micròfon desactivats"</string>
-    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificació}many{# notifications}other{# notificacions}}"</string>
+    <string name="dream_overlay_status_bar_notification_indicator" msgid="8091389255691081711">"{count,plural, =1{# notificació}many{# notificacions}other{# notificacions}}"</string>
 </resources>

@@ -173,7 +173,7 @@
     <item msgid="409235464399258501">"No"</item>
     <item msgid="4195153527464162486">"64 K / memòria intermèdia del registre"</item>
     <item msgid="7464037639415220106">"256 K / memòria intermèdia del registre"</item>
-    <item msgid="8539423820514360724">"1 M / memòria intermèdia reg."</item>
+    <item msgid="8539423820514360724">"1 M / memòria intermèdia del registre"</item>
     <item msgid="1984761927103140651">"4 M / memòria intermèdia del registre"</item>
     <item msgid="2983219471251787208">"8 M / memòria intermèdia del registre"</item>
   </string-array>
@@ -228,7 +228,7 @@
     <item msgid="8612549335720461635">"4K (segur)"</item>
     <item msgid="7322156123728520872">"4K (ampliat)"</item>
     <item msgid="7735692090314849188">"4K (ampliat, segur)"</item>
-    <item msgid="7346816300608639624">"720p, 1080p (pantalla doble)"</item>
+    <item msgid="7346816300608639624">"720p, 1080p (pantalla dual)"</item>
   </string-array>
   <string-array name="enable_opengl_traces_entries">
     <item msgid="4433736508877934305">"Cap"</item>

@@ -323,12 +323,12 @@
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"អាន និងសរសេរ​កំណត់​ហេតុ​ហៅ​ទូរសព្ទ"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"ទូរសព្ទ"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"ហៅទូរស័ព្ទ និងគ្រប់គ្រងការហៅទូរស័ព្ទ"</string>
-    <string name="permgrouplab_sensors" msgid="9134046949784064495">"ឧបករណ៍​ចាប់សញ្ញា​រាងកាយ"</string>
+    <string name="permgrouplab_sensors" msgid="9134046949784064495">"សេនស័រ​រាងកាយ"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"ចូលដំណើរការទិន្នន័យឧបករណ៍ចាប់សញ្ញាអំពីស្ថានភាពសុខភាពរបស់អ្នក"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"ការ​ជូនដំណឹង"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"បង្ហាញ​ការជូនដំណឹង"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"ទាញយក​ខ្លឹមសារ​វិនដូ"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ពិនិត្យ​ខ្លឹមសារវិនដូ​ដែល​អ្នក​កំពុង​ទាក់ទង​ជា​មួយ។"</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"ពិនិត្យ​ខ្លឹមសារវិនដូ​ដែល​អ្នក​កំពុង​ធ្វើអន្តរកម្ម​ជា​មួយ។"</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"បើក​ការ​រក​មើល​​ដោយ​ប៉ះ"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"ធាតុដែលបានប៉ះនឹងត្រូវបានអានឮៗ ហើយអេក្រង់នោះអាចត្រូវបានស្វែងរកដោយប្រើកាយវិការ។"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"មើល​អត្ថបទ​ដែល​វាយ"</string>
@@ -639,8 +639,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"ងងឹតជ្រុល។ សូមសាកល្បង​ប្រើ​ពន្លឺភ្លឺជាងនេះ។"</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"រំកិល​ទូរសព្ទឱ្យឆ្ងាយ​ជាងមុន។"</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"ផ្លាស់ទី​ទូរសព្ទ​ឱ្យ​ជិត​ជាង​មុន។"</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"ផ្លាស់ទីទូរសព្ទឱ្យខ្ពស់ជាងមុន។"</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"ផ្លាស់ទីទូរសព្ទឱ្យទាបជាងមុន។"</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"រំកិល​ទូរសព្ទឡើងលើ។"</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"រំកិល​ទូរសព្ទចុះក្រោម។"</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"ផ្លាស់ទី​ទូរសព្ទទៅខាងឆ្វេង។"</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"ផ្លាស់ទីទូរសព្ទទៅខាងស្ដាំ។"</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"សូមមើល​ឱ្យចំ​ឧបករណ៍​របស់អ្នក​ជាងមុន។"</string>
@@ -1685,7 +1685,7 @@
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"មើល និង​គ្រប់គ្រងអេក្រង់"</string>
     <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"វា​អាចអានខ្លឹមសារទាំងអស់​នៅលើអេក្រង់ និងបង្ហាញខ្លឹមសារ​លើកម្មវិធីផ្សេងទៀត។"</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"មើល និង​ធ្វើសកម្មភាព"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬឧបករណ៍ចាប់​សញ្ញាហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"វា​អាចតាមដានអន្តរកម្មរបស់អ្នកជាមួយនឹងកម្មវិធី ឬសេនស័រហាតវែរ និងធ្វើអន្តរកម្ម​ជាមួយកម្មវិធីនានា​ជំនួសឱ្យអ្នក។"</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"អនុញ្ញាត"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"បដិសេធ"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"ចុចមុខងារណាមួយ ដើម្បចាប់ផ្ដើមប្រើ៖"</string>
@@ -1889,7 +1889,7 @@
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"សំណើ SS ត្រូវបាន​ប្ដូរ​ទៅ​សំណើ USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"បាន​ប្ដូរ​ទៅ​សំណើ SS ថ្មី"</string>
     <string name="notification_phishing_alert_content_description" msgid="494227305355958790">"ការជូនដំណឹង​អំពីការ​ដាក់នុយ"</string>
-    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"ប្រវត្តិរូបការងារ"</string>
+    <string name="notification_work_profile_content_description" msgid="5296477955677725799">"កម្រងព័ត៌មានការងារ"</string>
     <string name="notification_alerted_content_description" msgid="6139691253611265992">"បាន​ជូនដំណឹង"</string>
     <string name="notification_verified_content_description" msgid="6401483602782359391">"បាន​ផ្ទៀងផ្ទាត់​"</string>
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"ពង្រីក"</string>

@@ -52,7 +52,7 @@
     <string name="enablePin" msgid="2543771964137091212">"Falha. Ative o bloqueio do chip/R-UIM."</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
       <item quantity="one">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
-      <item quantity="many">You have <xliff:g id="NUMBER_1">%d</xliff:g> remaining attempts before SIM is locked.</item>
+      <item quantity="many">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
       <item quantity="other">Tentativas restantes: <xliff:g id="NUMBER_1">%d</xliff:g>. Caso o código correto não seja digitado, o chip será bloqueado.</item>
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
@@ -595,7 +595,7 @@
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Use outra impressão digital"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Claro demais"</string>
     <string name="fingerprint_acquired_try_adjusting" msgid="3667006071003809364">"Ajuste a posição do dedo"</string>
-    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude a posição do dedo ligeiramente a cada momento"</string>
+    <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Mude ligeiramente a posição do dedo em cada registro"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Impressão digital não reconhecida"</string>
@@ -653,7 +653,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Incline a cabeça um pouco menos."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Incline a cabeça um pouco menos."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Incline a cabeça um pouco menos."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Remova tudo que esteja ocultando seu rosto."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Tire tudo que possa esconder seu rosto."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Limpe a parte superior da tela, inclusive a barra preta"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1527,7 +1527,7 @@
     <string name="add_account_button_label" msgid="322390749416414097">"Adicionar conta"</string>
     <string name="number_picker_increment_button" msgid="7621013714795186298">"Aumentar"</string>
     <string name="number_picker_decrement_button" msgid="5116948444762708204">"Diminuir"</string>
-    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e mantenha pressionado."</string>
+    <string name="number_picker_increment_scroll_mode" msgid="8403893549806805985">"<xliff:g id="VALUE">%s</xliff:g> toque e pressione."</string>
     <string name="number_picker_increment_scroll_action" msgid="8310191318914268271">"Deslize para cima para aumentar e para baixo para diminuir."</string>
     <string name="time_picker_increment_minute_button" msgid="7195870222945784300">"Aumentar minuto"</string>
     <string name="time_picker_decrement_minute_button" msgid="230925389943411490">"Diminuir minuto"</string>
@@ -1712,7 +1712,7 @@
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Para alternar entre recursos, deslize de baixo para cima na tela com três dedos, sem soltar."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ampliação"</string>
     <string name="user_switched" msgid="7249833311585228097">"Usuário atual <xliff:g id="NAME">%1$s</xliff:g>."</string>
-    <string name="user_switching_message" msgid="1912993630661332336">"Alternando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
+    <string name="user_switching_message" msgid="1912993630661332336">"Mudando para <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Desconectando <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="owner_name" msgid="8713560351570795743">"Proprietário"</string>
     <string name="guest_name" msgid="8502103277839834324">"Visitante"</string>

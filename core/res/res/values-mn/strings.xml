@@ -302,7 +302,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"Байршил"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"энэ төхөөрөмжийн байршилд хандалт хийх"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"Календарь"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарь руу хандах"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"Календарьд хандах"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"Мессеж"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"SMS мессежийг илгээх, харах"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"Файлууд"</string>
@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Толгойгоо арай багаар эргүүлнэ үү."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Толгойгоо арай бага хазайлгана уу."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Толгойгоо арай багаар эргүүлнэ үү."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Таны нүүрийг далдалж буй аливаа зүйлийг хасна уу."</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Таны нүүрийг далдалж буй аливаа зүйлийг авна уу."</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Хар хэсэг зэрэг дэлгэцийнхээ дээд хэсгийг цэвэрлэнэ үү"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1494,7 +1494,7 @@
     <string name="vpn_lockdown_config" msgid="8331697329868252169">"Сүлжээ эсвэл VPN тохиргоог өөрчлөх"</string>
     <string name="upload_file" msgid="8651942222301634271">"Файл сонгох"</string>
     <string name="no_file_chosen" msgid="4146295695162318057">"Сонгосон файл байхгүй"</string>
-    <string name="reset" msgid="3865826612628171429">"Бүгдийг цэвэрлэх"</string>
+    <string name="reset" msgid="3865826612628171429">"Шинэчлэх"</string>
     <string name="submit" msgid="862795280643405865">"Илгээх"</string>
     <string name="car_mode_disable_notification_title" msgid="8450693275833142896">"Жолоо барих апп ажиллаж байна"</string>
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Жолооны аппаас гарахын тулд товшино уу."</string>

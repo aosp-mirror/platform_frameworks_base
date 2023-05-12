@@ -326,7 +326,7 @@
     <string name="permgrouplab_phone" msgid="570318944091926620">"Telefon"</string>
     <string name="permgroupdesc_phone" msgid="270048070781478204">"uskutečňování a spravování telefonních hovorů"</string>
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Tělesné senzory"</string>
-    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"přístup k datům ze snímačů vašich životních funkcí"</string>
+    <string name="permgroupdesc_sensors" msgid="2610631290633747752">"přístup k datům ze senzorů vašich životních funkcí"</string>
     <string name="permgrouplab_notifications" msgid="5472972361980668884">"Oznámení"</string>
     <string name="permgroupdesc_notifications" msgid="4608679556801506580">"zobrazovat oznámení"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Načítat obsah oken"</string>
@@ -587,11 +587,11 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Při ověřování došlo k chybě"</string>
     <string name="screen_lock_app_setting_name" msgid="6054944352976789228">"Použít zámek obrazovky"</string>
     <string name="screen_lock_dialog_default_subtitle" msgid="120359538048533695">"Pokračujte zadáním zámku obrazovky"</string>
-    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevně zatlačte na senzor"</string>
+    <string name="fingerprint_acquired_partial" msgid="4323789264604479684">"Pevně zatlačte na snímač"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Zpracování otisku prstu se nezdařilo. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1770676120848224250">"Vyčistěte snímač otisků prstů a zkuste to znovu"</string>
     <string name="fingerprint_acquired_imager_dirty_alt" msgid="9169582140486372897">"Vyčistěte senzor a zkuste to znovu"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Zatlačte silně na senzor"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="1628459767349116104">"Pevně zatlačte na snímač"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohyb prstem byl příliš pomalý. Zkuste to znovu."</string>
     <string name="fingerprint_acquired_already_enrolled" msgid="2285166003936206785">"Zkuste jiný otisk prstu"</string>
     <string name="fingerprint_acquired_too_bright" msgid="3863560181670915607">"Je příliš světlo"</string>
@@ -641,8 +641,8 @@
     <string name="face_acquired_too_dark" msgid="252573548464426546">"Je moc velká tma. Přejděte na světlo."</string>
     <string name="face_acquired_too_close" msgid="1628767882971469833">"Umístěte telefon dál."</string>
     <string name="face_acquired_too_far" msgid="5098567726427173896">"Umístěte telefon blíž."</string>
-    <string name="face_acquired_too_high" msgid="4868033653626081839">"Umístěte telefon výš."</string>
-    <string name="face_acquired_too_low" msgid="1512237819632165945">"Umístěte telefon níž."</string>
+    <string name="face_acquired_too_high" msgid="4868033653626081839">"Posuňte telefon výš."</string>
+    <string name="face_acquired_too_low" msgid="1512237819632165945">"Posuňte telefon níž."</string>
     <string name="face_acquired_too_right" msgid="2513391513020932655">"Přesuňte telefon vlevo."</string>
     <string name="face_acquired_too_left" msgid="8882499346502714350">"Přesuňte telefon vpravo."</string>
     <string name="face_acquired_poor_gaze" msgid="4427153558773628020">"Dívejte se přímo na zařízení."</string>
@@ -1228,7 +1228,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Vždy zobrazovat"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> byla vytvořena nekompatibilní systému Android a může se chovat neočekávaně. K dispozici může být aktualizovaná verze aplikace."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Vždy zobrazovat"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Zkontrolovat aktualizace"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Zkontrolovat dostupnost aktualizace"</string>
     <string name="smv_application" msgid="3775183542777792638">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="1398801497130695446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefon se aktualizuje…"</string>
@@ -1355,7 +1355,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Byl zapnut tethering přes USB"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"Byl zapnut režim MIDI přes USB"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Je připojeno příslušenství USB"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte další možnosti."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Klepnutím zobrazíte další možnosti"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Nabíjení připojeného zařízení. Klepnutím zobrazíte další možnosti."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Bylo zjištěno analogové zvukové příslušenství"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Připojené zařízení není s tímto telefonem kompatibilní. Klepnutím zobrazíte další informace."</string>

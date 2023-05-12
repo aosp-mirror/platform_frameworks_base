@@ -1000,24 +1000,25 @@ public abstract class CameraMetadata<TKey> {
      * camera's crop region is set to maximum size, the FOV of the physical streams for the
      * ultrawide lens will be the same as the logical stream, by making the crop region
      * smaller than its active array size to compensate for the smaller focal length.</p>
-     * <p>There are two ways for the application to capture RAW images from a logical camera
-     * with RAW capability:</p>
+     * <p>For a logical camera, typically the underlying physical cameras have different RAW
+     * capabilities (such as resolution or CFA pattern). There are two ways for the
+     * application to capture RAW images from the logical camera:</p>
      * <ul>
-     * <li>Because the underlying physical cameras may have different RAW capabilities (such
-     * as resolution or CFA pattern), to maintain backward compatibility, when a RAW stream
-     * is configured, the camera device makes sure the default active physical camera remains
-     * active and does not switch to other physical cameras. (One exception is that, if the
-     * logical camera consists of identical image sensors and advertises multiple focalLength
-     * due to different lenses, the camera device may generate RAW images from different
-     * physical cameras based on the focalLength being set by the application.) This
-     * backward-compatible approach usually results in loss of optical zoom, to telephoto
-     * lens or to ultrawide lens.</li>
-     * <li>Alternatively, to take advantage of the full zoomRatio range of the logical camera,
-     * the application should use {@link android.hardware.camera2.MultiResolutionImageReader }
-     * to capture RAW images from the currently active physical camera. Because different
-     * physical camera may have different RAW characteristics, the application needs to use
-     * the characteristics and result metadata of the active physical camera for the
-     * relevant RAW metadata.</li>
+     * <li>If the logical camera has RAW capability, the application can create and use RAW
+     * streams in the same way as before. In case a RAW stream is configured, to maintain
+     * backward compatibility, the camera device makes sure the default active physical
+     * camera remains active and does not switch to other physical cameras. (One exception
+     * is that, if the logical camera consists of identical image sensors and advertises
+     * multiple focalLength due to different lenses, the camera device may generate RAW
+     * images from different physical cameras based on the focalLength being set by the
+     * application.) This backward-compatible approach usually results in loss of optical
+     * zoom, to telephoto lens or to ultrawide lens.</li>
+     * <li>Alternatively, if supported by the device,
+     * {@link android.hardware.camera2.MultiResolutionImageReader }
+     * can be used to capture RAW images from one of the underlying physical cameras (
+     * depending on current zoom level). Because different physical cameras may have
+     * different RAW characteristics, the application needs to use the characteristics
+     * and result metadata of the active physical camera for the relevant RAW metadata.</li>
      * </ul>
      * <p>The capture request and result metadata tags required for backward compatible camera
      * functionalities will be solely based on the logical camera capability. On the other

@@ -51,8 +51,8 @@
     <string name="usb_debugging_message" msgid="5794616114463921773">"La huella digital de tu clave RSA es:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Permitir siempre desde este ordenador"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Permitir"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Depuración USB no permitida"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"El usuario con el que se ha iniciado sesión en este dispositivo no puede activar la depuración USB. Para utilizar esta función, inicia sesión con la cuenta de usuario principal."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Depuración por USB no permitida"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"El usuario con el que se ha iniciado sesión en este dispositivo no puede activar la depuración por USB. Para utilizar esta función, inicia sesión con la cuenta de usuario principal."</string>
     <string name="hdmi_cec_set_menu_language_title" msgid="1259765420091503742">"¿Quieres cambiar el idioma del sistema a <xliff:g id="LANGUAGE">%1$s</xliff:g>?"</string>
     <string name="hdmi_cec_set_menu_language_description" msgid="8176716678074126619">"Otro dispositivo ha solicitado un cambio en el idioma del sistema"</string>
     <string name="hdmi_cec_set_menu_language_accept" msgid="2513689457281009578">"Cambiar idioma"</string>
@@ -203,7 +203,7 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Borrar todas las notificaciones"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> más"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> notificaciones más dentro.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> notificaciones más dentro.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> notificación más dentro.</item>
     </plurals>
@@ -254,7 +254,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos activado"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="many">%d devices</item>
+      <item quantity="many">%d dispositivos</item>
       <item quantity="other">%d dispositivos</item>
       <item quantity="one">%d dispositivo</item>
     </plurals>
@@ -312,7 +312,7 @@
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Este modo bloquea TODOS los sonidos y todas las vibraciones, lo que incluye alarmas, música, vídeos y juegos."</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Toca de nuevo para abrir"</string>
     <string name="tap_again" msgid="1315420114387908655">"Toca de nuevo"</string>
-    <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
+    <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza hacia arriba para abrir"</string>
     <string name="keyguard_unlock_press" msgid="9140109453735019209">"Pulsa el icono desbloquear para abrir"</string>
     <string name="keyguard_face_successful_unlock_press" msgid="25520941264602588">"Desbloqueado con la cara. Toca el icono de desbloquear para abrir."</string>
   <string-array name="udfps_accessibility_touch_hints">
@@ -349,7 +349,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sí, continuar"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Has alcanzado el límite de usuarios"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
+      <item quantity="many">Puedes añadir hasta <xliff:g id="COUNT">%d</xliff:g> usuarios.</item>
       <item quantity="other">Puedes añadir hasta <xliff:g id="COUNT">%d</xliff:g> usuarios.</item>
       <item quantity="one">Solo se puede crear un usuario.</item>
     </plurals>
@@ -539,12 +539,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Deshacer"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Volverá a mostrarse en <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="many">%d hours</item>
+      <item quantity="many">%d horas</item>
       <item quantity="other">%d horas</item>
       <item quantity="one">%d hora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="many">%d minutes</item>
+      <item quantity="many">%d minutos</item>
       <item quantity="other">%d minutos</item>
       <item quantity="one">%d minuto</item>
     </plurals>
@@ -771,7 +771,7 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Control de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige una aplicación para añadir controles"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
+      <item quantity="many">Se han añadido <xliff:g id="NUMBER_1">%s</xliff:g> controles.</item>
       <item quantity="other">Se han añadido <xliff:g id="NUMBER_1">%s</xliff:g> controles.</item>
       <item quantity="one">Se ha añadido <xliff:g id="NUMBER_0">%s</xliff:g> control.</item>
     </plurals>
@@ -827,8 +827,8 @@
     <string name="controls_media_smartspace_rec_item_description" msgid="2189271793070870883">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> de <xliff:g id="ARTIST_NAME">%2$s</xliff:g> en <xliff:g id="APP_LABEL">%3$s</xliff:g>"</string>
     <string name="controls_media_smartspace_rec_item_no_artist_description" msgid="8703614798636591077">"Poner <xliff:g id="SONG_NAME">%1$s</xliff:g> en <xliff:g id="APP_LABEL">%2$s</xliff:g>"</string>
     <string name="media_transfer_undo" msgid="1895606387620728736">"Deshacer"</string>
-    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para que se reproduzca en ese dispositivo"</string>
-    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para jugar aquí"</string>
+    <string name="media_move_closer_to_start_cast" msgid="2673104707465013176">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para reproducir contenido ahí"</string>
+    <string name="media_move_closer_to_end_cast" msgid="6495907340926563656">"Acércate a <xliff:g id="DEVICENAME">%1$s</xliff:g> para reproducir contenido aquí"</string>
     <string name="media_transfer_playing_different_device" msgid="7186806382609785610">"Reproduciendo en <xliff:g id="DEVICENAME">%1$s</xliff:g>"</string>
     <string name="media_transfer_failed" msgid="7955354964610603723">"Se ha producido un error. Inténtalo de nuevo."</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>

@@ -58,7 +58,7 @@
     <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problema sa pag-authenticate"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Hindi makakonekta"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Hindi makakonekta sa \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
-    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Suriin ang password at subukang muli"</string>
+    <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Suriin ang password at subukan ulit"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Wala sa sakop"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Hindi awtomatikong kokonekta"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"Walang access sa internet"</string>
@@ -81,7 +81,7 @@
     <string name="osu_opening_provider" msgid="4318105381295178285">"Binubuksan ang <xliff:g id="PASSPOINTPROVIDER">%1$s</xliff:g>"</string>
     <string name="osu_connect_failed" msgid="9107873364807159193">"Hindi makakonekta"</string>
     <string name="osu_completing_sign_up" msgid="8412636665040390901">"Kinukumpleto ang pag-sign up…"</string>
-    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Hindi makumpleto ang pag-sign up. I-tap para subukang muli."</string>
+    <string name="osu_sign_up_failed" msgid="5605453599586001793">"Hindi makumpleto ang pag-sign up. I-tap para subukan ulit."</string>
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Kumpleto na ang pag-sign up. Kumokonekta…"</string>
     <string name="speed_label_very_slow" msgid="8526005255731597666">"Napakabagal"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Mabagal"</string>
@@ -388,7 +388,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"Rendering ng Profile HWUI"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"I-enable ang GPU debug layer"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Payagang i-load ang GPU debug layer sa debug app"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Enable verbose vendor logging"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"I-enable ang verbose vendor logging"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Magsama sa mga ulat ng bug ng mga karagdagang log ng vendor na partikular sa device, na posibleng may pribadong impormasyon, gumamit ng mas maraming baterya, at/o gumamit ng mas malaking storage."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Scale ng window animation"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Scale ng transition animation"</string>
@@ -484,7 +484,7 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"Wireless na nagcha-charge"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Hindi nagcha-charge"</string>
     <string name="battery_info_status_not_charging" msgid="3371084153747234837">"Nakakonekta, hindi nagcha-charge"</string>
-    <string name="battery_info_status_full" msgid="1339002294876531312">"Nasingil"</string>
+    <string name="battery_info_status_full" msgid="1339002294876531312">"Charged"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Puno ang Baterya"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Pinapamahalaan ng admin"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Kinokontrol ng Pinaghihigpitang Setting"</string>

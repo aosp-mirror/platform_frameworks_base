@@ -119,7 +119,7 @@
     <string name="accessibility_phone_button" msgid="4256353121703100427">"Telemóvel"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"Assistente de voz"</string>
     <string name="accessibility_wallet_button" msgid="1458258783460555507">"Carteira"</string>
-    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Leitor de códigos QR"</string>
+    <string name="accessibility_qr_code_scanner_button" msgid="7521277927692910795">"Leitor QR"</string>
     <string name="accessibility_unlock_button" msgid="122785427241471085">"Desbloquear"</string>
     <string name="accessibility_lock_icon" msgid="661492842417875775">"Dispositivo bloqueado"</string>
     <string name="accessibility_scanning_face" msgid="3093828357921541387">"A analisar o rosto…"</string>
@@ -139,8 +139,8 @@
     <string name="biometric_dialog_tap_confirm_with_face" msgid="1092050545851021991">"Desbloqueio com a face. Prima o ícone de desb. p/ continuar."</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"Autenticado"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"Usar PIN"</string>
-    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Utilizar padrão"</string>
-    <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Utilizar palavra-passe"</string>
+    <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"Usar padrão"</string>
+    <string name="biometric_dialog_use_password" msgid="3445033859393474779">"Usar palavra-passe"</string>
     <string name="biometric_dialog_wrong_pin" msgid="1878539073972762803">"PIN incorreto."</string>
     <string name="biometric_dialog_wrong_pattern" msgid="8954812279840889029">"Padrão incorreto."</string>
     <string name="biometric_dialog_wrong_password" msgid="69477929306843790">"Palavra-passe incorreta."</string>
@@ -203,7 +203,7 @@
     <string name="accessibility_clear_all" msgid="970525598287244592">"Limpar todas as notificações."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> more notifications inside.</item>
+      <item quantity="many">Mais <xliff:g id="NUMBER_1">%s</xliff:g> notificações no grupo.</item>
       <item quantity="other">Mais <xliff:g id="NUMBER_1">%s</xliff:g> notificações no grupo.</item>
       <item quantity="one">Mais <xliff:g id="NUMBER_0">%s</xliff:g> notificação no grupo.</item>
     </plurals>
@@ -254,7 +254,7 @@
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"A ativar..."</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Poup. dados ativada"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
-      <item quantity="many">%d devices</item>
+      <item quantity="many">%d dispositivos</item>
       <item quantity="other">%d dispositivos</item>
       <item quantity="one">%d dispositivo</item>
     </plurals>
@@ -340,7 +340,7 @@
     <string name="keyguard_indication_charging_time" msgid="6492711711891071502">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • A carregar • Carga completa em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_fast" msgid="8390311020603859480">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • A carregar rapidamente • Carga completa em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_charging_time_slowly" msgid="301936949731705417">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • A carregar lentamente • Carga completa em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
-    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • A carregar na estação de ancoragem • Carga completa em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
+    <string name="keyguard_indication_charging_time_dock" msgid="6150404291427377863">"<xliff:g id="PERCENTAGE">%2$s</xliff:g> • A carregar na estação de carregamento • Carga completa em <xliff:g id="CHARGING_TIME_LEFT">%1$s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Mudar utilizador"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todas as apps e dados desta sessão serão eliminados."</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo de volta, convidado!"</string>
@@ -349,7 +349,7 @@
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Sim, continuar"</string>
     <string name="user_limit_reached_title" msgid="2429229448830346057">"Limite de utilizadores alcançado"</string>
     <plurals name="user_limit_reached_message" formatted="false" msgid="2573535787802908398">
-      <item quantity="many">You can add up to <xliff:g id="COUNT">%d</xliff:g> users.</item>
+      <item quantity="many">Pode adicionar até <xliff:g id="COUNT">%d</xliff:g> utilizadores.</item>
       <item quantity="other">Pode adicionar até <xliff:g id="COUNT">%d</xliff:g> utilizadores.</item>
       <item quantity="one">Apenas é possível criar um utilizador.</item>
     </plurals>
@@ -502,7 +502,7 @@
     <string name="notification_automatic_title" msgid="3745465364578762652">"Automática"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sem som ou vibração"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sem som ou vibração e aparece na parte inferior na secção de conversas."</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pode tocar ou vibrar com base nas definições do telemóvel."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pode tocar ou vibrar com base nas definições do telemóvel"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pode tocar ou vibrar com base nas definições do telemóvel. As conversas da app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem como um balão por predefinição."</string>
     <string name="notification_channel_summary_automatic" msgid="5813109268050235275">"Faça com que o sistema determine se esta notificação deve emitir um som ou uma vibração"</string>
     <string name="notification_channel_summary_automatic_alerted" msgid="954166812246932240">"&lt;b&gt;Estado:&lt;/b&gt; promovida para Predefinida"</string>
@@ -539,12 +539,12 @@
     <string name="snooze_undo" msgid="2738844148845992103">"Anular"</string>
     <string name="snoozed_for_time" msgid="7586689374860469469">"Suspensa por <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
     <plurals name="snoozeHourOptions" formatted="false" msgid="2066838694120718170">
-      <item quantity="many">%d hours</item>
+      <item quantity="many">%d horas</item>
       <item quantity="other">%d horas</item>
       <item quantity="one">%d hora</item>
     </plurals>
     <plurals name="snoozeMinuteOptions" formatted="false" msgid="8998483159208055980">
-      <item quantity="many">%d minutes</item>
+      <item quantity="many">%d minutos</item>
       <item quantity="other">%d minutos</item>
       <item quantity="one">%d minuto</item>
     </plurals>
@@ -670,7 +670,7 @@
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Ecrã de bloqueio"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telem. deslig. devido ao calor"</string>
     <string name="thermal_shutdown_message" msgid="6142269839066172984">"O seu telemóvel já está a funcionar normalmente.\nToque para obter mais informações."</string>
-    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O telemóvel estava muito quente, por isso desligou-se para arrefecer. Agora funciona normalmente.\n\nO telemóvel pode sobreaquecer se:\n	• Utilizar aplicações que utilizam mais recursos (jogos, vídeo ou aplicações de navegação)\n	• Transferir ou carregar ficheiros grandes\n	• Utilizar em altas temperaturas"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O telemóvel estava muito quente, por isso desligou-se para arrefecer. Agora funciona normalmente.\n\nO telemóvel pode sobreaquecer se:\n	• Usar aplicações que utilizam mais recursos (jogos, vídeo ou aplicações de navegação)\n	• Transferir ou carregar ficheiros grandes\n	• Usar em altas temperaturas"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Veja os passos de manutenção"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"O telemóvel está a aquecer"</string>
     <string name="high_temp_notif_message" msgid="1277346543068257549">"Algumas funcionalidades são limitadas enquanto o telemóvel arrefece.\nToque para obter mais informações."</string>
@@ -771,7 +771,7 @@
     <string name="quick_controls_title" msgid="6839108006171302273">"Controlos de dispositivos"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolha uma app para adicionar controlos"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
-      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controls added.</item>
+      <item quantity="many"><xliff:g id="NUMBER_1">%s</xliff:g> controlos adicionados.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlos adicionados.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controlo adicionado.</item>
     </plurals>
@@ -784,7 +784,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover para a posição <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controlos"</string>
     <string name="controls_favorite_subtitle" msgid="6481675111056961083">"Escolha os controlos a que pretende aceder a partir das Definições rápidas"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque sem soltar e arraste para reorganizar os controlos."</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque sem soltar e arraste para reorganizar os controlos"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controlos foram removidos."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Alterações não guardadas."</string>
     <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver outras apps"</string>

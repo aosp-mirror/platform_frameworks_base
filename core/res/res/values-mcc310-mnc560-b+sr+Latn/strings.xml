@@ -20,7 +20,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="3526528316378889524">"SIM картица није подешена MM#2"</string>
-    <string name="mmcc_illegal_ms" msgid="4618730283812066268">"SIM картица није дозвољена MM#3"</string>
-    <string name="mmcc_illegal_me" msgid="8522039751358990401">"Телефон није дозвољен MM#6"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="3526528316378889524">"SIM kartica nije podešena MM#2"</string>
+    <string name="mmcc_illegal_ms" msgid="4618730283812066268">"SIM kartica nije dozvoljena MM#3"</string>
+    <string name="mmcc_illegal_me" msgid="8522039751358990401">"Telefon nije dozvoljen MM#6"</string>
 </resources>

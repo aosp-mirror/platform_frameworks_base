@@ -44,7 +44,7 @@ import java.util.Random;
  * {@link WatchedSparseBooleanArray}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:WatcherTest
+ *  atest PackageManagerServiceTest:WatcherTest
  */
 @SmallTest
 public class WatcherTest {

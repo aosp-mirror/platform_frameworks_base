@@ -230,7 +230,7 @@
     <string name="shutdown_progress" msgid="5017145516412657345">"Uitzetten…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Je tablet wordt uitgezet."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Je Android TV-apparaat wordt uitgezet."</string>
-    <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Je horloge wordt uitgezet."</string>
+    <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"Je smartwatch wordt uitgezet."</string>
     <string name="shutdown_confirm" product="default" msgid="136816458966692315">"Je telefoon wordt uitgezet."</string>
     <string name="shutdown_confirm_question" msgid="796151167261608447">"Wil je afsluiten?"</string>
     <string name="reboot_safemode_title" msgid="5853949122655346734">"Opnieuw opstarten in veilige modus"</string>
@@ -652,7 +652,7 @@
     <string name="face_acquired_pan_too_extreme" msgid="7822191262299152527">"Draai je hoofd iets minder."</string>
     <string name="face_acquired_tilt_too_extreme" msgid="8618210742620248049">"Kantel je hoofd iets minder."</string>
     <string name="face_acquired_roll_too_extreme" msgid="1442830503572636825">"Draai je hoofd iets minder."</string>
-    <string name="face_acquired_obscured" msgid="4917643294953326639">"Zorg dat je gezicht volledig zichtbaar is"</string>
+    <string name="face_acquired_obscured" msgid="4917643294953326639">"Zorg dat er niets voor je gezicht zit"</string>
     <string name="face_acquired_sensor_dirty" msgid="8968391891086721678">"Reinig de bovenkant van je scherm, inclusief de zwarte balk"</string>
   <string-array name="face_acquired_vendor">
   </string-array>
@@ -1226,7 +1226,7 @@
     <string name="unsupported_display_size_show" msgid="980129850974919375">"Altijd tonen"</string>
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> is gemaakt voor een niet-geschikte versie van het Android-besturingssysteem en kan onverwacht gedrag vertonen. Mogelijk is er een geüpdatete versie van de app beschikbaar."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Altijd tonen"</string>
-    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Checken op updates"</string>
+    <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Controleren op updates"</string>
     <string name="smv_application" msgid="3775183542777792638">"De app <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="smv_process" msgid="1398801497130695446">"Het proces <xliff:g id="PROCESS">%1$s</xliff:g> heeft het zelf afgedwongen StrictMode-beleid geschonden."</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefoon wordt geüpdatet…"</string>
@@ -1681,11 +1681,11 @@
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"AAN"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"UIT"</string>
     <string name="accessibility_enable_service_title" msgid="3931558336268541484">"Toestaan dat <xliff:g id="SERVICE">%1$s</xliff:g> volledige controle over je apparaat heeft?"</string>
-    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volledige controle is gepast voor apps die je helpen met toegankelijkheid, maar niet voor de meeste apps."</string>
+    <string name="accessibility_service_warning_description" msgid="291674995220940133">"Volledige controle is gepast voor apps die je helpen met toegankelijkheid, maar niet voor de meeste andere apps."</string>
     <string name="accessibility_service_screen_control_title" msgid="190017412626919776">"Scherm bekijken en bedienen"</string>
-    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"De functie kan alle content op het scherm lezen en content bovenop andere apps weergeven."</string>
+    <string name="accessibility_service_screen_control_description" msgid="6946315917771791525">"Deze functie kan alle content op het scherm lezen en content bovenop andere apps weergeven."</string>
     <string name="accessibility_service_action_perform_title" msgid="779670378951658160">"Acties bekijken en uitvoeren"</string>
-    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"De functie kan je interacties met een app of een hardwaresensor bijhouden en namens jou met apps communiceren."</string>
+    <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Deze functie kan je interacties met een app of een hardwaresensor bijhouden en namens jou met apps communiceren."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Toestaan"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Weigeren"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tik op een functie om deze te gebruiken:"</string>
@@ -1951,7 +1951,7 @@
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="tablet" msgid="698460091901465092">"Deze app vraagt om aanvullende beveiliging. Probeer het in plaats daarvan op je tablet."</string>
     <string name="app_streaming_blocked_message_for_fingerprint_dialog" product="default" msgid="8552691971910603907">"Deze app vraagt om aanvullende beveiliging. Probeer het in plaats daarvan op je telefoon."</string>
     <string name="deprecated_target_sdk_message" msgid="5203207875657579953">"Deze app is ontwikkeld voor een oudere versie van Android en werkt mogelijk niet op de juiste manier. Controleer op updates of neem contact op met de ontwikkelaar."</string>
-    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Checken op updates"</string>
+    <string name="deprecated_target_sdk_app_store" msgid="8456784048558808909">"Controleren op updates"</string>
     <string name="new_sms_notification_title" msgid="6528758221319927107">"Je hebt nieuwe berichten"</string>
     <string name="new_sms_notification_content" msgid="3197949934153460639">"Open je sms-app om ze te bekijken"</string>
     <string name="profile_encrypted_title" msgid="9001208667521266472">"Functionaliteit kan beperkt zijn"</string>
