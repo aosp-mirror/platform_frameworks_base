@@ -30,6 +30,7 @@ import static com.android.server.pm.UserJourneyLogger.ERROR_CODE_USER_IS_NOT_AN_
 import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_GRANT_ADMIN;
 import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_REVOKE_ADMIN;
 import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_CREATE;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_LIFECYCLE;
 import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_REMOVE;
 
 import android.Manifest;
@@ -3332,7 +3333,7 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     /**
-    * Enforces that only the system UID or root's UID or apps that have the
+     * Enforces that only the system UID or root's UID or apps that have the
      * {@link android.Manifest.permission#MANAGE_USERS MANAGE_USERS} or
      * {@link android.Manifest.permission#QUERY_USERS QUERY_USERS}
      * can make certain calls to the UserManager.
@@ -5535,6 +5536,8 @@ public class UserManagerService extends IUserManager.Stub {
             }
 
             mUserJourneyLogger.logUserJourneyBegin(userId, USER_JOURNEY_USER_REMOVE);
+            mUserJourneyLogger.startSessionForDelayedJourney(userId,
+                    USER_JOURNEY_USER_LIFECYCLE, userData.info.creationTime);
 
             try {
                 mAppOpsService.removeUser(userId);
@@ -5560,6 +5563,10 @@ public class UserManagerService extends IUserManager.Stub {
                                 mUserJourneyLogger.logUserJourneyFinishWithError(originUserId,
                                         userData.info, USER_JOURNEY_USER_REMOVE,
                                         ERROR_CODE_UNSPECIFIED);
+                                mUserJourneyLogger
+                                        .logDelayedUserJourneyFinishWithError(originUserId,
+                                                userData.info, USER_JOURNEY_USER_LIFECYCLE,
+                                                ERROR_CODE_UNSPECIFIED);
                             }
                             @Override
                             public void userStopAborted(int userIdParam) {
@@ -5567,6 +5574,10 @@ public class UserManagerService extends IUserManager.Stub {
                                 mUserJourneyLogger.logUserJourneyFinishWithError(originUserId,
                                         userData.info, USER_JOURNEY_USER_REMOVE,
                                         ERROR_CODE_ABORTED);
+                                mUserJourneyLogger
+                                        .logDelayedUserJourneyFinishWithError(originUserId,
+                                                userData.info, USER_JOURNEY_USER_LIFECYCLE,
+                                                ERROR_CODE_ABORTED);
                             }
                         });
             } catch (RemoteException e) {
