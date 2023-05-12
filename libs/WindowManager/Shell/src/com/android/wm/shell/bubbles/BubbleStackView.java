@@ -1784,13 +1784,17 @@ public class BubbleStackView extends FrameLayout
             // We're expanded while the last bubble is being removed. Let the scrim animate away
             // and then remove our views (removing the icon view triggers the removal of the
             // bubble window so do that at the end of the animation so we see the scrim animate).
+            BadgedImageView iconView = bubble.getIconView();
             showScrim(false, () -> {
                 mRemovingLastBubbleWhileExpanded = false;
                 bubble.cleanupExpandedView();
-                mBubbleContainer.removeView(bubble.getIconView());
+                if (iconView != null) {
+                    mBubbleContainer.removeView(iconView);
+                }
                 bubble.cleanupViews(); // cleans up the icon view
                 updateExpandedView(); // resets state for no expanded bubble
             });
+            logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
             return;
         }
         // Remove it from the views
@@ -1816,6 +1820,7 @@ public class BubbleStackView extends FrameLayout
         // If a bubble is suppressed, it is not attached to the container. Clean it up.
         if (bubble.isSuppressed()) {
             bubble.cleanupViews();
+            logBubbleEvent(bubble, FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
         } else {
             Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
         }

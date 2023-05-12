@@ -29,7 +29,6 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.hardware.biometrics.BiometricFaceConstants;
-import android.hardware.biometrics.BiometricFingerprintConstants;
 import android.hardware.biometrics.BiometricSourceType;
 import android.os.Handler;
 import android.testing.AndroidTestingRunner;
@@ -51,6 +50,8 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.Optional;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -64,11 +65,16 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
     KeyguardStateController mKeyguardStateController;
     @Mock
     NotificationManager mNotificationManager;
+    @Mock
+    Optional<FingerprintReEnrollNotification> mFingerprintReEnrollNotificationOptional;
+    @Mock
+    FingerprintReEnrollNotification mFingerprintReEnrollNotification;
 
     private static final String TAG = "BiometricNotificationService";
     private static final int FACE_NOTIFICATION_ID = 1;
     private static final int FINGERPRINT_NOTIFICATION_ID = 2;
     private static final long SHOW_NOTIFICATION_DELAY_MS = 5_000L; // 5 seconds
+    private static final int FINGERPRINT_ACQUIRED_RE_ENROLL = 0;
 
     private final ArgumentCaptor<Notification> mNotificationArgumentCaptor =
             ArgumentCaptor.forClass(Notification.class);
@@ -78,6 +84,11 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        when(mFingerprintReEnrollNotificationOptional.orElse(any()))
+                .thenReturn(mFingerprintReEnrollNotification);
+        when(mFingerprintReEnrollNotification.isFingerprintReEnrollRequired(
+                FINGERPRINT_ACQUIRED_RE_ENROLL)).thenReturn(true);
+
         mLooper = TestableLooper.get(this);
         Handler handler = new Handler(mLooper.getLooper());
         BiometricNotificationDialogFactory dialogFactory = new BiometricNotificationDialogFactory();
@@ -87,7 +98,8 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
                 new BiometricNotificationService(mContext,
                         mKeyguardUpdateMonitor, mKeyguardStateController, handler,
                         mNotificationManager,
-                        broadcastReceiver);
+                        broadcastReceiver,
+                        mFingerprintReEnrollNotificationOptional);
         biometricNotificationService.start();
 
         ArgumentCaptor<KeyguardUpdateMonitorCallback> updateMonitorCallbackArgumentCaptor =
@@ -108,8 +120,8 @@ public class BiometricNotificationServiceTest extends SysuiTestCase {
     public void testShowFingerprintReEnrollNotification() {
         when(mKeyguardStateController.isShowing()).thenReturn(false);
 
-        mKeyguardUpdateMonitorCallback.onBiometricError(
-                BiometricFingerprintConstants.BIOMETRIC_ERROR_RE_ENROLL,
+        mKeyguardUpdateMonitorCallback.onBiometricHelp(
+                FINGERPRINT_ACQUIRED_RE_ENROLL,
                 "Testing Fingerprint Re-enrollment" /* errString */,
                 BiometricSourceType.FINGERPRINT
         );

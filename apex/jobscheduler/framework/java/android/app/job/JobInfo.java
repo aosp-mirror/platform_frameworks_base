@@ -1384,8 +1384,8 @@ public class JobInfo implements Parcelable {
          * want to call one of these methods.
          *
          * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
-         * an app must hold the {@link android.Manifest.permission#INTERNET} and
-         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permissions to
+         * an app must hold the
+         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permission to
          * schedule a job that requires a network.
          *
          * <p class="note">
@@ -1445,8 +1445,8 @@ public class JobInfo implements Parcelable {
          * constraint.
          *
          * Starting in Android version {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE},
-         * an app must hold the {@link android.Manifest.permission#INTERNET} and
-         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permissions to
+         * an app must hold the
+         * {@link android.Manifest.permission#ACCESS_NETWORK_STATE} permission to
          * schedule a job that requires a network.
          *
          * @param networkRequest The detailed description of the kind of network

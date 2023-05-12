@@ -958,7 +958,7 @@ final class LetterboxUiController {
      * Whether we use split screen aspect ratio for the activity when camera compat treatment
      * is active because the corresponding config is enabled and activity supports resizing.
      */
-    private boolean isCameraCompatSplitScreenAspectRatioAllowed() {
+    boolean isCameraCompatSplitScreenAspectRatioAllowed() {
         return mLetterboxConfiguration.isCameraCompatSplitScreenAspectRatioEnabled()
                 && !mActivityRecord.shouldCreateCompatDisplayInsets();
     }

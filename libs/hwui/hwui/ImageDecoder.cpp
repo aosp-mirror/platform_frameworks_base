@@ -51,6 +51,9 @@ using namespace android;
 sk_sp<SkColorSpace> ImageDecoder::getDefaultColorSpace() const {
     const skcms_ICCProfile* encodedProfile = mCodec->getICCProfile();
     if (encodedProfile) {
+        if (encodedProfile->has_CICP) {
+            return mCodec->computeOutputColorSpace(kN32_SkColorType);
+        }
         // If the profile maps directly to an SkColorSpace, that SkColorSpace
         // will be returned. Otherwise, nullptr will be returned. In either
         // case, using this SkColorSpace results in doing no color correction.

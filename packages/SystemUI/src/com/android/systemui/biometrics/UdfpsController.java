@@ -466,7 +466,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
         if (!mOnFingerDown) {
             playStartHaptic();
         }
-        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* strongAuth */);
+        mKeyguardViewManager.notifyKeyguardAuthenticated(false /* primaryAuth */);
         mAttemptedToDismissKeyguard = true;
     }
 
@@ -636,7 +636,7 @@ public class UdfpsController implements DozeReceiver, Dumpable {
                     mOverlay.getOverlayView().getViewRootImpl().getInputToken());
         }
 
-        return processedTouch.getTouchData().isWithinSensor(mOverlayParams.getNativeSensorBounds());
+        return processedTouch.getTouchData().isWithinBounds(mOverlayParams.getNativeSensorBounds());
     }
 
     private boolean oldOnTouch(long requestId, @NonNull MotionEvent event, boolean fromUdfpsView) {

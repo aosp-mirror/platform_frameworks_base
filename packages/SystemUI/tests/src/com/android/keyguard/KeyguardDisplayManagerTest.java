@@ -25,6 +25,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.hardware.display.DisplayManagerGlobal;
 import android.testing.AndroidTestingRunner;
@@ -38,6 +39,7 @@ import com.android.keyguard.dagger.KeyguardStatusViewComponent;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.settings.FakeDisplayTracker;
+import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +60,10 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
     private KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     @Mock
     private KeyguardDisplayManager.KeyguardPresentation mKeyguardPresentation;
+    @Mock
+    private KeyguardDisplayManager.DeviceStateHelper mDeviceStateHelper;
+    @Mock
+    private KeyguardStateController mKeyguardStateController;
 
     private Executor mMainExecutor = Runnable::run;
     private Executor mBackgroundExecutor = Runnable::run;
@@ -76,7 +82,7 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mManager = spy(new KeyguardDisplayManager(mContext, () -> mNavigationBarController,
                 mKeyguardStatusViewComponentFactory, mDisplayTracker, mMainExecutor,
-                mBackgroundExecutor));
+                mBackgroundExecutor, mDeviceStateHelper, mKeyguardStateController));
         doReturn(mKeyguardPresentation).when(mManager).createPresentation(any());
 
         mDefaultDisplay = new Display(DisplayManagerGlobal.getInstance(), Display.DEFAULT_DISPLAY,
@@ -122,5 +128,14 @@ public class KeyguardDisplayManagerTest extends SysuiTestCase {
 
         mManager.show();
         verify(mManager, times(1)).createPresentation(eq(mSecondaryDisplay));
+    }
+
+    @Test
+    public void testShow_concurrentDisplayActive_occluded() {
+        mDisplayTracker.setAllDisplays(new Display[]{mDefaultDisplay, mSecondaryDisplay});
+
+        when(mDeviceStateHelper.isConcurrentDisplayActive(mSecondaryDisplay)).thenReturn(true);
+        when(mKeyguardStateController.isOccluded()).thenReturn(true);
+        verify(mManager, never()).createPresentation(eq(mSecondaryDisplay));
     }
 }

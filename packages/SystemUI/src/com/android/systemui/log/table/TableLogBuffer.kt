@@ -23,6 +23,7 @@ import com.android.systemui.common.buffer.RingBuffer
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogLevel
 import com.android.systemui.log.LogcatEchoTracker
+import com.android.systemui.plugins.log.TableLogBufferBase
 import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.util.Locale
@@ -84,7 +85,7 @@ class TableLogBuffer(
     @Background private val bgDispatcher: CoroutineDispatcher,
     private val coroutineScope: CoroutineScope,
     private val localLogcat: LogProxy = LogProxyDefault(),
-) : Dumpable {
+) : Dumpable, TableLogBufferBase {
     init {
         if (maxSize <= 0) {
             throw IllegalArgumentException("maxSize must be > 0")
@@ -177,7 +178,7 @@ class TableLogBuffer(
      *
      * @param isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
      */
-    fun logChange(prefix: String, columnName: String, value: String?, isInitial: Boolean = false) {
+    override fun logChange(prefix: String, columnName: String, value: String?, isInitial: Boolean) {
         logChange(systemClock.currentTimeMillis(), prefix, columnName, value, isInitial)
     }
 
@@ -186,7 +187,7 @@ class TableLogBuffer(
      *
      * @param isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
      */
-    fun logChange(prefix: String, columnName: String, value: Boolean, isInitial: Boolean = false) {
+    override fun logChange(prefix: String, columnName: String, value: Boolean, isInitial: Boolean) {
         logChange(systemClock.currentTimeMillis(), prefix, columnName, value, isInitial)
     }
 
@@ -195,7 +196,7 @@ class TableLogBuffer(
      *
      * @param isInitial see [TableLogBuffer.logChange(String, Boolean, (TableRowLogger) -> Unit].
      */
-    fun logChange(prefix: String, columnName: String, value: Int?, isInitial: Boolean = false) {
+    override fun logChange(prefix: String, columnName: String, value: Int?, isInitial: Boolean) {
         logChange(systemClock.currentTimeMillis(), prefix, columnName, value, isInitial)
     }
 
