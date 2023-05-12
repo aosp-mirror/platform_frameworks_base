@@ -29,6 +29,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_TITL
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ComponentInfo;
@@ -47,6 +48,7 @@ import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * Description of a single dashboard tile that the user can select.
@@ -59,6 +61,8 @@ public abstract class Tile implements Parcelable {
      * Optional list of user handles which the intent should be launched on.
      */
     public ArrayList<UserHandle> userHandle = new ArrayList<>();
+
+    public HashMap<UserHandle, PendingIntent> pendingIntentMap = new HashMap<>();
 
     @VisibleForTesting
     long mLastUpdateTime;
@@ -183,6 +187,13 @@ public abstract class Tile implements Parcelable {
      */
     public boolean hasSwitch() {
         return mMetaData != null && mMetaData.containsKey(META_DATA_PREFERENCE_SWITCH_URI);
+    }
+
+    /**
+     * Check whether tile has a pending intent.
+     */
+    public boolean hasPendingIntent() {
+        return !pendingIntentMap.isEmpty();
     }
 
     /**
