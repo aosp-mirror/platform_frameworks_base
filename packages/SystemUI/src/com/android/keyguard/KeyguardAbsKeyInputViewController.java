@@ -179,10 +179,10 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
                     handleAttemptLockout(deadline);
                 }
             }
+            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             if (timeoutMs == 0) {
                 mMessageAreaController.setMessage(mView.getWrongPasswordStringId());
             }
-            mView.resetPasswordText(true /* animate */, false /* announce deletion if no match */);
             startErrorAnimation();
         }
     }
