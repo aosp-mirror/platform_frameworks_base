@@ -12495,6 +12495,17 @@ public final class Settings {
                 "bypass_device_policy_management_role_qualifications";
 
         /**
+         * Whether work profile telephony feature is enabled for non
+         * {@link android.app.role.RoleManager#ROLE_DEVICE_POLICY_MANAGEMENT} holders.
+         * ("0" = false, "1" = true).
+         *
+         * @hide
+         */
+        @Readable
+        public static final String ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS =
+                "allow_work_profile_telephony_for_non_dpm_role_holders";
+
+        /**
          * Indicates whether mobile data should be allowed while the device is being provisioned.
          * This allows the provisioning process to turn off mobile data before the user
          * has an opportunity to set things up, preventing other processes from burning
