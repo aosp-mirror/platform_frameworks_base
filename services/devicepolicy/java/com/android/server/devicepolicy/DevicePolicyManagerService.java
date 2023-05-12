@@ -11447,6 +11447,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         || isDefaultDeviceOwner(caller) || isFinancedDeviceOwner(caller));
                 enforcingAdmin = getEnforcingAdminForCaller(who, callerPackageName);
             }
+            if (!isPackageInstalledForUser(activity.getPackageName(), userId)) {
+                // Fail early as packageManager doesn't persist the activity if its not installed.
+                return;
+            }
             mDevicePolicyEngine.setLocalPolicy(
                     PolicyDefinition.PERSISTENT_PREFERRED_ACTIVITY(filter),
                     enforcingAdmin,
