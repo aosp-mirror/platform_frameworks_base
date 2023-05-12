@@ -74,9 +74,6 @@ public final class FillRequestEventLogger {
     public static final int TRIGGER_REASON_SERVED_FROM_CACHED_RESPONSE =
             AUTOFILL_FILL_REQUEST_REPORTED__REQUEST_TRIGGER_REASON__TRIGGER_REASON_SERVED_FROM_CACHED_RESPONSE;
 
-    // Augmented autofill currently doesn't have an assigned request_id, use -2 as the magic number.
-    public static final int AUGMENTED_AUTOFILL_REQUEST_ID = -2;
-
     private final int mSessionId;
     private Optional<FillRequestEventInternal> mEventInternal;
 
