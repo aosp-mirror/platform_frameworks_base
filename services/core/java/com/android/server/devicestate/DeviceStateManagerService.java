@@ -17,6 +17,7 @@
 package com.android.server.devicestate;
 
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.MAXIMUM_DEVICE_STATE;
@@ -73,6 +74,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -162,7 +164,7 @@ public final class DeviceStateManagerService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArray<ProcessRecord> mProcessRecords = new SparseArray<>();
 
-    private Set<Integer> mDeviceStatesAvailableForAppRequests;
+    private Set<Integer> mDeviceStatesAvailableForAppRequests = new HashSet<>();
 
     private Set<Integer> mFoldedDeviceStates;
 
@@ -879,8 +881,16 @@ public final class DeviceStateManagerService extends SystemService {
      * @param callingPid Process ID that is requesting this state change
      * @param state state that is being requested.
      */
-    private void assertCanRequestDeviceState(int callingPid, int state) {
-        if (!isTopApp(callingPid) || !isStateAvailableForAppRequests(state)) {
+    private void assertCanRequestDeviceState(int callingPid, int callingUid, int state) {
+        final boolean isTopApp = isTopApp(callingPid);
+        final boolean isForegroundApp = isForegroundApp(callingPid, callingUid);
+        final boolean isStateAvailableForAppRequests = isStateAvailableForAppRequests(state);
+
+        final boolean canRequestState = isTopApp
+                && isForegroundApp
+                && isStateAvailableForAppRequests;
+
+        if (!canRequestState) {
             getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
                     "Permission required to request device state, "
                             + "or the call must come from the top app "
@@ -893,13 +903,41 @@ public final class DeviceStateManagerService extends SystemService {
      * not the top app, then check if this process holds the CONTROL_DEVICE_STATE permission.
      *
      * @param callingPid Process ID that is requesting this state change
+     * @param callingUid UID that is requesting this state change
      */
-    private void assertCanControlDeviceState(int callingPid) {
-        if (!isTopApp(callingPid)) {
+    private void assertCanControlDeviceState(int callingPid, int callingUid) {
+        final boolean isTopApp = isTopApp(callingPid);
+        final boolean isForegroundApp = isForegroundApp(callingPid, callingUid);
+
+        final boolean canControlState = isTopApp && isForegroundApp;
+
+        if (!canControlState) {
             getContext().enforceCallingOrSelfPermission(CONTROL_DEVICE_STATE,
                     "Permission required to request device state, "
                             + "or the call must come from the top app.");
         }
+    }
+
+    /**
+     * Checks if the caller is in the foreground. Note that callers may be the top app as returned
+     * from {@link #isTopApp(int)}, but not be in the foreground. For example, keyguard may be on
+     * top of the top app.
+     */
+    private boolean isForegroundApp(int callingPid, int callingUid) {
+        try {
+            final List<ActivityManager.RunningAppProcessInfo> procs =
+                    ActivityManager.getService().getRunningAppProcesses();
+            for (int i = 0; i < procs.size(); i++) {
+                ActivityManager.RunningAppProcessInfo proc = procs.get(i);
+                if (proc.pid == callingPid && proc.uid == callingUid
+                        && proc.importance <= IMPORTANCE_FOREGROUND) {
+                    return true;
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "am.getRunningAppProcesses() failed", e);
+        }
+        return false;
     }
 
     private boolean isTopApp(int callingPid) {
@@ -918,7 +956,6 @@ public final class DeviceStateManagerService extends SystemService {
      */
     @GuardedBy("mLock")
     private void readStatesAvailableForRequestFromApps() {
-        mDeviceStatesAvailableForAppRequests = new HashSet<>();
         String[] availableAppStatesConfigIdentifiers = getContext().getResources()
                 .getStringArray(R.array.config_deviceStatesAvailableForAppRequests);
         for (int i = 0; i < availableAppStatesConfigIdentifiers.length; i++) {
@@ -1118,7 +1155,7 @@ public final class DeviceStateManagerService extends SystemService {
             // Allow top processes to request a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            assertCanRequestDeviceState(callingPid, state);
+            assertCanRequestDeviceState(callingPid, callingUid, state);
 
             if (token == null) {
                 throw new IllegalArgumentException("Request token must not be null.");
@@ -1139,10 +1176,11 @@ public final class DeviceStateManagerService extends SystemService {
         @Override // Binder call
         public void cancelStateRequest() {
             final int callingPid = Binder.getCallingPid();
+            final int callingUid = Binder.getCallingUid();
             // Allow top processes to cancel a device state change
             // If the calling process ID is not the top app, then we check if this process
             // holds a permission to CONTROL_DEVICE_STATE
-            assertCanControlDeviceState(callingPid);
+            assertCanControlDeviceState(callingPid, callingUid);
 
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
