@@ -56,7 +56,6 @@ import android.net.NetworkPolicyManager;
 import android.net.NetworkStack;
 import android.net.NetworkStats;
 import android.net.RouteInfo;
-import android.net.UidRangeParcel;
 import android.net.util.NetdService;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -97,7 +96,6 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1346,70 +1344,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    private void closeSocketsForFirewallChainLocked(int chain, String chainName) {
-        // UID ranges to close sockets on.
-        UidRangeParcel[] ranges;
-        // UID ranges whose sockets we won't touch.
-        int[] exemptUids;
-
-        int numUids = 0;
-        if (DBG) Slog.d(TAG, "Closing sockets after enabling chain " + chainName);
-        if (getFirewallType(chain) == FIREWALL_ALLOWLIST) {
-            // Close all sockets on all non-system UIDs...
-            ranges = new UidRangeParcel[] {
-                // TODO: is there a better way of finding all existing users? If so, we could
-                // specify their ranges here.
-                new UidRangeParcel(Process.FIRST_APPLICATION_UID, Integer.MAX_VALUE),
-            };
-            // ... except for the UIDs that have allow rules.
-            synchronized (mRulesLock) {
-                final SparseIntArray rules = getUidFirewallRulesLR(chain);
-                exemptUids = new int[rules.size()];
-                for (int i = 0; i < exemptUids.length; i++) {
-                    if (rules.valueAt(i) == FIREWALL_RULE_ALLOW) {
-                        exemptUids[numUids] = rules.keyAt(i);
-                        numUids++;
-                    }
-                }
-            }
-            // Normally, allowlist chains only contain deny rules, so numUids == exemptUids.length.
-            // But the code does not guarantee this in any way, and at least in one case - if we add
-            // a UID rule to the firewall, and then disable the firewall - the chains can contain
-            // the wrong type of rule. In this case, don't close connections that we shouldn't.
-            //
-            // TODO: tighten up this code by ensuring we never set the wrong type of rule, and
-            // fix setFirewallEnabled to grab mQuotaLock and clear rules.
-            if (numUids != exemptUids.length) {
-                exemptUids = Arrays.copyOf(exemptUids, numUids);
-            }
-        } else {
-            // Close sockets for every UID that has a deny rule...
-            synchronized (mRulesLock) {
-                final SparseIntArray rules = getUidFirewallRulesLR(chain);
-                ranges = new UidRangeParcel[rules.size()];
-                for (int i = 0; i < ranges.length; i++) {
-                    if (rules.valueAt(i) == FIREWALL_RULE_DENY) {
-                        int uid = rules.keyAt(i);
-                        ranges[numUids] = new UidRangeParcel(uid, uid);
-                        numUids++;
-                    }
-                }
-            }
-            // As above; usually numUids == ranges.length, but not always.
-            if (numUids != ranges.length) {
-                ranges = Arrays.copyOf(ranges, numUids);
-            }
-            // ... with no exceptions.
-            exemptUids = new int[0];
-        }
-
-        try {
-            mNetdService.socketDestroy(ranges, exemptUids);
-        } catch(RemoteException | ServiceSpecificException e) {
-            Slog.e(TAG, "Error closing sockets after enabling chain " + chainName + ": " + e);
-        }
-    }
-
     @Override
     public void setFirewallChainEnabled(int chain, boolean enable) {
         enforceSystemUid();
@@ -1433,14 +1367,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 cm.setFirewallChainEnabled(chain, enable);
             } catch (RuntimeException e) {
                 throw new IllegalStateException(e);
-            }
-
-            // Close any sockets that were opened by the affected UIDs. This has to be done after
-            // disabling network connectivity, in case they react to the socket close by reopening
-            // the connection and race with the iptables commands that enable the firewall. All
-            // allowlist and denylist chains allow RSTs through.
-            if (enable) {
-                closeSocketsForFirewallChainLocked(chain, chainName);
             }
         }
     }
