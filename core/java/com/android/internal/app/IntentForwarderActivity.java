@@ -19,7 +19,11 @@ package com.android.internal.app;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_PERSONAL;
 import static android.app.admin.DevicePolicyResources.Strings.Core.FORWARD_INTENT_TO_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_CALL_FROM_WORK;
 import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_OPEN_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_SWITCH_TO_WORK;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_WORK_TELEPHONY_CALL_BLOCKED_INFORMATION;
+import static android.app.admin.DevicePolicyResources.Strings.Core.MINIRESOLVER_WORK_TELEPHONY_TEXT_BLOCKED_INFORMATION;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
@@ -32,6 +36,7 @@ import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.ManagedSubscriptionsPolicy;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -41,6 +46,7 @@ import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
+import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,6 +54,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.telecom.TelecomManager;
 import android.util.Slog;
 import android.view.View;
 import android.widget.Button;
@@ -203,34 +210,115 @@ public class IntentForwarderActivity extends Activity  {
 
         findViewById(R.id.title_container).setElevation(0);
 
-        ImageView icon = findViewById(R.id.icon);
         PackageManager packageManagerForTargetUser =
                 createContextAsUser(UserHandle.of(targetUserId), /* flags= */ 0)
                         .getPackageManager();
-        icon.setImageDrawable(target.loadIcon(packageManagerForTargetUser));
+
+        ImageView icon = findViewById(R.id.icon);
+        icon.setImageDrawable(
+                getAppIcon(target, launchIntent, targetUserId, packageManagerForTargetUser));
 
         View buttonContainer = findViewById(R.id.button_bar_container);
         buttonContainer.setPadding(0, 0, 0, buttonContainer.getPaddingBottom());
 
         ((TextView) findViewById(R.id.open_cross_profile)).setText(
-                getOpenInWorkMessage(target.loadLabel(packageManagerForTargetUser)));
+                getOpenInWorkMessage(launchIntent, target.loadLabel(packageManagerForTargetUser)));
 
         // The mini-resolver's negative button is reused in this flow to cancel the intent
         ((Button) findViewById(R.id.use_same_profile_browser)).setText(R.string.cancel);
         findViewById(R.id.use_same_profile_browser).setOnClickListener(v -> finish());
 
+        ((Button) findViewById(R.id.button_open)).setText(getOpenInWorkButtonString(launchIntent));
         findViewById(R.id.button_open).setOnClickListener(v -> {
             startActivityAsCaller(launchIntent, targetUserId);
             finish();
         });
+
+
+        View telephonyInfo = findViewById(R.id.miniresolver_info_section);
+        DevicePolicyManager devicePolicyManager =
+                getSystemService(DevicePolicyManager.class);
+        // Additional information section is work telephony specific. Therefore, it is only shown
+        // for telephony related intents, when all sim subscriptions are in the work profile.
+        if ((isDialerIntent(launchIntent) || isTextMessageIntent(launchIntent))
+                && devicePolicyManager.getManagedSubscriptionsPolicy().getPolicyType()
+                    == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
+            telephonyInfo.setVisibility(View.VISIBLE);
+            ((TextView) findViewById(R.id.miniresolver_info_section_text))
+                    .setText(getWorkTelephonyInfoSectionMessage(launchIntent));
+        } else {
+            telephonyInfo.setVisibility(View.GONE);
+        }
     }
 
-    private String getOpenInWorkMessage(CharSequence targetLabel) {
+    private Drawable getAppIcon(
+            ResolveInfo target,
+            Intent launchIntent,
+            int targetUserId,
+            PackageManager packageManagerForTargetUser) {
+        if (isDialerIntent(launchIntent)) {
+            // The icon for the call intent will be a generic phone icon as the target will be
+            // the telecom call handler. From the user's perspective, they are being directed
+            // to the dialer app, so use the icon from that app instead.
+            TelecomManager telecomManager =
+                    getApplicationContext().getSystemService(TelecomManager.class);
+            String defaultDialerPackageName =
+                    telecomManager.getDefaultDialerPackage(UserHandle.of(targetUserId));
+            try {
+                return packageManagerForTargetUser
+                        .getApplicationInfo(defaultDialerPackageName, /* flags= */ 0)
+                        .loadIcon(packageManagerForTargetUser);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Allow to fall-through to the icon from the target if we can't find the default
+                // dialer icon.
+                Slog.w(TAG, "Cannot load icon for default dialer package");
+            }
+        }
+        return target.loadIcon(packageManagerForTargetUser);
+    }
+
+    private int getOpenInWorkButtonString(Intent launchIntent) {
+        if (isDialerIntent(launchIntent)) {
+            return R.string.miniresolver_call;
+        }
+        if (isTextMessageIntent(launchIntent)) {
+            return R.string.miniresolver_switch;
+        }
+        return R.string.whichViewApplicationLabel;
+    }
+
+    private String getOpenInWorkMessage(Intent launchIntent, CharSequence targetLabel) {
+        if (isDialerIntent(launchIntent)) {
+            return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_CALL_FROM_WORK,
+                () -> getString(R.string.miniresolver_call_in_work));
+        }
+        if (isTextMessageIntent(launchIntent)) {
+            return getSystemService(DevicePolicyManager.class).getResources().getString(
+                    MINIRESOLVER_SWITCH_TO_WORK,
+                    () -> getString(R.string.miniresolver_switch_to_work));
+        }
         return getSystemService(DevicePolicyManager.class).getResources().getString(
                 MINIRESOLVER_OPEN_WORK,
                 () -> getString(R.string.miniresolver_open_work, targetLabel),
                 targetLabel);
     }
+
+    private String getWorkTelephonyInfoSectionMessage(Intent launchIntent) {
+        if (isDialerIntent(launchIntent)) {
+            return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_WORK_TELEPHONY_CALL_BLOCKED_INFORMATION,
+                () -> getString(R.string.miniresolver_call_information));
+        }
+        if (isTextMessageIntent(launchIntent)) {
+            return getSystemService(DevicePolicyManager.class).getResources().getString(
+                MINIRESOLVER_WORK_TELEPHONY_TEXT_BLOCKED_INFORMATION,
+                () -> getString(R.string.miniresolver_sms_information));
+        }
+        return "";
+    }
+
+
 
     private String getForwardToPersonalMessage() {
         return getSystemService(DevicePolicyManager.class).getResources().getString(

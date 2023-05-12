@@ -382,7 +382,11 @@ public class DefaultCrossProfileIntentFiltersUtils {
         return filters;
     }
 
-    /** Call intent with tel scheme exclusively handled my managed profile. */
+    /** Call intent with tel scheme exclusively handled my managed profile.
+     * Note that work profile telephony relies on this intent filter to redirect intents to
+     * the IntentForwarderActivity. Work profile telephony error handling must be updated in
+     * the Telecomm package CallsManager if this filter is changed.
+     */
     private static final DefaultCrossProfileIntentFilter CALL_MANAGED_PROFILE =
             new DefaultCrossProfileIntentFilter.Builder(
                     DefaultCrossProfileIntentFilter.Direction.TO_PROFILE,
