@@ -1311,6 +1311,16 @@ final class LetterboxUiController {
 
         final Rect cropBounds = new Rect(mActivityRecord.getBounds());
 
+        // In case of translucent activities we check if the requested size is different from
+        // the size provided using inherited bounds. In that case we decide to not apply rounded
+        // corners because we assume the specific layout would. This is the case when the layout
+        // of the translucent activity uses only a part of all the bounds because of the use of
+        // LayoutParams.WRAP_CONTENT.
+        if (hasInheritedLetterboxBehavior() && (cropBounds.width() != mainWindow.mRequestedWidth
+                || cropBounds.height() != mainWindow.mRequestedHeight)) {
+            return null;
+        }
+
         // It is important to call {@link #adjustBoundsIfNeeded} before {@link cropBounds.offsetTo}
         // because taskbar bounds used in {@link #adjustBoundsIfNeeded}
         // are in screen coordinates

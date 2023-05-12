@@ -455,6 +455,29 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testGetCropBoundsIfNeeded_handleCropForTransparentActivityBasedOnOpaqueBounds() {
+        final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
+                 WindowInsets.Type.navigationBars());
+        taskbar.setInsetsRoundedCornerFrame(true);
+        final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
+        final Rect opaqueBounds = new Rect(0, 0, 500, 300);
+        doReturn(opaqueBounds).when(mActivity).getBounds();
+        // Activity is translucent
+        spyOn(mActivity.mLetterboxUiController);
+        doReturn(true).when(mActivity.mLetterboxUiController).hasInheritedLetterboxBehavior();
+
+        // Makes requested sizes different
+        mainWindow.mRequestedWidth = opaqueBounds.width() - 1;
+        mainWindow.mRequestedHeight = opaqueBounds.height() - 1;
+        assertNull(mActivity.mLetterboxUiController.getCropBoundsIfNeeded(mainWindow));
+
+        // Makes requested sizes equals
+        mainWindow.mRequestedWidth = opaqueBounds.width();
+        mainWindow.mRequestedHeight = opaqueBounds.height();
+        assertNotNull(mActivity.mLetterboxUiController.getCropBoundsIfNeeded(mainWindow));
+    }
+
+    @Test
     public void testGetCropBoundsIfNeeded_noCrop() {
         final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
                 WindowInsets.Type.navigationBars());
