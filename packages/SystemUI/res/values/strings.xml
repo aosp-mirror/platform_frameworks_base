@@ -2583,7 +2583,7 @@
     <!-- Title for media controls [CHAR_LIMIT=50] -->
     <string name="controls_media_title">Media</string>
     <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=50] -->
-    <string name="controls_media_close_session">Hide this media control for <xliff:g id="app_name" example="YouTube Music">%1$s</xliff:g>?</string>
+    <string name="controls_media_close_session">Hide this media control for <xliff:g id="app_name" example="Foo Music App">%1$s</xliff:g>?</string>
     <!-- Explanation that controls associated with a specific media session are active [CHAR_LIMIT=50] -->
     <string name="controls_media_active_session">The current media session cannot be hidden.</string>
     <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
@@ -2596,6 +2596,8 @@
     <string name="controls_media_playing_item_description"><xliff:g id="song_name" example="Daily mix">%1$s</xliff:g> by <xliff:g id="artist_name" example="Various artists">%2$s</xliff:g> is playing from <xliff:g id="app_label" example="Spotify">%3$s</xliff:g></string>
     <!-- Content description for media cotnrols progress bar [CHAR_LIMIT=NONE] -->
     <string name="controls_media_seekbar_description"><xliff:g id="elapsed_time" example="1:30">%1$s</xliff:g> of <xliff:g id="total_time" example="3:00">%2$s</xliff:g></string>
+    <!-- Placeholder title to inform user that an app has posted media controls [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_empty_title"><xliff:g id="app_name" example="Foo Music App">%1$s</xliff:g> is running</string>
 
     <!-- Description for button in media controls. Pressing button starts playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_button_play">Play</string>
