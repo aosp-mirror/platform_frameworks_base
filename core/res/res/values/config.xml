@@ -3711,6 +3711,10 @@
          magnification settings and adjust the default magnification capability.  -->
     <bool name="config_magnification_area">true</bool>
 
+    <!-- The default value for always on magnification feature flag if the remote feature
+         flag does not exist -->
+    <bool name="config_magnification_always_on_enabled">true</bool>
+
     <!-- If true, the display will be shifted around in ambient mode. -->
     <bool name="config_enableBurnInProtection">false</bool>
 
