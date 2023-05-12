@@ -64,7 +64,6 @@ class TrustRepositoryTest : SysuiTestCase() {
         testScope = TestScope()
         userRepository = FakeUserRepository()
         userRepository.setUserInfos(users)
-
         val logger =
             TrustRepositoryLogger(
                 LogBuffer("TestBuffer", 1, mock(LogcatEchoTracker::class.java), false)
@@ -223,5 +222,42 @@ class TrustRepositoryTest : SysuiTestCase() {
             userRepository.setSelectedUserInfo(users[0])
 
             assertThat(isCurrentUserTrusted()).isTrue()
+        }
+
+    @Test
+    fun isCurrentUserActiveUnlockRunning_runningFirstBeforeUserInfoChanges_emitsCorrectValue() =
+        testScope.runTest {
+            runCurrent()
+            verify(trustManager).registerTrustListener(listener.capture())
+            val isCurrentUserActiveUnlockRunning by
+                collectLastValue(underTest.isCurrentUserActiveUnlockRunning)
+            userRepository.setSelectedUserInfo(users[1])
+
+            // active unlock running = true for users[0].id, but not the current user
+            listener.value.onIsActiveUnlockRunningChanged(true, users[0].id)
+            assertThat(isCurrentUserActiveUnlockRunning).isFalse()
+
+            // current user is now users[0].id
+            userRepository.setSelectedUserInfo(users[0])
+            assertThat(isCurrentUserActiveUnlockRunning).isTrue()
+        }
+
+    @Test
+    fun isCurrentUserActiveUnlockRunning_whenActiveUnlockRunningForCurrentUser_emitsNewValue() =
+        testScope.runTest {
+            runCurrent()
+            verify(trustManager).registerTrustListener(listener.capture())
+            val isCurrentUserActiveUnlockRunning by
+                collectLastValue(underTest.isCurrentUserActiveUnlockRunning)
+            userRepository.setSelectedUserInfo(users[0])
+
+            listener.value.onIsActiveUnlockRunningChanged(true, users[0].id)
+            assertThat(isCurrentUserActiveUnlockRunning).isTrue()
+
+            listener.value.onIsActiveUnlockRunningChanged(false, users[0].id)
+            assertThat(isCurrentUserActiveUnlockRunning).isFalse()
+
+            listener.value.onIsActiveUnlockRunningChanged(true, users[0].id)
+            assertThat(isCurrentUserActiveUnlockRunning).isTrue()
         }
 }
