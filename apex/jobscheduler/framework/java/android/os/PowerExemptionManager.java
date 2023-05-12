@@ -98,6 +98,15 @@ public class PowerExemptionManager {
     public static final int TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1;
 
     /**
+     * Delay freezing the app when the broadcast is delivered. This flag is not required if
+     * TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED or
+     * TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED are specified, as those will
+     * already defer freezing during the allowlist duration.
+     * @hide temporarily until the next release
+     */
+    public static final int TEMPORARY_ALLOW_LIST_TYPE_APP_FREEZING_DELAYED = 1 << 2;
+
+    /**
      * The list of temp allow list types.
      * @hide
      */
@@ -105,6 +114,7 @@ public class PowerExemptionManager {
             TEMPORARY_ALLOW_LIST_TYPE_NONE,
             TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
             TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
+            TEMPORARY_ALLOW_LIST_TYPE_APP_FREEZING_DELAYED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TempAllowListType {}
@@ -216,6 +226,11 @@ public class PowerExemptionManager {
      * Set temp-allow-list for transferring accounts between users.
      */
     public static final int REASON_ACCOUNT_TRANSFER = 104;
+    /**
+     * Set temp-allow-list for server push messaging that can be deferred.
+     * @hide temporarily until the next release
+     */
+    public static final int REASON_PUSH_MESSAGING_DEFERRABLE = 105;
 
     /* Reason code range 200-299 are reserved for broadcast actions */
     /**
@@ -449,6 +464,7 @@ public class PowerExemptionManager {
             REASON_PUSH_MESSAGING_OVER_QUOTA,
             REASON_ACTIVITY_RECOGNITION,
             REASON_ACCOUNT_TRANSFER,
+            REASON_PUSH_MESSAGING_DEFERRABLE,
             REASON_BOOT_COMPLETED,
             REASON_PRE_BOOT_COMPLETED,
             REASON_LOCKED_BOOT_COMPLETED,
@@ -781,6 +797,8 @@ public class PowerExemptionManager {
                 return "ACTIVITY_RECOGNITION";
             case REASON_ACCOUNT_TRANSFER:
                 return "REASON_ACCOUNT_TRANSFER";
+            case REASON_PUSH_MESSAGING_DEFERRABLE:
+                return "PUSH_MESSAGING_DEFERRABLE";
             case REASON_BOOT_COMPLETED:
                 return "BOOT_COMPLETED";
             case REASON_PRE_BOOT_COMPLETED:

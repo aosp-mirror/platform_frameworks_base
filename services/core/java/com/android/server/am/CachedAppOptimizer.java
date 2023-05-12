@@ -47,6 +47,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FREEZER;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 import android.annotation.IntDef;
+import android.annotation.UptimeMillisLong;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal.OomAdjReason;
 import android.app.ActivityThread;
@@ -1278,14 +1279,35 @@ public final class CachedAppOptimizer {
         return true;
     }
 
+    /**
+     * Returns the earliest time (relative) from now that the app can be frozen.
+     * @param app The app to update
+     * @param delayMillis How much to delay freezing by
+     */
+    @GuardedBy("mProcLock")
+    private long updateEarliestFreezableTime(ProcessRecord app, long delayMillis) {
+        final long now = SystemClock.uptimeMillis();
+        app.mOptRecord.setEarliestFreezableTime(
+                Math.max(app.mOptRecord.getEarliestFreezableTime(), now + delayMillis));
+        return app.mOptRecord.getEarliestFreezableTime() - now;
+    }
+
     // This will ensure app will be out of the freezer for at least mFreezerDebounceTimeout.
     @GuardedBy("mAm")
     void unfreezeTemporarily(ProcessRecord app, @UnfreezeReason int reason) {
+        unfreezeTemporarily(app, reason, mFreezerDebounceTimeout);
+    }
+
+    // This will ensure app will be out of the freezer for at least mFreezerDebounceTimeout.
+    @GuardedBy("mAm")
+    void unfreezeTemporarily(ProcessRecord app, @UnfreezeReason int reason, long delayMillis) {
         if (mUseFreezer) {
             synchronized (mProcLock) {
+                // Move the earliest freezable time further, if necessary
+                final long delay = updateEarliestFreezableTime(app, delayMillis);
                 if (app.mOptRecord.isFrozen() || app.mOptRecord.isPendingFreeze()) {
                     unfreezeAppLSP(app, reason);
-                    freezeAppAsyncLSP(app);
+                    freezeAppAsyncLSP(app, delay);
                 }
             }
         }
@@ -1293,11 +1315,17 @@ public final class CachedAppOptimizer {
 
     @GuardedBy({"mAm", "mProcLock"})
     void freezeAppAsyncLSP(ProcessRecord app) {
-        freezeAppAsyncInternalLSP(app, mFreezerDebounceTimeout, false);
+        freezeAppAsyncLSP(app, updateEarliestFreezableTime(app, mFreezerDebounceTimeout));
     }
 
     @GuardedBy({"mAm", "mProcLock"})
-    void freezeAppAsyncInternalLSP(ProcessRecord app, long delayMillis, boolean force) {
+    private void freezeAppAsyncLSP(ProcessRecord app, @UptimeMillisLong long delayMillis) {
+        freezeAppAsyncInternalLSP(app, delayMillis, false);
+    }
+
+    @GuardedBy({"mAm", "mProcLock"})
+    void freezeAppAsyncInternalLSP(ProcessRecord app, @UptimeMillisLong long delayMillis,
+            boolean force) {
         final ProcessCachedOptimizerRecord opt = app.mOptRecord;
         if (opt.isPendingFreeze()) {
             // Skip redundant DO_FREEZE message

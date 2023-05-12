@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.UptimeMillisLong;
 import android.app.ActivityManagerInternal.OomAdjReason;
 
 import com.android.internal.annotations.GuardedBy;
@@ -118,6 +119,12 @@ final class ProcessCachedOptimizerRecord {
      */
     @GuardedBy("mProcLock")
     private boolean mPendingFreeze;
+
+    /**
+     * This is the soonest the process can be allowed to freeze, in uptime millis
+     */
+    @GuardedBy("mProcLock")
+    private @UptimeMillisLong long mEarliestFreezableTimeMillis;
 
     @GuardedBy("mProcLock")
     long getLastCompactTime() {
@@ -261,6 +268,16 @@ final class ProcessCachedOptimizerRecord {
     @GuardedBy("mProcLock")
     void setShouldNotFreeze(boolean shouldNotFreeze) {
         mShouldNotFreeze = shouldNotFreeze;
+    }
+
+    @GuardedBy("mProcLock")
+    @UptimeMillisLong long getEarliestFreezableTime() {
+        return mEarliestFreezableTimeMillis;
+    }
+
+    @GuardedBy("mProcLock")
+    void setEarliestFreezableTime(@UptimeMillisLong long earliestFreezableTimeMillis) {
+        mEarliestFreezableTimeMillis = earliestFreezableTimeMillis;
     }
 
     @GuardedBy("mProcLock")
