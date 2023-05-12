@@ -3074,7 +3074,9 @@ public final class Settings {
 
         public void destroy() {
             try {
-                if (!mArray.isClosed()) {
+                // If this process is the system server process, mArray is the same object as
+                // the memory int array kept inside SettingsProvider, so skipping the close()
+                if (!Settings.isInSystemServer() && !mArray.isClosed()) {
                     mArray.close();
                 }
             } catch (IOException e) {
