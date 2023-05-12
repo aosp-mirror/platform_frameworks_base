@@ -108,6 +108,7 @@ constructor(
                 }
                 updateFontSizes()
                 updateTimeListeners()
+                cachedWeatherData?.let { value.events.onWeatherDataChanged(it) }
                 value.smallClock.view.addOnAttachStateChangeListener(
                     object : OnAttachStateChangeListener {
                         override fun onViewAttachedToWindow(p0: View?) {
@@ -239,6 +240,7 @@ constructor(
     var largeTimeListener: TimeListener? = null
     val shouldTimeListenerRun: Boolean
         get() = isKeyguardVisible && dozeAmount < DOZE_TICKRATE_THRESHOLD
+    private var cachedWeatherData: WeatherData? = null
 
     private var smallClockIsDark = true
     private var largeClockIsDark = true
@@ -305,6 +307,7 @@ constructor(
             }
 
             override fun onWeatherDataChanged(data: WeatherData) {
+                cachedWeatherData = data
                 clock?.run { events.onWeatherDataChanged(data) }
             }
         }
