@@ -1040,9 +1040,6 @@ public class LockPatternUtils {
      */
     @UnsupportedAppUsage
     public boolean isVisiblePatternEnabled(int userId) {
-        // Default to true, since this gets explicitly set to true when a pattern is first set
-        // anyway, which makes true the user-visible default.  The low-level default should be the
-        // same, in order for FRP credential verification to get the same default.
         return getBoolean(Settings.Secure.LOCK_PATTERN_VISIBLE, true, userId);
     }
 
