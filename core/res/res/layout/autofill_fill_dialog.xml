@@ -35,10 +35,10 @@
 
         <ImageView
             android:id="@+id/autofill_service_icon"
-            android:scaleType="fitStart"
+            android:scaleType="fitCenter"
             android:visibility="gone"
-            android:layout_width="@dimen/autofill_dialog_icon_size"
-            android:layout_height="@dimen/autofill_dialog_icon_size"/>
+            android:layout_height="@dimen/autofill_dialog_icon_max_height"
+            android:layout_width="fill_parent"/>
 
         <LinearLayout
             android:id="@+id/autofill_dialog_header"
