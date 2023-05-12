@@ -79,6 +79,9 @@ final class BroadcastRecord extends Binder {
     final @Nullable String callerFeatureId; // which feature in the package sent this
     final int callingPid;   // the pid of who sent this
     final int callingUid;   // the uid of who sent this
+
+    final int originalStickyCallingUid;
+            // if this is a sticky broadcast, the Uid of the original sender
     final boolean callerInstantApp; // caller is an Instant App?
     final boolean callerInstrumented; // caller is being instrumented?
     final boolean ordered;  // serialize the send to receivers?
@@ -330,7 +333,8 @@ final class BroadcastRecord extends Binder {
             pw.print(prefix); pw.print("resultAbort="); pw.print(resultAbort);
                     pw.print(" ordered="); pw.print(ordered);
                     pw.print(" sticky="); pw.print(sticky);
-                    pw.print(" initialSticky="); pw.println(initialSticky);
+                    pw.print(" initialSticky="); pw.print(initialSticky);
+                    pw.print(" originalStickyCallingUid="); pw.println(originalStickyCallingUid);
         }
         if (nextReceiver != 0) {
             pw.print(prefix); pw.print("nextReceiver="); pw.println(nextReceiver);
@@ -399,6 +403,27 @@ final class BroadcastRecord extends Binder {
         }
     }
 
+    BroadcastRecord(BroadcastQueue queue,
+            Intent intent, ProcessRecord callerApp, String callerPackage,
+            @Nullable String callerFeatureId, int callingPid, int callingUid,
+            boolean callerInstantApp, String resolvedType,
+            String[] requiredPermissions, String[] excludedPermissions,
+            String[] excludedPackages, int appOp,
+            BroadcastOptions options, List receivers,
+            ProcessRecord resultToApp, IIntentReceiver resultTo, int resultCode,
+            String resultData, Bundle resultExtras, boolean serialized, boolean sticky,
+            boolean initialSticky, int userId,
+            @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
+            boolean timeoutExempt,
+            @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
+        this(queue, intent, callerApp, callerPackage, callerFeatureId, callingPid,
+                callingUid, callerInstantApp, resolvedType, requiredPermissions,
+                excludedPermissions, excludedPackages, appOp, options, receivers, resultToApp,
+                resultTo, resultCode, resultData, resultExtras, serialized, sticky,
+                initialSticky, userId, -1, backgroundStartPrivileges, timeoutExempt,
+                filterExtrasForReceiver);
+    }
+
     BroadcastRecord(BroadcastQueue _queue,
             Intent _intent, ProcessRecord _callerApp, String _callerPackage,
             @Nullable String _callerFeatureId, int _callingPid, int _callingUid,
@@ -408,7 +433,7 @@ final class BroadcastRecord extends Binder {
             BroadcastOptions _options, List _receivers,
             ProcessRecord _resultToApp, IIntentReceiver _resultTo, int _resultCode,
             String _resultData, Bundle _resultExtras, boolean _serialized, boolean _sticky,
-            boolean _initialSticky, int _userId,
+            boolean _initialSticky, int _userId, int originalStickyCallingUid,
             @NonNull BackgroundStartPrivileges backgroundStartPrivileges,
             boolean timeoutExempt,
             @Nullable BiFunction<Integer, Bundle, Bundle> filterExtrasForReceiver) {
@@ -460,6 +485,7 @@ final class BroadcastRecord extends Binder {
         interactive = options != null && options.isInteractive();
         shareIdentity = options != null && options.isShareIdentityEnabled();
         this.filterExtrasForReceiver = filterExtrasForReceiver;
+        this.originalStickyCallingUid = originalStickyCallingUid;
     }
 
     /**
@@ -524,6 +550,7 @@ final class BroadcastRecord extends Binder {
         shareIdentity = from.shareIdentity;
         urgent = from.urgent;
         filterExtrasForReceiver = from.filterExtrasForReceiver;
+        originalStickyCallingUid = from.originalStickyCallingUid;
     }
 
     /**
