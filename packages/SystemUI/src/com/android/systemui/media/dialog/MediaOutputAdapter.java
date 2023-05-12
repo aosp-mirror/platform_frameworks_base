@@ -207,10 +207,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         updateTitleIcon(R.drawable.media_output_icon_volume,
                                 mController.getColorItemContent());
                     }
-                    initMutingExpectedDevice();
                     mCurrentActivePosition = position;
                     updateFullItemClickListener(v -> onItemClick(v, device));
                     setSingleLineLayout(getItemTitle(device));
+                    initMutingExpectedDevice();
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
                         && mController.isSubStatusSupported()
                         && mController.isAdvancedLayoutSupported() && device.hasSubtext()) {
