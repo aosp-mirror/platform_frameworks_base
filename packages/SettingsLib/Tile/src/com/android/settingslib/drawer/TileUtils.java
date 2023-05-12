@@ -113,6 +113,12 @@ public class TileUtils {
     public static final String META_DATA_PREFERENCE_KEYHINT = "com.android.settings.keyhint";
 
     /**
+     * Name of the meta-data item that can be set in the AndroidManifest.xml or in the content
+     * provider to specify the key of a group / category where this preference belongs to.
+     */
+    public static final String META_DATA_PREFERENCE_GROUP_KEY = "com.android.settings.group_key";
+
+    /**
      * Order of the item that should be displayed on screen. Bigger value items displays closer on
      * top.
      */
