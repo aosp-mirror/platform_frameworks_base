@@ -418,7 +418,7 @@ JTvInputHal::TvInputCallback::TvInputCallback(JTvInputHal* hal) {
 ::ndk::ScopedAStatus JTvInputHal::TvInputCallback::notifyTvMessageEvent(
         const AidlTvMessageEvent& event) {
     const std::string DEVICE_ID_SUBTYPE = "device_id";
-    if (sizeof(event.messages) > 0 && event.messages[0].subType == DEVICE_ID_SUBTYPE) {
+    if (event.messages.size() > 1 && event.messages[0].subType == DEVICE_ID_SUBTYPE) {
         mHal->mLooper
                 ->sendMessage(new NotifyTvMessageHandler(mHal,
                                                          TvMessageEventWrapper::createEventWrapper(
