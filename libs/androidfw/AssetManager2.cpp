@@ -260,7 +260,7 @@ void AssetManager2::DumpToLog() const {
 
   auto op = StartOperation();
   std::string list;
-  for (size_t i = 0; i < apk_assets_.size(); ++i) {
+  for (size_t i = 0, s = apk_assets_.size(); i < s; ++i) {
     const auto& assets = GetApkAssets(i);
     base::StringAppendF(&list, "%s,", assets ? assets->GetDebugName().c_str() : "nullptr");
   }
@@ -353,7 +353,7 @@ bool AssetManager2::GetOverlayablesToString(android::StringPiece package_name,
                                             std::string* out) const {
   auto op = StartOperation();
   uint8_t package_id = 0U;
-  for (size_t i = 0; i != apk_assets_.size(); ++i) {
+  for (size_t i = 0, s = apk_assets_.size(); i != s; ++i) {
     const auto& assets = GetApkAssets(i);
     if (!assets) {
       continue;
@@ -412,7 +412,7 @@ bool AssetManager2::GetOverlayablesToString(android::StringPiece package_name,
 
 bool AssetManager2::ContainsAllocatedTable() const {
   auto op = StartOperation();
-  for (size_t i = 0; i != apk_assets_.size(); ++i) {
+  for (size_t i = 0, s = apk_assets_.size(); i != s; ++i) {
     const auto& assets = GetApkAssets(i);
     if (assets && assets->IsTableAllocated()) {
       return true;
