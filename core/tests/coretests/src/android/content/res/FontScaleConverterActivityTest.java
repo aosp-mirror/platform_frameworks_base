@@ -45,7 +45,6 @@ import com.android.frameworks.coretests.R;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
@@ -67,22 +66,9 @@ public class FontScaleConverterActivityTest {
     @Rule
     public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
-    private float mOriginalFontScale = Float.MIN_VALUE;
-
-    @Before
-    public void setup() {
-        mOriginalFontScale = Settings.System.getFloat(
-            InstrumentationRegistry.getInstrumentation().getContext().getContentResolver(),
-            Settings.System.FONT_SCALE,
-            Float.MIN_VALUE
-        );
-    }
-
     @After
     public void teardown() {
-        if (mOriginalFontScale != Float.MIN_VALUE) {
-            setSystemFontScale(mOriginalFontScale);
-        }
+        restoreSystemFontScaleToDefault();
     }
 
     @IwTest(focusArea = "accessibility")
@@ -157,6 +143,28 @@ public class FontScaleConverterActivityTest {
                     .getResources()
                     .getConfiguration()
                     .fontScale == fontScale
+        );
+    }
+
+    private static void restoreSystemFontScaleToDefault() {
+        ShellIdentityUtils.invokeWithShellPermissions(() -> {
+            // TODO(b/279083734): would use Settings.System.resetToDefaults() if it existed
+            Settings.System.putString(
+                    InstrumentationRegistry.getInstrumentation()
+                            .getContext()
+                            .getContentResolver(),
+                    Settings.System.FONT_SCALE,
+                    null,
+                    /* overrideableByRestore= */ true);
+        });
+
+        PollingCheck.waitFor(
+                /* timeout= */ 5000,
+                () -> InstrumentationRegistry.getInstrumentation()
+                                        .getContext()
+                                        .getResources()
+                                        .getConfiguration()
+                                        .fontScale == 1
         );
     }
 
