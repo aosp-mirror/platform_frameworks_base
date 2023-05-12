@@ -538,10 +538,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mShortPressOnSleepBehavior;
     int mShortPressOnWindowBehavior;
     int mPowerVolUpBehavior;
-    int mShortPressOnStemPrimaryBehavior;
-    int mDoublePressOnStemPrimaryBehavior;
-    int mTriplePressOnStemPrimaryBehavior;
-    int mLongPressOnStemPrimaryBehavior;
     boolean mStylusButtonsEnabled = true;
     boolean mHasSoftInput = false;
     boolean mHapticTextHandleEnabled;
@@ -554,6 +550,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     long mWakeUpToLastStateTimeout;
     int mSearchKeyBehavior;
     ComponentName mSearchKeyTargetActivity;
+
+    // Key Behavior - Stem Primary
+    private int mShortPressOnStemPrimaryBehavior;
+    private int mDoublePressOnStemPrimaryBehavior;
+    private int mTriplePressOnStemPrimaryBehavior;
+    private int mLongPressOnStemPrimaryBehavior;
 
     private boolean mHandleVolumeKeysInWM;
 

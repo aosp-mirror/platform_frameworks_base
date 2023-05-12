@@ -18,31 +18,39 @@ package com.android.server.policy;
 
 import static android.view.KeyEvent.KEYCODE_STEM_PRIMARY;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.server.policy.PhoneWindowManager.SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS;
 
-import org.junit.Before;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+
+import android.content.Context;
+import android.content.res.Resources;
+
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 
 /**
  * Test class for stem key gesture.
  *
  * Build/Install/Run:
- *  atest WmTests:StemKeyGestureTests
+ * atest WmTests:StemKeyGestureTests
  */
 public class StemKeyGestureTests extends ShortcutKeyTestBase {
-
-    @Before
-    public void stemKeySetup() {
-        mPhoneWindowManager.overrideShortPressOnStemPrimaryBehavior(
-                SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS);
-        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
-    }
+    @Mock private Resources mResources;
 
     /**
      * Stem single key should not launch behavior during set up.
      */
     @Test
     public void stemSingleKey_duringSetup_doNothing() {
+        stemKeySetup(
+                () -> overrideBehavior(
+                        com.android.internal.R.integer.config_shortPressOnStemPrimaryBehavior,
+                        SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS));
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
         mPhoneWindowManager.overrideIsUserSetupComplete(false);
 
         sendKey(KEYCODE_STEM_PRIMARY);
@@ -55,10 +63,40 @@ public class StemKeyGestureTests extends ShortcutKeyTestBase {
      */
     @Test
     public void stemSingleKey_AfterSetup_openAllApp() {
+        stemKeySetup(
+                () -> overrideBehavior(
+                        com.android.internal.R.integer.config_shortPressOnStemPrimaryBehavior,
+                        SHORT_PRESS_PRIMARY_LAUNCH_ALL_APPS));
+        mPhoneWindowManager.setKeyguardServiceDelegateIsShowing(false);
         mPhoneWindowManager.overrideIsUserSetupComplete(true);
 
         sendKey(KEYCODE_STEM_PRIMARY);
 
         mPhoneWindowManager.assertOpenAllAppView();
+    }
+
+    private void stemKeySetup(Runnable behaviorOverrideRunnable) {
+        super.tearDown();
+        setupResourcesMock();
+        behaviorOverrideRunnable.run();
+        super.setUp();
+    }
+
+    private void setupResourcesMock() {
+        Resources realResources = mContext.getResources();
+
+        mResources = Mockito.mock(Resources.class);
+        doReturn(mResources).when(mContext).getResources();
+
+        doAnswer(invocation -> realResources.getXml((Integer) invocation.getArguments()[0]))
+                .when(mResources).getXml(anyInt());
+        doAnswer(invocation -> realResources.getString((Integer) invocation.getArguments()[0]))
+                .when(mResources).getString(anyInt());
+        doAnswer(invocation -> realResources.getBoolean((Integer) invocation.getArguments()[0]))
+                .when(mResources).getBoolean(anyInt());
+    }
+
+    private void overrideBehavior(int resId, int expectedBehavior) {
+        doReturn(expectedBehavior).when(mResources).getInteger(eq(resId));
     }
 }
