@@ -197,7 +197,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      */
     private Set<Integer> mDebugTextUsedYPositions;
     private final boolean mDebugRemoveAnimation;
-    private final boolean mSimplifiedAppearFraction;
     private final boolean mSensitiveRevealAnimEndabled;
     private boolean mAnimatedInsets;
 
@@ -621,7 +620,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         FeatureFlags featureFlags = Dependency.get(FeatureFlags.class);
         mDebugLines = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
         mDebugRemoveAnimation = featureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
-        mSimplifiedAppearFraction = featureFlags.isEnabled(Flags.SIMPLIFIED_APPEAR_FRACTION);
         mSensitiveRevealAnimEndabled = featureFlags.isEnabled(Flags.SENSITIVE_REVEAL_ANIM);
         setAnimatedInsetsEnabled(featureFlags.isEnabled(Flags.ANIMATED_NOTIFICATION_SHADE_INSETS));
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
@@ -1638,14 +1636,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         return mAmbientState.getTrackedHeadsUpRow() != null;
     }
 
-    // TODO(b/246353296): remove it when Flags.SIMPLIFIED_APPEAR_FRACTION is removed
-    public float calculateAppearFractionOld(float height) {
-        float appearEndPosition = getAppearEndPosition();
-        float appearStartPosition = getAppearStartPosition();
-        return (height - appearStartPosition)
-                / (appearEndPosition - appearStartPosition);
-    }
-
     /**
      * @param height the height of the panel
      * @return Fraction of the appear animation that has been performed. Normally follows expansion
@@ -1653,30 +1643,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
      * when HUN is swiped up.
      */
     @FloatRange(from = -1.0, to = 1.0)
-    public float simplifiedAppearFraction(float height) {
+    public float calculateAppearFraction(float height) {
         if (isHeadsUpTransition()) {
             // HUN is a special case because fraction can go negative if swiping up. And for now
             // it must go negative as other pieces responsible for proper translation up assume
             // negative value for HUN going up.
             // This can't use expansion fraction as that goes only from 0 to 1. Also when
             // appear fraction for HUN is 0, expansion fraction will be already around 0.2-0.3
-            // and that makes translation jump immediately. Let's use old implementation for now and
-            // see if we can figure out something better
-            return MathUtils.constrain(calculateAppearFractionOld(height), -1, 1);
+            // and that makes translation jump immediately.
+            float appearEndPosition = getAppearEndPosition();
+            float appearStartPosition = getAppearStartPosition();
+            float hunAppearFraction = (height - appearStartPosition)
+                    / (appearEndPosition - appearStartPosition);
+            return MathUtils.constrain(hunAppearFraction, -1, 1);
         } else {
             return mAmbientState.getExpansionFraction();
-        }
-    }
-
-    public float calculateAppearFraction(float height) {
-        if (mSimplifiedAppearFraction) {
-            return simplifiedAppearFraction(height);
-        } else if (mShouldUseSplitNotificationShade) {
-            // for split shade we want to always use the new way of calculating appear fraction
-            // because without it heads-up experience is very broken and it's less risky change
-            return simplifiedAppearFraction(height);
-        } else {
-            return calculateAppearFractionOld(height);
         }
     }
 

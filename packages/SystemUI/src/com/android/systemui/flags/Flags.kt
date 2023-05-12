@@ -72,10 +72,6 @@ object Flags {
     val NOTIFICATION_MEMORY_LOGGING_ENABLED =
         unreleasedFlag(119, "notification_memory_logging_enabled")
 
-    @JvmField
-    val SIMPLIFIED_APPEAR_FRACTION =
-        releasedFlag(259395680, "simplified_appear_fraction")
-
     // TODO(b/257315550): Tracking Bug
     val NO_HUN_FOR_OLD_WHEN = releasedFlag(118, "no_hun_for_old_when")
 
