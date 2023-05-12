@@ -99,6 +99,8 @@ public class UserJourneyLogger {
             FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__GRANT_ADMIN;
     public static final int USER_JOURNEY_REVOKE_ADMIN =
             FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__REVOKE_ADMIN;
+    public static final int USER_JOURNEY_USER_LIFECYCLE =
+            FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__JOURNEY__USER_LIFECYCLE;
 
     @IntDef(prefix = {"USER_JOURNEY"}, value = {
             USER_JOURNEY_UNKNOWN,
@@ -109,7 +111,8 @@ public class UserJourneyLogger {
             USER_JOURNEY_USER_CREATE,
             USER_JOURNEY_USER_REMOVE,
             USER_JOURNEY_GRANT_ADMIN,
-            USER_JOURNEY_REVOKE_ADMIN
+            USER_JOURNEY_REVOKE_ADMIN,
+            USER_JOURNEY_USER_LIFECYCLE
     })
     public @interface UserJourney {
     }
@@ -272,11 +275,12 @@ public class UserJourneyLogger {
             int userType, int userFlags, @UserJourneyErrorCode int errorCode) {
         if (session == null) {
             writeUserLifecycleJourneyReported(-1, journey, originalUserId, targetUserId,
-                    userType, userFlags, ERROR_CODE_INVALID_SESSION_ID);
+                    userType, userFlags, ERROR_CODE_INVALID_SESSION_ID, -1);
         } else {
+            final long elapsedTime = System.currentTimeMillis() - session.mStartTimeInMills;
             writeUserLifecycleJourneyReported(
                     session.mSessionId, journey, originalUserId, targetUserId, userType, userFlags,
-                    errorCode);
+                    errorCode, elapsedTime);
         }
     }
 
@@ -285,10 +289,10 @@ public class UserJourneyLogger {
      */
     @VisibleForTesting
     public void writeUserLifecycleJourneyReported(long sessionId, int journey, int originalUserId,
-            int targetUserId, int userType, int userFlags, int errorCode) {
+            int targetUserId, int userType, int userFlags, int errorCode, long elapsedTime) {
         FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED,
                 sessionId, journey, originalUserId, targetUserId, userType, userFlags,
-                errorCode);
+                errorCode, elapsedTime);
     }
 
     /**
@@ -452,6 +456,29 @@ public class UserJourneyLogger {
     }
 
     /**
+     * Log user journey event and report finishing with error
+     */
+    public UserJourneySession logDelayedUserJourneyFinishWithError(@UserIdInt int originalUserId,
+            UserInfo targetUser, @UserJourney int journey, @UserJourneyErrorCode int errorCode) {
+        synchronized (mLock) {
+            final int key = getUserJourneyKey(targetUser.id, journey);
+            final UserJourneySession userJourneySession = mUserIdToUserJourneyMap.get(key);
+            if (userJourneySession != null) {
+                logUserLifecycleJourneyReported(
+                        userJourneySession,
+                        journey, originalUserId, targetUser.id,
+                        getUserTypeForStatsd(targetUser.userType),
+                        targetUser.flags,
+                        errorCode);
+                mUserIdToUserJourneyMap.remove(key);
+
+                return userJourneySession;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Log event and report finish when user is null. This is edge case when UserInfo
      * can not be passed because it is null, therefore all information are passed as arguments.
      */
@@ -533,6 +560,23 @@ public class UserJourneyLogger {
     }
 
     /**
+     * This keeps the start time when finishing extensively long journey was began.
+     * For instance full user lifecycle ( from creation to deletion )when user is about to delete
+     * we need to get user creation time before it was deleted.
+     */
+    public UserJourneySession startSessionForDelayedJourney(@UserIdInt int targetId,
+            @UserJourney int journey, long startTime) {
+        final long newSessionId = ThreadLocalRandom.current().nextLong(1, Long.MAX_VALUE);
+        synchronized (mLock) {
+            final int key = getUserJourneyKey(targetId, journey);
+            final UserJourneySession userJourneySession =
+                    new UserJourneySession(newSessionId, journey, startTime);
+            mUserIdToUserJourneyMap.append(key, userJourneySession);
+            return userJourneySession;
+        }
+    }
+
+    /**
      * Helper class to store user journey and session id.
      *
      * <p> User journey tracks a chain of user lifecycle events occurring during different user
@@ -542,11 +586,19 @@ public class UserJourneyLogger {
         public final long mSessionId;
         @UserJourney
         public final int mJourney;
+        public long mStartTimeInMills;
 
         @VisibleForTesting
         public UserJourneySession(long sessionId, @UserJourney int journey) {
             mJourney = journey;
             mSessionId = sessionId;
+            mStartTimeInMills = System.currentTimeMillis();
+        }
+        @VisibleForTesting
+        public UserJourneySession(long sessionId, @UserJourney int journey, long startTimeInMills) {
+            mJourney = journey;
+            mSessionId = sessionId;
+            mStartTimeInMills = startTimeInMills;
         }
     }
 }
