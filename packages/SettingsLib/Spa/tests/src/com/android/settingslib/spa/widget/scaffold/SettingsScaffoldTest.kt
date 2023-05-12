@@ -16,9 +16,12 @@
 
 package com.android.settingslib.spa.widget.scaffold
 
+import android.app.Activity
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.Text
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
@@ -29,11 +32,21 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.Mockito.verify
+import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
 
 @RunWith(AndroidJUnit4::class)
 class SettingsScaffoldTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val mockito: MockitoRule = MockitoJUnit.rule()
+
+    @Mock
+    private lateinit var activity: Activity
 
     @Test
     fun settingsScaffold_titleIsDisplayed() {
@@ -78,7 +91,18 @@ class SettingsScaffoldTest {
         assertThat(actualPaddingValues.calculateRightPadding(LayoutDirection.Rtl)).isEqualTo(0.dp)
     }
 
+    @Test
+    fun activityTitle() {
+        composeTestRule.setContent {
+            CompositionLocalProvider(LocalContext provides activity) {
+                ActivityTitle(title = TITLE)
+            }
+        }
+
+        verify(activity).title = TITLE
+    }
+
     private companion object {
-        const val TITLE = "title"
+        const val TITLE = "Title"
     }
 }
