@@ -20,47 +20,48 @@
     android:focusable="false"
     android:focusableInTouchMode="false"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:theme="@style/ReachabilityEduHandLayout">
 
     <androidx.appcompat.widget.AppCompatTextView
-        style="@style/ReachabilityEduHandLayout"
         android:text="@string/letterbox_reachability_reposition_text"
         app:drawableTopCompat="@drawable/reachability_education_ic_right_hand"
         android:layout_gravity="center_horizontal|top"
         android:layout_marginTop="@dimen/letterbox_reachability_education_dialog_margin"
         android:id="@+id/reachability_move_up_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:visibility="invisible"/>
 
     <androidx.appcompat.widget.AppCompatTextView
-        style="@style/ReachabilityEduHandLayout"
         android:text="@string/letterbox_reachability_reposition_text"
         app:drawableTopCompat="@drawable/reachability_education_ic_right_hand"
         android:layout_gravity="center_vertical|right"
         android:layout_marginTop="@dimen/letterbox_reachability_education_dialog_margin"
         android:id="@+id/reachability_move_right_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:visibility="invisible"/>
 
 
     <androidx.appcompat.widget.AppCompatTextView
-        style="@style/ReachabilityEduHandLayout"
         android:text="@string/letterbox_reachability_reposition_text"
         app:drawableTopCompat="@drawable/reachability_education_ic_left_hand"
         android:layout_gravity="center_vertical|left"
         android:layout_marginTop="@dimen/letterbox_reachability_education_dialog_margin"
         android:id="@+id/reachability_move_left_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:visibility="invisible"/>
 
     <androidx.appcompat.widget.AppCompatTextView
-        style="@style/ReachabilityEduHandLayout"
         android:text="@string/letterbox_reachability_reposition_text"
         app:drawableTopCompat="@drawable/reachability_education_ic_right_hand"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginTop="@dimen/letterbox_reachability_education_dialog_margin"
         android:id="@+id/reachability_move_down_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:visibility="invisible"/>
 
 </com.android.wm.shell.compatui.ReachabilityEduLayout>
