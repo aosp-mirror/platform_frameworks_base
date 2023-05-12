@@ -529,6 +529,30 @@ public class RemoteViewsTest {
     }
 
     @Test
+    public void visitUris_nestedViews() {
+        final RemoteViews outer = new RemoteViews(mPackage, R.layout.remote_views_test);
+
+        final RemoteViews inner = new RemoteViews(mPackage, 33);
+        final Uri imageUriI = Uri.parse("content://inner/image");
+        final Icon icon1 = Icon.createWithContentUri("content://inner/icon1");
+        final Icon icon2 = Icon.createWithContentUri("content://inner/icon2");
+        final Icon icon3 = Icon.createWithContentUri("content://inner/icon3");
+        final Icon icon4 = Icon.createWithContentUri("content://inner/icon4");
+        inner.setImageViewUri(R.id.image, imageUriI);
+        inner.setTextViewCompoundDrawables(R.id.text, icon1, icon2, icon3, icon4);
+
+        outer.addView(R.id.layout, inner);
+
+        Consumer<Uri> visitor = (Consumer<Uri>) spy(Consumer.class);
+        outer.visitUris(visitor);
+        verify(visitor, times(1)).accept(eq(imageUriI));
+        verify(visitor, times(1)).accept(eq(icon1.getUri()));
+        verify(visitor, times(1)).accept(eq(icon2.getUri()));
+        verify(visitor, times(1)).accept(eq(icon3.getUri()));
+        verify(visitor, times(1)).accept(eq(icon4.getUri()));
+    }
+
+    @Test
     public void visitUris_separateOrientation() {
         final RemoteViews landscape = new RemoteViews(mPackage, R.layout.remote_views_test);
         final Uri imageUriL = Uri.parse("content://landscape/image");
