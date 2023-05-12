@@ -1384,6 +1384,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     private void handlePackagesChanged(@Nullable String packageName, int userHandle) {
         boolean removedAdmin = false;
+        String removedAdminPackage = null;
         if (VERBOSE_LOG) {
             Slogf.d(LOG_TAG, "Handling package changes package " + packageName
                     + " for user " + userHandle);
@@ -1406,6 +1407,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                                     "Admin package %s not found for user %d, removing active admin",
                                     packageName, userHandle));
                             removedAdmin = true;
+                            removedAdminPackage = adminPackage;
                             policy.mAdminList.remove(i);
                             policy.mAdminMap.remove(aa.info.getComponent());
                             pushActiveAdminPackagesLocked(userHandle);
@@ -1439,7 +1441,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 startOwnerService(userHandle, "package-broadcast");
             }
             if (isPolicyEngineForFinanceFlagEnabled() || isPermissionCheckFlagEnabled()) {
-                mDevicePolicyEngine.handlePackageChanged(packageName, userHandle, removedAdmin);
+                mDevicePolicyEngine.handlePackageChanged(
+                        packageName, userHandle, removedAdminPackage);
             }
             // Persist updates if the removed package was an admin or delegate.
             if (removedAdmin || removedDelegate) {
@@ -3532,7 +3535,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             deleteTransferOwnershipBundleLocked(metadata.userId);
         }
         updateSystemUpdateFreezePeriodsRecord(/* saveIfChanged */ true);
-        pushUserControlDisabledPackagesLocked(metadata.userId);
+        if (!isPolicyEngineForFinanceFlagEnabled()) {
+            pushUserControlDisabledPackagesLocked(metadata.userId);
+        }
     }
 
     private void maybeLogStart() {
@@ -10104,7 +10109,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         clearUserPoliciesLocked(userId);
         clearOverrideApnUnchecked();
         clearApplicationRestrictions(userId);
-        mInjector.getPackageManagerInternal().clearBlockUninstallForUser(userId);
+        if (!isPolicyEngineForFinanceFlagEnabled()) {
+            mInjector.getPackageManagerInternal().clearBlockUninstallForUser(userId);
+        }
 
         mOwners.clearDeviceOwner();
         mOwners.writeDeviceOwner();
