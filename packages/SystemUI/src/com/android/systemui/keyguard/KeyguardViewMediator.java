@@ -1025,7 +1025,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     }
 
                     final RemoteAnimationTarget primary = apps[0];
-                    final boolean isDream = (apps[0].taskInfo.topActivityType
+                    final boolean isDream = (apps[0].taskInfo != null
+                            && apps[0].taskInfo.topActivityType
                             == WindowConfiguration.ACTIVITY_TYPE_DREAM);
                     if (!isDream) {
                         Log.w(TAG, "The occluding app isn't Dream; "
@@ -1125,7 +1126,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     }
 
                     final RemoteAnimationTarget primary = apps[0];
-                    final boolean isDream = (apps[0].taskInfo.topActivityType
+                    final boolean isDream = (apps[0].taskInfo != null
+                            && apps[0].taskInfo.topActivityType
                             == WindowConfiguration.ACTIVITY_TYPE_DREAM);
 
                     final SyncRtSurfaceTransactionApplier applier =
