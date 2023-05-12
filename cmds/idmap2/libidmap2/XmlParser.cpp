@@ -16,8 +16,6 @@
 
 #include "idmap2/XmlParser.h"
 
-#include <iostream>
-#include <map>
 #include <memory>
 #include <string>
 #include <utility>

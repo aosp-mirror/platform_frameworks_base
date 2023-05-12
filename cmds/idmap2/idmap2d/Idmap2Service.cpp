@@ -257,7 +257,7 @@ Status Idmap2Service::createFabricatedOverlay(
     const std::string random_suffix = RandomStringForPath(kSuffixLength);
     file_name = StringPrintf("%s-%s-%s.frro", overlay.packageName.c_str(),
                              overlay.overlayName.c_str(), random_suffix.c_str());
-    path = StringPrintf("%s/%s", kIdmapCacheDir, file_name.c_str());
+    path = StringPrintf("%s/%s", kIdmapCacheDir.data(), file_name.c_str());
 
     // Invoking std::filesystem::exists with a file name greater than 255 characters will cause this
     // process to abort since the name exceeds the maximum file name size.

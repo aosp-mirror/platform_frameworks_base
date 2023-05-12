@@ -613,19 +613,19 @@ class TestVisitor : public Visitor {
   }
 
   void visit(const Idmap& idmap ATTRIBUTE_UNUSED) override {
-    stream_ << "TestVisitor::visit(Idmap)" << std::endl;
+    stream_ << "TestVisitor::visit(Idmap)" << '\n';
   }
 
   void visit(const IdmapHeader& idmap ATTRIBUTE_UNUSED) override {
-    stream_ << "TestVisitor::visit(IdmapHeader)" << std::endl;
+    stream_ << "TestVisitor::visit(IdmapHeader)" << '\n';
   }
 
   void visit(const IdmapData& idmap ATTRIBUTE_UNUSED) override {
-    stream_ << "TestVisitor::visit(IdmapData)" << std::endl;
+    stream_ << "TestVisitor::visit(IdmapData)" << '\n';
   }
 
   void visit(const IdmapData::Header& idmap ATTRIBUTE_UNUSED) override {
-    stream_ << "TestVisitor::visit(IdmapData::Header)" << std::endl;
+    stream_ << "TestVisitor::visit(IdmapData::Header)" << '\n';
   }
 
  private:

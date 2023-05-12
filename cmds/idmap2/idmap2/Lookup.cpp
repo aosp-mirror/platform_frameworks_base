@@ -16,9 +16,9 @@
 
 #include <algorithm>
 #include <fstream>
+#include <iostream>
 #include <iterator>
 #include <memory>
-#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -230,7 +230,7 @@ Result<Unit> Lookup(const std::vector<std::string>& args) {
     if (!value) {
       return Error(value.GetError(), "resource 0x%08x not found", *resid);
     }
-    std::cout << *value << std::endl;
+    std::cout << *value << '\n';
   }
 
   return Unit{};

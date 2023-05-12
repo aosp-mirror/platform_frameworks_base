@@ -19,9 +19,10 @@
 
 #include <libidmap2/proto/fabricated_v1.pb.h>
 
-#include <iostream>
+#include <istream>
 #include <map>
 #include <memory>
+#include <ostream>
 #include <string>
 #include <unordered_map>
 #include <vector>

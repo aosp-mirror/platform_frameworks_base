@@ -18,13 +18,14 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
+#include <istream>
 #include <iterator>
 #include <limits>
 #include <memory>
 #include <string>
 #include <utility>
 
+#include "android-base/format.h"
 #include "android-base/macros.h"
 #include "androidfw/AssetManager2.h"
 #include "idmap2/ResourceMapping.h"
@@ -80,7 +81,7 @@ bool WARN_UNUSED ReadString(std::istream& stream, std::string* out) {
   if (padding_size != 0 && !stream.seekg(padding_size, std::ios_base::cur)) {
     return false;
   }
-  *out = buf;
+  *out = std::move(buf);
   return true;
 }
 
@@ -279,13 +280,13 @@ std::unique_ptr<const IdmapData> IdmapData::FromBinaryStream(std::istream& strea
   return std::move(data);
 }
 
-std::string Idmap::CanonicalIdmapPathFor(const std::string& absolute_dir,
-                                         const std::string& absolute_apk_path) {
+std::string Idmap::CanonicalIdmapPathFor(std::string_view absolute_dir,
+                                         std::string_view absolute_apk_path) {
   assert(absolute_dir.size() > 0 && absolute_dir[0] == "/");
   assert(absolute_apk_path.size() > 0 && absolute_apk_path[0] == "/");
-  std::string copy(++absolute_apk_path.cbegin(), absolute_apk_path.cend());
+  std::string copy(absolute_apk_path.begin() + 1, absolute_apk_path.end());
   replace(copy.begin(), copy.end(), '/', '@');
-  return absolute_dir + "/" + copy + "@idmap";
+  return fmt::format("{}/{}@idmap", absolute_dir, copy);
 }
 
 Result<std::unique_ptr<const Idmap>> Idmap::FromBinaryStream(std::istream& stream) {
@@ -332,7 +333,7 @@ Result<std::unique_ptr<const IdmapData>> IdmapData::FromResourceMapping(
         values[cd] = value;
         inline_value_count++;
       }
-      data->target_inline_entries_.push_back({mapping.first, values});
+      data->target_inline_entries_.push_back({mapping.first, std::move(values)});
     }
   }
 

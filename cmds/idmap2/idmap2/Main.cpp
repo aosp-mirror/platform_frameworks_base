@@ -45,7 +45,7 @@ void PrintUsage(const NameToFunctionMap& commands, std::ostream& out) {
     }
     out << iter->first;
   }
-  out << "]" << std::endl;
+  out << "]" << '\n';
 }
 
 }  // namespace
@@ -65,18 +65,18 @@ int main(int argc, char** argv) {
   const std::unique_ptr<std::vector<std::string>> args =
       CommandLineOptions::ConvertArgvToVector(argc - 1, const_cast<const char**>(argv + 1));
   if (!args) {
-    std::cerr << "error: failed to parse command line options" << std::endl;
+    std::cerr << "error: failed to parse command line options" << '\n';
     return EXIT_FAILURE;
   }
   const auto iter = commands.find(argv[1]);
   if (iter == commands.end()) {
-    std::cerr << argv[1] << ": command not found" << std::endl;
+    std::cerr << argv[1] << ": command not found" << '\n';
     PrintUsage(commands, std::cerr);
     return EXIT_FAILURE;
   }
   const auto result = iter->second(*args);
   if (!result) {
-    std::cerr << "error: " << result.GetErrorMessage() << std::endl;
+    std::cerr << "error: " << result.GetErrorMessage() << '\n';
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

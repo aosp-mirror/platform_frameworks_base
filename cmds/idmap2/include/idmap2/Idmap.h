@@ -71,9 +71,10 @@
 #ifndef IDMAP2_INCLUDE_IDMAP2_IDMAP_H_
 #define IDMAP2_INCLUDE_IDMAP2_IDMAP_H_
 
-#include <iostream>
+#include <istream>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "android-base/macros.h"
@@ -272,8 +273,8 @@ class IdmapData {
 
 class Idmap {
  public:
-  static std::string CanonicalIdmapPathFor(const std::string& absolute_dir,
-                                           const std::string& absolute_apk_path);
+  static std::string CanonicalIdmapPathFor(std::string_view absolute_dir,
+                                           std::string_view absolute_apk_path);
 
   static Result<std::unique_ptr<const Idmap>> FromBinaryStream(std::istream& stream);
 

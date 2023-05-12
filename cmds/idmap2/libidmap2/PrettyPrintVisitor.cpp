@@ -34,21 +34,21 @@ void PrettyPrintVisitor::visit(const Idmap& idmap ATTRIBUTE_UNUSED) {
 }
 
 void PrettyPrintVisitor::visit(const IdmapHeader& header) {
-  stream_ << "Paths:" << std::endl
-          << TAB "target path  : " << header.GetTargetPath() << std::endl
-          << TAB "overlay path : " << header.GetOverlayPath() << std::endl;
+  stream_ << "Paths:" << '\n'
+          << TAB "target path  : " << header.GetTargetPath() << '\n'
+          << TAB "overlay path : " << header.GetOverlayPath() << '\n';
 
   if (!header.GetOverlayName().empty()) {
-    stream_ << "Overlay name: " << header.GetOverlayName() << std::endl;
+    stream_ << "Overlay name: " << header.GetOverlayName() << '\n';
   }
 
   const std::string& debug = header.GetDebugInfo();
   if (!debug.empty()) {
     std::istringstream debug_stream(debug);
     std::string line;
-    stream_ << "Debug info:" << std::endl;
+    stream_ << "Debug info:" << '\n';
     while (std::getline(debug_stream, line)) {
-      stream_ << TAB << line << std::endl;
+      stream_ << TAB << line << '\n';
     }
   }
 
@@ -59,7 +59,7 @@ void PrettyPrintVisitor::visit(const IdmapHeader& header) {
     overlay_ = std::move(*overlay);
   }
 
-  stream_ << "Mapping:" << std::endl;
+  stream_ << "Mapping:" << '\n';
 }
 
 void PrettyPrintVisitor::visit(const IdmapData::Header& header ATTRIBUTE_UNUSED) {
@@ -90,7 +90,7 @@ void PrettyPrintVisitor::visit(const IdmapData& data) {
             << base::StringPrintf("0x%08x -> 0x%08x (%s -> %s)", target_entry.target_id,
                                   target_entry.overlay_id, target_name.c_str(),
                                   overlay_name.c_str())
-            << std::endl;
+            << '\n';
   }
 
   for (auto& target_entry : data.GetTargetInlineEntries()) {
@@ -114,7 +114,7 @@ void PrettyPrintVisitor::visit(const IdmapData& data) {
       }
     }
 
-    stream_ << " (" << target_name << ")" << std::endl;
+    stream_ << " (" << target_name << ")" << '\n';
   }
 }
 

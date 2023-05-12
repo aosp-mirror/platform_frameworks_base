@@ -17,8 +17,6 @@
 #ifndef IDMAP2_INCLUDE_IDMAP2_XMLPARSER_H_
 #define IDMAP2_INCLUDE_IDMAP2_XMLPARSER_H_
 
-#include <iostream>
-#include <map>
 #include <memory>
 #include <string>
 

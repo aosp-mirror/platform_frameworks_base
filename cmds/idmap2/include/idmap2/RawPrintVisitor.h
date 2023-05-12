@@ -17,7 +17,7 @@
 #ifndef IDMAP2_INCLUDE_IDMAP2_RAWPRINTVISITOR_H_
 #define IDMAP2_INCLUDE_IDMAP2_RAWPRINTVISITOR_H_
 
-#include <iostream>
+#include <ostream>
 #include <memory>
 #include <string>
 
