@@ -2668,7 +2668,10 @@ public final class ActiveServices {
                         + " code=" + code
                         + " callerApp=" + r.app
                         + " targetSDK=" + r.app.info.targetSdkVersion
-                        + " requiredPermissions=" + policyInfo.toPermissionString();
+                        + " requiredPermissions=" + policyInfo.toPermissionString()
+                        + (policyInfo.hasForegroundOnlyPermission()
+                        ? " and the app must be in the eligible state/exemptions"
+                        + " to access the foreground only permission" : "");
                 Slog.wtfQuiet(TAG, msg);
                 Slog.w(TAG, msg);
             } break;
@@ -2678,7 +2681,10 @@ public final class ActiveServices {
                         + " callerApp=" + r.app
                         + " targetSDK=" + r.app.info.targetSdkVersion
                         + " requires permissions: "
-                        + policyInfo.toPermissionString());
+                        + policyInfo.toPermissionString()
+                        + (policyInfo.hasForegroundOnlyPermission()
+                        ? " and the app must be in the eligible state/exemptions"
+                        + " to access the foreground only permission" : ""));
             } break;
             case FGS_TYPE_POLICY_CHECK_OK:
             default:

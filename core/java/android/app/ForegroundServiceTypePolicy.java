@@ -17,6 +17,7 @@
 package android.app;
 
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
@@ -37,6 +38,8 @@ import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_REMOTE_MESS
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SYSTEM_EXEMPTED;
+import static android.permission.PermissionCheckerManager.PERMISSION_HARD_DENIED;
+import static android.permission.PermissionCheckerManager.PERMISSION_SOFT_DENIED;
 
 import android.Manifest;
 import android.annotation.IntDef;
@@ -268,7 +271,8 @@ public abstract class ForegroundServiceTypePolicy {
             null /* allOfPermissions */,
             null /* anyOfPermissions */,
             null /* permissionEnforcementFlag */,
-            false /* permissionEnforcementFlagDefaultValue */
+            false /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -284,7 +288,8 @@ public abstract class ForegroundServiceTypePolicy {
             null /* allOfPermissions */,
             null /* anyOfPermissions */,
             null /* permissionEnforcementFlag */,
-            false /* permissionEnforcementFlagDefaultValue */
+            false /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -302,7 +307,8 @@ public abstract class ForegroundServiceTypePolicy {
             }, true),
             null /* anyOfPermissions */,
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_DATA_SYNC /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -320,7 +326,8 @@ public abstract class ForegroundServiceTypePolicy {
             }, true),
             null /* anyOfPermissions */,
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_MEDIA_PLAYBACK /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -341,7 +348,8 @@ public abstract class ForegroundServiceTypePolicy {
                 new RolePermission(RoleManager.ROLE_DIALER)
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_PHONE_CALL /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -362,7 +370,8 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.ACCESS_FINE_LOCATION),
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_LOCATION /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            true /* foregroundOnlyPermission */
     );
 
     /**
@@ -392,7 +401,8 @@ public abstract class ForegroundServiceTypePolicy {
                 new UsbAccessoryPermission(),
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_CONNECTED_DEVICE /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -413,7 +423,8 @@ public abstract class ForegroundServiceTypePolicy {
                 new AppOpPermission(AppOpsManager.OP_PROJECT_MEDIA)
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_MEDIA_PROJECTION /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -434,7 +445,8 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.SYSTEM_CAMERA),
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_CAMERA /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            true /* foregroundOnlyPermission */
     );
 
     /**
@@ -459,7 +471,8 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.RECORD_AUDIO),
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_MICROPHONE /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            true /* foregroundOnlyPermission */
     );
 
     /**
@@ -481,7 +494,8 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.HIGH_SAMPLING_RATE_SENSORS),
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_HEALTH /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -499,7 +513,8 @@ public abstract class ForegroundServiceTypePolicy {
             }, true),
             null /* anyOfPermissions */,
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_REMOTE_MESSAGING /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -521,7 +536,8 @@ public abstract class ForegroundServiceTypePolicy {
                 new AppOpPermission(AppOpsManager.OP_ACTIVATE_VPN),
             }, false),
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_SYSTEM_EXEMPTED /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -537,7 +553,8 @@ public abstract class ForegroundServiceTypePolicy {
             null /* allOfPermissions */,
             null /* anyOfPermissions */,
             null /* permissionEnforcementFlag */,
-            false /* permissionEnforcementFlagDefaultValue */
+            false /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -555,7 +572,8 @@ public abstract class ForegroundServiceTypePolicy {
             }, true),
             null /* anyOfPermissions */,
             null /* permissionEnforcementFlag */,
-            false /* permissionEnforcementFlagDefaultValue */
+            false /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -573,7 +591,8 @@ public abstract class ForegroundServiceTypePolicy {
             }, true),
             null /* anyOfPermissions */,
             FGS_TYPE_PERM_ENFORCEMENT_FLAG_SPECIAL_USE /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */
+            true /* permissionEnforcementFlagDefaultValue */,
+            false /* foregroundOnlyPermission */
     );
 
     /**
@@ -641,6 +660,29 @@ public abstract class ForegroundServiceTypePolicy {
     public @interface ForegroundServicePolicyCheckCode{}
 
     /**
+     * Whether or not to require that app to have actual access to certain foreground only
+     * permissions before starting the foreground service.
+     *
+     * <p>
+     * Examples here are microphone, camera and fg location related permissions.
+     * When the user grants the permission, its permission state is set to "granted",
+     * but the actual capability to access these sensors, is to be evaluated according to
+     * its process state. The Android {@link android.os.Build.VERSION_CODES#R} introduced
+     * the while-in-use permission, basically the background-started FGS will not have access
+     * to these sensors. In this context, there is no legitimate reasons to start a FGS from
+     * the background with these types. This flag controls the behavior of the enforcement,
+     * when it's enabled, in the aforementioned case, the FGS start will result in
+     * a SecurityException. </p>
+     */
+    private static final String FGS_TYPE_FG_PERM_ENFORCEMENT_FLAG =
+            "fgs_type_fg_perm_enforcement_flag";
+
+    /**
+     * The default value to the {@link #FGS_TYPE_FG_PERM_ENFORCEMENT_FLAG}.
+     */
+    private static final boolean DEFAULT_FGS_TYPE_FG_PERM_ENFORCEMENT_FLAG_VALUE = true;
+
+    /**
      * @return The policy info for the given type.
      */
     @NonNull
@@ -680,6 +722,11 @@ public abstract class ForegroundServiceTypePolicy {
             }
             return sDefaultForegroundServiceTypePolicy;
         }
+    }
+
+    private static boolean isFgsTypeFgPermissionEnforcementEnabled() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
+                FGS_TYPE_FG_PERM_ENFORCEMENT_FLAG, DEFAULT_FGS_TYPE_FG_PERM_ENFORCEMENT_FLAG_VALUE);
     }
 
     /**
@@ -739,6 +786,12 @@ public abstract class ForegroundServiceTypePolicy {
         final boolean mPermissionEnforcementFlagDefaultValue;
 
         /**
+         * Whether or not the permissions here are limited to foreground only.
+         * Typical examples are microphone/camera/location.
+         */
+        final boolean mForegroundOnlyPermission;
+
+        /**
          * A customized check for the permissions.
          */
         @Nullable ForegroundServiceTypePermission mCustomPermission;
@@ -774,7 +827,8 @@ public abstract class ForegroundServiceTypePolicy {
                 @Nullable ForegroundServiceTypePermissions allOfPermissions,
                 @Nullable ForegroundServiceTypePermissions anyOfPermissions,
                 @Nullable String permissionEnforcementFlag,
-                boolean permissionEnforcementFlagDefaultValue) {
+                boolean permissionEnforcementFlagDefaultValue,
+                boolean foregroundOnlyPermission) {
             mType = type;
             mDeprecationChangeId = deprecationChangeId;
             mDisabledChangeId = disabledChangeId;
@@ -783,6 +837,7 @@ public abstract class ForegroundServiceTypePolicy {
             mPermissionEnforcementFlag = permissionEnforcementFlag;
             mPermissionEnforcementFlagDefaultValue = permissionEnforcementFlagDefaultValue;
             mPermissionEnforcementFlagValue = permissionEnforcementFlagDefaultValue;
+            mForegroundOnlyPermission = foregroundOnlyPermission;
         }
 
         /**
@@ -882,6 +937,14 @@ public abstract class ForegroundServiceTypePolicy {
         public boolean isTypeDisabled(int callerUid) {
             return isValidChangeId(mDisabledChangeId)
                     && CompatChanges.isChangeEnabled(mDisabledChangeId, callerUid);
+        }
+
+        /**
+         * Whether or not the permissions here are limited to foreground only.
+         * Typical examples are microphone/camera/location.
+         */
+        public boolean hasForegroundOnlyPermission() {
+            return mForegroundOnlyPermission;
         }
 
         /**
@@ -1082,33 +1145,45 @@ public abstract class ForegroundServiceTypePolicy {
         @PackageManager.PermissionResult
         int checkPermission(@NonNull Context context, @NonNull String name, int callerUid,
                 int callerPid, String packageName, boolean allowWhileInUse) {
-            // Simple case, check if it's already granted.
-            @PermissionCheckerManager.PermissionResult int result;
-            if ((result = PermissionChecker.checkPermissionForPreflight(context, name, callerPid,
-                    callerUid, packageName)) == PermissionCheckerManager.PERMISSION_GRANTED) {
-                return PERMISSION_GRANTED;
+            @PermissionCheckerManager.PermissionResult final int result =
+                    PermissionChecker.checkPermissionForPreflight(context, name,
+                            callerPid, callerUid, packageName);
+            if (result == PERMISSION_HARD_DENIED) {
+                // If the user didn't grant this permission at all.
+                return PERMISSION_DENIED;
             }
-            if (allowWhileInUse && result == PermissionCheckerManager.PERMISSION_SOFT_DENIED) {
-                // Check its appops
-                final int opCode = AppOpsManager.permissionToOpCode(name);
-                final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
-                if (opCode != AppOpsManager.OP_NONE) {
-                    final int currentMode = appOpsManager.unsafeCheckOpRawNoThrow(opCode, callerUid,
-                            packageName);
-                    if (currentMode == MODE_FOREGROUND) {
-                        // It's in foreground only mode and we're allowing while-in-use.
-                        return PERMISSION_GRANTED;
-                    } else if (currentMode == MODE_IGNORED) {
-                       // If it's soft denied with the mode "ignore", semantically it's a silent
-                       // failure and no exception should be thrown, we might not want to allow
-                       // the FGS. However, since the user has agreed with this permission
-                       // (otherwise it's going to be a hard denial), and we're allowing
-                       // while-in-use here, it's safe to allow the FGS run here.
-                        return PERMISSION_GRANTED;
-                    }
-                }
+            final int opCode = AppOpsManager.permissionToOpCode(name);
+            if (opCode == AppOpsManager.OP_NONE) {
+                // Simple case, check if it's already granted.
+                return result == PermissionCheckerManager.PERMISSION_GRANTED
+                        ? PERMISSION_GRANTED : PERMISSION_DENIED;
             }
-            return PERMISSION_DENIED;
+            final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+            final int mode = appOpsManager.unsafeCheckOpRawNoThrow(opCode, callerUid, packageName);
+            switch (mode) {
+                case MODE_ALLOWED:
+                    // The appop is just allowed, plain and simple.
+                    return PERMISSION_GRANTED;
+                case MODE_DEFAULT:
+                    // Follow the permission check result.
+                    return result == PermissionCheckerManager.PERMISSION_GRANTED
+                            ? PERMISSION_GRANTED : PERMISSION_DENIED;
+                case MODE_FOREGROUND:
+                    // If the enforcement flag is OFF, we silently allow it. Or, if it's in
+                    // the foreground only mode and we're allowing while-in-use, allow it.
+                    return !isFgsTypeFgPermissionEnforcementEnabled() || allowWhileInUse
+                            ? PERMISSION_GRANTED : PERMISSION_DENIED;
+                case MODE_IGNORED:
+                    // If it's soft denied with the mode "ignore", semantically it's a silent
+                    // failure and no exception should be thrown, we might not want to allow
+                    // the FGS. However, since the user has agreed with this permission
+                    // (otherwise it's going to be a hard denial), and we're allowing
+                    // while-in-use here, it's safe to allow the FGS run here.
+                    return allowWhileInUse && result == PERMISSION_SOFT_DENIED
+                            ? PERMISSION_GRANTED : PERMISSION_DENIED;
+                default:
+                    return PERMISSION_DENIED;
+            }
         }
     }
 
