@@ -39,7 +39,6 @@ import java.util.Map;
 /**
  * For all future metric additions, this will contain their names for local usage after importing
  * from {@link com.android.internal.util.FrameworkStatsLog}.
- * TODO(b/271135048) - Emit all atoms, including all V4 atoms (specifically the rest of track 1).
  */
 public class MetricUtilities {
     private static final boolean LOG_FLAG = true;
@@ -101,7 +100,9 @@ public class MetricUtilities {
      */
     protected static int getMetricTimestampDifferenceMicroseconds(long t2, long t1) {
         if (t2 - t1 > Integer.MAX_VALUE) {
-            throw new ArithmeticException("Input timestamps are too far apart and unsupported");
+            Slog.i(TAG, "Input timestamps are too far apart and unsupported, "
+                    + "falling back to default int");
+            return DEFAULT_INT_32;
         }
         if (t2 < t1) {
             Slog.i(TAG, "The timestamps aren't in expected order, falling back to default int");
@@ -229,7 +230,7 @@ public class MetricUtilities {
                     authenticationMetric.isAuthReturned()
             );
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during candidate get metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during candidate auth metric logging: " + e);
         }
     }
 
@@ -252,22 +253,18 @@ public class MetricUtilities {
             }
             var sessions = providers.values();
             for (var session : sessions) {
-                try {
-                    var metric = session.getProviderSessionMetric()
-                            .getCandidatePhasePerProviderMetric();
-                    FrameworkStatsLog.write(
-                            FrameworkStatsLog.CREDENTIAL_MANAGER_GET_REPORTED,
-                            /* session_id */ metric.getSessionIdProvider(),
-                            /* sequence_num */ emitSequenceId,
-                            /* candidate_provider_uid */ metric.getCandidateUid(),
-                            /* response_unique_classtypes */
-                            metric.getResponseCollective().getUniqueResponseStrings(),
-                            /* per_classtype_counts */
-                            metric.getResponseCollective().getUniqueResponseCounts()
-                    );
-                } catch (Exception e) {
-                    Slog.w(TAG, "Unexpected exception during get metric logging" + e);
-                }
+                var metric = session.getProviderSessionMetric()
+                        .getCandidatePhasePerProviderMetric();
+                FrameworkStatsLog.write(
+                        FrameworkStatsLog.CREDENTIAL_MANAGER_GET_REPORTED,
+                        /* session_id */ metric.getSessionIdProvider(),
+                        /* sequence_num */ emitSequenceId,
+                        /* candidate_provider_uid */ metric.getCandidateUid(),
+                        /* response_unique_classtypes */
+                        metric.getResponseCollective().getUniqueResponseStrings(),
+                        /* per_classtype_counts */
+                        metric.getResponseCollective().getUniqueResponseCounts()
+                );
             }
         } catch (Exception e) {
             Slog.w(TAG, "Unexpected error during candidate get metric logging: " + e);
@@ -399,7 +396,7 @@ public class MetricUtilities {
                     /* caller_uid */ callingUid,
                     /* api_status */ apiStatus.getMetricCode());
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during simple v2 metric logging: " + e);
         }
     }
 
@@ -505,7 +502,7 @@ public class MetricUtilities {
                     candidateAggregateMetric.isAuthReturned()
             );
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during total candidate metric logging: " + e);
         }
     }
 
@@ -570,7 +567,7 @@ public class MetricUtilities {
                     /* primary_indicated */ finalPhaseMetric.isPrimary()
             );
         } catch (Exception e) {
-            Slog.w(TAG, "Unexpected error during metric logging: " + e);
+            Slog.w(TAG, "Unexpected error during final no uid metric logging: " + e);
         }
     }
 

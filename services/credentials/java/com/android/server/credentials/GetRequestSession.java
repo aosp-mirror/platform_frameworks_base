@@ -133,6 +133,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
         Slog.i(TAG, "onFinalResponseReceived from: " + componentName.flattenToString());
+        mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
         mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
                 isPrimaryProviderViaProviderInfo(componentName));
         if (response != null) {
