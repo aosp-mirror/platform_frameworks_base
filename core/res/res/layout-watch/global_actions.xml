@@ -17,7 +17,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="false"
-    android:fillViewport="true">
+    android:fillViewport="true"
+    android:background="@color/global_actions_container_background">
     <LinearLayout
         android:id="@+id/actions_container"
         android:layout_width="match_parent"
