@@ -44,6 +44,8 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.utils.os.FakeHandler
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.runCurrent
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -75,6 +77,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
     private lateinit var resources: TestableResources
     private lateinit var trustRepository: FakeTrustRepository
     private lateinit var featureFlags: FakeFeatureFlags
+    private lateinit var testScope: TestScope
 
     @Before
     fun setUp() {
@@ -83,9 +86,10 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
             .thenReturn(KeyguardSecurityModel.SecurityMode.PIN)
 
         DejankUtils.setImmediate(true)
+        testScope = TestScope()
         mainHandler = FakeHandler(android.os.Looper.getMainLooper())
         trustRepository = FakeTrustRepository()
-        featureFlags = FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, false) }
+        featureFlags = FakeFeatureFlags().apply { set(Flags.DELAY_BOUNCER, true) }
         underTest =
             PrimaryBouncerInteractor(
                 repository,
@@ -100,6 +104,7 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
                 keyguardUpdateMonitor,
                 trustRepository,
                 featureFlags,
+                testScope.backgroundScope,
             )
         whenever(repository.primaryBouncerStartingDisappearAnimation.value).thenReturn(null)
         whenever(repository.primaryBouncerShow.value).thenReturn(false)
@@ -398,7 +403,6 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
         mainHandler.setMode(FakeHandler.Mode.QUEUEING)
 
         // GIVEN bouncer should be delayed due to face auth
-        featureFlags.apply { set(Flags.DELAY_BOUNCER, true) }
         whenever(keyguardStateController.isFaceAuthEnabled).thenReturn(true)
         whenever(keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE))
             .thenReturn(true)
@@ -420,26 +424,29 @@ class PrimaryBouncerInteractorTest : SysuiTestCase() {
 
     @Test
     fun delayBouncerWhenActiveUnlockPossible() {
-        mainHandler.setMode(FakeHandler.Mode.QUEUEING)
+        testScope.run {
+            mainHandler.setMode(FakeHandler.Mode.QUEUEING)
 
-        // GIVEN bouncer should be delayed due to active unlock
-        featureFlags.apply { set(Flags.DELAY_BOUNCER, true) }
-        trustRepository.setCurrentUserActiveUnlockAvailable(true)
-        whenever(keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState()).thenReturn(true)
+            // GIVEN bouncer should be delayed due to active unlock
+            trustRepository.setCurrentUserActiveUnlockAvailable(true)
+            whenever(keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState())
+                .thenReturn(true)
+            runCurrent()
 
-        // WHEN bouncer show is requested
-        underTest.show(true)
+            // WHEN bouncer show is requested
+            underTest.show(true)
 
-        // THEN primary show & primary showing soon were scheduled to update
-        verify(repository, never()).setPrimaryShow(true)
-        verify(repository, never()).setPrimaryShowingSoon(false)
+            // THEN primary show & primary showing soon were scheduled to update
+            verify(repository, never()).setPrimaryShow(true)
+            verify(repository, never()).setPrimaryShowingSoon(false)
 
-        // WHEN all queued messages are dispatched
-        mainHandler.dispatchQueuedMessages()
+            // WHEN all queued messages are dispatched
+            mainHandler.dispatchQueuedMessages()
 
-        // THEN primary show & primary showing soon are updated
-        verify(repository).setPrimaryShow(true)
-        verify(repository).setPrimaryShowingSoon(false)
+            // THEN primary show & primary showing soon are updated
+            verify(repository).setPrimaryShow(true)
+            verify(repository).setPrimaryShowingSoon(false)
+        }
     }
 
     private fun updateSideFpsVisibilityParameters(
