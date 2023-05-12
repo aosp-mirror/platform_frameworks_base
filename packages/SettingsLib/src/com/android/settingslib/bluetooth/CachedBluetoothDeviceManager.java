@@ -318,7 +318,10 @@ public class CachedBluetoothDeviceManager {
             return mHearingAidDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
                 state);
         }
-        if (profileId == BluetoothProfile.CSIP_SET_COORDINATOR) {
+        if (profileId == BluetoothProfile.HEADSET
+                || profileId == BluetoothProfile.A2DP
+                || profileId == BluetoothProfile.LE_AUDIO
+                || profileId == BluetoothProfile.CSIP_SET_COORDINATOR) {
             return mCsipDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
                 state);
         }
