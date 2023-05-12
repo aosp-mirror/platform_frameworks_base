@@ -944,7 +944,7 @@ public class ActivityStarterTests extends WindowTestsBase {
                 anyInt(), anyInt()));
         doReturn(BackgroundStartPrivileges.allowBackgroundActivityStarts(null)).when(
                 () -> PendingIntentRecord.getBackgroundStartPrivilegesAllowedByCaller(
-                anyObject(), anyInt()));
+                anyObject(), anyInt(), anyObject()));
         runAndVerifyBackgroundActivityStartsSubtest(
                 "allowed_notAborted", false,
                 UNIMPORTANT_UID, false, PROCESS_STATE_BOUND_TOP,
