@@ -17,16 +17,16 @@
 package com.android.server.autofill;
 
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__DIALOG;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__MENU;
-import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__UNKNOWN_AUTOFILL_DISPLAY_PRESENTATION_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_FAILURE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_RESULT_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_SUCCESS;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_TYPE__AUTHENTICATION_TYPE_UNKNOWN;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_TYPE__DATASET_AUTHENTICATION;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_TYPE__FULL_AUTHENTICATION;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__DIALOG;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__INLINE;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__MENU;
+import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__DISPLAY_PRESENTATION_TYPE__UNKNOWN_AUTOFILL_DISPLAY_PRESENTATION_TYPE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__RESPONSE_STATUS__RESPONSE_STATUS_CANCELLED;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__RESPONSE_STATUS__RESPONSE_STATUS_FAILURE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__RESPONSE_STATUS__RESPONSE_STATUS_SESSION_DESTROYED;
@@ -318,6 +318,24 @@ public final class FillResponseEventLogger {
     });
   }
 
+  /**
+   * Set available_pcc_count.
+   */
+  public void maybeSetAvailablePccCount(int val) {
+    mEventInternal.ifPresent(event -> {
+      event.mAvailablePccCount = val;
+    });
+  }
+
+  /**
+   * Set available_pcc_only_count.
+   */
+  public void maybeSetAvailablePccOnlyCount(int val) {
+    mEventInternal.ifPresent(event -> {
+      event.mAvailablePccOnlyCount = val;
+    });
+  }
+
 
   /**
    * Log an AUTOFILL_FILL_RESPONSE_REPORTED event.
@@ -344,7 +362,9 @@ public final class FillResponseEventLogger {
           + " mLatencyAuthenticationUiDisplayMillis=" + event.mLatencyAuthenticationUiDisplayMillis
           + " mLatencyDatasetDisplayMillis=" + event.mLatencyDatasetDisplayMillis
           + " mResponseStatus=" + event.mResponseStatus
-          + " mLatencyResponseProcessingMillis=" + event.mLatencyResponseProcessingMillis);
+          + " mLatencyResponseProcessingMillis=" + event.mLatencyResponseProcessingMillis
+          + " mAvailablePccCount=" + event.mAvailablePccCount
+          + " mAvailablePccOnlyCount=" + event.mAvailablePccOnlyCount);
     }
     FrameworkStatsLog.write(
         AUTOFILL_FILL_RESPONSE_REPORTED,
@@ -361,7 +381,9 @@ public final class FillResponseEventLogger {
         event.mLatencyAuthenticationUiDisplayMillis,
         event.mLatencyDatasetDisplayMillis,
         event.mResponseStatus,
-        event.mLatencyResponseProcessingMillis);
+        event.mLatencyResponseProcessingMillis,
+        event.mAvailablePccCount,
+        event.mAvailablePccOnlyCount);
     mEventInternal = Optional.empty();
   }
 
@@ -379,6 +401,8 @@ public final class FillResponseEventLogger {
     int mLatencyDatasetDisplayMillis = 0;
     int mResponseStatus = RESPONSE_STATUS_UNKNOWN;
     int mLatencyResponseProcessingMillis = 0;
+    int mAvailablePccCount;
+    int mAvailablePccOnlyCount;
 
     FillResponseEventInternal() {
     }
