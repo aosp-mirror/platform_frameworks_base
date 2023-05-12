@@ -347,10 +347,13 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void onBindViewHolder_isMutingExpectedDevice_verifyView() {
+    public void advanced_onBindViewHolder_isMutingExpectedDevice_verifyView() {
+        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         when(mMediaDevice1.isMutingExpectedDevice()).thenReturn(true);
         when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(false);
         when(mMediaOutputController.isActiveRemoteDevice(mMediaDevice1)).thenReturn(false);
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
         assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
