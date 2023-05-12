@@ -31,6 +31,7 @@ import com.android.wm.shell.dagger.WMShellModule;
 import com.android.wm.shell.dagger.WMSingleton;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.recents.RecentTasks;
@@ -97,6 +98,9 @@ public interface WMComponent {
 
     @WMSingleton
     ShellTransitions getTransitions();
+
+    @WMSingleton
+    KeyguardTransitions getKeyguardTransitions();
 
     @WMSingleton
     Optional<StartingSurface> getStartingSurface();
