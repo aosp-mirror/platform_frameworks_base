@@ -222,16 +222,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     @GuardedBy("mService")
     private final SparseBooleanArray mUidForeground = new SparseBooleanArray();
 
-    /**
-     * Map from UID to its last known "cached" state.
-     * <p>
-     * We manually maintain this data structure since the lifecycle of
-     * {@link ProcessRecord} and {@link BroadcastProcessQueue} can be
-     * mismatched.
-     */
-    @GuardedBy("mService")
-    private final SparseBooleanArray mUidCached = new SparseBooleanArray();
-
     private final BroadcastConstants mConstants;
     private final BroadcastConstants mFgConstants;
     private final BroadcastConstants mBgConstants;
@@ -570,6 +560,13 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                 updateRunnableList(queue);
                 enqueueUpdateRunningList();
             }
+        }
+    }
+
+    @Override
+    public void onProcessFreezableChangedLocked(@NonNull ProcessRecord app) {
+        synchronized (mService) {
+            refreshProcessQueueLocked(app);
         }
     }
 
@@ -1296,7 +1293,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             };
             broadcastPredicate = BROADCAST_PREDICATE_ANY;
 
-            cleanupUserStateLocked(mUidCached, userId);
             cleanupUserStateLocked(mUidForeground, userId);
         }
         return forEachMatchingBroadcast(queuePredicate, broadcastPredicate,
@@ -1439,20 +1435,7 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
                     refreshProcessQueuesLocked(uid);
                 }
             }
-
-            @Override
-            public void onUidCachedChanged(int uid, boolean cached) {
-                synchronized (mService) {
-                    if (cached) {
-                        mUidCached.put(uid, true);
-                    } else {
-                        mUidCached.delete(uid);
-                    }
-                    refreshProcessQueuesLocked(uid);
-                }
-            }
-        }, ActivityManager.UID_OBSERVER_PROCSTATE | ActivityManager.UID_OBSERVER_CACHED,
-                ActivityManager.PROCESS_STATE_TOP, "android");
+        }, ActivityManager.UID_OBSERVER_PROCSTATE, ActivityManager.PROCESS_STATE_TOP, "android");
 
         // Kick off periodic health checks
         mLocalHandler.sendEmptyMessage(MSG_CHECK_HEALTH);
@@ -1641,10 +1624,9 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             // warm via this operation, we're going to immediately promote it to
             // be running, and any side effect of this operation will then apply
             // after it's finished and is returned to the runnable list.
-            queue.setProcessAndUidState(
-                    mService.getProcessRecordLocked(queue.processName, queue.uid),
-                    mUidForeground.get(queue.uid, false),
-                    mUidCached.get(queue.uid, false));
+            final ProcessRecord app = mService.getProcessRecordLocked(queue.processName, queue.uid);
+            queue.setProcessAndUidState(app, mUidForeground.get(queue.uid, false),
+                    isProcessFreezable(app));
         }
     }
 
@@ -1656,8 +1638,18 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
     private void setQueueProcess(@NonNull BroadcastProcessQueue queue,
             @Nullable ProcessRecord app) {
         if (queue.setProcessAndUidState(app, mUidForeground.get(queue.uid, false),
-                mUidCached.get(queue.uid, false))) {
+                isProcessFreezable(app))) {
             updateRunnableList(queue);
+        }
+    }
+
+    @GuardedBy("mService")
+    private boolean isProcessFreezable(@Nullable ProcessRecord app) {
+        if (app == null) {
+            return false;
+        }
+        synchronized (mService.mProcLock) {
+            return app.mOptRecord.isPendingFreeze() || app.mOptRecord.isFrozen();
         }
     }
 
@@ -1674,6 +1666,20 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
             setQueueProcess(leaf, leaf.app);
             leaf = leaf.processNameNext;
         }
+        enqueueUpdateRunningList();
+    }
+
+    /**
+     * Refresh the process queue corresponding to {@code app} with the latest process state
+     * so that runnableAt can be updated.
+     */
+    @GuardedBy("mService")
+    private void refreshProcessQueueLocked(@NonNull ProcessRecord app) {
+        final BroadcastProcessQueue queue = getProcessQueue(app.processName, app.uid);
+        if (queue == null || queue.app == null || queue.app.getPid() != app.getPid()) {
+            return;
+        }
+        setQueueProcess(queue, queue.app);
         enqueueUpdateRunningList();
     }
 
@@ -1993,12 +1999,6 @@ class BroadcastQueueModernImpl extends BroadcastQueue {
         ipw.println("Broadcasts with ignored delivery group policies:");
         ipw.increaseIndent();
         mService.dumpDeliveryGroupPolicyIgnoredActions(ipw);
-        ipw.decreaseIndent();
-        ipw.println();
-
-        ipw.println("Cached UIDs:");
-        ipw.increaseIndent();
-        ipw.println(mUidCached);
         ipw.decreaseIndent();
         ipw.println();
 
