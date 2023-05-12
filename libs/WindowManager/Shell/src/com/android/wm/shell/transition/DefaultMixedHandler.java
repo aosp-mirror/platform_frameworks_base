@@ -40,6 +40,7 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.protolog.common.ProtoLog;
+import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -63,6 +64,7 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     private PipTransitionController mPipHandler;
     private RecentsTransitionHandler mRecentsHandler;
     private StageCoordinator mSplitHandler;
+    private final KeyguardTransitionHandler mKeyguardHandler;
 
     private static class MixedTransition {
         static final int TYPE_ENTER_PIP_FROM_SPLIT = 1;
@@ -75,6 +77,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
 
         /** Recents transition while split-screen foreground. */
         static final int TYPE_RECENTS_DURING_SPLIT = 4;
+
+        /** Keyguard exit/occlude/unocclude transition. */
+        static final int TYPE_KEYGUARD = 5;
 
         /** The default animation for this mixed transition. */
         static final int ANIM_TYPE_DEFAULT = 0;
@@ -126,8 +131,10 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
     public DefaultMixedHandler(@NonNull ShellInit shellInit, @NonNull Transitions player,
             Optional<SplitScreenController> splitScreenControllerOptional,
             Optional<PipTouchHandler> pipTouchHandlerOptional,
-            Optional<RecentsTransitionHandler> recentsHandlerOptional) {
+            Optional<RecentsTransitionHandler> recentsHandlerOptional,
+            KeyguardTransitionHandler keyguardHandler) {
         mPlayer = player;
+        mKeyguardHandler = keyguardHandler;
         if (Transitions.ENABLE_SHELL_TRANSITIONS && pipTouchHandlerOptional.isPresent()
                 && splitScreenControllerOptional.isPresent()) {
             // Add after dependencies because it is higher priority
@@ -263,12 +270,26 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             @NonNull SurfaceControl.Transaction startTransaction,
             @NonNull SurfaceControl.Transaction finishTransaction,
             @NonNull Transitions.TransitionFinishCallback finishCallback) {
+
         MixedTransition mixed = null;
         for (int i = mActiveTransitions.size() - 1; i >= 0; --i) {
             if (mActiveTransitions.get(i).mTransition != transition) continue;
             mixed = mActiveTransitions.get(i);
             break;
         }
+
+        // Offer Keyguard the opportunity to take over lock transitions - ideally we could know by
+        // the time of handleRequest, but we need more information than is available at that time.
+        if (KeyguardTransitionHandler.handles(info)) {
+            if (mixed != null && mixed.mType != MixedTransition.TYPE_KEYGUARD) {
+                ProtoLog.w(ShellProtoLogGroup.WM_SHELL_TRANSITIONS,
+                        "Converting mixed transition into a keyguard transition");
+                onTransitionConsumed(transition, false, null);
+            }
+            mixed = new MixedTransition(MixedTransition.TYPE_KEYGUARD, transition);
+            mActiveTransitions.add(mixed);
+        }
+
         if (mixed == null) return false;
 
         if (mixed.mType == MixedTransition.TYPE_ENTER_PIP_FROM_SPLIT) {
@@ -282,6 +303,9 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
         } else if (mixed.mType == MixedTransition.TYPE_RECENTS_DURING_SPLIT) {
             return animateRecentsDuringSplit(mixed, info, startTransaction, finishTransaction,
                     finishCallback);
+        } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
+            return mKeyguardHandler.startAnimation(
+                    transition, info, startTransaction, finishTransaction, finishCallback);
         } else {
             mActiveTransitions.remove(mixed);
             throw new IllegalStateException("Starting mixed animation without a known mixed type? "
@@ -574,6 +598,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
                 }
                 mixed.mLeftoversHandler.mergeAnimation(transition, info, t, mergeTarget,
                         finishCallback);
+            } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
+                mKeyguardHandler.mergeAnimation(transition, info, t, mergeTarget, finishCallback);
             } else {
                 throw new IllegalStateException("Playing a mixed transition with unknown type? "
                         + mixed.mType);
@@ -597,6 +623,8 @@ public class DefaultMixedHandler implements Transitions.TransitionHandler,
             mixed.mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
         } else if (mixed.mType == MixedTransition.TYPE_OPTIONS_REMOTE_AND_PIP_CHANGE) {
             mixed.mLeftoversHandler.onTransitionConsumed(transition, aborted, finishT);
+        } else if (mixed.mType == MixedTransition.TYPE_KEYGUARD) {
+            mKeyguardHandler.onTransitionConsumed(transition, aborted, finishT);
         }
     }
 }

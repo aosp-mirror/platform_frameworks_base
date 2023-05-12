@@ -71,6 +71,7 @@ import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
@@ -686,7 +687,11 @@ public class Transitions implements RemoteCallable<Transitions>,
                     active.mToken, info, active.mStartT, active.mFinishT);
         }
 
-        if (info.getRootCount() == 0 && !TransitionUtil.alwaysReportToKeyguard(info)) {
+        /*
+         * Some transitions we always need to report to keyguard even if they are empty.
+         * TODO (b/274954192): Remove this once keyguard dispatching fully moves to Shell.
+         */
+        if (info.getRootCount() == 0 && !KeyguardTransitionHandler.handles(info)) {
             // No root-leashes implies that the transition is empty/no-op, so just do
             // housekeeping and return.
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "No transition roots in %s so"
