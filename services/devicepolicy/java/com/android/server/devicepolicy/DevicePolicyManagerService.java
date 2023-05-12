@@ -10956,8 +10956,13 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 /* deviceOwnerUserId= */ deviceOwnerUserId, /* callingUserId*/ caller.getUserId(),
                 isAdb(caller), hasIncompatibleAccountsOrNonAdb);
         if (code != STATUS_OK) {
-            throw new IllegalStateException(computeProvisioningErrorStringLocked(code,
-                    deviceOwnerUserId, owner, showComponentOnError));
+            final String provisioningErrorStringLocked = computeProvisioningErrorStringLocked(code,
+                    deviceOwnerUserId, owner, showComponentOnError);
+            if (code == STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED) {
+                throw new ServiceSpecificException(code, provisioningErrorStringLocked);
+            } else {
+                throw new IllegalStateException(provisioningErrorStringLocked);
+            }
         }
     }
 
@@ -11011,6 +11016,9 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             case STATUS_HAS_PAIRED:
                 return "Not allowed to set the device owner because this device has already "
                         + "paired.";
+            case STATUS_HEADLESS_SYSTEM_USER_MODE_NOT_SUPPORTED:
+                return "Cannot provision an unsupported DPC into DO on a"
+                        + " headless device";
             default:
                 return "Unexpected @ProvisioningPreCondition: " + code;
         }
