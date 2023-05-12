@@ -1483,10 +1483,4 @@ public interface AndroidPackage {
      * @hide
      */
     boolean isVisibleToInstantApps();
-
-    /**
-     * @see R.styleable#AndroidManifest_allowUpdateOwnership
-     * @hide
-     */
-    boolean isAllowUpdateOwnership();
 }
