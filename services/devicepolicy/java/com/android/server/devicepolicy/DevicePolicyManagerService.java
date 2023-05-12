@@ -11569,6 +11569,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller)
                     || isProfileOwnerOfOrganizationOwnedDevice(caller));
         }
+
+        if (!parent && isManagedProfile(caller.getUserId())
+                && getManagedSubscriptionsPolicy().getPolicyType()
+                != ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
+            throw new IllegalStateException(
+                    "Default sms application can only be set on the profile, when "
+                            + "ManagedSubscriptions policy is set");
+        }
+
         if (parent) {
             userId = getProfileParentId(mInjector.userHandleGetCallingUserId());
             mInjector.binderWithCleanCallingIdentity(() -> enforcePackageIsSystemPackage(
