@@ -33,6 +33,7 @@ import static com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.admin.DevicePolicyManager;
@@ -230,7 +231,15 @@ public class IntentForwarderActivity extends Activity  {
 
         ((Button) findViewById(R.id.button_open)).setText(getOpenInWorkButtonString(launchIntent));
         findViewById(R.id.button_open).setOnClickListener(v -> {
-            startActivityAsCaller(launchIntent, targetUserId);
+            startActivityAsCaller(
+                    launchIntent,
+                    ActivityOptions.makeCustomAnimation(
+                                    getApplicationContext(),
+                                    R.anim.activity_open_enter,
+                                    R.anim.push_down_out)
+                            .toBundle(),
+                    /* ignoreTargetSecurity= */ false,
+                    targetUserId);
             finish();
         });
 
