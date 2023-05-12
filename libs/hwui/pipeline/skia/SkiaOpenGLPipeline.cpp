@@ -16,6 +16,7 @@
 
 #include "SkiaOpenGLPipeline.h"
 
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <GrBackendSurface.h>
 #include <SkBlendMode.h>
 #include <SkImageInfo.h>
@@ -150,9 +151,9 @@ IRenderPipeline::DrawResult SkiaOpenGLPipeline::draw(
         surface = getBufferSkSurface(bufferParams);
         preTransform = bufferParams.getTransform();
     } else {
-        surface = SkSurface::MakeFromBackendRenderTarget(mRenderThread.getGrContext(), backendRT,
-                                                         getSurfaceOrigin(), colorType,
-                                                         mSurfaceColorSpace, &props);
+        surface = SkSurfaces::WrapBackendRenderTarget(mRenderThread.getGrContext(), backendRT,
+                                                      getSurfaceOrigin(), colorType,
+                                                      mSurfaceColorSpace, &props);
         preTransform = SkMatrix::I();
     }
 

@@ -141,7 +141,7 @@ TEST(RenderNodeDrawable, zReorder) {
 }
 
 TEST(RenderNodeDrawable, composeOnLayer) {
-    auto surface = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
     SkCanvas& canvas = *surface->getCanvas();
     canvas.drawColor(SK_ColorBLUE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorBLUE);
@@ -152,7 +152,7 @@ TEST(RenderNodeDrawable, composeOnLayer) {
             });
 
     // attach a layer to the render node
-    auto surfaceLayer = SkSurface::MakeRasterN32Premul(1, 1);
+    auto surfaceLayer = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(1, 1));
     auto canvas2 = surfaceLayer->getCanvas();
     canvas2->drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     rootNode->setLayerSurface(surfaceLayer);
@@ -187,7 +187,7 @@ static SkMatrix getRecorderMatrix(const SkiaRecordingCanvas& recorder) {
 }
 
 TEST(RenderNodeDrawable, saveLayerClipAndMatrixRestore) {
-    auto surface = SkSurface::MakeRasterN32Premul(400, 800);
+    auto surface = SkSurfaces::Raster(SkImageInfo::MakeN32Premul(400, 800));
     SkCanvas& canvas = *surface->getCanvas();
     canvas.drawColor(SK_ColorWHITE, SkBlendMode::kSrcOver);
     ASSERT_EQ(TestUtils::getColor(surface, 0, 0), SK_ColorWHITE);
@@ -1074,7 +1074,8 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(RenderNodeDrawable, layerComposeQuality) {
             });
 
     layerNode->animatorProperties().mutateLayerProperties().setType(LayerType::RenderLayer);
-    layerNode->setLayerSurface(SkSurface::MakeRasterN32Premul(LAYER_WIDTH, LAYER_HEIGHT));
+    layerNode->setLayerSurface(SkSurfaces::Raster(SkImageInfo::MakeN32Premul(LAYER_WIDTH, 
+                                                                             LAYER_HEIGHT)));
 
     FrameTestCanvas canvas;
     RenderNodeDrawable drawable(layerNode.get(), &canvas, true);

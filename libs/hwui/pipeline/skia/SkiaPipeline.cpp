@@ -16,6 +16,8 @@
 
 #include "SkiaPipeline.h"
 
+#include <include/android/SkSurfaceAndroid.h>
+#include <include/gpu/ganesh/SkSurfaceGanesh.h>
 #include <SkCanvas.h>
 #include <SkColor.h>
 #include <SkColorSpace.h>
@@ -186,9 +188,9 @@ bool SkiaPipeline::createOrUpdateLayer(RenderNode* node, const DamageAccumulator
                                  kPremul_SkAlphaType, getSurfaceColorSpace());
         SkSurfaceProps props(0, kUnknown_SkPixelGeometry);
         SkASSERT(mRenderThread.getGrContext() != nullptr);
-        node->setLayerSurface(SkSurface::MakeRenderTarget(mRenderThread.getGrContext(),
-                                                          skgpu::Budgeted::kYes, info, 0,
-                                                          this->getSurfaceOrigin(), &props));
+        node->setLayerSurface(SkSurfaces::RenderTarget(mRenderThread.getGrContext(),
+                                                       skgpu::Budgeted::kYes, info, 0,
+                                                       this->getSurfaceOrigin(), &props));
         if (node->getLayerSurface()) {
             // update the transform in window of the layer to reset its origin wrt light source
             // position
@@ -620,7 +622,7 @@ sk_sp<SkSurface> SkiaPipeline::getBufferSkSurface(
     auto bufferColorSpace = bufferParams.getColorSpace();
     if (mBufferSurface == nullptr || mBufferColorSpace == nullptr ||
         !SkColorSpace::Equals(mBufferColorSpace.get(), bufferColorSpace.get())) {
-        mBufferSurface = SkSurface::MakeFromAHardwareBuffer(
+        mBufferSurface = SkSurfaces::WrapAndroidHardwareBuffer(
                 mRenderThread.getGrContext(), mHardwareBuffer, kTopLeft_GrSurfaceOrigin,
                 bufferColorSpace, nullptr, true);
         mBufferColorSpace = bufferColorSpace;
