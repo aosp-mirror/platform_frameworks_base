@@ -606,8 +606,8 @@ final class InstallPackageHelper {
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    public int installExistingPackageAsUser(@Nullable String packageName, @UserIdInt int userId,
-            @PackageManager.InstallFlags int installFlags,
+    public Pair<Integer, IntentSender> installExistingPackageAsUser(@Nullable String packageName,
+            @UserIdInt int userId, @PackageManager.InstallFlags int installFlags,
             @PackageManager.InstallReason int installReason,
             @Nullable List<String> allowlistedRestrictedPermissions,
             @Nullable IntentSender intentSender) {
@@ -632,7 +632,7 @@ final class InstallPackageHelper {
                 true /* requireFullPermission */, true /* checkShell */,
                 "installExistingPackage for user " + userId);
         if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
-            return PackageManager.INSTALL_FAILED_USER_RESTRICTED;
+            return Pair.create(PackageManager.INSTALL_FAILED_USER_RESTRICTED, intentSender);
         }
 
         final long callingId = Binder.clearCallingIdentity();
@@ -648,7 +648,7 @@ final class InstallPackageHelper {
                 final Computer snapshot = mPm.snapshotComputer();
                 pkgSetting = mPm.mSettings.getPackageLPr(packageName);
                 if (pkgSetting == null || pkgSetting.getPkg() == null) {
-                    return PackageManager.INSTALL_FAILED_INVALID_URI;
+                    return Pair.create(PackageManager.INSTALL_FAILED_INVALID_URI, intentSender);
                 }
                 if (!snapshot.canViewInstantApps(callingUid, UserHandle.getUserId(callingUid))) {
                     // only allow the existing package to be used if it's installed as a full
@@ -661,7 +661,7 @@ final class InstallPackageHelper {
                         }
                     }
                     if (!installAllowed) {
-                        return PackageManager.INSTALL_FAILED_INVALID_URI;
+                        return Pair.create(PackageManager.INSTALL_FAILED_INVALID_URI, intentSender);
                     }
                 }
                 if (!pkgSetting.getInstalled(userId)) {
@@ -719,14 +719,17 @@ final class InstallPackageHelper {
                 }
                 // start async restore with no post-install since we finish install here
 
+                final IntentSender onCompleteSender = intentSender;
+                intentSender = null;
+
                 InstallRequest request = new InstallRequest(userId,
                         PackageManager.INSTALL_SUCCEEDED, pkgSetting.getPkg(), new int[]{ userId },
                         () -> {
                             mPm.restorePermissionsAndUpdateRolesForNewUserInstall(packageName,
                                     userId);
-                            if (intentSender != null) {
-                                onRestoreComplete(PackageManager.INSTALL_SUCCEEDED, mContext,
-                                        intentSender);
+                            if (onCompleteSender != null) {
+                                onInstallComplete(PackageManager.INSTALL_SUCCEEDED, mContext,
+                                        onCompleteSender);
                             }
                         });
                 restoreAndPostInstall(request);
@@ -735,10 +738,10 @@ final class InstallPackageHelper {
             Binder.restoreCallingIdentity(callingId);
         }
 
-        return PackageManager.INSTALL_SUCCEEDED;
+        return Pair.create(PackageManager.INSTALL_SUCCEEDED, intentSender);
     }
 
-    private static void onRestoreComplete(int returnCode, Context context, IntentSender target) {
+    static void onInstallComplete(int returnCode, Context context, IntentSender target) {
         Intent fillIn = new Intent();
         fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
                 PackageManager.installStatusToPublicStatus(returnCode));
