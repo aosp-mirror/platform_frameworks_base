@@ -1175,17 +1175,21 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final class StickyBroadcast {
         public Intent intent;
         public boolean deferUntilActive;
+        public int originalCallingUid;
 
-        public static StickyBroadcast create(Intent intent, boolean deferUntilActive) {
+        public static StickyBroadcast create(Intent intent, boolean deferUntilActive,
+                int originalCallingUid) {
             final StickyBroadcast b = new StickyBroadcast();
             b.intent = intent;
             b.deferUntilActive = deferUntilActive;
+            b.originalCallingUid = originalCallingUid;
             return b;
         }
 
         @Override
         public String toString() {
-            return "{intent=" + intent + ", defer=" + deferUntilActive + "}";
+            return "{intent=" + intent + ", defer=" + deferUntilActive + ", originalCallingUid="
+                    + originalCallingUid + "}";
         }
     }
 
@@ -11119,6 +11123,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 pw.print(" [D]");
                             }
                             pw.println();
+                            pw.print("      originalCallingUid: ");
+                            pw.println(broadcasts.get(i).originalCallingUid);
+                            pw.println();
                             Bundle bundle = intent.getExtras();
                             if (bundle != null) {
                                 pw.print("      extras: ");
@@ -14008,16 +14015,25 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (allSticky != null) {
                 ArrayList receivers = new ArrayList();
                 receivers.add(bf);
+                sticky = null;
 
                 final int stickyCount = allSticky.size();
                 for (int i = 0; i < stickyCount; i++) {
                     final StickyBroadcast broadcast = allSticky.get(i);
+                    final int originalStickyCallingUid = allSticky.get(i).originalCallingUid;
+                    // TODO(b/281889567): consider using checkComponentPermission instead of
+                    //  canAccessUnexportedComponents
+                    if (sticky == null && (exported || originalStickyCallingUid == callingUid
+                            || ActivityManager.canAccessUnexportedComponents(
+                            originalStickyCallingUid))) {
+                        sticky = broadcast.intent;
+                    }
                     BroadcastQueue queue = broadcastQueueForIntent(broadcast.intent);
                     BroadcastRecord r = new BroadcastRecord(queue, broadcast.intent, null,
                             null, null, -1, -1, false, null, null, null, null, OP_NONE,
                             BroadcastOptions.makeWithDeferUntilActive(broadcast.deferUntilActive),
                             receivers, null, null, 0, null, null, false, true, true, -1,
-                            BackgroundStartPrivileges.NONE,
+                            originalStickyCallingUid, BackgroundStartPrivileges.NONE,
                             false /* only PRE_BOOT_COMPLETED should be exempt, no stickies */,
                             null /* filterExtrasForReceiver */);
                     queue.enqueueBroadcastLocked(r);
@@ -14895,12 +14911,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (i = 0; i < stickiesCount; i++) {
                 if (intent.filterEquals(list.get(i).intent)) {
                     // This sticky already exists, replace it.
-                    list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive));
+                    list.set(i, StickyBroadcast.create(new Intent(intent), deferUntilActive,
+                            callingUid));
                     break;
                 }
             }
             if (i >= stickiesCount) {
-                list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive));
+                list.add(StickyBroadcast.create(new Intent(intent), deferUntilActive, callingUid));
             }
         }
 
