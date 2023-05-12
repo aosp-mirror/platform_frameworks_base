@@ -293,10 +293,9 @@ public class ImageExporter {
             final ContentValues values = createMetadata(time, format, fileName);
 
             Uri baseUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            if (UserHandle.myUserId() != owner.getIdentifier()) {
-                baseUri = ContentProvider.maybeAddUserId(baseUri, owner.getIdentifier());
-            }
-            Uri uri = resolver.insert(baseUri, values);
+            Uri uriWithUserId = ContentProvider.maybeAddUserId(baseUri, owner.getIdentifier());
+
+            Uri uri = resolver.insert(uriWithUserId, values);
             if (uri == null) {
                 throw new ImageExportException(RESOLVER_INSERT_RETURNED_NULL);
             }
