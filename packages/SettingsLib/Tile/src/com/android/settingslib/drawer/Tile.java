@@ -19,6 +19,7 @@ package com.android.settingslib.drawer;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_NEW_TASK;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_GROUP_KEY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
@@ -404,6 +405,76 @@ public abstract class Tile implements Parcelable {
                 ? metaData.getString(META_DATA_KEY_PROFILE) : PROFILE_ALL;
         profile = (profile != null ? profile : PROFILE_ALL);
         return TextUtils.equals(profile, PROFILE_PRIMARY);
+    }
+
+    /**
+     * Returns whether the tile belongs to another group / category.
+     */
+    public boolean hasGroupKey() {
+        return mMetaData != null
+                && !TextUtils.isEmpty(mMetaData.getString(META_DATA_PREFERENCE_GROUP_KEY));
+    }
+
+    /**
+     * Returns the group / category key this tile belongs to.
+     */
+    public String getGroupKey() {
+        return (mMetaData == null) ? null : mMetaData.getString(META_DATA_PREFERENCE_GROUP_KEY);
+    }
+
+    /**
+     * The type of the tile.
+     */
+    public enum Type {
+        /**
+         * A preference that can be tapped on to open a new page.
+         */
+        ACTION,
+
+        /**
+         * A preference that can be tapped on to open an external app.
+         */
+        EXTERNAL_ACTION,
+
+        /**
+         * A preference that shows an on / off switch that can be toggled by the user.
+         */
+        SWITCH,
+
+        /**
+         * A preference with both an on / off switch, and a tappable area that can perform an
+         * action.
+         */
+        SWITCH_WITH_ACTION,
+
+        /**
+         * A preference category with a title that can be used to group multiple preferences
+         * together.
+         */
+        GROUP;
+    }
+
+    /**
+     * Returns the type of the tile.
+     *
+     * @see Type
+     */
+    public Type getType() {
+        boolean hasExternalAction = hasPendingIntent();
+        boolean hasAction = hasExternalAction || this instanceof ActivityTile;
+        boolean hasSwitch = hasSwitch();
+
+        if (hasSwitch && hasAction) {
+            return Type.SWITCH_WITH_ACTION;
+        } else if (hasSwitch) {
+            return Type.SWITCH;
+        } else if (hasExternalAction) {
+            return Type.EXTERNAL_ACTION;
+        } else if (hasAction) {
+            return Type.ACTION;
+        } else {
+            return Type.GROUP;
+        }
     }
 
     public static final Comparator<Tile> TILE_COMPARATOR =
