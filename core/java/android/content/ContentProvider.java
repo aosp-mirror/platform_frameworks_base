@@ -892,8 +892,9 @@ public abstract class ContentProvider implements ContentInterface, ComponentCall
      */
     private boolean isContentRedirectionAllowedForUser(int incomingUserId) {
         if (MediaStore.AUTHORITY.equals(mAuthority)) {
-            if (mUsersRedirectedToOwnerForMedia.indexOfKey(incomingUserId) >= 0) {
-                return mUsersRedirectedToOwnerForMedia.valueAt(incomingUserId);
+            int incomingUserIdIndex = mUsersRedirectedToOwnerForMedia.indexOfKey(incomingUserId);
+            if (incomingUserIdIndex >= 0) {
+                return mUsersRedirectedToOwnerForMedia.valueAt(incomingUserIdIndex);
             }
 
             // Haven't seen this user yet, look it up
