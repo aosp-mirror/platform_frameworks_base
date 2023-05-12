@@ -101,6 +101,7 @@ public class PasswordTextView extends FrameLayout {
     private Interpolator mFastOutSlowInInterpolator;
     private boolean mShowPassword = true;
     private UserActivityListener mUserActivityListener;
+    private boolean mIsPinHinting;
     private PinShapeInput mPinShapeInput;
     private boolean mUsePinShapes = false;
 
@@ -419,10 +420,15 @@ public class PasswordTextView extends FrameLayout {
     /**
      * Determines whether AutoConfirmation feature is on.
      *
-     * @param usePinShapes
      * @param isPinHinting
      */
     public void setIsPinHinting(boolean isPinHinting) {
+        // Do not reinflate the view if we are using the same one.
+        if (mPinShapeInput != null && mIsPinHinting == isPinHinting) {
+            return;
+        }
+        mIsPinHinting = isPinHinting;
+
         if (mPinShapeInput != null) {
             removeView(mPinShapeInput.getView());
             mPinShapeInput = null;
