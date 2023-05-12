@@ -156,7 +156,7 @@ interface ClockAnimations {
      * Runs when swiping clock picker, swipingFraction: 1.0 -> clock is scaled up in the preview,
      * 0.0 -> clock is scaled down in the shade; previewRatio is previewSize / screenSize
      */
-    fun onPickerCarouselSwiping(swipingFraction: Float, previewRatio: Float) {}
+    fun onPickerCarouselSwiping(swipingFraction: Float) {}
 }
 
 /** Events that have specific data about the related face */
