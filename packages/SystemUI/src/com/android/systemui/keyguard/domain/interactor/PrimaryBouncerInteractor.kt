@@ -39,6 +39,7 @@ import com.android.systemui.keyguard.data.BouncerView
 import com.android.systemui.keyguard.data.repository.KeyguardBouncerRepository
 import com.android.systemui.keyguard.data.repository.TrustRepository
 import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants
+import com.android.systemui.keyguard.shared.constants.KeyguardBouncerConstants.EXPANSION_HIDDEN
 import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.SysUiStatsLog
@@ -183,6 +184,7 @@ constructor(
         cancelShowRunnable()
         repository.setPrimaryShowingSoon(false)
         repository.setPrimaryShow(false)
+        repository.setPanelExpansion(EXPANSION_HIDDEN)
         primaryBouncerCallbackInteractor.dispatchVisibilityChanged(View.INVISIBLE)
         Trace.endSection()
     }
