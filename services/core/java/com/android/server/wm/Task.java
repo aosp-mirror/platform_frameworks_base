@@ -5673,6 +5673,7 @@ class Task extends TaskFragment {
                         }
                         mTransitionController.requestStartTransition(transition, tr,
                                 null /* remoteTransition */, null /* displayChange */);
+                        mTransitionController.collect(tr);
                         moveTaskToBackInner(tr);
                     });
         } else {
