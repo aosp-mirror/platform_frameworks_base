@@ -130,6 +130,8 @@ public class CrossDeviceSyncController {
                                 callback.requestCrossDeviceSync(associationInfo);
                             } else {
                                 Slog.w(TAG, "No callback to report new transport");
+                                syncMessageToDevice(associationInfo.getId(),
+                                        createFacilitatorMessage());
                             }
                         } else {
                             mBlocklist.add(associationInfo.getId());
@@ -169,6 +171,8 @@ public class CrossDeviceSyncController {
                                     callback.requestCrossDeviceSync(associationInfo);
                                 } else {
                                     Slog.w(TAG, "No callback to report changed transport");
+                                    syncMessageToDevice(associationInfo.getId(),
+                                            createFacilitatorMessage());
                                 }
                             } else {
                                 Slog.i(TAG, "Blocking existing association for context sync");
