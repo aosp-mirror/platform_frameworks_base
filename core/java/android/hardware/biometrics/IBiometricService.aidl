@@ -58,10 +58,10 @@ interface IBiometricService {
     boolean hasEnrolledBiometrics(int userId, String opPackageName);
 
     // Registers an authenticator (e.g. face, fingerprint, iris).
-    // Sensor Id in sensor props must be unique, whereas modality doesn't need to be.
+    // Id must be unique, whereas strength and modality don't need to be.
     // TODO(b/123321528): Turn strength and modality into enums.
     @EnforcePermission("USE_BIOMETRIC_INTERNAL")
-    void registerAuthenticator(int modality, in SensorPropertiesInternal props,
+    void registerAuthenticator(int id, int modality, int strength,
             IBiometricAuthenticator authenticator);
 
     // Register callback for when keyguard biometric eligibility changes.
