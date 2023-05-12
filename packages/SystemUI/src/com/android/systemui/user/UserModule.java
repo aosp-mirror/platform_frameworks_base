@@ -18,6 +18,7 @@ package com.android.systemui.user;
 
 import android.os.UserHandle;
 
+import com.android.settingslib.users.CreateUserDialogController;
 import com.android.settingslib.users.EditUserInfoController;
 import com.android.systemui.user.data.repository.UserRepositoryModule;
 import com.android.systemui.user.domain.interactor.HeadlessSystemUserModeModule;
@@ -43,6 +44,12 @@ public abstract class UserModule {
     @Provides
     public static EditUserInfoController provideEditUserInfoController() {
         return new EditUserInfoController(FILE_PROVIDER_AUTHORITY);
+    }
+
+    /** Provides {@link CreateUserDialogController} */
+    @Provides
+    public static CreateUserDialogController provideCreateUserDialogController() {
+        return new CreateUserDialogController(FILE_PROVIDER_AUTHORITY);
     }
 
     /**
