@@ -6,6 +6,7 @@ import android.testing.TestableLooper
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.whenever
@@ -27,9 +28,7 @@ class CreateUserActivityTest : SysuiTestCase() {
                         createDialog(
                             /* activity = */ nullable(),
                             /* activityStarter = */ nullable(),
-                            /* oldUserIcon = */ nullable(),
-                            /* defaultUserName = */ nullable(),
-                            /* title = */ nullable(),
+                            /* isMultipleAdminsEnabled = */ any(),
                             /* successCallback = */ nullable(),
                             /* cancelCallback = */ nullable()
                         )
