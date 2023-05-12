@@ -28,6 +28,8 @@ import static com.android.server.credentials.ProviderGetSession.REMOTE_ENTRY_KEY
 
 import android.util.Slog;
 
+import com.android.server.credentials.ProviderCreateSession;
+
 import java.util.AbstractMap;
 import java.util.Map;
 
@@ -52,6 +54,8 @@ public enum EntryEnum {
             new AbstractMap.SimpleEntry<>(REMOTE_ENTRY_KEY,
                     REMOTE_ENTRY.mInnerMetricCode),
             new AbstractMap.SimpleEntry<>(CREDENTIAL_ENTRY_KEY,
+                    CREDENTIAL_ENTRY.mInnerMetricCode),
+            new AbstractMap.SimpleEntry<>(ProviderCreateSession.SAVE_ENTRY_KEY,
                     CREDENTIAL_ENTRY.mInnerMetricCode)
     );
 
