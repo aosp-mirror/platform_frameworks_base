@@ -156,7 +156,7 @@ public class MagnificationController implements WindowMagnificationManager.Callb
         mSupportWindowMagnification = context.getPackageManager().hasSystemFeature(
                 FEATURE_WINDOW_MAGNIFICATION);
 
-        mAlwaysOnMagnificationFeatureFlag = new AlwaysOnMagnificationFeatureFlag();
+        mAlwaysOnMagnificationFeatureFlag = new AlwaysOnMagnificationFeatureFlag(context);
         mAlwaysOnMagnificationFeatureFlag.addOnChangedListener(
                 mBackgroundExecutor, mAms::updateAlwaysOnMagnification);
     }
