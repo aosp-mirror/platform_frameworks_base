@@ -32,13 +32,17 @@ import android.app.BroadcastOptions;
 import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyState;
+import android.app.admin.IntentFilterPolicyKey;
 import android.app.admin.PolicyKey;
 import android.app.admin.PolicyUpdateReceiver;
 import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
 import android.app.admin.UserRestrictionPolicyKey;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -1043,8 +1047,54 @@ final class DevicePolicyEngine {
             }
             if (updatedPackage != null) {
                 updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+                removePersistentPreferredActivityPoliciesForPackage(updatedPackage, userId);
             }
         });
+    }
+
+    private void removePersistentPreferredActivityPoliciesForPackage(
+            @NonNull String packageName, int userId) {
+        Set<PolicyKey> policyKeys = getLocalPolicyKeysSetByAllAdmins(
+                PolicyDefinition.GENERIC_PERSISTENT_PREFERRED_ACTIVITY, userId);
+        for (PolicyKey key : policyKeys) {
+            if (!(key instanceof IntentFilterPolicyKey)) {
+                throw new IllegalStateException("PolicyKey for "
+                        + "PERSISTENT_PREFERRED_ACTIVITY is not of type "
+                        + "IntentFilterPolicyKey");
+            }
+            IntentFilterPolicyKey parsedKey =
+                    (IntentFilterPolicyKey) key;
+            IntentFilter intentFilter = Objects.requireNonNull(parsedKey.getIntentFilter());
+            PolicyDefinition<ComponentName> policyDefinition =
+                    PolicyDefinition.PERSISTENT_PREFERRED_ACTIVITY(intentFilter);
+            LinkedHashMap<EnforcingAdmin, PolicyValue<ComponentName>> policies =
+                    getLocalPoliciesSetByAdmins(
+                            policyDefinition,
+                            userId);
+            IPackageManager packageManager = AppGlobals.getPackageManager();
+            for (EnforcingAdmin admin : policies.keySet()) {
+                if (policies.get(admin).getValue() != null
+                        && policies.get(admin).getValue().getPackageName().equals(packageName)) {
+                    try {
+                        if (packageManager.getPackageInfo(
+                                packageName, 0, userId) == null
+                                || packageManager.getReceiverInfo(policies.get(admin).getValue(),
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                userId) == null) {
+                            Slogf.e(TAG, String.format(
+                                    "Persistent preferred activity in package %s not found for "
+                                            + "user %d, removing policy for admin",
+                                    packageName, userId));
+                            removeLocalPolicy(policyDefinition, admin, userId);
+                        }
+                    } catch (RemoteException re) {
+                        // Shouldn't happen.
+                        Slogf.wtf(TAG, "Error handling package changes", re);
+                    }
+                }
+            }
+        }
     }
 
     private boolean isPackageInstalled(String packageName, int userId) {
