@@ -16,7 +16,7 @@
 
 package com.android.settingslib.drawer;
 
-/** Interface for {@link SwitchController} whose instances support dynamic summary */
+/** Interface for {@link EntryController} whose instances support dynamic summary */
 public interface DynamicSummary {
     /** @return the dynamic summary text */
     String getDynamicSummary();
