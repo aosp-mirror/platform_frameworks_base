@@ -93,6 +93,9 @@ constructor(private val uiEventLogger: UiEventLogger, private val clock: SystemC
         @UiEvent(doc = "Magnification settings panel edit size save button clicked")
         MAGNIFICATION_SETTINGS_SIZE_EDITING_DEACTIVATED(1384),
 
+        @UiEvent(doc = "Magnification settings panel zoom slider changed")
+        MAGNIFICATION_SETTINGS_ZOOM_SLIDER_CHANGED(1385),
+
         @UiEvent(
             doc =
                 "Magnification settings panel window size selected. The selection rank is " +

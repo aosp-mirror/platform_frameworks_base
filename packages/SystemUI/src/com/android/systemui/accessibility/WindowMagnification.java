@@ -371,6 +371,9 @@ public class WindowMagnification implements CoreStartable, CommandQueue.Callback
             if (mWindowMagnificationConnectionImpl != null) {
                 mWindowMagnificationConnectionImpl.onPerformScaleAction(displayId, scale);
             }
+            mA11yLogger.logThrottled(
+                    MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_ZOOM_SLIDER_CHANGED
+            );
         }
 
         @Override

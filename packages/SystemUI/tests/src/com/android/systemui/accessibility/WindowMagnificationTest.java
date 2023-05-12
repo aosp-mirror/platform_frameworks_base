@@ -259,6 +259,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
                 TEST_DISPLAY, scale);
 
         verify(mConnectionCallback).onPerformScaleAction(eq(TEST_DISPLAY), eq(scale));
+        verify(mA11yLogger).logThrottled(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_ZOOM_SLIDER_CHANGED));
     }
 
     @Test
