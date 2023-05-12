@@ -28,8 +28,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.testing.TestableLooper;
+import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -48,6 +51,7 @@ import org.mockito.Mockito;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class TileLayoutTest extends SysuiTestCase {
     private Resources mResources;
     private int mLayoutSizeForOneTile;
@@ -227,5 +231,54 @@ public class TileLayoutTest extends SysuiTestCase {
         mTileLayout.updateResources(); // setup with 1
 
         assertEquals(false, mTileLayout.updateResources());
+    }
+
+    @Test
+    public void fontScalingChanged_updateResources_cellHeightEnoughForTileContent() {
+        final float originalFontScale = mContext.getResources().getConfiguration().fontScale;
+        float[] testScales = {0.8f, 1.0f, 1.4f, 1.6f, 2.0f};
+        for (float scale: testScales) {
+            changeFontScaling_updateResources_cellHeightEnoughForTileContent(scale);
+        }
+
+        changeFontScaling(originalFontScale);
+    }
+
+    private void changeFontScaling_updateResources_cellHeightEnoughForTileContent(float scale) {
+        changeFontScaling(scale);
+
+        QSPanelControllerBase.TileRecord tileRecord = createTileRecord();
+        mTileLayout.addTile(tileRecord);
+
+        FakeTileView tileView = new FakeTileView(mContext);
+        QSTile.State state = new QSTile.State();
+        state.label = "TEST LABEL";
+        state.secondaryLabel = "TEST SECONDARY LABEL";
+        tileView.changeState(state);
+
+        mTileLayout.updateResources();
+
+        int spec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+        tileView.measure(spec, spec);
+        assertTrue(mTileLayout.getCellHeight() >= tileView.getMeasuredHeight());
+
+        mTileLayout.removeTile(tileRecord);
+    }
+
+    private static class FakeTileView extends QSTileViewImpl {
+        FakeTileView(Context context) {
+            super(context, new QSIconViewImpl(context), /* collapsed= */ false);
+        }
+
+        void changeState(QSTile.State state) {
+            handleStateChanged(state);
+        }
+    }
+
+    private void changeFontScaling(float scale) {
+        Configuration configuration = new Configuration(mContext.getResources().getConfiguration());
+        configuration.fontScale = scale;
+        // updateConfiguration could help update on both resource configuration and displayMetrics
+        mContext.getResources().updateConfiguration(configuration, null, null);
     }
 }
