@@ -27,6 +27,7 @@ import static com.android.server.pm.UserJourneyLogger.EVENT_STATE_FINISH;
 import static com.android.server.pm.UserJourneyLogger.EVENT_STATE_NONE;
 import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_GRANT_ADMIN;
 import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_CREATE;
+import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_LIFECYCLE;
 import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_REMOVE;
 import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_START;
 import static com.android.server.pm.UserJourneyLogger.USER_JOURNEY_USER_STOP;
@@ -499,6 +500,27 @@ public class UserJourneyLoggerTest {
                 0x00000402, ERROR_CODE_UNSPECIFIED, 3);
     }
 
+    @Test
+    public void testUserLifecycleJourney() {
+        final long startTime = System.currentTimeMillis();
+        final UserJourneyLogger.UserJourneySession session = mUserJourneyLogger
+                .startSessionForDelayedJourney(10, USER_JOURNEY_USER_LIFECYCLE, startTime);
+
+
+        final UserLifecycleJourneyReportedCaptor report = new UserLifecycleJourneyReportedCaptor();
+        final UserInfo targetUser = new UserInfo(10, "test target user",
+                UserInfo.FLAG_ADMIN | UserInfo.FLAG_FULL);
+        mUserJourneyLogger.logDelayedUserJourneyFinishWithError(0, targetUser,
+                USER_JOURNEY_USER_LIFECYCLE, ERROR_CODE_UNSPECIFIED);
+
+
+        report.captureAndAssert(mUserJourneyLogger, session.mSessionId,
+                USER_JOURNEY_USER_LIFECYCLE, 0, 10,
+                FrameworkStatsLog.USER_LIFECYCLE_JOURNEY_REPORTED__USER_TYPE__FULL_SECONDARY,
+                0x00000402, ERROR_CODE_UNSPECIFIED, 1);
+        assertThat(report.mElapsedTime.getValue() > 0L).isTrue();
+    }
+
     static class UserLifecycleJourneyReportedCaptor {
         ArgumentCaptor<Long> mSessionId = ArgumentCaptor.forClass(Long.class);
         ArgumentCaptor<Integer> mJourney = ArgumentCaptor.forClass(Integer.class);
@@ -507,6 +529,7 @@ public class UserJourneyLoggerTest {
         ArgumentCaptor<Integer> mUserType = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> mUserFlags = ArgumentCaptor.forClass(Integer.class);
         ArgumentCaptor<Integer> mErrorCode = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Long> mElapsedTime = ArgumentCaptor.forClass(Long.class);
 
         public void captureAndAssert(UserJourneyLogger mUserJourneyLogger,
                 long sessionId, int journey, int originalUserId,
@@ -518,7 +541,8 @@ public class UserJourneyLoggerTest {
                             mTargetUserId.capture(),
                             mUserType.capture(),
                             mUserFlags.capture(),
-                            mErrorCode.capture());
+                            mErrorCode.capture(),
+                            mElapsedTime.capture());
 
             assertThat(mSessionId.getValue()).isEqualTo(sessionId);
             assertThat(mJourney.getValue()).isEqualTo(journey);
