@@ -284,6 +284,14 @@ public class AutofillFeatureFlags {
     public static final boolean DEFAULT_AUTOFILL_PCC_CLASSIFICATION_ENABLED = false;
     // END AUTOFILL PCC CLASSIFICATION FLAGS DEFAULTS
 
+    // AUTOFILL FOR ALL APPS DEFAULTS
+    private static final boolean DEFAULT_AFAA_ON_UNIMPORTANT_VIEW_ENABLED = true;
+    private static final boolean DEFAULT_AFAA_ON_IMPORTANT_VIEW_ENABLED = true;
+    private static final String DEFAULT_AFAA_DENYLIST = "";
+    private static final String DEFAULT_AFAA_ALLOWLIST = "";
+    private static final String DEFAULT_AFAA_NON_AUTOFILLABLE_IME_ACTIONS = "2,3,4";
+    private static final boolean DEFAULT_AFAA_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES = true;
+    private static final boolean DEFAULT_AFAA_SHOULD_ENABLE_MULTILINE_FILTER = true;
 
     private AutofillFeatureFlags() {};
 
@@ -363,7 +371,8 @@ public class AutofillFeatureFlags {
     public static boolean isTriggerFillRequestOnUnimportantViewEnabled() {
         return DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_AUTOFILL,
-            DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_UNIMPORTANT_VIEW, false);
+            DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_UNIMPORTANT_VIEW,
+            DEFAULT_AFAA_ON_UNIMPORTANT_VIEW_ENABLED);
     }
 
     /**
@@ -374,7 +383,8 @@ public class AutofillFeatureFlags {
     public static boolean isTriggerFillRequestOnFilteredImportantViewsEnabled() {
         return DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_AUTOFILL,
-            DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_FILTERED_IMPORTANT_VIEWS, false);
+            DEVICE_CONFIG_TRIGGER_FILL_REQUEST_ON_FILTERED_IMPORTANT_VIEWS,
+            DEFAULT_AFAA_ON_IMPORTANT_VIEW_ENABLED);
     }
 
     /**
@@ -385,7 +395,8 @@ public class AutofillFeatureFlags {
     public static boolean shouldEnableAutofillOnAllViewTypes(){
         return DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_AUTOFILL,
-            DEVICE_CONFIG_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES, false);
+            DEVICE_CONFIG_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES,
+            DEFAULT_AFAA_SHOULD_ENABLE_AUTOFILL_ON_ALL_VIEW_TYPES);
     }
 
     /**
@@ -396,7 +407,9 @@ public class AutofillFeatureFlags {
      */
     public static Set<String> getNonAutofillableImeActionIdSetFromFlag() {
         final String mNonAutofillableImeActions = DeviceConfig.getString(
-                DeviceConfig.NAMESPACE_AUTOFILL, DEVICE_CONFIG_NON_AUTOFILLABLE_IME_ACTION_IDS, "");
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_NON_AUTOFILLABLE_IME_ACTION_IDS,
+                DEFAULT_AFAA_NON_AUTOFILLABLE_IME_ACTIONS);
         return new ArraySet<>(Arrays.asList(mNonAutofillableImeActions.split(",")));
     }
 
@@ -411,7 +424,8 @@ public class AutofillFeatureFlags {
     public static String getDenylistStringFromFlag() {
         return DeviceConfig.getString(
             DeviceConfig.NAMESPACE_AUTOFILL,
-            DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW, "");
+            DEVICE_CONFIG_PACKAGE_DENYLIST_FOR_UNIMPORTANT_VIEW,
+            DEFAULT_AFAA_DENYLIST);
     }
 
     /**
@@ -422,7 +436,8 @@ public class AutofillFeatureFlags {
     public static String getAllowlistStringFromFlag() {
         return DeviceConfig.getString(
             DeviceConfig.NAMESPACE_AUTOFILL,
-            DEVICE_CONFIG_PACKAGE_AND_ACTIVITY_ALLOWLIST_FOR_TRIGGERING_FILL_REQUEST, "");
+            DEVICE_CONFIG_PACKAGE_AND_ACTIVITY_ALLOWLIST_FOR_TRIGGERING_FILL_REQUEST,
+            DEFAULT_AFAA_ALLOWLIST);
     }
     /**
      * Whether include all views that have autofill type not none in assist structure.
@@ -455,7 +470,8 @@ public class AutofillFeatureFlags {
     public static boolean shouldEnableMultilineFilter() {
         return DeviceConfig.getBoolean(
             DeviceConfig.NAMESPACE_AUTOFILL,
-            DEVICE_CONFIG_MULTILINE_FILTER_ENABLED, false);
+            DEVICE_CONFIG_MULTILINE_FILTER_ENABLED,
+            DEFAULT_AFAA_SHOULD_ENABLE_MULTILINE_FILTER);
     }
 
     // START AUTOFILL PCC CLASSIFICATION FUNCTIONS
