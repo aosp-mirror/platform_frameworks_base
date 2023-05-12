@@ -34,6 +34,8 @@ import android.os.SystemProperties;
 import android.os.UpdateEngine;
 import android.os.UpdateEngineCallback;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
+import android.provider.Settings.SettingNotFoundException;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -332,8 +334,17 @@ public final class ProfcollectForwardingService extends SystemService {
         Context context = getContext();
         BackgroundThread.get().getThreadHandler().post(() -> {
             try {
+                int usageSetting = -1;
+                try {
+                    // Get "Usage & diagnostics" checkbox status. 1 is for enabled, 0 is for
+                    // disabled.
+                    usageSetting = Settings.Global.getInt(context.getContentResolver(), "multi_cb");
+                } catch (SettingNotFoundException e) {
+                    Log.i(LOG_TAG, "Usage setting not found: " + e.getMessage());
+                }
+
                 // Prepare profile report
-                String reportName = mIProfcollect.report() + ".zip";
+                String reportName = mIProfcollect.report(usageSetting) + ".zip";
 
                 if (!context.getResources().getBoolean(
                         R.bool.config_profcollectReportUploaderEnabled)) {
