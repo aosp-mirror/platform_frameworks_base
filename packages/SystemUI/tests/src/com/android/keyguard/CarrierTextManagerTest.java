@@ -21,6 +21,8 @@ import static android.telephony.SubscriptionManager.DATA_ROAMING_DISABLE;
 import static android.telephony.SubscriptionManager.DATA_ROAMING_ENABLE;
 import static android.telephony.SubscriptionManager.NAME_SOURCE_CARRIER_ID;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertTrue;
@@ -30,13 +32,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.provider.Settings;
 import android.telephony.ServiceState;
@@ -47,8 +54,10 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.text.TextUtils;
 
+import com.android.keyguard.logging.CarrierTextManagerLogger;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.dump.LogBufferHelperKt;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.FakeWifiRepository;
 import com.android.systemui.statusbar.pipeline.wifi.shared.model.WifiNetworkModel;
@@ -110,6 +119,10 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
     private CarrierTextManager mCarrierTextManager;
 
+    private CarrierTextManagerLogger mLogger =
+            new CarrierTextManagerLogger(
+                    LogBufferHelperKt.logcatLogBuffer("CarrierTextManagerLog"));
+
     private Void checkMainThread(InvocationOnMock inv) {
         assertThat(mMainExecutor.isExecuting()).isTrue();
         assertThat(mBgExecutor.isExecuting()).isFalse();
@@ -144,7 +157,7 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         mCarrierTextManager = new CarrierTextManager.Builder(
                 mContext, mContext.getResources(), mWifiRepository,
                 mTelephonyManager, mTelephonyListenerManager, mWakefulnessLifecycle, mMainExecutor,
-                mBgExecutor, mKeyguardUpdateMonitor)
+                mBgExecutor, mKeyguardUpdateMonitor, mLogger)
                 .setShowAirplaneMode(true)
                 .setShowMissingSim(true)
                 .build();
@@ -181,6 +194,47 @@ public class CarrierTextManagerTest extends SysuiTestCase {
         FakeExecutor.exhaustExecutors(mMainExecutor, mBgExecutor);
         verify(mCarrierTextCallback).updateCarrierInfo(captor.capture());
         assertEquals(AIRPLANE_MODE_TEXT, captor.getValue().carrierText);
+    }
+
+    /** regression test for b/281706473, caused by sending NULL plmn / spn to the logger */
+    @Test
+    public void testAirplaneMode_noSim_nullPlmn_nullSpn_doesNotCrash() {
+        // GIVEN - sticy broadcast that returns a null PLMN and null SPN
+        Intent stickyIntent = new Intent(TelephonyManager.ACTION_SERVICE_PROVIDERS_UPDATED);
+        stickyIntent.putExtra(TelephonyManager.EXTRA_SHOW_PLMN, true);
+        stickyIntent.removeExtra(TelephonyManager.EXTRA_PLMN);
+        stickyIntent.putExtra(TelephonyManager.EXTRA_SHOW_SPN, true);
+        stickyIntent.removeExtra(TelephonyManager.EXTRA_SPN);
+
+        mCarrierTextManager = new CarrierTextManager.Builder(
+                getContextSpyForStickyBroadcast(stickyIntent),
+                mContext.getResources(),
+                mWifiRepository,
+                mTelephonyManager,
+                mTelephonyListenerManager,
+                mWakefulnessLifecycle,
+                mMainExecutor,
+                mBgExecutor,
+                mKeyguardUpdateMonitor,
+                mLogger
+        )
+                .setShowAirplaneMode(true)
+                .setShowMissingSim(true)
+                .build();
+
+        // GIVEN - airplane mode is off (causing CTM to fetch the sticky broadcast)
+        Settings.Global.putInt(mContext.getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, 1);
+        reset(mCarrierTextCallback);
+        List<SubscriptionInfo> list = new ArrayList<>();
+        when(mKeyguardUpdateMonitor.getFilteredSubscriptionInfo()).thenReturn(list);
+        when(mKeyguardUpdateMonitor.getSimState(0))
+                .thenReturn(TelephonyManager.SIM_STATE_NOT_READY);
+        mKeyguardUpdateMonitor.mServiceStates = new HashMap<>();
+
+        // WHEN CTM fetches the broadcast and attempts to log the result, no crash results
+        mCarrierTextManager.updateCarrierText();
+
+        // No assert, this test should not crash
     }
 
     @Test
@@ -505,5 +559,11 @@ public class CarrierTextManagerTest extends SysuiTestCase {
 
         assertEquals(TEST_CARRIER + SEPARATOR + TEST_CARRIER,
                 captor.getValue().carrierText);
+    }
+
+    private Context getContextSpyForStickyBroadcast(Intent returnVal) {
+        Context contextSpy = spy(mContext);
+        doReturn(returnVal).when(contextSpy).registerReceiver(eq(null), any(IntentFilter.class));
+        return contextSpy;
     }
 }
