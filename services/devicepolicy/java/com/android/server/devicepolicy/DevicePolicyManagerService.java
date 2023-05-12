@@ -15135,7 +15135,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             return;
         }
 
-        if ((flags == 0) || ((flags & ~(allowedFlags)) != 0)) {
+        if ((flags & ~(allowedFlags)) != 0) {
             throw new SecurityException(
                     "Permitted lock task features when managing a financed device: "
                             + "LOCK_TASK_FEATURE_SYSTEM_INFO, LOCK_TASK_FEATURE_KEYGUARD, "
