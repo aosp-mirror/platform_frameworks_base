@@ -147,13 +147,13 @@ interface IActivityManager {
     int checkPermission(in String permission, int pid, int uid);
 
     /** Logs start of an API call to associate with an FGS, used for FGS Type Metrics */
-    void logFgsApiBegin(int apiType, int appUid, int appPid);
+    oneway void logFgsApiBegin(int apiType, int appUid, int appPid);
 
     /** Logs stop of an API call to associate with an FGS, used for FGS Type Metrics */
-    void logFgsApiEnd(int apiType, int appUid, int appPid);
+    oneway void logFgsApiEnd(int apiType, int appUid, int appPid);
 
     /** Logs API state change to associate with an FGS, used for FGS Type Metrics */
-    void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
+    oneway void logFgsApiStateChanged(int apiType, int state, int appUid, int appPid);
     // =============== End of transactions used on native side as well ============================
 
     // Special low-level communication with activity manager.
