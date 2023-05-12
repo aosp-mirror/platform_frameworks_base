@@ -203,4 +203,24 @@ public class MetricsFeatureProviderTest {
         assertThat(loggable).isFalse();
         verifyNoMoreInteractions(mLogWriter);
     }
+
+    @Test
+    public void logSettingsTileClickWithProfile_isPersonalProfile_shouldTagPersonal() {
+        final String key = "abc";
+        final boolean loggable = mProvider.logSettingsTileClickWithProfile(key,
+                MetricsEvent.SETTINGS_GESTURES, false);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, "abc/personal");
+    }
+
+    @Test
+    public void logSettingsTileClickWithProfile_isWorkProfile_shouldTagWork() {
+        final String key = "abc";
+        final boolean loggable = mProvider.logSettingsTileClickWithProfile(key,
+                MetricsEvent.SETTINGS_GESTURES, true);
+
+        assertThat(loggable).isTrue();
+        verify(mLogWriter).clicked(MetricsEvent.SETTINGS_GESTURES, "abc/work");
+    }
 }

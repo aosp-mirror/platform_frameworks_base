@@ -24,12 +24,14 @@ import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.os.UserHandle;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -190,5 +192,21 @@ public class ActivityTileTest {
         tile.mComponentInfo = null;
 
         assertThat(tile.getTitle(RuntimeEnvironment.application)).isNull();
+    }
+
+    @Test
+    public void hasPendingIntent_empty_returnsFalse() {
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+
+        assertThat(tile.hasPendingIntent()).isFalse();
+    }
+
+    @Test
+    public void hasPendingIntent_notEmpty_returnsTrue() {
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+        tile.pendingIntentMap.put(
+                UserHandle.CURRENT, PendingIntent.getActivity(mContext, 0, new Intent(), 0));
+
+        assertThat(tile.hasPendingIntent()).isTrue();
     }
 }

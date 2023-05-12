@@ -21,6 +21,7 @@ import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_KEYHINT;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_PENDING_INTENT;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SUMMARY_URI;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
@@ -40,6 +41,7 @@ import static org.mockito.Mockito.when;
 import static org.robolectric.RuntimeEnvironment.application;
 
 import android.app.ActivityManager;
+import android.app.PendingIntent;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -350,6 +352,53 @@ public class TileUtilsTest {
         assertThat(outTiles).isEmpty();
     }
 
+    @Test
+    public void loadTilesForAction_multipleUserProfiles_updatesUserHandle() {
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY, null, 123, PROFILE_ALL);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION,
+                addedCache, null /* defaultCategory */, outTiles, false /* requiresSettings */);
+        TileUtils.loadTilesForAction(mContext, new UserHandle(10), IA_SETTINGS_ACTION,
+                addedCache, null /* defaultCategory */, outTiles, false /* requiresSettings */);
+
+        assertThat(outTiles).hasSize(1);
+        assertThat(outTiles.get(0).userHandle)
+                .containsExactly(UserHandle.CURRENT, new UserHandle(10));
+    }
+
+    @Test
+    public void loadTilesForAction_withPendingIntent_updatesPendingIntentMap() {
+        Map<Pair<String, String>, Tile> addedCache = new ArrayMap<>();
+        List<Tile> outTiles = new ArrayList<>();
+        List<ResolveInfo> info = new ArrayList<>();
+        ResolveInfo resolveInfo = newInfo(true, null /* category */, null, URI_GET_ICON,
+                URI_GET_SUMMARY, null, 123, PROFILE_ALL);
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, new Intent(), 0);
+        resolveInfo.activityInfo.metaData
+                .putParcelable(META_DATA_PREFERENCE_PENDING_INTENT, pendingIntent);
+        info.add(resolveInfo);
+
+        when(mPackageManager.queryIntentActivitiesAsUser(any(Intent.class), anyInt(), anyInt()))
+                .thenReturn(info);
+
+        TileUtils.loadTilesForAction(mContext, UserHandle.CURRENT, IA_SETTINGS_ACTION,
+                addedCache, null /* defaultCategory */, outTiles, false /* requiresSettings */);
+        TileUtils.loadTilesForAction(mContext, new UserHandle(10), IA_SETTINGS_ACTION,
+                addedCache, null /* defaultCategory */, outTiles, false /* requiresSettings */);
+
+        assertThat(outTiles).hasSize(1);
+        assertThat(outTiles.get(0).pendingIntentMap).containsExactly(
+                UserHandle.CURRENT, pendingIntent, new UserHandle(10), pendingIntent);
+    }
+
     public static ResolveInfo newInfo(boolean systemApp, String category) {
         return newInfo(systemApp, category, null);
     }
@@ -424,7 +473,7 @@ public class TileUtilsTest {
         private static Bundle sMetaData;
 
         @Implementation
-        protected static List<Bundle> getSwitchDataFromProvider(Context context, String authority) {
+        protected static List<Bundle> getEntryDataFromProvider(Context context, String authority) {
             return Arrays.asList(sMetaData);
         }
 
