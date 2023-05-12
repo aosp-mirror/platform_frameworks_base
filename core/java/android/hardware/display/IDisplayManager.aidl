@@ -227,4 +227,12 @@ interface IDisplayManager {
 
     // Query overlay properties of the device
     OverlayProperties getOverlaySupport();
+
+    // Enable a connected display that is disabled.
+    @EnforcePermission("MANAGE_DISPLAYS")
+    void enableConnectedDisplay(int displayId);
+
+    // Disable a connected display that is enabled.
+    @EnforcePermission("MANAGE_DISPLAYS")
+    void disableConnectedDisplay(int displayId);
 }

@@ -846,6 +846,8 @@
     <uses-permission android:name="android.permission.LAUNCH_CREDENTIAL_SELECTOR" />
     <!-- Permission required for CTS test IntentRedirectionTest -->
     <uses-permission android:name="android.permission.QUERY_CLONED_APPS" />
+    <!-- Permission required for adb display commands `enable-display` and `disable-display`. -->
+    <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
     <!-- Permission required for accessing all content provider mime types -->
     <uses-permission android:name="android.permission.GET_ANY_PROVIDER_TYPE" />
 

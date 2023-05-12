@@ -554,7 +554,8 @@ public final class DisplayManager {
             EVENT_FLAG_DISPLAY_CHANGED,
             EVENT_FLAG_DISPLAY_REMOVED,
             EVENT_FLAG_DISPLAY_BRIGHTNESS,
-            EVENT_FLAG_HDR_SDR_RATIO_CHANGED
+            EVENT_FLAG_HDR_SDR_RATIO_CHANGED,
+            EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventsMask {}
@@ -609,6 +610,13 @@ public final class DisplayManager {
      * @hide
      */
     public static final long EVENT_FLAG_HDR_SDR_RATIO_CHANGED = 1L << 4;
+
+    /**
+     * Event flag to register for a display's connection changed.
+     *
+     * @hide
+     */
+    public static final long EVENT_FLAG_DISPLAY_CONNECTION_CHANGED = 1L << 5;
 
     /** @hide */
     public DisplayManager(Context context) {
@@ -888,6 +896,25 @@ public final class DisplayManager {
     @UnsupportedAppUsage
     public WifiDisplayStatus getWifiDisplayStatus() {
         return mGlobal.getWifiDisplayStatus();
+    }
+
+    /**
+     * Enable a connected display that is currently disabled.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public void enableConnectedDisplay(int displayId) {
+        mGlobal.enableConnectedDisplay(displayId);
+    }
+
+
+    /**
+     * Disable a connected display that is currently enabled.
+     * @hide
+     */
+    @RequiresPermission("android.permission.MANAGE_DISPLAYS")
+    public void disableConnectedDisplay(int displayId) {
+        mGlobal.disableConnectedDisplay(displayId);
     }
 
     /**
@@ -1633,6 +1660,24 @@ public final class DisplayManager {
          * @param displayId The id of the logical display that changed.
          */
         void onDisplayChanged(int displayId);
+
+        /**
+         * Called when a display is connected, but not necessarily used.
+         *
+         * A display is always connected before being added.
+         * @hide
+         */
+        default void onDisplayConnected(int displayId) { }
+
+        /**
+         * Called when a display is disconnected.
+         *
+         * If a display was added, a display is only disconnected after it has been removed. Note,
+         * however, that the display may have been disconnected by the time the removed event is
+         * received by the listener.
+         * @hide
+         */
+        default void onDisplayDisconnected(int displayId) { }
     }
 
     /**

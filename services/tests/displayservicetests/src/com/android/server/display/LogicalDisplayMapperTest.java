@@ -30,6 +30,8 @@ import static com.android.server.display.DisplayAdapter.DISPLAY_DEVICE_EVENT_CHA
 import static com.android.server.display.DisplayAdapter.DISPLAY_DEVICE_EVENT_REMOVED;
 import static com.android.server.display.DisplayDeviceInfo.FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY;
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_ADDED;
+import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_CONNECTED;
+import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_DISCONNECTED;
 import static com.android.server.display.LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_REMOVED;
 import static com.android.server.display.layout.Layout.Display.POSITION_REAR;
 import static com.android.server.display.layout.Layout.Display.POSITION_UNKNOWN;
@@ -44,6 +46,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,6 +66,7 @@ import android.view.DisplayInfo;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.display.layout.DisplayIdProducer;
 import com.android.server.display.layout.Layout;
 import com.android.server.utils.FoldSettingWrapper;
@@ -79,7 +83,9 @@ import org.mockito.Spy;
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -107,8 +113,11 @@ public class LogicalDisplayMapperTest {
     @Mock IThermalService mIThermalServiceMock;
     @Spy DeviceStateToLayoutMap mDeviceStateToLayoutMapSpy =
             new DeviceStateToLayoutMap(mIdProducer, NON_EXISTING_FILE);
+    @Mock
+    DisplayManagerFlags mFlagsMock;
 
     @Captor ArgumentCaptor<LogicalDisplay> mDisplayCaptor;
+    @Captor ArgumentCaptor<Integer> mDisplayEventCaptor;
 
     @Before
     public void setUp() {
@@ -154,11 +163,12 @@ public class LogicalDisplayMapperTest {
                 com.android.internal.R.array.config_deviceStatesOnWhichToSleep))
                 .thenReturn(new int[]{0});
 
+        when(mFlagsMock.isConnectedDisplayManagementEnabled()).thenReturn(false);
         mLooper = new TestLooper();
         mHandler = new Handler(mLooper.getLooper());
         mLogicalDisplayMapper = new LogicalDisplayMapper(mContextMock, mDisplayDeviceRepo,
                 mListenerMock, new DisplayManagerService.SyncRoot(), mHandler,
-                mDeviceStateToLayoutMapSpy, mFoldSettingWrapperMock);
+                mDeviceStateToLayoutMapSpy, mFoldSettingWrapperMock, mFlagsMock);
     }
 
 
@@ -276,6 +286,67 @@ public class LogicalDisplayMapperTest {
         // The logical displays had their devices swapped and Display 2 was removed
         assertEquals(display2, displayRemoved);
         assertEquals(info(display1).address, info(device2).address);
+    }
+
+    @Test
+    public void testDisplayDeviceAddAndRemove_withDisplayManagement() {
+        when(mFlagsMock.isConnectedDisplayManagementEnabled()).thenReturn(true);
+        DisplayDevice device = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+
+        // add
+        mDisplayDeviceRepo.onDisplayDeviceEvent(device, DISPLAY_DEVICE_EVENT_ADDED);
+
+        verify(mListenerMock, times(2)).onLogicalDisplayEventLocked(
+                mDisplayCaptor.capture(), mDisplayEventCaptor.capture());
+        LogicalDisplay added = mDisplayCaptor.getAllValues().get(0);
+        assertThat(mDisplayCaptor.getAllValues().get(1)).isEqualTo(added);
+        LogicalDisplay displayAdded = add(device);
+        assertThat(info(displayAdded).address).isEqualTo(info(device).address);
+        assertThat(id(displayAdded)).isEqualTo(DEFAULT_DISPLAY);
+        assertThat(mDisplayEventCaptor.getAllValues()).containsExactly(
+                LOGICAL_DISPLAY_EVENT_CONNECTED, LOGICAL_DISPLAY_EVENT_ADDED).inOrder();
+        clearInvocations(mListenerMock);
+
+        // remove
+        mDisplayDeviceRepo.onDisplayDeviceEvent(device, DISPLAY_DEVICE_EVENT_REMOVED);
+        verify(mListenerMock, times(2)).onLogicalDisplayEventLocked(
+                mDisplayCaptor.capture(), mDisplayEventCaptor.capture());
+        List<Integer> allEvents = mDisplayEventCaptor.getAllValues();
+        int numEvents = allEvents.size();
+        // Only extract the last two events
+        List<Integer> events = new ArrayList(2);
+        events.add(allEvents.get(numEvents - 2));
+        events.add(allEvents.get(numEvents - 1));
+        assertThat(events).containsExactly(
+                LOGICAL_DISPLAY_EVENT_REMOVED, LOGICAL_DISPLAY_EVENT_DISCONNECTED).inOrder();
+        List<LogicalDisplay> displays = mDisplayCaptor.getAllValues();
+        LogicalDisplay displayRemoved = displays.get(numEvents - 2);
+        assertThat(displays.get(numEvents - 1)).isEqualTo(displayRemoved);
+        assertThat(id(displayRemoved)).isEqualTo(DEFAULT_DISPLAY);
+        assertThat(displayRemoved).isEqualTo(displayAdded);
+    }
+
+    @Test
+    public void testDisplayDisableEnable_withDisplayManagement() {
+        when(mFlagsMock.isConnectedDisplayManagementEnabled()).thenReturn(true);
+        DisplayDevice device = createDisplayDevice(TYPE_INTERNAL, 600, 800,
+                FLAG_ALLOWED_TO_BE_DEFAULT_DISPLAY);
+        LogicalDisplay displayAdded = add(device);
+        assertThat(displayAdded.isEnabledLocked()).isTrue();
+
+        // Disable device
+        mLogicalDisplayMapper.setDisplayEnabledLocked(
+                displayAdded.getDisplayIdLocked(), /* isEnabled= */ false);
+        verify(mListenerMock).onLogicalDisplayEventLocked(mDisplayCaptor.capture(),
+                eq(LOGICAL_DISPLAY_EVENT_REMOVED));
+        clearInvocations(mListenerMock);
+
+        // Enable device
+        mLogicalDisplayMapper.setDisplayEnabledLocked(
+                displayAdded.getDisplayIdLocked(), /* isEnabled= */ true);
+        verify(mListenerMock).onLogicalDisplayEventLocked(mDisplayCaptor.capture(),
+                eq(LOGICAL_DISPLAY_EVENT_ADDED));
     }
 
     @Test

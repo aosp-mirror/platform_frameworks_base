@@ -1,0 +1,12 @@
+aconfig_declarations {
+    name: "display_flags",
+    package: "com.android.server.display.feature.flags",
+    srcs: [
+        "*.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "display_flags_lib",
+    aconfig_declarations: "display_flags",
+}
