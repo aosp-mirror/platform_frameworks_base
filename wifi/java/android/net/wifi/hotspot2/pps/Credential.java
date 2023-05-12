@@ -16,6 +16,8 @@
 
 package android.net.wifi.hotspot2.pps;
 
+import static android.net.wifi.hotspot2.PasspointConfiguration.MAX_STRING_LENGTH;
+
 import android.net.wifi.EAPConstants;
 import android.net.wifi.ParcelUtil;
 import android.os.Parcel;
@@ -413,7 +415,13 @@ public final class Credential implements Parcelable {
                         + mPassword.getBytes(StandardCharsets.UTF_8).length);
                 return false;
             }
-
+            if (mSoftTokenApp != null) {
+                if (mSoftTokenApp.getBytes(StandardCharsets.UTF_8).length > MAX_STRING_LENGTH) {
+                    Log.d(TAG, "app name exceeding maximum length: "
+                            + mSoftTokenApp.getBytes(StandardCharsets.UTF_8).length);
+                    return false;
+                }
+            }
             // Only supports EAP-TTLS for user credential.
             if (mEapType != EAPConstants.EAP_TTLS) {
                 Log.d(TAG, "Invalid EAP Type for user credential: " + mEapType);
