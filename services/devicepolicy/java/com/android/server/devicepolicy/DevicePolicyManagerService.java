@@ -232,7 +232,6 @@ import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPR
 import static android.net.ConnectivityManager.PROFILE_NETWORK_PREFERENCE_ENTERPRISE_NO_FALLBACK;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.DeviceConfig.NAMESPACE_DEVICE_POLICY_MANAGER;
-import static android.provider.DeviceConfig.NAMESPACE_TELEPHONY;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
 import static android.provider.Settings.Secure.MANAGED_PROVISIONING_DPC_DOWNLOADED;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
@@ -875,10 +874,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     // TODO(b/265683382) remove the flag after rollout.
     private static final String KEEP_PROFILES_RUNNING_FLAG = "enable_keep_profiles_running";
     public static final boolean DEFAULT_KEEP_PROFILES_RUNNING_FLAG = true;
-
-    private static final String ENABLE_WORK_PROFILE_TELEPHONY_FLAG =
-            "enable_work_profile_telephony";
-    private static final boolean DEFAULT_WORK_PROFILE_TELEPHONY_FLAG = false;
 
     // TODO(b/261999445) remove the flag after rollout.
     private static final String HEADLESS_FLAG = "headless";
@@ -3376,9 +3371,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 onLockSettingsReady();
                 loadAdminDataAsync();
                 mOwners.systemReady();
-                if (isWorkProfileTelephonyEnabled()) {
-                    applyManagedSubscriptionsPolicyIfRequired();
-                }
+                applyManagedSubscriptionsPolicyIfRequired();
                 break;
             case SystemService.PHASE_ACTIVITY_MANAGER_READY:
                 synchronized (getLockObject()) {
@@ -3409,9 +3402,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             unregisterOnSubscriptionsChangedListener();
             int policyType = getManagedSubscriptionsPolicy().getPolicyType();
             if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_PERSONAL_SUBSCRIPTIONS) {
-                final int parentUserId = getProfileParentId(copeProfileUserId);
-                // By default, assign all current and future subs to system user on COPE devices.
-                registerListenerToAssignSubscriptionsToUser(parentUserId);
+                clearManagedSubscriptionsPolicy();
             } else if (policyType == ManagedSubscriptionsPolicy.TYPE_ALL_MANAGED_SUBSCRIPTIONS) {
                 // Add listener to assign all current and future subs to managed profile.
                 registerListenerToAssignSubscriptionsToUser(copeProfileUserId);
@@ -7718,11 +7709,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
         mLockSettingsInternal.refreshStrongAuthTimeout(parentId);
 
-        if (isWorkProfileTelephonyEnabled()) {
-            clearManagedSubscriptionsPolicy();
-            clearLauncherShortcutOverrides();
-            updateTelephonyCrossProfileIntentFilters(parentId, UserHandle.USER_NULL, false);
-        }
+        clearManagedSubscriptionsPolicy();
+        clearLauncherShortcutOverrides();
+        updateTelephonyCrossProfileIntentFilters(parentId, UserHandle.USER_NULL, false);
+
         Slogf.i(LOG_TAG, "Cleaning up device-wide policies done.");
     }
 
@@ -11334,11 +11324,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             synchronized (mSubscriptionsChangedListenerLock) {
                 pw.println("Subscription changed listener : " + mSubscriptionsChangedListener);
             }
-            pw.println("DPM Flag enable_work_profile_telephony : "
-                    + isWorkProfileTelephonyDevicePolicyManagerFlagEnabled());
-            pw.println("Telephony Flag enable_work_profile_telephony : "
-                    + isWorkProfileTelephonySubscriptionManagerFlagEnabled());
 
+            pw.println("DPM global setting ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS : "
+                    + mInjector.settingsGlobalGetString(
+                    Global.ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS));
             mHandler.post(() -> handleDump(pw));
             dumpResources(pw);
         }
@@ -15197,8 +15186,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setGlobalSetting(ComponentName who, String setting, String value) {
-        Objects.requireNonNull(who, "ComponentName is null");
         final CallerIdentity caller = getCallerIdentity(who);
+        if (Global.ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS.equals(setting)) {
+            Preconditions.checkCallAuthorization(isCallerDevicePolicyManagementRoleHolder(caller));
+            mInjector.binderWithCleanCallingIdentity(
+                    () -> mInjector.settingsGlobalPutString(setting, value));
+            return;
+        }
+        Objects.requireNonNull(who, "ComponentName is null");
         Preconditions.checkCallAuthorization(isDefaultDeviceOwner(caller));
 
         DevicePolicyEventLogger
@@ -23791,26 +23786,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         suspendAppsForQuietProfiles(keepProfileRunning);
     }
 
-    private boolean isWorkProfileTelephonyEnabled() {
-        return isWorkProfileTelephonyDevicePolicyManagerFlagEnabled()
-                && isWorkProfileTelephonySubscriptionManagerFlagEnabled();
-    }
-
-    private boolean isWorkProfileTelephonyDevicePolicyManagerFlagEnabled() {
-        return DeviceConfig.getBoolean(NAMESPACE_DEVICE_POLICY_MANAGER,
-                ENABLE_WORK_PROFILE_TELEPHONY_FLAG, DEFAULT_WORK_PROFILE_TELEPHONY_FLAG);
-    }
-
-    private boolean isWorkProfileTelephonySubscriptionManagerFlagEnabled() {
-        final long ident = mInjector.binderClearCallingIdentity();
-        try {
-            return DeviceConfig.getBoolean(NAMESPACE_TELEPHONY, ENABLE_WORK_PROFILE_TELEPHONY_FLAG,
-                    false);
-        } finally {
-            mInjector.binderRestoreCallingIdentity(ident);
-        }
-    }
-
     @Override
     public void setOverrideKeepProfilesRunning(boolean enabled) {
         Preconditions.checkCallAuthorization(
@@ -23921,12 +23896,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public ManagedSubscriptionsPolicy getManagedSubscriptionsPolicy() {
-        if (isWorkProfileTelephonyEnabled()) {
-            synchronized (getLockObject()) {
-                ActiveAdmin admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
-                if (admin != null && admin.mManagedSubscriptionsPolicy != null) {
-                    return admin.mManagedSubscriptionsPolicy;
-                }
+        synchronized (getLockObject()) {
+            ActiveAdmin admin = getProfileOwnerOfOrganizationOwnedDeviceLocked();
+            if (admin != null && admin.mManagedSubscriptionsPolicy != null) {
+                return admin.mManagedSubscriptionsPolicy;
             }
         }
         return new ManagedSubscriptionsPolicy(
@@ -23935,10 +23908,14 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public void setManagedSubscriptionsPolicy(ManagedSubscriptionsPolicy policy) {
-        if (!isWorkProfileTelephonyEnabled()) {
+        CallerIdentity caller = getCallerIdentity();
+
+        if (!isCallerDevicePolicyManagementRoleHolder(caller)
+                && !Objects.equals(mInjector.settingsGlobalGetString(
+                        Global.ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS), "1")) {
             throw new UnsupportedOperationException("This api is not enabled");
         }
-        CallerIdentity caller = getCallerIdentity();
+
         Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller),
                 "This policy can only be set by a profile owner on an organization-owned "
                         + "device.");
