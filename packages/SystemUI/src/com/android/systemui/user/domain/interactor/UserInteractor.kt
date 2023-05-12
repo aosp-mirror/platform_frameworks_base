@@ -50,6 +50,7 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.user.UserSwitchDialogController
 import com.android.systemui.telephony.domain.interactor.TelephonyInteractor
+import com.android.systemui.user.CreateUserActivity
 import com.android.systemui.user.data.model.UserSwitcherSettingsModel
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.user.data.source.UserRecord
@@ -455,13 +456,16 @@ constructor(
             UserActionModel.ADD_USER -> {
                 uiEventLogger.log(MultiUserActionsEvent.CREATE_USER_FROM_USER_SWITCHER)
                 val currentUser = repository.getSelectedUserInfo()
-                showDialog(
-                    ShowDialogRequestModel.ShowAddUserDialog(
-                        userHandle = currentUser.userHandle,
-                        isKeyguardShowing = keyguardInteractor.isKeyguardShowing(),
-                        showEphemeralMessage = currentUser.isGuest && currentUser.isEphemeral,
-                        dialogShower = dialogShower,
-                    )
+                dismissDialog()
+                activityStarter.startActivity(
+                    CreateUserActivity.createIntentForStart(
+                        applicationContext,
+                        keyguardInteractor.isKeyguardShowing()
+                    ),
+                    /* dismissShade= */ true,
+                    /* animationController */ null,
+                    /* showOverLockscreenWhenLocked */ true,
+                    /* userHandle */ currentUser.getUserHandle(),
                 )
             }
             UserActionModel.ADD_SUPERVISED_USER -> {
