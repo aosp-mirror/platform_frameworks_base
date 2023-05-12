@@ -299,8 +299,8 @@
     <string name="android_system_label" msgid="5974767339591067210">"Sistema Android"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"Canvia al perfil personal"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"Canvia al perfil de treball"</string>
-    <string name="user_owner_app_label" msgid="1553595155465750298">"Canvia al perfil personal de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="managed_profile_app_label" msgid="367401088383965725">"Canvia al perfil de treball de <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="user_owner_app_label" msgid="1553595155465750298">"Canvia al perfil personal a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="managed_profile_app_label" msgid="367401088383965725">"Canvia al perfil de treball a <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contactes"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"accedir als contactes"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"Ubicació"</string>
@@ -1366,7 +1366,7 @@
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"S\'ha activat el mode MIDI per USB"</string>
     <string name="usb_uvc_notification_title" msgid="2030032862673400008">"Dispositiu connectat com a càmera web"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"S\'ha connectat un accessori USB"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Toca per veure més opcions."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Toca per veure més opcions"</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"S\'està carregant el dispositiu connectat. Toca per veure més opcions."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"S\'ha detectat un accessori d\'àudio analògic"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"El dispositiu connectat no és compatible amb aquest telèfon. Toca per obtenir més informació."</string>
@@ -2165,8 +2165,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Reactiva"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Cap aplicació de treball"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Cap aplicació personal"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Obre <xliff:g id="APP">%s</xliff:g> al perfil personal"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Obre <xliff:g id="APP">%s</xliff:g> al perfil de treball"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Utilitza el navegador personal"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Utilitza el navegador de treball"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN de desbloqueig de la xarxa SIM"</string>

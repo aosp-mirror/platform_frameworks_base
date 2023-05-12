@@ -20,9 +20,6 @@ import static androidx.window.extensions.area.WindowAreaComponent.SESSION_STATE_
 import static androidx.window.extensions.area.WindowAreaComponent.SESSION_STATE_INACTIVE;
 
 import android.content.Context;
-import android.hardware.devicestate.DeviceStateRequest;
-import android.hardware.display.DisplayManager;
-import android.util.Log;
 import android.view.Display;
 
 import androidx.annotation.NonNull;
@@ -32,17 +29,12 @@ import androidx.window.extensions.core.util.function.Consumer;
 import java.util.Objects;
 
 /**
- * Controller class that keeps track of the status of the device state request
- * to enable the rear display presentation feature. This controller notifies the session callback
- * when the state request is active, and notifies the callback when the request is canceled.
- *
- * Clients are notified via {@link Consumer} provided with
- * {@link androidx.window.extensions.area.WindowAreaComponent.WindowAreaStatus} values to signify
- * when the request becomes active and cancelled.
+ * Controller class that manages the creation of the {@link android.app.Presentation} object used
+ * to show content on the rear facing display. This controller notifies the session callback with
+ * {@link androidx.window.extensions.area.WindowAreaComponent.WindowAreaStatus} values when the
+ * feature is active, or when the feature has been ended.
  */
-class RearDisplayPresentationController implements DeviceStateRequest.Callback {
-
-    private static final String TAG = "RearDisplayPresentationController";
+class RearDisplayPresentationController {
 
     // Original context that requested to enable rear display presentation mode
     @NonNull
@@ -51,8 +43,6 @@ class RearDisplayPresentationController implements DeviceStateRequest.Callback {
     private final Consumer<@WindowAreaComponent.WindowAreaSessionState Integer> mStateConsumer;
     @Nullable
     private ExtensionWindowAreaPresentation mExtensionWindowAreaPresentation;
-    @NonNull
-    private final DisplayManager mDisplayManager;
 
     /**
      * Creates the RearDisplayPresentationController
@@ -71,25 +61,15 @@ class RearDisplayPresentationController implements DeviceStateRequest.Callback {
 
         mContext = context;
         mStateConsumer = stateConsumer;
-        mDisplayManager = context.getSystemService(DisplayManager.class);
     }
 
-    @Override
-    public void onRequestActivated(@NonNull DeviceStateRequest request) {
-        Display[] rearDisplays = mDisplayManager.getDisplays(DisplayManager.DISPLAY_CATEGORY_REAR);
-        if (rearDisplays.length == 0) {
-            mStateConsumer.accept(SESSION_STATE_INACTIVE);
-            Log.e(TAG, "Rear display list should not be empty");
-            return;
-        }
-
+    public void startSession(@NonNull Display rearDisplay) {
         mExtensionWindowAreaPresentation =
-                new RearDisplayPresentation(mContext, rearDisplays[0], mStateConsumer);
+                new RearDisplayPresentation(mContext, rearDisplay, mStateConsumer);
         mStateConsumer.accept(SESSION_STATE_ACTIVE);
     }
 
-    @Override
-    public void onRequestCanceled(@NonNull DeviceStateRequest request) {
+    public void endSession() {
         mStateConsumer.accept(SESSION_STATE_INACTIVE);
     }
 

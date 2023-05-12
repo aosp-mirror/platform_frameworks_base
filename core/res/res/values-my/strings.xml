@@ -43,7 +43,7 @@
     <string name="mismatchPin" msgid="2929611853228707473">"သင် ရိုက်ထည့်ခဲ့သည့် PIN များ မတိုက်ဆိုင်ပါ။"</string>
     <string name="invalidPin" msgid="7542498253319440408">"နံပါတ်(၄)ခုမှ(၈)ခုအထိပါရှိသော ပင်နံပါတ်အားထည့်ပါ"</string>
     <string name="invalidPuk" msgid="8831151490931907083">"နံပါတ်(၈)ခုသို့မဟုတ် ထိုထက်ရှည်သောသော PUKအားထည့်သွင်းပါ"</string>
-    <string name="needPuk" msgid="3503414069503752211">"ဆင်းမ်၏ ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ်ကို လော့ခ်ချထားသည်။ ၎င်းကိုဖွင့်ရန် ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ်ကို ထည့်ပါ။"</string>
+    <string name="needPuk" msgid="3503414069503752211">"ဆင်းမ်ကတ်၏ ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ်ကို လော့ခ်ချထားသည်။ ၎င်းကိုဖွင့်ရန် ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ်ကို ထည့်ပါ။"</string>
     <string name="needPuk2" msgid="3910763547447344963">"ဆင်းမ်ကိုဖွင့်ရန် ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ် ၂ ကို ထည့်ပါ။"</string>
     <string name="enablePin" msgid="2543771964137091212">"မအောင်မြင်ပါ, SIM/RUIM သော့ကို အရင် သုံးခွင့်ပြုရန်"</string>
     <plurals name="pinpuk_attempts" formatted="false" msgid="1619867269012213584">
@@ -80,7 +80,7 @@
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"ဖုန်းဝန်ဆောင်မှု မရှိပါ"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="3982069078579103087">"ဖုန်းခေါ်ဆိုခြင်း ဝန်ဆောင်မှု သို့မဟုတ် အရေးပေါ်ခေါ်ဆိုခြင်း မရနိုင်ပါ"</string>
     <string name="RestrictedStateContent" msgid="7693575344608618926">"သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားသည်"</string>
-    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> အတွက် သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားပါသည်"</string>
+    <string name="RestrictedStateContentMsimTemplate" msgid="5228235722511044687">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> အတွက် သင်၏ ဝန်ဆောင်မှုပေးသူက ယာယီပိတ်ထားပါသည်"</string>
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"မိုဘိုင်းကွန်ရက် လိုင်းမရပါ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ဦးစားပေးကွန်ရက်သို့ ပြောင်းကြည့်ပါ။ ပြောင်းရန် တို့ပါ။"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"အရေးပေါ်ခေါ်ဆိုမှု မရနိုင်ပါ"</string>
@@ -746,8 +746,8 @@
     <string name="permdesc_sdcardWrite" msgid="8376047679331387102">"မျှဝေသိုလှောင်ခန်းမှ အရာများ ရေးခွင့်ပြုသည်။"</string>
     <string name="permlab_use_sip" msgid="8250774565189337477">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်/လက်ခံရန်"</string>
     <string name="permdesc_use_sip" msgid="3590270893253204451">"SIP ခေါ်ဆိုမှုများ ခေါ်ရန်နှင့် လက်ခံနိုင်ရန် အက်ပ်ကို ခွင့်ပြုပါ။"</string>
-    <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"တယ်လီကွမ် ဆင်းမ် ချိတ်ဆက်မှုများကို မှတ်ပုံတင်ပါ"</string>
-    <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"အက်ပ်အား တယ်လီကွမ် ဆင်းမ် ချိတ်ဆက်မှုကို မှတ်ပုံတင်ခွင့် ပြုသည်။"</string>
+    <string name="permlab_register_sim_subscription" msgid="1653054249287576161">"တယ်လီကွမ် ဆင်းမ်ကတ် ချိတ်ဆက်မှုများကို မှတ်ပုံတင်ပါ"</string>
+    <string name="permdesc_register_sim_subscription" msgid="4183858662792232464">"အက်ပ်အား တယ်လီကွမ် ဆင်းမ်ကတ် ချိတ်ဆက်မှုကို မှတ်ပုံတင်ခွင့် ပြုသည်။"</string>
     <string name="permlab_register_call_provider" msgid="6135073566140050702">"တယ်လီကွမ် တယ်လီကွမ် ချိတ်ဆက်မှု အသစ်များကို မှတ်ပုံတင်ပါ"</string>
     <string name="permdesc_register_call_provider" msgid="4201429251459068613">"အက်ပ်အား တယ်လီကွမ် ချိတ်ဆက်မှု အသစ်များကို မှတ်ပုံတင်ခွင့် ပြုသည်။"</string>
     <string name="permlab_connection_manager" msgid="3179365584691166915">"တယ်လီကွမ် ဆက်သွယ်မှုများကို စီမံရန်"</string>
@@ -973,13 +973,13 @@
     <string name="lockscreen_storage_locked" msgid="634993789186443380">"ဝန်ဆောင်မှုနှင့် ဒေတာအားလုံးအတွက် လော့ခ်ဖွင့်ပါ"</string>
     <string name="faceunlock_multiple_failures" msgid="681991538434031708">"မျက်မှာပြ လော့ခ်ဖွင့်ခြင်း ခွင့်ပြုသော အကြိမ်ရေထက် ကျော်လွန်သွားပါပြီ"</string>
     <string name="lockscreen_missing_sim_message_short" msgid="1229301273156907613">"ဆင်းမ်ကတ် မရှိပါ"</string>
-    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"တက်ဘလက်တွင် ဆင်းမ်မရှိပါ။"</string>
+    <string name="lockscreen_missing_sim_message" product="tablet" msgid="3986843848305639161">"တက်ဘလက်တွင် ဆင်းမ်ကတ်မရှိပါ။"</string>
     <string name="lockscreen_missing_sim_message" product="tv" msgid="3903140876952198273">"သင့် Android TV စက်တွင် ဆင်းမ်မရှိပါ။"</string>
-    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"ဖုန်းတွင် ဆင်းမ်မရှိပါ။"</string>
-    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"ဆင်းမ်ထည့်ပါ။"</string>
-    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"ဆင်းမ်မရှိပါ (သို့) သုံး၍မရပါ။ ဆင်းမ်ထည့်ပါ။"</string>
-    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"ဆင်းမ်ကို သုံး၍မရပါ။"</string>
-    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"သင်၏ဆင်းမ်ကို အပြီးပိတ်လိုက်သည်။\n ဆင်းမ်နောက်တစ်ခု ရယူရန် သင်၏ ကြိုးမဲ့ဝန်ဆောင်မှုပေးသူထံ ဆက်သွယ်ပါ။"</string>
+    <string name="lockscreen_missing_sim_message" product="default" msgid="6184187634180854181">"ဖုန်းတွင် ဆင်းမ်ကတ်မရှိပါ။"</string>
+    <string name="lockscreen_missing_sim_instructions" msgid="5823469004536805423">"ဆင်းမ်ကတ်ထည့်ပါ။"</string>
+    <string name="lockscreen_missing_sim_instructions_long" msgid="4403843937236648032">"ဆင်းမ်ကတ်မရှိပါ (သို့) သုံး၍မရပါ။ ဆင်းမ်ကတ်ထည့်ပါ။"</string>
+    <string name="lockscreen_permanent_disabled_sim_message_short" msgid="1925200607820809677">"ဆင်းမ်ကတ်ကို သုံး၍မရပါ။"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="6902979937802238429">"သင်၏ဆင်းမ်ကတ်ကို အပြီးပိတ်လိုက်သည်။\n ဆင်းမ်ကတ်နောက်တစ်ခု ရယူရန် သင်၏ ကြိုးမဲ့ဝန်ဆောင်မှုပေးသူထံ ဆက်သွယ်ပါ။"</string>
     <string name="lockscreen_transport_prev_description" msgid="2879469521751181478">"ယခင် တစ်ပုဒ်"</string>
     <string name="lockscreen_transport_next_description" msgid="2931509904881099919">"နောက် တစ်ပုဒ်"</string>
     <string name="lockscreen_transport_pause_description" msgid="6705284702135372494">"ခဏရပ်ရန်"</string>
@@ -989,10 +989,10 @@
     <string name="lockscreen_transport_ffw_description" msgid="4763794746640196772">"ရှေ့သို့ သွားရန်"</string>
     <string name="emergency_calls_only" msgid="3057351206678279851">"အရေးပေါ်ခေါ်ဆိုမှုသာ"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"ကွန်ရက် သော့ကျနေခြင်း"</string>
-    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"ဆင်းမ်၏ ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ်ကို လော့ခ်ချထားသည်။"</string>
+    <string name="lockscreen_sim_puk_locked_message" msgid="2867953953604224166">"ဆင်းမ်ကတ်၏ ပင်နံပါတ်ပြန်ဖွင့်သည့် ကုဒ်ကို လော့ခ်ချထားသည်။"</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"သုံးစွဲသူ လမ်းညွှန်ကို ကြည့်ပါ သို့မဟုတ် ဖောက်သည်များ စောင့်ရှောက်ရေး ဌာနကို ဆက်သွယ်ပါ။"</string>
-    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"ဆင်းမ်ကို လော့ခ်ချထားသည်။"</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"ဆင်းမ်ကိုဖွင့်နေသည်…"</string>
+    <string name="lockscreen_sim_locked_message" msgid="5911944931911850164">"ဆင်းမ်ကတ်ကို လော့ခ်ချထားသည်။"</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="8381565919325410939">"ဆင်းမ်ကတ် ဖွင့်နေသည်…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"သင်သည် သော့ဖွင့် ပုံစံကို<xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မမှန်မကန် ရေးဆွဲခဲ့သည်။ \n\nထပ်ပြီးတော့ <xliff:g id="NUMBER_1">%2$d</xliff:g>စက္ကန့် အကြာမှာ စမ်းကြည့်ပါ။"</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"သင်သည် စကားဝှက်ကို  <xliff:g id="NUMBER_0">%1$d</xliff:g> ကြိမ် မမှန်မကန် ရိုက်ခဲ့ပြီ။ \n\n ထပ်ပြီးတော့ <xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာ စမ်းကြည့်ပါ။"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"သင်သည် သင်၏ PIN <xliff:g id="NUMBER_0">%1$d</xliff:g>ကို ကြိမ် မမှန်မကန် ရိုက်ခဲ့ပြီ။ \n\n ထပ်ပြီးတော့ <xliff:g id="NUMBER_1">%2$d</xliff:g> စက္ကန့်အကြာ စမ်းကြည့်ပါ။"</string>
@@ -1337,7 +1337,7 @@
     <string name="sms_short_code_confirm_always_allow" msgid="2223014893129755950">"အမြဲခွင့်ပြုရန်"</string>
     <string name="sms_short_code_confirm_never_allow" msgid="2688828813521652079">"ဘယ်တော့မှခွင့်မပြုပါ"</string>
     <string name="sim_removed_title" msgid="1349026474932481037">"ဆင်းမ်ဖယ်ရှားလိုက်သည်"</string>
-    <string name="sim_removed_message" msgid="8469588437451533845">"မှန်ကန်သောဆင်းမ်ဖြင့် ပြန်မစမချင်း မိုဘိုင်းကွန်ရက်ကို ရနိုင်မည်မဟုတ်ပါ။"</string>
+    <string name="sim_removed_message" msgid="8469588437451533845">"မှန်ကန်သောဆင်းမ်ကတ်ဖြင့် ပြန်မစမချင်း မိုဘိုင်းကွန်ရက်ကို ရနိုင်မည်မဟုတ်ပါ။"</string>
     <string name="sim_done_button" msgid="6464250841528410598">"ပြီးပါပြီ"</string>
     <string name="sim_added_title" msgid="2976783426741012468">"ဆင်းမ်ထည့်လိုက်သည်"</string>
     <string name="sim_added_message" msgid="6602906609509958680">"မိုးဘိုင်းကွန်ရက်ကို ဆက်သွယ်ရန် စက်ကို ပြန် စ ပါ"</string>
@@ -1653,7 +1653,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"ဆင်းမ်ကဒ်သည် ယခု ပိတ်သွားပါပြီ ဆက်လက် လုပ်ဆောင်ရန် ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ်ကို ရိုက်ထည့်ပါ။ ပိုမိုသိချင်လျင် ဖုန်းဝန်ဆောင်မှု ပေးသောဌာန အားဆက်သွယ်နိုင်ပါသည်။"</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"လိုချင်သော ပင်နံပါတ်ကို ရိုက်ထည့်ပါ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"လိုချင်သော ပင်နံပါတ်ကို အတည်ပြုရန်"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"ဆင်းမ်ကိုဖွင့်နေသည်…"</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="5743634657721110967">"ဆင်းမ်ကတ် ဖွင့်နေသည်…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"ပင်နံပါတ် အမှား"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"ဂဏန်း၄ လုံးမှ ၈ လုံးအထိ ရှိသော ပင်နံပါတ် ရိုက်ထည့်ပါ"</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"ပင်နံပါတ် ပြန်ဖွင့်သည့် ကုဒ် က နံပါတ် ၈ လုံး ဖြစ်ရပါမည်"</string>
@@ -2046,14 +2046,14 @@
     <string name="etws_primary_default_message_test" msgid="4583367373909549421">"အရေးပေါ် မက်ဆေ့ဂျ် စမ်းသပ်မှု"</string>
     <string name="notification_reply_button_accessibility" msgid="5235776156579456126">"စာပြန်ရန်"</string>
     <string name="etws_primary_default_message_others" msgid="7958161706019130739"></string>
-    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"စကားသံအတွက် ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"စကားသံအတွက် ဆင်းမ်ကို ထောက်ပံ့မထားပါ"</string>
-    <string name="mmcc_illegal_ms" msgid="7509650265233909445">"စကားသံအတွက် ဆင်းမ်ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_authentication_reject" msgid="4891965994643876369">"စကားသံအတွက် ဆင်းမ်ကတ်ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr" msgid="227760698553988751">"စကားသံအတွက် ဆင်းမ်ကတ်ကို ထောက်ပံ့မထားပါ"</string>
+    <string name="mmcc_illegal_ms" msgid="7509650265233909445">"စကားသံအတွက် ဆင်းမ်ကတ်ကို ခွင့်မပြုပါ"</string>
     <string name="mmcc_illegal_me" msgid="6505557881889904915">"စကားသံအတွက် ဖုန်းကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ပေးမထားပါ"</string>
-    <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
-    <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"ဆင်းမ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_authentication_reject_msim_template" msgid="4480853038909922153">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_imsi_unknown_in_hlr_msim_template" msgid="3688508325248599657">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ပေးမထားပါ"</string>
+    <string name="mmcc_illegal_ms_msim_template" msgid="832644375774599327">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
+    <string name="mmcc_illegal_me_msim_template" msgid="4802735138861422802">"ဆင်းမ်ကတ် <xliff:g id="SIMNUMBER">%d</xliff:g> ကို ခွင့်မပြုပါ"</string>
     <string name="popup_window_default_title" msgid="6907717596694826919">"ပေါ့ပ်အပ် ဝင်းဒိုး"</string>
     <string name="slice_more_content" msgid="3377367737876888459">"+ <xliff:g id="NUMBER">%1$d</xliff:g>"</string>
     <string name="shortcut_restored_on_lower_version" msgid="9206301954024286063">"အက်ပ်ဗားရှင်းကို အဆင့်နှိမ့်ထားသည် သို့မဟုတ် ဤဖြတ်လမ်းလင့်ခ်နှင့် သဟဇာတမဖြစ်ပါ"</string>
@@ -2164,8 +2164,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"ပြန်ဖွင့်ရန်"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"အလုပ်သုံးအက်ပ်များ မရှိပါ"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"ကိုယ်ပိုင်အက်ပ်များ မရှိပါ"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"ကိုယ်ရေးကိုယ်တာသုံး <xliff:g id="APP">%s</xliff:g> ဖွင့်ခြင်း"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"အလုပ်သုံး <xliff:g id="APP">%s</xliff:g> ဖွင့်ခြင်း"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"ကိုယ်ပိုင်ဘရောင်ဇာ သုံးရန်"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"အလုပ်သုံးဘရောင်ဇာ သုံးရန်"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"ဆင်းမ်ကွန်ရက် လော့ခ်ဖွင့်ရန် ပင်နံပါတ်"</string>

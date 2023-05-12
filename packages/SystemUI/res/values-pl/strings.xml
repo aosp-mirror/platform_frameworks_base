@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Urząd certyfikacji zainstalowany na tym urządzeniu. Twój zabezpieczony ruch w sieci może być monitorowany i zmieniany."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim urządzeniu."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Administrator włączył rejestrowanie sieciowe, które pozwala monitorować ruch na Twoim profilu służbowym, ale nie na profilu osobistym."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"To urządzenie jest połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>. Twoja aktywność w sieci, w tym poczta e-mail i dane przeglądania, są widoczne dla dostawcy VPN."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"To urządzenie jest połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>. Twoja aktywność w sieci, w tym poczta e-mail i dane przeglądania, są widoczne dla administratora IT."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"To urządzenie jest połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP_0">%1$s</xliff:g> i <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Twoja aktywność w sieci, w tym poczta e-mail i dane przeglądania, są widoczne dla administratora IT."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Twoje aplikacje służbowe są połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>. Twoja aktywność w sieci w aplikacjach służbowych, w tym poczta e-mail i dane przeglądania, są widoczne dla administratora IT i firmy świadczącej usługi VPN."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Twoje aplikacje osobiste są połączone z internetem za pomocą aplikacji <xliff:g id="VPN_APP">%1$s</xliff:g>. Twoja aktywność w sieci, w tym poczta e-mail i dane przeglądania, są widoczne dla firmy świadczącej usługi VPN."</string>
@@ -987,6 +985,10 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Głośniki i wyświetlacze"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Proponowane urządzenia"</string>
+    <!-- no translation found for media_output_end_session_dialog_summary (5954520685989877347) -->
+    <skip />
+    <!-- no translation found for media_output_end_session_dialog_stop (208189434474624412) -->
+    <skip />
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"Jak działa transmitowanie"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Transmisja"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"Osoby w pobliżu ze zgodnymi urządzeniami Bluetooth mogą słuchać transmitowanych przez Ciebie multimediów"</string>
@@ -1124,10 +1126,8 @@
     <string name="keyguard_affordance_enablement_dialog_qr_scanner_instruction" msgid="5355839079232119791">"• Zainstalowano aplikację aparatu."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_1" msgid="8438311171750568633">"• Aplikacja została skonfigurowana."</string>
     <string name="keyguard_affordance_enablement_dialog_home_instruction_2" msgid="8308525385889021652">"• Dostępne jest co najmniej 1 urządzenie."</string>
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_instruction (2274489846095284167) -->
-    <skip />
-    <!-- no translation found for keyguard_affordance_enablement_dialog_notes_app_action (6821710209675089470) -->
-    <skip />
+    <string name="keyguard_affordance_enablement_dialog_notes_app_instruction" msgid="2274489846095284167">"Wybierz domyślną aplikację do obsługi notatek, której skrótu będziesz używać do funkcji notowania"</string>
+    <string name="keyguard_affordance_enablement_dialog_notes_app_action" msgid="6821710209675089470">"Wybierz aplikację"</string>
     <string name="keyguard_affordance_press_too_short" msgid="8145437175134998864">"Skrót – naciśnij i przytrzymaj"</string>
     <string name="rear_display_bottom_sheet_cancel" msgid="3461468855493357248">"Anuluj"</string>
     <string name="rear_display_bottom_sheet_confirm" msgid="1507591562761552899">"Przełącz ekrany teraz"</string>

@@ -20,23 +20,23 @@
     <string name="app_name" msgid="4539824758261855508">"Menedżer danych logowania"</string>
     <string name="string_cancel" msgid="6369133483981306063">"Anuluj"</string>
     <string name="string_continue" msgid="1346732695941131882">"Dalej"</string>
-    <string name="string_more_options" msgid="7990658711962795124">"Więcej opcji"</string>
+    <string name="string_more_options" msgid="2763852250269945472">"Zapisz inny sposób"</string>
     <string name="string_learn_more" msgid="4541600451688392447">"Więcej informacji"</string>
     <string name="content_description_show_password" msgid="3283502010388521607">"Pokaż hasło"</string>
     <string name="content_description_hide_password" msgid="6841375971631767996">"Ukryj hasło"</string>
-    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Klucze zwiększają Twoje bezpieczeństwo"</string>
-    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Dzięki kluczom nie musisz tworzyć ani zapamiętywać skomplikowanych haseł"</string>
-    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Klucze są szyfrowanymi kluczami cyfrowymi, które tworzysz za pomocą blokady ekranu bądź funkcji rozpoznawania twarzy lub odcisku palca"</string>
+    <string name="passkey_creation_intro_title" msgid="4251037543787718844">"Klucze dostępu zwiększają Twoje bezpieczeństwo"</string>
+    <string name="passkey_creation_intro_body_password" msgid="8825872426579958200">"Dzięki kluczom dostępu nie musisz tworzyć ani zapamiętywać skomplikowanych haseł"</string>
+    <string name="passkey_creation_intro_body_fingerprint" msgid="7331338631826254055">"Klucze dostępu są szyfrowanymi kluczami cyfrowymi, które tworzysz za pomocą blokady ekranu bądź funkcji rozpoznawania twarzy lub odcisku palca"</string>
     <string name="passkey_creation_intro_body_device" msgid="1203796455762131631">"Klucze są zapisane w menedżerze haseł, dzięki czemu możesz logować się na innych urządzeniach"</string>
-    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Więcej informacji o kluczach"</string>
+    <string name="more_about_passkeys_title" msgid="7797903098728837795">"Więcej informacji o kluczach dostępu"</string>
     <string name="passwordless_technology_title" msgid="2497513482056606668">"Technologia niewymagająca haseł"</string>
-    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Klucze umożliwiają logowanie się bez konieczności stosowania haseł. Wystarczy użyć odcisku palca, rozpoznawania twarzy, kodu PIN lub wzoru, aby potwierdzić tożsamość i utworzyć klucz."</string>
+    <string name="passwordless_technology_detail" msgid="6853928846532955882">"Klucze dostępu umożliwiają logowanie się bez konieczności stosowania haseł. Wystarczy użyć odcisku palca, rozpoznawania twarzy, kodu PIN lub wzoru, aby potwierdzić tożsamość i utworzyć klucz dostępu."</string>
     <string name="public_key_cryptography_title" msgid="6751970819265298039">"Kryptografia klucza publicznego"</string>
-    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Zgodnie z zasadami FIDO Alliance (stowarzyszenia zrzeszającego m.in. Google, Apple i Microsoft) oraz standardami W3C klucze opierają się na kluczach kryptograficznych. W odróżnieniu od nazw użytkownika i ciągów znaków stanowiących hasła pary kluczy prywatnych i publicznych są tworzone dla konkretnych aplikacji i stron. Klucz prywatny jest bezpiecznie przechowywany na urządzeniu lub w menedżerze haseł i potwierdza Twoją tożsamość. Klucz publiczny jest udostępniany serwerowi aplikacji lub strony. Mając odpowiednie klucze, od razu się zarejestrujesz i zalogujesz."</string>
+    <string name="public_key_cryptography_detail" msgid="6937631710280562213">"Zgodnie z zasadami FIDO Alliance (stowarzyszenia zrzeszającego m.in. Google, Apple i Microsoft) oraz standardami W3C klucze dostępu opierają się na kluczach kryptograficznych. W odróżnieniu od nazw użytkownika i ciągów znaków stanowiących hasła pary kluczy prywatnych i publicznych są tworzone dla konkretnych aplikacji i stron. Klucz prywatny jest bezpiecznie przechowywany na urządzeniu lub w menedżerze haseł i potwierdza Twoją tożsamość. Klucz publiczny jest udostępniany serwerowi aplikacji lub strony. Mając odpowiednie klucze, od razu się zarejestrujesz i zalogujesz."</string>
     <string name="improved_account_security_title" msgid="1069841917893513424">"Zwiększone bezpieczeństwo konta"</string>
     <string name="improved_account_security_detail" msgid="9123750251551844860">"Każdy klucz jest połączony wyłącznie z aplikacją lub stroną, dla której został utworzony, więc nie zalogujesz się przypadkowo w fałszywej aplikacji ani na fałszywej stronie. Ponadto na serwerach są przechowywane wyłącznie klucze publiczne, co znacznie utrudnia hakowanie."</string>
     <string name="seamless_transition_title" msgid="5335622196351371961">"Płynne przechodzenie"</string>
-    <string name="seamless_transition_detail" msgid="4475509237171739843">"W czasie przechodzenia na technologie niewymagające haseł możliwość stosowania haseł – niezależnie od kluczy – wciąż będzie dostępna."</string>
+    <string name="seamless_transition_detail" msgid="4475509237171739843">"W czasie przechodzenia na technologie niewymagające haseł możliwość stosowania haseł – niezależnie od kluczy dostępu – wciąż będzie dostępna."</string>
     <string name="choose_provider_title" msgid="8870795677024868108">"Wybierz, gdzie zapisywać <xliff:g id="CREATETYPES">%1$s</xliff:g>"</string>
     <string name="choose_provider_body" msgid="4967074531845147434">"Wybierz menedżera haseł, aby zapisywać informacje i logować się szybciej"</string>
     <string name="choose_create_option_passkey_title" msgid="5220979185879006862">"Utworzyć klucz dla aplikacji <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
@@ -44,25 +44,22 @@
     <string name="choose_create_option_sign_in_title" msgid="4124872317613421249">"Zapisać dane logowania do aplikacji <xliff:g id="APPNAME">%1$s</xliff:g>?"</string>
     <string name="passkey" msgid="632353688396759522">"klucz"</string>
     <string name="password" msgid="6738570945182936667">"hasło"</string>
-    <string name="passkeys" msgid="5733880786866559847">"klucze"</string>
+    <string name="passkeys" msgid="5733880786866559847">"klucze dostępu"</string>
     <string name="passwords" msgid="5419394230391253816">"hasła"</string>
     <string name="sign_ins" msgid="4710739369149469208">"dane logowania"</string>
     <string name="sign_in_info" msgid="2627704710674232328">"dane logowania"</string>
     <string name="save_credential_to_title" msgid="3172811692275634301">"Zapisać <xliff:g id="CREDENTIALTYPES">%1$s</xliff:g> w:"</string>
-    <!-- no translation found for create_passkey_in_other_device_title (2360053098931886245) -->
-    <skip />
-    <!-- no translation found for save_password_on_other_device_title (5829084591948321207) -->
-    <skip />
-    <!-- no translation found for save_sign_in_on_other_device_title (2827990118560134692) -->
-    <skip />
+    <string name="create_passkey_in_other_device_title" msgid="2360053098931886245">"Utworzyć klucz dostępu na innym urządzeniu?"</string>
+    <string name="save_password_on_other_device_title" msgid="5829084591948321207">"Zapisać hasło na innym urządzeniu?"</string>
+    <string name="save_sign_in_on_other_device_title" msgid="2827990118560134692">"Zapisać sposób logowania się na innym urządzeniu?"</string>
     <string name="use_provider_for_all_title" msgid="4201020195058980757">"Używać usługi <xliff:g id="PROVIDERINFODISPLAYNAME">%1$s</xliff:g> w przypadku wszystkich danych logowania?"</string>
-    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Menedżer haseł na koncie <xliff:g id="USERNAME">%1$s</xliff:g> będzie zapisywał Twoje hasła i klucze, aby ułatwić Ci logowanie"</string>
+    <string name="use_provider_for_all_description" msgid="1998772715863958997">"Menedżer haseł na koncie <xliff:g id="USERNAME">%1$s</xliff:g> będzie zapisywał Twoje hasła i klucze dostępu, aby ułatwić Ci logowanie"</string>
     <string name="set_as_default" msgid="4415328591568654603">"Ustaw jako domyślną"</string>
     <string name="settings" msgid="6536394145760913145">"Ustawienia"</string>
     <string name="use_once" msgid="9027366575315399714">"Użyj raz"</string>
-    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Hasła: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Klucze: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
+    <string name="more_options_usage_passwords_passkeys" msgid="3470113942332934279">"Hasła: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g> • Klucze dostępu: <xliff:g id="PASSKEYSNUMBER">%2$s</xliff:g>"</string>
     <string name="more_options_usage_passwords" msgid="1632047277723187813">"Hasła: <xliff:g id="PASSWORDSNUMBER">%1$s</xliff:g>"</string>
-    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Klucze: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
+    <string name="more_options_usage_passkeys" msgid="5390320437243042237">"Klucze dostępu: <xliff:g id="PASSKEYSNUMBER">%1$s</xliff:g>"</string>
     <string name="more_options_usage_credentials" msgid="1785697001787193984">"Dane logowania: <xliff:g id="TOTALCREDENTIALSNUMBER">%1$s</xliff:g>"</string>
     <string name="passkey_before_subtitle" msgid="2448119456208647444">"Klucz"</string>
     <string name="another_device" msgid="5147276802037801217">"Inne urządzenie"</string>
@@ -72,7 +69,12 @@
     <string name="accessibility_close_button" msgid="1163435587545377687">"Zamknij"</string>
     <string name="accessibility_snackbar_dismiss" msgid="3456598374801836120">"Zamknij"</string>
     <string name="get_dialog_title_use_passkey_for" msgid="6236608872708021767">"Użyć zapisanego klucza dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_use_password_for" msgid="625828023234318484">"Użyć zapisanego hasła do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_sign_in_for" msgid="790049858275131785">"Użyć tych danych logowania do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_unlock_options_for" msgid="7605568190597632433">"Odblokować opcje logowania do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
+    <string name="get_dialog_title_choose_passkey_for" msgid="9175997688078538490">"Wybierz zapisany klucz dostępu do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_password_for" msgid="1724435823820819221">"Wybierz zapisane hasło do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="get_dialog_title_choose_saved_sign_in_for" msgid="2420298653461652728">"Wybierz zapisane dane logowania do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_sign_in_for" msgid="3048870756117876514">"Wybierz dane logowania do aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_title_choose_option_for" msgid="4976380044745029107">"Wybrać opcję dla aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>
     <string name="get_dialog_title_use_info_on" msgid="8863708099535435146">"Użyć tych informacji w aplikacji <xliff:g id="APP_NAME">%1$s</xliff:g>?"</string>

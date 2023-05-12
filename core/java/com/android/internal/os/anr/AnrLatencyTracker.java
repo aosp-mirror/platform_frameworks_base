@@ -118,6 +118,9 @@ public class AnrLatencyTracker implements AutoCloseable {
     private boolean mIsSkipped = false;
     private boolean mCopyingFirstPidSucceeded = false;
 
+    private long mPreDumpIfLockTooSlowStartUptime;
+    private long mPreDumpIfLockTooSlowDuration = 0;
+
     private final int mAnrRecordPlacedOnQueueCookie =
             sNextAnrRecordPlacedOnQueueCookieGenerator.incrementAndGet();
 
@@ -401,6 +404,17 @@ public class AnrLatencyTracker implements AutoCloseable {
         Trace.traceCounter(TRACE_TAG_ACTIVITY_MANAGER, "anrRecordsQueueSize", queueSize);
     }
 
+    /** Records the start of AnrController#preDumpIfLockTooSlow. */
+    public void preDumpIfLockTooSlowStarted() {
+        mPreDumpIfLockTooSlowStartUptime = getUptimeMillis();
+    }
+
+    /** Records the end of AnrController#preDumpIfLockTooSlow. */
+    public void preDumpIfLockTooSlowEnded() {
+        mPreDumpIfLockTooSlowDuration +=
+                getUptimeMillis() - mPreDumpIfLockTooSlowStartUptime;
+    }
+
     /** Records a skipped ANR in ProcessErrorStateRecord#appNotResponding. */
     public void anrSkippedProcessErrorStateRecordAppNotResponding() {
         anrSkipped("appNotResponding");
@@ -415,7 +429,7 @@ public class AnrLatencyTracker implements AutoCloseable {
      * Returns latency data as a comma separated value string for inclusion in ANR report.
      */
     public String dumpAsCommaSeparatedArrayWithHeader() {
-        return "DurationsV3: " + mAnrTriggerUptime
+        return "DurationsV4: " + mAnrTriggerUptime
                 /* triggering_to_app_not_responding_duration = */
                 + "," + (mAppNotRespondingStartUptime -  mAnrTriggerUptime)
                 /* app_not_responding_duration = */
@@ -464,6 +478,8 @@ public class AnrLatencyTracker implements AutoCloseable {
                 + "," + mEarlyDumpStatus
                 /* copying_first_pid_succeeded = */
                 + "," + (mCopyingFirstPidSucceeded ? 1 : 0)
+                /* preDumpIfLockTooSlow_duration = */
+                + "," + mPreDumpIfLockTooSlowDuration
                 + "\n\n";
 
     }

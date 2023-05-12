@@ -16,7 +16,10 @@
 
 package com.android.server.adb;
 
+import static android.os.InputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
+
 import static com.android.internal.util.dump.DumpUtils.writeStringIfNotNull;
+import static com.android.server.adb.AdbService.ADBD;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,6 +61,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.os.SystemService;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -99,6 +103,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -153,6 +158,10 @@ public class AdbDebuggingManager {
     private static final String WIFI_PERSISTENT_GUID =
             "persist.adb.wifi.guid";
     private static final int PAIRING_CODE_LENGTH = 6;
+    /**
+     * The maximum time to wait for the adbd service to change state when toggling.
+     */
+    private static final long ADBD_STATE_CHANGE_TIMEOUT = DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
     private PairingThread mPairingThread = null;
     // A list of keys connected via wifi
     private final Set<String> mWifiConnectedKeys = new HashSet<>();
@@ -949,6 +958,31 @@ public class AdbDebuggingManager {
                     mWifiConnectedKeys.clear();
                     mAdbKeyStore.deleteKeyStore();
                     cancelJobToUpdateAdbKeyStore();
+                    // Disconnect all active sessions unless the user opted out through Settings.
+                    if (Settings.Global.getInt(mContentResolver,
+                            Settings.Global.ADB_DISCONNECT_SESSIONS_ON_REVOKE, 1) == 1) {
+                        // If adb is currently enabled, then toggle it off and back on to disconnect
+                        // any existing sessions.
+                        if (mAdbUsbEnabled) {
+                            try {
+                                SystemService.stop(ADBD);
+                                SystemService.waitForState(ADBD, SystemService.State.STOPPED,
+                                        ADBD_STATE_CHANGE_TIMEOUT);
+                                SystemService.start(ADBD);
+                                SystemService.waitForState(ADBD, SystemService.State.RUNNING,
+                                        ADBD_STATE_CHANGE_TIMEOUT);
+                            } catch (TimeoutException e) {
+                                Slog.e(TAG, "Timeout occurred waiting for adbd to cycle: ", e);
+                                // TODO(b/281758086): Display a dialog to the user to warn them
+                                // of this state and direct them to manually toggle adb.
+                                // If adbd fails to toggle within the timeout window, set adb to
+                                // disabled to alert the user that further action is required if
+                                // they want to continue using adb after revoking the grants.
+                                Settings.Global.putInt(mContentResolver,
+                                        Settings.Global.ADB_ENABLED, 0);
+                            }
+                        }
+                    }
                     break;
                 }
 

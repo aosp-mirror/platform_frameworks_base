@@ -460,10 +460,8 @@
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"A certificate authority is installed on this device. Your secure network traffic may be monitored or modified."</string>
     <string name="monitoring_description_management_network_logging" msgid="216983105036994771">"Your admin has turned on network logging, which monitors traffic on your device."</string>
     <string name="monitoring_description_managed_profile_network_logging" msgid="6932303843097006037">"Your admin has turned on network logging, which monitors traffic in your work profile but not in your personal profile."</string>
-    <!-- no translation found for monitoring_description_named_vpn (8220190039787149671) -->
-    <skip />
-    <!-- no translation found for monitoring_description_managed_device_named_vpn (7693648349547785255) -->
-    <skip />
+    <string name="monitoring_description_named_vpn" msgid="8220190039787149671">"This device is connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to the VPN provider."</string>
+    <string name="monitoring_description_managed_device_named_vpn" msgid="7693648349547785255">"This device is connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin."</string>
     <string name="monitoring_description_two_named_vpns" msgid="6726394451199620634">"This device is connected to the Internet through <xliff:g id="VPN_APP_0">%1$s</xliff:g> and <xliff:g id="VPN_APP_1">%2$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your IT admin."</string>
     <string name="monitoring_description_managed_profile_named_vpn" msgid="7254359257263069766">"Your work apps are connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>. Your network activity in work apps, including emails and browsing data, is visible to your IT admin and VPN provider."</string>
     <string name="monitoring_description_personal_profile_named_vpn" msgid="5083909710727365452">"Your personal apps are connected to the Internet through <xliff:g id="VPN_APP">%1$s</xliff:g>. Your network activity, including emails and browsing data, is visible to your VPN provider."</string>
@@ -987,6 +985,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"Speakers &amp; displays"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"Suggested devices"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"Stop your shared session to move media to another device"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"Stop"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"How broadcasting works"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"Broadcast"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"People near you with compatible Bluetooth devices can listen to the media that you\'re broadcasting"</string>

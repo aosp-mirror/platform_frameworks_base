@@ -2164,8 +2164,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Genoptag"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Der er ingen arbejdsapps"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Der er ingen personlige apps"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Åbn <xliff:g id="APP">%s</xliff:g> (privat)"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Åbn <xliff:g id="APP">%s</xliff:g> (arbejde)"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Brug personlig browser"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Brug arbejdsbrowser"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"Pinkode til oplåsning af SIM-netværket"</string>
@@ -2325,7 +2329,7 @@
     <string name="concurrent_display_notification_power_save_title" msgid="1794569070730736281">"Dual Screen er ikke tilgængelig"</string>
     <string name="concurrent_display_notification_power_save_content" msgid="2198116070583851493">"Dual Screen er ikke tilgængelig, fordi Batterisparefunktion er aktiveret. Du kan deaktivere dette i Indstillinger."</string>
     <string name="device_state_notification_settings_button" msgid="691937505741872749">"Gå til Indstillinger"</string>
-    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Deaktiver"</string>
+    <string name="device_state_notification_turn_off_button" msgid="6327161707661689232">"Sluk"</string>
     <string name="keyboard_layout_notification_selected_title" msgid="1202560174252421219">"<xliff:g id="DEVICE_NAME">%s</xliff:g> er konfigureret"</string>
     <string name="keyboard_layout_notification_one_selected_message" msgid="4314216053129257197">"Tastaturlayoutet er angivet som <xliff:g id="LAYOUT_1">%s</xliff:g>. Tryk for at ændre dette."</string>
     <string name="keyboard_layout_notification_two_selected_message" msgid="1876349944065922950">"Tastaturlayoutet er angivet som <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>. Tryk for at ændre dette."</string>

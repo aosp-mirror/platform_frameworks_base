@@ -794,10 +794,10 @@
 
     <!--  Control whether to launch Car dock home app when user presses home button or when
           car dock intent is fired.
-          In mobile device, usually separate home app is expected in car mode, and this should be
-          enabled. But in environments like real car, default home app may be enough, and in that
-          case, this can be disabled (set to false). -->
-    <bool name="config_enableCarDockHomeLaunch">true</bool>
+          For devices where a separate home app is expected in car mode this should be enabled.
+          But in environments like real car, default home app may be enough, and in that case
+          this can be disabled (set to false). Defaults to false on mobile devices. -->
+    <bool name="config_enableCarDockHomeLaunch">false</bool>
 
     <!-- Control whether to force apps to give up control over the display of system bars at all
          times regardless of System Ui Flags.

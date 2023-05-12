@@ -638,7 +638,7 @@
     <string name="fingerprint_acquired_immobile" msgid="1621891895241888048">"Breyttu stöðu fingursins örlítið í hvert skipti"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Ekki þekkt fingrafar"</string>
+    <string name="fingerprint_error_not_match" msgid="4599441812893438961">"Fingrafar þekkist ekki"</string>
     <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"Fingrafar þekkist ekki"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Fingrafar staðfest"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"Andlit staðfest"</string>
@@ -678,7 +678,7 @@
     <string name="fingerprint_recalibrate_notification_content" msgid="8519935717822194943">"Þú verður að fara á verkstæði."</string>
     <string name="face_acquired_insufficient" msgid="6889245852748492218">"Ekki tekst að búa til andlitslíkan. Reyndu aftur."</string>
     <string name="face_acquired_too_bright" msgid="8070756048978079164">"Of bjart. Prófaðu mýkri lýsingu."</string>
-    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Of lítið ljós"</string>
+    <string name="face_acquired_too_dark" msgid="8539853432479385326">"Ekki næg birta"</string>
     <string name="face_acquired_too_close" msgid="4453646176196302462">"Færðu símann lengra frá"</string>
     <string name="face_acquired_too_far" msgid="2922278214231064859">"Færðu símann nær"</string>
     <string name="face_acquired_too_high" msgid="8278815780046368576">"Færðu símann hærra"</string>
@@ -2164,8 +2164,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Ljúka hléi"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Engin vinnuforrit"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Engin forrit til einkanota"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Opna <xliff:g id="APP">%s</xliff:g> með einkaprófíl"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Opna <xliff:g id="APP">%s</xliff:g> með vinnuprófíl"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Nota einkavafra"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Nota vinnuvafra"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN-númer fyrir opnun á SIM-korti netkerfis"</string>

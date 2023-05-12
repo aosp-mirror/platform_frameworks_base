@@ -985,6 +985,8 @@
     <string name="media_output_dialog_volume_percentage" msgid="1613984910585111798">"<xliff:g id="PERCENTAGE">%1$d</xliff:g>%%"</string>
     <string name="media_output_group_title_speakers_and_displays" msgid="7169712332365659820">"ឧបករណ៍បំពងសំឡេង និងផ្ទាំងអេក្រង់"</string>
     <string name="media_output_group_title_suggested_device" msgid="4157186235837903826">"ឧបករណ៍​ដែលបានណែនាំ"</string>
+    <string name="media_output_end_session_dialog_summary" msgid="5954520685989877347">"បញ្ឈប់វគ្គដែលអ្នក​បានចែករំលែក ដើម្បីផ្លាស់ទីមេឌៀ​ទៅឧបករណ៍​ផ្សេងទៀត"</string>
+    <string name="media_output_end_session_dialog_stop" msgid="208189434474624412">"បញ្ឈប់"</string>
     <string name="media_output_first_broadcast_title" msgid="6292237789860753022">"របៀបដែលការផ្សាយដំណើរការ"</string>
     <string name="media_output_broadcast" msgid="3555580945878071543">"ការ​ផ្សាយ"</string>
     <string name="media_output_first_notify_broadcast_message" msgid="6353857724136398494">"មនុស្សនៅជិត​អ្នកដែលមាន​ឧបករណ៍ប៊្លូធូស​ត្រូវគ្នា​អាចស្តាប់​មេឌៀ​ដែលអ្នកកំពុងផ្សាយបាន"</string>

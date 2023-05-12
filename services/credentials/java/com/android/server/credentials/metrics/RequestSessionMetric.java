@@ -16,14 +16,19 @@
 
 package com.android.server.credentials.metrics;
 
+import static com.android.server.credentials.MetricUtilities.DEFAULT_INT_32;
 import static com.android.server.credentials.MetricUtilities.DELTA_EXCEPTION_CUT;
 import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT;
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
+import static com.android.server.credentials.MetricUtilities.logApiCalledAggregateCandidate;
+import static com.android.server.credentials.MetricUtilities.logApiCalledAuthenticationMetric;
+import static com.android.server.credentials.MetricUtilities.logApiCalledCandidateGetMetric;
 import static com.android.server.credentials.MetricUtilities.logApiCalledCandidatePhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledFinalPhase;
 import static com.android.server.credentials.MetricUtilities.logApiCalledNoUidFinal;
 
 import android.annotation.NonNull;
+import android.content.ComponentName;
 import android.credentials.GetCredentialRequest;
 import android.credentials.ui.UserSelectionDialogResult;
 import android.util.Slog;
@@ -52,7 +57,6 @@ public class RequestSessionMetric {
     protected final InitialPhaseMetric mInitialPhaseMetric;
     protected final ChosenProviderFinalPhaseMetric
             mChosenProviderFinalPhaseMetric;
-    // TODO(b/271135048) - Replace this with a new atom per each browsing emit (V4)
     protected List<CandidateBrowsingPhaseMetric> mCandidateBrowsingPhaseMetric = new ArrayList<>();
     // Specific aggregate candidate provider metric for the provider this session handles
     @NonNull
@@ -100,8 +104,6 @@ public class RequestSessionMetric {
      * @param timestampStarted the timestamp the service begins at
      * @param mCallingUid      the calling process's uid
      * @param metricCode       typically pulled from {@link ApiName}
-     * @param callingAppFlowUniqueInt the unique integer used as the session id for the calling app
-     *                                known flow
      */
     public void collectInitialPhaseMetricInfo(long timestampStarted,
             int mCallingUid, int metricCode) {
@@ -214,9 +216,8 @@ public class RequestSessionMetric {
 
     /**
      * During browsing, where multiple entries can be selected, this collects the browsing phase
-     * metric information.
-     * TODO(b/271135048) - modify asap to account for a new metric emit per browse response to
-     * framework.
+     * metric information. This is emitted together with the final phase, and the recursive path
+     * with authentication entries, which may occur in rare circumstances, are captured.
      *
      * @param selection                   contains the selected entry key type
      * @param selectedProviderPhaseMetric contains the utility information of the selected provider
@@ -281,6 +282,26 @@ public class RequestSessionMetric {
     }
 
     /**
+     * Used to update metrics when a response is received in a RequestSession.
+     *
+     * @param componentName the component name associated with the provider the response is for
+     */
+    public void updateMetricsOnResponseReceived(Map<String, ProviderSession> providers,
+            ComponentName componentName, boolean isPrimary) {
+        try {
+            var chosenProviderSession = providers.get(componentName.flattenToString());
+            if (chosenProviderSession != null) {
+                ProviderSessionMetric providerSessionMetric =
+                        chosenProviderSession.getProviderSessionMetric();
+                collectChosenMetricViaCandidateTransfer(providerSessionMetric
+                        .getCandidatePhasePerProviderMetric(), isPrimary);
+            }
+        } catch (Exception e) {
+            Slog.i(TAG, "Exception upon candidate to chosen metric transfer: " + e);
+        }
+    }
+
+    /**
      * Called by RequestSessions upon chosen metric determination. It's expected that most bits
      * are transferred here. However, certain new information, such as the selected provider's final
      * exception bit, the framework to ui and back latency, or the ui response bit are set at other
@@ -289,10 +310,13 @@ public class RequestSessionMetric {
      * {@link com.android.internal.util.FrameworkStatsLog} metric generation.
      *
      * @param candidatePhaseMetric the componentName to associate with a provider
+     * @param isPrimary indicates that this chosen provider is the primary provider (or not)
      */
-    public void collectChosenMetricViaCandidateTransfer(CandidatePhaseMetric candidatePhaseMetric) {
+    public void collectChosenMetricViaCandidateTransfer(CandidatePhaseMetric candidatePhaseMetric,
+            boolean isPrimary) {
         try {
             mChosenProviderFinalPhaseMetric.setChosenUid(candidatePhaseMetric.getCandidateUid());
+            mChosenProviderFinalPhaseMetric.setPrimary(isPrimary);
 
             mChosenProviderFinalPhaseMetric.setQueryPhaseLatencyMicroseconds(
                     candidatePhaseMetric.getQueryLatencyMicroseconds());
@@ -343,6 +367,7 @@ public class RequestSessionMetric {
     public void logCandidatePhaseMetrics(Map<String, ProviderSession> providers) {
         try {
             logApiCalledCandidatePhase(providers, ++mSequenceCounter, mInitialPhaseMetric);
+            logApiCalledCandidateGetMetric(providers, mSequenceCounter);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during candidate metric emit: " + e);
         }
@@ -357,9 +382,32 @@ public class RequestSessionMetric {
     public void logCandidateAggregateMetrics(Map<String, ProviderSession> providers) {
         try {
             mCandidateAggregateMetric.collectAverages(providers);
+            logApiCalledAggregateCandidate(mCandidateAggregateMetric, ++mSequenceCounter);
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during aggregate candidate logging " + e);
         }
+    }
+
+    /**
+     * This logs the authentication entry when browsed. Combined with the known browsed clicks
+     * in the {@link ChosenProviderFinalPhaseMetric}, this fully captures the authentication entry
+     * logic for multiple loops. An auth entry may have default or missing data, but if a provider
+     * was never assigned to an auth entry, this indicates an auth entry was never clicked.
+     * This case is handled in this emit.
+     *
+     * @param browsedAuthenticationMetric the authentication metric information to emit
+     */
+    public void logAuthEntry(BrowsedAuthenticationMetric browsedAuthenticationMetric) {
+        try {
+            if (browsedAuthenticationMetric.getProviderUid() == DEFAULT_INT_32) {
+                Slog.v(TAG, "An authentication entry was not clicked");
+                return;
+            }
+            logApiCalledAuthenticationMetric(browsedAuthenticationMetric, ++mSequenceCounter);
+        } catch (Exception e) {
+            Slog.i(TAG, "Unexpected error during metric logging: " + e);
+        }
+
     }
 
     /**

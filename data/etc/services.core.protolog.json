@@ -3865,6 +3865,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowState.java"
     },
+    "1511273241": {
+      "message": "Refreshing activity for camera compatibility treatment, activityRecord=%s",
+      "level": "VERBOSE",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
+    },
     "1518495446": {
       "message": "removeWindowToken: Attempted to remove non-existing token: %s",
       "level": "WARN",
@@ -4296,12 +4302,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_REMOTE_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RemoteAnimationController.java"
-    },
-    "1967643923": {
-      "message": "Refershing activity for camera compatibility treatment, activityRecord=%s",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/DisplayRotationCompatPolicy.java"
     },
     "1967975839": {
       "message": "Changing app %s visible=%b performLayout=%b",

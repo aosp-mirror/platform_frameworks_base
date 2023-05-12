@@ -38,6 +38,7 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.server.credentials.metrics.ApiName;
 import com.android.server.credentials.metrics.ApiStatus;
+import com.android.server.credentials.metrics.ProviderSessionMetric;
 import com.android.server.credentials.metrics.ProviderStatusForMetrics;
 import com.android.server.credentials.metrics.RequestSessionMetric;
 
@@ -199,10 +200,20 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
             Slog.w(TAG, "providerSession not found in onUiSelection. This is strange.");
             return;
         }
+        ProviderSessionMetric providerSessionMetric = providerSession.mProviderSessionMetric;
+        int initialAuthMetricsProvider = providerSessionMetric.getBrowsedAuthenticationMetric()
+                .size();
         mRequestSessionMetric.collectMetricPerBrowsingSelect(selection,
                 providerSession.mProviderSessionMetric.getCandidatePhasePerProviderMetric());
         providerSession.onUiEntrySelected(selection.getEntryKey(),
                 selection.getEntrySubkey(), selection.getPendingIntentProviderResponse());
+        int numAuthPerProvider = providerSessionMetric.getBrowsedAuthenticationMetric().size();
+        boolean authMetricLogged = (numAuthPerProvider - initialAuthMetricsProvider) == 1;
+        if (authMetricLogged) {
+            mRequestSessionMetric.logAuthEntry(
+                    providerSession.mProviderSessionMetric.getBrowsedAuthenticationMetric()
+                            .get(numAuthPerProvider - 1));
+        }
     }
 
     protected void finishSession(boolean propagateCancellation) {
@@ -210,7 +221,6 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         if (propagateCancellation) {
             mProviders.values().forEach(ProviderSession::cancelProviderRemoteSession);
         }
-        cancelExistingPendingIntent();
         mRequestSessionStatus = RequestSessionStatus.COMPLETE;
         mProviders.clear();
         clearRequestSessionLocked();
@@ -294,6 +304,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
      * @param response the response associated with the API call that just completed
      */
     protected void respondToClientWithResponseAndFinish(V response) {
+        mRequestSessionMetric.logCandidateAggregateMetrics(mProviders);
         mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(/*has_exception=*/ false,
                 ProviderStatusForMetrics.FINAL_SUCCESS);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
@@ -327,6 +338,7 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
      * @param errorMsg  the error message given back in the flow
      */
     protected void respondToClientWithErrorAndFinish(String errorType, String errorMsg) {
+        mRequestSessionMetric.logCandidateAggregateMetrics(mProviders);
         mRequestSessionMetric.collectFinalPhaseProviderMetricStatus(
                 /*has_exception=*/ true, ProviderStatusForMetrics.FINAL_FAILURE);
         if (mRequestSessionStatus == RequestSessionStatus.COMPLETE) {
@@ -348,5 +360,17 @@ abstract class RequestSession<T, U, V> implements CredentialManagerUi.Credential
         boolean isUserCanceled = errorType.contains(MetricUtilities.USER_CANCELED_SUBSTRING);
         mRequestSessionMetric.logFailureOrUserCancel(isUserCanceled);
         finishSession(/*propagateCancellation=*/false);
+    }
+
+    /**
+     * Reveals if a certain provider is primary after ensuring it exists at all in the designated
+     * provider info.
+     *
+     * @param componentName used to identify the provider we want to check primary status for
+     */
+    protected boolean isPrimaryProviderViaProviderInfo(ComponentName componentName) {
+        var chosenProviderSession = mProviders.get(componentName.flattenToString());
+        return chosenProviderSession != null && chosenProviderSession.mProviderInfo != null
+                && chosenProviderSession.mProviderInfo.isPrimary();
     }
 }

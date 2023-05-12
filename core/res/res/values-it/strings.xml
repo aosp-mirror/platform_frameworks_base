@@ -1855,8 +1855,8 @@
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ruota per migliorare l\'anteprima"</string>
     <string name="display_rotation_camera_compat_toast_in_split_screen" msgid="8393302456336805466">"Esci dallo schermo diviso per migliorare l\'anteprima"</string>
     <string name="done_label" msgid="7283767013231718521">"Fine"</string>
-    <string name="hour_picker_description" msgid="5153757582093524635">"Dispositivo di scorrimento circolare per le ore"</string>
-    <string name="minute_picker_description" msgid="9029797023621927294">"Dispositivo di scorrimento circolare per i minuti"</string>
+    <string name="hour_picker_description" msgid="5153757582093524635">"Cursore circolare per le ore"</string>
+    <string name="minute_picker_description" msgid="9029797023621927294">"Cursore circolare per i minuti"</string>
     <string name="select_hours" msgid="5982889657313147347">"Seleziona le ore"</string>
     <string name="select_minutes" msgid="9157401137441014032">"Seleziona i minuti"</string>
     <string name="select_day" msgid="2060371240117403147">"Seleziona mese e giorno"</string>
@@ -1953,7 +1953,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> non è al momento disponibile. Viene gestita tramite <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"Scopri di più"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Riattiva app"</string>
-    <string name="work_mode_off_title" msgid="6367463960165135829">"Riattivare app di lavoro?"</string>
+    <string name="work_mode_off_title" msgid="6367463960165135829">"Riattivare le app di lavoro?"</string>
     <string name="work_mode_turn_on" msgid="5316648862401307800">"Riattiva"</string>
     <string name="work_mode_emergency_call_button" msgid="6818855962881612322">"Emergenza"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"L\'app non è disponibile"</string>
@@ -2165,8 +2165,12 @@
     <string name="resolver_switch_on_work" msgid="4527096360772311894">"Riattiva"</string>
     <string name="resolver_no_work_apps_available" msgid="3298291360133337270">"Nessuna app di lavoro"</string>
     <string name="resolver_no_personal_apps_available" msgid="6284837227019594881">"Nessuna app personale"</string>
-    <string name="miniresolver_open_in_personal" msgid="6499100403307136696">"Apri l\'app <xliff:g id="APP">%s</xliff:g> personale"</string>
-    <string name="miniresolver_open_in_work" msgid="7138659785478630639">"Apri l\'app <xliff:g id="APP">%s</xliff:g> di lavoro"</string>
+    <!-- no translation found for miniresolver_open_work (6286176185835401931) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_personal (807427577794490375) -->
+    <skip />
+    <!-- no translation found for miniresolver_open_in_work (941341494673509916) -->
+    <skip />
     <string name="miniresolver_use_personal_browser" msgid="776072682871133308">"Usa il browser personale"</string>
     <string name="miniresolver_use_work_browser" msgid="543575306251952994">"Usa il browser di lavoro"</string>
     <string name="PERSOSUBSTATE_SIM_NETWORK_ENTRY" msgid="8050953231914637819">"PIN di sblocco rete SIM"</string>

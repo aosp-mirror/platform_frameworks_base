@@ -862,9 +862,12 @@ public final class TelephonyPermissions {
                         + " destAddr is emergency number");
                 return true;
             }
-        }   finally {
+        } catch(Exception e) {
+            Log.e(LOG_TAG, "Cannot verify if destAddr is an emergency number: " + e);
+        } finally {
             Binder.restoreCallingIdentity(token);
         }
+
         return checkSubscriptionAssociatedWithUser(context, subId, callerUserHandle);
     }
 
