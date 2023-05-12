@@ -29,6 +29,13 @@ flag {
 }
 
 flag {
+    name: "notification_color_update_logger"
+    namespace: "systemui"
+    description: "Enabled debug logging and dumping of notification color updates."
+    bug: "294347738"
+}
+
+flag {
     name: "notifications_footer_view_refactor"
     namespace: "systemui"
     description: "Enables the refactored version of the footer view in the notification shade "
@@ -452,4 +459,3 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
-
