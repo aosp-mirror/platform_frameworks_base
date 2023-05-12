@@ -93,6 +93,7 @@ public final class ClearRequestSession extends RequestSession<ClearCredentialSta
     public void onFinalResponseReceived(
             ComponentName componentName,
             Void response) {
+        mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
         mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
                 isPrimaryProviderViaProviderInfo(componentName));
         respondToClientWithResponseAndFinish(null);
