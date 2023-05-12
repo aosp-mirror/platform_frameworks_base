@@ -17,8 +17,10 @@ package com.android.settingslib.drawer;
 
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_ORDER;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_KEY_PROFILE;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_GROUP_KEY;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON;
 import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_ICON_URI;
+import static com.android.settingslib.drawer.TileUtils.META_DATA_PREFERENCE_SWITCH_URI;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_ALL;
 import static com.android.settingslib.drawer.TileUtils.PROFILE_PRIMARY;
 
@@ -208,5 +210,50 @@ public class ActivityTileTest {
                 UserHandle.CURRENT, PendingIntent.getActivity(mContext, 0, new Intent(), 0));
 
         assertThat(tile.hasPendingIntent()).isTrue();
+    }
+
+    @Test
+    public void hasGroupKey_empty_returnsFalse() {
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+
+        assertThat(tile.hasGroupKey()).isFalse();
+    }
+
+    @Test
+    public void hasGroupKey_notEmpty_returnsTrue() {
+        mActivityInfo.metaData.putString(META_DATA_PREFERENCE_GROUP_KEY, "test_key");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+
+        assertThat(tile.hasGroupKey()).isTrue();
+    }
+
+    @Test
+    public void getGroupKey_empty_returnsNull() {
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+
+        assertThat(tile.getGroupKey()).isNull();
+    }
+
+    @Test
+    public void getGroupKey_notEmpty_returnsValue() {
+        mActivityInfo.metaData.putString(META_DATA_PREFERENCE_GROUP_KEY, "test_key");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+
+        assertThat(tile.getGroupKey()).isEqualTo("test_key");
+    }
+
+    @Test
+    public void getType_withoutSwitch_returnsAction() {
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+
+        assertThat(tile.getType()).isEqualTo(Tile.Type.ACTION);
+    }
+
+    @Test
+    public void getType_withSwitch_returnsSwitchWithAction() {
+        mActivityInfo.metaData.putString(META_DATA_PREFERENCE_SWITCH_URI, "test://testabc/");
+        final Tile tile = new ActivityTile(mActivityInfo, "category");
+
+        assertThat(tile.getType()).isEqualTo(Tile.Type.SWITCH_WITH_ACTION);
     }
 }
