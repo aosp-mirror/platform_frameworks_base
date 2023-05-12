@@ -17,6 +17,7 @@
 package com.android.keyguard.logging
 
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.shared.model.ActiveUnlockModel
 import com.android.systemui.keyguard.shared.model.TrustManagedModel
 import com.android.systemui.keyguard.shared.model.TrustModel
 import com.android.systemui.log.LogBuffer
@@ -76,12 +77,33 @@ constructor(
         )
     }
 
+    fun activeUnlockModelEmitted(value: ActiveUnlockModel) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            {
+                int1 = value.userId
+                bool1 = value.isRunning
+            },
+            { "activeUnlockModel emitted: userId: $int1 isRunning: $bool1" }
+        )
+    }
+
     fun isCurrentUserTrusted(isCurrentUserTrusted: Boolean) {
         logBuffer.log(
             TAG,
             DEBUG,
             { bool1 = isCurrentUserTrusted },
             { "isCurrentUserTrusted emitted: $bool1" }
+        )
+    }
+
+    fun isCurrentUserActiveUnlockRunning(isCurrentUserActiveUnlockRunning: Boolean) {
+        logBuffer.log(
+            TAG,
+            LogLevel.DEBUG,
+            { bool1 = isCurrentUserActiveUnlockRunning },
+            { "isCurrentUserActiveUnlockRunning emitted: $bool1" }
         )
     }
 
