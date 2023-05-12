@@ -648,24 +648,24 @@ public class ActivityManagerServiceTest {
 
         broadcastIntent(intent1, null, true);
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false));
+                StickyBroadcast.create(intent1, false, Process.myUid()));
         assertNull(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER));
         assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent2, options.toBundle(), true);
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false));
+                StickyBroadcast.create(intent1, false, Process.myUid()));
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
-                StickyBroadcast.create(intent2, true));
+                StickyBroadcast.create(intent2, true, Process.myUid()));
         assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent3, null, true);
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false));
+                StickyBroadcast.create(intent1, false, Process.myUid()));
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
-                StickyBroadcast.create(intent2, true));
+                StickyBroadcast.create(intent2, true, Process.myUid()));
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER),
-                StickyBroadcast.create(intent3, false));
+                StickyBroadcast.create(intent3, false, Process.myUid()));
     }
 
     @SuppressWarnings("GuardedBy")
@@ -696,6 +696,9 @@ public class ActivityManagerServiceTest {
             return false;
         }
         if (a.deferUntilActive != b.deferUntilActive) {
+            return false;
+        }
+        if (a.originalCallingUid != b.originalCallingUid) {
             return false;
         }
         return true;
