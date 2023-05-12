@@ -16,7 +16,10 @@
 
 package com.android.systemui.accessibility;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_NONE;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -24,12 +27,17 @@ import static com.google.common.truth.Truth.assertThat;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.annotation.IdRes;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.database.ContentObserver;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -102,7 +110,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     @Test
     public void showSettingPanel_hasAccessibilityWindowTitle() {
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
 
         final WindowManager.LayoutParams layoutPrams =
                 mWindowManager.getLayoutParamsFromAttachedView();
@@ -114,7 +125,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     @Test
     public void showSettingPanel_windowMode_showEditButtonAndDiagonalView() {
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
 
         final Button editButton = getInternalView(R.id.magnifier_edit_button);
         assertEquals(editButton.getVisibility(), View.VISIBLE);
@@ -125,7 +139,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     @Test
     public void showSettingPanel_fullScreenMode_hideEditButtonAndDiagonalView() {
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+        mWindowMagnificationSettings.showSettingPanel();
 
         final Button editButton = getInternalView(R.id.magnifier_edit_button);
         assertEquals(editButton.getVisibility(), View.INVISIBLE);
@@ -135,9 +152,22 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     }
 
     @Test
+    public void showSettingPanel_windowOnlyCapability_hideFullscreenButton() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
+
+        final View fullscreenButton = getInternalView(R.id.magnifier_full_button);
+        assertThat(fullscreenButton.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
     public void performClick_smallSizeButton_changeMagnifierSizeSmallAndSwitchToWindowMode() {
-        // Open view
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
 
         verifyOnSetMagnifierSizeAndOnModeSwitch(
                 R.id.magnifier_small_button, MAGNIFICATION_SIZE_SMALL);
@@ -145,8 +175,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     @Test
     public void performClick_mediumSizeButton_changeMagnifierSizeMediumAndSwitchToWindowMode() {
-        // Open view
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
 
         verifyOnSetMagnifierSizeAndOnModeSwitch(
                 R.id.magnifier_medium_button, MAGNIFICATION_SIZE_MEDIUM);
@@ -154,8 +186,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     @Test
     public void performClick_largeSizeButton_changeMagnifierSizeLargeAndSwitchToWindowMode() {
-        // Open view
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
 
         verifyOnSetMagnifierSizeAndOnModeSwitch(
                 R.id.magnifier_large_button, MAGNIFICATION_SIZE_LARGE);
@@ -178,8 +212,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         View fullScreenModeButton = getInternalView(R.id.magnifier_full_button);
         getInternalView(R.id.magnifier_panel_view);
 
-        // Open view
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
 
         // Perform click
         fullScreenModeButton.performClick();
@@ -192,8 +228,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
     public void performClick_editButton_setEditMagnifierSizeMode() {
         View editButton = getInternalView(R.id.magnifier_edit_button);
 
-        // Open view
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
 
         // Perform click
         editButton.performClick();
@@ -208,8 +246,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
                 getInternalView(R.id.magnifier_horizontal_lock_switch);
         final boolean currentCheckedState = diagonalScrollingSwitch.isChecked();
 
-        // Open view
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
 
         // Perform click
         diagonalScrollingSwitch.performClick();
@@ -219,8 +259,10 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
 
     @Test
     public void onConfigurationChanged_selectedButtonIsStillSelected() {
-        // Open view
-        mWindowMagnificationSettings.showSettingPanel(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+        mWindowMagnificationSettings.showSettingPanel();
         View magnifierMediumButton = getInternalView(R.id.magnifier_medium_button);
         magnifierMediumButton.performClick();
 
@@ -232,9 +274,46 @@ public class WindowMagnificationSettingsTest extends SysuiTestCase {
         assertThat(magnifierMediumButton.isSelected()).isTrue();
     }
 
+    @Test
+    public void showSettingsPanel_observerRegistered() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mWindowMagnificationSettings.showSettingPanel();
+
+        verify(mSecureSettings).registerContentObserverForUser(
+                eq(ACCESSIBILITY_MAGNIFICATION_CAPABILITY),
+                any(ContentObserver.class),
+                eq(UserHandle.USER_CURRENT));
+    }
+
+    @Test
+    public void hideSettingsPanel_observerUnregistered() {
+        setupMagnificationCapabilityAndMode(
+                /* capability= */ ACCESSIBILITY_MAGNIFICATION_MODE_ALL,
+                /* mode= */ ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW);
+
+        mWindowMagnificationSettings.showSettingPanel();
+        mWindowMagnificationSettings.hideSettingPanel();
+
+        verify(mSecureSettings).unregisterContentObserver(any(ContentObserver.class));
+    }
+
     private <T extends View> T getInternalView(@IdRes int idRes) {
         T view = mSettingView.findViewById(idRes);
         assertNotNull(view);
         return view;
+    }
+
+    private void setupMagnificationCapabilityAndMode(int capability, int mode) {
+        when(mSecureSettings.getIntForUser(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
+                ACCESSIBILITY_MAGNIFICATION_MODE_NONE,
+                UserHandle.USER_CURRENT)).thenReturn(capability);
+        when(mSecureSettings.getIntForUser(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE,
+                ACCESSIBILITY_MAGNIFICATION_MODE_NONE,
+                UserHandle.USER_CURRENT)).thenReturn(mode);
     }
 }
