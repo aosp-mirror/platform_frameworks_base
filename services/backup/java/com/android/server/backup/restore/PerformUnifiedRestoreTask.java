@@ -900,9 +900,6 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             mAgent.doRestoreFinished(mEphemeralOpToken,
                     backupManagerService.getBackupManagerBinder());
 
-            // Ask the agent for logs after doRestoreFinished() to allow it to finalize its logs.
-            BackupManagerMonitorUtils.monitorAgentLoggingResults(mMonitor, mCurrentPackage, mAgent);
-
             // If we get this far, the callback or timeout will schedule the
             // next restore state, so we're done
         } catch (Exception e) {
@@ -1322,6 +1319,11 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 int size = (int) mBackupDataName.length();
                 EventLog.writeEvent(EventLogTags.RESTORE_PACKAGE,
                         mCurrentPackage.packageName, size);
+
+                // Ask the agent for logs after doRestoreFinished() has completed executing to allow
+                // it to finalize its logs.
+                BackupManagerMonitorUtils.monitorAgentLoggingResults(mMonitor, mCurrentPackage,
+                        mAgent);
 
                 // Just go back to running the restore queue
                 keyValueAgentCleanup();
