@@ -342,11 +342,22 @@ public class WindowAreaComponentImpl implements WindowAreaComponent,
                             mRearDisplayPresentationController);
             DeviceStateRequest concurrentDisplayStateRequest = DeviceStateRequest.newBuilder(
                     mConcurrentDisplayState).build();
-            mDeviceStateManager.requestState(
-                    concurrentDisplayStateRequest,
-                    mExecutor,
-                    deviceStateCallback
-            );
+
+            try {
+                mDeviceStateManager.requestState(
+                        concurrentDisplayStateRequest,
+                        mExecutor,
+                        deviceStateCallback
+                );
+            } catch (SecurityException e) {
+                // If a SecurityException occurs when invoking DeviceStateManager#requestState
+                // (e.g. if the caller is not in the foreground, or if it does not have the required
+                // permissions), we should first clean up our local state before re-throwing the
+                // SecurityException to the caller. Otherwise, subsequent attempts to
+                // startRearDisplayPresentationSession will always fail.
+                mRearDisplayPresentationController = null;
+                throw e;
+            }
         }
     }
 
