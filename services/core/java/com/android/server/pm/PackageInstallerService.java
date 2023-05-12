@@ -1293,8 +1293,15 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     public void installExistingPackage(String packageName, int installFlags, int installReason,
             IntentSender statusReceiver, int userId, List<String> allowListedPermissions) {
         final InstallPackageHelper installPackageHelper = new InstallPackageHelper(mPm);
-        installPackageHelper.installExistingPackageAsUser(packageName, userId, installFlags,
-                installReason, allowListedPermissions, statusReceiver);
+
+        var result = installPackageHelper.installExistingPackageAsUser(packageName, userId,
+                installFlags, installReason, allowListedPermissions, statusReceiver);
+
+        int returnCode = result.first;
+        IntentSender onCompleteSender = result.second;
+        if (onCompleteSender != null) {
+            InstallPackageHelper.onInstallComplete(returnCode, mContext, onCompleteSender);
+        }
     }
 
     @android.annotation.EnforcePermission(android.Manifest.permission.INSTALL_PACKAGES)
