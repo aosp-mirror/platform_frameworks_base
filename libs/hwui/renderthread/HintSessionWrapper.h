@@ -42,6 +42,7 @@ private:
     APerformanceHintSession* mHintSession = nullptr;
     std::future<APerformanceHintSession*> mHintSessionFuture;
 
+    int mResetsSinceLastReport = 0;
     nsecs_t mLastFrameNotification = 0;
     nsecs_t mLastTargetWorkDuration = 0;
 
