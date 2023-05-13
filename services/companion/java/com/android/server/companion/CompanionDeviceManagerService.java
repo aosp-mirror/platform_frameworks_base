@@ -1383,10 +1383,11 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback) {
+        public void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback,
+                @CrossDeviceSyncControllerCallback.Type int type) {
             if (CompanionDeviceConfig.isEnabled(
                     CompanionDeviceConfig.ENABLE_CONTEXT_SYNC_TELECOM)) {
-                mCrossDeviceSyncController.registerCallMetadataSyncCallback(callback);
+                mCrossDeviceSyncController.registerCallMetadataSyncCallback(callback, type);
             }
         }
 
