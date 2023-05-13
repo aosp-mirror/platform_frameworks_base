@@ -863,6 +863,7 @@
         android:label="@string/permlab_readContacts"
         android:description="@string/permdesc_readContacts"
         android:protectionLevel="dangerous" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <!-- Allows an application to write the user's contacts data.
          <p>Protection level: dangerous
@@ -6039,6 +6040,7 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.CALL_PRIVILEGED"
         android:protectionLevel="signature|privileged" />
+    <uses-permission android:name="android.permission.CALL_PRIVILEGED" />
 
     <!-- @SystemApi Allows an application to perform CDMA OTA provisioning @hide -->
     <permission android:name="android.permission.PERFORM_CDMA_PROVISIONING"
@@ -7690,22 +7692,6 @@
                  android:defaultToDeviceProtectedStorage="true"
                  android:forceQueryable="true"
                  android:directBootAware="true">
-        <activity android:name="com.android.internal.app.ChooserActivity"
-                android:theme="@style/Theme.DeviceDefault.Chooser"
-                android:finishOnCloseSystemDialogs="true"
-                android:excludeFromRecents="true"
-                android:documentLaunchMode="never"
-                android:relinquishTaskIdentity="true"
-                android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                android:process=":ui"
-                android:exported="true"
-                android:visibleToInstantApps="true">
-            <intent-filter android:priority="100">
-                <action android:name="android.intent.action.CHOOSER" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.VOICE" />
-            </intent-filter>
-        </activity>
         <activity android:name="com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity"
                   android:exported="false"
                   android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
@@ -8231,7 +8217,7 @@
         </service>
 
         <service android:name="com.android.server.companion.datatransfer.contextsync.CallMetadataSyncConnectionService"
-                 android:permission="android.permission.BIND_CONNECTION_SERVICE"
+                 android:permission="android.permission.BIND_TELECOM_CONNECTION_SERVICE"
                  android:exported="true">
             <intent-filter>
                 <action android:name="android.telecom.ConnectionService"/>

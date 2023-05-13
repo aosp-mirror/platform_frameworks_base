@@ -73,6 +73,7 @@ fun SearchScaffold(
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (bottomPadding: Dp, searchQuery: State<String>) -> Unit,
 ) {
+    ActivityTitle(title)
     var isSearchMode by rememberSaveable { mutableStateOf(false) }
     val viewModel: SearchScaffoldViewModel = viewModel()
 

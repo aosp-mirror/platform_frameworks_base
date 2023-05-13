@@ -31,7 +31,7 @@
         android:paddingStart="16dp"
         android:paddingTop="16dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="24dp"
+        android:paddingBottom="16dp"
         android:orientation="horizontal">
         <ImageView
             android:id="@+id/header_icon"
@@ -113,6 +113,8 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/list_result"
             android:scrollbars="vertical"
+            android:paddingTop="8dp"
+            android:clipToPadding="false"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
     </LinearLayout>

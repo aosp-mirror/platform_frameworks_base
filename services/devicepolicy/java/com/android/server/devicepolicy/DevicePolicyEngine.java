@@ -27,17 +27,22 @@ import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PAREN
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.app.BroadcastOptions;
 import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyState;
+import android.app.admin.IntentFilterPolicyKey;
 import android.app.admin.PolicyKey;
 import android.app.admin.PolicyUpdateReceiver;
 import android.app.admin.PolicyValue;
 import android.app.admin.TargetUser;
 import android.app.admin.UserRestrictionPolicyKey;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
@@ -45,6 +50,7 @@ import android.content.pm.UserProperties;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.TelephonyManager;
@@ -1015,20 +1021,90 @@ final class DevicePolicyEngine {
     /**
      * Handles internal state related to packages getting updated.
      */
-    void handlePackageChanged(@Nullable String updatedPackage, int userId, boolean packageRemoved) {
-        if (updatedPackage == null) {
-            return;
-        }
-        if (packageRemoved) {
+    void handlePackageChanged(
+            @Nullable String updatedPackage, int userId, @Nullable String removedDpcPackage) {
+        Binder.withCleanCallingIdentity(() -> {
             Set<EnforcingAdmin> admins = getEnforcingAdminsOnUser(userId);
-            for (EnforcingAdmin admin : admins) {
-                if (admin.getPackageName().equals(updatedPackage)) {
-                    // remove policies for the uninstalled package
-                    removePoliciesForAdmin(admin);
+            if (removedDpcPackage != null) {
+                for (EnforcingAdmin admin : admins) {
+                    if (removedDpcPackage.equals(admin.getPackageName())) {
+                        removePoliciesForAdmin(admin);
+                        return;
+                    }
                 }
             }
-        } else {
-            updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+            for (EnforcingAdmin admin : admins) {
+                if (updatedPackage == null || updatedPackage.equals(admin.getPackageName())) {
+                    if (!isPackageInstalled(admin.getPackageName(), userId)) {
+                        Slogf.i(TAG, String.format(
+                                "Admin package %s not found for user %d, removing admin policies",
+                                admin.getPackageName(), userId));
+                        // remove policies for the uninstalled package
+                        removePoliciesForAdmin(admin);
+                        return;
+                    }
+                }
+            }
+            if (updatedPackage != null) {
+                updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+                removePersistentPreferredActivityPoliciesForPackage(updatedPackage, userId);
+            }
+        });
+    }
+
+    private void removePersistentPreferredActivityPoliciesForPackage(
+            @NonNull String packageName, int userId) {
+        Set<PolicyKey> policyKeys = getLocalPolicyKeysSetByAllAdmins(
+                PolicyDefinition.GENERIC_PERSISTENT_PREFERRED_ACTIVITY, userId);
+        for (PolicyKey key : policyKeys) {
+            if (!(key instanceof IntentFilterPolicyKey)) {
+                throw new IllegalStateException("PolicyKey for "
+                        + "PERSISTENT_PREFERRED_ACTIVITY is not of type "
+                        + "IntentFilterPolicyKey");
+            }
+            IntentFilterPolicyKey parsedKey =
+                    (IntentFilterPolicyKey) key;
+            IntentFilter intentFilter = Objects.requireNonNull(parsedKey.getIntentFilter());
+            PolicyDefinition<ComponentName> policyDefinition =
+                    PolicyDefinition.PERSISTENT_PREFERRED_ACTIVITY(intentFilter);
+            LinkedHashMap<EnforcingAdmin, PolicyValue<ComponentName>> policies =
+                    getLocalPoliciesSetByAdmins(
+                            policyDefinition,
+                            userId);
+            IPackageManager packageManager = AppGlobals.getPackageManager();
+            for (EnforcingAdmin admin : policies.keySet()) {
+                if (policies.get(admin).getValue() != null
+                        && policies.get(admin).getValue().getPackageName().equals(packageName)) {
+                    try {
+                        if (packageManager.getPackageInfo(
+                                packageName, 0, userId) == null
+                                || packageManager.getReceiverInfo(policies.get(admin).getValue(),
+                                PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                                userId) == null) {
+                            Slogf.e(TAG, String.format(
+                                    "Persistent preferred activity in package %s not found for "
+                                            + "user %d, removing policy for admin",
+                                    packageName, userId));
+                            removeLocalPolicy(policyDefinition, admin, userId);
+                        }
+                    } catch (RemoteException re) {
+                        // Shouldn't happen.
+                        Slogf.wtf(TAG, "Error handling package changes", re);
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean isPackageInstalled(String packageName, int userId) {
+        try {
+            return AppGlobals.getPackageManager().getPackageInfo(
+                    packageName, 0, userId) != null;
+        } catch (RemoteException re) {
+            // Shouldn't happen.
+            Slogf.wtf(TAG, "Error handling package changes", re);
+            return true;
         }
     }
 

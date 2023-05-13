@@ -301,6 +301,33 @@ public class DisplayPolicyTests extends WindowTestsBase {
     }
 
     @Test
+    public void testSwitchDecorInsets() {
+        createNavBarWithProvidedInsets(mDisplayContent);
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        final DisplayInfo info = mDisplayContent.getDisplayInfo();
+        final int w = info.logicalWidth;
+        final int h = info.logicalHeight;
+        displayPolicy.updateDecorInsetsInfo();
+        final Rect prevConfigFrame = new Rect(displayPolicy.getDecorInsetsInfo(info.rotation,
+                info.logicalWidth, info.logicalHeight).mConfigFrame);
+
+        displayPolicy.updateCachedDecorInsets();
+        mDisplayContent.updateBaseDisplayMetrics(w / 2, h / 2,
+                info.logicalDensityDpi, info.physicalXDpi, info.physicalYDpi);
+        // There is no previous cache. But the current state will be cached.
+        assertFalse(displayPolicy.shouldKeepCurrentDecorInsets());
+
+        // Switch to original state.
+        displayPolicy.updateCachedDecorInsets();
+        mDisplayContent.updateBaseDisplayMetrics(w, h,
+                info.logicalDensityDpi, info.physicalXDpi, info.physicalYDpi);
+        assertTrue(displayPolicy.shouldKeepCurrentDecorInsets());
+        // The current insets are restored from cache directly.
+        assertEquals(prevConfigFrame, displayPolicy.getDecorInsetsInfo(info.rotation,
+                info.logicalWidth, info.logicalHeight).mConfigFrame);
+    }
+
+    @Test
     public void testUpdateDisplayConfigurationByDecor() {
         doReturn(NO_CUTOUT).when(mDisplayContent).calculateDisplayCutoutForRotation(anyInt());
         final WindowState navbar = createNavBarWithProvidedInsets(mDisplayContent);

@@ -3882,7 +3882,9 @@ public class Activity extends ContextThemeWrapper
      * it will set up the dispatch to call {@link #onKeyUp} where the action
      * will be performed; for earlier applications, it will perform the
      * action immediately in on-down, as those versions of the platform
-     * behaved.
+     * behaved. This implementation will also take care of {@link KeyEvent#KEYCODE_ESCAPE}
+     * by finishing the activity if it would be closed by touching outside
+     * of it.
      *
      * <p>Other additional default key handling may be performed
      * if configured with {@link #setDefaultKeyMode}.
@@ -3901,6 +3903,11 @@ public class Activity extends ContextThemeWrapper
             } else {
                 onBackPressed();
             }
+            return true;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_ESCAPE && mWindow.shouldCloseOnTouchOutside()) {
+            event.startTracking();
             return true;
         }
 
@@ -3999,6 +4006,15 @@ public class Activity extends ContextThemeWrapper
                 return true;
             }
         }
+
+        if (keyCode == KeyEvent.KEYCODE_ESCAPE
+                && mWindow.shouldCloseOnTouchOutside()
+                && event.isTracking()
+                && !event.isCanceled()) {
+            finish();
+            return true;
+        }
+
         return false;
     }
 

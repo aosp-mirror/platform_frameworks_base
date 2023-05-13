@@ -19,6 +19,12 @@ package com.android.server.autofill;
 import static android.Manifest.permission.PROVIDE_OWN_AUTOFILL_SUGGESTIONS;
 import static android.service.autofill.AutofillFieldClassificationService.EXTRA_SCORES;
 import static android.service.autofill.AutofillService.EXTRA_FILL_RESPONSE;
+import static android.service.autofill.Dataset.PICK_REASON_NO_PCC;
+import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_ONLY;
+import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
+import static android.service.autofill.Dataset.PICK_REASON_PROVIDER_DETECTION_ONLY;
+import static android.service.autofill.Dataset.PICK_REASON_PROVIDER_DETECTION_PREFERRED_WITH_PCC;
+import static android.service.autofill.Dataset.PICK_REASON_UNKNOWN;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_DIALOG;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
@@ -124,6 +130,7 @@ import android.service.autofill.AutofillFieldClassificationService.Scores;
 import android.service.autofill.AutofillService;
 import android.service.autofill.CompositeUserData;
 import android.service.autofill.Dataset;
+import android.service.autofill.Dataset.DatasetEligibleReason;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
 import android.service.autofill.FieldClassificationUserData;
@@ -798,7 +805,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Returns empty list if PCC is off or no types available
     */
     private List<String> getTypeHintsForProvider() {
-        if (!mService.getMaster().isPccClassificationEnabled()) {
+        if (!mService.isPccClassificationEnabled()) {
             return Collections.EMPTY_LIST;
         }
         final String typeHints = mService.getMaster().getPccProviderHints();
@@ -1158,7 +1165,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             mSessionFlags.mAugmentedAutofillOnly = true;
             mFillRequestEventLogger.maybeSetRequestId(AUGMENTED_AUTOFILL_REQUEST_ID);
-            mFillRequestEventLogger.maybeSetIsAugmented(mSessionFlags.mAugmentedAutofillOnly);
+            mFillRequestEventLogger.maybeSetIsAugmented(true);
             mFillRequestEventLogger.logAndEndEvent();
             triggerAugmentedAutofillLocked(flags);
             return;
@@ -1200,7 +1207,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // structure is taken. This causes only one fill request per burst of focus changes.
         cancelCurrentRequestLocked();
 
-        if (mService.getMaster().isPccClassificationEnabled()
+        if (mService.isPccClassificationEnabled()
                 && mClassificationState.mHintsToAutofillIdMap == null) {
             if (sVerbose) {
                 Slog.v(TAG, "triggering field classification");
@@ -1631,7 +1638,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Slog.d(TAG, "DBG: computeDatasetsForProviderAndUpdateContainer: "
                     + autofillProviderContainer);
         }
-        if (!mService.getMaster().isPccClassificationEnabled())  {
+        if (!mService.isPccClassificationEnabled())  {
             if (sVerbose) {
                 Slog.v(TAG, "PCC classification is disabled");
             }
@@ -1798,6 +1805,13 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private void computeDatasetsForProviderAndUpdateContainer(
             FillResponse response, DatasetComputationContainer container) {
+        @DatasetEligibleReason int globalPickReason = PICK_REASON_UNKNOWN;
+        boolean isPccEnabled = mService.isPccClassificationEnabled();
+        if (isPccEnabled) {
+            globalPickReason = PICK_REASON_PROVIDER_DETECTION_ONLY;
+        } else {
+            globalPickReason = PICK_REASON_NO_PCC;
+        }
         List<Dataset> datasets = response.getDatasets();
         if (datasets == null) return;
         ArrayMap<AutofillId, Set<Dataset>> autofillIdToDatasetMap = new ArrayMap<>();
@@ -1805,6 +1819,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         Set<AutofillId> eligibleAutofillIds = new ArraySet<>();
         for (Dataset dataset : response.getDatasets()) {
             if (dataset.getFieldIds() == null || dataset.getFieldIds().isEmpty()) continue;
+            @DatasetEligibleReason int pickReason = globalPickReason;
             if (dataset.getAutofillDatatypes() != null
                     && !dataset.getAutofillDatatypes().isEmpty()) {
                 // This dataset has information relevant for detection too, so we should filter
@@ -1827,6 +1842,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (newSize == 0) continue;
 
                 if (conversionRequired) {
+                    pickReason = PICK_REASON_PROVIDER_DETECTION_PREFERRED_WITH_PCC;
                     ArrayList<AutofillId> fieldIds = new ArrayList<>(newSize);
                     ArrayList<AutofillValue> fieldValues = new ArrayList<>(newSize);
                     ArrayList<RemoteViews> fieldPresentations = new ArrayList<>(newSize);
@@ -1870,6 +1886,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                     dataset.getAuthentication());
                 }
             }
+            dataset.setEligibleReasonReason(pickReason);
             eligibleDatasets.add(dataset);
             for (AutofillId id : dataset.getFieldIds()) {
                 eligibleAutofillIds.add(id);
@@ -1905,6 +1922,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Set<AutofillId> eligibleAutofillIds = new ArraySet<>();
 
             for (int i = 0; i < datasets.size(); i++) {
+
+                @DatasetEligibleReason int pickReason = PICK_REASON_PCC_DETECTION_ONLY;
                 Dataset dataset = datasets.get(i);
                 if (dataset.getAutofillDatatypes() == null
                         || dataset.getAutofillDatatypes().isEmpty()) continue;
@@ -1919,7 +1938,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Set<AutofillId> datasetAutofillIds = new ArraySet<>();
 
                 for (int j = 0; j < dataset.getAutofillDatatypes().size(); j++) {
-                    if (dataset.getAutofillDatatypes().get(j) == null) continue;
+                    if (dataset.getAutofillDatatypes().get(j) == null) {
+                        if (dataset.getFieldIds() != null && dataset.getFieldIds().get(j) != null) {
+                            pickReason = PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
+                        }
+                        continue;
+                    }
                     String hint = dataset.getAutofillDatatypes().get(j);
 
                     if (hintsToAutofillIdMap.containsKey(hint)) {
@@ -1966,6 +1990,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                 null,
                                 dataset.getId(),
                                 dataset.getAuthentication());
+                dataset.setEligibleReasonReason(pickReason);
                 eligibleDatasets.add(newDataset);
                 Set<Dataset> newDatasets;
                 for (AutofillId autofillId : datasetAutofillIds) {
@@ -2229,7 +2254,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void save() {
         synchronized (mLock) {
-            mSaveEventLogger.maybeSetSaveButtonClicked(true);
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#save() rejected - session: "
                         + id + " destroyed");
@@ -2248,7 +2272,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     public void cancelSave() {
         synchronized (mLock) {
             mSessionFlags.mShowingSaveUi = false;
-            mSaveEventLogger.maybeSetDialogDismissed(true);
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#cancelSave() rejected - session: "
                         + id + " destroyed");
@@ -3403,7 +3426,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
                         mComponentName, this, mContext,  mPendingSaveUi, isUpdate, mCompatMode,
-                        response.getShowSaveDialogIcon());
+                        response.getShowSaveDialogIcon(), mSaveEventLogger);
                 mSaveEventLogger.maybeSetLatencySaveUiDisplayMillis(
                     SystemClock.elapsedRealtime()- saveUiDisplayStartTimestamp);
                 if (client != null) {
@@ -4388,7 +4411,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         getUiForShowing().showFillDialog(filledId, response, filterText,
                 mService.getServicePackageName(), mComponentName, serviceIcon, this,
-                id, mCompatMode);
+                id, mCompatMode, mPresentationStatsEventLogger);
         return true;
     }
 
@@ -4818,6 +4841,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mFillRequestEventLogger.maybeSetAppPackageUid(uid);
         mFillRequestEventLogger.maybeSetFlags(mFlags);
         mFillRequestEventLogger.maybeSetRequestId(AUGMENTED_AUTOFILL_REQUEST_ID);
+        mFillRequestEventLogger.maybeSetIsAugmented(true);
         mFillRequestEventLogger.logAndEndEvent();
 
         final ViewState viewState = mViewStates.get(mCurrentViewId);

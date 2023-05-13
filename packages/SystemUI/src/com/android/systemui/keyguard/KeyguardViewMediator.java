@@ -93,6 +93,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.window.IRemoteTransition;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -153,12 +154,14 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 
 import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
@@ -961,7 +964,26 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 }
             };
 
-    private IRemoteAnimationRunner mOccludeAnimationRunner =
+    private final IRemoteAnimationRunner.Stub mExitAnimationRunner =
+            new IRemoteAnimationRunner.Stub() {
+        @Override // Binder interface
+        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers,
+                RemoteAnimationTarget[] nonApps,
+                IRemoteAnimationFinishedCallback finishedCallback) {
+            Trace.beginSection("mExitAnimationRunner.onAnimationStart#startKeyguardExitAnimation");
+            startKeyguardExitAnimation(transit, apps, wallpapers, nonApps, finishedCallback);
+            Trace.endSection();
+        }
+
+        @Override // Binder interface
+        public void onAnimationCancelled() {
+            cancelKeyguardExitAnimation();
+        }
+    };
+
+    private final IRemoteAnimationRunner mOccludeAnimationRunner =
             new OccludeActivityLaunchRemoteAnimationRunner(mOccludeAnimationController);
 
     private final IRemoteAnimationRunner mOccludeByDreamAnimationRunner =
@@ -1003,7 +1025,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     }
 
                     final RemoteAnimationTarget primary = apps[0];
-                    final boolean isDream = (apps[0].taskInfo.topActivityType
+                    final boolean isDream = (apps[0].taskInfo != null
+                            && apps[0].taskInfo.topActivityType
                             == WindowConfiguration.ACTIVITY_TYPE_DREAM);
                     if (!isDream) {
                         Log.w(TAG, "The occluding app isn't Dream; "
@@ -1103,7 +1126,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     }
 
                     final RemoteAnimationTarget primary = apps[0];
-                    final boolean isDream = (apps[0].taskInfo.topActivityType
+                    final boolean isDream = (apps[0].taskInfo != null
+                            && apps[0].taskInfo.topActivityType
                             == WindowConfiguration.ACTIVITY_TYPE_DREAM);
 
                     final SyncRtSurfaceTransactionApplier applier =
@@ -1186,6 +1210,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mWallpaperSupportsAmbientMode;
     private ScreenOnCoordinator mScreenOnCoordinator;
+    private final KeyguardTransitions mKeyguardTransitions;
 
     private Lazy<ActivityLaunchAnimator> mActivityLaunchAnimator;
     private Lazy<ScrimController> mScrimControllerLazy;
@@ -1221,6 +1246,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             ScreenOffAnimationController screenOffAnimationController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthController,
             ScreenOnCoordinator screenOnCoordinator,
+            KeyguardTransitions keyguardTransitions,
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
             Lazy<ShadeController> shadeControllerLazy,
@@ -1248,6 +1274,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         dumpManager.registerDumpable(getClass().getName(), this);
         mDeviceConfig = deviceConfig;
         mScreenOnCoordinator = screenOnCoordinator;
+        mKeyguardTransitions = keyguardTransitions;
         mNotificationShadeWindowControllerLazy = notificationShadeWindowControllerLazy;
         mShowHomeOverLockscreen = mDeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -1322,6 +1349,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             // The system's keyguard is disabled or missing.
             setShowingLocked(false /* showing */, true /* forceCallbacks */);
         }
+
+        mKeyguardTransitions.register(
+                KeyguardService.wrap(getExitAnimationRunner()),
+                KeyguardService.wrap(getOccludeAnimationRunner()),
+                KeyguardService.wrap(getOccludeByDreamAnimationRunner()),
+                KeyguardService.wrap(getUnoccludeAnimationRunner()));
 
         final ContentResolver cr = mContext.getContentResolver();
 
@@ -1468,13 +1501,17 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             notifyFinishedGoingToSleep();
 
             if (cameraGestureTriggered) {
-
                 // Just to make sure, make sure the device is awake.
                 mContext.getSystemService(PowerManager.class).wakeUp(SystemClock.uptimeMillis(),
                         PowerManager.WAKE_REASON_CAMERA_LAUNCH,
                         "com.android.systemui:CAMERA_GESTURE_PREVENT_LOCK");
                 setPendingLock(false);
                 mPendingReset = false;
+                mPowerGestureIntercepted = true;
+                if (DEBUG) {
+                    Log.d(TAG, "cameraGestureTriggered=" + cameraGestureTriggered
+                            + ",mPowerGestureIntercepted=" + mPowerGestureIntercepted);
+                }
             }
 
             if (mPendingReset) {
@@ -1673,7 +1710,13 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             mAnimatingScreenOff = false;
             cancelDoKeyguardLaterLocked();
             cancelDoKeyguardForChildProfilesLocked();
-            if (DEBUG) Log.d(TAG, "onStartedWakingUp, seq = " + mDelayedShowingSequence);
+            if (cameraGestureTriggered) {
+                mPowerGestureIntercepted = true;
+            }
+            if (DEBUG) {
+                Log.d(TAG, "onStartedWakingUp, seq = " + mDelayedShowingSequence
+                        + ", mPowerGestureIntercepted = " + mPowerGestureIntercepted);
+            }
             notifyStartedWakingUp();
         }
         mUiEventLogger.logWithInstanceIdAndPosition(
@@ -1858,6 +1901,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         Trace.endSection();
     }
 
+    public IRemoteAnimationRunner getExitAnimationRunner() {
+        return mExitAnimationRunner;
+    }
+
     public IRemoteAnimationRunner getOccludeAnimationRunner() {
         return mOccludeAnimationRunner;
     }
@@ -1896,11 +1943,18 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 startKeyguardExitAnimation(0, 0);
             }
 
+            mPowerGestureIntercepted = mUpdateMonitor.isSecureCameraLaunchedOverKeyguard();
+
             if (mOccluded != isOccluded) {
                 mOccluded = isOccluded;
                 mKeyguardViewControllerLazy.get().setOccluded(isOccluded, animate
                         && mDeviceInteractive);
                 adjustStatusBarLocked();
+            }
+
+            if (DEBUG) {
+                Log.d(TAG, "isOccluded=" + isOccluded + ",mPowerGestureIntercepted="
+                        + mPowerGestureIntercepted);
             }
         }
         Trace.endSection();
@@ -3016,6 +3070,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 if (!mShowHomeOverLockscreen || !mInGestureNavigationMode) {
                     flags |= StatusBarManager.DISABLE_HOME;
                 }
+                flags |= StatusBarManager.DISABLE_RECENT;
+            }
+
+            if (mPowerGestureIntercepted) {
                 flags |= StatusBarManager.DISABLE_RECENT;
             }
 

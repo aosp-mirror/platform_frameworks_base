@@ -324,7 +324,6 @@ final class InstallPackageHelper {
         InstallSource installSource = request.getInstallSource();
         final boolean isApex = (scanFlags & SCAN_AS_APEX) != 0;
         final boolean pkgAlreadyExists = oldPkgSetting != null;
-        final boolean isAllowUpdateOwnership = parsedPackage.isAllowUpdateOwnership();
         final String oldUpdateOwner =
                 pkgAlreadyExists ? oldPkgSetting.getInstallSource().mUpdateOwnerPackageName : null;
         final String updateOwnerFromSysconfig = isApex || !pkgSetting.isSystem() ? null
@@ -346,11 +345,7 @@ final class InstallPackageHelper {
             }
 
             // Handle the update ownership enforcement for APK
-            if (!isAllowUpdateOwnership) {
-                // If the app wants to opt-out of the update ownership enforcement via manifest,
-                // it overrides the installer's use of #setRequestUpdateOwnership.
-                installSource = installSource.setUpdateOwnerPackageName(null);
-            } else if (!isApex) {
+            if (!isApex) {
                 // User installer UID as "current" userId if present; otherwise, use the userId
                 // from InstallRequest.
                 final int userId = installSource.mInstallerPackageUid != Process.INVALID_UID
@@ -391,22 +386,18 @@ final class InstallPackageHelper {
         // For non-standard install (addForInit), installSource is null.
         } else if (pkgSetting.isSystem()) {
             // We still honor the manifest attr if the system app wants to opt-out of it.
-            if (!isAllowUpdateOwnership) {
-                pkgSetting.setUpdateOwnerPackage(null);
-            } else {
-                final boolean isSameUpdateOwner = isUpdateOwnershipEnabled
-                        && TextUtils.equals(oldUpdateOwner, updateOwnerFromSysconfig);
+            final boolean isSameUpdateOwner = isUpdateOwnershipEnabled
+                    && TextUtils.equals(oldUpdateOwner, updateOwnerFromSysconfig);
 
-                // Here we handle the update owner for the system package, and the rules are:
-                // -. We use the update owner from sysconfig as the initial value.
-                // -. Once an app becomes to system app later via OTA, only retains the update
-                //    owner if it's consistence with sysconfig.
-                // -. Clear the update owner when update owner changes from sysconfig.
-                if (!pkgAlreadyExists || isSameUpdateOwner) {
-                    pkgSetting.setUpdateOwnerPackage(updateOwnerFromSysconfig);
-                } else {
-                    pkgSetting.setUpdateOwnerPackage(null);
-                }
+            // Here we handle the update owner for the system package, and the rules are:
+            // -. We use the update owner from sysconfig as the initial value.
+            // -. Once an app becomes to system app later via OTA, only retains the update
+            //    owner if it's consistence with sysconfig.
+            // -. Clear the update owner when update owner changes from sysconfig.
+            if (!pkgAlreadyExists || isSameUpdateOwner) {
+                pkgSetting.setUpdateOwnerPackage(updateOwnerFromSysconfig);
+            } else {
+                pkgSetting.setUpdateOwnerPackage(null);
             }
         }
 
@@ -606,8 +597,8 @@ final class InstallPackageHelper {
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
 
-    public int installExistingPackageAsUser(@Nullable String packageName, @UserIdInt int userId,
-            @PackageManager.InstallFlags int installFlags,
+    public Pair<Integer, IntentSender> installExistingPackageAsUser(@Nullable String packageName,
+            @UserIdInt int userId, @PackageManager.InstallFlags int installFlags,
             @PackageManager.InstallReason int installReason,
             @Nullable List<String> allowlistedRestrictedPermissions,
             @Nullable IntentSender intentSender) {
@@ -632,7 +623,7 @@ final class InstallPackageHelper {
                 true /* requireFullPermission */, true /* checkShell */,
                 "installExistingPackage for user " + userId);
         if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
-            return PackageManager.INSTALL_FAILED_USER_RESTRICTED;
+            return Pair.create(PackageManager.INSTALL_FAILED_USER_RESTRICTED, intentSender);
         }
 
         final long callingId = Binder.clearCallingIdentity();
@@ -648,7 +639,7 @@ final class InstallPackageHelper {
                 final Computer snapshot = mPm.snapshotComputer();
                 pkgSetting = mPm.mSettings.getPackageLPr(packageName);
                 if (pkgSetting == null || pkgSetting.getPkg() == null) {
-                    return PackageManager.INSTALL_FAILED_INVALID_URI;
+                    return Pair.create(PackageManager.INSTALL_FAILED_INVALID_URI, intentSender);
                 }
                 if (!snapshot.canViewInstantApps(callingUid, UserHandle.getUserId(callingUid))) {
                     // only allow the existing package to be used if it's installed as a full
@@ -661,7 +652,7 @@ final class InstallPackageHelper {
                         }
                     }
                     if (!installAllowed) {
-                        return PackageManager.INSTALL_FAILED_INVALID_URI;
+                        return Pair.create(PackageManager.INSTALL_FAILED_INVALID_URI, intentSender);
                     }
                 }
                 if (!pkgSetting.getInstalled(userId)) {
@@ -719,14 +710,17 @@ final class InstallPackageHelper {
                 }
                 // start async restore with no post-install since we finish install here
 
+                final IntentSender onCompleteSender = intentSender;
+                intentSender = null;
+
                 InstallRequest request = new InstallRequest(userId,
                         PackageManager.INSTALL_SUCCEEDED, pkgSetting.getPkg(), new int[]{ userId },
                         () -> {
                             mPm.restorePermissionsAndUpdateRolesForNewUserInstall(packageName,
                                     userId);
-                            if (intentSender != null) {
-                                onRestoreComplete(PackageManager.INSTALL_SUCCEEDED, mContext,
-                                        intentSender);
+                            if (onCompleteSender != null) {
+                                onInstallComplete(PackageManager.INSTALL_SUCCEEDED, mContext,
+                                        onCompleteSender);
                             }
                         });
                 restoreAndPostInstall(request);
@@ -735,10 +729,10 @@ final class InstallPackageHelper {
             Binder.restoreCallingIdentity(callingId);
         }
 
-        return PackageManager.INSTALL_SUCCEEDED;
+        return Pair.create(PackageManager.INSTALL_SUCCEEDED, intentSender);
     }
 
-    private static void onRestoreComplete(int returnCode, Context context, IntentSender target) {
+    static void onInstallComplete(int returnCode, Context context, IntentSender target) {
         Intent fillIn = new Intent();
         fillIn.putExtra(PackageInstaller.EXTRA_STATUS,
                 PackageManager.installStatusToPublicStatus(returnCode));

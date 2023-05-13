@@ -22,6 +22,7 @@ import static android.media.RouteListingPreference.Item.SUBTEXT_SUBSCRIPTION_REQ
 
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_GO_TO_APP;
 import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_NONE;
+import static com.android.settingslib.media.MediaDevice.SelectionBehavior.SELECTION_BEHAVIOR_TRANSFER;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -94,10 +95,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(false);
-        when(mMediaOutputController.isSubStatusSupported()).thenReturn(false);
         when(mMediaOutputController.getMediaItemList()).thenReturn(mMediaItems);
-        when(mMediaOutputController.getMediaDevices()).thenReturn(mMediaDevices);
         when(mMediaOutputController.hasAdjustVolumeUserRestriction()).thenReturn(false);
         when(mMediaOutputController.isAnyDeviceTransferring()).thenReturn(false);
         when(mMediaOutputController.getDeviceIconCompat(mMediaDevice1)).thenReturn(mIconCompat);
@@ -126,85 +124,24 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void getItemCount_containExtraOneForPairNew() {
-        assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaDevices.size() + 1);
-    }
-
-    @Test
-    public void getItemId_validPosition_returnCorrespondingId() {
-        assertThat(mMediaOutputAdapter.getItemId(0)).isEqualTo(mMediaDevices.get(
-                0).getId().hashCode());
-    }
-
-    @Test
-    public void getItemId_invalidPosition_returnPosition() {
-        int invalidPosition = mMediaDevices.size() + 1;
-        assertThat(mMediaOutputAdapter.getItemId(invalidPosition)).isEqualTo(invalidPosition);
-    }
-
-    @Test
-    public void advanced_getItemCount_returnsMediaItemSize() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void getItemCount_returnsMediaItemSize() {
         assertThat(mMediaOutputAdapter.getItemCount()).isEqualTo(mMediaItems.size());
     }
 
     @Test
-    public void advanced_getItemId_validPosition_returnCorrespondingId() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void getItemId_validPosition_returnCorrespondingId() {
         assertThat(mMediaOutputAdapter.getItemId(0)).isEqualTo(mMediaItems.get(
                 0).getMediaDevice().get().getId().hashCode());
     }
 
     @Test
-    public void advanced_getItemId_invalidPosition_returnPosition() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void getItemId_invalidPosition_returnPosition() {
         int invalidPosition = mMediaItems.size() + 1;
         assertThat(mMediaOutputAdapter.getItemId(invalidPosition)).isEqualTo(invalidPosition);
     }
 
     @Test
     public void onBindViewHolder_bindPairNew_verifyView() {
-        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
-
-        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mTitleText.getText()).isEqualTo(mContext.getText(
-                R.string.media_output_dialog_pairing_new));
-    }
-
-    @Test
-    public void onBindViewHolder_bindGroup_withSessionName_verifyView() {
-        when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
-        when(mMediaOutputController.getSessionName()).thenReturn(TEST_SESSION_NAME);
-        mMediaOutputAdapter.getItemCount();
-        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
-
-        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.VISIBLE);
-    }
-
-    @Test
-    public void onBindViewHolder_bindGroup_noSessionName_verifyView() {
-        when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
-        when(mMediaOutputController.getSessionName()).thenReturn(null);
-        mMediaOutputAdapter.getItemCount();
-        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
-
-        assertThat(mViewHolder.mSeekBar.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mTitleText.getVisibility()).isEqualTo(View.VISIBLE);
-        assertThat(mViewHolder.mProgressBar.getVisibility()).isEqualTo(View.GONE);
-        assertThat(mViewHolder.mCheckBox.getVisibility()).isEqualTo(View.VISIBLE);
-    }
-
-    @Test
-    public void advanced_onBindViewHolder_bindPairNew_verifyView() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
         mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
@@ -222,8 +159,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void advanced_onBindViewHolder_bindGroup_withSessionName_verifyView() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void onBindViewHolder_bindGroup_withSessionName_verifyView() {
         when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(
                 mMediaItems.stream().map((item) -> item.getMediaDevice().get()).collect(
                         Collectors.toList()));
@@ -243,8 +179,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void advanced_onBindViewHolder_bindGroup_noSessionName_verifyView() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void onBindViewHolder_bindGroup_noSessionName_verifyView() {
         when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(
                 mMediaItems.stream().map((item) -> item.getMediaDevice().get()).collect(
                         Collectors.toList()));
@@ -277,8 +212,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void advanced_onBindViewHolder_bindNonRemoteConnectedDevice_verifyView() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void onBindViewHolder_bindNonRemoteConnectedDevice_verifyView() {
         when(mMediaOutputController.isActiveRemoteDevice(mMediaDevice1)).thenReturn(false);
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
                 .onCreateViewHolder(new LinearLayout(mContext), 0);
@@ -294,8 +228,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void advanced_onBindViewHolder_bindConnectedRemoteDevice_verifyView() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void onBindViewHolder_bindConnectedRemoteDevice_verifyView() {
         when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(
                 ImmutableList.of(mMediaDevice2));
         when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(true);
@@ -314,8 +247,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void advanced_onBindViewHolder_bindSingleConnectedRemoteDevice_verifyView() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void onBindViewHolder_bindSingleConnectedRemoteDevice_verifyView() {
         when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(
                 ImmutableList.of());
         when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(true);
@@ -351,6 +283,8 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         when(mMediaDevice1.isMutingExpectedDevice()).thenReturn(true);
         when(mMediaOutputController.isCurrentConnectedDeviceRemote()).thenReturn(false);
         when(mMediaOutputController.isActiveRemoteDevice(mMediaDevice1)).thenReturn(false);
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
 
         assertThat(mViewHolder.mTwoLineLayout.getVisibility()).isEqualTo(View.GONE);
@@ -446,8 +380,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Test
     public void subStatusSupported_onBindViewHolder_bindHostDeviceWithOngoingSession_verifyView() {
-        when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         when(mMediaOutputController.isVolumeControlEnabled(mMediaDevice1)).thenReturn(true);
         when(mMediaDevice1.isHostForOngoingSession()).thenReturn(true);
         when(mMediaDevice1.hasSubtext()).thenReturn(true);
@@ -477,8 +409,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     public void subStatusSupported_onBindViewHolder_bindDeviceRequirePremium_verifyView() {
         String deviceStatus = (String) mContext.getText(
                 R.string.media_output_status_require_premium);
-        when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         when(mMediaDevice2.hasSubtext()).thenReturn(true);
         when(mMediaDevice2.getSubtext()).thenReturn(SUBTEXT_SUBSCRIPTION_REQUIRED);
         when(mMediaDevice2.getSubtextString()).thenReturn(deviceStatus);
@@ -503,8 +433,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     public void subStatusSupported_onBindViewHolder_bindDeviceWithAdPlaying_verifyView() {
         String deviceStatus = (String) mContext.getText(
                 R.string.media_output_status_try_after_ad);
-        when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         when(mMediaDevice2.hasSubtext()).thenReturn(true);
         when(mMediaDevice2.getSubtext()).thenReturn(SUBTEXT_AD_ROUTING_DISALLOWED);
         when(mMediaDevice2.getSubtextString()).thenReturn(deviceStatus);
@@ -528,8 +456,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Test
     public void subStatusSupported_onBindViewHolder_bindDeviceWithOngoingSession_verifyView() {
-        when(mMediaOutputController.isSubStatusSupported()).thenReturn(true);
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         when(mMediaDevice1.hasSubtext()).thenReturn(true);
         when(mMediaDevice1.getSubtext()).thenReturn(SUBTEXT_CUSTOM);
         when(mMediaDevice1.getSubtextString()).thenReturn(TEST_CUSTOM_SUBTEXT);
@@ -600,15 +526,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Test
     public void onItemClick_clickPairNew_verifyLaunchBluetoothPairing() {
-        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 2);
-        mViewHolder.mContainerLayout.performClick();
-
-        verify(mMediaOutputController).launchBluetoothPairing(mViewHolder.mContainerLayout);
-    }
-
-    @Test
-    public void advanced_onItemClick_clickPairNew_verifyLaunchBluetoothPairing() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
         mMediaOutputAdapter.updateItems();
         mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
@@ -626,6 +543,12 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         when(mMediaOutputController.isCurrentOutputDeviceHasSessionOngoing()).thenReturn(false);
         assertThat(mMediaDevice2.getState()).isEqualTo(
                 LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+        when(mMediaDevice2.getSelectionBehavior()).thenReturn(SELECTION_BEHAVIOR_TRANSFER);
+        mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mMediaOutputAdapter.updateItems();
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
+        mMediaOutputAdapter.getItemCount();
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
         mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
         mViewHolder.mContainerLayout.performClick();
@@ -638,7 +561,13 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
         when(mMediaOutputController.isCurrentOutputDeviceHasSessionOngoing()).thenReturn(true);
         assertThat(mMediaDevice2.getState()).isEqualTo(
                 LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+        when(mMediaDevice2.getSelectionBehavior()).thenReturn(SELECTION_BEHAVIOR_TRANSFER);
+        mMediaOutputAdapter = new MediaOutputAdapter(mMediaOutputController);
+        mMediaOutputAdapter.updateItems();
+        mViewHolder = (MediaOutputAdapter.MediaDeviceViewHolder) mMediaOutputAdapter
+                .onCreateViewHolder(new LinearLayout(mContext), 0);
         MediaOutputAdapter.MediaDeviceViewHolder spyMediaDeviceViewHolder = spy(mViewHolder);
+        mMediaOutputAdapter.getItemCount();
 
         mMediaOutputAdapter.onBindViewHolder(spyMediaDeviceViewHolder, 0);
         mMediaOutputAdapter.onBindViewHolder(spyMediaDeviceViewHolder, 1);
@@ -662,20 +591,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void onItemClick_clicksSelectableDevice_triggerGrouping() {
-        List<MediaDevice> selectableDevices = new ArrayList<>();
-        selectableDevices.add(mMediaDevice2);
-        when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(selectableDevices);
-        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 1);
-
-        mViewHolder.mContainerLayout.performClick();
-
-        verify(mMediaOutputController).addDeviceToPlayMedia(mMediaDevice2);
-    }
-
-    @Test
-    public void advanced_onGroupActionTriggered_clicksEndAreaOfSelectableDevice_triggerGrouping() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void onGroupActionTriggered_clicksEndAreaOfSelectableDevice_triggerGrouping() {
         List<MediaDevice> selectableDevices = new ArrayList<>();
         selectableDevices.add(mMediaDevice2);
         when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(selectableDevices);
@@ -689,8 +605,7 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
     }
 
     @Test
-    public void advanced_onGroupActionTriggered_clickSelectedRemoteDevice_triggerUngrouping() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
+    public void onGroupActionTriggered_clickSelectedRemoteDevice_triggerUngrouping() {
         when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(
                 ImmutableList.of(mMediaDevice2));
         when(mMediaOutputController.getDeselectableMediaDevice()).thenReturn(
@@ -707,21 +622,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Test
     public void onItemClick_onGroupActionTriggered_verifySeekbarDisabled() {
-        when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(mMediaDevices);
-        List<MediaDevice> selectableDevices = new ArrayList<>();
-        selectableDevices.add(mMediaDevice1);
-        when(mMediaOutputController.getSelectableMediaDevice()).thenReturn(selectableDevices);
-        when(mMediaOutputController.hasAdjustVolumeUserRestriction()).thenReturn(true);
-        mMediaOutputAdapter.onBindViewHolder(mViewHolder, 0);
-
-        mViewHolder.mContainerLayout.performClick();
-
-        assertThat(mViewHolder.mSeekBar.isEnabled()).isFalse();
-    }
-
-    @Test
-    public void advanced_onItemClick_onGroupActionTriggered_verifySeekbarDisabled() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         when(mMediaOutputController.getSelectedMediaDevice()).thenReturn(
                 mMediaItems.stream().map((item) -> item.getMediaDevice().get()).collect(
                         Collectors.toList()));
@@ -764,7 +664,6 @@ public class MediaOutputAdapterTest extends SysuiTestCase {
 
     @Test
     public void updateItems_controllerItemsUpdated_notUpdatesInAdapterUntilUpdateItems() {
-        when(mMediaOutputController.isAdvancedLayoutSupported()).thenReturn(true);
         mMediaOutputAdapter.updateItems();
         List<MediaItem> updatedList = new ArrayList<>();
         updatedList.add(new MediaItem());

@@ -113,6 +113,12 @@ public class TileUtils {
     public static final String META_DATA_PREFERENCE_KEYHINT = "com.android.settings.keyhint";
 
     /**
+     * Name of the meta-data item that can be set in the AndroidManifest.xml or in the content
+     * provider to specify the key of a group / category where this preference belongs to.
+     */
+    public static final String META_DATA_PREFERENCE_GROUP_KEY = "com.android.settings.group_key";
+
+    /**
      * Order of the item that should be displayed on screen. Bigger value items displays closer on
      * top.
      */
@@ -200,6 +206,13 @@ public class TileUtils {
      */
     public static final String META_DATA_PREFERENCE_SWITCH_URI =
             "com.android.settings.switch_uri";
+
+    /**
+     * Name of the meta-data item that can be set from the content provider providing the intent
+     * that will be executed when the user taps on the preference.
+     */
+    public static final String META_DATA_PREFERENCE_PENDING_INTENT =
+            "com.android.settings.pending_intent";
 
     /**
      * Value for {@link #META_DATA_KEY_PROFILE}. When the device has a managed profile,
@@ -331,12 +344,12 @@ public class TileUtils {
                 continue;
             }
             final ProviderInfo providerInfo = resolved.providerInfo;
-            final List<Bundle> switchData = getSwitchDataFromProvider(context,
+            final List<Bundle> entryData = getEntryDataFromProvider(context,
                     providerInfo.authority);
-            if (switchData == null || switchData.isEmpty()) {
+            if (entryData == null || entryData.isEmpty()) {
                 continue;
             }
-            for (Bundle metaData : switchData) {
+            for (Bundle metaData : entryData) {
                 loadTile(user, addedCache, defaultCategory, outTiles, intent, metaData,
                         providerInfo);
             }
@@ -386,27 +399,43 @@ public class TileUtils {
         if (!tile.userHandle.contains(user)) {
             tile.userHandle.add(user);
         }
+        if (metaData.containsKey(META_DATA_PREFERENCE_PENDING_INTENT)) {
+            tile.pendingIntentMap.put(
+                    user, metaData.getParcelable(META_DATA_PREFERENCE_PENDING_INTENT));
+        }
         if (!outTiles.contains(tile)) {
             outTiles.add(tile);
         }
     }
 
-    /** Returns the switch data of the key specified from the provider */
+    /** Returns the entry data of the key specified from the provider */
     // TODO(b/144732809): rearrange methods by access level modifiers
-    static Bundle getSwitchDataFromProvider(Context context, String authority, String key) {
+    static Bundle getEntryDataFromProvider(Context context, String authority, String key) {
         final Map<String, IContentProvider> providerMap = new ArrayMap<>();
-        final Uri uri = buildUri(authority, SwitchesProvider.METHOD_GET_SWITCH_DATA, key);
-        return getBundleFromUri(context, uri, providerMap, null /* bundle */);
+        final Uri uri = buildUri(authority, EntriesProvider.METHOD_GET_ENTRY_DATA, key);
+        Bundle result = getBundleFromUri(context, uri, providerMap, null /* bundle */);
+        if (result == null) {
+            Uri fallbackUri = buildUri(authority, EntriesProvider.METHOD_GET_SWITCH_DATA, key);
+            result = getBundleFromUri(context, fallbackUri, providerMap, null /* bundle */);
+        }
+        return result;
     }
 
-    /** Returns all switch data from the provider */
-    private static List<Bundle> getSwitchDataFromProvider(Context context, String authority) {
+    /** Returns all entry data from the provider */
+    private static List<Bundle> getEntryDataFromProvider(Context context, String authority) {
         final Map<String, IContentProvider> providerMap = new ArrayMap<>();
-        final Uri uri = buildUri(authority, SwitchesProvider.METHOD_GET_SWITCH_DATA);
+        final Uri uri = buildUri(authority, EntriesProvider.METHOD_GET_ENTRY_DATA);
         final Bundle result = getBundleFromUri(context, uri, providerMap, null /* bundle */);
-        return result != null
-                ? result.getParcelableArrayList(SwitchesProvider.EXTRA_SWITCH_DATA)
-                : null;
+        if (result != null) {
+            return result.getParcelableArrayList(EntriesProvider.EXTRA_ENTRY_DATA);
+        } else {
+            Uri fallbackUri = buildUri(authority, EntriesProvider.METHOD_GET_SWITCH_DATA);
+            Bundle fallbackResult =
+                    getBundleFromUri(context, fallbackUri, providerMap, null /* bundle */);
+            return fallbackResult != null
+                    ? fallbackResult.getParcelableArrayList(EntriesProvider.EXTRA_SWITCH_DATA)
+                    : null;
+        }
     }
 
     /**

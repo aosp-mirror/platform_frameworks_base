@@ -101,6 +101,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
     private Button mAppButton;
     private int mListMaxHeight;
     private int mItemHeight;
+    private int mListPaddingTop;
     private WallpaperColors mWallpaperColors;
     private boolean mShouldLaunchLeBroadcastDialog;
     private boolean mIsLeBroadcastCallbackRegistered;
@@ -111,7 +112,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
 
     private final ViewTreeObserver.OnGlobalLayoutListener mDeviceListLayoutListener = () -> {
         ViewGroup.LayoutParams params = mDeviceListLayout.getLayoutParams();
-        int totalItemsHeight = mAdapter.getItemCount() * mItemHeight;
+        int totalItemsHeight = mAdapter.getItemCount() * mItemHeight
+                + mListPaddingTop;
         int correctHeight = Math.min(totalItemsHeight, mListMaxHeight);
         // Set max height for list
         if (correctHeight != params.height) {
@@ -220,6 +222,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
                 R.dimen.media_output_dialog_list_max_height);
         mItemHeight = context.getResources().getDimensionPixelSize(
                 R.dimen.media_output_dialog_list_item_height);
+        mListPaddingTop = mContext.getResources().getDimensionPixelSize(
+                R.dimen.media_output_dialog_list_padding_top);
         mExecutor = Executors.newSingleThreadExecutor();
     }
 
@@ -266,10 +270,8 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog implements
             dismiss();
         });
         mAppButton.setOnClickListener(mMediaOutputController::tryToLaunchMediaApplication);
-        if (mMediaOutputController.isAdvancedLayoutSupported()) {
-            mMediaMetadataSectionLayout.setOnClickListener(
-                    mMediaOutputController::tryToLaunchMediaApplication);
-        }
+        mMediaMetadataSectionLayout.setOnClickListener(
+                mMediaOutputController::tryToLaunchMediaApplication);
     }
 
     @Override

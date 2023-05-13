@@ -116,6 +116,7 @@ public class SettingsBackupTest {
                     Settings.Global.ADD_USERS_WHEN_LOCKED,
                     Settings.Global.AIRPLANE_MODE_ON,
                     Settings.Global.AIRPLANE_MODE_RADIOS,
+                    Settings.Global.ALLOW_WORK_PROFILE_TELEPHONY_FOR_NON_DPM_ROLE_HOLDERS,
                     Settings.Global.SATELLITE_MODE_RADIOS,
                     Settings.Global.SATELLITE_MODE_ENABLED,
                     Settings.Global.AIRPLANE_MODE_TOGGLEABLE_RADIOS,

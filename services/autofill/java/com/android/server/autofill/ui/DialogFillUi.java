@@ -29,6 +29,7 @@ import android.graphics.drawable.Drawable;
 import android.service.autofill.Dataset;
 import android.service.autofill.FillResponse;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 import android.util.PluralsMessageFormatter;
 import android.util.Slog;
 import android.view.ContextThemeWrapper;
@@ -177,7 +178,14 @@ final class DialogFillUi {
         window.setGravity(Gravity.BOTTOM | Gravity.CENTER);
         window.setCloseOnTouchOutside(true);
         final WindowManager.LayoutParams params = window.getAttributes();
-        params.width = WindowManager.LayoutParams.MATCH_PARENT;
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        window.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        final int screenWidth = displayMetrics.widthPixels;
+        final int maxWidth =
+                mContext.getResources().getDimensionPixelSize(R.dimen.autofill_dialog_max_width);
+        params.width = Math.min(screenWidth, maxWidth);
+
         params.accessibilityTitle =
                 mContext.getString(R.string.autofill_picker_accessibility_title);
         params.windowAnimations = R.style.AutofillSaveAnimation;
