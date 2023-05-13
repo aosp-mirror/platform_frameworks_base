@@ -530,6 +530,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         verify(collapsedSet).setVisibility(R.id.actionPlayPause, ConstraintSet.VISIBLE)
 
         assertThat(actionNext.isEnabled()).isTrue()
+        assertThat(actionNext.isFocusable()).isTrue()
+        assertThat(actionNext.isClickable()).isTrue()
         assertThat(actionNext.contentDescription).isEqualTo("next")
         verify(collapsedSet).setVisibility(R.id.actionNext, ConstraintSet.VISIBLE)
 
@@ -576,6 +578,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         assertThat(actionPrev.isEnabled()).isFalse()
         assertThat(actionPrev.drawable).isNull()
+        assertThat(actionPrev.isFocusable()).isFalse()
+        assertThat(actionPrev.isClickable()).isFalse()
         verify(expandedSet).setVisibility(R.id.actionPrev, ConstraintSet.INVISIBLE)
 
         assertThat(actionNext.isEnabled()).isFalse()
@@ -610,6 +614,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         assertThat(actionNext.isEnabled()).isFalse()
         assertThat(actionNext.drawable).isNull()
+        assertThat(actionNext.isFocusable()).isFalse()
+        assertThat(actionNext.isClickable()).isFalse()
         verify(expandedSet).setVisibility(R.id.actionNext, ConstraintSet.INVISIBLE)
     }
 
