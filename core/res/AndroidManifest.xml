@@ -7694,22 +7694,6 @@
                  android:defaultToDeviceProtectedStorage="true"
                  android:forceQueryable="true"
                  android:directBootAware="true">
-        <activity android:name="com.android.internal.app.ChooserActivity"
-                android:theme="@style/Theme.DeviceDefault.Chooser"
-                android:finishOnCloseSystemDialogs="true"
-                android:excludeFromRecents="true"
-                android:documentLaunchMode="never"
-                android:relinquishTaskIdentity="true"
-                android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation|keyboard|keyboardHidden"
-                android:process=":ui"
-                android:exported="true"
-                android:visibleToInstantApps="true">
-            <intent-filter android:priority="100">
-                <action android:name="android.intent.action.CHOOSER" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.VOICE" />
-            </intent-filter>
-        </activity>
         <activity android:name="com.android.internal.accessibility.dialog.AccessibilityShortcutChooserActivity"
                   android:exported="false"
                   android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
