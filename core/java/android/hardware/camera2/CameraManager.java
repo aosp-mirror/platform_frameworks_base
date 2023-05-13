@@ -30,6 +30,7 @@ import android.compat.annotation.Overridable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
+import android.hardware.CameraExtensionSessionStats;
 import android.hardware.CameraStatus;
 import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
@@ -1724,6 +1725,30 @@ public final class CameraManager {
                 throwAsPublicException(sse);
             }
         }
+    }
+
+    /**
+     * Reports {@link CameraExtensionSessionStats} to the {@link ICameraService} to be logged for
+     * currently active session. Validation is done downstream.
+     *
+     * @param extStats Extension Session stats to be logged by cameraservice
+     *
+     * @return the key to be used with the next call.
+     *         See {@link ICameraService#reportExtensionSessionStats}.
+     * @hide
+     */
+    public static String reportExtensionSessionStats(CameraExtensionSessionStats extStats) {
+        ICameraService cameraService = CameraManagerGlobal.get().getCameraService();
+        if (cameraService == null) {
+            Log.e(TAG, "CameraService not available. Not reporting extension stats.");
+            return "";
+        }
+        try {
+            return cameraService.reportExtensionSessionStats(extStats);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to report extension session stats to cameraservice.", e);
+        }
+        return "";
     }
 
     /**

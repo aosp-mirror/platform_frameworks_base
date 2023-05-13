@@ -50,6 +50,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -205,7 +206,7 @@ public class Toast {
         INotificationManager service = getService();
         String pkg = mContext.getOpPackageName();
         TN tn = mTN;
-        tn.mNextView = mNextView;
+        tn.mNextView = new WeakReference<>(mNextView);
         final boolean isUiContext = mContext.isUiContext();
         final int displayId = mContext.getDisplayId();
 
@@ -622,7 +623,7 @@ public class Toast {
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
         View mView;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
-        View mNextView;
+        WeakReference<View> mNextView;
         int mDuration;
 
         WindowManager mWM;
@@ -632,7 +633,7 @@ public class Toast {
         private final ToastPresenter mPresenter;
 
         @GuardedBy("mCallbacks")
-        private final List<Callback> mCallbacks;
+        private final WeakReference<List<Callback>> mCallbacks;
 
         /**
          * Creates a {@link ITransientNotification} object.
@@ -649,7 +650,7 @@ public class Toast {
             mParams = mPresenter.getLayoutParams();
             mPackageName = packageName;
             mToken = token;
-            mCallbacks = callbacks;
+            mCallbacks = new WeakReference<>(callbacks);
 
             mHandler = new Handler(looper, null) {
                 @Override
@@ -685,7 +686,11 @@ public class Toast {
 
         private List<Callback> getCallbacks() {
             synchronized (mCallbacks) {
-                return new ArrayList<>(mCallbacks);
+                if (mCallbacks.get() != null) {
+                    return new ArrayList<>(mCallbacks.get());
+                } else {
+                    return new ArrayList<>();
+                }
             }
         }
 
@@ -721,13 +726,15 @@ public class Toast {
             if (mHandler.hasMessages(CANCEL) || mHandler.hasMessages(HIDE)) {
                 return;
             }
-            if (mView != mNextView) {
+            if (mNextView != null && mView != mNextView.get()) {
                 // remove the old view if necessary
                 handleHide();
-                mView = mNextView;
-                mPresenter.show(mView, mToken, windowToken, mDuration, mGravity, mX, mY,
-                        mHorizontalMargin, mVerticalMargin,
-                        new CallbackBinder(getCallbacks(), mHandler));
+                mView = mNextView.get();
+                if (mView != null) {
+                    mPresenter.show(mView, mToken, windowToken, mDuration, mGravity, mX, mY,
+                            mHorizontalMargin, mVerticalMargin,
+                            new CallbackBinder(getCallbacks(), mHandler));
+                }
             }
         }
 

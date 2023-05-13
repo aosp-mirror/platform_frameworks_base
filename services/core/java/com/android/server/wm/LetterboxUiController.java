@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.pm.ActivityInfo.FORCE_NON_RESIZE_APP;
+import static android.content.pm.ActivityInfo.FORCE_RESIZE_APP;
 import static android.content.pm.ActivityInfo.OVERRIDE_ANY_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_FORCE_ROTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_DISABLE_REFRESH;
@@ -25,6 +27,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_RESPECT_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
@@ -49,7 +52,9 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 
@@ -185,10 +190,21 @@ final class LetterboxUiController {
     // when dealing with translucent activities.
     private final List<LetterboxUiController> mDestroyListeners = new ArrayList<>();
 
+    // Corresponds to OVERRIDE_MIN_ASPECT_RATIO
+    private final boolean mIsOverrideMinAspectRatio;
+    // Corresponds to FORCE_RESIZE_APP
+    private final boolean mIsOverrideForceResizeApp;
+    // Corresponds to FORCE_NON_RESIZE_APP
+    private final boolean mIsOverrideForceNonResizeApp;
+
     @Nullable
     private final Boolean mBooleanPropertyAllowOrientationOverride;
     @Nullable
     private final Boolean mBooleanPropertyAllowDisplayOrientationOverride;
+    @Nullable
+    private final Boolean mBooleanPropertyAllowMinAspectRatioOverride;
+    @Nullable
+    private final Boolean mBooleanPropertyAllowForceResizeOverride;
 
     /*
      * WindowContainerListener responsible to make translucent activities inherit
@@ -300,6 +316,14 @@ final class LetterboxUiController {
                 readComponentProperty(packageManager, mActivityRecord.packageName,
                         /* gatingCondition */ null,
                         PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE);
+        mBooleanPropertyAllowMinAspectRatioOverride =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        /* gatingCondition */ null,
+                        PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE);
+        mBooleanPropertyAllowForceResizeOverride =
+                readComponentProperty(packageManager, mActivityRecord.packageName,
+                        /* gatingCondition */ null,
+                        PROPERTY_COMPAT_ALLOW_RESIZEABLE_ACTIVITY_OVERRIDES);
 
         mIsOverrideAnyOrientationEnabled = isCompatChangeEnabled(OVERRIDE_ANY_ORIENTATION);
         mIsOverrideToPortraitOrientationEnabled =
@@ -330,6 +354,9 @@ final class LetterboxUiController {
 
         mIsOverrideEnableCompatFakeFocusEnabled =
                 isCompatChangeEnabled(OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS);
+        mIsOverrideMinAspectRatio = isCompatChangeEnabled(OVERRIDE_MIN_ASPECT_RATIO);
+        mIsOverrideForceResizeApp = isCompatChangeEnabled(FORCE_RESIZE_APP);
+        mIsOverrideForceNonResizeApp = isCompatChangeEnabled(FORCE_NON_RESIZE_APP);
     }
 
     /**
@@ -499,6 +526,61 @@ final class LetterboxUiController {
                 /* gatingCondition */ mLetterboxConfiguration::isCompatFakeFocusEnabled,
                 mIsOverrideEnableCompatFakeFocusEnabled,
                 mBooleanPropertyFakeFocus);
+    }
+
+    /**
+     * Whether we should apply the min aspect ratio per-app override. When this override is applied
+     * the min aspect ratio given in the app's manifest will be overridden to the largest enabled
+     * aspect ratio treatment unless the app's manifest value is higher. The treatment will also
+     * apply if no value is provided in the manifest.
+     *
+     * <p>This method returns {@code true} when the following conditions are met:
+     * <ul>
+     *     <li>Opt-out component property isn't enabled
+     *     <li>Per-app override is enabled
+     * </ul>
+     */
+    boolean shouldOverrideMinAspectRatio() {
+        return shouldEnableWithOptInOverrideAndOptOutProperty(
+                /* gatingCondition */ () -> true,
+                mIsOverrideMinAspectRatio,
+                mBooleanPropertyAllowMinAspectRatioOverride);
+    }
+
+    /**
+     * Whether we should apply the force resize per-app override. When this override is applied it
+     * forces the packages it is applied to to be resizable. It won't change whether the app can be
+     * put into multi-windowing mode, but allow the app to resize without going into size-compat
+     * mode when the window container resizes, such as display size change or screen rotation.
+     *
+     * <p>This method returns {@code true} when the following conditions are met:
+     * <ul>
+     *     <li>Opt-out component property isn't enabled
+     *     <li>Per-app override is enabled
+     * </ul>
+     */
+    boolean shouldOverrideForceResizeApp() {
+        return shouldEnableWithOptInOverrideAndOptOutProperty(
+                /* gatingCondition */ () -> true,
+                mIsOverrideForceResizeApp,
+                mBooleanPropertyAllowForceResizeOverride);
+    }
+
+    /**
+     * Whether we should apply the force non resize per-app override. When this override is applied
+     * it forces the packages it is applied to to be non-resizable.
+     *
+     * <p>This method returns {@code true} when the following conditions are met:
+     * <ul>
+     *     <li>Opt-out component property isn't enabled
+     *     <li>Per-app override is enabled
+     * </ul>
+     */
+    boolean shouldOverrideForceNonResizeApp() {
+        return shouldEnableWithOptInOverrideAndOptOutProperty(
+                /* gatingCondition */ () -> true,
+                mIsOverrideForceNonResizeApp,
+                mBooleanPropertyAllowForceResizeOverride);
     }
 
     /**
@@ -1279,6 +1361,16 @@ final class LetterboxUiController {
         }
 
         final Rect cropBounds = new Rect(mActivityRecord.getBounds());
+
+        // In case of translucent activities we check if the requested size is different from
+        // the size provided using inherited bounds. In that case we decide to not apply rounded
+        // corners because we assume the specific layout would. This is the case when the layout
+        // of the translucent activity uses only a part of all the bounds because of the use of
+        // LayoutParams.WRAP_CONTENT.
+        if (hasInheritedLetterboxBehavior() && (cropBounds.width() != mainWindow.mRequestedWidth
+                || cropBounds.height() != mainWindow.mRequestedHeight)) {
+            return null;
+        }
 
         // It is important to call {@link #adjustBoundsIfNeeded} before {@link cropBounds.offsetTo}
         // because taskbar bounds used in {@link #adjustBoundsIfNeeded}

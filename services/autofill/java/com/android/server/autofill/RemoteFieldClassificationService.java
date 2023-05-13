@@ -28,6 +28,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Build;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -155,7 +156,19 @@ final class RemoteFieldClassificationService
                                     public void onSuccess(FieldClassificationResponse response) {
                                         logLatency(startTime);
                                         if (sDebug) {
-                                            Log.d(TAG, "onSuccess Response: " + response);
+                                            if (Build.IS_DEBUGGABLE) {
+                                                Slog.d(TAG, "onSuccess Response: " + response);
+                                            } else {
+                                                String msg = "";
+                                                if (response == null
+                                                        || response.getClassifications() == null) {
+                                                    msg = "null response";
+                                                } else {
+                                                    msg = "size: "
+                                                            + response.getClassifications().size();
+                                                }
+                                                Slog.d(TAG, "onSuccess " + msg);
+                                            }
                                         }
                                         fieldClassificationServiceCallbacks
                                                 .onClassificationRequestSuccess(response);
@@ -165,7 +178,7 @@ final class RemoteFieldClassificationService
                                     public void onFailure() {
                                         logLatency(startTime);
                                         if (sDebug) {
-                                            Log.d(TAG, "onFailure");
+                                            Slog.d(TAG, "onFailure");
                                         }
                                         fieldClassificationServiceCallbacks
                                                 .onClassificationRequestFailure(0, null);

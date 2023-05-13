@@ -152,9 +152,15 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
         `when`(passwordTextView.text).thenReturn("")
 
         pinViewController.startAppearAnimation()
-        verify(deleteButton).visibility = View.INVISIBLE
+        verify(deleteButton).visibility = View.VISIBLE
         verify(enterButton).visibility = View.VISIBLE
         verify(passwordTextView).setUsePinShapes(true)
-        verify(passwordTextView).setIsPinHinting(true)
+        verify(passwordTextView).setIsPinHinting(false)
+    }
+
+    @Test
+    fun handleLockout_readsNumberOfErrorAttempts() {
+        pinViewController.handleAttemptLockout(0)
+        verify(lockPatternUtils).getCurrentFailedPasswordAttempts(anyInt())
     }
 }

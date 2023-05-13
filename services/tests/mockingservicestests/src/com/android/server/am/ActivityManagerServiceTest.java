@@ -37,6 +37,7 @@ import static com.android.server.am.ProcessList.NETWORK_STATE_BLOCK;
 import static com.android.server.am.ProcessList.NETWORK_STATE_NO_CHANGE;
 import static com.android.server.am.ProcessList.NETWORK_STATE_UNBLOCK;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
@@ -60,6 +61,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
@@ -82,13 +84,16 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
+import android.provider.DeviceConfig;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService.StickyBroadcast;
 import com.android.server.am.ProcessList.IsolatedUidRange;
@@ -106,6 +111,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -137,7 +143,9 @@ public class ActivityManagerServiceTest {
 
     private static final String TEST_EXTRA_KEY1 = "com.android.server.am.TEST_EXTRA_KEY1";
     private static final String TEST_EXTRA_VALUE1 = "com.android.server.am.TEST_EXTRA_VALUE1";
-
+    private static final String PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS =
+            "apply_sdk_sandbox_next_restrictions";
+    private static final String APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS = ":isSdkSandboxNext";
     private static final int TEST_UID = 11111;
     private static final int USER_ID = 666;
 
@@ -154,6 +162,7 @@ public class ActivityManagerServiceTest {
     };
 
     private static PackageManagerInternal sPackageManagerInternal;
+    private static ProcessList.ProcessListSettingsListener sProcessListSettingsListener;
 
     @BeforeClass
     public static void setUpOnce() {
@@ -181,7 +190,6 @@ public class ActivityManagerServiceTest {
     private ActivityManagerService mAms;
     private HandlerThread mHandlerThread;
     private TestHandler mHandler;
-
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -203,6 +211,15 @@ public class ActivityManagerServiceTest {
         mAms.mActivityTaskManager.initialize(null, null, mHandler.getLooper());
         mHandler.setRunnablesToIgnore(
                 List.of(mAms.mUidObserverController.getDispatchRunnableForTest()));
+
+        // Required for updating DeviceConfig.
+        InstrumentationRegistry.getInstrumentation()
+                .getUiAutomation()
+                .adoptShellPermissionIdentity(
+                Manifest.permission.READ_DEVICE_CONFIG,
+                Manifest.permission.WRITE_DEVICE_CONFIG);
+        sProcessListSettingsListener = mAms.mProcessList.getProcessListSettingsListener();
+        assertThat(sProcessListSettingsListener).isNotNull();
     }
 
     private void mockNoteOperation() {
@@ -216,6 +233,12 @@ public class ActivityManagerServiceTest {
     @After
     public void tearDown() {
         mHandlerThread.quit();
+        InstrumentationRegistry.getInstrumentation()
+            .getUiAutomation()
+            .dropShellPermissionIdentity();
+        if (sProcessListSettingsListener != null) {
+            sProcessListSettingsListener.unregisterObserver();
+        }
     }
 
     @SuppressWarnings("GuardedBy")
@@ -267,6 +290,77 @@ public class ActivityManagerServiceTest {
                 NETWORK_STATE_UNBLOCK, // expectedBlockState
                 false); // expectNotify
     }
+
+    @SuppressWarnings("GuardedBy")
+    @SmallTest
+    @Test
+    public void defaultSdkSandboxNextRestrictions() throws Exception {
+        sProcessListSettingsListener.onPropertiesChanged(
+                new DeviceConfig.Properties(
+                DeviceConfig.NAMESPACE_ADSERVICES,
+                Map.of(PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS, "")));
+        assertThat(
+            sProcessListSettingsListener.applySdkSandboxRestrictionsNext())
+            .isFalse();
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @SmallTest
+    @Test
+    public void doNotApplySdkSandboxNextRestrictions() throws Exception {
+        MockitoSession mockitoSession =
+                ExtendedMockito.mockitoSession().spyStatic(Process.class).startMocking();
+        try {
+            sProcessListSettingsListener.onPropertiesChanged(
+                    new DeviceConfig.Properties(
+                    DeviceConfig.NAMESPACE_ADSERVICES,
+                    Map.of(PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS, "false")));
+            assertThat(
+                sProcessListSettingsListener.applySdkSandboxRestrictionsNext())
+                .isFalse();
+            ExtendedMockito.doReturn(true).when(() -> Process.isSdkSandboxUid(anyInt()));
+            ApplicationInfo info = new ApplicationInfo();
+            info.packageName = "com.android.sdksandbox";
+            info.seInfo = "default:targetSdkVersion=34:complete";
+            final ProcessRecord appRec = new ProcessRecord(
+                    mAms, info, TAG, Process.FIRST_SDK_SANDBOX_UID,
+                    /* sdkSandboxClientPackageName= */ "com.example.client",
+                    /* definingUid= */ 0, /* definingProcessName= */ "");
+            assertThat(mAms.mProcessList.updateSeInfo(appRec)).doesNotContain(
+                    APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS);
+        } finally {
+            mockitoSession.finishMocking();
+        }
+    }
+    @SuppressWarnings("GuardedBy")
+    @SmallTest
+    @Test
+    public void applySdkSandboxNextRestrictions() throws Exception {
+        MockitoSession mockitoSession =
+                ExtendedMockito.mockitoSession().spyStatic(Process.class).startMocking();
+        try {
+            sProcessListSettingsListener.onPropertiesChanged(
+                    new DeviceConfig.Properties(
+                    DeviceConfig.NAMESPACE_ADSERVICES,
+                    Map.of(PROPERTY_APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS, "true")));
+            assertThat(
+                sProcessListSettingsListener.applySdkSandboxRestrictionsNext())
+                .isTrue();
+            ExtendedMockito.doReturn(true).when(() -> Process.isSdkSandboxUid(anyInt()));
+            ApplicationInfo info = new ApplicationInfo();
+            info.packageName = "com.android.sdksandbox";
+            info.seInfo = "default:targetSdkVersion=34:complete";
+            final ProcessRecord appRec = new ProcessRecord(
+                    mAms, info, TAG, Process.FIRST_SDK_SANDBOX_UID,
+                    /* sdkSandboxClientPackageName= */ "com.example.client",
+                    /* definingUid= */ 0, /* definingProcessName= */ "");
+            assertThat(mAms.mProcessList.updateSeInfo(appRec)).contains(
+                    APPLY_SDK_SANDBOX_NEXT_RESTRICTIONS);
+        } finally {
+            mockitoSession.finishMocking();
+        }
+    }
+
 
     private UidRecord addUidRecord(int uid) {
         final UidRecord uidRec = new UidRecord(uid, mAms);
@@ -648,24 +742,24 @@ public class ActivityManagerServiceTest {
 
         broadcastIntent(intent1, null, true);
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false));
+                StickyBroadcast.create(intent1, false, Process.myUid()));
         assertNull(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER));
         assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent2, options.toBundle(), true);
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false));
+                StickyBroadcast.create(intent1, false, Process.myUid()));
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
-                StickyBroadcast.create(intent2, true));
+                StickyBroadcast.create(intent2, true, Process.myUid()));
         assertNull(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER));
 
         broadcastIntent(intent3, null, true);
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION1, TEST_USER),
-                StickyBroadcast.create(intent1, false));
+                StickyBroadcast.create(intent1, false, Process.myUid()));
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION2, TEST_USER),
-                StickyBroadcast.create(intent2, true));
+                StickyBroadcast.create(intent2, true, Process.myUid()));
         assertStickyBroadcasts(mAms.getStickyBroadcasts(TEST_ACTION3, TEST_USER),
-                StickyBroadcast.create(intent3, false));
+                StickyBroadcast.create(intent3, false, Process.myUid()));
     }
 
     @SuppressWarnings("GuardedBy")
@@ -696,6 +790,9 @@ public class ActivityManagerServiceTest {
             return false;
         }
         if (a.deferUntilActive != b.deferUntilActive) {
+            return false;
+        }
+        if (a.originalCallingUid != b.originalCallingUid) {
             return false;
         }
         return true;

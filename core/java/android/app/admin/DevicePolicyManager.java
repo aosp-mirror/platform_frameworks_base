@@ -8359,6 +8359,26 @@ public class DevicePolicyManager {
      * from Android {@link android.os.Build.VERSION_CODES#R}, requests to disable camera from
      * legacy device admins targeting SDK version {@link android.os.Build.VERSION_CODES#P} or
      * below will be silently ignored.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the camera disabled
+     * policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
+     * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully set or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier returned from
+     * {@link DevicePolicyIdentifiers#getIdentifierForUserRestriction(String)} with user restriction
+     * {@link UserManager#DISALLOW_CAMERA}
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with or null if
                      the caller is not a device admin
@@ -9783,6 +9803,27 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a profile owner or device owner. If it is not, a security
      * exception will be thrown.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the persistent preferred
+     * activity policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
+     * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully set or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier
+     * {@link DevicePolicyIdentifiers#PERSISTENT_PREFERRED_ACTIVITY_POLICY}
+     * <li> The additional policy params bundle, which contains
+     * {@link PolicyUpdateReceiver#EXTRA_INTENT_FILTER} the intent filter the policy applies to
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
      *
      * <p>NOTE: Performs disk I/O and shouldn't be called on the main thread.
      *
@@ -9816,6 +9857,27 @@ public class DevicePolicyManager {
      * <p>
      * The calling device admin must be a profile owner. If it is not, a security exception will be
      * thrown.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the persistent preferred
+     * activity policy has been cleared, {@link PolicyUpdateReceiver#onPolicySetResult(Context,
+     * String, Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy
+     * was successfully cleared or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier
+     * {@link DevicePolicyIdentifiers#PERSISTENT_PREFERRED_ACTIVITY_POLICY}
+     * <li> The additional policy params bundle, which contains
+     * {@link PolicyUpdateReceiver#EXTRA_INTENT_FILTER} the intent filter the policy applies to
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully cleared or the
+     * reason the policy failed to be cleared
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *              caller is not a device admin.
@@ -9862,6 +9924,9 @@ public class DevicePolicyManager {
      *                                  profile owner of an organization-owned managed profile.
      * @throws IllegalArgumentException if called on the parent profile and the package
      *                                  provided is not a pre-installed system package.
+     * @throws IllegalStateException while trying to set default sms app on the profile and
+     *                             {@link ManagedSubscriptionsPolicy#TYPE_ALL_MANAGED_SUBSCRIPTIONS}
+     *                             policy is not set.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_DEFAULT_SMS, conditional = true)
     public void setDefaultSmsApplication(@Nullable ComponentName admin,
@@ -11472,6 +11537,26 @@ public class DevicePolicyManager {
      * {@link #getParentProfileInstance(ComponentName)}. To set a restriction globally, call
      * {@link #addUserRestrictionGlobally} instead.
      *
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the user restriction
+     * policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
+     * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully set or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier returned from
+     * {@link DevicePolicyIdentifiers#getIdentifierForUserRestriction(String)}
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
+     *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param key   The key of the restriction.
      * @throws SecurityException if {@code admin} is not a device or profile owner and if the caller
@@ -11504,6 +11589,25 @@ public class DevicePolicyManager {
      * <p> See the constants in {@link android.os.UserManager} for the list of restrictions that can
      * be enforced device-wide. These constants will also state in their documentation which
      * permission is required to manage the restriction using this API.
+     * <p>
+     * After the user restriction policy has been set,
+     * {@link PolicyUpdateReceiver#onPolicySetResult(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin on whether the policy was successfully set or not.
+     * This callback will contain:
+     * <ul>
+     * <li> The policy identifier returned from
+     * {@link DevicePolicyIdentifiers#getIdentifierForUserRestriction(String)}
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
      *
      * @param key The key of the restriction.
      * @throws SecurityException if {@code admin} is not a device or profile owner and if the
@@ -11540,6 +11644,26 @@ public class DevicePolicyManager {
      * <p>For callers targeting Android {@link android.os.Build.VERSION_CODES#UPSIDE_DOWN_CAKE} or
      * above, calling this API will result in clearing any local and global restriction with the
      * specified key that was previously set by the caller.
+     *
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the user restriction
+     * policy has been cleared, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
+     * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully cleared or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier returned from
+     * {@link DevicePolicyIdentifiers#getIdentifierForUserRestriction(String)}
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully cleared or the
+     * reason the policy failed to be cleared
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param key   The key of the restriction.
@@ -11689,6 +11813,27 @@ public class DevicePolicyManager {
      * {@link #getParentProfileInstance(ComponentName)}, where the caller must be the profile owner
      * of an organization-owned managed profile and the package must be a system package. If called
      * on the parent instance, then the package is hidden or unhidden in the personal profile.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the application hidden
+     * policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
+     * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully set or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier
+     * {@link DevicePolicyIdentifiers#APPLICATION_HIDDEN_POLICY}
+     * <li> The additional policy params bundle, which contains
+     * {@link PolicyUpdateReceiver#EXTRA_PACKAGE_NAME} the package name the policy applies to
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if the caller is not a device admin.
@@ -11728,6 +11873,9 @@ public class DevicePolicyManager {
      * of an organization-owned managed profile and the package must be a system package. If called
      * on the parent instance, this will determine whether the package is hidden or unhidden in the
      * personal profile.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the returned policy will be the
+     * current resolved policy rather than the policy set by the calling admin.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with, or
      *            {@code null} if the caller is not a device admin.
@@ -11852,6 +12000,27 @@ public class DevicePolicyManager {
      * {@link #getParentProfileInstance(ComponentName)} by the profile owner on an
      * organization-owned device, to restrict accounts that may not be managed on the primary
      * profile.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the account management
+     * disabled policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
+     * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully set or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier
+     * {@link DevicePolicyIdentifiers#ACCOUNT_MANAGEMENT_DISABLED_POLICY}
+     * <li> The additional policy params bundle, which contains
+     * {@link PolicyUpdateReceiver#EXTRA_ACCOUNT_TYPE} the account type the policy applies to
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *              caller is not a device admin.
@@ -11984,6 +12153,28 @@ public class DevicePolicyManager {
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}. See
      * {@link #isAffiliatedUser}.
      * Any package set via this method will be cleared if the user becomes unaffiliated.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the lock task policy has
+     * been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin on whether the policy was successfully set or not.
+     * This callback will contain:
+     * <ul>
+     * <li> The policy identifier {@link DevicePolicyIdentifiers#LOCK_TASK_POLICY}
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, lock task features and lock task
+     * packages are bundled as one policy. A failure to apply one will result in a failure to apply
+     * the other.
      *
      * @param packages The list of packages allowed to enter lock task mode
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
@@ -12013,6 +12204,9 @@ public class DevicePolicyManager {
 
     /**
      * Returns the list of packages allowed to start the lock task mode.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the returned policy will be the
+     * current resolved policy rather than the policy set by the calling admin.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *              caller is not a device admin.
@@ -12065,6 +12259,28 @@ public class DevicePolicyManager {
      * permission {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_LOCK_TASK}. See
      * {@link #isAffiliatedUser}.
      * Any features set using this method are cleared if the user becomes unaffiliated.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the lock task features
+     * policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String, Bundle,
+     * TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully set or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier {@link DevicePolicyIdentifiers#LOCK_TASK_POLICY}
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, lock task features and lock task
+     * packages are bundled as one policy. A failure to apply one will result in a failure to apply
+     * the other.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *               caller is not a device admin.
@@ -12089,6 +12305,9 @@ public class DevicePolicyManager {
 
     /**
      * Gets which system features are enabled for LockTask mode.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the returned policy will be the
+     * current resolved policy rather than the policy set by the calling admin.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *               caller is not a device admin.
@@ -12574,6 +12793,27 @@ public class DevicePolicyManager {
      * profile owner, or by a delegate given the {@link #DELEGATION_BLOCK_UNINSTALL} scope via
      * {@link #setDelegatedScopes} or holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the set uninstall blocked
+     * policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
+     * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully set or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier
+     * {@link DevicePolicyIdentifiers#PACKAGE_UNINSTALL_BLOCKED_POLICY}
+     * <li> The additional policy params bundle, which contains
+     * {@link PolicyUpdateReceiver#EXTRA_PACKAGE_NAME} the package name the policy applies to
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *               caller is not a device admin.
@@ -12611,6 +12851,9 @@ public class DevicePolicyManager {
      * <strong>Note:</strong> If your app targets Android 11 (API level 30) or higher,
      * this method returns a filtered result. Learn more about how to
      * <a href="/training/basics/intents/package-visibility">manage package visibility</a>.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the returned policy will be the
+     * current resolved policy rather than the policy set by the calling admin.
      *
      * @param admin The name of the admin component whose blocking policy will be checked, or
      *            {@code null} to check whether any admin has blocked the uninstallation. Starting
@@ -15720,6 +15963,25 @@ public class DevicePolicyManager {
      * control over apps. User will not be able to clear app data or force-stop packages. When
      * called by a device owner, applies to all users on the device. Packages with user control
      * disabled are exempted from App Standby Buckets.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, after the user control disabled
+     * packages policy has been set, {@link PolicyUpdateReceiver#onPolicySetResult(Context, String,
+     * Bundle, TargetUser, PolicyUpdateResult)} will notify the admin on whether the policy was
+     * successfully set or not. This callback will contain:
+     * <ul>
+     * <li> The policy identifier
+     * {@link DevicePolicyIdentifiers#USER_CONTROL_DISABLED_PACKAGES_POLICY}
+     * <li> The {@link TargetUser} that this policy relates to
+     * <li> The {@link PolicyUpdateResult}, which will be
+     * {@link PolicyUpdateResult#RESULT_POLICY_SET} if the policy was successfully set or the
+     * reason the policy failed to be set
+     * (e.g. {@link PolicyUpdateResult#RESULT_FAILURE_CONFLICTING_ADMIN_POLICY})
+     * </ul>
+     * If there has been a change to the policy,
+     * {@link PolicyUpdateReceiver#onPolicyChanged(Context, String, Bundle, TargetUser,
+     * PolicyUpdateResult)} will notify the admin of this change. This callback will contain the
+     * same parameters as PolicyUpdateReceiver#onPolicySetResult and the {@link PolicyUpdateResult}
+     * will contain the reason why the policy changed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *               caller is not a device admin.
@@ -15746,6 +16008,9 @@ public class DevicePolicyManager {
      * Returns the list of packages over which user control is disabled by a device or profile
      * owner or holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_APPS_CONTROL}.
+     * <p>
+     * Starting from {@link Build.VERSION_CODES#UPSIDE_DOWN_CAKE}, the returned policy will be the
+     * current resolved policy rather than the policy set by the calling admin.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with. Null if the
      *               caller is not a device admin.

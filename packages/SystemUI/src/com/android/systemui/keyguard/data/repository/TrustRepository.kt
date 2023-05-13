@@ -22,6 +22,7 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.keyguard.shared.model.ActiveUnlockModel
 import com.android.systemui.keyguard.shared.model.TrustManagedModel
 import com.android.systemui.keyguard.shared.model.TrustModel
 import com.android.systemui.user.data.repository.UserRepository
@@ -29,7 +30,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -45,8 +45,8 @@ interface TrustRepository {
     /** Flow representing whether the current user is trusted. */
     val isCurrentUserTrusted: Flow<Boolean>
 
-    /** Flow representing whether active unlock is available for the current user. */
-    val isCurrentUserActiveUnlockAvailable: StateFlow<Boolean>
+    /** Flow representing whether active unlock is running for the current user. */
+    val isCurrentUserActiveUnlockRunning: Flow<Boolean>
 
     /** Reports that whether trust is managed has changed for the current user. */
     val isCurrentUserTrustManaged: StateFlow<Boolean>
@@ -62,6 +62,7 @@ constructor(
     private val logger: TrustRepositoryLogger,
 ) : TrustRepository {
     private val latestTrustModelForUser = mutableMapOf<Int, TrustModel>()
+    private val activeUnlockRunningForUser = mutableMapOf<Int, ActiveUnlockModel>()
     private val trustManagedForUser = mutableMapOf<Int, TrustManagedModel>()
 
     private val trust =
@@ -87,6 +88,17 @@ constructor(
 
                         override fun onEnabledTrustAgentsChanged(userId: Int) = Unit
 
+                        override fun onIsActiveUnlockRunningChanged(
+                            isRunning: Boolean,
+                            userId: Int
+                        ) {
+                            trySendWithFailureLogging(
+                                ActiveUnlockModel(isRunning, userId),
+                                TrustRepositoryLogger.TAG,
+                                "onActiveUnlockRunningChanged"
+                            )
+                        }
+
                         override fun onTrustManagedChanged(isTrustManaged: Boolean, userId: Int) {
                             logger.onTrustManagedChanged(isTrustManaged, userId)
                             trySendWithFailureLogging(
@@ -95,11 +107,6 @@ constructor(
                                 "onTrustManagedChanged"
                             )
                         }
-
-                        override fun onIsActiveUnlockRunningChanged(
-                            isRunning: Boolean,
-                            userId: Int
-                        ) = Unit
                     }
                 trustManager.registerTrustListener(callback)
                 logger.trustListenerRegistered()
@@ -114,6 +121,10 @@ constructor(
                         latestTrustModelForUser[it.userId] = it
                         logger.trustModelEmitted(it)
                     }
+                    is ActiveUnlockModel -> {
+                        activeUnlockRunningForUser[it.userId] = it
+                        logger.activeUnlockModelEmitted(it)
+                    }
                     is TrustManagedModel -> {
                         trustManagedForUser[it.userId] = it
                         logger.trustManagedModelEmitted(it)
@@ -122,8 +133,17 @@ constructor(
             }
             .shareIn(applicationScope, started = SharingStarted.Eagerly, replay = 1)
 
-    // TODO: Implement based on TrustManager callback b/267322286
-    override val isCurrentUserActiveUnlockAvailable: StateFlow<Boolean> = MutableStateFlow(true)
+    override val isCurrentUserActiveUnlockRunning: Flow<Boolean> =
+        combine(trust, userRepository.selectedUserInfo, ::Pair)
+            .map { activeUnlockRunningForUser[it.second.id]?.isRunning ?: false }
+            .distinctUntilChanged()
+            .onEach { logger.isCurrentUserActiveUnlockRunning(it) }
+            .onStart {
+                emit(
+                    activeUnlockRunningForUser[userRepository.getSelectedUserInfo().id]?.isRunning
+                        ?: false
+                )
+            }
 
     override val isCurrentUserTrustManaged: StateFlow<Boolean>
         get() =

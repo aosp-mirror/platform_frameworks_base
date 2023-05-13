@@ -219,7 +219,6 @@ public class ParsingPackageUtils {
     public static final int PARSE_DEFAULT_INSTALL_LOCATION =
             PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
     public static final int PARSE_DEFAULT_TARGET_SANDBOX = 1;
-    public static final boolean PARSE_DEFAULT_ALLOW_UPDATE_OWNERSHIP = true;
 
     /**
      * If set to true, we will only allow package files that exactly match the DTD. Otherwise, we
@@ -887,9 +886,7 @@ public class ParsingPackageUtils {
                 .setTargetSandboxVersion(anInteger(PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
-                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0)
-                .setAllowUpdateOwnership(bool(PARSE_DEFAULT_ALLOW_UPDATE_OWNERSHIP,
-                        R.styleable.AndroidManifest_allowUpdateOwnership, sa));
+                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
 
         boolean foundApp = false;
         final int depth = parser.getDepth();

@@ -60,7 +60,7 @@ public class LogModule {
         if (Compile.IS_DEBUG && notifPipelineFlags.isDevLoggingEnabled()) {
             maxSize *= 10;
         }
-        return factory.create("NotifLog", maxSize, false /* systrace */);
+        return factory.create("NotifLog", maxSize, Compile.IS_DEBUG /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to notifications on the lockscreen. */
@@ -370,6 +370,16 @@ public class LogModule {
     @KeyguardUpdateMonitorLog
     public static LogBuffer provideKeyguardUpdateMonitorLogBuffer(LogBufferFactory factory) {
         return factory.create("KeyguardUpdateMonitorLog", 400);
+    }
+
+    /**
+     * Provides a {@link LogBuffer} for use by {@link com.android.keyguard.KeyguardUpdateMonitor}.
+     */
+    @Provides
+    @SysUISingleton
+    @CarrierTextManagerLog
+    public static LogBuffer provideCarrierTextManagerLog(LogBufferFactory factory) {
+        return factory.create("CarrierTextManagerLog", 100);
     }
 
     /**

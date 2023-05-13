@@ -47,7 +47,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.settingslib.Utils;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.R;
@@ -277,9 +276,10 @@ public abstract class MediaOutputBaseAdapter extends
                 backgroundDrawable = mContext.getDrawable(
                         showSeekBar || isFakeActive ? R.drawable.media_output_item_background_active
                                 : R.drawable.media_output_item_background).mutate();
-                backgroundDrawable.setTint(
+                mItemLayout.setBackgroundTintList(ColorStateList.valueOf(
                         showSeekBar || isFakeActive ? mController.getColorConnectedItemBackground()
-                                : mController.getColorItemBackground());
+                                : mController.getColorItemBackground()
+                ));
                 mIconAreaLayout.setBackgroundTintList(
                         ColorStateList.valueOf(showProgressBar || isFakeActive
                                 ? mController.getColorConnectedItemBackground()
@@ -299,7 +299,8 @@ public abstract class MediaOutputBaseAdapter extends
                 backgroundDrawable = mContext.getDrawable(
                                 R.drawable.media_output_item_background)
                         .mutate();
-                backgroundDrawable.setTint(mController.getColorItemBackground());
+                mItemLayout.setBackgroundTintList(
+                        ColorStateList.valueOf(mController.getColorItemBackground()));
             }
             mItemLayout.setBackground(backgroundDrawable);
             mProgressBar.setVisibility(showProgressBar ? View.VISIBLE : View.GONE);
@@ -455,11 +456,16 @@ public abstract class MediaOutputBaseAdapter extends
 
         void initMutingExpectedDevice() {
             disableSeekBar();
+            updateTitleIcon(R.drawable.media_output_icon_volume,
+                    mController.getColorItemContent());
             final Drawable backgroundDrawable = mContext.getDrawable(
                                     R.drawable.media_output_item_background_active)
                             .mutate();
-            backgroundDrawable.setTint(mController.getColorConnectedItemBackground());
             mItemLayout.setBackground(backgroundDrawable);
+            mItemLayout.setBackgroundTintList(
+                    ColorStateList.valueOf(mController.getColorConnectedItemBackground()));
+            mIconAreaLayout.setBackgroundTintList(
+                    ColorStateList.valueOf(mController.getColorConnectedItemBackground()));
         }
 
         private void animateCornerAndVolume(int fromProgress, int toProgress) {
@@ -530,14 +536,6 @@ public abstract class MediaOutputBaseAdapter extends
             });
         }
 
-        Drawable getSpeakerDrawable() {
-            final Drawable drawable = mContext.getDrawable(R.drawable.ic_speaker_group_black_24dp)
-                    .mutate();
-            drawable.setTint(Utils.getColorStateListDefaultColor(mContext,
-                    R.color.media_dialog_item_main_content));
-            return drawable;
-        }
-
         protected void disableSeekBar() {
             mSeekBar.setEnabled(false);
             mSeekBar.setOnTouchListener((v, event) -> true);
@@ -574,7 +572,6 @@ public abstract class MediaOutputBaseAdapter extends
                         return;
                     }
                     mTitleIcon.setImageIcon(icon);
-                    icon.setTint(mController.getColorItemContent());
                     mTitleIcon.setImageTintList(
                             ColorStateList.valueOf(mController.getColorItemContent()));
                 });

@@ -85,23 +85,6 @@ public class TransitionUtil {
         return false;
     }
 
-    /**
-     * Some transitions we always need to report to keyguard even if they are empty.
-     * TODO (b/274954192): Remove this once keyguard dispatching moves to Shell.
-     */
-    public static boolean alwaysReportToKeyguard(TransitionInfo info) {
-        // occlusion status of activities can change while screen is off so there will be no
-        // visibility change but we still need keyguardservice to be notified.
-        if (info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE) return true;
-
-        // It's possible for some activities to stop with bad timing (esp. since we can't yet
-        // queue activity transitions initiated by apps) that results in an empty transition for
-        // keyguard going-away. In general, we should should always report Keyguard-going-away.
-        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) return true;
-
-        return false;
-    }
-
     /** Returns `true` if `change` is a wallpaper. */
     public static boolean isWallpaper(TransitionInfo.Change change) {
         return (change.getTaskInfo() == null)
@@ -252,11 +235,20 @@ public class TransitionUtil {
     public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
             TransitionInfo info, SurfaceControl.Transaction t,
             @Nullable ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
+        return newTarget(change, order, false /* forceTranslucent */, info, t, leashMap);
+    }
+
+    /**
+     * Creates a new RemoteAnimationTarget from the provided change info
+     */
+    public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
+            boolean forceTranslucent, TransitionInfo info, SurfaceControl.Transaction t,
+            @Nullable ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         final SurfaceControl leash = createLeash(info, change, order, t);
         if (leashMap != null) {
             leashMap.put(change.getLeash(), leash);
         }
-        return newTarget(change, order, leash);
+        return newTarget(change, order, leash, forceTranslucent);
     }
 
     /**
@@ -264,6 +256,14 @@ public class TransitionUtil {
      */
     public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
             SurfaceControl leash) {
+        return newTarget(change, order, leash, false /* forceTranslucent */);
+    }
+
+    /**
+     * Creates a new RemoteAnimationTarget from the provided change and leash
+     */
+    public static RemoteAnimationTarget newTarget(TransitionInfo.Change change, int order,
+            SurfaceControl leash, boolean forceTranslucent) {
         if (isDividerBar(change)) {
             return getDividerTarget(change, leash);
         }
@@ -293,7 +293,7 @@ public class TransitionUtil {
                 // TODO: once we can properly sync transactions across process,
                 // then get rid of this leash.
                 leash,
-                (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0,
+                forceTranslucent || (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0,
                 null,
                 // TODO(shell-transitions): we need to send content insets? evaluate how its used.
                 new Rect(0, 0, 0, 0),

@@ -20,6 +20,7 @@ import static com.android.server.credentials.MetricUtilities.DELTA_RESPONSES_CUT
 import static com.android.server.credentials.MetricUtilities.generateMetricKey;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.service.credentials.BeginCreateCredentialResponse;
 import android.service.credentials.BeginGetCredentialResponse;
 import android.service.credentials.CredentialEntry;
@@ -205,18 +206,22 @@ public class ProviderSessionMetric {
      *
      * @param response contains entries and data from the candidate provider responses
      * @param isAuthEntry indicates if this is an auth entry collection or not
+     * @param initialPhaseMetric for create flows, this helps identify the response type, which
+     *                           will identify the *type* of create flow, especially important in
+     *                           track 2. This is expected to be null in get flows.
      * @param <R> the response type associated with the API flow in progress
      */
-    public <R> void collectCandidateEntryMetrics(R response, boolean isAuthEntry) {
+    public <R> void collectCandidateEntryMetrics(R response, boolean isAuthEntry,
+            @Nullable InitialPhaseMetric initialPhaseMetric) {
         try {
             if (response instanceof BeginGetCredentialResponse) {
                 beginGetCredentialResponseCollectionCandidateEntryMetrics(
                         (BeginGetCredentialResponse) response, isAuthEntry);
             } else if (response instanceof BeginCreateCredentialResponse) {
                 beginCreateCredentialResponseCollectionCandidateEntryMetrics(
-                        (BeginCreateCredentialResponse) response);
+                        (BeginCreateCredentialResponse) response, initialPhaseMetric);
             } else {
-                Slog.i(TAG, "Your response type is unsupported for metric logging");
+                Slog.i(TAG, "Your response type is unsupported for candidate metric logging");
             }
         } catch (Exception e) {
             Slog.i(TAG, "Unexpected error during candidate entry metric logging: " + e);
@@ -245,7 +250,6 @@ public class ProviderSessionMetric {
             String entryKey = generateMetricKey(entry.getType(), DELTA_RESPONSES_CUT);
             responseCounts.put(entryKey, responseCounts.getOrDefault(entryKey, 0) + 1);
         });
-
         ResponseCollective responseCollective = new ResponseCollective(responseCounts, entryCounts);
         mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);
     }
@@ -262,19 +266,21 @@ public class ProviderSessionMetric {
     }
 
     private void beginCreateCredentialResponseCollectionCandidateEntryMetrics(
-            BeginCreateCredentialResponse response) {
+            BeginCreateCredentialResponse response, InitialPhaseMetric initialPhaseMetric) {
         Map<EntryEnum, Integer> entryCounts = new LinkedHashMap<>();
         var createEntries = response.getCreateEntries();
-        int numRemoteEntry = response.getRemoteCreateEntry() != null ? MetricUtilities.ZERO :
+        int numRemoteEntry = response.getRemoteCreateEntry() == null ? MetricUtilities.ZERO :
                 MetricUtilities.UNIT;
         int numCreateEntries = createEntries.size();
         entryCounts.put(EntryEnum.REMOTE_ENTRY, numRemoteEntry);
         entryCounts.put(EntryEnum.CREDENTIAL_ENTRY, numCreateEntries);
 
         Map<String, Integer> responseCounts = new LinkedHashMap<>();
-        responseCounts.put(MetricUtilities.DEFAULT_STRING, numCreateEntries);
-        // We don't store create response because it's directly related to the request
-        // We do still store the count, however
+        String[] requestStrings = initialPhaseMetric == null ? new String[0] :
+                initialPhaseMetric.getUniqueRequestStrings();
+        if (requestStrings.length > 0) {
+            responseCounts.put(requestStrings[0], initialPhaseMetric.getUniqueRequestCounts()[0]);
+        }
 
         ResponseCollective responseCollective = new ResponseCollective(responseCounts, entryCounts);
         mCandidatePhasePerProviderMetric.setResponseCollective(responseCollective);

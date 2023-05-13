@@ -20,7 +20,6 @@ import android.animation.AnimatorListenerAdapter
 import android.app.ActivityTaskManager
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
@@ -436,23 +435,29 @@ private fun LottieAnimationView.addOverlayDynamicColor(
     fun update() {
         val isKeyguard = reason == REASON_AUTH_KEYGUARD
         if (isKeyguard) {
-            val color = context.getColor(R.color.numpad_key_color_secondary) // match bouncer color
+            val color =
+                com.android.settingslib.Utils.getColorAttrDefaultColor(
+                    context,
+                    com.android.internal.R.attr.materialColorPrimaryFixed
+                )
+            val outerRimColor =
+                com.android.settingslib.Utils.getColorAttrDefaultColor(
+                    context,
+                    com.android.internal.R.attr.materialColorPrimaryFixedDim
+                )
             val chevronFill =
                 com.android.settingslib.Utils.getColorAttrDefaultColor(
                     context,
-                    android.R.attr.textColorPrimaryInverse
+                    com.android.internal.R.attr.materialColorOnPrimaryFixed
                 )
-            for (key in listOf(".blue600", ".blue400")) {
-                addValueCallback(KeyPath(key, "**"), LottieProperty.COLOR_FILTER) {
-                    PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
-                }
+            addValueCallback(KeyPath(".blue600", "**"), LottieProperty.COLOR_FILTER) {
+                PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP)
+            }
+            addValueCallback(KeyPath(".blue400", "**"), LottieProperty.COLOR_FILTER) {
+                PorterDuffColorFilter(outerRimColor, PorterDuff.Mode.SRC_ATOP)
             }
             addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
                 PorterDuffColorFilter(chevronFill, PorterDuff.Mode.SRC_ATOP)
-            }
-        } else if (!isDarkMode(context)) {
-            addValueCallback(KeyPath(".black", "**"), LottieProperty.COLOR_FILTER) {
-                PorterDuffColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP)
             }
         } else if (isDarkMode(context)) {
             for (key in listOf(".blue600", ".blue400")) {

@@ -23,7 +23,13 @@ import static android.media.MediaRoute2Info.TYPE_GROUP;
 import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_GAME_CONSOLE;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_SMARTWATCH;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET;
+import static android.media.MediaRoute2Info.TYPE_REMOTE_TABLET_DOCKED;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
 import static android.media.MediaRoute2Info.TYPE_UNKNOWN;
 import static android.media.MediaRoute2Info.TYPE_USB_ACCESSORY;
@@ -531,7 +537,6 @@ public class InfoMediaManager extends MediaManager {
     @SuppressWarnings("NewApi")
     @VisibleForTesting
     void addMediaDevice(MediaRoute2Info route) {
-        //TODO(b/258141461): Attach flag and disable reason in MediaDevice
         final int deviceType = route.getType();
         MediaDevice mediaDevice = null;
         switch (deviceType) {
@@ -539,7 +544,12 @@ public class InfoMediaManager extends MediaManager {
             case TYPE_REMOTE_TV:
             case TYPE_REMOTE_SPEAKER:
             case TYPE_GROUP:
-                //TODO(b/148765806): use correct device type once api is ready.
+            case TYPE_REMOTE_TABLET:
+            case TYPE_REMOTE_TABLET_DOCKED:
+            case TYPE_REMOTE_COMPUTER:
+            case TYPE_REMOTE_GAME_CONSOLE:
+            case TYPE_REMOTE_CAR:
+            case TYPE_REMOTE_SMARTWATCH:
                 mediaDevice = new InfoMediaDevice(mContext, mRouterManager, route,
                         mPackageName, mPreferenceItemMap.get(route.getId()));
                 break;
