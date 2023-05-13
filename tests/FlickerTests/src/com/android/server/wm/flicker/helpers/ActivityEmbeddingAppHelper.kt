@@ -60,6 +60,24 @@ constructor(
     }
 
     /**
+     * Clicks the button to finishes the secondary activity launched through
+     * [launchSecondaryActivity], waits for the main activity to resume.
+     */
+    fun finishSecondaryActivity(wmHelper: WindowManagerStateHelper) {
+        val finishButton =
+            uiDevice.wait(
+                Until.findObject(By.res(getPackage(), "finish_secondary_activity_button")),
+                FIND_TIMEOUT
+            )
+        require(finishButton != null) { "Can't find finish secondary activity button on screen." }
+        finishButton.click()
+        wmHelper
+            .StateSyncBuilder()
+            .withActivityRemoved(SECONDARY_ACTIVITY_COMPONENT)
+            .waitForAndVerify()
+    }
+
+    /**
      * Clicks the button to launch the placeholder primary activity, which should launch the
      * placeholder secondary activity based on the placeholder rule.
      */
