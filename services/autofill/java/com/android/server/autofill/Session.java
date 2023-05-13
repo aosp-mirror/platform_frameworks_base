@@ -1609,9 +1609,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 Slog.d(TAG, message.toString());
             }
         }
-
-        if (((response.getDatasets() == null || response.getDatasets().isEmpty())
-                        && response.getAuthentication() == null)
+        List<Dataset> datasetList = response.getDatasets();
+        if (((datasetList == null || datasetList.isEmpty()) && response.getAuthentication() == null)
                 || autofillDisabled) {
             // Response is "empty" from a UI point of view, need to notify client.
             notifyUnavailableToClient(
@@ -1632,6 +1631,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         fieldClassificationIds.length);
             }
         }
+
+        mFillResponseEventLogger.maybeSetAvailableCount(
+                datasetList == null ? 0 : datasetList.size());
 
         // TODO(b/266379948): Ideally wait for PCC request to finish for a while more
         // (say 100ms) before proceeding further on.
@@ -1785,6 +1787,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             }
             if (ids.isEmpty()) return saveInfo;
             AutofillId[] autofillIds = new AutofillId[ids.size()];
+            mSaveEventLogger.maybeSetIsFrameworkCreatedSaveInfo(true);
             ids.toArray(autofillIds);
             return SaveInfo.copy(saveInfo, autofillIds);
         }
@@ -4107,8 +4110,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     mPresentationStatsEventLogger.maybeSetRequestId(response.getRequestId());
                     mPresentationStatsEventLogger.maybeSetAvailableCount(
                             response.getDatasets(), mCurrentViewId);
-                    mFillResponseEventLogger.maybeSetAvailableCount(
-                        response.getDatasets(), mCurrentViewId);
                 }
 
                 if (isSameViewEntered) {
@@ -4819,6 +4820,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             autofillableIds = null;
         }
         // Log the existing FillResponse event.
+        mFillResponseEventLogger.maybeSetAvailableCount(0);
         mFillResponseEventLogger.logAndEndEvent();
         mService.resetLastResponse();
 
@@ -5047,10 +5049,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mResponses.put(requestId, newResponse);
         mClientState = newClientState != null ? newClientState : newResponse.getClientState();
 
-        mPresentationStatsEventLogger.maybeSetAvailableCount(
-                newResponse.getDatasets(), mCurrentViewId);
-        mFillResponseEventLogger.maybeSetAvailableCount(
-            newResponse.getDatasets(), mCurrentViewId);
+        List<Dataset> datasetList = newResponse.getDatasets();
+
+        mPresentationStatsEventLogger.maybeSetAvailableCount(datasetList, mCurrentViewId);
+        mFillResponseEventLogger.maybeSetAvailableDatasetsPccCount(datasetList);
 
         setViewStatesLocked(newResponse, ViewState.STATE_FILLABLE, false);
         updateFillDialogTriggerIdsLocked();
@@ -5175,6 +5177,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (generateEvent) {
                     mService.logDatasetSelected(dataset.getId(), id, mClientState, uiType);
                     mPresentationStatsEventLogger.maybeSetSelectedDatasetId(datasetIndex);
+                    mPresentationStatsEventLogger.maybeSetSelectedDatasetPickReason(
+                            dataset.getEligibleReason());
                 }
                 if (mCurrentViewId != null) {
                     mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
