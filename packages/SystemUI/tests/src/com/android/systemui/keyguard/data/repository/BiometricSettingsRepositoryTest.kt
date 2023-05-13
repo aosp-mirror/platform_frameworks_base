@@ -310,19 +310,38 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             createBiometricSettingsRepository()
             verify(biometricManager)
                 .registerEnabledOnKeyguardCallback(biometricManagerCallback.capture())
-
             whenever(devicePolicyManager.getKeyguardDisabledFeatures(isNull(), eq(PRIMARY_USER_ID)))
                 .thenReturn(0)
             broadcastDPMStateChange()
-
-            biometricManagerCallback.value.onChanged(true, PRIMARY_USER_ID)
             val isFaceAuthEnabled = collectLastValue(underTest.isFaceAuthenticationEnabled)
 
-            assertThat(isFaceAuthEnabled()).isTrue()
+            assertThat(isFaceAuthEnabled()).isFalse()
 
-            biometricManagerCallback.value.onChanged(false, PRIMARY_USER_ID)
+            // Value changes for another user
+            biometricManagerCallback.value.onChanged(true, ANOTHER_USER_ID)
 
             assertThat(isFaceAuthEnabled()).isFalse()
+
+            // Value changes for current user.
+            biometricManagerCallback.value.onChanged(true, PRIMARY_USER_ID)
+
+            assertThat(isFaceAuthEnabled()).isTrue()
+        }
+
+    @Test
+    fun userChange_biometricEnabledChange_handlesRaceCondition() =
+        testScope.runTest {
+            createBiometricSettingsRepository()
+            verify(biometricManager)
+                .registerEnabledOnKeyguardCallback(biometricManagerCallback.capture())
+            val isFaceAuthEnabled = collectLastValue(underTest.isFaceAuthenticationEnabled)
+            biometricManagerCallback.value.onChanged(true, ANOTHER_USER_ID)
+            runCurrent()
+
+            userRepository.setSelectedUserInfo(ANOTHER_USER)
+            runCurrent()
+
+            assertThat(isFaceAuthEnabled()).isTrue()
         }
 
     @Test
@@ -382,7 +401,7 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
         }
 
     @Test
-    fun userInLockdownUsesStrongAuthFlagsToDetermineValue() =
+    fun userInLockdownUsesAuthFlagsToDetermineValue() =
         testScope.runTest {
             createBiometricSettingsRepository()
 
@@ -403,6 +422,38 @@ class BiometricSettingsRepositoryTest : SysuiTestCase() {
             onStrongAuthChanged(inLockdown, PRIMARY_USER_ID)
 
             assertThat(isUserInLockdown()).isTrue()
+        }
+
+    @Test
+    fun authFlagChangesForCurrentUserArePropagated() =
+        testScope.runTest {
+            createBiometricSettingsRepository()
+
+            val authFlags = collectLastValue(underTest.authenticationFlags)
+            // has default value.
+            val defaultStrongAuthValue = STRONG_AUTH_REQUIRED_AFTER_BOOT
+            assertThat(authFlags()!!.flag).isEqualTo(defaultStrongAuthValue)
+
+            // change strong auth flags for another user.
+            // Combine with one more flag to check if we do the bitwise and
+            val inLockdown =
+                STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN or STRONG_AUTH_REQUIRED_AFTER_TIMEOUT
+            onStrongAuthChanged(inLockdown, ANOTHER_USER_ID)
+
+            // Still false.
+            assertThat(authFlags()!!.flag).isEqualTo(defaultStrongAuthValue)
+
+            // change strong auth flags for current user.
+            onStrongAuthChanged(inLockdown, PRIMARY_USER_ID)
+
+            assertThat(authFlags()!!.flag).isEqualTo(inLockdown)
+
+            onStrongAuthChanged(STRONG_AUTH_REQUIRED_AFTER_TIMEOUT, ANOTHER_USER_ID)
+
+            assertThat(authFlags()!!.flag).isEqualTo(inLockdown)
+
+            userRepository.setSelectedUserInfo(ANOTHER_USER)
+            assertThat(authFlags()!!.flag).isEqualTo(STRONG_AUTH_REQUIRED_AFTER_TIMEOUT)
         }
 
     private fun enrollmentChange(biometricType: BiometricType, userId: Int, enabled: Boolean) {
