@@ -1454,7 +1454,7 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         // Skip the animation when the screen is off or suspended.
         boolean brightnessAdjusted = false;
         final boolean brightnessIsTemporary =
-                (mBrightnessReason.getReason() == BrightnessReason.REASON_TEMPORARY)
+                (mBrightnessReasonTemp.getReason() == BrightnessReason.REASON_TEMPORARY)
                         || mAutomaticBrightnessStrategy
                         .isTemporaryAutoBrightnessAdjustmentApplied();
         if (!mPendingScreenOff) {
@@ -1539,21 +1539,9 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
                 }
             }
 
-            // Report brightness to brightnesstracker:
-            // If brightness is not temporary (ie the slider has been released)
-            // AND if we are not in idle screen brightness mode.
-            if (!brightnessIsTemporary
-                    && (mAutomaticBrightnessController != null
-                    && !mAutomaticBrightnessController.isInIdleMode())) {
-                if (userInitiatedChange && (mAutomaticBrightnessController == null
-                        || !mAutomaticBrightnessController.hasValidAmbientLux())) {
-                    // If we don't have a valid lux reading we can't report a valid
-                    // slider event so notify as if the system changed the brightness.
-                    userInitiatedChange = false;
-                }
-                notifyBrightnessTrackerChanged(brightnessState, userInitiatedChange,
-                        wasShortTermModelActive);
-            }
+            notifyBrightnessTrackerChanged(brightnessState, userInitiatedChange,
+                    wasShortTermModelActive, mAutomaticBrightnessStrategy.isAutoBrightnessEnabled(),
+                    brightnessIsTemporary);
 
             // We save the brightness info *after* the brightness setting has been changed and
             // adjustments made so that the brightness info reflects the latest value.
@@ -2171,11 +2159,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }, mClock.uptimeMillis());
     }
 
-    private float getAutoBrightnessAdjustmentSetting() {
-        final float adj = Settings.System.getFloatForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f, UserHandle.USER_CURRENT);
-        return Float.isNaN(adj) ? 0.0f : clampAutoBrightnessAdjustment(adj);
-    }
 
     @Override
     public float getScreenBrightnessSetting() {
@@ -2215,23 +2198,45 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
     }
 
     private void notifyBrightnessTrackerChanged(float brightness, boolean userInitiated,
-            boolean wasShortTermModelActive) {
+            boolean wasShortTermModelActive, boolean autobrightnessEnabled,
+            boolean brightnessIsTemporary) {
+
         final float brightnessInNits =
                 mDisplayBrightnessController.convertToAdjustedNits(brightness);
-        if (mAutomaticBrightnessStrategy.shouldUseAutoBrightness() && brightnessInNits >= 0.0f
-                && mAutomaticBrightnessController != null && mBrightnessTracker != null) {
-            // We only want to track changes on devices that can actually map the display backlight
-            // values into a physical brightness unit since the value provided by the API is in
-            // nits and not using the arbitrary backlight units.
-            final float powerFactor = mPowerRequest.lowPowerMode
-                    ? mPowerRequest.screenLowPowerBrightnessFactor
-                    : 1.0f;
-            mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated,
-                    powerFactor, wasShortTermModelActive,
-                    mAutomaticBrightnessController.isDefaultConfig(), mUniqueDisplayId,
-                    mAutomaticBrightnessController.getLastSensorValues(),
-                    mAutomaticBrightnessController.getLastSensorTimestamps());
+        // Don't report brightness to brightnessTracker:
+        // If brightness is temporary (ie the slider has not been released)
+        // or if we are in idle screen brightness mode.
+        // or display is not on
+        // or we shouldn't be using autobrightness
+        // or the nits is invalid.
+        if (brightnessIsTemporary
+                || mAutomaticBrightnessController == null
+                || mAutomaticBrightnessController.isInIdleMode()
+                || !autobrightnessEnabled
+                || mBrightnessTracker == null
+                || !mAutomaticBrightnessStrategy.shouldUseAutoBrightness()
+                || brightnessInNits < 0.0f) {
+            return;
         }
+
+        if (userInitiated && (mAutomaticBrightnessController == null
+                || !mAutomaticBrightnessController.hasValidAmbientLux())) {
+            // If we don't have a valid lux reading we can't report a valid
+            // slider event so notify as if the system changed the brightness.
+            userInitiated = false;
+        }
+
+        // We only want to track changes on devices that can actually map the display backlight
+        // values into a physical brightness unit since the value provided by the API is in
+        // nits and not using the arbitrary backlight units.
+        final float powerFactor = mPowerRequest.lowPowerMode
+                ? mPowerRequest.screenLowPowerBrightnessFactor
+                : 1.0f;
+        mBrightnessTracker.notifyBrightnessChanged(brightnessInNits, userInitiated,
+                powerFactor, wasShortTermModelActive,
+                mAutomaticBrightnessController.isDefaultConfig(), mUniqueDisplayId,
+                mAutomaticBrightnessController.getLastSensorValues(),
+                mAutomaticBrightnessController.getLastSensorTimestamps());
     }
 
     @Override
@@ -2426,9 +2431,6 @@ final class DisplayPowerController2 implements AutomaticBrightnessController.Cal
         }
     }
 
-    private static float clampAutoBrightnessAdjustment(float value) {
-        return MathUtils.constrain(value, -1.0f, 1.0f);
-    }
 
     private void noteScreenState(int screenState) {
         // Log screen state change with display id

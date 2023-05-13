@@ -19,6 +19,7 @@ package com.android.systemui.accessibility;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
 import static android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW;
 
+import static com.android.systemui.accessibility.AccessibilityLogger.MagnificationSettingsEvent;
 import static com.android.systemui.accessibility.WindowMagnificationSettings.MagnificationSize;
 import static com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_MAGNIFICATION_OVERLAP;
@@ -89,6 +90,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
     private WindowMagnificationController mWindowMagnificationController;
     @Mock
     private MagnificationSettingsController mMagnificationSettingsController;
+    @Mock
+    private AccessibilityLogger mA11yLogger;
 
     @Before
     public void setUp() throws Exception {
@@ -103,11 +106,22 @@ public class WindowMagnificationTest extends SysuiTestCase {
 
         when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
 
+        doAnswer(invocation -> {
+            mWindowMagnification.mMagnificationSettingsControllerCallback
+                    .onSettingsPanelVisibilityChanged(TEST_DISPLAY, /* shown= */ true);
+            return null;
+        }).when(mMagnificationSettingsController).showMagnificationSettings();
+        doAnswer(invocation -> {
+            mWindowMagnification.mMagnificationSettingsControllerCallback
+                    .onSettingsPanelVisibilityChanged(TEST_DISPLAY, /* shown= */ false);
+            return null;
+        }).when(mMagnificationSettingsController).closeMagnificationSettings();
+
         mCommandQueue = new CommandQueue(getContext(), mDisplayTracker);
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue, mModeSwitchesController,
                 mSysUiState, mOverviewProxyService, mSecureSettings, mDisplayTracker,
-                getContext().getSystemService(DisplayManager.class));
+                getContext().getSystemService(DisplayManager.class), mA11yLogger);
         mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class), mWindowMagnificationController);
         mWindowMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
@@ -185,6 +199,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mMagnificationSettingsController).showMagnificationSettings();
+        verify(mA11yLogger).log(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED));
     }
 
     @Test
@@ -195,6 +211,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mWindowMagnificationController).changeMagnificationSize(eq(index));
+        verify(mA11yLogger).log(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_WINDOW_SIZE_SELECTED));
     }
 
     @Test
@@ -214,6 +232,16 @@ public class WindowMagnificationTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mWindowMagnificationController).setEditMagnifierSizeMode(eq(true));
+        verify(mA11yLogger).log(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_SIZE_EDITING_ACTIVATED));
+
+        mWindowMagnification.mMagnificationSettingsControllerCallback.onEditMagnifierSizeMode(
+                TEST_DISPLAY, /* enable= */ false);
+        waitForIdleSync();
+        verify(mA11yLogger).log(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_SIZE_EDITING_ACTIVATED));
+        verify(mA11yLogger).log(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_SIZE_EDITING_DEACTIVATED));
     }
 
     @Test
@@ -239,6 +267,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mMagnificationSettingsController).closeMagnificationSettings();
+        verify(mA11yLogger).log(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_CLOSED));
         verify(mConnectionCallback).onChangeMagnificationMode(eq(TEST_DISPLAY),
                 eq(ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN));
     }
@@ -268,6 +298,8 @@ public class WindowMagnificationTest extends SysuiTestCase {
         waitForIdleSync();
 
         verify(mWindowMagnificationController).updateDragHandleResourcesIfNeeded(eq(shown));
+        verify(mA11yLogger).log(
+                eq(MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_CLOSED));
     }
 
     @Test

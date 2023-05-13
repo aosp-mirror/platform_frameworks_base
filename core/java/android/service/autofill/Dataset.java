@@ -123,47 +123,50 @@ public final class Dataset implements Parcelable {
      */
     public static final int PICK_REASON_UNKNOWN = 0;
     /**
-     * This dataset is picked because of autofill provider detection was chosen.
+     * This dataset is picked because pcc wasn't enabled.
      * @hide
      */
-    public static final int PICK_REASON_AUTOFILL_PROVIDER_DETECTION = 1;
+    public static final int PICK_REASON_NO_PCC = 1;
+    /**
+     * This dataset is picked because provider gave this dataset.
+     * @hide
+     */
+    public static final int PICK_REASON_PROVIDER_DETECTION_ONLY = 2;
+    /**
+     * This dataset is picked because provider detection was preferred. However, provider also made
+     * this dataset available for PCC detected types, so they could've been picked up by PCC
+     * detection. This however doesn't imply that this dataset would've been chosen for sure. For
+     * eg, if PCC Detection was preferred, and PCC detected other field types, which wasn't
+     * applicable to this dataset, it wouldn't have been shown.
+     * @hide
+     */
+    public static final int PICK_REASON_PROVIDER_DETECTION_PREFERRED_WITH_PCC = 3;
     /**
      * This dataset is picked because of PCC detection was chosen.
      * @hide
      */
-    public static final int PICK_REASON_PCC_DETECTION = 2;
+    public static final int PICK_REASON_PCC_DETECTION_ONLY = 4;
     /**
-     * This dataset is picked because of Framework detection was chosen.
+     * This dataset is picked because of PCC Detection was preferred. However, Provider also gave
+     * this dataset, so if PCC wasn't enabled, this dataset would've been eligible anyway.
      * @hide
      */
-    public static final int PICK_REASON_FRAMEWORK_DETECTION = 3;
-    /**
-     * This dataset is picked because of Autofill Provider being a fallback.
-     * @hide
-     */
-    public static final int PICK_REASON_AUTOFILL_PROVIDER_FALLBACK = 4;
-    /**
-     * This dataset is picked because of PCC detection being a fallback.
-     * @hide
-     */
-    public static final int PICK_REASON_PCC_DETECTION_FALLBACK = 5;
-    /**
-     * This dataset is picked because of Framework detection being a fallback.
-     * @hide
-     */
-    public static final int PICK_REASON_FRAMEWORK_FALLBACK = 6;
+    public static final int PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER = 5;
 
+    /**
+     * Reason why the dataset was eligible for autofill.
+     * @hide
+     */
     @IntDef(prefix = { "PICK_REASON_" }, value = {
             PICK_REASON_UNKNOWN,
-            PICK_REASON_AUTOFILL_PROVIDER_DETECTION,
-            PICK_REASON_PCC_DETECTION,
-            PICK_REASON_FRAMEWORK_DETECTION,
-            PICK_REASON_AUTOFILL_PROVIDER_FALLBACK,
-            PICK_REASON_PCC_DETECTION_FALLBACK,
-            PICK_REASON_FRAMEWORK_FALLBACK,
+            PICK_REASON_NO_PCC,
+            PICK_REASON_PROVIDER_DETECTION_ONLY,
+            PICK_REASON_PROVIDER_DETECTION_PREFERRED_WITH_PCC,
+            PICK_REASON_PCC_DETECTION_ONLY,
+            PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER,
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface DatasetEligibleReason{}
+    public @interface DatasetEligibleReason{}
 
     private @DatasetEligibleReason int mEligibleReason;
 

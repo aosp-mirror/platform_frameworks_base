@@ -5,11 +5,11 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import androidx.annotation.IntDef;
@@ -69,12 +69,13 @@ public class KeyguardClockSwitch extends RelativeLayout {
     /**
      * Frame for small/large clocks
      */
-    private FrameLayout mSmallClockFrame;
-    private FrameLayout mLargeClockFrame;
+    private KeyguardClockFrame mSmallClockFrame;
+    private KeyguardClockFrame mLargeClockFrame;
     private ClockController mClock;
 
     private View mStatusArea;
     private int mSmartspaceTopOffset;
+    private int mDrawAlpha = 255;
 
     /**
      * Maintain state so that a newly connected plugin can be initialized.
@@ -119,6 +120,19 @@ public class KeyguardClockSwitch extends RelativeLayout {
         mStatusArea = findViewById(R.id.keyguard_status_area);
 
         onDensityOrFontScaleChanged();
+    }
+
+    @Override
+    protected boolean onSetAlpha(int alpha) {
+        mDrawAlpha = alpha;
+        return true;
+    }
+
+    @Override
+    protected void dispatchDraw(Canvas canvas) {
+        int restoreTo = KeyguardClockFrame.saveCanvasAlpha(this, canvas, mDrawAlpha);
+        super.dispatchDraw(canvas);
+        canvas.restoreToCount(restoreTo);
     }
 
     public void setLogBuffer(LogBuffer logBuffer) {

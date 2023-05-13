@@ -20,7 +20,6 @@ import android.annotation.NonNull;
 import android.companion.ContextSyncMessage;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.telecom.PhoneAccountHandle;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -189,7 +188,6 @@ class CallMetadataSyncData {
         private String mCallerId;
         private byte[] mAppIcon;
         private CallFacilitator mFacilitator;
-        private PhoneAccountHandle mPhoneAccountHandle;
         private int mStatus;
         private final Set<Integer> mControls = new HashSet<>();
 
@@ -200,9 +198,6 @@ class CallMetadataSyncData {
             call.setAppIcon(parcel.readBlob());
             call.setFacilitator(parcel.readParcelable(CallFacilitator.class.getClassLoader(),
                     CallFacilitator.class));
-            call.setPhoneAccountHandle(
-                    parcel.readParcelable(PhoneAccountHandle.class.getClassLoader(),
-                            android.telecom.PhoneAccountHandle.class));
             call.setStatus(parcel.readInt());
             final int numberOfControls = parcel.readInt();
             for (int i = 0; i < numberOfControls; i++) {
@@ -217,7 +212,6 @@ class CallMetadataSyncData {
             parcel.writeString(mCallerId);
             parcel.writeBlob(mAppIcon);
             parcel.writeParcelable(mFacilitator, parcelableFlags);
-            parcel.writeParcelable(mPhoneAccountHandle, parcelableFlags);
             parcel.writeInt(mStatus);
             parcel.writeInt(mControls.size());
             for (int control : mControls) {
@@ -241,16 +235,17 @@ class CallMetadataSyncData {
             mFacilitator = facilitator;
         }
 
-        void setPhoneAccountHandle(PhoneAccountHandle phoneAccountHandle) {
-            mPhoneAccountHandle = phoneAccountHandle;
-        }
-
         void setStatus(int status) {
             mStatus = status;
         }
 
         void addControl(int control) {
             mControls.add(control);
+        }
+
+        void setControls(Set<Integer> controls) {
+            mControls.clear();
+            mControls.addAll(controls);
         }
 
         String getId() {
@@ -267,10 +262,6 @@ class CallMetadataSyncData {
 
         CallFacilitator getFacilitator() {
             return mFacilitator;
-        }
-
-        PhoneAccountHandle getPhoneAccountHandle() {
-            return mPhoneAccountHandle;
         }
 
         int getStatus() {

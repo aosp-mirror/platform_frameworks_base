@@ -36,7 +36,8 @@ public interface CompanionDeviceManagerServiceInternal {
      * Registers a callback from an InCallService / ConnectionService to CDM to process sync
      * requests and perform call control actions.
      */
-    void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback);
+    void registerCallMetadataSyncCallback(CrossDeviceSyncControllerCallback callback,
+            @CrossDeviceSyncControllerCallback.Type int type);
 
     /**
      * Requests a sync from an InCallService / ConnectionService to CDM, for the given association
