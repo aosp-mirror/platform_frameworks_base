@@ -26,6 +26,8 @@ import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.classifier.FalsingCollectorFake
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.statusbar.policy.DevicePostureController
 import org.junit.Before
 import org.junit.Test
@@ -72,6 +74,7 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
   @Mock private lateinit var mPostureController: DevicePostureController
 
   private lateinit var mKeyguardPatternViewController: KeyguardPatternViewController
+  private lateinit var fakeFeatureFlags: FakeFeatureFlags
 
   @Before
   fun setup() {
@@ -86,6 +89,8 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
     `when`(mKeyguardMessageAreaControllerFactory.create(mKeyguardMessageArea))
         .thenReturn(mKeyguardMessageAreaController)
     `when`(mKeyguardPatternView.resources).thenReturn(context.resources)
+    fakeFeatureFlags = FakeFeatureFlags()
+    fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, false)
     mKeyguardPatternViewController =
         KeyguardPatternViewController(
             mKeyguardPatternView,
@@ -97,7 +102,17 @@ class KeyguardPatternViewControllerTest : SysuiTestCase() {
             mFalsingCollector,
             mEmergencyButtonController,
             mKeyguardMessageAreaControllerFactory,
-            mPostureController)
+            mPostureController,
+            fakeFeatureFlags)
+  }
+
+  @Test
+  fun withFeatureFlagOn_oldMessage_isHidden() {
+    fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
+
+    mKeyguardPatternViewController.init()
+
+    verify<KeyguardMessageAreaController<*>>(mKeyguardMessageAreaController).disable()
   }
 
   @Test

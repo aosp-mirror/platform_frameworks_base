@@ -38,6 +38,7 @@ import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingClassifier;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.statusbar.policy.DevicePostureController;
 
 import java.util.HashMap;
@@ -196,9 +197,9 @@ public class KeyguardPatternViewController
             FalsingCollector falsingCollector,
             EmergencyButtonController emergencyButtonController,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
-            DevicePostureController postureController) {
+            DevicePostureController postureController, FeatureFlags featureFlags) {
         super(view, securityMode, keyguardSecurityCallback, emergencyButtonController,
-                messageAreaControllerFactory);
+                messageAreaControllerFactory, featureFlags);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
