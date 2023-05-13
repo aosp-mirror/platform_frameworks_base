@@ -206,7 +206,7 @@ public abstract class DevicePolicyManagerInternal {
      *
      * @hide
      */
-    public abstract List<String> getAllCrossProfilePackages();
+    public abstract List<String> getAllCrossProfilePackages(int userId);
 
     /**
      * Returns the default package names set by the OEM that are allowed to communicate

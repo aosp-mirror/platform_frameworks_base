@@ -13397,14 +13397,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 PolicyDefinition<Boolean> policyDefinition =
                         PolicyDefinition.getPolicyDefinitionForUserRestriction(key);
                 if (enabledFromThisOwner) {
-                    // TODO: Remove this special case - replace with breaking change to require
-                    //  setGlobally to disable ADB
-                    if (key.equals(UserManager.DISALLOW_DEBUGGING_FEATURES) && parent) {
-                        setGlobalUserRestrictionInternal(admin, key, /* enabled= */ true);
-                    } else {
-                        setLocalUserRestrictionInternal(
-                                admin, key, /* enabled= */ true, affectedUserId);
-                    }
+                    setLocalUserRestrictionInternal(
+                            admin, key, /* enabled= */ true, affectedUserId);
                 } else {
                     // Remove any local and global policy that was set by the admin
                     if (!policyDefinition.isLocalOnlyPolicy()) {
@@ -13922,7 +13916,6 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         CallerIdentity caller = getCallerIdentity(who, callerPackage);
         final int userId = parent ? getProfileParentId(caller.getUserId()) : caller.getUserId();
         if (isPolicyEngineForFinanceFlagEnabled()) {
-            // TODO: We need to ensure the delegate with DELEGATION_PACKAGE_ACCESS can do this
             enforcePermission(MANAGE_DEVICE_POLICY_PACKAGE_STATE, caller.getPackageName(), userId);
         } else {
             Preconditions.checkCallAuthorization((caller.hasAdminComponent()
@@ -16093,8 +16086,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         }
 
         @Override
-        public List<String> getAllCrossProfilePackages() {
-            return DevicePolicyManagerService.this.getAllCrossProfilePackages();
+        public List<String> getAllCrossProfilePackages(int userId) {
+            return DevicePolicyManagerService.this.getAllCrossProfilePackages(userId);
         }
 
         @Override
@@ -20318,7 +20311,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public List<String> getAllCrossProfilePackages() {
+    public List<String> getAllCrossProfilePackages(int userId) {
         if (!mHasFeature) {
             return Collections.emptyList();
         }
@@ -20327,10 +20320,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                 isSystemUid(caller) || isRootUid(caller) || hasCallingPermission(
                         permission.INTERACT_ACROSS_USERS) || hasCallingPermission(
                         permission.INTERACT_ACROSS_USERS_FULL) || hasPermissionForPreflight(
-                        caller, permission.INTERACT_ACROSS_PROFILES));
+                                                caller, permission.INTERACT_ACROSS_PROFILES));
 
         synchronized (getLockObject()) {
-            final List<ActiveAdmin> admins = getProfileOwnerAdminsForCurrentProfileGroup();
+            final List<ActiveAdmin> admins = getProfileOwnerAdminsForProfileGroup(userId);
             final List<String> packages = getCrossProfilePackagesForAdmins(admins);
 
             packages.addAll(getDefaultCrossProfilePackages());
@@ -20359,11 +20352,10 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         return new ArrayList<>(crossProfilePackages);
     }
 
-    private List<ActiveAdmin> getProfileOwnerAdminsForCurrentProfileGroup() {
+    private List<ActiveAdmin> getProfileOwnerAdminsForProfileGroup(int userId) {
         synchronized (getLockObject()) {
             final List<ActiveAdmin> admins = new ArrayList<>();
-            int[] users = mUserManager.getProfileIdsWithDisabled(
-                    mInjector.userHandleGetCallingUserId());
+            int[] users = mUserManager.getProfileIdsWithDisabled(userId);
             for (int i = 0; i < users.length; i++) {
                 final ComponentName componentName = getProfileOwnerAsUser(users[i]);
                 if (componentName != null) {
