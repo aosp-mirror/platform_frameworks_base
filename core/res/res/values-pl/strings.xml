@@ -911,7 +911,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="8583732939138432793">"Błędny kod PIN"</string>
     <string name="keyguard_label_text" msgid="3841953694564168384">"Aby odblokować, naciśnij Menu, a następnie 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="2978165477085612673">"Numer alarmowy"</string>
-    <string name="lockscreen_carrier_default" msgid="6192313772955399160">"Brak usługi"</string>
+    <string name="lockscreen_carrier_default" msgid="6192313772955399160">"Brak sieci"</string>
     <string name="lockscreen_screen_locked" msgid="7364905540516041817">"Ekran zablokowany."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Naciśnij Menu, aby odblokować lub wykonać połączenie alarmowe."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Naciśnij Menu, aby odblokować."</string>

@@ -1354,7 +1354,7 @@
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"Partage de connexion via USB activé"</string>
     <string name="usb_midi_notification_title" msgid="7404506788950595557">"MIDI via USB activé"</string>
     <string name="usb_accessory_notification_title" msgid="1385394660861956980">"Accessoire USB connecté"</string>
-    <string name="usb_notification_message" msgid="4715163067192110676">"Appuyez ici pour plus d\'options."</string>
+    <string name="usb_notification_message" msgid="4715163067192110676">"Appuyez pour plus d\'options."</string>
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Recharge de l\'appareil connecté. Appuyez ici pour plus d\'options."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Accessoire audio analogique détecté"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"L\'appareil connecté n\'est pas compatible avec ce téléphone. Appuyez ici pour en savoir plus."</string>
