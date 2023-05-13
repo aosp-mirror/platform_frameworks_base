@@ -72,102 +72,67 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup,
             int viewType) {
         super.onCreateViewHolder(viewGroup, viewType);
-        if (mController.isAdvancedLayoutSupported()) {
-            switch (viewType) {
-                case MediaItem.MediaItemType.TYPE_GROUP_DIVIDER:
-                    return new MediaGroupDividerViewHolder(mHolderView);
-                case MediaItem.MediaItemType.TYPE_PAIR_NEW_DEVICE:
-                case MediaItem.MediaItemType.TYPE_DEVICE:
-                default:
-                    return new MediaDeviceViewHolder(mHolderView);
-            }
-        } else {
-            return new MediaDeviceViewHolder(mHolderView);
+        switch (viewType) {
+            case MediaItem.MediaItemType.TYPE_GROUP_DIVIDER:
+                return new MediaGroupDividerViewHolder(mHolderView);
+            case MediaItem.MediaItemType.TYPE_PAIR_NEW_DEVICE:
+            case MediaItem.MediaItemType.TYPE_DEVICE:
+            default:
+                return new MediaDeviceViewHolder(mHolderView);
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-        if (mController.isAdvancedLayoutSupported()) {
-            if (position >= mMediaItemList.size()) {
-                if (DEBUG) {
-                    Log.d(TAG, "Incorrect position: " + position + " list size: "
-                            + mMediaItemList.size());
-                }
-                return;
+        if (position >= mMediaItemList.size()) {
+            if (DEBUG) {
+                Log.d(TAG, "Incorrect position: " + position + " list size: "
+                        + mMediaItemList.size());
             }
-            MediaItem currentMediaItem = mMediaItemList.get(position);
-            switch (currentMediaItem.getMediaItemType()) {
-                case MediaItem.MediaItemType.TYPE_GROUP_DIVIDER:
-                    ((MediaGroupDividerViewHolder) viewHolder).onBind(currentMediaItem.getTitle());
-                    break;
-                case MediaItem.MediaItemType.TYPE_PAIR_NEW_DEVICE:
-                    ((MediaDeviceViewHolder) viewHolder).onBind(CUSTOMIZED_ITEM_PAIR_NEW);
-                    break;
-                case MediaItem.MediaItemType.TYPE_DEVICE:
-                    ((MediaDeviceViewHolder) viewHolder).onBind(
-                            currentMediaItem.getMediaDevice().get(),
-                            position);
-                    break;
-                default:
-                    Log.d(TAG, "Incorrect position: " + position);
-            }
-        } else {
-            final int size = mController.getMediaDevices().size();
-            if (position == size) {
+            return;
+        }
+        MediaItem currentMediaItem = mMediaItemList.get(position);
+        switch (currentMediaItem.getMediaItemType()) {
+            case MediaItem.MediaItemType.TYPE_GROUP_DIVIDER:
+                ((MediaGroupDividerViewHolder) viewHolder).onBind(currentMediaItem.getTitle());
+                break;
+            case MediaItem.MediaItemType.TYPE_PAIR_NEW_DEVICE:
                 ((MediaDeviceViewHolder) viewHolder).onBind(CUSTOMIZED_ITEM_PAIR_NEW);
-            } else if (position < size) {
+                break;
+            case MediaItem.MediaItemType.TYPE_DEVICE:
                 ((MediaDeviceViewHolder) viewHolder).onBind(
-                        ((List<MediaDevice>) (mController.getMediaDevices())).get(position),
+                        currentMediaItem.getMediaDevice().get(),
                         position);
-            } else if (DEBUG) {
+                break;
+            default:
                 Log.d(TAG, "Incorrect position: " + position);
-            }
         }
     }
 
     @Override
     public long getItemId(int position) {
-        if (mController.isAdvancedLayoutSupported()) {
-            if (position >= mMediaItemList.size()) {
-                Log.d(TAG, "Incorrect position for item id: " + position);
-                return position;
-            }
-            MediaItem currentMediaItem = mMediaItemList.get(position);
-            return currentMediaItem.getMediaDevice().isPresent()
-                    ? currentMediaItem.getMediaDevice().get().getId().hashCode()
-                    : position;
-        }
-        final int size = mController.getMediaDevices().size();
-        if (position == size) {
-            return -1;
-        } else if (position < size) {
-            return ((List<MediaDevice>) (mController.getMediaDevices()))
-                    .get(position).getId().hashCode();
-        } else if (DEBUG) {
+        if (position >= mMediaItemList.size()) {
             Log.d(TAG, "Incorrect position for item id: " + position);
+            return position;
         }
-        return position;
+        MediaItem currentMediaItem = mMediaItemList.get(position);
+        return currentMediaItem.getMediaDevice().isPresent()
+                ? currentMediaItem.getMediaDevice().get().getId().hashCode()
+                : position;
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (mController.isAdvancedLayoutSupported()
-                && position >= mMediaItemList.size()) {
+        if (position >= mMediaItemList.size()) {
             Log.d(TAG, "Incorrect position for item type: " + position);
             return MediaItem.MediaItemType.TYPE_GROUP_DIVIDER;
         }
-        return mController.isAdvancedLayoutSupported()
-                ? mMediaItemList.get(position).getMediaItemType()
-                : super.getItemViewType(position);
+        return mMediaItemList.get(position).getMediaItemType();
     }
 
     @Override
     public int getItemCount() {
-        // Add extra one for "pair new"
-        return mController.isAdvancedLayoutSupported()
-                ? mMediaItemList.size()
-                : mController.getMediaDevices().size() + 1;
+        return mMediaItemList.size();
     }
 
     class MediaDeviceViewHolder extends MediaDeviceBaseViewHolder {
@@ -203,17 +168,14 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 // Set different layout for each device
                 if (device.isMutingExpectedDevice()
                         && !mController.isCurrentConnectedDeviceRemote()) {
-                    if (!mController.isAdvancedLayoutSupported()) {
-                        updateTitleIcon(R.drawable.media_output_icon_volume,
-                                mController.getColorItemContent());
-                    }
+                    updateTitleIcon(R.drawable.media_output_icon_volume,
+                            mController.getColorItemContent());
                     mCurrentActivePosition = position;
                     updateFullItemClickListener(v -> onItemClick(v, device));
                     setSingleLineLayout(getItemTitle(device));
                     initMutingExpectedDevice();
                 } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-                        && mController.isSubStatusSupported()
-                        && mController.isAdvancedLayoutSupported() && device.hasSubtext()) {
+                        && device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
                             (device.hasOngoingSession() && (currentlyConnected || isDeviceIncluded(
                                     mController.getSelectedMediaDevice(), device)));
@@ -284,10 +246,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     // selected device in group
                     boolean isDeviceDeselectable = isDeviceIncluded(
                             mController.getDeselectableMediaDevice(), device);
-                    if (!mController.isAdvancedLayoutSupported()) {
-                        updateTitleIcon(R.drawable.media_output_icon_volume,
-                                mController.getColorItemContent());
-                    }
+                    updateTitleIcon(R.drawable.media_output_icon_volume,
+                            mController.getColorItemContent());
                     updateGroupableCheckBox(true, isDeviceDeselectable, device);
                     updateEndClickArea(device, isDeviceDeselectable);
                     setUpContentDescriptionForView(mContainerLayout, false, device);
@@ -305,8 +265,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         updateFullItemClickListener(v -> cancelMuteAwaitConnection());
                         setSingleLineLayout(getItemTitle(device));
                     } else if (mController.isCurrentConnectedDeviceRemote()
-                            && !mController.getSelectableMediaDevice().isEmpty()
-                            && mController.isAdvancedLayoutSupported()) {
+                            && !mController.getSelectableMediaDevice().isEmpty()) {
                         //If device is connected and there's other selectable devices, layout as
                         // one of selected devices.
                         updateTitleIcon(R.drawable.media_output_icon_volume,
@@ -334,36 +293,27 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     //groupable device
                     setUpDeviceIcon(device);
                     updateGroupableCheckBox(false, true, device);
-                    if (mController.isAdvancedLayoutSupported()) {
-                        updateEndClickArea(device, true);
-                    }
-                    updateFullItemClickListener(mController.isAdvancedLayoutSupported()
-                            ? v -> onItemClick(v, device)
-                            : v -> onGroupActionTriggered(true, device));
+                    updateEndClickArea(device, true);
+                    updateFullItemClickListener(v -> onItemClick(v, device));
                     setSingleLineLayout(getItemTitle(device), false /* showSeekBar */,
                             false /* showProgressBar */, true /* showCheckBox */,
                             true /* showEndTouchArea */);
                 } else {
                     setUpDeviceIcon(device);
                     setSingleLineLayout(getItemTitle(device));
-                    if (mController.isAdvancedLayoutSupported()
-                            && mController.isSubStatusSupported()) {
-                        Drawable deviceStatusIcon =
-                                device.hasOngoingSession() ? mContext.getDrawable(
-                                        R.drawable.ic_sound_bars_anim)
-                                        : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
-                                                device,
-                                                mContext);
-                        if (deviceStatusIcon != null) {
-                            updateDeviceStatusIcon(deviceStatusIcon);
-                            mStatusIcon.setVisibility(View.VISIBLE);
-                        }
-                        updateSingleLineLayoutContentAlpha(
-                                updateClickActionBasedOnSelectionBehavior(device)
-                                        ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
-                    } else {
-                        updateFullItemClickListener(v -> onItemClick(v, device));
+                    Drawable deviceStatusIcon =
+                            device.hasOngoingSession() ? mContext.getDrawable(
+                                    R.drawable.ic_sound_bars_anim)
+                                    : Api34Impl.getDeviceStatusIconBasedOnSelectionBehavior(
+                                            device,
+                                            mContext);
+                    if (deviceStatusIcon != null) {
+                        updateDeviceStatusIcon(deviceStatusIcon);
+                        mStatusIcon.setVisibility(View.VISIBLE);
                     }
+                    updateSingleLineLayoutContentAlpha(
+                            updateClickActionBasedOnSelectionBehavior(device)
+                                    ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
                 }
             }
         }
@@ -400,10 +350,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
         }
 
         public void updateEndClickAreaColor(int color) {
-            if (mController.isAdvancedLayoutSupported()) {
-                mEndTouchArea.setBackgroundTintList(
-                        ColorStateList.valueOf(color));
-            }
+            mEndTouchArea.setBackgroundTintList(
+                    ColorStateList.valueOf(color));
         }
 
         private boolean updateClickActionBasedOnSelectionBehavior(MediaDevice device) {
@@ -440,10 +388,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     isDeviceDeselectable ? (v) -> mCheckBox.performClick() : null);
             mEndTouchArea.setImportantForAccessibility(
                     View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-            if (mController.isAdvancedLayoutSupported()) {
-                mEndTouchArea.setBackgroundTintList(
-                        ColorStateList.valueOf(mController.getColorItemBackground()));
-            }
+            mEndTouchArea.setBackgroundTintList(
+                    ColorStateList.valueOf(mController.getColorItemBackground()));
             setUpContentDescriptionForView(mEndTouchArea, true, device);
         }
 
@@ -473,10 +419,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                 mTitleIcon.setImageDrawable(addDrawable);
                 mTitleIcon.setImageTintList(
                         ColorStateList.valueOf(mController.getColorItemContent()));
-                if (mController.isAdvancedLayoutSupported()) {
-                    mIconAreaLayout.setBackgroundTintList(
-                            ColorStateList.valueOf(mController.getColorItemBackground()));
-                }
+                mIconAreaLayout.setBackgroundTintList(
+                        ColorStateList.valueOf(mController.getColorItemBackground()));
                 mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
             }
         }
