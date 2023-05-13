@@ -74,6 +74,8 @@ public class InputShellCommand extends ShellCommand {
     private static final int DEFAULT_EDGE_FLAGS = 0;
     private static final int DEFAULT_BUTTON_STATE = 0;
     private static final int DEFAULT_FLAGS = 0;
+    private static final boolean INJECT_ASYNC = true;
+    private static final boolean INJECT_SYNC = false;
 
     /** Modifier key to meta state */
     private static final Map<Integer, Integer> MODIFIER;
@@ -109,9 +111,11 @@ public class InputShellCommand extends ShellCommand {
         SOURCES = unmodifiableMap(map);
     }
 
-    private void injectKeyEvent(KeyEvent event) {
-        InputManagerGlobal.getInstance().injectInputEvent(event,
-                InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
+    private void injectKeyEvent(KeyEvent event, boolean async) {
+        int injectMode = async
+                ? InputManager.INJECT_INPUT_EVENT_MODE_ASYNC
+                : InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH;
+        InputManagerGlobal.getInstance().injectInputEvent(event, injectMode);
     }
 
     private int getInputDeviceId(int inputSource) {
@@ -271,7 +275,9 @@ public class InputShellCommand extends ShellCommand {
             out.println();
             out.println("The commands and default sources are:");
             out.println("      text <string> (Default: touchscreen)");
-            out.println("      keyevent [--longpress|--doubletap] <key code number or name> ..."
+            out.println("      keyevent [--longpress|--doubletap|--async"
+                    + "|--delay <duration between keycodes in ms>]"
+                    + " <key code number or name> ..."
                     + " (Default: keyboard)");
             out.println("      tap <x> <y> (Default: touchscreen)");
             out.println("      swipe <x1> <y1> <x2> <y2> [duration(ms)]"
@@ -322,32 +328,45 @@ public class InputShellCommand extends ShellCommand {
                 e.setSource(source);
             }
             e.setDisplayId(displayId);
-            injectKeyEvent(e);
+            injectKeyEvent(e, INJECT_SYNC);
         }
     }
 
     private void runKeyEvent(int inputSource, int displayId) {
-        String arg = getNextArgRequired();
-        final boolean longpress = "--longpress".equals(arg);
-        if (longpress) {
-            arg = getNextArgRequired();
-        } else {
-            final boolean doubleTap = "--doubletap".equals(arg);
-            if (doubleTap) {
-                arg = getNextArgRequired();
-                final int keycode = KeyEvent.keyCodeFromString(arg);
-                sendKeyDoubleTap(inputSource, keycode, displayId);
-                return;
-            }
-        }
+        boolean longPress = false;
+        boolean async = false;
+        boolean doubleTap = false;
+        long delayMs = 0;
 
+        String arg = getNextArgRequired();
         do {
-            final int keycode = KeyEvent.keyCodeFromString(arg);
-            sendKeyEvent(inputSource, keycode, longpress, displayId);
+            if (!arg.startsWith("--")) break;
+            longPress = (longPress || arg.equals("--longpress"));
+            async = (async || arg.equals("--async"));
+            doubleTap = (doubleTap || arg.equals("--doubletap"));
+            if (arg.equals("--delay")) {
+                delayMs = Long.parseLong(getNextArgRequired());
+            }
+        } while ((arg = getNextArg()) != null);
+
+        boolean firstInput = true;
+        do {
+            if (!firstInput && delayMs > 0) {
+                sleep(delayMs);
+            }
+            firstInput = false;
+
+            final int keyCode = KeyEvent.keyCodeFromString(arg);
+            sendKeyEvent(inputSource, keyCode, longPress, displayId, async);
+            if (doubleTap) {
+                sleep(ViewConfiguration.getDoubleTapMinTime());
+                sendKeyEvent(inputSource, keyCode, longPress, displayId, async);
+            }
         } while ((arg = getNextArg()) != null);
     }
 
-    private void sendKeyEvent(int inputSource, int keyCode, boolean longpress, int displayId) {
+    private void sendKeyEvent(
+            int inputSource, int keyCode, boolean longPress, int displayId, boolean async) {
         final long now = SystemClock.uptimeMillis();
 
         KeyEvent event = new KeyEvent(now, now, KeyEvent.ACTION_DOWN, keyCode, 0 /* repeatCount */,
@@ -355,21 +374,16 @@ public class InputShellCommand extends ShellCommand {
                 inputSource);
         event.setDisplayId(displayId);
 
-        injectKeyEvent(event);
-        if (longpress) {
+        injectKeyEvent(event, async);
+        if (longPress) {
             sleep(ViewConfiguration.getLongPressTimeout());
             // Some long press behavior would check the event time, we set a new event time here.
             final long nextEventTime = now + ViewConfiguration.getLongPressTimeout();
-            injectKeyEvent(KeyEvent.changeTimeRepeat(event, nextEventTime, 1 /* repeatCount */,
-                    KeyEvent.FLAG_LONG_PRESS));
+            KeyEvent longPressEvent = KeyEvent.changeTimeRepeat(
+                    event, nextEventTime, 1 /* repeatCount */, KeyEvent.FLAG_LONG_PRESS);
+            injectKeyEvent(longPressEvent, async);
         }
-        injectKeyEvent(KeyEvent.changeAction(event, KeyEvent.ACTION_UP));
-    }
-
-    private void sendKeyDoubleTap(int inputSource, int keyCode, int displayId) {
-        sendKeyEvent(inputSource, keyCode, false, displayId);
-        sleep(ViewConfiguration.getDoubleTapMinTime());
-        sendKeyEvent(inputSource, keyCode, false, displayId);
+        injectKeyEvent(KeyEvent.changeAction(event, KeyEvent.ACTION_UP), async);
     }
 
     private void runTap(int inputSource, int displayId) {
@@ -530,11 +544,6 @@ public class InputShellCommand extends ShellCommand {
         sendKeyCombination(inputSource, keyCodes, displayId, duration);
     }
 
-    private void injectKeyEventAsync(KeyEvent event) {
-        InputManagerGlobal.getInstance().injectInputEvent(event,
-                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-    }
-
     private void sendKeyCombination(int inputSource, IntArray keyCodes, int displayId,
             long duration) {
         final long now = SystemClock.uptimeMillis();
@@ -555,7 +564,7 @@ public class InputShellCommand extends ShellCommand {
         for (KeyEvent event: events) {
             // Use async inject so interceptKeyBeforeQueueing or interceptKeyBeforeDispatching could
             // handle keys.
-            injectKeyEventAsync(event);
+            injectKeyEvent(event, INJECT_ASYNC);
         }
 
         sleep(duration);
@@ -565,7 +574,7 @@ public class InputShellCommand extends ShellCommand {
             final KeyEvent upEvent = new KeyEvent(now, now, KeyEvent.ACTION_UP, keyCode,
                     0, metaState, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /*scancode*/, 0 /*flags*/,
                     inputSource);
-            injectKeyEventAsync(upEvent);
+            injectKeyEvent(upEvent, INJECT_ASYNC);
             metaState &= ~MODIFIER.getOrDefault(keyCode, 0);
         }
     }
