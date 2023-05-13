@@ -80,6 +80,8 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
     private OverviewProxyService mOverviewProxyService;
     @Mock
     private SecureSettings mSecureSettings;
+    @Mock
+    private AccessibilityLogger mA11yLogger;
 
     private IWindowMagnificationConnection mIWindowMagnificationConnection;
     private WindowMagnification mWindowMagnification;
@@ -97,7 +99,7 @@ public class IWindowMagnificationConnectionTest extends SysuiTestCase {
         mWindowMagnification = new WindowMagnification(getContext(),
                 getContext().getMainThreadHandler(), mCommandQueue,
                 mModeSwitchesController, mSysUiState, mOverviewProxyService, mSecureSettings,
-                mDisplayTracker, getContext().getSystemService(DisplayManager.class));
+                mDisplayTracker, getContext().getSystemService(DisplayManager.class), mA11yLogger);
         mWindowMagnification.mMagnificationControllerSupplier = new FakeControllerSupplier(
                 mContext.getSystemService(DisplayManager.class));
         mWindowMagnification.mMagnificationSettingsSupplier = new FakeSettingsSupplier(
