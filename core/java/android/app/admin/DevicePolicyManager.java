@@ -15735,7 +15735,7 @@ public class DevicePolicyManager {
         throwIfParentInstance("getAllCrossProfilePackages");
         if (mService != null) {
             try {
-                return new ArraySet<>(mService.getAllCrossProfilePackages());
+                return new ArraySet<>(mService.getAllCrossProfilePackages(mContext.getUserId()));
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
