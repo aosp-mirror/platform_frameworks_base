@@ -54,6 +54,7 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.desktopmode.DesktopModeController;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,6 +88,7 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
     @Mock private DesktopTasksController mDesktopTasksController;
     @Mock private InputMonitor mInputMonitor;
     @Mock private InputManager mInputManager;
+    @Mock private Transitions mTransitions;
     @Mock private DesktopModeWindowDecorViewModel.InputMonitorFactory mMockInputMonitorFactory;
     @Mock private Supplier<SurfaceControl.Transaction> mTransactionFactory;
     @Mock private SurfaceControl.Transaction mTransaction;
@@ -106,6 +108,7 @@ public class DesktopModeWindowDecorViewModelTests extends ShellTestCase {
                 mTaskOrganizer,
                 mDisplayController,
                 mSyncQueue,
+                mTransitions,
                 Optional.of(mDesktopModeController),
                 Optional.of(mDesktopTasksController),
                 Optional.of(mSplitScreenController),
