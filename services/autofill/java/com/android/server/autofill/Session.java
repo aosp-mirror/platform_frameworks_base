@@ -2254,7 +2254,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Override
     public void save() {
         synchronized (mLock) {
-            mSaveEventLogger.maybeSetSaveButtonClicked(true);
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#save() rejected - session: "
                         + id + " destroyed");
@@ -2273,7 +2272,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     public void cancelSave() {
         synchronized (mLock) {
             mSessionFlags.mShowingSaveUi = false;
-            mSaveEventLogger.maybeSetDialogDismissed(true);
             if (mDestroyed) {
                 Slog.w(TAG, "Call to Session#cancelSave() rejected - session: "
                         + id + " destroyed");
@@ -3428,7 +3426,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
                         mComponentName, this, mContext,  mPendingSaveUi, isUpdate, mCompatMode,
-                        response.getShowSaveDialogIcon());
+                        response.getShowSaveDialogIcon(), mSaveEventLogger);
                 mSaveEventLogger.maybeSetLatencySaveUiDisplayMillis(
                     SystemClock.elapsedRealtime()- saveUiDisplayStartTimestamp);
                 if (client != null) {
@@ -4413,7 +4411,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
         getUiForShowing().showFillDialog(filledId, response, filterText,
                 mService.getServicePackageName(), mComponentName, serviceIcon, this,
-                id, mCompatMode);
+                id, mCompatMode, mPresentationStatsEventLogger);
         return true;
     }
 
