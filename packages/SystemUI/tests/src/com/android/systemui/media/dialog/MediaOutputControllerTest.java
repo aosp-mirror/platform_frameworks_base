@@ -76,7 +76,6 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.ActivityLaunchAnimator;
 import com.android.systemui.animation.DialogLaunchAnimator;
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
@@ -200,8 +199,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
                 mNotifCollection, mDialogLaunchAnimator,
                 Optional.of(mNearbyMediaDevicesManager), mAudioManager, mPowerExemptionManager,
                 mKeyguardManager, mFlags, mUserTracker);
-        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(false);
-        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ROUTES_PROCESSING)).thenReturn(false);
         mLocalMediaManager = spy(mMediaOutputController.mLocalMediaManager);
         when(mLocalMediaManager.isPreferenceRouteListingExist()).thenReturn(false);
         mMediaOutputController.mLocalMediaManager = mLocalMediaManager;
@@ -402,24 +399,9 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void onDeviceListUpdate_verifyDeviceListCallback() {
-        mMediaOutputController.start(mCb);
-        reset(mCb);
-
-        mMediaOutputController.onDeviceListUpdate(mMediaDevices);
-        final List<MediaDevice> devices = new ArrayList<>(mMediaOutputController.getMediaDevices());
-
-        assertThat(devices.containsAll(mMediaDevices)).isTrue();
-        assertThat(devices.size()).isEqualTo(mMediaDevices.size());
-        verify(mCb).onDeviceListChanged();
-    }
-
-    @Test
     public void routeProcessSupport_onDeviceListUpdate_preferenceExist_NotUpdatesRangeInformation()
             throws RemoteException {
         when(mLocalMediaManager.isPreferenceRouteListingExist()).thenReturn(true);
-        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ROUTES_PROCESSING)).thenReturn(true);
-        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
         mMediaOutputController.start(mCb);
         reset(mCb);
 
@@ -431,8 +413,7 @@ public class MediaOutputControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void advanced_onDeviceListUpdate_verifyDeviceListCallback() {
-        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
+    public void onDeviceListUpdate_verifyDeviceListCallback() {
         mMediaOutputController.start(mCb);
         reset(mCb);
 
@@ -453,7 +434,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void advanced_onDeviceListUpdateWithConnectedDeviceRemote_verifyItemSize() {
-        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
         when(mMediaDevice1.getFeatures()).thenReturn(
                 ImmutableList.of(MediaRoute2Info.FEATURE_REMOTE_PLAYBACK));
         when(mLocalMediaManager.getCurrentConnectedDevice()).thenReturn(mMediaDevice1);
@@ -477,7 +457,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void advanced_categorizeMediaItems_withSuggestedDevice_verifyDeviceListSize() {
-        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
         when(mMediaDevice1.isSuggestedDevice()).thenReturn(true);
         when(mMediaDevice2.isSuggestedDevice()).thenReturn(false);
 
@@ -515,7 +494,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void advanced_onDeviceListUpdate_isRefreshing_updatesNeedRefreshToTrue() {
-        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
         mMediaOutputController.start(mCb);
         reset(mCb);
         mMediaOutputController.mIsRefreshing = true;
@@ -717,7 +695,6 @@ public class MediaOutputControllerTest extends SysuiTestCase {
 
     @Test
     public void isAnyDeviceTransferring_advancedLayoutSupport() {
-        when(mFlags.isEnabled(Flags.OUTPUT_SWITCHER_ADVANCED_LAYOUT)).thenReturn(true);
         when(mMediaDevice1.getState()).thenReturn(
                 LocalMediaManager.MediaDeviceState.STATE_CONNECTING);
         mMediaOutputController.start(mCb);
