@@ -21,6 +21,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Rect
 import android.os.PowerManager
+import android.os.Process
+import android.os.VibrationAttributes
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -226,7 +228,15 @@ constructor(
         maybeGetAccessibilityFocus(newInfo, currentView)
 
         // ---- Haptics ----
-        newInfo.vibrationEffect?.let { vibratorHelper.vibrate(it) }
+        newInfo.vibrationEffect?.let {
+            vibratorHelper.vibrate(
+                Process.myUid(),
+                context.getApplicationContext().getPackageName(),
+                it,
+                newInfo.windowTitle,
+                VIBRATION_ATTRIBUTES,
+            )
+        }
     }
 
     private fun maybeGetAccessibilityFocus(info: ChipbarInfo?, view: ViewGroup) {
@@ -352,6 +362,11 @@ constructor(
         val loadingView: View,
         val animator: ObjectAnimator,
     )
+
+    companion object {
+        val VIBRATION_ATTRIBUTES: VibrationAttributes =
+            VibrationAttributes.createForUsage(VibrationAttributes.USAGE_HARDWARE_FEEDBACK)
+    }
 }
 
 @IdRes private val INFO_TAG = R.id.tag_chipbar_info
