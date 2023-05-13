@@ -42,7 +42,8 @@ public enum ShellProtoLogGroup implements IProtoLogGroup {
             "ShellBackPreview"),
     WM_SHELL_RECENT_TASKS(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
             Consts.TAG_WM_SHELL),
-    WM_SHELL_PICTURE_IN_PICTURE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, false,
+    // TODO(b/282232877): turn logToLogcat to false.
+    WM_SHELL_PICTURE_IN_PICTURE(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
             Consts.TAG_WM_SHELL),
     WM_SHELL_SPLIT_SCREEN(Consts.ENABLE_DEBUG, Consts.ENABLE_LOG_TO_PROTO_DEBUG, true,
             Consts.TAG_WM_SPLIT_SCREEN),
