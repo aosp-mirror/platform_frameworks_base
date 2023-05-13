@@ -16,6 +16,7 @@
 
 package com.android.server.companion;
 
+import android.os.Binder;
 import android.provider.DeviceConfig;
 
 /**
@@ -34,7 +35,12 @@ public class CompanionDeviceConfig {
      * Returns whether the given flag is currently enabled, with a default value of {@code false}.
      */
     public static boolean isEnabled(String flag) {
-        return DeviceConfig.getBoolean(NAMESPACE_COMPANION, flag, /* defaultValue= */ false);
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return DeviceConfig.getBoolean(NAMESPACE_COMPANION, flag, /* defaultValue= */ false);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
