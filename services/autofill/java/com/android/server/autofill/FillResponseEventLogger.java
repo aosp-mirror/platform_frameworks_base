@@ -16,6 +16,9 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_ONLY;
+import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
+
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_FAILURE;
 import static com.android.internal.util.FrameworkStatsLog.AUTOFILL_FILL_RESPONSE_REPORTED__AUTHENTICATION_RESULT__AUTHENTICATION_RESULT_UNKNOWN;
@@ -218,7 +221,16 @@ public final class FillResponseEventLogger {
 
   public void maybeSetAvailableCount(int val) {
     mEventInternal.ifPresent(event -> {
-      event.mAvailableCount = val;
+      // Don't reset if it's already populated.
+      // This is just a technical limitation of not having complicated logic.
+      // Autofill Provider may return some datasets which are applicable to data types.
+      // In such a case, we set available count to the number of datasets provided.
+      // However, it's possible that those data types aren't detected by PCC, so in effect, there
+      // are 0 datasets. In the codebase, we treat it as null response, which may call this again
+      // to set 0. But we don't want to overwrite this value.
+      if (event.mAvailableCount == 0) {
+        event.mAvailableCount = val;
+      }
     });
   }
 
@@ -333,6 +345,32 @@ public final class FillResponseEventLogger {
   public void maybeSetAvailablePccOnlyCount(int val) {
     mEventInternal.ifPresent(event -> {
       event.mAvailablePccOnlyCount = val;
+    });
+  }
+
+  /**
+   * Set available_pcc_count.
+   */
+  public void maybeSetAvailableDatasetsPccCount(@Nullable List<Dataset> datasetList) {
+    mEventInternal.ifPresent(event -> {
+      int pccOnlyCount = 0;
+      int pccCount = 0;
+      if (datasetList != null) {
+        for (int i = 0; i < datasetList.size(); i++) {
+          Dataset dataset = datasetList.get(i);
+          if (dataset != null) {
+            if (dataset.getEligibleReason() == PICK_REASON_PCC_DETECTION_ONLY) {
+              pccOnlyCount++;
+              pccCount++;
+            } else if (dataset.getEligibleReason()
+                    == PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER) {
+              pccCount++;
+            }
+          }
+        }
+      }
+      event.mAvailablePccOnlyCount = pccOnlyCount;
+      event.mAvailablePccCount = pccCount;
     });
   }
 

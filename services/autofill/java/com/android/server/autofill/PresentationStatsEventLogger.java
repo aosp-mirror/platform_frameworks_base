@@ -16,6 +16,8 @@
 
 package com.android.server.autofill;
 
+import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_ONLY;
+import static android.service.autofill.Dataset.PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_DIALOG;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_INLINE;
 import static android.service.autofill.FillEventHistory.Event.UI_TYPE_MENU;
@@ -228,36 +230,61 @@ public final class PresentationStatsEventLogger {
     public void maybeSetAvailableCount(@Nullable List<Dataset> datasetList,
             AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
-            int availableCount = getDatasetCountForAutofillId(datasetList, currentViewId);
-            event.mAvailableCount = availableCount;
-            event.mIsDatasetAvailable = availableCount > 0;
+            CountContainer container = getDatasetCountForAutofillId(datasetList, currentViewId);
+            event.mAvailableCount = container.mAvailableCount;
+            event.mAvailablePccCount = container.mAvailablePccCount;
+            event.mAvailablePccOnlyCount = container.mAvailablePccOnlyCount;
+            event.mIsDatasetAvailable = container.mAvailableCount > 0;
         });
     }
 
     public void maybeSetCountShown(@Nullable List<Dataset> datasetList,
             AutofillId currentViewId) {
         mEventInternal.ifPresent(event -> {
-            int countShown = getDatasetCountForAutofillId(datasetList, currentViewId);
-            event.mCountShown = countShown;
-            if (countShown > 0) {
+            CountContainer container = getDatasetCountForAutofillId(datasetList, currentViewId);
+            event.mCountShown = container.mAvailableCount;
+            if (container.mAvailableCount > 0) {
                 event.mNoPresentationReason = NOT_SHOWN_REASON_ANY_SHOWN;
             }
         });
     }
 
-    private static int getDatasetCountForAutofillId(@Nullable List<Dataset> datasetList,
+    private static CountContainer getDatasetCountForAutofillId(@Nullable List<Dataset> datasetList,
             AutofillId currentViewId) {
-        int availableCount = 0;
+
+        CountContainer container = new CountContainer();
         if (datasetList != null) {
             for (int i = 0; i < datasetList.size(); i++) {
                 Dataset data = datasetList.get(i);
                 if (data != null && data.getFieldIds() != null
                         && data.getFieldIds().contains(currentViewId)) {
-                    availableCount += 1;
+                    container.mAvailableCount += 1;
+                    if (data.getEligibleReason() == PICK_REASON_PCC_DETECTION_ONLY) {
+                        container.mAvailablePccOnlyCount++;
+                        container.mAvailablePccCount++;
+                    } else if (data.getEligibleReason()
+                            == PICK_REASON_PCC_DETECTION_PREFERRED_WITH_PROVIDER) {
+                        container.mAvailablePccCount++;
+                    }
                 }
             }
         }
-        return availableCount;
+        return container;
+    }
+
+    private static class CountContainer{
+        int mAvailableCount = 0;
+        int mAvailablePccCount = 0;
+        int mAvailablePccOnlyCount = 0;
+
+        CountContainer() {}
+
+        CountContainer(int availableCount, int availablePccCount,
+                int availablePccOnlyCount) {
+            mAvailableCount = availableCount;
+            mAvailablePccCount = availablePccCount;
+            mAvailablePccOnlyCount = availablePccOnlyCount;
+        }
     }
 
     public void maybeSetCountFilteredUserTyping(int countFilteredUserTyping) {
