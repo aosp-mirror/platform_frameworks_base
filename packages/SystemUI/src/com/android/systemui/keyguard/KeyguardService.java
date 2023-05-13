@@ -42,8 +42,6 @@ import android.app.ActivityTaskManager;
 import android.app.Service;
 import android.app.WindowConfiguration;
 import android.content.Intent;
-import android.graphics.Point;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
@@ -77,6 +75,7 @@ import com.android.systemui.SystemUIApplication;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.wm.shell.transition.ShellTransitions;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.TransitionUtil;
 
 import java.util.ArrayList;
 
@@ -105,7 +104,8 @@ public class KeyguardService extends Service {
         }
     }
 
-    private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers) {
+    private static RemoteAnimationTarget[] wrap(TransitionInfo info, boolean wallpapers,
+            SurfaceControl.Transaction t, ArrayMap<SurfaceControl, SurfaceControl> leashMap) {
         final ArrayList<RemoteAnimationTarget> out = new ArrayList<>();
         for (int i = 0; i < info.getChanges().size(); i++) {
             boolean changeIsWallpaper =
@@ -115,32 +115,14 @@ public class KeyguardService extends Service {
             final TransitionInfo.Change change = info.getChanges().get(i);
             final ActivityManager.RunningTaskInfo taskInfo = change.getTaskInfo();
             final int taskId = taskInfo != null ? change.getTaskInfo().taskId : -1;
-            boolean isNotInRecents;
-            WindowConfiguration windowConfiguration = null;
-            if (taskInfo != null) {
-                if (taskInfo.getConfiguration() != null) {
-                    windowConfiguration =
-                            change.getTaskInfo().getConfiguration().windowConfiguration;
-                }
-                isNotInRecents = !change.getTaskInfo().isRunning;
-            } else {
-                isNotInRecents = true;
-            }
-            Rect localBounds = new Rect(change.getEndAbsBounds());
-            localBounds.offsetTo(change.getEndRelOffset().x, change.getEndRelOffset().y);
 
-            final RemoteAnimationTarget target = new RemoteAnimationTarget(
-                    taskId,
-                    newModeToLegacyMode(change.getMode()),
-                    change.getLeash(),
-                    (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0
-                            || (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0,
-                    null /* clipRect */,
-                    new Rect(0, 0, 0, 0) /* contentInsets */,
+            final RemoteAnimationTarget target = TransitionUtil.newTarget(change,
+                    // wallpapers go into the "below" layer space
                     info.getChanges().size() - i,
-                    new Point(), localBounds, new Rect(change.getEndAbsBounds()),
-                    windowConfiguration, isNotInRecents, null /* startLeash */,
-                    change.getStartAbsBounds(), taskInfo, false /* allowEnterPip */);
+                    // keyguard treats wallpaper as translucent
+                    (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0,
+                    info, t, leashMap);
+
             // Use hasAnimatingParent to mark the anything below root task
             if (taskId != -1 && change.getParent() != null) {
                 final TransitionInfo.Change parentChange = info.getChange(change.getParent());
@@ -178,31 +160,27 @@ public class KeyguardService extends Service {
         return new IRemoteTransition.Stub() {
             final ArrayMap<IBinder, IRemoteTransitionFinishedCallback> mFinishCallbacks =
                     new ArrayMap<>();
+            private final ArrayMap<SurfaceControl, SurfaceControl> mLeashMap = new ArrayMap<>();
 
             @Override
             public void startAnimation(IBinder transition, TransitionInfo info,
                     SurfaceControl.Transaction t, IRemoteTransitionFinishedCallback finishCallback)
                     throws RemoteException {
                 Slog.d(TAG, "Starts IRemoteAnimationRunner: info=" + info);
-                final RemoteAnimationTarget[] apps = wrap(info, false /* wallpapers */);
-                final RemoteAnimationTarget[] wallpapers = wrap(info, true /* wallpapers */);
+                final RemoteAnimationTarget[] apps =
+                        wrap(info, false /* wallpapers */, t, mLeashMap);
+                final RemoteAnimationTarget[] wallpapers =
+                        wrap(info, true /* wallpapers */, t, mLeashMap);
                 final RemoteAnimationTarget[] nonApps = new RemoteAnimationTarget[0];
 
                 // Sets the alpha to 0 for the opening root task for fade in animation. And since
                 // the fade in animation can only apply on the first opening app, so set alpha to 1
                 // for anything else.
-                boolean foundOpening = false;
                 for (RemoteAnimationTarget target : apps) {
                     if (target.taskId != -1
                             && target.mode == RemoteAnimationTarget.MODE_OPENING
                             && !target.hasAnimatingParent) {
-                        if (foundOpening) {
-                            Log.w(TAG, "More than one opening target");
-                            t.setAlpha(target.leash, 1.0f);
-                            continue;
-                        }
                         t.setAlpha(target.leash, 0.0f);
-                        foundOpening = true;
                     } else {
                         t.setAlpha(target.leash, 1.0f);
                     }
