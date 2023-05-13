@@ -51,6 +51,8 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.common.ScreenshotUtils;
 import com.android.wm.shell.common.SurfaceUtils;
 
+import java.util.function.Consumer;
+
 /**
  * Handles split decor like showing resizing hint for a specific split.
  */
@@ -251,7 +253,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
     }
 
     /** Stops showing resizing hint. */
-    public void onResized(SurfaceControl.Transaction t, Runnable animFinishedCallback) {
+    public void onResized(SurfaceControl.Transaction t, Consumer<Boolean> animFinishedCallback) {
         if (mScreenshotAnimator != null && mScreenshotAnimator.isRunning()) {
             mScreenshotAnimator.cancel();
         }
@@ -281,7 +283,7 @@ public class SplitDecorManager extends WindowlessWindowManager {
                     mScreenshot = null;
 
                     if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
-                        animFinishedCallback.run();
+                        animFinishedCallback.accept(true);
                     }
                 }
             });
@@ -313,12 +315,12 @@ public class SplitDecorManager extends WindowlessWindowManager {
             }
         }
         if (mShown) {
-            fadeOutDecor(animFinishedCallback);
+            fadeOutDecor(()-> animFinishedCallback.accept(true));
         } else {
             // Decor surface is hidden so release it directly.
             releaseDecor(t);
             if (mRunningAnimationCount == 0 && animFinishedCallback != null) {
-                animFinishedCallback.run();
+                animFinishedCallback.accept(false);
             }
         }
     }
