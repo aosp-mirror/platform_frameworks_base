@@ -316,7 +316,9 @@ public class BrightnessTracker {
     }
 
     /**
-     * Notify the BrightnessTracker that the user has changed the brightness of the display.
+     * Notify the BrightnessTracker that the brightness of the display has changed.
+     * We pass both the user change and system changes, so that we know the starting point
+     * of the next user interaction. Only user interactions are then sent as BrightnessChangeEvents.
      */
     public void notifyBrightnessChanged(float brightness, boolean userInitiated,
             float powerBrightnessFactor, boolean wasShortTermModelActive,
@@ -352,10 +354,8 @@ public class BrightnessTracker {
                 // Not currently gathering brightness change information
                 return;
             }
-
             float previousBrightness = mLastBrightness;
             mLastBrightness = brightness;
-
             if (!userInitiated) {
                 // We want to record what current brightness is so that we know what the user
                 // changed it from, but if it wasn't user initiated then we don't want to record it
@@ -429,7 +429,7 @@ public class BrightnessTracker {
 
         BrightnessChangeEvent event = builder.build();
         if (DEBUG) {
-            Slog.d(TAG, "Event " + event.brightness + " " + event.packageName);
+            Slog.d(TAG, "Event: " + event.toString());
         }
         synchronized (mEventsLock) {
             mEventsDirty = true;
