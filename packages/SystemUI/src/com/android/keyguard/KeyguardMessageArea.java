@@ -44,11 +44,18 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     private ViewGroup mContainer;
     private int mTopMargin;
     protected boolean mAnimate;
+    private final int mStyleResId;
+    private boolean mIsDisabled = false;
 
     public KeyguardMessageArea(Context context, AttributeSet attrs) {
         super(context, attrs);
         setLayerType(LAYER_TYPE_HARDWARE, null); // work around nested unclipped SaveLayer bug
-
+        if (attrs != null) {
+            mStyleResId = attrs.getStyleAttribute();
+        } else {
+            // Set to default reference style if the component is used without setting "style" attr
+            mStyleResId = R.style.Keyguard_TextView;
+        }
         onThemeChanged();
     }
 
@@ -82,11 +89,15 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     }
 
     void onDensityOrFontScaleChanged() {
-        TypedArray array = mContext.obtainStyledAttributes(R.style.Keyguard_TextView, new int[] {
+        TypedArray array = mContext.obtainStyledAttributes(getStyleResId(), new int[] {
                 android.R.attr.textSize
         });
         setTextSize(TypedValue.COMPLEX_UNIT_PX, array.getDimensionPixelSize(0, 0));
         array.recycle();
+    }
+
+    protected int getStyleResId() {
+        return mStyleResId;
     }
 
     @Override
@@ -118,6 +129,10 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
     }
 
     void update() {
+        if (mIsDisabled) {
+            setVisibility(GONE);
+            return;
+        }
         CharSequence status = mMessage;
         setVisibility(TextUtils.isEmpty(status) || (!mIsVisible) ? INVISIBLE : VISIBLE);
         setText(status);
@@ -136,4 +151,17 @@ public abstract class KeyguardMessageArea extends TextView implements SecurityMe
 
     /** Set the text color */
     protected abstract void updateTextColor();
+
+    /**
+     * Mark this view with {@link android.view.View#GONE} visibility to remove this from the layout
+     * of the view. Any calls to {@link #setIsVisible(boolean)} after this will be a no-op.
+     */
+    public void disable() {
+        mIsDisabled = true;
+        update();
+    }
+
+    public boolean isDisabled() {
+        return mIsDisabled;
+    }
 }
