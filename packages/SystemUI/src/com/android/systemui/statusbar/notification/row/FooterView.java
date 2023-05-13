@@ -16,11 +16,15 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.graphics.PorterDuff.Mode.SRC_ATOP;
+
 import android.annotation.ColorInt;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.IndentingPrintWriter;
@@ -157,10 +161,20 @@ public class FooterView extends StackScrollerDecorView {
      */
     public void updateColors() {
         Resources.Theme theme = mContext.getTheme();
-        int textColor = getResources().getColor(R.color.notif_pill_text, theme);
-        mClearAllButton.setBackground(theme.getDrawable(R.drawable.notif_footer_btn_background));
+        final @ColorInt int textColor = getResources().getColor(R.color.notif_pill_text, theme);
+        final Drawable clearAllBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
+        final Drawable manageBg = theme.getDrawable(R.drawable.notif_footer_btn_background);
+        // TODO(b/282173943): Remove redundant tinting once Resources are thread-safe
+        final @ColorInt int buttonBgColor =
+                Utils.getColorAttrDefaultColor(mContext, com.android.internal.R.attr.colorSurface);
+        final ColorFilter bgColorFilter = new PorterDuffColorFilter(buttonBgColor, SRC_ATOP);
+        if (buttonBgColor != 0) {
+            clearAllBg.setColorFilter(bgColorFilter);
+            manageBg.setColorFilter(bgColorFilter);
+        }
+        mClearAllButton.setBackground(clearAllBg);
         mClearAllButton.setTextColor(textColor);
-        mManageButton.setBackground(theme.getDrawable(R.drawable.notif_footer_btn_background));
+        mManageButton.setBackground(manageBg);
         mManageButton.setTextColor(textColor);
         final @ColorInt int labelTextColor =
                 Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorPrimary);
