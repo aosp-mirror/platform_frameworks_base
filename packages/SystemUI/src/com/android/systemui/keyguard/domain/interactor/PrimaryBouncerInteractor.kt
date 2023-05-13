@@ -31,6 +31,7 @@ import com.android.systemui.DejankUtils
 import com.android.systemui.R
 import com.android.systemui.classifier.FalsingCollector
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
@@ -43,11 +44,14 @@ import com.android.systemui.keyguard.shared.model.BouncerShowMessageModel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.shared.system.SysUiStatsLog
 import com.android.systemui.statusbar.policy.KeyguardStateController
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
@@ -58,18 +62,19 @@ import javax.inject.Inject
 class PrimaryBouncerInteractor
 @Inject
 constructor(
-        private val repository: KeyguardBouncerRepository,
-        private val primaryBouncerView: BouncerView,
-        @Main private val mainHandler: Handler,
-        private val keyguardStateController: KeyguardStateController,
-        private val keyguardSecurityModel: KeyguardSecurityModel,
-        private val primaryBouncerCallbackInteractor: PrimaryBouncerCallbackInteractor,
-        private val falsingCollector: FalsingCollector,
-        private val dismissCallbackRegistry: DismissCallbackRegistry,
-        private val context: Context,
-        private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
-        private val trustRepository: TrustRepository,
-        private val featureFlags: FeatureFlags,
+    private val repository: KeyguardBouncerRepository,
+    private val primaryBouncerView: BouncerView,
+    @Main private val mainHandler: Handler,
+    private val keyguardStateController: KeyguardStateController,
+    private val keyguardSecurityModel: KeyguardSecurityModel,
+    private val primaryBouncerCallbackInteractor: PrimaryBouncerCallbackInteractor,
+    private val falsingCollector: FalsingCollector,
+    private val dismissCallbackRegistry: DismissCallbackRegistry,
+    private val context: Context,
+    private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    private val trustRepository: TrustRepository,
+    private val featureFlags: FeatureFlags,
+    @Application private val applicationScope: CoroutineScope,
 ) {
     private val passiveAuthBouncerDelay = context.resources.getInteger(
             R.integer.primary_bouncer_passive_auth_delay).toLong()
@@ -104,6 +109,7 @@ constructor(
     /** Allow for interaction when just about fully visible */
     val isInteractable: Flow<Boolean> = bouncerExpansion.map { it > 0.9 }
     val sideFpsShowing: Flow<Boolean> = repository.sideFpsShowing
+    private var currentUserActiveUnlockRunning = false
 
     /** This callback needs to be a class field so it does not get garbage collected. */
     val keyguardUpdateMonitorCallback =
@@ -122,6 +128,13 @@ constructor(
 
     init {
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
+        if (featureFlags.isEnabled(Flags.DELAY_BOUNCER)) {
+            applicationScope.launch {
+                trustRepository.isCurrentUserActiveUnlockRunning.collect {
+                    currentUserActiveUnlockRunning = it
+                }
+            }
+        }
     }
 
     // TODO(b/243685699): Move isScrimmed logic to data layer.
@@ -377,8 +390,9 @@ constructor(
     private fun usePrimaryBouncerPassiveAuthDelay(): Boolean {
         val canRunFaceAuth = keyguardStateController.isFaceAuthEnabled &&
                 keyguardUpdateMonitor.isUnlockingWithBiometricAllowed(BiometricSourceType.FACE)
-        val canRunActiveUnlock = trustRepository.isCurrentUserActiveUnlockAvailable.value &&
+        val canRunActiveUnlock = currentUserActiveUnlockRunning &&
                 keyguardUpdateMonitor.canTriggerActiveUnlockBasedOnDeviceState()
+
         return featureFlags.isEnabled(Flags.DELAY_BOUNCER) &&
                 !needsFullscreenBouncer() &&
                 (canRunFaceAuth || canRunActiveUnlock)

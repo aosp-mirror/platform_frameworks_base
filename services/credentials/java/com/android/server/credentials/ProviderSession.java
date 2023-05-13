@@ -215,8 +215,10 @@ public abstract class ProviderSession<T, R>
             CredentialsSource source) {
         setStatus(status);
         boolean isPrimary = mProviderInfo != null && mProviderInfo.isPrimary();
-        mProviderSessionMetric.collectCandidateMetricUpdate(isTerminatingStatus(status),
-                isCompletionStatus(status), mProviderSessionUid,
+        mProviderSessionMetric.collectCandidateMetricUpdate(isTerminatingStatus(status)
+                        || isStatusWaitingForRemoteResponse(status),
+                isCompletionStatus(status) || isUiInvokingStatus(status),
+                mProviderSessionUid,
                 /*isAuthEntry*/source == CredentialsSource.AUTH_ENTRY,
                 /*isPrimary*/isPrimary);
         mCallbacks.onProviderStatusChanged(status, mComponentName, source);

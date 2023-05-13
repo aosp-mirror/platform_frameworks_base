@@ -1318,6 +1318,7 @@
     <dimen name="media_output_dialog_active_background_radius">28dp</dimen>
     <dimen name="media_output_dialog_default_margin_end">16dp</dimen>
     <dimen name="media_output_dialog_selectable_margin_end">80dp</dimen>
+    <dimen name="media_output_dialog_list_padding_top">8dp</dimen>
 
     <!-- Distance that the full shade transition takes in order to complete by tapping on a button
          like "expand". -->
@@ -1772,8 +1773,12 @@
     <!-- Rear Display Education dimens -->
     <dimen name="rear_display_animation_width">273dp</dimen>
     <dimen name="rear_display_animation_height">200dp</dimen>
+    <dimen name="rear_display_animation_width_opened">273dp</dimen>
+    <dimen name="rear_display_animation_height_opened">200dp</dimen>
     <dimen name="rear_display_title_top_padding">24dp</dimen>
     <dimen name="rear_display_title_bottom_padding">16dp</dimen>
+    <dimen name="rear_display_title_top_padding_opened">24dp</dimen>
+    <dimen name="rear_display_title_bottom_padding_opened">16dp</dimen>
 
     <!-- Bouncer user switcher margins -->
     <dimen name="bouncer_user_switcher_view_mode_user_switcher_bottom_margin">0dp</dimen>

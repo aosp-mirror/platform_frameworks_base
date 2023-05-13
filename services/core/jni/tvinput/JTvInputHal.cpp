@@ -275,6 +275,26 @@ void JTvInputHal::onStreamConfigurationsChanged(int deviceId, int cableConnectio
                         cableConnectionStatus);
 }
 
+void JTvInputHal::onTvMessage(int deviceId, int streamId, AidlTvMessageEventType type,
+                              AidlTvMessage& message, signed char data[], int dataLength) {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jobject bundle = env->NewObject(gBundleClassInfo.clazz, gBundleClassInfo.constructor);
+    const jsize len = static_cast<jsize>(dataLength);
+    jbyteArray convertedData = env->NewByteArray(len);
+    env->SetByteArrayRegion(convertedData, 0, len, reinterpret_cast<const jbyte*>(data));
+    env->CallObjectMethod(bundle, gBundleClassInfo.putString,
+                          "android.media.tv.TvInputManager.subtype", message.subType.c_str());
+    env->CallObjectMethod(bundle, gBundleClassInfo.putByteArray,
+                          "android.media.tv.TvInputManager.raw_data", convertedData);
+    env->CallObjectMethod(bundle, gBundleClassInfo.putInt,
+                          "android.media.tv.TvInputManager.group_id", message.groupId);
+    env->CallObjectMethod(bundle, gBundleClassInfo.putInt,
+                          "android.media.tv.TvInputManager.stream_id", streamId);
+    env->CallVoidMethod(mThiz, gTvInputHalClassInfo.tvMessageReceived, deviceId,
+                        static_cast<int>(type), bundle);
+    env->DeleteLocalRef(convertedData);
+}
+
 void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded) {
     sp<BufferProducerThread> thread;
     {
@@ -316,6 +336,17 @@ JTvInputHal::TvInputEventWrapper JTvInputHal::TvInputEventWrapper::createEventWr
     return event;
 }
 
+JTvInputHal::TvMessageEventWrapper JTvInputHal::TvMessageEventWrapper::createEventWrapper(
+        const AidlTvMessageEvent& aidlTvMessageEvent) {
+    TvMessageEventWrapper event;
+    event.messages.insert(event.messages.begin(), std::begin(aidlTvMessageEvent.messages) + 1,
+                          std::end(aidlTvMessageEvent.messages));
+    event.streamId = aidlTvMessageEvent.streamId;
+    event.deviceId = aidlTvMessageEvent.messages[0].groupId;
+    event.type = aidlTvMessageEvent.type;
+    return event;
+}
+
 JTvInputHal::NotifyHandler::NotifyHandler(JTvInputHal* hal, const TvInputEventWrapper& event) {
     mHal = hal;
     mEvent = event;
@@ -338,6 +369,41 @@ void JTvInputHal::NotifyHandler::handleMessage(const Message& message) {
     }
 }
 
+JTvInputHal::NotifyTvMessageHandler::NotifyTvMessageHandler(JTvInputHal* hal,
+                                                            const TvMessageEventWrapper& event) {
+    mHal = hal;
+    mEvent = event;
+}
+
+void JTvInputHal::NotifyTvMessageHandler::handleMessage(const Message& message) {
+    std::shared_ptr<AidlMessageQueue<int8_t, SynchronizedReadWrite>> queue =
+            mHal->mQueueMap[mEvent.deviceId][mEvent.streamId];
+    for (AidlTvMessage item : mEvent.messages) {
+        if (queue == NULL || !queue->isValid() || queue->availableToRead() < item.dataLengthBytes) {
+            MQDescriptor<int8_t, SynchronizedReadWrite> queueDesc;
+            if (mHal->mTvInput->getTvMessageQueueDesc(&queueDesc, mEvent.deviceId, mEvent.streamId)
+                        .isOk()) {
+                queue = std::make_shared<AidlMessageQueue<int8_t, SynchronizedReadWrite>>(queueDesc,
+                                                                                          false);
+            }
+            if (queue == NULL || !queue->isValid() ||
+                queue->availableToRead() < item.dataLengthBytes) {
+                ALOGE("Incomplete TvMessageQueue data or missing queue");
+                return;
+            }
+            mHal->mQueueMap[mEvent.deviceId][mEvent.streamId] = queue;
+        }
+        signed char* buffer = new signed char[item.dataLengthBytes];
+        if (queue->read(buffer, item.dataLengthBytes)) {
+            mHal->onTvMessage(mEvent.deviceId, mEvent.streamId, mEvent.type, item, buffer,
+                              item.dataLengthBytes);
+        } else {
+            ALOGE("Failed to read from TvMessageQueue");
+        }
+        delete[] buffer;
+    }
+}
+
 JTvInputHal::TvInputCallback::TvInputCallback(JTvInputHal* hal) {
     mHal = hal;
 }
@@ -351,7 +417,15 @@ JTvInputHal::TvInputCallback::TvInputCallback(JTvInputHal* hal) {
 
 ::ndk::ScopedAStatus JTvInputHal::TvInputCallback::notifyTvMessageEvent(
         const AidlTvMessageEvent& event) {
-    // TODO: Implement this
+    const std::string DEVICE_ID_SUBTYPE = "device_id";
+    if (event.messages.size() > 1 && event.messages[0].subType == DEVICE_ID_SUBTYPE) {
+        mHal->mLooper
+                ->sendMessage(new NotifyTvMessageHandler(mHal,
+                                                         TvMessageEventWrapper::createEventWrapper(
+                                                                 event)),
+                              static_cast<int>(event.type));
+    }
+
     return ::ndk::ScopedAStatus::ok();
 }
 
@@ -403,6 +477,16 @@ JTvInputHal::ITvInputWrapper::ITvInputWrapper(std::shared_ptr<AidlITvInput>& aid
         return ::ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
     } else {
         return mAidlTvInput->setTvMessageEnabled(deviceId, streamId, in_type, enabled);
+    }
+}
+
+::ndk::ScopedAStatus JTvInputHal::ITvInputWrapper::getTvMessageQueueDesc(
+        MQDescriptor<int8_t, SynchronizedReadWrite>* out_queue, int32_t in_deviceId,
+        int32_t in_streamId) {
+    if (mIsHidl) {
+        return ::ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
+    } else {
+        return mAidlTvInput->getTvMessageQueueDesc(out_queue, in_deviceId, in_streamId);
     }
 }
 

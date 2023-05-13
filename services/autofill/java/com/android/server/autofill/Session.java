@@ -798,7 +798,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      * Returns empty list if PCC is off or no types available
     */
     private List<String> getTypeHintsForProvider() {
-        if (!mService.getMaster().isPccClassificationEnabled()) {
+        if (!mService.isPccClassificationEnabled()) {
             return Collections.EMPTY_LIST;
         }
         final String typeHints = mService.getMaster().getPccProviderHints();
@@ -1200,7 +1200,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         // structure is taken. This causes only one fill request per burst of focus changes.
         cancelCurrentRequestLocked();
 
-        if (mService.getMaster().isPccClassificationEnabled()
+        if (mService.isPccClassificationEnabled()
                 && mClassificationState.mHintsToAutofillIdMap == null) {
             if (sVerbose) {
                 Slog.v(TAG, "triggering field classification");
@@ -1631,7 +1631,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             Slog.d(TAG, "DBG: computeDatasetsForProviderAndUpdateContainer: "
                     + autofillProviderContainer);
         }
-        if (!mService.getMaster().isPccClassificationEnabled())  {
+        if (!mService.isPccClassificationEnabled())  {
             if (sVerbose) {
                 Slog.v(TAG, "PCC classification is disabled");
             }

@@ -85,23 +85,6 @@ public class TransitionUtil {
         return false;
     }
 
-    /**
-     * Some transitions we always need to report to keyguard even if they are empty.
-     * TODO (b/274954192): Remove this once keyguard dispatching moves to Shell.
-     */
-    public static boolean alwaysReportToKeyguard(TransitionInfo info) {
-        // occlusion status of activities can change while screen is off so there will be no
-        // visibility change but we still need keyguardservice to be notified.
-        if (info.getType() == TRANSIT_KEYGUARD_UNOCCLUDE) return true;
-
-        // It's possible for some activities to stop with bad timing (esp. since we can't yet
-        // queue activity transitions initiated by apps) that results in an empty transition for
-        // keyguard going-away. In general, we should should always report Keyguard-going-away.
-        if ((info.getFlags() & TRANSIT_FLAG_KEYGUARD_GOING_AWAY) != 0) return true;
-
-        return false;
-    }
-
     /** Returns `true` if `change` is a wallpaper. */
     public static boolean isWallpaper(TransitionInfo.Change change) {
         return (change.getTaskInfo() == null)

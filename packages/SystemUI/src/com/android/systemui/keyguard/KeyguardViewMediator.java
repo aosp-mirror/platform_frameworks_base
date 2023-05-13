@@ -79,7 +79,6 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -94,6 +93,7 @@ import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.window.IRemoteTransition;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -154,12 +154,14 @@ import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 
 import dagger.Lazy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
@@ -744,7 +746,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         @Override
-        public void keyguardDone(boolean strongAuth, int targetUserId) {
+        public void keyguardDone(boolean primaryAuth, int targetUserId) {
             if (targetUserId != KeyguardUpdateMonitor.getCurrentUser()) {
                 return;
             }
@@ -765,7 +767,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         }
 
         @Override
-        public void keyguardDonePending(boolean strongAuth, int targetUserId) {
+        public void keyguardDonePending(boolean primaryAuth, int targetUserId) {
             Trace.beginSection("KeyguardViewMediator.mViewMediatorCallback#keyguardDonePending");
             if (DEBUG) Log.d(TAG, "keyguardDonePending");
             if (targetUserId != KeyguardUpdateMonitor.getCurrentUser()) {
@@ -962,7 +964,26 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 }
             };
 
-    private IRemoteAnimationRunner mOccludeAnimationRunner =
+    private final IRemoteAnimationRunner.Stub mExitAnimationRunner =
+            new IRemoteAnimationRunner.Stub() {
+        @Override // Binder interface
+        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
+                RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers,
+                RemoteAnimationTarget[] nonApps,
+                IRemoteAnimationFinishedCallback finishedCallback) {
+            Trace.beginSection("mExitAnimationRunner.onAnimationStart#startKeyguardExitAnimation");
+            startKeyguardExitAnimation(transit, apps, wallpapers, nonApps, finishedCallback);
+            Trace.endSection();
+        }
+
+        @Override // Binder interface
+        public void onAnimationCancelled() {
+            cancelKeyguardExitAnimation();
+        }
+    };
+
+    private final IRemoteAnimationRunner mOccludeAnimationRunner =
             new OccludeActivityLaunchRemoteAnimationRunner(mOccludeAnimationController);
 
     private final IRemoteAnimationRunner mOccludeByDreamAnimationRunner =
@@ -1004,7 +1025,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     }
 
                     final RemoteAnimationTarget primary = apps[0];
-                    final boolean isDream = (apps[0].taskInfo.topActivityType
+                    final boolean isDream = (apps[0].taskInfo != null
+                            && apps[0].taskInfo.topActivityType
                             == WindowConfiguration.ACTIVITY_TYPE_DREAM);
                     if (!isDream) {
                         Log.w(TAG, "The occluding app isn't Dream; "
@@ -1104,7 +1126,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                     }
 
                     final RemoteAnimationTarget primary = apps[0];
-                    final boolean isDream = (apps[0].taskInfo.topActivityType
+                    final boolean isDream = (apps[0].taskInfo != null
+                            && apps[0].taskInfo.topActivityType
                             == WindowConfiguration.ACTIVITY_TYPE_DREAM);
 
                     final SyncRtSurfaceTransactionApplier applier =
@@ -1187,6 +1210,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     private final InteractionJankMonitor mInteractionJankMonitor;
     private boolean mWallpaperSupportsAmbientMode;
     private ScreenOnCoordinator mScreenOnCoordinator;
+    private final KeyguardTransitions mKeyguardTransitions;
 
     private Lazy<ActivityLaunchAnimator> mActivityLaunchAnimator;
     private Lazy<ScrimController> mScrimControllerLazy;
@@ -1222,6 +1246,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             ScreenOffAnimationController screenOffAnimationController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthController,
             ScreenOnCoordinator screenOnCoordinator,
+            KeyguardTransitions keyguardTransitions,
             InteractionJankMonitor interactionJankMonitor,
             DreamOverlayStateController dreamOverlayStateController,
             Lazy<ShadeController> shadeControllerLazy,
@@ -1249,6 +1274,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         dumpManager.registerDumpable(getClass().getName(), this);
         mDeviceConfig = deviceConfig;
         mScreenOnCoordinator = screenOnCoordinator;
+        mKeyguardTransitions = keyguardTransitions;
         mNotificationShadeWindowControllerLazy = notificationShadeWindowControllerLazy;
         mShowHomeOverLockscreen = mDeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -1323,6 +1349,12 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             // The system's keyguard is disabled or missing.
             setShowingLocked(false /* showing */, true /* forceCallbacks */);
         }
+
+        mKeyguardTransitions.register(
+                KeyguardService.wrap(getExitAnimationRunner()),
+                KeyguardService.wrap(getOccludeAnimationRunner()),
+                KeyguardService.wrap(getOccludeByDreamAnimationRunner()),
+                KeyguardService.wrap(getUnoccludeAnimationRunner()));
 
         final ContentResolver cr = mContext.getContentResolver();
 
@@ -1859,6 +1891,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         Trace.endSection();
     }
 
+    public IRemoteAnimationRunner getExitAnimationRunner() {
+        return mExitAnimationRunner;
+    }
+
     public IRemoteAnimationRunner getOccludeAnimationRunner() {
         return mOccludeAnimationRunner;
     }
@@ -2218,16 +2254,6 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
         }
     };
-
-    private void keyguardDone() {
-        Trace.beginSection("KeyguardViewMediator#keyguardDone");
-        if (DEBUG) Log.d(TAG, "keyguardDone()");
-        userActivity();
-        EventLog.writeEvent(70000, 2);
-        Message msg = mHandler.obtainMessage(KEYGUARD_DONE);
-        mHandler.sendMessage(msg);
-        Trace.endSection();
-    }
 
     /**
      * This handler will be associated with the policy thread, which will also
@@ -3124,7 +3150,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         Trace.beginSection("KeyguardViewMediator#onWakeAndUnlocking");
         mWakeAndUnlocking = true;
 
-        keyguardDone();
+        mKeyguardViewControllerLazy.get().notifyKeyguardAuthenticated(/* primaryAuth */ false);
+        userActivity();
         Trace.endSection();
     }
 

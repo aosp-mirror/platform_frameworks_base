@@ -158,6 +158,7 @@ import android.app.PictureInPictureUiState;
 import android.app.ProfilerInfo;
 import android.app.WaitResult;
 import android.app.admin.DevicePolicyCache;
+import android.app.admin.DeviceStateCache;
 import android.app.assist.ActivityId;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
@@ -782,6 +783,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private int[] mAccessibilityServiceUids = new int[0];
 
     private int mDeviceOwnerUid = Process.INVALID_UID;
+
+    private Set<Integer> mProfileOwnerUids = new ArraySet<Integer>();
 
     private final class SettingObserver extends ContentObserver {
         private final Uri mFontScaleUri = Settings.System.getUriFor(FONT_SCALE);
@@ -5334,12 +5337,51 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return null;
     }
 
-    WindowProcessController getProcessController(int pid, int uid) {
+    /**
+     * Returns the {@link WindowProcessController} for the app process for the given uid and pid.
+     *
+     * If no such {@link WindowProcessController} is found, it does not belong to an app, or the
+     * pid does not match the uid {@code null} is returned.
+     */
+    @Nullable WindowProcessController getProcessController(int pid, int uid) {
+        return UserHandle.isApp(uid) ? getProcessControllerInternal(pid, uid) : null;
+    }
+
+    /**
+     * Returns the {@link WindowProcessController} for the given uid and pid.
+     *
+     * If no such {@link WindowProcessController} is found or the pid does not match the uid
+     * {@code null} is returned.
+     */
+    private @Nullable WindowProcessController getProcessControllerInternal(int pid, int uid) {
         final WindowProcessController proc = mProcessMap.getProcess(pid);
-        if (proc == null) return null;
-        if (UserHandle.isApp(uid) && proc.mUid == uid) {
+        if (proc == null) {
+            return null;
+        }
+        if (proc.mUid == uid) {
             return proc;
         }
+        return null;
+    }
+
+    /**
+     * Returns the package name if (and only if) the package name can be uniquely determined.
+     * Otherwise returns {@code null}.
+     *
+     * The provided pid must match the provided uid, otherwise this also returns null.
+     */
+    @Nullable String getPackageNameIfUnique(int uid, int pid) {
+        WindowProcessController processController = getProcessControllerInternal(pid, uid);
+        if (processController == null) {
+            Slog.w(TAG, "callingPackage for (uid=" + uid + ", pid=" + pid + ") has no WPC");
+            return null;
+        }
+        List<String> realCallingPackages = processController.getPackageList();
+        if (realCallingPackages.size() == 1) {
+            return realCallingPackages.get(0);
+        }
+        Slog.w(TAG, "callingPackage for (uid=" + uid + ", pid=" + pid + ") is ambiguous: "
+                + realCallingPackages);
         return null;
     }
 
@@ -5358,6 +5400,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     void setDeviceOwnerUid(int uid) {
         mDeviceOwnerUid = uid;
+    }
+
+    boolean isAffiliatedProfileOwner(int uid) {
+        return uid >= 0 && mProfileOwnerUids.contains(uid)
+            && DeviceStateCache.getInstance().hasAffiliationWithDevice(UserHandle.getUserId(uid));
+    }
+
+    void setProfileOwnerUids(Set<Integer> uids) {
+        mProfileOwnerUids = uids;
     }
 
     /**
@@ -5806,26 +5857,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void setFocusedActivity(IBinder token) {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-                if (r == null) {
-                    throw new IllegalArgumentException(
-                            "setFocusedActivity: No activity record matching token=" + token);
-                }
-                if (r.moveFocusableActivityToTop("setFocusedActivity")) {
-                    mRootWindowContainer.resumeFocusedTasksTopActivities();
-                }
-            }
-        }
-
-        @Override
         public int getDisplayId(IBinder token) {
             synchronized (mGlobalLock) {
                 ActivityRecord r = ActivityRecord.forTokenLocked(token);
                 if (r == null) {
                     throw new IllegalArgumentException(
-                            "setFocusedActivity: No activity record matching token=" + token);
+                            "getDisplayId: No activity record matching token=" + token);
                 }
                 return r.getDisplayId();
             }
@@ -6912,6 +6949,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void setDeviceOwnerUid(int uid) {
             synchronized (mGlobalLock) {
                 ActivityTaskManagerService.this.setDeviceOwnerUid(uid);
+            }
+        }
+
+        @Override
+        public void setProfileOwnerUids(Set<Integer> uids) {
+            synchronized (mGlobalLock) {
+                ActivityTaskManagerService.this.setProfileOwnerUids(uids);
             }
         }
 

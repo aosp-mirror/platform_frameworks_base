@@ -174,6 +174,10 @@ public class DisplayPolicy {
 
     private static final int INSETS_OVERRIDE_INDEX_INVALID = -1;
 
+    // TODO(b/266197298): Remove this by a more general protocol from the insets providers.
+    private static final boolean USE_CACHED_INSETS_FOR_DISPLAY_SWITCH =
+            SystemProperties.getBoolean("persist.wm.debug.cached_insets_switch", false);
+
     private final WindowManagerService mService;
     private final Context mContext;
     private final Context mUiContext;
@@ -218,6 +222,8 @@ public class DisplayPolicy {
     private SystemGesturesPointerEventListener mSystemGestures;
 
     final DecorInsets mDecorInsets;
+    /** Currently it can only be non-null when physical display switch happens. */
+    private DecorInsets.Cache mCachedDecorInsets;
 
     private volatile int mLidState = LID_ABSENT;
     private volatile int mDockMode = Intent.EXTRA_DOCK_STATE_UNDOCKED;
@@ -1248,6 +1254,10 @@ public class DisplayPolicy {
         return mNavigationBar;
     }
 
+    boolean isImmersiveMode() {
+        return mIsImmersiveMode;
+    }
+
     /**
      * Control the animation to run when a window's state changes.  Return a positive number to
      * force the animation to a specific resource ID, {@link #ANIMATION_STYLEABLE} to use the
@@ -1707,11 +1717,7 @@ public class DisplayPolicy {
      * Called when the configuration has changed, and it's safe to load new values from resources.
      */
     public void onConfigurationChanged() {
-        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
-
         final Resources res = getCurrentUserResources();
-        final int portraitRotation = displayRotation.getPortraitRotation();
-
         mNavBarOpacityMode = res.getInteger(R.integer.config_navBarOpacityMode);
         mLeftGestureInset = mGestureNavigationSettingsObserver.getLeftSensitivity(res);
         mRightGestureInset = mGestureNavigationSettingsObserver.getRightSensitivity(res);
@@ -1882,10 +1888,11 @@ public class DisplayPolicy {
 
             @Override
             public String toString() {
-                return "{nonDecorInsets=" + mNonDecorInsets
-                        + ", configInsets=" + mConfigInsets
-                        + ", nonDecorFrame=" + mNonDecorFrame
-                        + ", configFrame=" + mConfigFrame + '}';
+                final StringBuilder tmpSb = new StringBuilder(32);
+                return "{nonDecorInsets=" + mNonDecorInsets.toShortString(tmpSb)
+                        + ", configInsets=" + mConfigInsets.toShortString(tmpSb)
+                        + ", nonDecorFrame=" + mNonDecorFrame.toShortString(tmpSb)
+                        + ", configFrame=" + mConfigFrame.toShortString(tmpSb) + '}';
             }
         }
 
@@ -1923,6 +1930,39 @@ public class DisplayPolicy {
                 info.mNeedUpdate = true;
             }
         }
+
+        void setTo(DecorInsets src) {
+            for (int i = mInfoForRotation.length - 1; i >= 0; i--) {
+                mInfoForRotation[i].set(src.mInfoForRotation[i]);
+            }
+        }
+
+        void dump(String prefix, PrintWriter pw) {
+            for (int rotation = 0; rotation < mInfoForRotation.length; rotation++) {
+                final DecorInsets.Info info = mInfoForRotation[rotation];
+                pw.println(prefix + Surface.rotationToString(rotation) + "=" + info);
+            }
+        }
+
+        private static class Cache {
+            /**
+             * If {@link #mPreserveId} is this value, it is in the middle of updating display
+             * configuration before a transition is started. Then the active cache should be used.
+             */
+            static final int ID_UPDATING_CONFIG = -1;
+            final DecorInsets mDecorInsets;
+            int mPreserveId;
+            boolean mActive;
+
+            Cache(DisplayContent dc) {
+                mDecorInsets = new DecorInsets(dc);
+            }
+
+            boolean canPreserve() {
+                return mPreserveId == ID_UPDATING_CONFIG || mDecorInsets.mDisplayContent
+                        .mTransitionController.inTransition(mPreserveId);
+            }
+        }
     }
 
     /**
@@ -1930,6 +1970,9 @@ public class DisplayPolicy {
      * call {@link DisplayContent#sendNewConfiguration()} if this method returns {@code true}.
      */
     boolean updateDecorInsetsInfo() {
+        if (shouldKeepCurrentDecorInsets()) {
+            return false;
+        }
         final DisplayFrames displayFrames = mDisplayContent.mDisplayFrames;
         final int rotation = displayFrames.mRotation;
         final int dw = displayFrames.mWidth;
@@ -1940,6 +1983,10 @@ public class DisplayPolicy {
         if (newInfo.mConfigFrame.equals(currentInfo.mConfigFrame)) {
             return false;
         }
+        if (mCachedDecorInsets != null && !mCachedDecorInsets.canPreserve()
+                && !mDisplayContent.isSleeping()) {
+            mCachedDecorInsets = null;
+        }
         mDecorInsets.invalidate();
         mDecorInsets.mInfoForRotation[rotation].set(newInfo);
         return true;
@@ -1947,6 +1994,71 @@ public class DisplayPolicy {
 
     DecorInsets.Info getDecorInsetsInfo(int rotation, int w, int h) {
         return mDecorInsets.get(rotation, w, h);
+    }
+
+    /** Returns {@code true} to trust that {@link #mDecorInsets} already has the expected state. */
+    boolean shouldKeepCurrentDecorInsets() {
+        return mCachedDecorInsets != null && mCachedDecorInsets.mActive
+                && mCachedDecorInsets.canPreserve();
+    }
+
+    void physicalDisplayChanged() {
+        if (USE_CACHED_INSETS_FOR_DISPLAY_SWITCH) {
+            updateCachedDecorInsets();
+        }
+    }
+
+    /**
+     * Caches the current insets and switches current insets to previous cached insets. This is to
+     * reduce multiple display configuration changes if there are multiple insets provider windows
+     * which may trigger {@link #updateDecorInsetsInfo()} individually.
+     */
+    @VisibleForTesting
+    void updateCachedDecorInsets() {
+        DecorInsets prevCache = null;
+        if (mCachedDecorInsets == null) {
+            mCachedDecorInsets = new DecorInsets.Cache(mDisplayContent);
+        } else {
+            prevCache = new DecorInsets(mDisplayContent);
+            prevCache.setTo(mCachedDecorInsets.mDecorInsets);
+        }
+        // Set a special id to preserve it before a real id is available from transition.
+        mCachedDecorInsets.mPreserveId = DecorInsets.Cache.ID_UPDATING_CONFIG;
+        // Cache the current insets.
+        mCachedDecorInsets.mDecorInsets.setTo(mDecorInsets);
+        // Switch current to previous cache.
+        if (prevCache != null) {
+            mDecorInsets.setTo(prevCache);
+            mCachedDecorInsets.mActive = true;
+        }
+    }
+
+    /**
+     * Called after the display configuration is updated according to the physical change. Suppose
+     * there should be a display change transition, so associate the cached decor insets with the
+     * transition to limit the lifetime of using the cache.
+     */
+    void physicalDisplayUpdated() {
+        if (mCachedDecorInsets == null) {
+            return;
+        }
+        if (!mDisplayContent.mTransitionController.isCollecting()) {
+            // Unable to know when the display switch is finished.
+            mCachedDecorInsets = null;
+            return;
+        }
+        mCachedDecorInsets.mPreserveId =
+                mDisplayContent.mTransitionController.getCollectingTransitionId();
+        // The validator will run after the transition is finished. So if the insets are changed
+        // during the transition, it can update to the latest state.
+        mDisplayContent.mTransitionController.mStateValidators.add(() -> {
+            // The insets provider client may defer to change its window until screen is on. So
+            // only validate when awake to avoid the cache being always dropped.
+            if (!mDisplayContent.isSleeping() && updateDecorInsetsInfo()) {
+                Slog.d(TAG, "Insets changed after display switch transition");
+                mDisplayContent.sendNewConfiguration();
+            }
+        });
     }
 
     @NavigationBarPosition
@@ -2626,9 +2738,10 @@ public class DisplayPolicy {
         pw.print(prefix); pw.print("mRemoteInsetsControllerControlsSystemBars=");
         pw.println(mRemoteInsetsControllerControlsSystemBars);
         pw.print(prefix); pw.println("mDecorInsetsInfo:");
-        for (int rotation = 0; rotation < mDecorInsets.mInfoForRotation.length; rotation++) {
-            final DecorInsets.Info info = mDecorInsets.mInfoForRotation[rotation];
-            pw.println(prefixInner + Surface.rotationToString(rotation) + "=" + info);
+        mDecorInsets.dump(prefixInner, pw);
+        if (mCachedDecorInsets != null) {
+            pw.print(prefix); pw.println("mCachedDecorInsets:");
+            mCachedDecorInsets.mDecorInsets.dump(prefixInner, pw);
         }
         if (!CLIENT_TRANSIENT) {
             mSystemGestures.dump(pw, prefix);

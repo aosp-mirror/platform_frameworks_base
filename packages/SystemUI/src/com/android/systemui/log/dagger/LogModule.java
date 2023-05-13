@@ -60,7 +60,7 @@ public class LogModule {
         if (Compile.IS_DEBUG && notifPipelineFlags.isDevLoggingEnabled()) {
             maxSize *= 10;
         }
-        return factory.create("NotifLog", maxSize, false /* systrace */);
+        return factory.create("NotifLog", maxSize, Compile.IS_DEBUG /* systrace */);
     }
 
     /** Provides a logging buffer for all logs related to notifications on the lockscreen. */
@@ -419,6 +419,14 @@ public class LogModule {
     @BouncerLog
     public static TableLogBuffer provideBouncerLogBuffer(TableLogBufferFactory factory) {
         return factory.create("BouncerLog", 250);
+    }
+
+    /** Provides a table logging buffer for the Monitor. */
+    @Provides
+    @SysUISingleton
+    @MonitorLog
+    public static TableLogBuffer provideMonitorTableLogBuffer(TableLogBufferFactory factory) {
+        return factory.create("MonitorLog", 250);
     }
 
     /**

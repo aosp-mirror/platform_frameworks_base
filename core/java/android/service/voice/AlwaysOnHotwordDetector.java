@@ -18,6 +18,7 @@ package android.service.voice;
 
 import static android.Manifest.permission.CAPTURE_AUDIO_HOTWORD;
 import static android.Manifest.permission.RECORD_AUDIO;
+import static android.service.voice.SoundTriggerFailure.ERROR_CODE_UNKNOWN;
 import static android.service.voice.VoiceInteractionService.MULTIPLE_ACTIVE_HOTWORD_DETECTORS;
 
 import android.annotation.ElapsedRealtimeLong;
@@ -270,6 +271,15 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     static final long THROW_ON_INITIALIZE_IF_NO_DSP = 269165460L;
 
     /**
+     * Gates returning {@link Callback#onFailure} and {@link Callback#onUnknownFailure}
+     * when asynchronous exceptions are propagated to the client. If the change is not enabled,
+     * the existing behavior of delivering {@link #STATE_ERROR} is retained.
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+    static final long SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS = 280471513L;
+
+    /**
      * Controls the sensitivity threshold adjustment factor for a given model.
      * Negative value corresponds to less sensitive model (high threshold) and
      * a positive value corresponds to a more sensitive model (low threshold).
@@ -313,7 +323,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
     private final Executor mExternalExecutor;
     private final Handler mHandler;
     private final IBinder mBinder = new Binder();
-    private final int mTargetSdkVersion;
     private final boolean mSupportSandboxedDetectionService;
 
     @GuardedBy("mLock")
@@ -856,7 +865,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 new Handler(Looper.myLooper()));
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
-        mTargetSdkVersion = targetSdkVersion;
         mSupportSandboxedDetectionService = supportSandboxedDetectionService;
     }
 
@@ -1382,6 +1390,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
      *
      * @hide
      */
+    // TODO(b/281608561): remove the enrollment flow from AlwaysOnHotwordDetector
     void onSoundModelsChanged() {
         synchronized (mLock) {
             if (mAvailability == STATE_INVALID
@@ -1401,20 +1410,38 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                 return;
             }
 
-            // Stop the recognition before proceeding.
-            // This is done because we want to stop the recognition on an older model if it changed
-            // or was deleted.
-            // The availability change callback should ensure that the client starts recognition
-            // again if needed.
+            // Stop the recognition before proceeding if we are in the enrolled state.
+            // The framework makes the guarantee that an actively used model is present in the
+            // system server's enrollment database. For this reason we much stop an actively running
+            // model when the underlying sound model in enrollment database no longer match.
             if (mAvailability == STATE_KEYPHRASE_ENROLLED) {
+                // A SoundTriggerFailure will be sent to the client if the model state was
+                // changed. This is an overloading of the onFailure usage because we are sending a
+                // callback even in the successful stop case. If stopRecognition is successful,
+                // suggested next action RESTART_RECOGNITION will be sent.
+                // TODO(b/281608561): This code path will be removed with other enrollment flows in
+                //  this class.
                 try {
-                    stopRecognitionLocked();
-                } catch (SecurityException e) {
-                    Slog.w(TAG, "Failed to Stop the recognition", e);
-                    if (mTargetSdkVersion <= Build.VERSION_CODES.R) {
-                        throw e;
+                    int result = stopRecognitionLocked();
+                    if (result == STATUS_OK) {
+                        sendSoundTriggerFailure(new SoundTriggerFailure(ERROR_CODE_UNKNOWN,
+                                "stopped recognition because of enrollment update",
+                                FailureSuggestedAction.RESTART_RECOGNITION));
                     }
-                    updateAndNotifyStateChangedLocked(STATE_ERROR);
+                    // only log to logcat here because many failures can be false positives such as
+                    // calling stopRecognition where there is no started session.
+                    Log.w(TAG, "Failed to stop recognition after enrollment update: code="
+                            + result);
+                } catch (Exception e) {
+                    Slog.w(TAG, "Failed to stop recognition after enrollment update", e);
+                    if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
+                        sendSoundTriggerFailure(new SoundTriggerFailure(ERROR_CODE_UNKNOWN,
+                                "Failed to stop recognition after enrollment update: "
+                                        + Log.getStackTraceString(e),
+                                FailureSuggestedAction.RECREATE_DETECTOR));
+                    } else {
+                        updateAndNotifyStateChangedLocked(STATE_ERROR);
+                    }
                     return;
                 }
             }
@@ -1538,6 +1565,12 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
 
     @GuardedBy("mLock")
     private void updateAndNotifyStateChangedLocked(int availability) {
+        updateAvailabilityLocked(availability);
+        notifyStateChangedLocked();
+    }
+
+    @GuardedBy("mLock")
+    private void updateAvailabilityLocked(int availability) {
         if (DBG) {
             Slog.d(TAG, "Hotword availability changed from " + mAvailability
                     + " -> " + availability);
@@ -1545,7 +1578,6 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         if (!mIsAvailabilityOverriddenByTestApi) {
             mAvailability = availability;
         }
-        notifyStateChangedLocked();
     }
 
     @GuardedBy("mLock")
@@ -1553,6 +1585,18 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         Message message = Message.obtain(mHandler, MSG_AVAILABILITY_CHANGED);
         message.arg1 = mAvailability;
         message.sendToTarget();
+    }
+
+    @GuardedBy("mLock")
+    private void sendUnknownFailure(String failureMessage) {
+        // update but do not call onAvailabilityChanged callback for STATE_ERROR
+        updateAvailabilityLocked(STATE_ERROR);
+        Message.obtain(mHandler, MSG_DETECTION_UNKNOWN_FAILURE, failureMessage).sendToTarget();
+    }
+
+    private void sendSoundTriggerFailure(@NonNull SoundTriggerFailure soundTriggerFailure) {
+        Message.obtain(mHandler, MSG_DETECTION_SOUND_TRIGGER_FAILURE, soundTriggerFailure)
+                .sendToTarget();
     }
 
     /** @hide */
@@ -1577,6 +1621,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                             .build())
                     .sendToTarget();
         }
+
         @Override
         public void onGenericSoundTriggerDetected(SoundTrigger.GenericRecognitionEvent event) {
             Slog.w(TAG, "Generic sound trigger event detected at AOHD: " + event);
@@ -1726,6 +1771,7 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
         }
     }
 
+    // TODO(b/267681692): remove the AsyncTask usage
     class RefreshAvailabilityTask extends AsyncTask<Void, Void, Void> {
 
         @Override
@@ -1744,13 +1790,17 @@ public class AlwaysOnHotwordDetector extends AbstractDetector {
                     }
                     updateAndNotifyStateChangedLocked(availability);
                 }
-            } catch (SecurityException e) {
+            } catch (Exception e) {
+                // Any exception here not caught will crash the process because AsyncTask does not
+                // bubble up the exceptions to the client app, so we must propagate it to the app.
                 Slog.w(TAG, "Failed to refresh availability", e);
-                if (mTargetSdkVersion <= Build.VERSION_CODES.R) {
-                    throw e;
-                }
                 synchronized (mLock) {
-                    updateAndNotifyStateChangedLocked(STATE_ERROR);
+                    if (CompatChanges.isChangeEnabled(SEND_ON_FAILURE_FOR_ASYNC_EXCEPTIONS)) {
+                        sendUnknownFailure(
+                                "Failed to refresh availability: " + Log.getStackTraceString(e));
+                    } else {
+                        updateAndNotifyStateChangedLocked(STATE_ERROR);
+                    }
                 }
             }
 

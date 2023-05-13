@@ -49,6 +49,7 @@ import android.media.MediaRoute2Info;
 import android.media.NearbyDevice;
 import android.media.RoutingSessionInfo;
 import android.media.session.MediaController;
+import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.IBinder;
@@ -86,6 +87,7 @@ import com.android.systemui.flags.Flags;
 import com.android.systemui.media.nearby.NearbyMediaDevicesManager;
 import com.android.systemui.monet.ColorScheme;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
@@ -165,6 +167,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
     private float mInactiveRadius;
     private float mActiveRadius;
     private FeatureFlags mFeatureFlags;
+    private UserTracker mUserTracker;
 
     public enum BroadcastNotifyDialog {
         ACTION_FIRST_LAUNCH,
@@ -181,7 +184,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             AudioManager audioManager,
             PowerExemptionManager powerExemptionManager,
             KeyguardManager keyGuardManager,
-            FeatureFlags featureFlags) {
+            FeatureFlags featureFlags,
+            UserTracker userTracker) {
         mContext = context;
         mPackageName = packageName;
         mMediaSessionManager = mediaSessionManager;
@@ -192,6 +196,7 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         mPowerExemptionManager = powerExemptionManager;
         mKeyGuardManager = keyGuardManager;
         mFeatureFlags = featureFlags;
+        mUserTracker = userTracker;
         InfoMediaManager imm = new InfoMediaManager(mContext, packageName, null, lbm);
         mLocalMediaManager = new LocalMediaManager(mContext, lbm, imm, packageName);
         mMetricLogger = new MediaOutputMetricLogger(mContext, mPackageName);
@@ -232,16 +237,13 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             mNearbyMediaDevicesManager.registerNearbyDevicesCallback(this);
         }
         if (!TextUtils.isEmpty(mPackageName)) {
-            for (MediaController controller : mMediaSessionManager.getActiveSessions(null)) {
-                if (TextUtils.equals(controller.getPackageName(), mPackageName)) {
-                    mMediaController = controller;
-                    mMediaController.unregisterCallback(mCb);
-                    if (mMediaController.getPlaybackState() != null) {
-                        mCurrentState = mMediaController.getPlaybackState().getState();
-                    }
-                    mMediaController.registerCallback(mCb);
-                    break;
+            mMediaController = getMediaController();
+            if (mMediaController != null) {
+                mMediaController.unregisterCallback(mCb);
+                if (mMediaController.getPlaybackState() != null) {
+                    mCurrentState = mMediaController.getPlaybackState().getState();
                 }
+                mMediaController.registerCallback(mCb);
             }
         }
         if (mMediaController == null) {
@@ -282,6 +284,26 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
             mNearbyMediaDevicesManager.unregisterNearbyDevicesCallback(this);
         }
         mNearbyDeviceInfoMap.clear();
+    }
+
+    private MediaController getMediaController() {
+        for (NotificationEntry entry : mNotifCollection.getAllNotifs()) {
+            final Notification notification = entry.getSbn().getNotification();
+            if (notification.isMediaNotification()
+                    && TextUtils.equals(entry.getSbn().getPackageName(), mPackageName)) {
+                MediaSession.Token token = notification.extras.getParcelable(
+                        Notification.EXTRA_MEDIA_SESSION,
+                        MediaSession.Token.class);
+                return new MediaController(mContext, token);
+            }
+        }
+        for (MediaController controller : mMediaSessionManager.getActiveSessionsForUser(null,
+                mUserTracker.getUserHandle())) {
+            if (TextUtils.equals(controller.getPackageName(), mPackageName)) {
+                return controller;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -1011,7 +1033,8 @@ public class MediaOutputController implements LocalMediaManager.DeviceCallback,
         MediaOutputController controller = new MediaOutputController(mContext, mPackageName,
                 mMediaSessionManager, mLocalBluetoothManager, mActivityStarter,
                 mNotifCollection, mDialogLaunchAnimator, Optional.of(mNearbyMediaDevicesManager),
-                mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags);
+                mAudioManager, mPowerExemptionManager, mKeyGuardManager, mFeatureFlags,
+                mUserTracker);
         MediaOutputBroadcastDialog dialog = new MediaOutputBroadcastDialog(mContext, true,
                 broadcastSender, controller);
         dialog.show();

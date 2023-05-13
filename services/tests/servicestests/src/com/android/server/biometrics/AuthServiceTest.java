@@ -58,6 +58,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
+import com.android.server.LocalServices;
+import com.android.server.companion.virtual.VirtualDeviceManagerInternal;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -102,6 +104,8 @@ public class AuthServiceTest {
     IFaceService mFaceService;
     @Mock
     AppOpsManager mAppOpsManager;
+    @Mock
+    private VirtualDeviceManagerInternal mVdmInternal;
     @Captor
     private ArgumentCaptor<List<FingerprintSensorPropertiesInternal>> mFingerprintPropsCaptor;
     @Captor
@@ -115,6 +119,8 @@ public class AuthServiceTest {
                 "1:4:15", // ID1:Iris:Strong
                 "2:8:15", // ID2:Face:Strong
         };
+        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
+        LocalServices.addService(VirtualDeviceManagerInternal.class, mVdmInternal);
 
         when(mResources.getIntArray(eq(R.array.config_udfps_sensor_props))).thenReturn(new int[0]);
         when(mResources.getBoolean(eq(R.bool.config_is_powerbutton_fps))).thenReturn(false);
@@ -152,7 +158,8 @@ public class AuthServiceTest {
 
         verify(mBiometricService, never()).registerAuthenticator(
                 anyInt(),
-                any(),
+                anyInt(),
+                anyInt(),
                 any());
     }
 
@@ -269,6 +276,47 @@ public class AuthServiceTest {
                 promptInfo);
         waitForIdle();
         verify(mReceiver).onError(eq(TYPE_NONE), eq(BIOMETRIC_ERROR_CANCELED), anyInt());
+    }
+
+    @Test
+    public void testAuthenticate_noVdmInternalService_noCrash() throws Exception {
+        LocalServices.removeServiceForTest(VirtualDeviceManagerInternal.class);
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final Binder token = new Binder();
+
+        // This should not crash
+        mAuthService.mImpl.authenticate(
+                token,
+                0, /* sessionId */
+                0, /* userId */
+                mReceiver,
+                TEST_OP_PACKAGE_NAME,
+                new PromptInfo());
+        waitForIdle();
+    }
+
+    @Test
+    public void testAuthenticate_callsVirtualDeviceManagerOnAuthenticationPrompt()
+            throws Exception {
+        mAuthService = new AuthService(mContext, mInjector);
+        mAuthService.onStart();
+
+        final Binder token = new Binder();
+
+        mAuthService.mImpl.authenticate(
+                token,
+                0, /* sessionId */
+                0, /* userId */
+                mReceiver,
+                TEST_OP_PACKAGE_NAME,
+                new PromptInfo());
+        waitForIdle();
+
+        ArgumentCaptor<Integer> uidCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mVdmInternal).onAuthenticationPrompt(uidCaptor.capture());
+        assertEquals((int) (uidCaptor.getValue()), Binder.getCallingUid());
     }
 
     @Test

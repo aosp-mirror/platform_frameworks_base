@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.Manifest;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -178,6 +179,9 @@ public class InstallStaging extends AlertActivity {
         params.setInstallerPackageName(intent.getStringExtra(
                 Intent.EXTRA_INSTALLER_PACKAGE_NAME));
         params.setInstallReason(PackageManager.INSTALL_REASON_USER);
+        // Disable full screen intent usage by for sideloads.
+        params.setPermissionState(Manifest.permission.USE_FULL_SCREEN_INTENT,
+                PackageInstaller.SessionParams.PERMISSION_STATE_DENIED);
 
         if (pfd != null) {
             try {

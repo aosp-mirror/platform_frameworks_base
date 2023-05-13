@@ -24,6 +24,7 @@ import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_FAKE_FOCUS;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
 import static android.content.pm.ActivityInfo.OVERRIDE_ENABLE_COMPAT_IGNORE_REQUESTED_ORIENTATION;
 import static android.content.pm.ActivityInfo.OVERRIDE_LANDSCAPE_ORIENTATION_TO_REVERSE_LANDSCAPE;
+import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO;
 import static android.content.pm.ActivityInfo.OVERRIDE_ORIENTATION_ONLY_FOR_CAMERA;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_NOSENSOR;
 import static android.content.pm.ActivityInfo.OVERRIDE_UNDEFINED_ORIENTATION_TO_PORTRAIT;
@@ -40,6 +41,7 @@ import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ALLOW_REFRESH;
 import static android.view.WindowManager.PROPERTY_CAMERA_COMPAT_ENABLE_REFRESH_VIA_PAUSE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_DISPLAY_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_IGNORING_ORIENTATION_REQUEST_WHEN_LOOP_DETECTED;
+import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ALLOW_ORIENTATION_OVERRIDE;
 import static android.view.WindowManager.PROPERTY_COMPAT_ENABLE_FAKE_FOCUS;
 import static android.view.WindowManager.PROPERTY_COMPAT_IGNORE_REQUESTED_ORIENTATION;
@@ -453,6 +455,29 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
     }
 
     @Test
+    public void testGetCropBoundsIfNeeded_handleCropForTransparentActivityBasedOnOpaqueBounds() {
+        final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
+                 WindowInsets.Type.navigationBars());
+        taskbar.setInsetsRoundedCornerFrame(true);
+        final WindowState mainWindow = mockForGetCropBoundsAndRoundedCorners(taskbar);
+        final Rect opaqueBounds = new Rect(0, 0, 500, 300);
+        doReturn(opaqueBounds).when(mActivity).getBounds();
+        // Activity is translucent
+        spyOn(mActivity.mLetterboxUiController);
+        doReturn(true).when(mActivity.mLetterboxUiController).hasInheritedLetterboxBehavior();
+
+        // Makes requested sizes different
+        mainWindow.mRequestedWidth = opaqueBounds.width() - 1;
+        mainWindow.mRequestedHeight = opaqueBounds.height() - 1;
+        assertNull(mActivity.mLetterboxUiController.getCropBoundsIfNeeded(mainWindow));
+
+        // Makes requested sizes equals
+        mainWindow.mRequestedWidth = opaqueBounds.width();
+        mainWindow.mRequestedHeight = opaqueBounds.height();
+        assertNotNull(mActivity.mLetterboxUiController.getCropBoundsIfNeeded(mainWindow));
+    }
+
+    @Test
     public void testGetCropBoundsIfNeeded_noCrop() {
         final InsetsSource taskbar = new InsetsSource(/*id=*/ 0,
                 WindowInsets.Type.navigationBars());
@@ -858,6 +883,62 @@ public class LetterboxUiControllerTest extends WindowTestsBase {
         mController = new LetterboxUiController(mWm, mActivity);
 
         assertTrue(mController.shouldSendFakeFocus());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
+    public void testshouldOverrideMinAspectRatio_overrideEnabled_returnsTrue() {
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertTrue(mController.shouldOverrideMinAspectRatio());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
+    public void testshouldOverrideMinAspectRatio_propertyTrue_overrideEnabled_returnsTrue()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertTrue(mController.shouldOverrideMinAspectRatio());
+    }
+
+    @Test
+    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
+    public void testshouldOverrideMinAspectRatio_propertyTrue_overrideDisabled_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ true);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideMinAspectRatio());
+    }
+
+    @Test
+    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
+    public void testshouldOverrideMinAspectRatio_overrideDisabled_returnsFalse() {
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideMinAspectRatio());
+    }
+
+    @Test
+    @EnableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
+    public void testshouldOverrideMinAspectRatio_propertyFalse_overrideEnabled_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideMinAspectRatio());
+    }
+
+    @Test
+    @DisableCompatChanges({OVERRIDE_MIN_ASPECT_RATIO})
+    public void testshouldOverrideMinAspectRatio_propertyFalse_noOverride_returnsFalse()
+            throws Exception {
+        mockThatProperty(PROPERTY_COMPAT_ALLOW_MIN_ASPECT_RATIO_OVERRIDE, /* value */ false);
+        mController = new LetterboxUiController(mWm, mActivity);
+
+        assertFalse(mController.shouldOverrideMinAspectRatio());
     }
 
     @Test

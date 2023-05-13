@@ -262,12 +262,6 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void setVr2dDisplayId(int vr2dDisplayId);
 
-    /**
-     * Set focus on an activity.
-     * @param token The activity token.
-     */
-    public abstract void setFocusedActivity(IBinder token);
-
     public abstract void registerScreenObserver(ScreenObserver observer);
 
     /**
@@ -583,6 +577,11 @@ public abstract class ActivityTaskManagerInternal {
      * Called by DevicePolicyManagerService to set the uid of the device owner.
      */
     public abstract void setDeviceOwnerUid(int uid);
+
+    /**
+     * Called by DevicePolicyManagerService to set the uids of the profile owners.
+     */
+    public abstract void setProfileOwnerUids(Set<Integer> uids);
 
     /**
      * Set all associated companion app that belongs to a userId.
