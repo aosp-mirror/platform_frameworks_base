@@ -16,6 +16,8 @@
 
 #include "JTvInputHal.h"
 
+#include <nativehelper/ScopedLocalRef.h>
+
 namespace android {
 
 JTvInputHal::JTvInputHal(JNIEnv* env, jobject thiz, std::shared_ptr<ITvInputWrapper> tvInput,
@@ -278,21 +280,27 @@ void JTvInputHal::onStreamConfigurationsChanged(int deviceId, int cableConnectio
 void JTvInputHal::onTvMessage(int deviceId, int streamId, AidlTvMessageEventType type,
                               AidlTvMessage& message, signed char data[], int dataLength) {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
-    jobject bundle = env->NewObject(gBundleClassInfo.clazz, gBundleClassInfo.constructor);
-    const jsize len = static_cast<jsize>(dataLength);
-    jbyteArray convertedData = env->NewByteArray(len);
-    env->SetByteArrayRegion(convertedData, 0, len, reinterpret_cast<const jbyte*>(data));
-    env->CallObjectMethod(bundle, gBundleClassInfo.putString,
-                          "android.media.tv.TvInputManager.subtype", message.subType.c_str());
-    env->CallObjectMethod(bundle, gBundleClassInfo.putByteArray,
-                          "android.media.tv.TvInputManager.raw_data", convertedData);
-    env->CallObjectMethod(bundle, gBundleClassInfo.putInt,
-                          "android.media.tv.TvInputManager.group_id", message.groupId);
-    env->CallObjectMethod(bundle, gBundleClassInfo.putInt,
-                          "android.media.tv.TvInputManager.stream_id", streamId);
+    ScopedLocalRef<jobject> bundle(env,
+                                   env->NewObject(gBundleClassInfo.clazz,
+                                                  gBundleClassInfo.constructor));
+    ScopedLocalRef<jbyteArray> convertedData(env, env->NewByteArray(dataLength));
+    env->SetByteArrayRegion(convertedData.get(), 0, dataLength, reinterpret_cast<jbyte*>(data));
+    std::string key = "android.media.tv.TvInputManager.raw_data";
+    ScopedLocalRef<jstring> jkey(env, env->NewStringUTF(key.c_str()));
+    env->CallVoidMethod(bundle.get(), gBundleClassInfo.putByteArray, jkey.get(),
+                        convertedData.get());
+    ScopedLocalRef<jstring> subtype(env, env->NewStringUTF(message.subType.c_str()));
+    key = "android.media.tv.TvInputManager.subtype";
+    jkey = ScopedLocalRef<jstring>(env, env->NewStringUTF(key.c_str()));
+    env->CallVoidMethod(bundle.get(), gBundleClassInfo.putString, jkey.get(), subtype.get());
+    key = "android.media.tv.TvInputManager.group_id";
+    jkey = ScopedLocalRef<jstring>(env, env->NewStringUTF(key.c_str()));
+    env->CallVoidMethod(bundle.get(), gBundleClassInfo.putInt, jkey.get(), message.groupId);
+    key = "android.media.tv.TvInputManager.stream_id";
+    jkey = ScopedLocalRef<jstring>(env, env->NewStringUTF(key.c_str()));
+    env->CallVoidMethod(bundle.get(), gBundleClassInfo.putInt, jkey.get(), streamId);
     env->CallVoidMethod(mThiz, gTvInputHalClassInfo.tvMessageReceived, deviceId,
-                        static_cast<int>(type), bundle);
-    env->DeleteLocalRef(convertedData);
+                        static_cast<jint>(type), bundle.get());
 }
 
 void JTvInputHal::onCaptured(int deviceId, int streamId, uint32_t seq, bool succeeded) {

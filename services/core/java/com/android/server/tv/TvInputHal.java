@@ -234,6 +234,7 @@ final class TvInputHal implements Handler.Callback {
                 int type = msg.arg2;
                 Bundle data = (Bundle) msg.obj;
                 mCallback.onTvMessage(deviceId, type, data);
+                break;
             }
 
             default:
