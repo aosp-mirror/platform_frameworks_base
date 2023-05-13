@@ -22,6 +22,7 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.media.MediaRoute2Info
 import android.os.PowerManager
+import android.os.VibrationAttributes
 import android.os.VibrationEffect
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
@@ -210,7 +211,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(chipbarView.getErrorIcon().visibility).isEqualTo(View.GONE)
         assertThat(uiEventLoggerFake.eventId(0))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_START_CAST.id)
-        verify(vibratorHelper).vibrate(any<VibrationEffect>())
+        verify(vibratorHelper)
+            .vibrate(
+                any(),
+                any(),
+                any<VibrationEffect>(),
+                any(),
+                any<VibrationAttributes>(),
+            )
     }
 
     @Test
@@ -246,7 +254,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(chipbarView.getErrorIcon().visibility).isEqualTo(View.GONE)
         assertThat(uiEventLoggerFake.eventId(0))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_ALMOST_CLOSE_TO_END_CAST.id)
-        verify(vibratorHelper).vibrate(any<VibrationEffect>())
+        verify(vibratorHelper)
+            .vibrate(
+                any(),
+                any(),
+                any<VibrationEffect>(),
+                any(),
+                any<VibrationAttributes>(),
+            )
     }
 
     @Test
@@ -267,7 +282,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(chipbarView.getErrorIcon().visibility).isEqualTo(View.GONE)
         assertThat(uiEventLoggerFake.eventId(0))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_TRIGGERED.id)
-        verify(vibratorHelper).vibrate(any<VibrationEffect>())
+        verify(vibratorHelper)
+            .vibrate(
+                any(),
+                any(),
+                any<VibrationEffect>(),
+                any(),
+                any<VibrationAttributes>(),
+            )
     }
 
     @Test
@@ -303,7 +325,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         assertThat(chipbarView.getErrorIcon().visibility).isEqualTo(View.GONE)
         assertThat(uiEventLoggerFake.eventId(0))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_TRIGGERED.id)
-        verify(vibratorHelper).vibrate(any<VibrationEffect>())
+        verify(vibratorHelper)
+            .vibrate(
+                any(),
+                any(),
+                any<VibrationEffect>(),
+                any(),
+                any<VibrationAttributes>(),
+            )
     }
 
     @Test
@@ -326,7 +355,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         // Event index 1 since initially displaying the triggered chip would also log an event.
         assertThat(uiEventLoggerFake.eventId(1))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_SUCCEEDED.id)
-        verify(vibratorHelper, never()).vibrate(any<VibrationEffect>())
+        verify(vibratorHelper, never())
+            .vibrate(
+                any(),
+                any(),
+                any<VibrationEffect>(),
+                any(),
+                any<VibrationAttributes>(),
+            )
     }
 
     @Test
@@ -403,7 +439,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         // Event index 1 since initially displaying the triggered chip would also log an event.
         assertThat(uiEventLoggerFake.eventId(1))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_SUCCEEDED.id)
-        verify(vibratorHelper, never()).vibrate(any<VibrationEffect>())
+        verify(vibratorHelper, never())
+            .vibrate(
+                any(),
+                any(),
+                any<VibrationEffect>(),
+                any(),
+                any<VibrationAttributes>(),
+            )
     }
 
     @Test
@@ -483,7 +526,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         // Event index 1 since initially displaying the triggered chip would also log an event.
         assertThat(uiEventLoggerFake.eventId(1))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_RECEIVER_FAILED.id)
-        verify(vibratorHelper).vibrate(any<VibrationEffect>())
+        verify(vibratorHelper)
+            .vibrate(
+                any(),
+                any(),
+                any<VibrationEffect>(),
+                any(),
+                any<VibrationAttributes>(),
+            )
     }
 
     @Test
@@ -511,7 +561,14 @@ class MediaTttSenderCoordinatorTest : SysuiTestCase() {
         // Event index 1 since initially displaying the triggered chip would also log an event.
         assertThat(uiEventLoggerFake.eventId(1))
             .isEqualTo(MediaTttSenderUiEvents.MEDIA_TTT_SENDER_TRANSFER_TO_THIS_DEVICE_FAILED.id)
-        verify(vibratorHelper).vibrate(any<VibrationEffect>())
+        verify(vibratorHelper)
+            .vibrate(
+                any(),
+                any(),
+                any<VibrationEffect>(),
+                any(),
+                any<VibrationAttributes>(),
+            )
     }
 
     @Test
