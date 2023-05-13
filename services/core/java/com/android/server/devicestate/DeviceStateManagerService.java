@@ -342,16 +342,20 @@ public final class DeviceStateManagerService extends SystemService {
         return supportedStates;
     }
 
+    /**
+     * Returns the current {@link DeviceStateInfo} of the device. If there has been no base state
+     * or committed state provided, {@link DeviceStateManager#INVALID_DEVICE_STATE} will be returned
+     * respectively. The supported states will always be included.
+     *
+     */
+    @GuardedBy("mLock")
     @NonNull
     private DeviceStateInfo getDeviceStateInfoLocked() {
-        if (!mBaseState.isPresent() || !mCommittedState.isPresent()) {
-            throw new IllegalStateException("Trying to get the current DeviceStateInfo before the"
-                    + " initial state has been committed.");
-        }
-
         final int[] supportedStates = getSupportedStateIdentifiersLocked();
-        final int baseState = mBaseState.get().getIdentifier();
-        final int currentState = mCommittedState.get().getIdentifier();
+        final int baseState =
+                mBaseState.isPresent() ? mBaseState.get().getIdentifier() : INVALID_DEVICE_STATE;
+        final int currentState = mCommittedState.isPresent() ? mCommittedState.get().getIdentifier()
+                : INVALID_DEVICE_STATE;
 
         return new DeviceStateInfo(supportedStates, baseState, currentState);
     }
@@ -715,6 +719,9 @@ public final class DeviceStateManagerService extends SystemService {
             }
             mProcessRecords.put(pid, record);
 
+            // Callback clients should not be notified of invalid device states, so calls to
+            // #getDeviceStateInfoLocked should be gated on checks if a committed state is present
+            // before getting the device state info.
             DeviceStateInfo currentInfo = mCommittedState.isPresent()
                     ? getDeviceStateInfoLocked() : null;
             if (currentInfo != null) {
@@ -1128,6 +1135,7 @@ public final class DeviceStateManagerService extends SystemService {
 
     /** Implementation of {@link IDeviceStateManager} published as a binder service. */
     private final class BinderService extends IDeviceStateManager.Stub {
+
         @Override // Binder call
         public DeviceStateInfo getDeviceStateInfo() {
             synchronized (mLock) {
