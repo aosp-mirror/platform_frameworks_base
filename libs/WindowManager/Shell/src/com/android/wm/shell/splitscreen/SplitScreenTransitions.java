@@ -208,11 +208,13 @@ class SplitScreenTransitions {
                 mAnimations.add(va);
 
                 decor.setScreenshotIfNeeded(change.getSnapshot(), startTransaction);
-                decor.onResized(startTransaction, () -> {
-                    mTransitions.getMainExecutor().execute(() -> {
-                        mAnimations.remove(va);
-                        onFinish(null /* wct */, null /* wctCB */);
-                    });
+                decor.onResized(startTransaction, animated -> {
+                    mAnimations.remove(va);
+                    if (animated) {
+                        mTransitions.getMainExecutor().execute(() -> {
+                            onFinish(null /* wct */, null /* wctCB */);
+                        });
+                    }
                 });
             }
         }
