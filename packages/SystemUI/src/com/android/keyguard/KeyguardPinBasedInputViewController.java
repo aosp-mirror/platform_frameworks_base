@@ -27,6 +27,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.flags.FeatureFlags;
 
 public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinBasedInputView>
         extends KeyguardAbsKeyInputViewController<T> {
@@ -58,10 +59,11 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             LatencyTracker latencyTracker,
             LiftToActivateListener liftToActivateListener,
             EmergencyButtonController emergencyButtonController,
-            FalsingCollector falsingCollector) {
+            FalsingCollector falsingCollector,
+            FeatureFlags featureFlags) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
-                emergencyButtonController);
+                emergencyButtonController, featureFlags);
         mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
