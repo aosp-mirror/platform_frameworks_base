@@ -64,7 +64,6 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.RemoteException;
 import android.os.SystemProperties;
-import android.util.Log;
 import android.view.Choreographer;
 import android.view.Display;
 import android.view.Surface;
@@ -109,7 +108,6 @@ import java.util.function.IntConsumer;
 public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         DisplayController.OnDisplaysChangedListener, ShellTaskOrganizer.FocusListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
-    private static final boolean DEBUG = false;
 
     /**
      * The fixed start delay in ms when fading out the content overlay from bounds animation.
@@ -1045,7 +1043,8 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     void onExitPipFinished(TaskInfo info) {
         if (mLeash == null) {
             // TODO(239461594): Remove once the double call to onExitPipFinished() is fixed
-            Log.w(TAG, "Warning, onExitPipFinished() called multiple times in the same sessino");
+            ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "Warning, onExitPipFinished() called multiple times in the same session");
             return;
         }
 
@@ -1134,15 +1133,13 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
                 && (mPipTransitionState.getTransitionState() != PipTransitionState.ENTERED_PIP);
         if ((mPipTransitionState.getInSwipePipToHomeTransition()
                 || waitForFixedRotationOnEnteringPip) && fromRotation) {
-            if (DEBUG) {
-                ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
-                        "%s: Skip onMovementBoundsChanged on rotation change"
-                                + " InSwipePipToHomeTransition=%b"
-                                + " mWaitForFixedRotation=%b"
-                                + " getTransitionState=%d", TAG,
-                        mPipTransitionState.getInSwipePipToHomeTransition(), mWaitForFixedRotation,
-                        mPipTransitionState.getTransitionState());
-            }
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: Skip onMovementBoundsChanged on rotation change"
+                            + " InSwipePipToHomeTransition=%b"
+                            + " mWaitForFixedRotation=%b"
+                            + " getTransitionState=%d", TAG,
+                    mPipTransitionState.getInSwipePipToHomeTransition(), mWaitForFixedRotation,
+                    mPipTransitionState.getTransitionState());
             return;
         }
         final PipAnimationController.PipTransitionAnimator animator =
@@ -1437,8 +1434,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         }
 
         if (mLeash == null || !mLeash.isValid()) {
-            Log.e(TAG, String.format("scheduleFinishResizePip with null leash! mState=%d",
-                  mPipTransitionState.getTransitionState()));
+            ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
+                    "%s: scheduleFinishResizePip with null leash! mState=%d",
+                    TAG, mPipTransitionState.getTransitionState());
             return;
         }
 
