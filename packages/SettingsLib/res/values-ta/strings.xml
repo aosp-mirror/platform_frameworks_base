@@ -346,7 +346,7 @@
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP சரிபார்ப்பு"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP சரிபார்க்கும் செயல்பாடுகளை அமை"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"பிழைதிருத்தம்"</string>
-    <string name="debug_app" msgid="8903350241392391766">"பிழைத்திருத்தப் பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
+    <string name="debug_app" msgid="8903350241392391766">"பிழைத்திருத்த ஆப்ஸைத் தேர்ந்தெடுக்கவும்"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"பிழைத்திருத்த ஆப்ஸ் அமைக்கப்படவில்லை"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"பிழைதிருத்தும் ஆப்ஸ்: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="select_application" msgid="2543228890535466325">"பயன்பாட்டைத் தேர்ந்தெடுக்கவும்"</string>
@@ -357,7 +357,7 @@
     <string name="debug_drawing_category" msgid="5066171112313666619">"வரைபொருள்"</string>
     <string name="debug_hw_drawing_category" msgid="5830815169336975162">"வன்பொருள் முடுக்கத்துடன் கூடிய காட்சியாக்கம்"</string>
     <string name="media_category" msgid="8122076702526144053">"மீடியா"</string>
-    <string name="debug_monitoring_category" msgid="1597387133765424994">"கண்காணி"</string>
+    <string name="debug_monitoring_category" msgid="1597387133765424994">"கண்காணித்தல்"</string>
     <string name="strict_mode" msgid="889864762140862437">"நிலையான பயன்முறை இயக்கப்பட்டது"</string>
     <string name="strict_mode_summary" msgid="1838248687233554654">"முக்கியத் தொடரிழையில் நீண்ட நேரம் செயல்படும்போது திரையைக் காட்சிப்படுத்தும்"</string>
     <string name="pointer_location" msgid="7516929526199520173">"குறிப்பான் இடம்"</string>

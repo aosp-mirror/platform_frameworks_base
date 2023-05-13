@@ -598,7 +598,7 @@
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_error_not_match" msgid="4599441812893438961">"আঙ্গুলের ছাপ শনাক্ত করা যায়নি"</string>
-    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"আঙুলের ছাপ শনাক্ত করা যায়নি"</string>
+    <string name="fingerprint_udfps_error_not_match" msgid="8236930793223158856">"ফিঙ্গারপ্রিন্ট শনাক্ত করা যায়নি"</string>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"আঙ্গুলের ছাপ যাচাই করা হয়েছে"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="8867889115112348167">"ফেস যাচাই করা হয়েছে"</string>
     <string name="face_authenticated_confirmation_required" msgid="6872632732508013755">"ফেস যাচাই করা হয়েছে, \'কনফার্ম করুন\' বোতাম প্রেস করুন"</string>
@@ -626,7 +626,7 @@
     <string name="face_recalibrate_notification_name" msgid="7311163114750748686">"ফেস আনলক"</string>
     <string name="face_recalibrate_notification_title" msgid="2524791952735579082">"\'ফেস আনলক\' ফিচার ব্যবহার করার ক্ষেত্রে হওয়া সমস্যা"</string>
     <string name="face_recalibrate_notification_content" msgid="3064513770251355594">"আপনার ফেস মডেল মুছে দেওয়ার জন্য ট্যাপ করুন এবং তারপরে আবার ফেস যোগ করুন"</string>
-    <string name="face_setup_notification_title" msgid="8843461561970741790">"\'ফেস আনলক\' সেট আপ করুন"</string>
+    <string name="face_setup_notification_title" msgid="8843461561970741790">"\'ফেস আনলক\' সেট-আপ করুন"</string>
     <string name="face_setup_notification_content" msgid="5463999831057751676">"আপনার ফোনের দিকে তাকিয়ে এটিকে আনলক করুন"</string>
     <string name="face_sensor_privacy_enabled" msgid="7407126963510598508">"\'ফেস আনলক\' ফিচার ব্যবহার করতে \'সেটিংস ও গোপনীয়তা\' বিকল্পে গিয়ে "<b>"ক্যামেরায় অ্যাক্সেস দিন"</b></string>
     <string name="fingerprint_setup_notification_title" msgid="2002630611398849495">"আনলক করার জন্য বিভিন্ন উপায়ে সেট আপ করুন"</string>
@@ -1358,7 +1358,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"অ্যানালগ অডিও অ্যাক্সেসরি শনাক্ত করা হয়েছে"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"সংযুক্ত ডিভাইসটি এই ফোনের সাথে ব্যবহার করা যাবে না। আরও জানতে ট্যাপ করুন।"</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB ডিবাগিং কানেক্ট হয়েছে"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"ইউএসবি ডিবাগিং বন্ধ করতে ট্যাপ করুন"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ডিবাগিং বন্ধ করতে ট্যাপ করুন"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ডিবাগিং অক্ষম করতে বেছে নিন।"</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ওয়্যারলেস ডিবাগিং কানেক্ট করা হয়েছে"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"ওয়্যারলেস ডিবাগিং বন্ধ করতে ট্যাপ করুন"</string>

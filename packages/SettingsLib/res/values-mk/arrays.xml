@@ -55,12 +55,12 @@
   </string-array>
   <string-array name="hdcp_checking_summaries">
     <item msgid="4045840870658484038">"Никогаш не користи HDCP проверка"</item>
-    <item msgid="8254225038262324761">"Користи HDCP-проверка само за DRM-содржини"</item>
+    <item msgid="8254225038262324761">"Користи проверка со HDCP само за DRM-содржини"</item>
     <item msgid="6421717003037072581">"Секогаш користи HDCP проверка"</item>
   </string-array>
   <string-array name="bt_hci_snoop_log_entries">
     <item msgid="695678520785580527">"Оневозможено"</item>
-    <item msgid="6336372935919715515">"Овозможено е филтрирано"</item>
+    <item msgid="6336372935919715515">"Овозможено филтрирање"</item>
     <item msgid="2779123106632690576">"Овозможено"</item>
   </string-array>
   <string-array name="bluetooth_avrcp_versions">
