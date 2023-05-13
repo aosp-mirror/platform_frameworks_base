@@ -30,6 +30,7 @@ abstract class KeyguardSimInputView(context: Context, attrs: AttributeSet) :
     private var disableESimButton: KeyguardEsimArea? = null
 
     override fun onFinishInflate() {
+        super.onFinishInflate()
         simImageView = findViewById(R.id.keyguard_sim)
         disableESimButton = findViewById(R.id.keyguard_esim_area)
         super.onFinishInflate()
