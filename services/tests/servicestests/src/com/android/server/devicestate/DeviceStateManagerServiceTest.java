@@ -75,6 +75,10 @@ public final class DeviceStateManagerServiceTest {
     private static final DeviceState UNSUPPORTED_DEVICE_STATE =
             new DeviceState(255, "UNSUPPORTED", 0 /* flags */);
 
+    private static final int[] SUPPORTED_DEVICE_STATE_IDENTIFIERS =
+            new int[]{DEFAULT_DEVICE_STATE.getIdentifier(), OTHER_DEVICE_STATE.getIdentifier(),
+                    DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP.getIdentifier()};
+
     private static final int FAKE_PROCESS_ID = 100;
 
     private TestDeviceStatePolicy mPolicy;
@@ -267,12 +271,24 @@ public final class DeviceStateManagerServiceTest {
     public void getDeviceStateInfo() throws RemoteException {
         DeviceStateInfo info = mService.getBinderService().getDeviceStateInfo();
         assertNotNull(info);
-        assertArrayEquals(info.supportedStates,
-                new int[] { DEFAULT_DEVICE_STATE.getIdentifier(),
-                        OTHER_DEVICE_STATE.getIdentifier(),
-                        DEVICE_STATE_CANCEL_WHEN_REQUESTER_NOT_ON_TOP.getIdentifier()});
+        assertArrayEquals(info.supportedStates, SUPPORTED_DEVICE_STATE_IDENTIFIERS);
         assertEquals(info.baseState, DEFAULT_DEVICE_STATE.getIdentifier());
         assertEquals(info.currentState, DEFAULT_DEVICE_STATE.getIdentifier());
+    }
+
+    @Test
+    public void getDeviceStateInfo_baseStateAndCommittedStateNotSet() throws RemoteException {
+        // Create a provider and a service without an initial base state.
+        mProvider = new TestDeviceStateProvider(null /* initialState */);
+        mPolicy = new TestDeviceStatePolicy(mProvider);
+        setupDeviceStateManagerService();
+        flushHandler(); // Flush the handler to ensure the initial values are committed.
+
+        DeviceStateInfo info = mService.getBinderService().getDeviceStateInfo();
+
+        assertArrayEquals(info.supportedStates, SUPPORTED_DEVICE_STATE_IDENTIFIERS);
+        assertEquals(info.baseState, INVALID_DEVICE_STATE);
+        assertEquals(info.currentState, INVALID_DEVICE_STATE);
     }
 
     @FlakyTest(bugId = 223153452)
