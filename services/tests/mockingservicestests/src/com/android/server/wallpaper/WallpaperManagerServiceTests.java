@@ -292,7 +292,8 @@ public class WallpaperManagerServiceTests {
         verifyLastWallpaperData(testUserId, sDefaultWallpaperComponent);
         verifyCurrentSystemData(testUserId);
 
-        mService.setWallpaperComponent(sImageWallpaperComponentName, FLAG_SYSTEM, testUserId);
+        mService.setWallpaperComponent(sImageWallpaperComponentName, sContext.getOpPackageName(),
+                FLAG_SYSTEM, testUserId);
         verifyLastWallpaperData(testUserId, sImageWallpaperComponentName);
         verifyCurrentSystemData(testUserId);
 
@@ -321,7 +322,8 @@ public class WallpaperManagerServiceTests {
 
         WallpaperManagerService.DisplayConnector connector =
                 mService.mLastWallpaper.connection.getDisplayConnectorOrCreate(DEFAULT_DISPLAY);
-        mService.setWallpaperComponent(sDefaultWallpaperComponent, FLAG_SYSTEM, testUserId);
+        mService.setWallpaperComponent(sDefaultWallpaperComponent, sContext.getOpPackageName(),
+                FLAG_SYSTEM, testUserId);
 
         verify(connector.mEngine).dispatchWallpaperCommand(
                 eq(COMMAND_REAPPLY), anyInt(), anyInt(), anyInt(), any());
@@ -465,7 +467,8 @@ public class WallpaperManagerServiceTests {
     public void testGetAdjustedWallpaperColorsOnDimming() throws RemoteException {
         final int testUserId = USER_SYSTEM;
         mService.switchUser(testUserId, null);
-        mService.setWallpaperComponent(sDefaultWallpaperComponent, FLAG_SYSTEM, testUserId);
+        mService.setWallpaperComponent(sDefaultWallpaperComponent, sContext.getOpPackageName(),
+                FLAG_SYSTEM, testUserId);
         WallpaperData wallpaper = mService.getCurrentWallpaperData(FLAG_SYSTEM, testUserId);
 
         // Mock a wallpaper data with color hints that support dark text and dark theme
