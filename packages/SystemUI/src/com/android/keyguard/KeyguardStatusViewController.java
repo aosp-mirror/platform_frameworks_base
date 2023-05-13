@@ -180,8 +180,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      */
     public void setAlpha(float alpha) {
         if (!mKeyguardVisibilityHelper.isVisibilityAnimating()) {
-            mView.setAlpha(alpha, true);
-            mKeyguardClockSwitchController.setAlpha(alpha);
+            mView.setAlpha(alpha);
         }
     }
 
