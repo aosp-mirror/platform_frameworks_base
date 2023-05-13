@@ -946,10 +946,15 @@ public class PipController implements PipTransitionController.PipTransitionCallb
                     mPipBoundsState.getDisplayBounds().right,
                     mPipBoundsState.getDisplayBounds().bottom);
             mPipBoundsState.addNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG, rect);
+            updatePipPositionForKeepClearAreas();
         } else {
             mPipBoundsState.removeNamedUnrestrictedKeepClearArea(LAUNCHER_KEEP_CLEAR_AREA_TAG);
+            // postpone moving in response to hide of Launcher in case there's another change
+            mMainExecutor.removeCallbacks(mMovePipInResponseToKeepClearAreasChangeCallback);
+            mMainExecutor.executeDelayed(
+                    mMovePipInResponseToKeepClearAreasChangeCallback,
+                    PIP_KEEP_CLEAR_AREAS_DELAY);
         }
-        updatePipPositionForKeepClearAreas();
     }
 
     private void setLauncherAppIconSize(int iconSizePx) {
