@@ -26,6 +26,8 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.util.concurrency.DelayableExecutor
 import org.junit.Before
 import org.junit.Test
@@ -76,6 +78,8 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
     Mockito.`when`(keyguardPasswordView.findViewById<EditText>(R.id.passwordEntry))
         .thenReturn(passwordEntry)
     `when`(keyguardPasswordView.resources).thenReturn(context.resources)
+    val fakeFeatureFlags = FakeFeatureFlags()
+    fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
     keyguardPasswordViewController =
         KeyguardPasswordViewController(
             keyguardPasswordView,
@@ -90,7 +94,8 @@ class KeyguardPasswordViewControllerTest : SysuiTestCase() {
             mainExecutor,
             mContext.resources,
             falsingCollector,
-            keyguardViewController)
+            keyguardViewController,
+            fakeFeatureFlags)
   }
 
   @Test
