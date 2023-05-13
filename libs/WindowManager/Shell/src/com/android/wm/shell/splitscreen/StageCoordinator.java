@@ -2175,6 +2175,14 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             return;
         }
         mDisplayLayout.set(mDisplayController.getDisplayLayout(displayId));
+
+        if (mSplitLayout != null && mSplitLayout.isDensityChanged(newConfig.densityDpi)
+                && mMainStage.isActive()
+                && mSplitLayout.updateConfiguration(newConfig)
+                && ENABLE_SHELL_TRANSITIONS) {
+            mSplitLayout.update(null /* t */);
+            onLayoutSizeChanged(mSplitLayout);
+        }
     }
 
     void updateSurfaces(SurfaceControl.Transaction transaction) {

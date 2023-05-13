@@ -21,17 +21,23 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.annotation.CallSuper;
 import androidx.annotation.Nullable;
 
 import com.android.internal.jank.InteractionJankMonitor;
+import com.android.systemui.R;
 
 /**
  * A Base class for all Keyguard password/pattern/pin related inputs.
  */
 public abstract class KeyguardInputView extends LinearLayout {
     private Runnable mOnFinishImeAnimationRunnable;
+
+    @Nullable
+    private View mBouncerMessageView;
 
     public KeyguardInputView(Context context) {
         super(context);
@@ -85,6 +91,18 @@ public abstract class KeyguardInputView extends LinearLayout {
 
     public void setOnFinishImeAnimationRunnable(Runnable onFinishImeAnimationRunnable) {
         mOnFinishImeAnimationRunnable = onFinishImeAnimationRunnable;
+    }
+
+    @Override
+    @CallSuper
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+        mBouncerMessageView = findViewById(R.id.bouncer_message_view);
+    }
+
+    @Nullable
+    public final View getBouncerMessageView() {
+        return mBouncerMessageView;
     }
 
     public void runOnFinishImeAnimationRunnable() {

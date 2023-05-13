@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 package com.android.server.pm;
+
 import static android.Manifest.permission.CONFIGURE_INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
@@ -333,9 +334,10 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
     }
 
     private boolean isCrossProfilePackageAllowlisted(String packageName) {
+        int userId = mInjector.getCallingUserId();
         return mInjector.withCleanCallingIdentity(() ->
                 mInjector.getDevicePolicyManagerInternal()
-                        .getAllCrossProfilePackages().contains(packageName));
+                        .getAllCrossProfilePackages(userId).contains(packageName));
     }
 
     private boolean isCrossProfilePackageAllowlistedByDefault(String packageName) {

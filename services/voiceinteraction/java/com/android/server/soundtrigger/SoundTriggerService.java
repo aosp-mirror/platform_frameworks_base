@@ -366,10 +366,10 @@ public class SoundTriggerService extends SystemService {
             try {
                 int uid = mPackageManager.getPackageUid(mOriginatorIdentity.packageName,
                         PackageManager.PackageInfoFlags.of(0));
-                if (uid != mOriginatorIdentity.uid) {
-                    throw new SecurityException("Package name: " +
-                            mOriginatorIdentity.packageName + "with uid: " + uid
-                            + "attempted to spoof as: " + mOriginatorIdentity.uid);
+                if (!UserHandle.isSameApp(uid, mOriginatorIdentity.uid)) {
+                    throw new SecurityException("Uid " + mOriginatorIdentity.uid +
+                            " attempted to spoof package name " +
+                            mOriginatorIdentity.packageName + " with uid: " + uid);
                 }
             } catch (PackageManager.NameNotFoundException e) {
                 throw new SecurityException("Package name not found: "

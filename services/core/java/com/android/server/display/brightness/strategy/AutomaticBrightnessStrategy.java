@@ -202,7 +202,7 @@ public class AutomaticBrightnessStrategy {
         final float adj = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f, UserHandle.USER_CURRENT);
         mPendingAutoBrightnessAdjustment = Float.isNaN(adj) ? Float.NaN
-                : BrightnessUtils.clampAbsoluteBrightness(adj);
+                : BrightnessUtils.clampBrightnessAdjustment(adj);
         if (userSwitch) {
             processPendingAutoBrightnessAdjustments();
         }
@@ -402,6 +402,6 @@ public class AutomaticBrightnessStrategy {
     private float getAutoBrightnessAdjustmentSetting() {
         final float adj = Settings.System.getFloatForUser(mContext.getContentResolver(),
                 Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, 0.0f, UserHandle.USER_CURRENT);
-        return Float.isNaN(adj) ? 0.0f : BrightnessUtils.clampAbsoluteBrightness(adj);
+        return Float.isNaN(adj) ? 0.0f : BrightnessUtils.clampBrightnessAdjustment(adj);
     }
 }
