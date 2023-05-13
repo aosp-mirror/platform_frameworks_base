@@ -3511,6 +3511,51 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     @Test
+    public void testLetterboxAlignedToBottom_NotOverlappingNavbar() {
+        assertLandscapeActivityAlignedToBottomWithNavbar(false /* immersive */);
+    }
+
+    @Test
+    public void testImmersiveLetterboxAlignedToBottom_OverlappingNavbar() {
+        assertLandscapeActivityAlignedToBottomWithNavbar(true /* immersive */);
+    }
+
+    private void assertLandscapeActivityAlignedToBottomWithNavbar(boolean immersive) {
+        final int screenHeight = 2800;
+        final int screenWidth = 1400;
+        final int taskbarHeight = 200;
+        setUpDisplaySizeWithApp(screenWidth, screenHeight);
+
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true);
+        mActivity.mWmService.mLetterboxConfiguration.setLetterboxVerticalPositionMultiplier(1.0f);
+
+        final InsetsSource navSource = new InsetsSource(
+                InsetsSource.createId(null, 0, navigationBars()), navigationBars());
+        navSource.setInsetsRoundedCornerFrame(true);
+        // Immersive activity has transient navbar
+        navSource.setVisible(!immersive);
+        navSource.setFrame(new Rect(0, screenHeight - taskbarHeight, screenWidth, screenHeight));
+        mActivity.mWmService.mLetterboxConfiguration.setLetterboxActivityCornersRadius(15);
+
+        final WindowState w1 = addWindowToActivity(mActivity);
+        w1.mAboveInsetsState.addSource(navSource);
+
+        // Prepare unresizable landscape activity
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+        final DisplayPolicy displayPolicy = mActivity.mDisplayContent.getDisplayPolicy();
+        doReturn(immersive).when(displayPolicy).isImmersiveMode();
+
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        LetterboxDetails letterboxDetails = mActivity.mLetterboxUiController.getLetterboxDetails();
+
+        // Letterboxed activity at bottom
+        assertEquals(new Rect(0, 2100, 1400, 2800), mActivity.getBounds());
+        final int expectedHeight = immersive ? screenHeight : screenHeight - taskbarHeight;
+        assertEquals(expectedHeight, letterboxDetails.getLetterboxInnerBounds().bottom);
+    }
+
+    @Test
     public void testSplitScreenLetterboxDetailsForStatusBar_twoLetterboxedApps() {
         mAtm.mDevEnableNonResizableMultiWindow = true;
         setUpDisplaySizeWithApp(2800, 1000);
@@ -3938,7 +3983,7 @@ public class SizeCompatTests extends WindowTestsBase {
         mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
         mWm.mLetterboxConfiguration.setIsAutomaticReachabilityInBookModeEnabled(true);
         mWm.mLetterboxConfiguration.setLetterboxHorizontalPositionMultiplier(
-                1.0f /*letterboxVerticalPositionMultiplier*/);
+                1.0f /*letterboxHorizontalPositionMultiplier*/);
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
         Rect letterboxNoFold = new Rect(2100, 0, 2800, 1400);

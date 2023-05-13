@@ -25,6 +25,7 @@ import android.content.IntentFilter
 import android.graphics.Rect
 import android.hardware.display.DisplayManager
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.view.LayoutInflater
 import android.view.SurfaceControlViewHost
@@ -41,6 +42,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardBottomAreaViewModel
 import com.android.systemui.shared.clocks.ClockRegistry
+import com.android.systemui.shared.clocks.DefaultClockController
 import com.android.systemui.shared.clocks.shared.model.ClockPreviewConstants
 import com.android.systemui.shared.quickaffordance.shared.model.KeyguardPreviewConstants
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
@@ -57,6 +59,7 @@ class KeyguardPreviewRenderer
 constructor(
     @Application private val context: Context,
     @Main private val mainDispatcher: CoroutineDispatcher,
+    @Main private val mainHandler: Handler,
     private val bottomAreaViewModel: KeyguardBottomAreaViewModel,
     displayManager: DisplayManager,
     private val windowManager: WindowManager,
@@ -112,7 +115,7 @@ constructor(
     }
 
     fun render() {
-        runBlocking(mainDispatcher) {
+        mainHandler.post {
             val rootView = FrameLayout(context)
 
             setUpBottomArea(rootView)
@@ -168,14 +171,12 @@ constructor(
      * @param hide TRUE hides smartspace, FALSE shows smartspace
      */
     fun hideSmartspace(hide: Boolean) {
-        runBlocking(mainDispatcher) {
-            smartSpaceView?.visibility = if (hide) View.INVISIBLE else View.VISIBLE
-        }
+        mainHandler.post { smartSpaceView?.visibility = if (hide) View.INVISIBLE else View.VISIBLE }
     }
 
     /** Sets the clock's color to the overridden seed color. */
     fun onColorOverridden(@ColorInt color: Int?) {
-        runBlocking(mainDispatcher) {
+        mainHandler.post {
             colorOverride = color
             clockController.clock?.run { events.onSeedColorChanged(color) }
         }
@@ -312,6 +313,36 @@ constructor(
             },
         )
         disposables.add(DisposableHandle { broadcastDispatcher.unregisterReceiver(receiver) })
+
+        val layoutChangeListener =
+            object : View.OnLayoutChangeListener {
+                override fun onLayoutChange(
+                    v: View,
+                    left: Int,
+                    top: Int,
+                    right: Int,
+                    bottom: Int,
+                    oldLeft: Int,
+                    oldTop: Int,
+                    oldRight: Int,
+                    oldBottom: Int
+                ) {
+                    if (clockController.clock !is DefaultClockController) {
+                        clockController.clock
+                            ?.largeClock
+                            ?.events
+                            ?.onTargetRegionChanged(
+                                KeyguardClockSwitch.getLargeClockRegion(parentView)
+                            )
+                    }
+                }
+            }
+
+        parentView.addOnLayoutChangeListener(layoutChangeListener)
+
+        disposables.add(
+            DisposableHandle { parentView.removeOnLayoutChangeListener(layoutChangeListener) }
+        )
 
         onClockChanged(parentView)
     }

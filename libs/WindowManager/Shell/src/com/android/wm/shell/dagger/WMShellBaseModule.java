@@ -77,6 +77,8 @@ import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
+import com.android.wm.shell.keyguard.KeyguardTransitions;
 import com.android.wm.shell.recents.RecentTasks;
 import com.android.wm.shell.recents.RecentTasksController;
 import com.android.wm.shell.recents.RecentsTransitionHandler;
@@ -559,6 +561,28 @@ public abstract class WMShellBaseModule {
     @Provides
     static TaskViewTransitions provideTaskViewTransitions(Transitions transitions) {
         return new TaskViewTransitions(transitions);
+    }
+
+    //
+    // Keyguard transitions (optional feature)
+    //
+
+    @WMSingleton
+    @Provides
+    static KeyguardTransitionHandler provideKeyguardTransitionHandler(
+            ShellInit shellInit,
+            Transitions transitions,
+            @ShellMainThread Handler mainHandler,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new KeyguardTransitionHandler(
+                    shellInit, transitions, mainHandler, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static KeyguardTransitions provideKeyguardTransitions(
+            KeyguardTransitionHandler handler) {
+        return handler.asKeyguardTransitions();
     }
 
     //

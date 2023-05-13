@@ -27,3 +27,9 @@ class FakeStatusEvent(
     override val showAnimation: Boolean = true,
     override var contentDescription: String? = "",
 ) : StatusEvent
+
+class FakePrivacyStatusEvent(
+    override val viewCreator: ViewCreator,
+    override val showAnimation: Boolean = true,
+    override var contentDescription: String? = "",
+) : PrivacyEvent()

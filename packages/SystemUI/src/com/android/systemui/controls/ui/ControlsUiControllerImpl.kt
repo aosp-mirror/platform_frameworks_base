@@ -328,6 +328,13 @@ class ControlsUiControllerImpl @Inject constructor (
 
     @VisibleForTesting
     internal fun startRemovingApp(componentName: ComponentName, appName: CharSequence) {
+        activityStarter.dismissKeyguardThenExecute({
+            showAppRemovalDialog(componentName, appName)
+            true
+        }, null, true)
+    }
+
+    private fun showAppRemovalDialog(componentName: ComponentName, appName: CharSequence) {
         removeAppDialog?.cancel()
         removeAppDialog = dialogsFactory.createRemoveAppDialog(context, appName) { shouldRemove ->
             if (!shouldRemove || !controlsController.get().removeFavorites(componentName)) {

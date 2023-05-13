@@ -1100,7 +1100,8 @@ public class AudioDeviceInventory {
         synchronized (rolesMap) {
             Pair<Integer, Integer> key = new Pair<>(useCase, role);
             if (!rolesMap.containsKey(key)) {
-                return AudioSystem.SUCCESS;
+                // trying to clear a role for a device that wasn't set
+                return AudioSystem.BAD_VALUE;
             }
             final int status = asi.deviceRoleAction(useCase, role, null);
             if (status == AudioSystem.SUCCESS) {

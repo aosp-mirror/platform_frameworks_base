@@ -20,6 +20,7 @@
 
 #include "tvinput/JTvInputHal.h"
 
+gBundleClassInfoType gBundleClassInfo;
 gTvInputHalClassInfoType gTvInputHalClassInfo;
 gTvStreamConfigClassInfoType gTvStreamConfigClassInfo;
 gTvStreamConfigBuilderClassInfoType gTvStreamConfigBuilderClassInfo;
@@ -133,9 +134,21 @@ int register_android_server_tv_TvInputHal(JNIEnv* env) {
     GET_METHOD_ID(
             gTvInputHalClassInfo.firstFrameCaptured, clazz,
             "firstFrameCapturedFromNative", "(II)V");
+    GET_METHOD_ID(gTvInputHalClassInfo.tvMessageReceived, clazz, "tvMessageReceivedFromNative",
+                  "(IILandroid/os/Bundle;)V");
 
     FIND_CLASS(gTvStreamConfigClassInfo.clazz, "android/media/tv/TvStreamConfig");
     gTvStreamConfigClassInfo.clazz = jclass(env->NewGlobalRef(gTvStreamConfigClassInfo.clazz));
+
+    FIND_CLASS(gBundleClassInfo.clazz, "android/os/Bundle");
+    gBundleClassInfo.clazz = jclass(env->NewGlobalRef(gBundleClassInfo.clazz));
+    GET_METHOD_ID(gBundleClassInfo.constructor, gBundleClassInfo.clazz, "<init>", "()V");
+    GET_METHOD_ID(gBundleClassInfo.putByteArray, gBundleClassInfo.clazz, "putByteArray",
+                  "(Ljava/lang/String;[B)V");
+    GET_METHOD_ID(gBundleClassInfo.putString, gBundleClassInfo.clazz, "putString",
+                  "(Ljava/lang/String;Ljava/lang/String;)V");
+    GET_METHOD_ID(gBundleClassInfo.putInt, gBundleClassInfo.clazz, "putInt",
+                  "(Ljava/lang/String;I)V");
 
     FIND_CLASS(gTvStreamConfigBuilderClassInfo.clazz, "android/media/tv/TvStreamConfig$Builder");
     gTvStreamConfigBuilderClassInfo.clazz =

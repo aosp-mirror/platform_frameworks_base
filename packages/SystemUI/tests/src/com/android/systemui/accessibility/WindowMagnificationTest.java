@@ -184,8 +184,7 @@ public class WindowMagnificationTest extends SysuiTestCase {
         mWindowMagnification.mWindowMagnifierCallback.onClickSettingsButton(TEST_DISPLAY);
         waitForIdleSync();
 
-        verify(mMagnificationSettingsController).showMagnificationSettings(
-                eq(ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW));
+        verify(mMagnificationSettingsController).showMagnificationSettings();
     }
 
     @Test

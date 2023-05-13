@@ -133,6 +133,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
     public void onFinalResponseReceived(ComponentName componentName,
             @Nullable GetCredentialResponse response) {
         Slog.i(TAG, "onFinalResponseReceived from: " + componentName.flattenToString());
+        mRequestSessionMetric.collectUiResponseData(/*uiReturned=*/ true, System.nanoTime());
         mRequestSessionMetric.updateMetricsOnResponseReceived(mProviders, componentName,
                 isPrimaryProviderViaProviderInfo(componentName));
         if (response != null) {
@@ -158,7 +159,7 @@ public class GetRequestSession extends RequestSession<GetCredentialRequest,
 
     @Override
     public void onUiCancellation(boolean isUserCancellation) {
-        String exception = GetCredentialException.TYPE_NO_CREDENTIAL;
+        String exception = GetCredentialException.TYPE_USER_CANCELED;
         String message = "User cancelled the selector";
         if (!isUserCancellation) {
             exception = GetCredentialException.TYPE_INTERRUPTED;

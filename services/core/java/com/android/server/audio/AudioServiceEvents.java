@@ -609,7 +609,7 @@ public class AudioServiceEvents {
                     (mStreamType <= AudioSystem.getNumStreamTypes() && mStreamType >= 0)
                             ? AudioSystem.STREAM_NAMES[mStreamType]
                             : ("stream " + mStreamType);
-            return new StringBuilder("Error trying to unmute ")
+            return new StringBuilder("Invalid call to unmute ")
                     .append(streamName)
                     .append(" despite muted streams 0x")
                     .append(Integer.toHexString(mRingerZenMutedStreams))

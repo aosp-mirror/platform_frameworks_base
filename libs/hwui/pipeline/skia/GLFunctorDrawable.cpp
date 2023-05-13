@@ -27,6 +27,7 @@
 #include "include/gpu/GpuTypes.h" // from Skia
 #include "utils/GLUtils.h"
 #include <effects/GainmapRenderer.h>
+#include "renderthread/CanvasContext.h"
 
 namespace android {
 namespace uirenderer {
@@ -131,6 +132,8 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
     mat4.getColMajor(&info.transform[0]);
     info.color_space_ptr = canvas->imageInfo().colorSpace();
     info.currentHdrSdrRatio = getTargetHdrSdrRatio(info.color_space_ptr);
+    info.fboColorType = canvas->imageInfo().colorType();
+    info.shouldDither = renderthread::CanvasContext::shouldDither();
 
     // ensure that the framebuffer that the webview will render into is bound before we clear
     // the stencil and/or draw the functor.

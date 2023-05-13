@@ -9862,6 +9862,9 @@ public class DevicePolicyManager {
      *                                  profile owner of an organization-owned managed profile.
      * @throws IllegalArgumentException if called on the parent profile and the package
      *                                  provided is not a pre-installed system package.
+     * @throws IllegalStateException while trying to set default sms app on the profile and
+     *                             {@link ManagedSubscriptionsPolicy#TYPE_ALL_MANAGED_SUBSCRIPTIONS}
+     *                             policy is not set.
      */
     @RequiresPermission(value = MANAGE_DEVICE_POLICY_DEFAULT_SMS, conditional = true)
     public void setDefaultSmsApplication(@Nullable ComponentName admin,

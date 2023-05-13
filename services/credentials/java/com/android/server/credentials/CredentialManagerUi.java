@@ -33,7 +33,6 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ResultReceiver;
 import android.service.credentials.CredentialProviderInfoFactory;
-import android.util.Log;
 import android.util.Slog;
 
 import java.util.ArrayList;
@@ -72,7 +71,6 @@ public class CredentialManagerUi {
     };
 
     private void handleUiResult(int resultCode, Bundle resultData) {
-        Log.i("reemademo", "handleUiResult with resultCOde: " + resultCode);
 
         switch (resultCode) {
             case UserSelectionDialogResult.RESULT_CODE_DIALOG_COMPLETE_WITH_SELECTION:
@@ -86,13 +84,11 @@ public class CredentialManagerUi {
                 }
                 break;
             case UserSelectionDialogResult.RESULT_CODE_DIALOG_USER_CANCELED:
-                Log.i("reemademo", "RESULT_CODE_DIALOG_USER_CANCELED");
 
                 mStatus = UiStatus.TERMINATED;
                 mCallbacks.onUiCancellation(/* isUserCancellation= */ true);
                 break;
             case UserSelectionDialogResult.RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS:
-                Log.i("reemademo", "RESULT_CODE_CANCELED_AND_LAUNCHED_SETTINGS");
 
                 mStatus = UiStatus.TERMINATED;
                 mCallbacks.onUiCancellation(/* isUserCancellation= */ false);
@@ -102,7 +98,6 @@ public class CredentialManagerUi {
                 mCallbacks.onUiSelectorInvocationFailure();
                 break;
             default:
-                Log.i("reemademo", "Unknown error code returned from the UI");
                 mStatus = UiStatus.IN_PROGRESS;
                 mCallbacks.onUiSelectorInvocationFailure();
                 break;

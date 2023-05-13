@@ -27,6 +27,7 @@ import static android.content.pm.UserProperties.INHERIT_DEVICE_POLICY_FROM_PAREN
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.AppGlobals;
 import android.app.BroadcastOptions;
 import android.app.admin.DevicePolicyIdentifiers;
 import android.app.admin.DevicePolicyManager;
@@ -45,6 +46,7 @@ import android.content.pm.UserProperties;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.telephony.TelephonyManager;
@@ -1015,20 +1017,44 @@ final class DevicePolicyEngine {
     /**
      * Handles internal state related to packages getting updated.
      */
-    void handlePackageChanged(@Nullable String updatedPackage, int userId, boolean packageRemoved) {
-        if (updatedPackage == null) {
-            return;
-        }
-        if (packageRemoved) {
+    void handlePackageChanged(
+            @Nullable String updatedPackage, int userId, @Nullable String removedDpcPackage) {
+        Binder.withCleanCallingIdentity(() -> {
             Set<EnforcingAdmin> admins = getEnforcingAdminsOnUser(userId);
-            for (EnforcingAdmin admin : admins) {
-                if (admin.getPackageName().equals(updatedPackage)) {
-                    // remove policies for the uninstalled package
-                    removePoliciesForAdmin(admin);
+            if (removedDpcPackage != null) {
+                for (EnforcingAdmin admin : admins) {
+                    if (removedDpcPackage.equals(admin.getPackageName())) {
+                        removePoliciesForAdmin(admin);
+                        return;
+                    }
                 }
             }
-        } else {
-            updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+            for (EnforcingAdmin admin : admins) {
+                if (updatedPackage == null || updatedPackage.equals(admin.getPackageName())) {
+                    if (!isPackageInstalled(admin.getPackageName(), userId)) {
+                        Slogf.i(TAG, String.format(
+                                "Admin package %s not found for user %d, removing admin policies",
+                                admin.getPackageName(), userId));
+                        // remove policies for the uninstalled package
+                        removePoliciesForAdmin(admin);
+                        return;
+                    }
+                }
+            }
+            if (updatedPackage != null) {
+                updateDeviceAdminServiceOnPackageChanged(updatedPackage, userId);
+            }
+        });
+    }
+
+    private boolean isPackageInstalled(String packageName, int userId) {
+        try {
+            return AppGlobals.getPackageManager().getPackageInfo(
+                    packageName, 0, userId) != null;
+        } catch (RemoteException re) {
+            // Shouldn't happen.
+            Slogf.wtf(TAG, "Error handling package changes", re);
+            return true;
         }
     }
 

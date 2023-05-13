@@ -3718,6 +3718,10 @@
          magnification settings and adjust the default magnification capability.  -->
     <bool name="config_magnification_area">true</bool>
 
+    <!-- The default value for always on magnification feature flag if the remote feature
+         flag does not exist -->
+    <bool name="config_magnification_always_on_enabled">true</bool>
+
     <!-- If true, the display will be shifted around in ambient mode. -->
     <bool name="config_enableBurnInProtection">false</bool>
 
@@ -5177,10 +5181,11 @@
         <item>0,0,1.0,0,1</item>
         <item>1,1,1.0,0,1</item>
         <item>1,1,1.0,.4,1</item>
+        <item>1,1,1.0,.15,15</item>
     </string-array>
 
     <!-- The integer index of the selected option in config_udfps_touch_detection_options -->
-    <integer name="config_selected_udfps_touch_detection">2</integer>
+    <integer name="config_selected_udfps_touch_detection">3</integer>
 
     <!-- An array of arrays of side fingerprint sensor properties relative to each display.
          Note: this value is temporary and is expected to be queried directly
