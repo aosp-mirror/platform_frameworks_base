@@ -25,7 +25,6 @@ import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback
 import android.os.UserHandle
 import android.util.Log
 import com.android.internal.widget.LockPatternUtils
-import com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN
 import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.biometrics.AuthController
@@ -36,13 +35,14 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.keyguard.TAG
+import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.user.data.repository.UserRepository
 import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -108,10 +108,14 @@ interface BiometricSettingsRepository {
      * lockdown.
      */
     val isCurrentUserInLockdown: Flow<Boolean>
+
+    /** Authentication flags set for the current user. */
+    val authenticationFlags: Flow<AuthenticationFlags>
 }
 
-const val TAG = "BiometricsRepositoryImpl"
+private const val TAG = "BiometricsRepositoryImpl"
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
 class BiometricSettingsRepositoryImpl
 @Inject
@@ -129,12 +133,17 @@ constructor(
     dumpManager: DumpManager,
 ) : BiometricSettingsRepository, Dumpable {
 
+    private val biometricsEnabledForUser = mutableMapOf<Int, Boolean>()
+
     override val isFaceAuthSupportedInCurrentPosture: Flow<Boolean>
 
     private val strongAuthTracker = StrongAuthTracker(userRepository, context)
 
     override val isCurrentUserInLockdown: Flow<Boolean> =
         strongAuthTracker.currentUserAuthFlags.map { it.isInUserLockdown }
+
+    override val authenticationFlags: Flow<AuthenticationFlags> =
+        strongAuthTracker.currentUserAuthFlags
 
     init {
         Log.d(TAG, "Registering StrongAuthTracker")
@@ -231,9 +240,14 @@ constructor(
             }
         }
 
+    private val isFaceEnabledByBiometricsManagerForCurrentUser: Flow<Boolean> =
+        userRepository.selectedUserInfo.flatMapLatest { userInfo ->
+            isFaceEnabledByBiometricsManager.map { biometricsEnabledForUser[userInfo.id] ?: false }
+        }
+
     override val isFaceAuthenticationEnabled: Flow<Boolean>
         get() =
-            combine(isFaceEnabledByBiometricsManager, isFaceEnabledByDevicePolicy) {
+            combine(isFaceEnabledByBiometricsManagerForCurrentUser, isFaceEnabledByDevicePolicy) {
                 biometricsManagerSetting,
                 devicePolicySetting ->
                 biometricsManagerSetting && devicePolicySetting
@@ -249,13 +263,13 @@ constructor(
             .flowOn(backgroundDispatcher)
             .distinctUntilChanged()
 
-    private val isFaceEnabledByBiometricsManager =
+    private val isFaceEnabledByBiometricsManager: Flow<Pair<Int, Boolean>> =
         conflatedCallbackFlow {
                 val callback =
                     object : IBiometricEnabledOnKeyguardCallback.Stub() {
                         override fun onChanged(enabled: Boolean, userId: Int) {
                             trySendWithFailureLogging(
-                                enabled,
+                                Pair(userId, enabled),
                                 TAG,
                                 "biometricsEnabled state changed"
                             )
@@ -264,9 +278,10 @@ constructor(
                 biometricManager?.registerEnabledOnKeyguardCallback(callback)
                 awaitClose {}
             }
+            .onEach { biometricsEnabledForUser[it.first] = it.second }
             // This is because the callback is binder-based and we want to avoid multiple callbacks
             // being registered.
-            .stateIn(scope, SharingStarted.Eagerly, false)
+            .stateIn(scope, SharingStarted.Eagerly, Pair(0, false))
 
     override val isStrongBiometricAllowed: StateFlow<Boolean> =
         strongAuthTracker.isStrongBiometricAllowed.stateIn(
@@ -306,14 +321,13 @@ constructor(
             )
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 private class StrongAuthTracker(private val userRepository: UserRepository, context: Context?) :
     LockPatternUtils.StrongAuthTracker(context) {
 
     // Backing field for onStrongAuthRequiredChanged
-    private val _strongAuthFlags =
-        MutableStateFlow(
-            StrongAuthenticationFlags(currentUserId, getStrongAuthForUser(currentUserId))
-        )
+    private val _authFlags =
+        MutableStateFlow(AuthenticationFlags(currentUserId, getStrongAuthForUser(currentUserId)))
 
     // Backing field for onIsNonStrongBiometricAllowedChanged
     private val _nonStrongBiometricAllowed =
@@ -321,17 +335,15 @@ private class StrongAuthTracker(private val userRepository: UserRepository, cont
             Pair(currentUserId, isNonStrongBiometricAllowedAfterIdleTimeout(currentUserId))
         )
 
-    val currentUserAuthFlags: Flow<StrongAuthenticationFlags> =
+    val currentUserAuthFlags: Flow<AuthenticationFlags> =
         userRepository.selectedUserInfo
             .map { it.id }
             .distinctUntilChanged()
             .flatMapLatest { userId ->
-                _strongAuthFlags
-                    .filter { it.userId == userId }
+                _authFlags
+                    .map { AuthenticationFlags(userId, getStrongAuthForUser(userId)) }
                     .onEach { Log.d(TAG, "currentUser authFlags changed, new value: $it") }
-                    .onStart {
-                        emit(StrongAuthenticationFlags(userId, getStrongAuthForUser(userId)))
-                    }
+                    .onStart { emit(AuthenticationFlags(userId, getStrongAuthForUser(userId))) }
             }
 
     /** isStrongBiometricAllowed for the current user. */
@@ -356,7 +368,7 @@ private class StrongAuthTracker(private val userRepository: UserRepository, cont
 
     override fun onStrongAuthRequiredChanged(userId: Int) {
         val newFlags = getStrongAuthForUser(userId)
-        _strongAuthFlags.value = StrongAuthenticationFlags(userId, newFlags)
+        _authFlags.value = AuthenticationFlags(userId, newFlags)
         Log.d(TAG, "onStrongAuthRequiredChanged for userId: $userId, flag value: $newFlags")
     }
 
@@ -375,11 +387,3 @@ private fun DevicePolicyManager.isFingerprintDisabled(userId: Int): Boolean =
 
 private fun DevicePolicyManager.isNotActive(userId: Int, policy: Int): Boolean =
     (getKeyguardDisabledFeatures(null, userId) and policy) == 0
-
-private data class StrongAuthenticationFlags(val userId: Int, val flag: Int) {
-    val isInUserLockdown = containsFlag(flag, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN)
-}
-
-private fun containsFlag(haystack: Int, needle: Int): Boolean {
-    return haystack and needle != 0
-}

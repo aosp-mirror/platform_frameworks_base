@@ -133,6 +133,14 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
         mView.setIsVisible(isVisible);
     }
 
+    /**
+     * Mark this view with {@link View#GONE} visibility to remove this from the layout of the view.
+     * Any calls to {@link #setIsVisible(boolean)} after this will be a no-op.
+     */
+    public void disable() {
+        mView.disable();
+    }
+
     public void setMessage(CharSequence s) {
         setMessage(s, true);
     }
@@ -141,6 +149,9 @@ public class KeyguardMessageAreaController<T extends KeyguardMessageArea>
      * Sets a message to the underlying text view.
      */
     public void setMessage(CharSequence s, boolean animate) {
+        if (mView.isDisabled()) {
+            return;
+        }
         mView.setMessage(s, animate);
     }
 

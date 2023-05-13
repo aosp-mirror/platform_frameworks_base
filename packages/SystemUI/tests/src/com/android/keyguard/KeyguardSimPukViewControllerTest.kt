@@ -27,6 +27,8 @@ import com.android.internal.widget.LockPatternUtils
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingCollector
+import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.Flags
 import com.android.systemui.util.mockito.any
 import org.junit.Before
 import org.junit.Test
@@ -70,6 +72,9 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
         simPukView =
             LayoutInflater.from(context).inflate(R.layout.keyguard_sim_puk_view, null)
                 as KeyguardSimPukView
+        val fakeFeatureFlags = FakeFeatureFlags()
+        fakeFeatureFlags.set(Flags.REVAMPED_BOUNCER_MESSAGES, true)
+
         underTest =
             KeyguardSimPukViewController(
                 simPukView,
@@ -82,7 +87,8 @@ class KeyguardSimPukViewControllerTest : SysuiTestCase() {
                 liftToActivateListener,
                 telephonyManager,
                 falsingCollector,
-                emergencyButtonController
+                emergencyButtonController,
+                fakeFeatureFlags,
             )
         underTest.init()
     }
