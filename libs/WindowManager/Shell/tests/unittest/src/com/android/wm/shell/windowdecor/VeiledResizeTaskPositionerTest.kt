@@ -22,12 +22,14 @@ import android.os.IBinder
 import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.SurfaceControl
+import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
+import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_RIGHT
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_TOP
 import com.android.wm.shell.windowdecor.DragPositioningCallback.CTRL_TYPE_UNDEFINED
@@ -78,6 +80,8 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
     private lateinit var mockTransactionFactory: Supplier<SurfaceControl.Transaction>
     @Mock
     private lateinit var mockTransaction: SurfaceControl.Transaction
+    @Mock
+    private lateinit var mockTransitions: Transitions
 
     private lateinit var taskPositioner: VeiledResizeTaskPositioner
 
@@ -92,7 +96,8 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
                 mockDisplayController,
                 DISALLOWED_AREA_FOR_END_BOUNDS,
                 mockDragStartListener,
-                mockTransactionFactory
+                mockTransactionFactory,
+                mockTransitions
             )
 
         whenever(taskToken.asBinder()).thenReturn(taskBinder)
@@ -129,6 +134,12 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             STARTING_BOUNDS.left.toFloat(),
             STARTING_BOUNDS.top.toFloat()
         )
+        verify(mockTransitions, never()).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
+                        change.configuration.windowConfiguration.bounds == STARTING_BOUNDS}},
+            eq(taskPositioner))
         verify(mockDesktopWindowDecoration).hideResizeVeil()
     }
 
@@ -206,15 +217,12 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
         rectAfterEnd.right += 10
         rectAfterEnd.top += 10
         verify(mockDesktopWindowDecoration, times(2)).updateResizeVeil(any())
-        verify(mockDesktopWindowDecoration).hideResizeVeil()
-
-        verify(mockShellTaskOrganizer).applyTransaction(argThat { wct ->
+        verify(mockTransitions).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->
                 token == taskBinder &&
                         (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
-                        change.configuration.windowConfiguration.bounds == rectAfterEnd
-            }
-        })
+                        change.configuration.windowConfiguration.bounds == rectAfterEnd}},
+            eq(taskPositioner))
     }
 
     @Test
@@ -235,7 +243,13 @@ class VeiledResizeTaskPositionerTest : ShellTestCase() {
             STARTING_BOUNDS.left.toFloat() + 10,
             STARTING_BOUNDS.top.toFloat() + 10
         )
-        verify(mockDesktopWindowDecoration).hideResizeVeil()
+
+        verify(mockTransitions, never()).startTransition(eq(TRANSIT_CHANGE), argThat { wct ->
+            return@argThat wct.changes.any { (token, change) ->
+                token == taskBinder &&
+                        (change.windowSetMask and WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0 &&
+                        change.configuration.windowConfiguration.bounds == STARTING_BOUNDS}},
+            eq(taskPositioner))
 
         verify(mockShellTaskOrganizer, never()).applyTransaction(argThat { wct ->
             return@argThat wct.changes.any { (token, change) ->

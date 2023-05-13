@@ -44,7 +44,7 @@ import java.util.function.Supplier;
  * Creates and updates a veil that covers task contents on resize.
  */
 public class ResizeVeil {
-    private static final int RESIZE_ALPHA_DURATION = 200;
+    private static final int RESIZE_ALPHA_DURATION = 100;
     private final Context mContext;
     private final Supplier<SurfaceControl.Builder> mSurfaceControlBuilderSupplier;
     private final Supplier<SurfaceControl.Transaction> mSurfaceControlTransactionSupplier;
@@ -155,7 +155,6 @@ public class ResizeVeil {
      * Animate veil's alpha to 0, fading it out.
      */
     public void hideVeil() {
-        final View resizeVeilView = mViewHost.getView();
         final ValueAnimator animator = new ValueAnimator();
         animator.setFloatValues(1, 0);
         animator.setDuration(RESIZE_ALPHA_DURATION);
